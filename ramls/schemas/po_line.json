@@ -1,0 +1,143 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "po_line_id": {
+      "type": "string"
+    },
+    "acquisition_method": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "recorded": {
+      "type": "string",
+      "format": "date-time"
+
+    },
+    "receipt_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "source": {
+      "type": ["string", "null"]
+    },
+    "donor": {
+      "type": ["string", "null"]
+    },
+    "selector": {
+      "type": ["string", "null"]
+    },
+    "requester": {
+      "type": "string"
+    },
+    "cancellation_restriction": {
+      "type": "boolean"
+    },
+    "rush": {
+      "type": "boolean"
+    },
+    "manual_batching": {
+      "type": "boolean"
+    },
+    "collection": {
+      "type": "boolean"
+    },
+    "cancellation_description": {
+      "type": ["string", "null"]
+    },
+    "line_description": {
+      "type": ["string", "null"]
+    },
+    "comments": {
+      "type": ["string", "null"]
+    },
+    "cost": {
+      "type": "object",
+      "$ref": "po_line_cost"
+    },
+    "details": {
+      "type": "object",
+      "$ref": "po_line_details"
+    },
+    "claim": {
+      "type": "object",
+      "$ref": "po_line_claim"
+    },
+    "physical": {
+      "type": ["object", "null"],
+      "$ref": "po_line_physical"
+    },
+    "eresource": {
+      "type": ["object", "null"],
+      "$ref": "po_line_eresource"
+    },
+    "fund_distribution": {
+      "id": "fund_distribution",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "po_line_fund_distribution"
+      }
+    },
+    "location": {
+      "id": "location",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "po_line_location"
+      }
+    },
+    "reporting_codes": {
+      "id": "reporting_codes",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "vendor": {
+      "type": "object",
+      "$ref": "po_line_vendor"
+    },
+    "renewal": {
+      "type": ["object", "null"],
+      "$ref": "po_line_renewal"
+    },
+    "adjustment": {
+      "type": "object",
+      "$ref": "po_line_adjustment"
+    },
+    "vendor_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "purchase_order_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "po_line_id",
+    "format",
+    "type",
+    "status"
+  ]
+}

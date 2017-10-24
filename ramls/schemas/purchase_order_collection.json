@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "purchase_orders": {
+      "type": "array",
+      "id": "purchase_order",
+      "items": {
+        "type": "object",
+        "$ref": "purchase_order"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "purchase_orders",
+    "total_records"
+  ]
+}

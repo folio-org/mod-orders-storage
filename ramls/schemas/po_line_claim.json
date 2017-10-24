@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "claim": {
+      "type": "boolean"
+    },
+    "sent": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "grace": {
+      "type": ["integer", "null"]
+    }
+  },
+  "additionalProperties": false,
+  "required": []
+}

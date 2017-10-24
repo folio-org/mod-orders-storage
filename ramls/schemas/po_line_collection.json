@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "po_lines": {
+      "type": "array",
+      "id": "po_lines",
+      "items": {
+        "type": "object",
+        "$ref": "po_line"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "po_lines",
+    "total_records"
+  ]
+}

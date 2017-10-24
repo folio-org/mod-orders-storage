@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "approval_status": {
+      "type": "string"
+    },
+    "comments": {
+      "type": "string"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "payment_status": {
+      "type": "string"
+    },
+    "po_number": {
+      "type": "string"
+    },
+    "receipt_status": {
+      "type": "string"
+    },
+    "sent": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "assigned_to": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "created_by": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "vendor": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "changelog": {
+      "id": "changelog",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "changelog"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "po_number",
+    "vendor"
+  ]
+}

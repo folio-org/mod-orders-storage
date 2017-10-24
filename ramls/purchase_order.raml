@@ -1,0 +1,78 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: Sample Module
+    content: <b>CRUD API</b>
+
+schemas:
+  - changelog: !include schemas/changelog.json
+  - po_line_adjustment: !include schemas/po_line_adjustment.json
+  - po_line_claim: !include schemas/po_line_claim.json
+  - po_line_cost: !include schemas/po_line_cost.json
+  - po_line_details: !include schemas/po_line_details.json
+  - po_line_eresource: !include schemas/po_line_eresource.json
+  - po_line_fund_distribution: !include schemas/po_line_fund_distribution.json
+  - po_line_license: !include schemas/po_line_license.json
+  - po_line_location: !include schemas/po_line_location.json
+  - po_line_physical: !include schemas/po_line_physical.json
+  - po_line_renewal: !include schemas/po_line_renewal.json
+  - po_line_vendor: !include schemas/po_line_vendor.json
+  - po_line: !include schemas/po_line.json
+  - po_line_collection: !include schemas/po_line_collection.json
+  - purchase_order: !include schemas/purchase_order.json
+  - purchase_order_collection: !include schemas/purchase_order_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/purchase_order:
+  type:
+    collection:
+      exampleCollection: !include examples/purchase_order_collection.sample
+      exampleItem: !include examples/purchase_order_post.sample
+      schemaCollection: purchase_order_collection
+      schemaItem: purchase_order
+  get:
+    description: Get list of purchase orders
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      orderable: {fieldsList: "field A, field B"},
+      pageable
+    ]
+  /{purchase_order_id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/purchase_order_get.sample
+        schema: purchase_order
+
+
+/po_lines:
+  type:
+    collection:
+      exampleCollection: !include examples/po_line_collection.sample
+      exampleItem: !include examples/po_line_post.sample
+      schemaCollection: po_line_collection
+      schemaItem: po_line
+  get:
+    description: Get list of PO Lines for the given PO
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      orderable: {fieldsList: "field A, field B"},
+      pageable
+    ]
+  /{po_line_id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/po_line_get.sample
+        schema: po_line
