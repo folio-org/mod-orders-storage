@@ -1,7 +1,7 @@
 {
-  "srvcId" : "sample-module",
+  "srvcId" : "mod-orders-1.0.0",
   "nodeId" : "localhost",
   "descriptor" : {
-    "exec" : "java -jar ../target/sample-module-fat.jar -Dhttp.port=%p"
+    "exec" : "java -Dhttp.port=%p -jar /Users/jben/Workspaces/folio/mod-orders/target/mod-orders-fat.jar"
   }
 }

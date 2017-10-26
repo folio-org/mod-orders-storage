@@ -19,7 +19,7 @@
         <http.port>8081</http.port>
         <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
         <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-        <raml-module-builder.version>13.0.2</raml-module-builder.version>
+        <raml-module-builder.version>15.0.0</raml-module-builder.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <flyway.version>4.2.0</flyway.version>
         <postgres.driver.version>9.4.1212</postgres.driver.version>
