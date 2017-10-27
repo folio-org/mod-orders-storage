@@ -180,7 +180,7 @@ public class PurchaseOrderAPI implements PurchaseOrderResource{
         Criterion c = new Criterion(
           new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PURCHASE_ORDER_TABLE, PurchaseOrderCollection.class, c, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PURCHASE_ORDER_TABLE, PurchaseOrder.class, c, true,
           reply -> {
             try {
               if(reply.succeeded()){

@@ -55,8 +55,6 @@ public class POLineAPI implements PoLineResource {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
         Criterion criterion = Criterion.json2Criterion(query);
-//        Criteria criteria = new Criteria("/ramls/schemas/" +PURCHASE_ORDER_TABLE + ".json");
-//        criterion.addCriterion(criteria);
         criterion.setLimit(new Limit(limit));
         criterion.setOffset(new Offset(offset));
 
@@ -174,7 +172,7 @@ public class POLineAPI implements PoLineResource {
         Criterion c = new Criterion(
           new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PO_LINE_TABLE, PoLineCollection.class, c, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PO_LINE_TABLE, PoLine.class, c, true,
           reply -> {
             try {
               if(reply.succeeded()){
@@ -290,7 +288,7 @@ public class POLineAPI implements PoLineResource {
           .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
-    
+
   }
 
   private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
