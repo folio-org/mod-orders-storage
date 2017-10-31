@@ -36,6 +36,7 @@ public class OrdersTest {
 
   @Before
   public void before(TestContext context) {
+    logger.info("--- mod-orders-test: START ");
     vertx = Vertx.vertx();
 
     // Deploy a verticle
@@ -56,6 +57,7 @@ public class OrdersTest {
   public void after(TestContext context) {
     async = context.async();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
+      logger.info("--- mod-orders-test: END ");
       async.complete();
     });
   }
@@ -79,8 +81,6 @@ public class OrdersTest {
   public void testOrders(TestContext context) {
     async = context.async();
     try {
-      logger.info("--- mod-orders-test: START ");
-
       logger.info("--- mod-orders-test: Verifying empty database ... ");
       emptyCollection();
 
@@ -106,7 +106,7 @@ public class OrdersTest {
       String poEditSample = getFile("purchase_order_put.sample");
       response = putData("purchase_order", po_id, poEditSample);
       response.then()
-        .statusCode(204);
+        .statusCode(200);
 
       logger.info("--- mod-orders-test: Fetching edited PO with ID:"+ po_id);
       getDataById("purchase_order", po_id).then()
@@ -157,8 +157,6 @@ public class OrdersTest {
       logger.info("--- mod-orders-test: Deleting PO created from sample file ... ");
       deleteData("purchase_order", po_id).then()
         .statusCode(204);
-
-      logger.info("--- mod-orders-test: END ");
     }
     catch (Exception e) {
       context.fail("--- mod-orders-test: ERROR: " + e.getMessage());
