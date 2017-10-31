@@ -97,10 +97,22 @@ public class OrdersTest {
         .statusCode(200)
         .body("total_records", equalTo(1));
 
-      logger.info("--- mod-orders-test: Fetching PO with ID:"+ po_id+ " created from sample file ... ");
+      logger.info("--- mod-orders-test: Fetching PO with ID:"+ po_id +" created from sample file ... ");
       getDataById("purchase_order", po_id).then()
         .statusCode(200)
         .body("id", equalTo(po_id));
+
+      logger.info("--- mod-orders-test: Editing PO with ID:"+ po_id +" with sample file ... ");
+      String poEditSample = getFile("purchase_order_put.sample");
+      response = putData("purchase_order", po_id, poEditSample);
+      response.then()
+        .statusCode(204);
+
+      logger.info("--- mod-orders-test: Fetching edited PO with ID:"+ po_id);
+      getDataById("purchase_order", po_id).then()
+        .statusCode(200)
+        .body("id", equalTo(po_id))
+        .body("po_number", equalTo("HIST-CONN-2018"));
 
       logger.info("--- mod-orders-test: Creating PO Lines from sample file ... ");
       String poLineSample = getFile("po_line_post.sample");
@@ -122,6 +134,21 @@ public class OrdersTest {
       getDataById("po_line", po_line_id).then()
         .statusCode(200)
         .body("id", equalTo(po_line_id));
+
+      logger.info("--- mod-orders-test: Editing PO Line with ID:"+ po_line_id + " with sample file ... ");
+      String poLineEditSample = getFile("po_line_put.sample");
+      poLineJSON = new JSONObject(poLineEditSample);
+      poLineJSON.put("purchase_order_id", po_id);
+      poLineEditSample = poLineJSON.toString();
+      response = putData("po_line", po_line_id, poLineEditSample);
+      response.then()
+        .statusCode(204);
+
+      logger.info("--- mod-orders-test: Fetching edited PO Line with ID:" + po_line_id);
+      getDataById("po_line", po_line_id).then()
+        .statusCode(200)
+        .body("id", equalTo(po_line_id))
+        .body("owner", equalTo("Joe Ingram"));
 
       logger.info("--- mod-orders-test: Deleting PO Line created from sample file ... ");
       deleteData("po_line", po_line_id).then()
