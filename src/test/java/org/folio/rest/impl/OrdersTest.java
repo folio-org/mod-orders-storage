@@ -106,7 +106,7 @@ public class OrdersTest {
       String poEditSample = getFile("purchase_order_put.sample");
       response = putData("purchase_order", po_id, poEditSample);
       response.then()
-        .statusCode(200);
+        .statusCode(204);
 
       logger.info("--- mod-orders-test: Fetching edited PO with ID:"+ po_id);
       getDataById("purchase_order", po_id).then()
