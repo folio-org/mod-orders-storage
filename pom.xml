@@ -310,18 +310,6 @@
                 <version>1.0.0</version>
                 <executions>
                     <execution>
-                        <id>initialize-properties</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>src/main/resources/db.properties</file>
-                            </files>
-                        </configuration>
-                    </execution>
-                    <execution>
                         <id>set-system-properties</id>
                         <goals>
                             <goal>set-system-properties</goal>
