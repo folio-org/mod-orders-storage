@@ -1,5 +1,11 @@
 # MOD-ORDER
 
+Copyright (C) 2017 The Open Library Foundation
+
+This software is distributed under the terms of the Apache License, Version 2.0. See the file "LICENSE" for more information.
+
+## Introduction
+
 This module is responsible for the persistence of Order data i.e. purchase orders (POs), PO Lines and related items.
 
 This is an RMB-based module.
