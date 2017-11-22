@@ -1,7 +1,7 @@
 {
-  "srvcId" : "mod-orders-1.0.0",
-  "nodeId" : "localhost",
-  "descriptor" : {
-    "exec" : "java -jar /Users/jben/Workspaces/folio/mod-orders/target/mod-orders-fat.jar -Dhttp.port=%p embed_postgres=true"
+  "srvcId": "${artifactId}-${version}",
+  "nodeId": "localhost",
+  "descriptor": {
+    "exec": "java -Dport=%p -jar ../${artifactId}/target/${artifactId}-fat.jar -Dhttp.port=%p embed_postgres=true"
   }
 }
