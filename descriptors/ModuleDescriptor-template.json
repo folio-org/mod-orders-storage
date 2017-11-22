@@ -1,5 +1,5 @@
 {
-  "id": "mod-orders-1.0.0",
+  "id": "${artifactId}-${version}",
   "name": "Orders CRUD Module",
   "provides": [
     {
