@@ -1,10 +1,10 @@
 -- SQL script to create the tenant/schema
 
 create role diku_mod_orders PASSWORD 'password' NOSUPERUSER NOCREATEDB INHERIT LOGIN;
+create schema diku_mod_orders authorization diku_mod_orders;
 grant all privileges on all tables in schema diku_mod_orders to current_user;
 grant all privileges on all tables in schema diku_mod_orders to diku_mod_orders;
 
-create schema diku_mod_orders authorization diku_mod_orders;
 set search_path to diku_mod_orders, public;
 
 /**
@@ -38,7 +38,7 @@ begin
 end;
 $$ language 'plpgsql';
 create trigger update_timestamp_purchase_order
-before update on purchase_order
+before insert or update on purchase_order
 for each row execute procedure update_modified_column_purchase_order();
 
 
@@ -62,5 +62,5 @@ begin
 end;
 $$ language 'plpgsql';
 create trigger update_po_line
-before update on purchase_order_line
+before insert or update on purchase_order_line
 for each row execute procedure update_modified_column_po_line();
