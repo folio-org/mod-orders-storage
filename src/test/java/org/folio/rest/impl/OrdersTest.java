@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
@@ -14,6 +15,8 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.json.JSONObject;
 import org.junit.After;
@@ -34,10 +37,38 @@ public class OrdersTest {
   private final Logger logger = LoggerFactory.getLogger("okapi");
   private final int port = Integer.parseInt(System.getProperty("port", "8081"));
 
+  private final String TENANT_NAME = "diku";
+  private final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
+
+  private String moduleName;      // "mod_vendors";
+  private String moduleVersion;   // "1.0.0"
+  private String moduleId;        // "mod-vendors-1.0.0"
+
   @Before
   public void before(TestContext context) {
     logger.info("--- mod-orders-test: START ");
     vertx = Vertx.vertx();
+
+    moduleName = PomReader.INSTANCE.getModuleName();
+    moduleVersion = PomReader.INSTANCE.getVersion();
+
+    moduleId = String.format("%s-%s", moduleName, moduleVersion);
+
+    // RMB returns a 'normalized' name, with underscores
+    moduleId = moduleId.replaceAll("_", "-");
+
+    try {
+      // Run this test in embedded postgres mode
+      // IMPORTANT: Later we will initialize the schema by calling the tenant interface.
+      PostgresClient.setIsEmbedded(true);
+      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+      PostgresClient.getInstance(vertx).dropCreateDatabase(TENANT_NAME + "_" + PomReader.INSTANCE.getModuleName());
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      context.fail(e);
+      return;
+    }
 
     // Deploy a verticle
     JsonObject conf = new JsonObject()
@@ -57,13 +88,14 @@ public class OrdersTest {
   public void after(TestContext context) {
     async = context.async();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
-      logger.info("--- mod-orders-test: END ");
+      PostgresClient.stopEmbeddedPostgres();
       async.complete();
+      logger.info("--- mod-orders-test: END ");
     });
   }
 
   // Validates that there are zero vendor records in the DB
-  private void emptyCollection() {
+  private void verifyInitialDBState() {
 
     // Validate 200 response and that there are zero records
     getData("purchase_order").then()
@@ -81,8 +113,12 @@ public class OrdersTest {
   public void testOrders(TestContext context) {
     async = context.async();
     try {
+      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
+      logger.info("--- mod-vendors-test: Preparing test tenant");
+      prepareTenant();
+
       logger.info("--- mod-orders-test: Verifying empty database ... ");
-      emptyCollection();
+      verifyInitialDBState();
 
       logger.info("--- mod-orders-test: Creating PO from sample file ... ");
       String poSample = getFile("purchase_order_post.sample");
@@ -162,6 +198,17 @@ public class OrdersTest {
       context.fail("--- mod-orders-test: ERROR: " + e.getMessage());
     }
     async.complete();
+  }
+
+  private void prepareTenant() {
+    String tenants = "{\"module_to\":\"" + moduleId + "\"}";
+    given()
+      .header(TENANT_HEADER)
+      .contentType(ContentType.JSON)
+      .body(tenants)
+      .post("/_/tenant")
+      .then().log().ifValidationFails()
+      .statusCode(201);
   }
 
   private String getFile(String filename) {

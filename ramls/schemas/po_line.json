@@ -69,30 +69,30 @@
     },
     "cost": {
       "type": "object",
-      "$ref": "po_line_cost"
+      "$ref": "po_line_cost.json"
     },
     "details": {
       "type": "object",
-      "$ref": "po_line_details"
+      "$ref": "po_line_details.json"
     },
     "claim": {
       "type": "object",
-      "$ref": "po_line_claim"
+      "$ref": "po_line_claim.json"
     },
     "physical": {
       "type": ["object", "null"],
-      "$ref": "po_line_physical"
+      "$ref": "po_line_physical.json"
     },
     "eresource": {
       "type": ["object", "null"],
-      "$ref": "po_line_eresource"
+      "$ref": "po_line_eresource.json"
     },
     "fund_distribution": {
       "id": "fund_distribution",
       "type": "array",
       "items": {
         "type": "object",
-        "$ref": "po_line_fund_distribution"
+        "$ref": "po_line_fund_distribution.json"
       }
     },
     "location": {
@@ -100,7 +100,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "$ref": "po_line_location"
+        "$ref": "po_line_location.json"
       }
     },
     "reporting_codes": {
@@ -112,15 +112,15 @@
     },
     "vendor": {
       "type": "object",
-      "$ref": "po_line_vendor"
+      "$ref": "po_line_vendor.json"
     },
     "renewal": {
       "type": ["object", "null"],
-      "$ref": "po_line_renewal"
+      "$ref": "po_line_renewal.json"
     },
     "adjustment": {
       "type": "object",
-      "$ref": "po_line_adjustment"
+      "$ref": "po_line_adjustment.json"
     },
     "vendor_id": {
       "type": ["string", "null"],

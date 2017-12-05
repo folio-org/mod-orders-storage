@@ -6,36 +6,27 @@ This software is distributed under the terms of the Apache License, Version 2.0.
 
 ## Introduction
 
-This module is responsible for the persistence of Order data i.e. purchase orders (POs), PO Lines and related items.
+This RMB module is responsible for the persistence of Orders data (i.e. POs and PO-Lines).
 
-This is an RMB-based module.
-
-
-For additional information on the acquisitions-vendor-module, please refer to the [Order Module WIKI](https://wiki.folio.org/display/RM/Acquisitions+Orders+Module).
-
-
-For API documentation, run this project locally and then go to [http://localhost:8081/apidocs/index.html?raml=raml/purchase_order.raml](http://localhost:8081/apidocs/index.html?raml=raml/purchase_order.raml)
+For additional information on the acquisitions-vendor-module, please refer to the [Orders Module WIKI](https://wiki.folio.org/display/RM/Acquisitions+Orders+Module).
 
 
 ## Building the Project
 
-This module leverages RMB to build the code.
-
-The database connection must be configured in the following file:
+To compile this module, head to the root-folder and run the following command in your Terminal:
 
 ```
-src/main/resources/postgres-conf.json
+mvn clean install
 ```
 
-As of the new version of RMB, the schema is defined in
+To run the module in standalone mode (i.e. without involving Okapi):
 ```
-src/main/resources/templates/schema.json
-```
-
-Deploying the module in Okapi should initialize the schema. Nonetheless, for testing purposes, the following files have been included to build the DB schema from scratch:
-
-```
-src/main/resources/create_tenant.sql
-src/main/resources/delete_tenant.sql
+java -jar target/mod-orders-fat.jar -Dhttp.port=8081 embed_postgres=true
 ```
 
+>Note that the above command launches an embedded Postgres server and is accessible using the default creds found in the *Credentials* section [here](https://github.com/folio-org/raml-module-builder).
+
+
+Once up, access the module's API docs through the following links: 
+* [Purchase Order APIs](http://localhost:8081/apidocs/index.html?raml=raml/purchase_order.raml)
+* [PO Line APIs](http://localhost:8081/apidocs/index.html?raml=raml/po_line.raml)

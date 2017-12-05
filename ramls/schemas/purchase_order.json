@@ -50,7 +50,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "$ref": "changelog"
+        "$ref": "changelog.json"
       }
     }
   },

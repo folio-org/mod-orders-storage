@@ -1,5 +1,3 @@
-
-
 buildMvn {
   publishModDescriptor = 'yes'
   publishAPI = 'yes'
@@ -13,4 +11,3 @@ buildMvn {
     }
   }
 }
-

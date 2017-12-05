@@ -1,9 +1,6 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
+import io.vertx.core.*;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.RestVerticle;
@@ -31,7 +28,7 @@ public class POLineAPI implements PoLineResource {
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrderAPI.class);
   private final Messages messages = Messages.getInstance();
-  private String idFieldName = "_id";
+  private String idFieldName = "id";
 
 
   private org.folio.rest.persist.Criteria.Order getOrder(Order order, String field) {
@@ -47,6 +44,11 @@ public class POLineAPI implements PoLineResource {
     String fieldTemplate = String.format("jsonb->'%s'", field);
     return new org.folio.rest.persist.Criteria.Order(fieldTemplate, org.folio.rest.persist.Criteria.Order.ORDER.valueOf(sortOrder.toUpperCase()));
   }
+
+  public POLineAPI(Vertx vertx, String tenantId) {
+    PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
+  }
+
 
   @Override
   public void getPoLine(String query, String orderBy, Order order, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
