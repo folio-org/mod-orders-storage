@@ -12,10 +12,12 @@ import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
+import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -30,42 +32,23 @@ public class POLineAPI implements PoLineResource {
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
-
-  private org.folio.rest.persist.Criteria.Order getOrder(Order order, String field) {
-    if (field == null) {
-      return null;
-    }
-
-    String sortOrder = org.folio.rest.persist.Criteria.Order.ASC;
-    if (order.name().equals("desc")) {
-      sortOrder = org.folio.rest.persist.Criteria.Order.DESC;
-    }
-
-    String fieldTemplate = String.format("jsonb->'%s'", field);
-    return new org.folio.rest.persist.Criteria.Order(fieldTemplate, org.folio.rest.persist.Criteria.Order.ORDER.valueOf(sortOrder.toUpperCase()));
-  }
-
   public POLineAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
-
   @Override
-  public void getPoLine(String query, String orderBy, Order order, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+  public void getPoLine(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
     vertxContext.runOnContext(v -> {
       try {
         String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
 
-        Criterion criterion = Criterion.json2Criterion(query);
-        criterion.setLimit(new Limit(limit));
-        criterion.setOffset(new Offset(offset));
+        String[] fieldList = {"*"};
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", PO_LINE_TABLE));
+        CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
+          .setLimit(new Limit(limit))
+          .setOffset(new Offset(offset));
 
-        org.folio.rest.persist.Criteria.Order or = getOrder(order, orderBy);
-        if (or != null) {
-          criterion.setOrder(or);
-        }
-
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PO_LINE_TABLE, PoLine.class, criterion, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PO_LINE_TABLE, PoLine.class, fieldList, cql, true, false,
           reply -> {
             try {
               if(reply.succeeded()){

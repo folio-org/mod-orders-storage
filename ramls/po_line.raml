@@ -47,7 +47,6 @@ resourceTypes:
     description: Get list of PO Lines for the given PO
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
   /{po_line_id}:
