@@ -7,7 +7,7 @@
       "id": "purchase_order",
       "items": {
         "type": "object",
-        "$ref": "purchase_order"
+        "$ref": "purchase_order.json"
       }
     },
     "total_records": {

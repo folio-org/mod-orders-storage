@@ -1,8 +1,7 @@
 {
-  "id": "da0272e4-7ff7-4ea8-9bc9-9d9cd5c81580",
   "po_line_id": "HIST-CONN-MX712",
   "acquisition_method": "Approval Plan",
-  "owner": "Joe Smith",
+  "owner": "Joe Ingram",
   "format": "Physical Resource",
   "status": "Pending",
   "type": "One-Time",
@@ -85,5 +84,5 @@
     "use_pro_rate": false
   },
   "vendor_id": "ce1a897b-1e39-2a11-88ab-9c9adc9f9a78",
-  "purchase_order_id": "a5da9c44-6619-403f-bd3b-f9bd2f63bc59"
+  "purchase_order_id": "607d4315-afe1-443f-8281-3b936eb9c68a"
 }

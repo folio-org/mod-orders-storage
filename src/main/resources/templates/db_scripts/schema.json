@@ -1,0 +1,27 @@
+{
+  "tables": [
+    {
+      "tableName": "purchase_order",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "ginIndex": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "purchase_order_line",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "ginIndex": true,
+      "populateJsonWithId": true,
+      "foreignKeys": [
+        {
+          "fieldName": "purchase_order_id",
+          "targetTable": "purchase_order",
+          "tOps": "ADD"
+        }
+      ]
+    }
+  ]
+}

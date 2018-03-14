@@ -1,0 +1,56 @@
+#%RAML 0.8
+title: "Mod-Orders"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: Mod-Orders
+    content: <b>CRUD API</b>
+
+schemas:
+  - changelog.json: !include schemas/changelog.json
+  - po_line_adjustment.json: !include schemas/po_line_adjustment.json
+  - po_line_claim.json: !include schemas/po_line_claim.json
+  - po_line_cost.json: !include schemas/po_line_cost.json
+  - po_line_details.json: !include schemas/po_line_details.json
+  - po_line_eresource.json: !include schemas/po_line_eresource.json
+  - po_line_fund_distribution.json: !include schemas/po_line_fund_distribution.json
+  - po_line_license.json: !include schemas/po_line_license.json
+  - po_line_location.json: !include schemas/po_line_location.json
+  - po_line_physical.json: !include schemas/po_line_physical.json
+  - po_line_renewal.json: !include schemas/po_line_renewal.json
+  - po_line_vendor.json: !include schemas/po_line_vendor.json
+  - po_line.json: !include schemas/po_line.json
+  - po_line_collection: !include schemas/po_line_collection.json
+  - purchase_order.json: !include schemas/purchase_order.json
+  - purchase_order_collection: !include schemas/purchase_order_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/po_line:
+  type:
+    collection:
+      exampleCollection: !include examples/po_line_collection.sample
+      exampleItem: !include examples/po_line_post.sample
+      schemaCollection: po_line_collection
+      schemaItem: po_line.json
+  get:
+    description: Get list of PO Lines for the given PO
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
+  /{po_line_id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/po_line_get.sample
+        schema: po_line.json

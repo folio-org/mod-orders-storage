@@ -1,35 +1,35 @@
 {
-  "id": "sample-module",
-  "name": "Sample FOLIO Module",
+  "id": "${artifactId}-${version}",
+  "name": "Orders CRUD Module",
   "provides": [
     {
-      "id": "some-feature",
+      "id": "purchase_order_crud",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/endpoint",
-          "permissionsRequired": ["some.permission.get"]
+          "pathPattern": "/purchase_order",
+          "permissionsRequired": []
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/endpoint",
-          "permissionsRequired": ["some.permission.post"]
+          "pathPattern": "/purchase_order",
+          "permissionsRequired": []
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/endpoint/{id}",
-          "permissionsRequired": ["some.permission.get"]
+          "pathPattern": "/purchase_order/{id}",
+          "permissionsRequired": []
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/endpoint/{id}",
-          "permissionsRequired": ["some.permission.put"]
+          "pathPattern": "/purchase_order/{id}",
+          "permissionsRequired": []
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/endpoint/{id}",
-          "permissionsRequired": ["some.permission.delete"]
+          "pathPattern": "/purchase_order/{id}",
+          "permissionsRequired": []
         }
       ]
     },
@@ -39,7 +39,15 @@
       "interfaceType": "system",
       "handlers": [
         {
-          "methods": [ "POST" ],
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/_/tenant"
+        },
+        {
+          "methods": [
+            "DELETE"
+          ],
           "pathPattern": "/_/tenant"
         }
       ]
