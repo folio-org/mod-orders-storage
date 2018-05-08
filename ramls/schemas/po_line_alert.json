@@ -12,9 +12,6 @@
     },
     "description": {
       "type": "string"
-    },
-    "reference": {
-      "type": "string"
     }
   },
   "additionalProperties": false,
