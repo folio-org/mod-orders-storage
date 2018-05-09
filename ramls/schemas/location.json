@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "quantity": {
+      "type": "integer"
+    },
+    "po_line_id": {
+      "type": "string"
+    },
+    "library_id": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "location_id",
+    "quantity"
+  ]
+}

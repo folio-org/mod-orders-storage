@@ -7,130 +7,220 @@
       "description": "UUID",
       "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "po_line_id": {
-      "type": "string"
-    },
     "acquisition_method": {
       "type": "string"
     },
-    "owner": {
-      "type": "string"
-    },
-    "format": {
-      "type": "string"
-    },
-    "status": {
-      "type": "string"
-    },
-    "type": {
-      "type": "string"
-    },
-    "recorded": {
-      "type": "string",
-      "format": "date-time"
-
-    },
-    "receipt_date": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "source": {
-      "type": ["string", "null"]
-    },
-    "donor": {
-      "type": ["string", "null"]
-    },
-    "selector": {
-      "type": ["string", "null"]
-    },
-    "requester": {
+    "barcode": {
       "type": "string"
     },
     "cancellation_restriction": {
       "type": "boolean"
     },
-    "rush": {
-      "type": "boolean"
+    "cancellation_restriction_comment": {
+      "type": "string"
     },
-    "manual_batching": {
-      "type": "boolean"
+    "receipt_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "claim_grace": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "claim_sent": {
+      "type": ["string", "null"],
+      "format": "date-time"
     },
     "collection": {
       "type": "boolean"
     },
-    "cancellation_description": {
-      "type": ["string", "null"]
+    "currency": {
+      "type": "string"
     },
-    "line_description": {
-      "type": ["string", "null"]
+    "po_line_description": {
+      "type": "string"
     },
-    "comments": {
-      "type": ["string", "null"]
+    "list_price": {
+      "type": "number"
     },
-    "cost": {
-      "type": "object",
-      "$ref": "po_line_cost"
+    "estimated_price": {
+      "type": "number"
     },
-    "details": {
-      "type": "object",
-      "$ref": "po_line_details"
+    "manual_po": {
+      "type": "boolean"
     },
-    "claim": {
-      "type": "object",
-      "$ref": "po_line_claim"
+    "manual_renewal": {
+      "type": "boolean"
     },
-    "physical": {
-      "type": ["object", "null"],
-      "$ref": "po_line_physical"
+    "owner": {
+      "type": "string"
     },
-    "eresource": {
-      "type": ["object", "null"],
-      "$ref": "po_line_eresource"
+    "po_line_no": {
+      "type": "string"
     },
-    "fund_distribution": {
-      "id": "fund_distribution",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "$ref": "po_line_fund_distribution"
-      }
+    "po_line_workflow_status": {
+      "type": "string"
     },
-    "location": {
-      "id": "location",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "$ref": "po_line_location"
-      }
+    "po_line_receipt_status": {
+      "type": "string"
     },
-    "reporting_codes": {
-      "id": "reporting_codes",
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
+    "po_line_payment_status": {
+      "type": "string"
+    },
+    "po_line_order_type": {
+      "type": "string"
+    },
+    "po_line_order_format": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "created_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "reporting_code": {
+      "type": "string"
+    },
+    "renewal_cycle": {
+      "type": "string"
+    },
+    "renewal_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "renewal_interval": {
+      "type": "integer"
+    },
+    "suppress_in_discovery": {
+      "type": "boolean"
+    },
+    "rush": {
+      "type": "boolean"
+    },
+    "source": {
+      "type": "string"
     },
     "vendor": {
-      "type": "object",
-      "$ref": "po_line_vendor"
+      "id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "UUID",
+        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      }
     },
-    "renewal": {
-      "type": ["object", "null"],
-      "$ref": "po_line_renewal"
+    "vendor_ref_no": {
+      "type": "string"
     },
-    "adjustment": {
-      "type": "object",
-      "$ref": "po_line_adjustment"
+    "comment_from_vendor": {
+      "type": "string"
     },
-    "vendor_id": {
+    "instruction_to_vendor": {
+      "type": "string"
+    },
+    "vendor_ref_no_type": {
+      "type": "string"
+    },
+    "po_id": {
+      "id": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "UUID",
+        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      }
+    },
+    "item_name": {
+      "type": "string"
+    },
+    "item_description": {
+      "type": "string"
+    },
+    "access_provider": {
+      "type": "string"
+    },
+    "activation_due": {
+      "type": "integer"
+    },
+    "activation_status": {
+      "type": "string"
+    },
+    "create_inventory": {
+      "type": "boolean"
+    },
+    "codex_id": {
+      "type": "string"
+    },
+    "discoverable": {
+      "type": "boolean"
+    },
+    "expected_activation_date": {
       "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      "format": "date-time"
     },
-    "purchase_order_id": {
+    "expected_activation_interval": {
+      "type": "integer"
+    },
+    "quantity_received": {
+      "type": "number"
+    },
+    "product_identifier": {
+      "type": "string"
+    },
+    "product_identifier_type": {
+      "type": "string"
+    },
+    "material_supplier": {
+      "type": "string"
+    },
+    "material_type": {
+      "type": "string"
+    },
+    "metadata_source": {
+      "type": "string"
+    },
+    "line_item_status": {
+      "type": "string"
+    },
+    "receipt_due": {
       "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      "format": "date-time"
+    },
+    "receiving_note": {
+      "type": "string"
+    },
+    "subscription_from_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "subscription_interval": {
+      "type": "integer"
+    },
+    "subscription_to_date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "trial": {
+      "type": "boolean"
+    },
+    "license": {
+      "type": "string"
+    },
+    "donor": {
+      "type": "string"
+    },
+    "requester": {
+      "type": "string"
+    },
+    "selector": {
+      "type": "string"
+    },
+    "account_number": {
+      "type": "string"
     }
   },
   "additionalProperties": false,
