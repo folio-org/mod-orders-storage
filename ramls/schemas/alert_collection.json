@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "alerts": {
+      "type": "array",
+      "id": "alert",
+      "items": {
+        "type": "object",
+        "$ref": "alert"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "alerts",
+    "total_records"
+  ]
+}
