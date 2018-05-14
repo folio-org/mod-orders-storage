@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "id": {
-      "type": ["string", "null"],
+      "type": "string",
       "description": "UUID",
       "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
@@ -103,11 +103,7 @@
       "type": "string"
     },
     "vendor": {
-      "id": {
-        "type": [
-          "string",
-          "null"
-        ],
+      "type": "string",
         "description": "UUID",
         "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
       }
@@ -125,11 +121,7 @@
       "type": "string"
     },
     "po_id": {
-      "id": {
-        "type": [
-          "string",
-          "null"
-        ],
+      "type": "string",
         "description": "UUID",
         "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
       }
