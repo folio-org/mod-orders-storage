@@ -10,7 +10,7 @@ documentation:
 schemas:
   - changelog: !include schemas/changelog.json
   - po_line: !include schemas/po_line.json
-  #- alert_collection: !include schemas/alert_collection.json
+  - po_line_collection: !include schemas/po_line_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -24,12 +24,12 @@ resourceTypes:
   - collection-item: !include raml-util/rtypes/item-collection.raml
 
 /po_line:
-  #type:
-  #  collection:
-  #    exampleCollection: !include examples/alert_collection.sample
-  #    exampleItem: !include examples/alert_post.sample
-  #    schemaCollection: alert_collection
-  #    schemaItem: alert
+  type:
+    collection:
+      exampleCollection: !include examples/po_line_collection.sample
+      exampleItem: !include examples/po_line_post.sample
+      schemaCollection: po_line_collection
+      schemaItem: alert
   get:
     description: Get list of po_lines
     is: [
