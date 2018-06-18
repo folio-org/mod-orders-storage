@@ -1,0 +1,11 @@
+{
+    "id": "da0272e4-7ff7-4ea8-9bc9-9d9cd5c81580",
+    "shipment": 0,
+    "insurance": 0,
+    "discount": 0,
+    "overhead": 0,
+    "credit": 0,
+    "tax": 1.62,
+    "invoice_id": null,
+    "use_pro_rate": false
+}

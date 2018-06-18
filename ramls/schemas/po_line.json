@@ -23,202 +23,132 @@
       "type": ["string", "null"],
       "format": "date-time"
     },
-    "claim_grace": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "claim_sent": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
     "collection": {
-      "type": "boolean"
-    },
-    "currency": {
-      "type": "string"
-    },
-    "po_line_description": {
-      "type": "string"
-    },
-    "list_price": {
-      "type": "number"
-    },
-    "estimated_price": {
-      "type": "number"
-    },
-    "manual_po": {
-      "type": "boolean"
-    },
-    "manual_renewal": {
       "type": "boolean"
     },
     "owner": {
       "type": "string"
     },
-    "po_line_no": {
+    "po_line_description": {
       "type": "string"
     },
-    "po_line_workflow_status": {
-      "type": "string"
-    },
-    "po_line_receipt_status": {
-      "type": "string"
-    },
-    "po_line_payment_status": {
-      "type": "string"
-    },
-    "po_line_order_type": {
-      "type": "string"
-    },
-    "po_line_order_format": {
-      "type": "string"
-    },
-    "quantity": {
-      "type": "integer"
-    },
-    "created_date": {
+    "adjustment_id": {
       "type": ["string", "null"],
-      "format": "date-time"
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "reporting_code": {
-      "type": "string"
-    },
-    "renewal_cycle": {
-      "type": "string"
-    },
-    "renewal_date": {
-      "type": ["string", "null"],
-      "format": "date-time"
-    },
-    "renewal_interval": {
-      "type": "integer"
-    },
-    "suppress_in_discovery": {
-      "type": "boolean"
-    },
-    "rush": {
-      "type": "boolean"
-    },
-    "source": {
-      "type": "string"
-    },
-    "vendor": {
-      "type": "string",
+    "alerts": {
+      "id": "alerts",
+      "type": "array",
+      "items": {
+        "type": "string",
         "description": "UUID",
-        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
       }
     },
-    "vendor_ref_no": {
-      "type": "string"
+    "claim_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "comment_from_vendor": {
-      "type": "string"
+    "cost_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "instruction_to_vendor": {
-      "type": "string"
+    "details_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "vendor_ref_no_type": {
-      "type": "string"
+    "eresource_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "po_id": {
-      "type": "string",
+    "fund_distributions": {
+      "id": "fund_distributions",
+      "type": "array",
+      "items": {
+        "type": "string",
         "description": "UUID",
-        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      }
     },
-    "item_name": {
-      "type": "string"
-    },
-    "item_description": {
-      "type": "string"
-    },
-    "access_provider": {
-      "type": "string"
-    },
-    "activation_due": {
-      "type": "integer"
-    },
-    "activation_status": {
-      "type": "string"
-    },
-    "create_inventory": {
-      "type": "boolean"
-    },
-    "codex_id": {
-      "type": "string"
-    },
-    "discoverable": {
-      "type": "boolean"
-    },
-    "expected_activation_date": {
+    "license_id": {
       "type": ["string", "null"],
-      "format": "date-time"
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "expected_activation_interval": {
-      "type": "integer"
-    },
-    "quantity_received": {
-      "type": "number"
-    },
-    "product_identifier": {
-      "type": "string"
-    },
-    "product_identifier_type": {
-      "type": "string"
-    },
-    "material_supplier": {
-      "type": "string"
-    },
-    "material_type": {
-      "type": "string"
-    },
-    "metadata_source": {
-      "type": "string"
-    },
-    "line_item_status": {
-      "type": "string"
-    },
-    "receipt_due": {
+    "location_id": {
       "type": ["string", "null"],
-      "format": "date-time"
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "receiving_note": {
-      "type": "string"
-    },
-    "subscription_from_date": {
+    "order_format_id": {
       "type": ["string", "null"],
-      "format": "date-time"
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "subscription_interval": {
-      "type": "integer"
-    },
-    "subscription_to_date": {
+    "order_type_id": {
       "type": ["string", "null"],
-      "format": "date-time"
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "trial": {
-      "type": "boolean"
+    "physical_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "license": {
-      "type": "string"
+    "receipt_status_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "donor": {
+    "renewal_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "source_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "vendor_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "workflow_status_id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "selector": {
       "type": "string"
     },
     "requester": {
       "type": "string"
     },
-    "selector": {
-      "type": "string"
-    },
     "account_number": {
       "type": "string"
+    },
+    "donor": {
+      "type": "string"
+    },
+    "changelog": {
+      "id": "changelog",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "UUID",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+      }
     }
   },
   "additionalProperties": false,
   "required": [
-    "po_line_id",
-    "format",
-    "type",
-    "status"
+    "barcode"
   ]
 }

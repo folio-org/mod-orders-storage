@@ -1,0 +1,44 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: Sample Module
+    content: <b>CRUD API</b>
+
+schemas:
+  - changelog: !include schemas/changelog.json
+  - workflow_status: !include schemas/po_line_workflow_status.json
+  - workflow_status_collection: !include schemas/po_line_workflow_status_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/workflow_status:
+  type:
+    collection:
+      exampleCollection: !include examples/workflow_status_collection.sample
+      exampleItem: !include examples/workflow_status_post.sample
+      schemaCollection: workflow_status_collection
+      schemaItem: po_line_workflow_status.json
+  get:
+    description: Get list of workflow_statuses
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      orderable: {fieldsList: "field A, field B"},
+      pageable
+    ]
+  /{workflow_status_id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/workflow_status_get.sample
+        schema: po_line_workflow_status.json

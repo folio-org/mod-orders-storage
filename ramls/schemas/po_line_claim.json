@@ -22,5 +22,7 @@
     }
   },
   "additionalProperties": false,
-  "required": []
+  "required": [
+    "po_line_id"
+  ]
 }

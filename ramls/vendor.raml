@@ -1,0 +1,44 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: Sample Module
+    content: <b>CRUD API</b>
+
+schemas:
+  - changelog: !include schemas/changelog.json
+  - vendor: !include schemas/po_line_vendor.json
+  - vendor_collection: !include schemas/po_line_vendor_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/vendor:
+  type:
+    collection:
+      exampleCollection: !include examples/vendor_collection.sample
+      exampleItem: !include examples/vendor_post.sample
+      schemaCollection: vendor_collection
+      schemaItem: po_line_vendor.json
+  get:
+    description: Get list of locationss
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      orderable: {fieldsList: "field A, field B"},
+      pageable
+    ]
+  /{vendor_id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/vendor_get.sample
+        schema: po_line_vendor.json

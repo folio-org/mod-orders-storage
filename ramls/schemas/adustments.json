@@ -31,6 +31,5 @@
       "type": "boolean"
     }
   },
-  "additionalProperties": false,
-  "required": []
+  "additionalProperties": false
 }

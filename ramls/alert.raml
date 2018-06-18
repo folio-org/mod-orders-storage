@@ -9,7 +9,7 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - alert: !include schemas/alert.json
+  - alert: !include schemas/po_line_alert.json
   - alert_collection: !include schemas/alert_collection.json
 
 traits:
@@ -29,7 +29,7 @@ resourceTypes:
       exampleCollection: !include examples/alert_collection.sample
       exampleItem: !include examples/alert_post.sample
       schemaCollection: alert_collection
-      schemaItem: alert
+      schemaItem: po_line_alert.json
   get:
     description: Get list of alerts
     is: [
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/alert_get.sample
-        schema: alert
+        schema: po_line_alert.json

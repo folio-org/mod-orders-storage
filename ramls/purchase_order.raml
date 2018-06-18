@@ -42,7 +42,7 @@ resourceTypes:
       exampleCollection: !include examples/purchase_order_collection.sample
       exampleItem: !include examples/purchase_order_post.sample
       schemaCollection: purchase_order_collection
-      schemaItem: purchase_order
+      schemaItem: purchase_order.json
   get:
     description: Get list of purchase orders
     is: [
@@ -54,25 +54,5 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/purchase_order_get.sample
-        schema: purchase_order
+        schema: purchase_order.json
 
-
-/po_lines:
-  type:
-    collection:
-      exampleCollection: !include examples/po_line_collection.sample
-      exampleItem: !include examples/po_line_post.sample
-      schemaCollection: po_line_collection
-      schemaItem: po_line
-  get:
-    description: Get list of PO Lines for the given PO
-    is: [
-      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
-      pageable
-    ]
-  /{po_line_id}:
-    type:
-      collection-item:
-        exampleItem: !include examples/po_line_get.sample
-        schema: po_line

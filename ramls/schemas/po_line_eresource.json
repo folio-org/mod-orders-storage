@@ -2,6 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
     "activation_status": {
       "type": "string"
     },
@@ -15,7 +20,7 @@
       "type": "boolean"
     },
     "expected_activation": {
-      "type": "string",
+      "type": ["string", "null"],
       "format": "date-time"
     },
     "user_limit": {
@@ -30,6 +35,5 @@
       "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     }
   },
-  "additionalProperties": false,
-  "required": []
+  "additionalProperties": false
 }

@@ -7,7 +7,7 @@
       "id": "po_lines",
       "items": {
         "type": "object",
-        "$ref": "po_line"
+        "$ref": "po_line.json"
       }
     },
     "total_records": {
@@ -20,9 +20,5 @@
       "type": "integer"
     }
   },
-  "additionalProperties": false,
-  "required": [
-    "po_lines",
-    "total_records"
-  ]
+  "additionalProperties": false
 }
