@@ -20,5 +20,9 @@
       "type": "integer"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "required": [
+    "order_types",
+    "total_records"
+  ]
 }

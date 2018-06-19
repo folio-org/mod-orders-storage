@@ -19,16 +19,20 @@
         "invoice_id": null,
         "use_pro_rate": false
     },
-    "alert": {
-        "po_line_id": null,
-        "alert": "alert",
-    },
-    "claim": {
-        "po_line_id": null,
-        "date": null,
-        "sent": null,
-        "grace": null
-    },
+    "alerts": [
+        {
+            "po_line_id": null,
+            "alert": "alert",
+        }
+    ]
+    "claims": [
+        {
+            "po_line_id": null,
+            "date": null,
+            "sent": null,
+            "grace": null
+        }
+    ]
     "cost": {
         "list_price": 32.36,
         "currency": "CAD",
@@ -55,7 +59,7 @@
         "material_id": null,
         "access_provider": null
     },
-    "fund_distribution": [
+    "fund_distributions": [
         {
             "amount": null,
             "percent": 0.5,
@@ -122,7 +126,7 @@
     "requester": "John Castillo",
     "account_number": "1234",
     "donor": null,
-    "changelog": [
+    "changelogs": [
         {
             "note": "Created PO HIST-CONN-2017",
             "timestamp": "2017-20-09T09:53:15-07",

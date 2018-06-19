@@ -2,12 +2,12 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "po_lines": {
+    "receipt_statuses": {
       "type": "array",
       "id": "receipt_statuses",
       "items": {
         "type": "object",
-        "$ref": "po_line_receipt_status.json"
+        "$ref": "receipt_status.json"
       }
     },
     "total_records": {
@@ -20,5 +20,9 @@
       "type": "integer"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "required": [
+    "receipt_statuses",
+    "total_records"
+  ]
 }

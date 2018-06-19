@@ -9,8 +9,8 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - order_type: !include schemas/po_line_order_type.json
-  - order_type_collection: !include schemas/po_line_order_type_collection.json
+  - order_type.json: !include schemas/order_type.json
+  - order_type_collection.json: !include schemas/order_type_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,8 +28,8 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/order_type_collection.sample
       exampleItem: !include examples/order_type_post.sample
-      schemaCollection: order_type_collection
-      schemaItem: po_line_order_type.json
+      schemaCollection: order_type_collection.json
+      schemaItem: order_type.json
   get:
     description: Get list of order_types
     is: [
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/order_type_get.sample
-        schema: po_line_order_type.json
+        schema: order_type.json

@@ -32,98 +32,85 @@
     "po_line_description": {
       "type": "string"
     },
-    "adjustment_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "adjustment": {
+      "type": "object",
+      "$ref": "adjustment.json"
     },
     "alerts": {
       "id": "alerts",
       "type": "array",
       "items": {
-        "type": "string",
-        "description": "UUID",
-        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        "type": "object",
+        "$ref": "alert.json"
       }
     },
-    "claim_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "claims": {
+      "id": "claims",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "$ref": "claim.json"
+      }
     },
-    "cost_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "cost": {
+      "type": "object",
+      "$ref": "cost.json"
     },
-    "details_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "details": {
+      "type": "object",
+      "$ref": "details.json"
     },
-    "eresource_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "eresource": {
+      "type": "object",
+      "$ref": "eresource.json"
     },
     "fund_distributions": {
       "id": "fund_distributions",
       "type": "array",
       "items": {
-        "type": "string",
-        "description": "UUID",
-        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        "type": "object",
+        "$ref": "fund_distribution.json"
       }
     },
-    "license_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "license": {
+      "type": "object",
+      "$ref": "license.json"
     },
-    "location_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "location": {
+      "type": "object",
+      "$ref": "location.json"
     },
-    "order_format_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "order_format": {
+      "type": "object",
+      "$ref": "order_format.json"
     },
-    "order_type_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "order_type": {
+      "type": "object",
+      "$ref": "order_type.json"
     },
-    "physical_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "physical": {
+      "type": "object",
+      "$ref": "physical.json"
     },
-    "receipt_status_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "receipt_status": {
+      "type": "object",
+      "$ref": "receipt_status.json"
     },
-    "renewal_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "renewal": {
+      "type": "object",
+      "$ref": "renewal.json"
     },
-    "source_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "source": {
+      "type": "object",
+      "$ref": "source.json"
     },
-    "vendor_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "vendor": {
+      "type": "object",
+      "$ref": "vendor.json"
     },
-    "workflow_status_id": {
-      "type": ["string", "null"],
-      "description": "UUID",
-      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    "workflow_status": {
+      "type": "object",
+      "$ref": "workflow_status.json"
     },
     "selector": {
       "type": "string"
@@ -137,13 +124,12 @@
     "donor": {
       "type": "string"
     },
-    "changelog": {
-      "id": "changelog",
+    "changelogs": {
+      "id": "changelogs",
       "type": "array",
       "items": {
-        "type": "string",
-        "description": "UUID",
-        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+        "type": "object",
+        "$ref": "changelog.json"
       }
     }
   },

@@ -4,10 +4,10 @@
   "properties": {
     "alerts": {
       "type": "array",
-      "id": "alert",
+      "id": "alerts",
       "items": {
         "type": "object",
-        "$ref": "alert"
+        "$ref": "alert.json"
       }
     },
     "total_records": {

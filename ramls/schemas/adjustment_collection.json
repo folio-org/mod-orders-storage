@@ -7,7 +7,7 @@
       "id": "adjustments",
       "items": {
         "type": "object",
-        "$ref": "po_line_adjustment.json"
+        "$ref": "adjustment.json"
       }
     },
     "total_records": {

@@ -10,24 +10,24 @@ documentation:
 schemas:
   - changelog: !include schemas/changelog.json
   - po_line: !include schemas/po_line.json
-  - po_line_adjustment: !include schemas/po_line_adjustment.json
-  - po_line_alert: !include schemas/po_line_alert.json
-  - po_line_claim: !include schemas/po_line_claim.json
-  - po_line_collection !include schemas/po_line_collection.json
-  - po_line_cost: !include schemas/po_line_cost.json
-  - po_line_detials: !include schemas/po_line_details.json
-  - po_line_eresource: !include schemas/po_line_eresource.json
-  - po_line_fund_distribution: !include schemas/po_line_fund_distribution.json
-  - po_line_license: !include schemas/po_line_license.json
-  - po_line_location: !include schemas/po_line_location.
-  - po_line_order_format: !include schemas/po_line_order_format.json
-  - po_line_order_type: !include schemas/po_line_order_type.json
-  - po_line_physical: !include schemas/po_line_physical.json
-  - po_line_receipt_status: !include schemas/po_line_receipt_status.json
-  - po_line_renewal: !include schemas/po_line_renewal.json
-  - po_line_source: !include schemas/po_line_source.json
-  - po_line_vendor: !include schemas/po_line_vendor.json
-  - po_line_workflow_status: !include schemas/po_line_workflow_status.json
+  - adjustment.json: !include schemas/adjustment.json
+  - alert.json: !include schemas/alert.json
+  - claim.json: !include schemas/claim.json
+  - po_line_collection.json !include schemas/po_line_collection.json
+  - cost.json: !include schemas/cost.json
+  - detials.json: !include schemas/details.json
+  - eresource.json: !include schemas/eresource.json
+  - fund_distribution.json: !include schemas/fund_distribution.json
+  - license.json: !include schemas/license.json
+  - location.json: !include schemas/location.json
+  - order_format.json: !include schemas/order_format.json
+  - order_type.json: !include schemas/order_type.json
+  - physical.json: !include schemas/physical.json
+  - receipt_status.json: !include schemas/receipt_status.json
+  - renewal.json: !include schemas/renewal.json
+  - source.json: !include schemas/source.json
+  - vendor.json: !include schemas/vendor.json
+  - workflow_status.json: !include schemas/workflow_status.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -45,7 +45,7 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/po_line_collection.sample
       exampleItem: !include examples/po_line_post.sample
-      schemaCollection: po_line_collection
+      schemaCollection: po_line_collection.json
       schemaItem: po_line.json
   get:
     description: Get list of po_lines

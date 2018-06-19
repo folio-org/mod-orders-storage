@@ -9,8 +9,8 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - physical: !include schemas/po_line_physical.json
-  - physical_collection: !include schemas/po_line_physical_collection.json
+  - physical.json: !include schemas/physical.json
+  - physical_collection.json: !include schemas/physical_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,8 +28,8 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/physical_collection.sample
       exampleItem: !include examples/physical_post.sample
-      schemaCollection: physical_collection
-      schemaItem: po_line_physical.json
+      schemaCollection: physical_collection.json
+      schemaItem: physical.json
   get:
     description: Get list of locationss
     is: [
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/physical_get.sample
-        schema: po_line_physical.json
+        schema: physical.json

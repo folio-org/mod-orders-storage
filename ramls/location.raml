@@ -9,8 +9,8 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - location: !include schemas/po_line_location.json
-  - location_collection: !include schemas/po_line_location_collection.json
+  - location.json: !include schemas/location.json
+  - location_collection.json: !include schemas/location_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,10 +28,10 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/location_collection.sample
       exampleItem: !include examples/location_post.sample
-      schemaCollection: location_collection
-      schemaItem: po_line_location.json
+      schemaCollection: location_collection.json
+      schemaItem: location.json
   get:
-    description: Get list of locationss
+    description: Get list of locations
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       orderable: {fieldsList: "field A, field B"},
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/location_get.sample
-        schema: po_line_location.json
+        schema: location.json

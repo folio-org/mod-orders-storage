@@ -9,8 +9,8 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - fund_distribution: !include schemas/po_line_fund_distribution.json
-  - cost_collection: !include schemas/po_line_fund_distribution_collection.json
+  - fund_distribution.json: !include schemas/fund_distribution.json
+  - fund_distribution_collection.json: !include schemas/fund_distribution_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,8 +28,8 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/fund_distribution_collection.sample
       exampleItem: !include examples/fund_distribution_post.sample
-      schemaCollection: fund_distribution_collection
-      schemaItem: po_line_fund_distribution.json
+      schemaCollection: fund_distribution_collection.json
+      schemaItem: fund_distribution.json
   get:
     description: Get list of fund_distributions
     is: [
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/fund_distribution_get.sample
-        schema: po_line_fund_distribution.json
+        schema: fund_distribution.json

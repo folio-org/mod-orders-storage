@@ -2,12 +2,12 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "po_lines": {
+    "order_formats": {
       "type": "array",
       "id": "order_formats",
       "items": {
         "type": "object",
-        "$ref": "po_line_order_format.json"
+        "$ref": "order_format.json"
       }
     },
     "total_records": {
@@ -20,5 +20,9 @@
       "type": "integer"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "required": [
+    "order_formats",
+    "total_records"
+  ]
 }

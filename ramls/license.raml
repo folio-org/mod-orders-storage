@@ -9,8 +9,8 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - license: !include schemas/po_line_license.json
-  - license_collection: !include schemas/po_line_license_collection.json
+  - license.json: !include schemas/license.json
+  - license_collection.json: !include schemas/license_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,8 +28,8 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/license_collection.sample
       exampleItem: !include examples/license_post.sample
-      schemaCollection: license_collection
-      schemaItem: po_line_license.json
+      schemaCollection: license_collection.json
+      schemaItem: license.json
   get:
     description: Get list of licenses
     is: [
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/license_get.sample
-        schema: po_line_license.json
+        schema: license.json

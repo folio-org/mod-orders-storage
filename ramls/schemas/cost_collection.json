@@ -2,12 +2,12 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "po_lines": {
+    "costs": {
       "type": "array",
-      "id": "claims",
+      "id": "costs",
       "items": {
         "type": "object",
-        "$ref": "po_line_claim.json"
+        "$ref": "cost.json"
       }
     },
     "total_records": {
@@ -20,5 +20,9 @@
       "type": "integer"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "required": [
+    "costs",
+    "total_records"
+  ]
 }

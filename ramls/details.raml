@@ -9,8 +9,8 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - details: !include schemas/po_line_details.json
-  - details_collection: !include schemas/po_line_details_collection.json
+  - details.json: !include schemas/details.json
+  - details_collection.json: !include schemas/details_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,8 +28,8 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/details_collection.sample
       exampleItem: !include examples/details_post.sample
-      schemaCollection: details_collection
-      schemaItem: po_line_details.json
+      schemaCollection: details_collection.json
+      schemaItem: details.json
   get:
     description: Get list of details
     is: [
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/details_get.sample
-        schema: po_line_details.json
+        schema: details.json
