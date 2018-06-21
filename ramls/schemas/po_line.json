@@ -123,14 +123,6 @@
     },
     "donor": {
       "type": "string"
-    },
-    "changelogs": {
-      "id": "changelogs",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "$ref": "changelog.json"
-      }
     }
   },
   "additionalProperties": false,
