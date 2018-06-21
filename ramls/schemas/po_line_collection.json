@@ -22,7 +22,7 @@
   },
   "additionalProperties": false,
   "required": [
-    "order_types",
+    "po_lines",
     "total_records"
   ]
 }

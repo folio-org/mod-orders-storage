@@ -9,8 +9,8 @@ documentation:
 
 schemas:
   - changelog: !include schemas/changelog.json
-  - workflow_status: !include schemas/po_line_workflow_status.json
-  - workflow_status_collection: !include schemas/po_line_workflow_status_collection.json
+  - workflow_status.json: !include schemas/workflow_status.json
+  - workflow_status_collection.json: !include schemas/workflow_status_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,8 +28,8 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/workflow_status_collection.sample
       exampleItem: !include examples/workflow_status_post.sample
-      schemaCollection: workflow_status_collection
-      schemaItem: po_line_workflow_status.json
+      schemaCollection: workflow_status_collection.json
+      schemaItem: workflow_status.json
   get:
     description: Get list of workflow_statuses
     is: [
@@ -41,4 +41,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include examples/workflow_status_get.sample
-        schema: po_line_workflow_status.json
+        schema: workflow_status.json

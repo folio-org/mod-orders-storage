@@ -10,7 +10,6 @@
                 "receipt_date": null,
                 "collection": false,
                 "owner": "Joe Smith",
-                "source": "EDI",
                 "po_line_description": "History Connect In",
                 "adjustment": {
                     "shipment": 0,
@@ -22,16 +21,20 @@
                     "invoice_id": null,
                     "use_pro_rate": false
                 },
-                "alert": {
-                    "po_line_id": null,
-                    "alert": "alert",
-                },
-                "claim": {
-                    "po_line_id": null,
-                    "date": null,
-                    "sent": null,
-                    "grace": null
-                },
+                "alerts": [
+                    {
+                        "po_line_id": null,
+                        "alert": "alert"
+                    }
+                ],
+                "claims": [
+                    {
+                        "po_line_id": null,
+                        "date": null,
+                        "sent": null,
+                        "grace": null
+                    }
+                ],
                 "cost": {
                     "list_price": 32.36,
                     "currency": "CAD",
@@ -46,7 +49,7 @@
                     "subscription_to": null,
                     "subscription_from": null,
                     "subscription_interval": null,
-                    "description": "The bible for historians and archaeologists studying the final days of the Inca. For the past thirty years, The Conquest of the Incas has remained the most influential book for Inca scholars. There is no other book which is even in the same class.",
+                    "description": "The bible for historians and archaeologists studying the final days of the Inca. For the past thirty years, The Conquest of the Incas has remained the most influential book for Inca scholars. There is no other book which is even in the same class."
                 },
                 "eresource": {
                     "activation_status": "",
@@ -54,11 +57,11 @@
                     "create_inventory": false,
                     "trial": false,
                     "expected_activation": null,
-                    "user_limit" 5,
+                    "user_limit": 5,
                     "material_id": null,
                     "access_provider": null
                 },
-                "fund_distribution": [
+                "fund_distributions": [
                     {
                         "amount": null,
                         "percent": 0.5,
@@ -72,11 +75,11 @@
                 ],
                 "license": {
                     "item": null,
-                    "license_id", null
+                    "license_id": null
                 },
                 "location": {
                     "quantity": 8,
-                    "location_id", null
+                    "location_id": null
                 },
                 "order_format": {
                     "code": null,
@@ -90,10 +93,9 @@
                     "expected_receipt_date": "2017-25-09T09:53:15-07",
                     "receipt_due": null,
                     "expected_receipt_interval": 5,
-                    "material_supplier": "112ae2e4-88ae-4fa5-a75b-2379d2035e52"
+                    "material_supplier": "112ae2e4-88ae-4fa5-a75b-2379d2035e52",
                     "volumes": 1,
-                    "material_id": "0156028263",
-                    "material_supplier": null
+                    "material_id": "0156028263"
                 },
                 "receipt_status": {
                     "code": null,
@@ -125,7 +127,7 @@
                 "requester": "John Castillo",
                 "account_number": "1234",
                 "donor": null,
-                "changelog": [
+                "changelogs": [
                     {
                         "note": "Created PO HIST-CONN-2017",
                         "timestamp": "2017-20-09T09:53:15-07",
