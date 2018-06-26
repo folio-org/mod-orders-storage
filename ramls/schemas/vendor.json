@@ -23,5 +23,8 @@
       "type": "string"
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "required": [
+    "instructions"
+  ]
 }

@@ -12,7 +12,6 @@ schemas:
   - adjustment.json: !include schemas/adjustment.json
   - alert.json: !include schemas/alert.json
   - claim.json: !include schemas/claim.json
-  - po_line_collection.json !include schemas/po_line_collection.json
   - cost.json: !include schemas/cost.json
   - details.json: !include schemas/details.json
   - eresource.json: !include schemas/eresource.json
@@ -27,6 +26,7 @@ schemas:
   - source.json: !include schemas/source.json
   - vendor.json: !include schemas/vendor.json
   - workflow_status.json: !include schemas/workflow_status.json
+  - po_line_collection.json !include schemas/po_line_collection.json
 
 
 traits:
@@ -41,12 +41,7 @@ resourceTypes:
   - collection-item: !include raml-util/rtypes/item-collection.raml
 
 /po_line:
-  type:
-    collection:
-      exampleCollection: !include examples/po_line_collection.sample
-      exampleItem: !include examples/po_line_post.sample
-      schemaCollection: po_line_collection.json
-      schemaItem: po_line.json
+  
   get:
     description: Get list of po_lines
     is: [
