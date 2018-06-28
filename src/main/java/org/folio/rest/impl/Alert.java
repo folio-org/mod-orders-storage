@@ -1,4 +1,4 @@
-package org.folio.rest.jaxrs.model;
+package org.folio.rest.impl;
 
 import javax.annotation.Generated;
 import javax.validation.constraints.NotNull;
