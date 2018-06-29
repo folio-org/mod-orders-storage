@@ -45,6 +45,53 @@
       ]
     }
   ],
+  "permissionSets" : [
+    {
+      "permissionName" : "purchase_order.collection.get",
+      "displayName" : "purchase_order-collection get",
+      "description" : "Get a collection of purchase orders"
+    },
+    {
+      "permissionName" : "purchase_order.item.post",
+      "displayName" : "purchase_order-item post",
+      "description" : "Create a new purchase_order"
+    },
+    {
+      "permissionName" : "purchase_order.item.get",
+      "displayName" : "purchase_order-item get",
+      "description" : "Fetch a purchase_order"
+    },
+    {
+      "permissionName" : "purchase_order.item.put",
+      "displayName" : "purchase_order-item put",
+      "description" : "Update a purchase order"
+    },
+    {
+      "permissionName" : "purchase_order.item.delete",
+      "displayName" : "purchase_order-item delete",
+      "description" : "Delete a purchase order"
+    },
+    {
+      "permissionName" : "purchase_order.all",
+      "displayName" : "All purchase order perms",
+      "description" : "All permissions for the purchase order",
+      "subPermissions" : [
+        "purchase_order.collection.get",
+        "purchase_order.item.post",
+        "purchase_order.item.get",
+        "purchase_order.item.put",
+        "purchase_order.item.delete"
+      ]
+    },
+    {
+      "permissionName" : "orders.module.all",
+      "displayName" : "All orders-module perms",
+      "description" : "All permissions for the orders module",
+      "subPermissions" : [
+        "purchase_order.all"
+      ]
+    }
+  ],
   "launchDescriptor": {
     "dockerImage": "${artifactId}:${version}",
     "dockerArgs": {
