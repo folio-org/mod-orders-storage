@@ -1,35 +1,35 @@
 {
-  "id": "sample-module",
-  "name": "Sample FOLIO Module",
+  "id": "${artifactId}-${version}",
+  "name": "Orders CRUD module",
   "provides": [
     {
-      "id": "some-feature",
+      "id": "purchase_order",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/endpoint",
-          "permissionsRequired": ["some.permission.get"]
+          "pathPattern": "/purchase_order",
+          "permissionsRequired": ["purchase_order.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/endpoint",
-          "permissionsRequired": ["some.permission.post"]
+          "pathPattern": "/purchase_order",
+          "permissionsRequired": ["purchase_order.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/endpoint/{id}",
-          "permissionsRequired": ["some.permission.get"]
+          "pathPattern": "/purchase_order/{id}",
+          "permissionsRequired": ["purchase_order.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/endpoint/{id}",
-          "permissionsRequired": ["some.permission.put"]
+          "pathPattern": "/purchase_order/{id}",
+          "permissionsRequired": ["purchase_order.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/endpoint/{id}",
-          "permissionsRequired": ["some.permission.delete"]
+          "pathPattern": "/purchase_order/{id}",
+          "permissionsRequired": ["purchase_order.item.delete"]
         }
       ]
     },
