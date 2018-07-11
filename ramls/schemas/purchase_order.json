@@ -60,7 +60,6 @@
   },
   "additionalProperties": false,
   "required": [
-    "po_number",
-    "vendor"
+    "po_number"
   ]
 }

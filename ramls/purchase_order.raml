@@ -8,9 +8,8 @@ documentation:
     content: <b>This module implements the CRUD interface</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
   - purchase_order.json: !include schemas/purchase_order.json
-  - purchase_order_collection.json: !include schemas/purchase_order_collection.json
+  - purchase_order_collection: !include schemas/purchase_order_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -27,17 +26,16 @@ resourceTypes:
   type:
     collection:
       exampleCollection: !include examples/purchase_order_collection.sample
-      exampleItem: !include examples/purchase_order_post.sample
-      schemaCollection: purchase_order_collection.json
+      exampleItem: !include examples/purchase_order_get.sample
+      schemaCollection: purchase_order_collection
       schemaItem: purchase_order.json
   get:
     description: Get list of purchase orders
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{purchase_order_id}:
+  /{id}:
     type:
       collection-item:
         exampleItem: !include examples/purchase_order_get.sample

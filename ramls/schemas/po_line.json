@@ -33,84 +33,99 @@
       "type": "string"
     },
     "adjustment": {
-      "type": "object",
-      "$ref": "adjustment.json"
+      "type": "string"
     },
     "alerts": {
       "id": "alerts",
       "type": "array",
       "items": {
-        "type": "object",
-        "$ref": "alert.json"
+        "type": "string",
+        "description": "UUID",
+        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
       }
     },
     "claims": {
       "id": "claims",
       "type": "array",
       "items": {
-        "type": "object",
-        "$ref": "claim.json"
+        "type": "string",
+        "description": "UUID",
+        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
       }
     },
     "cost": {
-      "type": "object",
-      "$ref": "cost.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "details": {
-      "type": "object",
-      "$ref": "details.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "eresource": {
-      "type": "object",
-      "$ref": "eresource.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "fund_distributions": {
       "id": "fund_distributions",
       "type": "array",
       "items": {
-        "type": "object",
-        "$ref": "fund_distribution.json"
+        "type": "string",
+        "description": "UUID",
+        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
       }
     },
     "license": {
-      "type": "object",
-      "$ref": "license.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "location": {
-      "type": "object",
-      "$ref": "location.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "order_format": {
-      "type": "object",
-      "$ref": "order_format.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "order_type": {
-      "type": "object",
-      "$ref": "order_type.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "physical": {
-      "type": "object",
-      "$ref": "physical.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "receipt_status": {
-      "type": "object",
-      "$ref": "receipt_status.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "renewal": {
-      "type": "object",
-      "$ref": "renewal.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "source": {
-      "type": "object",
-      "$ref": "source.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "vendor": {
-      "type": "object",
-      "$ref": "vendor.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "workflow_status": {
-      "type": "object",
-      "$ref": "workflow_status.json"
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "selector": {
       "type": "string"

@@ -1,33 +1,15 @@
 #%RAML 0.8
-title: "Sample-Module"
-baseUri: http://github.com/org/folio/sample-module
+title: "mod-orders"
+baseUri: http://github.com/folio-org/mod-orders
 version: v1
 
 documentation:
-  - title: Sample Module
-    content: <b>CRUD API</b>
+  - title: mod-orders
+    content: <b>This module implements the CRUD interface</b>
 
 schemas:
   - po_line.json: !include schemas/po_line.json
-  - adjustment.json: !include schemas/adjustment.json
-  - alert.json: !include schemas/alert.json
-  - claim.json: !include schemas/claim.json
-  - cost.json: !include schemas/cost.json
-  - details.json: !include schemas/details.json
-  - eresource.json: !include schemas/eresource.json
-  - fund_distribution.json: !include schemas/fund_distribution.json
-  - license.json: !include schemas/license.json
-  - location.json: !include schemas/location.json
-  - order_format.json: !include schemas/order_format.json
-  - order_type.json: !include schemas/order_type.json
-  - physical.json: !include schemas/physical.json
-  - receipt_status.json: !include schemas/receipt_status.json
-  - renewal.json: !include schemas/renewal.json
-  - source.json: !include schemas/source.json
-  - vendor.json: !include schemas/vendor.json
-  - workflow_status.json: !include schemas/workflow_status.json
-  - po_line_collection.json !include schemas/po_line_collection.json
-
+  - po_line_collection: !include schemas/po_line_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -41,16 +23,21 @@ resourceTypes:
   - collection-item: !include raml-util/rtypes/item-collection.raml
 
 /po_line:
-  
+  type:
+    collection:
+      exampleCollection: !include examples/po_line_collection.sample
+      exampleItem: !include examples/po_line_post.sample
+      schemaCollection: po_line_collection
+      schemaItem: po_line.json
   get:
-    description: Get list of po_lines
+    description: Get list of purchase orders
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{po_line_id}:
+  /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/po_line_get.sample
+        exampleItem: !include examples/po_line_post.sample
         schema: po_line.json
+

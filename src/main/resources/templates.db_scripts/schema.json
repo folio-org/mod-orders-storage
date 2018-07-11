@@ -1,0 +1,12 @@
+{
+  "tables": [
+    {
+      "tableName": "purchase_order",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "ginIndex": true,
+      "populateJsonWithId": true
+    }
+  ]
+}
