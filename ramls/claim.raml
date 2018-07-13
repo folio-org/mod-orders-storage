@@ -8,9 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
   - claim.json: !include schemas/claim.json
-  - claim_collection.json: !include schemas/claim_collection.json
+  - claim_collection: !include schemas/claim_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,16 +27,15 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/claim_collection.sample
       exampleItem: !include examples/claim_post.sample
-      schemaCollection: claim_collection.json
+      schemaCollection: claim_collection
       schemaItem: claim.json
   get:
     description: Get list of alerts
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{claim_id}:
+  /{id}:
     type:
       collection-item:
         exampleItem: !include examples/claim_get.sample

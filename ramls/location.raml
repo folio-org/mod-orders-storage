@@ -8,9 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
   - location.json: !include schemas/location.json
-  - location_collection.json: !include schemas/location_collection.json
+  - location_collection: !include schemas/location_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,16 +27,15 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/location_collection.sample
       exampleItem: !include examples/location_post.sample
-      schemaCollection: location_collection.json
+      schemaCollection: location_collection
       schemaItem: location.json
   get:
     description: Get list of locations
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{location_id}:
+  /{id}:
     type:
       collection-item:
         exampleItem: !include examples/location_get.sample

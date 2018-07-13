@@ -8,9 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
   - order_type.json: !include schemas/order_type.json
-  - order_type_collection.json: !include schemas/order_type_collection.json
+  - order_type_collection: !include schemas/order_type_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,16 +27,15 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/order_type_collection.sample
       exampleItem: !include examples/order_type_post.sample
-      schemaCollection: order_type_collection.json
+      schemaCollection: order_type_collection
       schemaItem: order_type.json
   get:
     description: Get list of order_types
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{order_type_id}:
+  /{id}:
     type:
       collection-item:
         exampleItem: !include examples/order_type_get.sample

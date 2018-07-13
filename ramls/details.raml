@@ -8,9 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
   - details.json: !include schemas/details.json
-  - details_collection.json: !include schemas/details_collection.json
+  - details_collection: !include schemas/details_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,16 +27,15 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/details_collection.sample
       exampleItem: !include examples/details_post.sample
-      schemaCollection: details_collection.json
+      schemaCollection: details_collection
       schemaItem: details.json
   get:
     description: Get list of details
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{details_id}:
+  /{id}:
     type:
       collection-item:
         exampleItem: !include examples/details_get.sample

@@ -8,9 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
   - vendor.json: !include schemas/vendor.json
-  - vendor_collection.json: !include schemas/vendor_collection.json
+  - vendor_collection: !include schemas/vendor_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,16 +27,15 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/vendor_collection.sample
       exampleItem: !include examples/vendor_post.sample
-      schemaCollection: vendor_collection.json
+      schemaCollection: vendor_collection
       schemaItem: vendor.json
   get:
     description: Get list of locationss
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{vendor_id}:
+  /{id}:
     type:
       collection-item:
         exampleItem: !include examples/vendor_get.sample

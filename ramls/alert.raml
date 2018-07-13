@@ -8,9 +8,8 @@ documentation:
     content: <b>CRUD APIs used to manage alerts.</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
   - alert.json: !include schemas/alert.json
-  - alert_collection.json: !include schemas/alert_collection.json
+  - alert_collection: !include schemas/alert_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -28,17 +27,16 @@ resourceTypes:
     collection:
       exampleCollection: !include examples/alert_collection.sample
       exampleItem: !include examples/alert_post.sample
-      schemaCollection: alert_collection.json
+      schemaCollection: alert_collection
       schemaItem: alert.json
   get:
     description: Get list of alerts
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-      orderable: {fieldsList: "field A, field B"},
       pageable
     ]
-  /{alert_id}:
+  /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/alert_get.sample
+        exampleItem: !include examples/alert_post.sample
         schema: alert.json
