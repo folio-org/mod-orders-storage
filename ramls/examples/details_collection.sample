@@ -1,0 +1,19 @@
+{
+    "details":
+        [
+            {
+            	"id": "da0272e4-7ff7-4ea8-9bc9-9d9cd5c81580",
+                "title": "The Conquest of the Incas",
+                "receiving_note": "Please shelve in B5-History",
+                "product_id": "0156028263",
+                "material_type": "Physical Monograph",
+                "subscription_to": null,
+                "subscription_from": null,
+                "subscription_interval": null,
+                "description": "The bible for historians and archaeologists studying the final days of the Inca. For the past thirty years, The Conquest of the Incas has remained the most influential book for Inca scholars. There is no other book which is even in the same class."
+            }
+        ],
+    "total_records": 1,
+    "first": 1,
+    "last": 1
+}

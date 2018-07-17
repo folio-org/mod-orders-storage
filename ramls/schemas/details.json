@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": ["string", "null"],
+      "description": "UUID",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "receiving_note": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "subscription_from": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "material_type": {
+      "type": "string"
+    },
+    "subscription_interval": {
+      "type": "integer"
+    },
+    "subscription_to": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "description": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "title"
+  ]
+}

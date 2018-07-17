@@ -15,13 +15,12 @@
 
     <properties>
         <aspectj.version>1.8.9</aspectj.version>
-        <module_name>vendor-module</module_name>
+        <module_name>mod-orders</module_name>
         <http.port>8081</http.port>
         <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
         <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-        <raml-module-builder.version>13.0.2</raml-module-builder.version>
+        <raml-module-builder.version>19.0.0</raml-module-builder.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <flyway.version>4.2.0</flyway.version>
         <postgres.driver.version>9.4.1212</postgres.driver.version>
     </properties>
 
@@ -44,6 +43,12 @@
             <groupId>org.folio</groupId>
             <artifactId>domain-models-runtime</artifactId>
             <version>${raml-module-builder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-unit</artifactId>
+            <version>3.5.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -236,7 +241,7 @@
                 <executions>
                     <execution>
                         <id>copy-resources</id>
-                        <phase>prepare-package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -252,7 +257,7 @@
                     </execution>
                     <execution>
                         <id>copy-resources-2</id>
-                        <phase>prepare-package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -264,6 +269,70 @@
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>filter-descriptor-inputs</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/descriptors</directory>
+                                    <include>*Descriptor*-template.json</include>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>build-helper-maven-plugin</artifactId>
+              <version>3.0.0</version>
+              <executions>
+                <execution>
+                  <id>add-raml-jaxrs-source</id>
+                  <phase>generate-sources</phase>
+                  <goals>
+                    <goal>add-source</goal>
+                  </goals>
+                  <configuration>
+                    <sources>
+                      <source>${project.build.directory}/generated-sources/raml-jaxrs</source>
+                    </sources>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+      
+            <plugin>
+                <groupId>com.coderplus.maven.plugins</groupId>
+                <artifactId>copy-rename-maven-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <id>rename-descriptor-outputs</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>rename</goal>
+                        </goals>
+                        <configuration>
+                            <fileSets>
+                                <fileSet>
+                                    <sourceFile>${project.build.directory}/ModuleDescriptor-template.json</sourceFile>
+                                    <destinationFile>${project.build.directory}/ModuleDescriptor.json</destinationFile>
+                                </fileSet>
+                                <fileSet>
+                                    <sourceFile>${project.build.directory}/DeploymentDescriptor-template.json</sourceFile>
+                                    <destinationFile>${project.build.directory}/DeploymentDescriptor.json</destinationFile>
+                                </fileSet>
+                            </fileSets>
                         </configuration>
                     </execution>
                 </executions>
@@ -303,18 +372,6 @@
                 <artifactId>properties-maven-plugin</artifactId>
                 <version>1.0.0</version>
                 <executions>
-                    <execution>
-                        <id>initialize-properties</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>src/main/resources/db.properties</file>
-                            </files>
-                        </configuration>
-                    </execution>
                     <execution>
                         <id>set-system-properties</id>
                         <goals>
@@ -391,29 +448,6 @@
                     <pushChanges>false</pushChanges>
                     <localCheckout>true</localCheckout>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway.version}</version>
-                <configuration>
-                    <sqlMigrationSeparator>__</sqlMigrationSeparator>
-                    <locations>
-                        <location>filesystem:src/main/resources/db/migration</location>
-                    </locations>
-                    <url>${db.url}</url>
-                    <user>${db.username}</user>
-                    <password>${db.password}</password>
-                    <schemas>${db.schema}</schemas>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${postgres.driver.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
