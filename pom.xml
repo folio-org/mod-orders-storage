@@ -241,7 +241,7 @@
                 <executions>
                     <execution>
                         <id>copy-resources</id>
-                        <phase>prepare-package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -257,7 +257,7 @@
                     </execution>
                     <execution>
                         <id>copy-resources-2</id>
-                        <phase>prepare-package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
@@ -291,6 +291,26 @@
                 </executions>
             </plugin>
 
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>build-helper-maven-plugin</artifactId>
+              <version>3.0.0</version>
+              <executions>
+                <execution>
+                  <id>add-raml-jaxrs-source</id>
+                  <phase>generate-sources</phase>
+                  <goals>
+                    <goal>add-source</goal>
+                  </goals>
+                  <configuration>
+                    <sources>
+                      <source>${project.build.directory}/generated-sources/raml-jaxrs</source>
+                    </sources>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+      
             <plugin>
                 <groupId>com.coderplus.maven.plugins</groupId>
                 <artifactId>copy-rename-maven-plugin</artifactId>
