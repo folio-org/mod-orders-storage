@@ -862,7 +862,7 @@
         "fund_distribution.item.put",
         "fund_distribution.item.delete"
       ]
-    }
+    },
     {
       "permissionName" : "license.collection.get",
       "displayName" : "license-collection get",
