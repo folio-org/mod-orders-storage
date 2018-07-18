@@ -1,0 +1,42 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/folio-org/mod-orders
+version: v1
+
+documentation:
+  - title: mod-orders (Alert)
+    content: <b>CRUD APIs used to manage acquisition methods.</b>
+
+schemas:
+  - acquisition_method.json: !include schemas/acquisition_method.json
+  - acquisition_method_collection: !include schemas/acquisition_method_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/alert:
+  type:
+    collection:
+      exampleCollection: !include examples/alert_collection.sample
+      exampleItem: !include examples/alert_post.sample
+      schemaCollection: alert_collection
+      schemaItem: alert.json
+  get:
+    description: Get list of alerts
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
+  /{id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/alert_post.sample
+        schema: alert.json
