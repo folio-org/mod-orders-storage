@@ -7,7 +7,7 @@
       "id": "po_lines",
       "items": {
         "type": "object",
-        "$ref": "po_line"
+        "$ref": "po_line.json"
       }
     },
     "total_records": {

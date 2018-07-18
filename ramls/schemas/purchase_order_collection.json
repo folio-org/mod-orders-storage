@@ -4,10 +4,10 @@
   "properties": {
     "purchase_orders": {
       "type": "array",
-      "id": "purchase_order",
+      "id": "purchase_orders",
       "items": {
         "type": "object",
-        "$ref": "purchase_order"
+        "$ref": "purchase_order.json"
       }
     },
     "total_records": {

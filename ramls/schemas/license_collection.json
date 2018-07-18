@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "licenses": {
+      "type": "array",
+      "id": "licenses",
+      "items": {
+        "type": "object",
+        "$ref": "license.json"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "licenses",
+    "total_records"
+  ]
+}

@@ -1,0 +1,149 @@
+{
+  "tables": [
+    {
+      "tableName": "adjustment",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "alert",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "claim",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "cost",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "details",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "eresource",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "fund_distribution",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "license",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "location",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "order_format",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "order_type",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "physical",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "po_line",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "workflow_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "receipt_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },    
+    {
+      "tableName": "purchase_order",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true,
+      "foreignKeys": [
+        {
+          "fieldName": "po_workflow_status_id",
+          "targetTable": "workflow_status",
+          "tOps": "ADD"
+        },
+        {
+          "fieldName": "po_receipt_status",
+          "targetTable": "receipt_status",
+          "tOps": "ADD"
+        }
+      ]
+    },
+    {
+      "tableName": "renewal",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "source",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "vendor",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    }
+  ]
+}

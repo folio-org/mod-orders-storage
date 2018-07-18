@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "order_types": {
+      "type": "array",
+      "id": "order_types",
+      "items": {
+        "type": "object",
+        "$ref": "order_type.json"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "order_types",
+    "total_records"
+  ]
+}
