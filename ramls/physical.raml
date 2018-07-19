@@ -1,0 +1,42 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: Sample Module
+    content: <b>CRUD API</b>
+
+schemas:
+  - physical.json: !include schemas/physical.json
+  - physical_collection: !include schemas/physical_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/physical:
+  type:
+    collection:
+      exampleCollection: !include examples/physical_collection.sample
+      exampleItem: !include examples/physical_post.sample
+      schemaCollection: physical_collection
+      schemaItem: physical.json
+  get:
+    description: Get list of locationss
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
+  /{id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/physical_get.sample
+        schema: physical.json

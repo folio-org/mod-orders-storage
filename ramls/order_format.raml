@@ -1,0 +1,42 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: Sample Module
+    content: <b>CRUD API</b>
+
+schemas:
+  - order_format.json: !include schemas/order_format.json
+  - order_format_collection: !include schemas/order_format_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/order_format:
+  type:
+    collection:
+      exampleCollection: !include examples/order_format_collection.sample
+      exampleItem: !include examples/order_format_post.sample
+      schemaCollection: order_format_collection
+      schemaItem: order_format.json
+  get:
+    description: Get list of locationss
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
+  /{id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/order_format_get.sample
+        schema: order_format.json

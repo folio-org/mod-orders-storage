@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "adjustments": {
+      "type": "array",
+      "id": "adjustments",
+      "items": {
+        "type": "object",
+        "$ref": "adjustment.json"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "adjustments",
+    "total_records"
+  ]
+}

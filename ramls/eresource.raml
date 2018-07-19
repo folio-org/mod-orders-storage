@@ -1,0 +1,42 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: Sample Module
+    content: <b>CRUD API</b>
+
+schemas:
+  - eresource.json: !include schemas/eresource.json
+  - eresource_collection: !include schemas/eresource_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/eresource:
+  type:
+    collection:
+      exampleCollection: !include examples/eresource_collection.sample
+      exampleItem: !include examples/eresource_post.sample
+      schemaCollection: eresource_collection
+      schemaItem: eresource.json
+  get:
+    description: Get list of eresources
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
+  /{id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/eresource_get.sample
+        schema: eresource.json
