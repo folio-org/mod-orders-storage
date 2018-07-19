@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "reporting_codes": {
+      "type": "array",
+      "id": "reporting_codes",
+      "items": {
+        "type": "object",
+        "$ref": "reporting_code.json"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "reporting_codes",
+    "total_records"
+  ]
+}
