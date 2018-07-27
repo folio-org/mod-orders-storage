@@ -4,12 +4,12 @@ baseUri: http://github.com/org/folio/sample-module
 version: v1
 
 documentation:
-  - mod-orders (Reporting Code)
-    content: <b>CRUD APIs used to manage reporting codes.</b>
+  - title: Sample Module
+    content: <b>CRUD API</b>
 
 schemas:
-  - reporting_code.json: !include schemas/reporting_code.json
-  - reporting_code_collection: !include schemas/reporting_code_collection.json
+  - vendor_detail.json: !include schemas/vendor_detail.json
+  - vendor_detail_collection: !include schemas/vendor_detail_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -22,15 +22,15 @@ resourceTypes:
   - collection: !include raml-util/rtypes/collection.raml
   - collection-item: !include raml-util/rtypes/item-collection.raml
 
-/reporting_code:
+/vendor_detail:
   type:
     collection:
-      exampleCollection: !include examples/reporting_code_collection.sample
-      exampleItem: !include examples/reporting_post.sample
-      schemaCollection: reporting_code_collection
-      schemaItem: reporting_code.json
+      exampleCollection: !include examples/vendor_detail_collection.sample
+      exampleItem: !include examples/vendor__detail_post.sample
+      schemaCollection: vendor_detail_collection
+      schemaItem: vendor_detail.json
   get:
-    description: Get list of renewals
+    description: Get list of locationss
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/reporting_code_post.sample
-        schema: reporting_code.json
+        exampleItem: !include examples/vendor_detail_get.sample
+        schema: vendor_detail.json

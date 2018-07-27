@@ -189,37 +189,6 @@
       ]
     },
     {
-      "id": "fund_distribution",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/fund_distribution",
-          "permissionsRequired": ["fund_distribution.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/fund_distribution",
-          "permissionsRequired": ["fund_distribution.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/fund_distribution/{id}",
-          "permissionsRequired": ["fund_distribution.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/fund_distribution/{id}",
-          "permissionsRequired": ["fund_distribution.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/fund_distribution/{id}",
-          "permissionsRequired": ["fund_distribution.item.delete"]
-        }
-      ]
-    },
-    {
       "id": "license",
       "version": "1.0",
       "handlers": [
@@ -827,43 +796,6 @@
       ]
     },
     {
-      "permissionName" : "fund_distribution.collection.get",
-      "displayName" : "fund_distribution-collection get",
-      "description" : "Get a collection of fund_distributions"
-    },
-    {
-      "permissionName" : "fund_distribution.item.post",
-      "displayName" : "fund_distribution-item post",
-      "description" : "Create a new fund_distribution"
-    },
-    {
-      "permissionName" : "fund_distribution.item.get",
-      "displayName" : "purchase_order-item get",
-      "description" : "Fetch a purchase_order"
-    },
-    {
-      "permissionName" : "fund_distribution.item.put",
-      "displayName" : "fund_distribution-item put",
-      "description" : "Update a fund distribution"
-    },
-    {
-      "permissionName" : "fund_distribution.item.delete",
-      "displayName" : "fund_distribution-item delete",
-      "description" : "Delete a fund_distribution"
-    },
-    {
-      "permissionName" : "fund_distribution.all",
-      "displayName" : "All fund distribution perms",
-      "description" : "All permissions for the fund distribution",
-      "subPermissions" : [
-        "fund_distribution.collection.get",
-        "fund_distribution.item.post",
-        "fund_distribution.item.get",
-        "fund_distribution.item.put",
-        "fund_distribution.item.delete"
-      ]
-    },
-    {
       "permissionName" : "license.collection.get",
       "displayName" : "license-collection get",
       "description" : "Get a collection of licenses"
@@ -1318,7 +1250,6 @@
         "cost.all",
         "details.all",
         "eresource.all",
-        "fund_distribution.all",
         "license.all",
         "location.all",
         "order_format.all",

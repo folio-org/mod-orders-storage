@@ -2,7 +2,18 @@
     "po_lines": [
         {
             "id": "da0272e4-7ff7-4ea8-9bc9-9d9cd5c81580",
-            "barcode": "1234"
+            "acquisition_method": "Approval Plan",
+            "barcode": "1234",
+            "cancellation_restriction": false,
+            "cancellation_restriction_comment": null,
+            "receipt_date": null,
+            "collection": false,
+            "owner": "Joe Smith",
+            "po_line_description": "History Connect In",
+            "selector": "Nathan Pick",
+            "requester": "John Castillo",
+            "account_number": "1234",
+            "donor": null
         }
     ],
     "total_records": 1,

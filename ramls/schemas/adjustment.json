@@ -19,7 +19,13 @@
     "overhead": {
       "type": "number"
     },
-    "tax": {
+    "credit": {
+      "type": "number"
+    },
+    "tax_1": {
+      "type": "number"
+    }
+    "tax_2": {
       "type": "number"
     },
     "invoice_id": {

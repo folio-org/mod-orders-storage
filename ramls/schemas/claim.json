@@ -7,13 +7,15 @@
       "description": "UUID",
       "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "date": {
-      "type": ["string", "null"],
-      "format": "date-time"
+    "claim": {
+      "type": "boolean"
     },
     "sent": {
       "type": ["string", "null"],
       "format": "date-time"
+    },
+    "grace": {
+      "type": "integer"
     },
     "po_line_id": {
       "type": ["string", "null"],
