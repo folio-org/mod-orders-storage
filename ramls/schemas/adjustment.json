@@ -24,7 +24,7 @@
     },
     "tax_1": {
       "type": "number"
-    }
+    },
     "tax_2": {
       "type": "number"
     },
