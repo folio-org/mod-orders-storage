@@ -85,20 +85,6 @@
       "populateJsonWithId": true
     },
     {
-      "tableName": "po_line",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true,
-      "foreignKeys": [
-        {
-          "fieldName": "purchase_order_id",
-          "targetTable": "purchase_order",
-          "tOps": "ADD"
-        }
-      ]
-    },
-    {
       "tableName": "workflow_status",
       "generateId": true,
       "fromModuleVersion": 1.0,
@@ -127,6 +113,20 @@
         {
           "fieldName": "po_receipt_status",
           "targetTable": "receipt_status",
+          "tOps": "ADD"
+        }
+      ]
+    },
+    {
+      "tableName": "po_line",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true,
+      "foreignKeys": [
+        {
+          "fieldName": "purchase_order_id",
+          "targetTable": "purchase_order",
           "tOps": "ADD"
         }
       ]
