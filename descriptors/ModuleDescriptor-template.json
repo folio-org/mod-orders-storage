@@ -499,33 +499,33 @@
       ]
     },
     {
-      "id": "vendor",
+      "id": "vendor_detail",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/vendor",
-          "permissionsRequired": ["vendor.collection.get"]
+          "pathPattern": "/vendor_detail",
+          "permissionsRequired": ["vendor_detail.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/vendor",
-          "permissionsRequired": ["vendor.item.post"]
+          "pathPattern": "/vendor_detail",
+          "permissionsRequired": ["vendor_detail.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/vendor/{id}",
-          "permissionsRequired": ["vendor.item.get"]
+          "pathPattern": "/vendor_detail/{id}",
+          "permissionsRequired": ["vendor_detail.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/vendor/{id}",
-          "permissionsRequired": ["vendor.item.put"]
+          "pathPattern": "/vendor_detail/{id}",
+          "permissionsRequired": ["vendor_detail.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/vendor/{id}",
-          "permissionsRequired": ["vendor.item.delete"]
+          "pathPattern": "/vendor_detail/{id}",
+          "permissionsRequired": ["vendor_detail.item.delete"]
         }
       ]
     },
@@ -1166,40 +1166,40 @@
       ]
     },
     {
-      "permissionName" : "vendor.collection.get",
-      "displayName" : "vendor-collection get",
-      "description" : "Get a collection of vendors"
+      "permissionName" : "vendor_detail.collection.get",
+      "displayName" : "vendor_detail-collection get",
+      "description" : "Get a collection of vendor_details"
     },
     {
-      "permissionName" : "vendor.item.post",
-      "displayName" : "vendor-item post",
-      "description" : "Create a new vendor"
+      "permissionName" : "vendor_detail.item.post",
+      "displayName" : "vendor_detail-item post",
+      "description" : "Create a new vendor_detail"
     },
     {
-      "permissionName" : "vendor.item.get",
-      "displayName" : "vendor-item get",
-      "description" : "Fetch a vendor"
+      "permissionName" : "vendor_detail.item.get",
+      "displayName" : "vendor_detail-item get",
+      "description" : "Fetch a vendor_detail"
     },
     {
-      "permissionName" : "vendor.item.put",
-      "displayName" : "vendor-item put",
-      "description" : "Update a vendor"
+      "permissionName" : "vendor_detail.item.put",
+      "displayName" : "vendor_detail-item put",
+      "description" : "Update a vendor_detail"
     },
     {
-      "permissionName" : "vendor.item.delete",
-      "displayName" : "vendor-item delete",
-      "description" : "Delete a vendor"
+      "permissionName" : "vendor_detail.item.delete",
+      "displayName" : "vendor_detail-item delete",
+      "description" : "Delete a vendor_detail"
     },
     {
-      "permissionName" : "vendor.all",
-      "displayName" : "All vendor perms",
-      "description" : "All permissions for the vendor",
+      "permissionName" : "vendor_detail.all",
+      "displayName" : "All vendor_detail perms",
+      "description" : "All permissions for the vendor_detail",
       "subPermissions" : [
-        "vendor.collection.get",
-        "vendor.item.post",
-        "vendor.item.get",
-        "vendor.item.put",
-        "vendor.item.delete"
+        "vendor_detail.collection.get",
+        "vendor_detail.item.post",
+        "vendor_detail.item.get",
+        "vendor_detail.item.put",
+        "vendor_detail.item.delete"
       ]
     },
     {
@@ -1260,7 +1260,7 @@
         "receipt_status.all",
         "renewal.all",
         "source.all",
-        "vendor.all",
+        "vendor_detail.all",
         "workflow_status.all"
       ]
     }
