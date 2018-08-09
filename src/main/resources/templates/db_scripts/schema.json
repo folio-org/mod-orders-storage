@@ -146,7 +146,7 @@
       "populateJsonWithId": true
     },
     {
-      "tableName": "vendor",
+      "tableName": "vendor_detail",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
