@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "payment_statuses": {
+      "type": "array",
+      "id": "payment_statuses",
+      "items": {
+        "type": "object",
+        "$ref": "payment_status.json"
+      }
+    },
+    "total_records": {
+      "type": "integer"
+    },
+    "first": {
+      "type": "integer"
+    },
+    "last": {
+      "type": "integer"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "payment_statuses",
+    "total_records"
+  ]
+}

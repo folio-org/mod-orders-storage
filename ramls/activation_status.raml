@@ -1,15 +1,15 @@
 #%RAML 0.8
 title: "Sample-Module"
-baseUri: http://github.com/org/folio/sample-module
+baseUri: http://github.com/folio-org/mod-orders
 version: v1
 
 documentation:
-  - title: Sample Module
-    content: <b>CRUD API</b>
+  - title: mod-orders (Activation Status)
+    content: <b>CRUD APIs used to manage activation statuses.</b>
 
 schemas:
-  - vendor.json: !include schemas/vendor.json
-  - vendor_collection: !include schemas/vendor_collection.json
+  - activation_status.json: !include schemas/activation_status.json
+  - activation_status_collection: !include schemas/activation_status_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -22,15 +22,15 @@ resourceTypes:
   - collection: !include raml-util/rtypes/collection.raml
   - collection-item: !include raml-util/rtypes/item-collection.raml
 
-/vendor:
+/activation_status:
   type:
     collection:
-      exampleCollection: !include examples/vendor_collection.sample
-      exampleItem: !include examples/vendor_post.sample
-      schemaCollection: vendor_collection
-      schemaItem: vendor.json
+      exampleCollection: !include examples/activation_status_collection.sample
+      exampleItem: !include examples/activation_status_post.sample
+      schemaCollection: activation_status_collection
+      schemaItem: activation_status.json
   get:
-    description: Get list of locationss
+    description: Get list of acquisition_methods
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/vendor_get.sample
-        schema: vendor.json
+        exampleItem: !include examples/activation_status_post.sample
+        schema: activation_status.json

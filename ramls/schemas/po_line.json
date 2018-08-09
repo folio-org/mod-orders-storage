@@ -68,15 +68,6 @@
       "description": "UUID",
       "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
-    "fund_distributions": {
-      "id": "fund_distributions",
-      "type": "array",
-      "items": {
-        "type": "string",
-        "description": "UUID",
-        "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
-      }
-    },
     "license": {
       "type": "string",
       "description": "UUID",
@@ -98,6 +89,11 @@
       "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
     },
     "physical": {
+      "type": "string",
+      "description": "UUID",
+      "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "purchase_order_id": {
       "type": "string",
       "description": "UUID",
       "pattern": "^[a-f0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"

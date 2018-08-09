@@ -1,0 +1,42 @@
+#%RAML 0.8
+title: "Sample-Module"
+baseUri: http://github.com/org/folio/sample-module
+version: v1
+
+documentation:
+  - title: mod-orders (Vendor Detail)
+    content: <b>CRUD APIs used to manage reporting codes.</b>
+
+schemas:
+  - vendor_detail.json: !include schemas/vendor_detail.json
+  - vendor_detail_collection: !include schemas/vendor_detail_collection.json
+
+traits:
+  - secured: !include raml-util/traits/auth.raml
+  - orderable: !include raml-util/traits/orderable.raml
+  - pageable:  !include raml-util/traits/pageable.raml
+  - searchable: !include raml-util/traits/searchable.raml
+  - language: !include raml-util/traits/language.raml
+
+resourceTypes:
+  - collection: !include raml-util/rtypes/collection.raml
+  - collection-item: !include raml-util/rtypes/item-collection.raml
+
+/vendor_detail:
+  type:
+    collection:
+      exampleCollection: !include examples/vendor_detail_collection.sample
+      exampleItem: !include examples/vendor_detail_post.sample
+      schemaCollection: vendor_detail_collection
+      schemaItem: vendor_detail.json
+  get:
+    description: Get list of locationss
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
+  /{id}:
+    type:
+      collection-item:
+        exampleItem: !include examples/vendor_detail_get.sample
+        schema: vendor_detail.json

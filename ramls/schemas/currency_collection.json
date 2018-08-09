@@ -2,12 +2,12 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "vendors": {
+    "currencies": {
       "type": "array",
-      "id": "vendors",
+      "id": "currencies",
       "items": {
         "type": "object",
-        "$ref": "vendor.json"
+        "$ref": "currency.json"
       }
     },
     "total_records": {
@@ -22,7 +22,7 @@
   },
   "additionalProperties": false,
   "required": [
-    "vendors",
+    "currencies",
     "total_records"
   ]
 }
