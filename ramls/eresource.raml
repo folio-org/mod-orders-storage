@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - eresource.json: !include schemas/eresource.json
-  - eresource_collection: !include schemas/eresource_collection.json
+  - eresource.json: !include acq-models/mod-orders-storage/schemas/eresource.json
+  - eresource_collection: !include acq-models/mod-orders-storage/schemas/eresource_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /eresource:
   type:
     collection:
-      exampleCollection: !include examples/eresource_collection.sample
-      exampleItem: !include examples/eresource_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/eresource_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/eresource_post.sample
       schemaCollection: eresource_collection
       schemaItem: eresource.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/eresource_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/eresource_get.sample
         schema: eresource.json

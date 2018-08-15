@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - license.json: !include schemas/license.json
-  - license_collection: !include schemas/license_collection.json
+  - license.json: !include acq-models/mod-orders-storage/schemas/license.json
+  - license_collection: !include acq-models/mod-orders-storage/schemas/license_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /license:
   type:
     collection:
-      exampleCollection: !include examples/license_collection.sample
-      exampleItem: !include examples/license_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/license_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/license_post.sample
       schemaCollection: license_collection
       schemaItem: license.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/license_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/license_get.sample
         schema: license.json

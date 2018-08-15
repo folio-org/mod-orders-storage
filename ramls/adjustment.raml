@@ -8,9 +8,9 @@ documentation:
     content: <b>CRUD APIs used to manage adjustments.</b>
 
 schemas:
-  - changelog: !include schemas/changelog.json
-  - adjustment.json: !include schemas/adjustment.json
-  - adjustment_collection: !include schemas/adjustment_collection.json
+  - changelog: !include acq-models/mod-orders-storage/schemas/changelog.json
+  - adjustment.json: !include acq-models/mod-orders-storage/schemas/adjustment.json
+  - adjustment_collection: !include acq-models/mod-orders-storage/schemas/adjustment_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -26,8 +26,8 @@ resourceTypes:
 /adjustment:
   type:
     collection:
-      exampleCollection: !include examples/adjustment_collection.sample
-      exampleItem: !include examples/adjustment_get.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/adjustment_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/adjustment_get.sample
       schemaCollection: adjustment_collection
       schemaItem: adjustment.json
   get:
@@ -39,5 +39,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/adjustment_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/adjustment_get.sample
         schema: adjustment.json

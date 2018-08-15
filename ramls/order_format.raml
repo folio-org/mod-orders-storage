@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - order_format.json: !include schemas/order_format.json
-  - order_format_collection: !include schemas/order_format_collection.json
+  - order_format.json: !include acq-models/mod-orders-storage/schemas/order_format.json
+  - order_format_collection: !include acq-models/mod-orders-storage/schemas/order_format_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /order_format:
   type:
     collection:
-      exampleCollection: !include examples/order_format_collection.sample
-      exampleItem: !include examples/order_format_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/order_format_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/order_format_post.sample
       schemaCollection: order_format_collection
       schemaItem: order_format.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/order_format_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/order_format_get.sample
         schema: order_format.json

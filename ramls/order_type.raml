@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - order_type.json: !include schemas/order_type.json
-  - order_type_collection: !include schemas/order_type_collection.json
+  - order_type.json: !include acq-models/mod-orders-storage/schemas/order_type.json
+  - order_type_collection: !include acq-models/mod-orders-storage/schemas/order_type_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /order_type:
   type:
     collection:
-      exampleCollection: !include examples/order_type_collection.sample
-      exampleItem: !include examples/order_type_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/order_type_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/order_type_post.sample
       schemaCollection: order_type_collection
       schemaItem: order_type.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/order_type_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/order_type_get.sample
         schema: order_type.json
