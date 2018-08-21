@@ -1,6 +1,6 @@
 #%RAML 0.8
 title: "Sample-Module"
-baseUri: http://github.com/folio-org/mod-orders
+baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
 
 documentation:
@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD APIs used to manage acquisition methods.</b>
 
 schemas:
-  - acquisition_method.json: !include schemas/acquisition_method.json
-  - acquisition_method_collection: !include schemas/acquisition_method_collection.json
+  - acquisition_method.json: !include acq-models/mod-orders-storage/schemas/acquisition_method.json
+  - acquisition_method_collection: !include acq-models/mod-orders-storage/schemas/acquisition_method_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /acquisition_method:
   type:
     collection:
-      exampleCollection: !include examples/acquisition_method_collection.sample
-      exampleItem: !include examples/acquisition_method_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/acquisition_method_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/acquisition_method_post.sample
       schemaCollection: acquisition_method_collection
       schemaItem: acquisition_method.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/acquisition_method_post.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/acquisition_method_post.sample
         schema: acquisition_method.json

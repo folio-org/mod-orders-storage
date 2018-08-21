@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - claim.json: !include schemas/claim.json
-  - claim_collection: !include schemas/claim_collection.json
+  - claim.json: !include acq-models/mod-orders-storage/schemas/claim.json
+  - claim_collection: !include acq-models/mod-orders-storage/schemas/claim_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /claim:
   type:
     collection:
-      exampleCollection: !include examples/claim_collection.sample
-      exampleItem: !include examples/claim_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/claim_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/claim_post.sample
       schemaCollection: claim_collection
       schemaItem: claim.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/claim_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/claim_get.sample
         schema: claim.json

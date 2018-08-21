@@ -1,6 +1,6 @@
 #%RAML 0.8
 title: "Sample-Module"
-baseUri: http://github.com/folio-org/mod-orders
+baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
 
 documentation:
@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD APIs used to manage activation statuses.</b>
 
 schemas:
-  - activation_status.json: !include schemas/activation_status.json
-  - activation_status_collection: !include schemas/activation_status_collection.json
+  - activation_status.json: !include acq-models/mod-orders-storage/schemas/activation_status.json
+  - activation_status_collection: !include acq-models/mod-orders-storage/schemas/activation_status_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /activation_status:
   type:
     collection:
-      exampleCollection: !include examples/activation_status_collection.sample
-      exampleItem: !include examples/activation_status_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/activation_status_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/activation_status_post.sample
       schemaCollection: activation_status_collection
       schemaItem: activation_status.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/activation_status_post.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/activation_status_post.sample
         schema: activation_status.json

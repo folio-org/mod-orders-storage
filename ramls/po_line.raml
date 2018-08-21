@@ -1,6 +1,6 @@
 #%RAML 0.8
 title: "mod-orders"
-baseUri: http://github.com/folio-org/mod-orders
+baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
 
 documentation:
@@ -8,8 +8,8 @@ documentation:
     content: <b>This module implements the CRUD interface</b>
 
 schemas:
-  - po_line.json: !include schemas/po_line.json
-  - po_line_collection: !include schemas/po_line_collection.json
+  - po_line.json: !include acq-models/mod-orders-storage/schemas/po_line.json
+  - po_line_collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /po_line:
   type:
     collection:
-      exampleCollection: !include examples/po_line_collection.sample
-      exampleItem: !include examples/po_line_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/po_line_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/po_line_post.sample
       schemaCollection: po_line_collection
       schemaItem: po_line.json
   get:
@@ -38,6 +38,6 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/po_line_post.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/po_line_post.sample
         schema: po_line.json
 

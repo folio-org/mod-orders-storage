@@ -1,6 +1,6 @@
 #%RAML 0.8
 title: "Sample-Module"
-baseUri: http://github.com/folio-org/mod-orders
+baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
 
 documentation:
@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD APIs used to manage currencies.</b>
 
 schemas:
-  - currency.json: !include schemas/currency.json
-  - currency_collection: !include schemas/currency_collection.json
+  - currency.json: !include acq-models/mod-orders-storage/schemas/currency.json
+  - currency_collection: !include acq-models/mod-orders-storage/schemas/currency_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /currency:
   type:
     collection:
-      exampleCollection: !include examples/currency_collection.sample
-      exampleItem: !include examples/currency_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/currency_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/currency_post.sample
       schemaCollection: currency_collection
       schemaItem: currency.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/currency_post.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/currency_post.sample
         schema: currency.json

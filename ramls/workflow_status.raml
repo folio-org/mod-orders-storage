@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - workflow_status.json: !include schemas/workflow_status.json
-  - workflow_status_collection: !include schemas/workflow_status_collection.json
+  - workflow_status.json: !include acq-models/mod-orders-storage/schemas/workflow_status.json
+  - workflow_status_collection: !include acq-models/mod-orders-storage/schemas/workflow_status_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /workflow_status:
   type:
     collection:
-      exampleCollection: !include examples/workflow_status_collection.sample
-      exampleItem: !include examples/workflow_status_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/workflow_status_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/workflow_status_post.sample
       schemaCollection: workflow_status_collection
       schemaItem: workflow_status.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/workflow_status_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/workflow_status_get.sample
         schema: workflow_status.json

@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - renewal.json: !include schemas/renewal.json
-  - renewal_collection: !include schemas/renewal_collection.json
+  - renewal.json: !include acq-models/mod-orders-storage/schemas/renewal.json
+  - renewal_collection: !include acq-models/mod-orders-storage/schemas/renewal_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /renewal:
   type:
     collection:
-      exampleCollection: !include examples/renewal_collection.sample
-      exampleItem: !include examples/renewal_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/renewal_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/renewal_post.sample
       schemaCollection: renewal_collection
       schemaItem: renewal.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/renewal_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/renewal_get.sample
         schema: renewal.json

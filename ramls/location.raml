@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - location.json: !include schemas/location.json
-  - location_collection: !include schemas/location_collection.json
+  - location.json: !include acq-models/mod-orders-storage/schemas/location.json
+  - location_collection: !include acq-models/mod-orders-storage/schemas/location_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /location:
   type:
     collection:
-      exampleCollection: !include examples/location_collection.sample
-      exampleItem: !include examples/location_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/location_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/location_post.sample
       schemaCollection: location_collection
       schemaItem: location.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/location_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/location_get.sample
         schema: location.json

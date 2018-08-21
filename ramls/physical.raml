@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - physical.json: !include schemas/physical.json
-  - physical_collection: !include schemas/physical_collection.json
+  - physical.json: !include acq-models/mod-orders-storage/schemas/physical.json
+  - physical_collection: !include acq-models/mod-orders-storage/schemas/physical_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /physical:
   type:
     collection:
-      exampleCollection: !include examples/physical_collection.sample
-      exampleItem: !include examples/physical_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/physical_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/physical_post.sample
       schemaCollection: physical_collection
       schemaItem: physical.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/physical_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/physical_get.sample
         schema: physical.json

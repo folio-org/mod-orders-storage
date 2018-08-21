@@ -1,6 +1,6 @@
 #%RAML 0.8
 title: "Sample-Module"
-baseUri: http://github.com/folio-org/mod-orders
+baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
 
 documentation:
@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD APIs used to manage alerts.</b>
 
 schemas:
-  - alert.json: !include schemas/alert.json
-  - alert_collection: !include schemas/alert_collection.json
+  - alert.json: !include acq-models/mod-orders-storage/schemas/alert.json
+  - alert_collection: !include acq-models/mod-orders-storage/schemas/alert_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /alert:
   type:
     collection:
-      exampleCollection: !include examples/alert_collection.sample
-      exampleItem: !include examples/alert_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/alert_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/alert_post.sample
       schemaCollection: alert_collection
       schemaItem: alert.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/alert_post.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/alert_post.sample
         schema: alert.json

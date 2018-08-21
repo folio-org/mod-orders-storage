@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - receipt_status.json: !include schemas/receipt_status.json
-  - receipt_status_collection: !include schemas/receipt_status_collection.json
+  - receipt_status.json: !include acq-models/mod-orders-storage/schemas/receipt_status.json
+  - receipt_status_collection: !include acq-models/mod-orders-storage/schemas/receipt_status_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /receipt_status:
   type:
     collection:
-      exampleCollection: !include examples/receipt_status_collection.sample
-      exampleItem: !include examples/receipt_status_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/receipt_status_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/receipt_status_post.sample
       schemaCollection: receipt_status_collection
       schemaItem: receipt_status.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/receipt_status_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/receipt_status_get.sample
         schema: receipt_status.json

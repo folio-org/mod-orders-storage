@@ -8,8 +8,8 @@ documentation:
     content: <b>CRUD API</b>
 
 schemas:
-  - fund_distribution.json: !include schemas/fund_distribution.json
-  - fund_distribution_collection: !include schemas/fund_distribution_collection.json
+  - fund_distribution.json: !include acq-models/mod-orders-storage/schemas/fund_distribution.json
+  - fund_distribution_collection: !include acq-models/mod-orders-storage/schemas/fund_distribution_collection.json
 
 traits:
   - secured: !include raml-util/traits/auth.raml
@@ -25,8 +25,8 @@ resourceTypes:
 /fund_distribution:
   type:
     collection:
-      exampleCollection: !include examples/fund_distribution_collection.sample
-      exampleItem: !include examples/fund_distribution_post.sample
+      exampleCollection: !include acq-models/mod-orders-storage/examples/fund_distribution_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/fund_distribution_post.sample
       schemaCollection: fund_distribution_collection
       schemaItem: fund_distribution.json
   get:
@@ -38,5 +38,5 @@ resourceTypes:
   /{id}:
     type:
       collection-item:
-        exampleItem: !include examples/fund_distribution_get.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/fund_distribution_get.sample
         schema: fund_distribution.json
