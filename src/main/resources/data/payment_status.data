@@ -1,0 +1,6 @@
+{ "code": "P","description":"Pending" },
+{ "code": "AP","description":"Awaiting payment" },
+{ "code": "PP","description":"Partially paid" },
+{ "code": "FP","description":"Fully paid" },
+{ "code": "PNR","description":"Payment not required" },
+{ "code": "C","description":"Cancelled" }

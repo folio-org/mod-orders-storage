@@ -1,4 +1,31 @@
 {
+  "scripts": [
+    {
+      "run": "after",
+      "snippet": "COPY wokflow_status (jsonb) FROM 'data/workflow_status.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY acquisition_method (jsonb) FROM 'data/acquisition_method.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY receipt_status (jsonb) FROM 'data/receipt_status.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY payment_status (jsonb) FROM 'data/payment_status.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY order_type (jsonb) FROM 'data/order_type.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    }
+  ],
   "tables": [
     {
       "tableName": "adjustment",
