@@ -46,7 +46,7 @@ public class PaymentStatusAPI implements PaymentStatusResource {
     }
 
     @Override
-    public void getRPaymentStatus(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    public void getPaymentStatus(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
         vertxContext.runOnContext((Void v) -> {
             try {
                 String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
@@ -73,17 +73,17 @@ public class PaymentStatusAPI implements PaymentStatusResource {
                             }
                             collection.setFirst(first);
                             collection.setLast(last);
-                            asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetReceiptStatusResponse
+                            asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetPaymentStatusResponse
                                     .withJsonOK(collection)));
                         }
                         else {
                             log.error(reply.cause().getMessage(), reply.cause());
-                            asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetReceiptStatusResponse
+                            asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetPaymentStatusResponse
                                     .withPlainBadRequest(reply.cause().getMessage())));
                         }
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
-                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetReceiptStatusResponse
+                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetPaymentStatusResponse
                                 .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
                     }
                 });
@@ -93,7 +93,7 @@ public class PaymentStatusAPI implements PaymentStatusResource {
                 if(e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")){
                     message = " CQL parse error " + e.getLocalizedMessage();
                 }
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetReceiptStatusResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PaymentStatusResource.GetPaymentStatusResponse
                         .withPlainInternalServerError(message)));
             }
         });
@@ -123,7 +123,7 @@ public class PaymentStatusAPI implements PaymentStatusResource {
                                     OutStream stream = new OutStream();
                                     stream.setData(entity);
 
-                                    Response response = PaymentStatusResource.PostReceiptStatusResponse.
+                                    Response response = PaymentStatusResource.PostPaymentStatusResponse.
                                             withJsonCreated(PAYMENT_STATUS_LOCATION_PREFIX + persistenceId, stream);
                                     respond(asyncResultHandler, response);
                                 }
@@ -155,7 +155,7 @@ public class PaymentStatusAPI implements PaymentStatusResource {
     }
 
     @Override
-    public void getRPaymentStatusById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
+    public void getPaymentStatusById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
         vertxContext.runOnContext(v -> {
             try {
                 String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
