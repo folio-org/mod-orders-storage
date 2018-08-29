@@ -28,6 +28,20 @@
   ],
   "tables": [
     {
+      "tableName": "acquisition_method",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "activation_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
       "tableName": "adjustment",
       "generateId": true,
       "fromModuleVersion": 1.0,
@@ -56,6 +70,13 @@
       "populateJsonWithId": true
     },
     {
+      "tableName": "currency",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
       "tableName": "details",
       "generateId": true,
       "fromModuleVersion": 1.0,
@@ -64,13 +85,6 @@
     },
     {
       "tableName": "eresource",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "fund_distribution",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
@@ -105,7 +119,49 @@
       "populateJsonWithId": true
     },
     {
+      "tableName": "payment_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
       "tableName": "physical",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "receipt_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "renewal",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "reporting_code",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "source",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "vendor_detail",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
@@ -118,13 +174,6 @@
       "withMetadata": true,
       "populateJsonWithId": true
     },
-    {
-      "tableName": "receipt_status",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },    
     {
       "tableName": "purchase_order",
       "generateId": true,
@@ -157,27 +206,6 @@
           "tOps": "ADD"
         }
       ]
-    },
-    {
-      "tableName": "renewal",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "source",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "vendor_detail",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
     }
   ]
 }
