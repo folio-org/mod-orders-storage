@@ -1,5 +1,46 @@
 {
+  "scripts": [
+    {
+      "run": "after",
+      "snippet": "COPY wokflow_status (jsonb) FROM 'data/workflow_status.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY acquisition_method (jsonb) FROM 'data/acquisition_method.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY receipt_status (jsonb) FROM 'data/receipt_status.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY payment_status (jsonb) FROM 'data/payment_status.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY order_type (jsonb) FROM 'data/order_type.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    }
+  ],
   "tables": [
+    {
+      "tableName": "acquisition_method",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "activation_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
     {
       "tableName": "adjustment",
       "generateId": true,
@@ -29,6 +70,13 @@
       "populateJsonWithId": true
     },
     {
+      "tableName": "currency",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
       "tableName": "details",
       "generateId": true,
       "fromModuleVersion": 1.0,
@@ -37,13 +85,6 @@
     },
     {
       "tableName": "eresource",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "fund_distribution",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
@@ -78,7 +119,49 @@
       "populateJsonWithId": true
     },
     {
+      "tableName": "payment_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
       "tableName": "physical",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "receipt_status",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "renewal",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "reporting_code",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "source",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "vendor_detail",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
@@ -91,13 +174,6 @@
       "withMetadata": true,
       "populateJsonWithId": true
     },
-    {
-      "tableName": "receipt_status",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },    
     {
       "tableName": "purchase_order",
       "generateId": true,
@@ -130,27 +206,6 @@
           "tOps": "ADD"
         }
       ]
-    },
-    {
-      "tableName": "renewal",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "source",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "vendor_detail",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
     }
   ]
 }
