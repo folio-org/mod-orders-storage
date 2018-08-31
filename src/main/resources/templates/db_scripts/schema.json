@@ -2,7 +2,7 @@
   "scripts": [
     {
       "run": "after",
-      "snippet": "COPY wokflow_status (jsonb) FROM 'data/workflow_status.data' ENCODING 'UTF8';",
+      "snippet": "COPY workflow_status (jsonb) FROM 'data/workflow_status.data' ENCODING 'UTF8';",
       "fromModuleVersion": "1.0"
     },
     {
