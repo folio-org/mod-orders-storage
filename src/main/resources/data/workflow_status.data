@@ -1,6 +1,6 @@
-{ "code": "P","description":"Pending" },
-{ "code": "IR","description":"In review" },
-{ "code": "A","description":"Approved" },
-{ "code": "NAUR","description":"Not approved update required" },
-{ "code": "D","description":"Declined" },
+{ "code": "P","description":"Pending" }
+{ "code": "IR","description":"In review" }
+{ "code": "A","description":"Approved" }
+{ "code": "NAUR","description":"Not approved update required" }
+{ "code": "D","description":"Declined" }
 { "code": "C","description":"Closed" }
