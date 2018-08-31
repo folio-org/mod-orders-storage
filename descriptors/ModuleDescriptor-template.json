@@ -1209,7 +1209,6 @@
         "order_type.item.delete"
       ]
     },
-    ,
     {
       "permissionName" : "payment_status.collection.get",
       "displayName" : "payment_status-collection get",
