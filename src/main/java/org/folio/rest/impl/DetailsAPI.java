@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class DetailsAPI implements DetailsResource {
-    private static final String DETAIL_TABLE = "detail";
-    private static final String DETAIL_LOCATION_PREFIX = "/detail/";
+    private static final String DETAIL_TABLE = "details";
+    private static final String DETAIL_LOCATION_PREFIX = "/details/";
 
     private static final Logger log = LoggerFactory.getLogger(DetailsAPI.class);
     private final Messages messages = Messages.getInstance();
