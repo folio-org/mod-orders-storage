@@ -24,6 +24,26 @@
       "run": "after",
       "snippet": "COPY order_type (jsonb) FROM 'data/order_type.data' ENCODING 'UTF8';",
       "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY cost (jsonb) FROM 'data/cost.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY eresource (jsonb) FROM 'data/eresource.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY location (jsonb) FROM 'data/location.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY po_line (jsonb) FROM 'data/po_line.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
     }
   ],
   "tables": [
