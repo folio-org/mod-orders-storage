@@ -3,68 +3,6 @@
   "name": "Orders CRUD module",
   "provides": [
     {
-      "id": "acquisition_method",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/acquisition_method",
-          "permissionsRequired": ["acquisition_method.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/acquisition_method",
-          "permissionsRequired": ["acquisition_method.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/acquisition_method/{id}",
-          "permissionsRequired": ["acquisition_method.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/acquisition_method/{id}",
-          "permissionsRequired": ["acquisition_method.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/acquisition_method/{id}",
-          "permissionsRequired": ["acquisition_method.item.delete"]
-        }
-      ]
-    },
-    {
-      "id": "activation_status",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/activation_status",
-          "permissionsRequired": ["activation_status.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/activation_status",
-          "permissionsRequired": ["activation_status.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/activation_status/{id}",
-          "permissionsRequired": ["activation_status.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/activation_status/{id}",
-          "permissionsRequired": ["activation_status.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/activation_status/{id}",
-          "permissionsRequired": ["activation_status.item.delete"]
-        }
-      ]
-    },
-    {
       "id": "adjustment",
       "version": "1.0",
       "handlers": [
@@ -185,37 +123,6 @@
           "methods": ["DELETE"],
           "pathPattern": "/cost/{id}",
           "permissionsRequired": ["cost.item.delete"]
-        }
-      ]
-    },
-    {
-      "id": "currency",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/urrency",
-          "permissionsRequired": ["urrency.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/urrency",
-          "permissionsRequired": ["urrency.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/urrency/{id}",
-          "permissionsRequired": ["urrency.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/urrency/{id}",
-          "permissionsRequired": ["urrency.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/urrency/{id}",
-          "permissionsRequired": ["urrency.item.delete"]
         }
       ]
     },
@@ -344,68 +251,6 @@
       ]
     },
     {
-      "id": "order_format",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/order_format",
-          "permissionsRequired": ["order_format.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/order_format",
-          "permissionsRequired": ["order_format.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/order_format/{id}",
-          "permissionsRequired": ["order_format.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/order_format/{id}",
-          "permissionsRequired": ["order_format.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/order_format/{id}",
-          "permissionsRequired": ["order_format.item.delete"]
-        }
-      ]
-    },
-    {
-      "id": "order_type",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/order_type",
-          "permissionsRequired": ["order_type.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/order_type",
-          "permissionsRequired": ["order_type.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/order_type/{id}",
-          "permissionsRequired": ["order_type.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/order_type/{id}",
-          "permissionsRequired": ["order_type.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/order_type/{id}",
-          "permissionsRequired": ["order_type.item.delete"]
-        }
-      ]
-    },
-    {
       "id": "payment_status",
       "version": "1.0",
       "handlers": [
@@ -526,37 +371,6 @@
           "methods": ["DELETE"],
           "pathPattern": "/purchase_order/{id}",
           "permissionsRequired": ["purchase_order.item.delete"]
-        }
-      ]
-    },
-    {
-      "id": "receipt_status",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/receipt_status",
-          "permissionsRequired": ["receipt_status.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/receipt_status",
-          "permissionsRequired": ["receipt_status.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/receipt_status/{id}",
-          "permissionsRequired": ["receipt_status.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/receipt_status/{id}",
-          "permissionsRequired": ["receipt_status.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/receipt_status/{id}",
-          "permissionsRequired": ["receipt_status.item.delete"]
         }
       ]
     },
@@ -685,37 +499,6 @@
       ]
     },
     {
-      "id": "workflow_status",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/workflow_status",
-          "permissionsRequired": ["workflow_status.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/workflow_status",
-          "permissionsRequired": ["workflow_status.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/workflow_status/{id}",
-          "permissionsRequired": ["workflow_status.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/workflow_status/{id}",
-          "permissionsRequired": ["workflow_status.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/workflow_status/{id}",
-          "permissionsRequired": ["workflow_status.item.delete"]
-        }
-      ]
-    },
-    {
       "id": "_tenant",
       "version": "1.0",
       "interfaceType": "system",
@@ -728,80 +511,6 @@
     }
   ],
   "permissionSets" : [
-    {
-      "permissionName" : "acquisition_method.collection.get",
-      "displayName" : "acquisition_method-collection get",
-      "description" : "Get a collection of acquisition_methods"
-    },
-    {
-      "permissionName" : "acquisition_method.item.post",
-      "displayName" : "acquisition_method-item post",
-      "description" : "Create a new acquisition_method"
-    },
-    {
-      "permissionName" : "acquisition_method.item.get",
-      "displayName" : "acquisition_method-item get",
-      "description" : "Fetch an acquisition_method"
-    },
-    {
-      "permissionName" : "acquisition_method.item.put",
-      "displayName" : "acquisition_method-item put",
-      "description" : "Update an acquisition_method"
-    },
-    {
-      "permissionName" : "acquisition_method.item.delete",
-      "displayName" : "acquisition_method-item delete",
-      "description" : "Delete an acquisition_method"
-    },
-    {
-      "permissionName" : "acquisition_method.all",
-      "displayName" : "All acquisition_method perms",
-      "description" : "All permissions for the acquisition_method",
-      "subPermissions" : [
-        "acquisition_method.collection.get",
-        "acquisition_method.item.post",
-        "acquisition_method.item.get",
-        "acquisition_method.item.put",
-        "acquisition_method.item.delete"
-      ]
-    },
-    {
-      "permissionName" : "activation_status.collection.get",
-      "displayName" : "activation_status-collection get",
-      "description" : "Get a collection of activation_status"
-    },
-    {
-      "permissionName" : "activation_status.item.post",
-      "displayName" : "activation_status-item post",
-      "description" : "Create a new activation_status"
-    },
-    {
-      "permissionName" : "activation_status.item.get",
-      "displayName" : "activation_status-item get",
-      "description" : "Fetch an activation_status"
-    },
-    {
-      "permissionName" : "activation_status.item.put",
-      "displayName" : "activation_status-item put",
-      "description" : "Update an activation_status"
-    },
-    {
-      "permissionName" : "activation_status.item.delete",
-      "displayName" : "activation_status-item delete",
-      "description" : "Delete an activation_status"
-    },
-    {
-      "permissionName" : "activation_status.all",
-      "displayName" : "All activation_status perms",
-      "description" : "All permissions for the activation_status",
-      "subPermissions" : [
-        "activation_status.collection.get",
-        "activation_status.item.post",
-        "activation_status.item.get",
-        "activation_status.item.put",
-        "activation_status.item.delete"
-      ]
-    },
     {
       "permissionName" : "adjustment.collection.get",
       "displayName" : "adjustment-collection get",
@@ -948,43 +657,6 @@
         "cost.item.get",
         "cost.item.put",
         "cost.item.delete"
-      ]
-    },
-    {
-      "permissionName" : "currency.collection.get",
-      "displayName" : "currency-collection get",
-      "description" : "Get a collection of currency"
-    },
-    {
-      "permissionName" : "currency.item.post",
-      "displayName" : "currency-item post",
-      "description" : "Create a new currency"
-    },
-    {
-      "permissionName" : "currency.item.get",
-      "displayName" : "currency-item get",
-      "description" : "Fetch a currency"
-    },
-    {
-      "permissionName" : "currency.item.put",
-      "displayName" : "currency-item put",
-      "description" : "Update a currency"
-    },
-    {
-      "permissionName" : "currency.item.delete",
-      "displayName" : "currency-item delete",
-      "description" : "Delete a currency"
-    },
-    {
-      "permissionName" : "currency.all",
-      "displayName" : "All currency perms",
-      "description" : "All permissions for the currency",
-      "subPermissions" : [
-        "currency.collection.get",
-        "currency.item.post",
-        "currency.item.get",
-        "currency.item.put",
-        "currency.item.delete"
       ]
     },
     {
@@ -1136,117 +808,6 @@
       ]
     },
     {
-      "permissionName" : "order_format.collection.get",
-      "displayName" : "order_format-collection get",
-      "description" : "Get a collection of order_formats"
-    },
-    {
-      "permissionName" : "order_format.item.post",
-      "displayName" : "order_format-item post",
-      "description" : "Create a new order_format"
-    },
-    {
-      "permissionName" : "prder_format.item.get",
-      "displayName" : "order_format-item get",
-      "description" : "Fetch an order_format"
-    },
-    {
-      "permissionName" : "order_format.item.put",
-      "displayName" : "order_format-item put",
-      "description" : "Update an order_format"
-    },
-    {
-      "permissionName" : "order_format.item.delete",
-      "displayName" : "order_format-item delete",
-      "description" : "Delete an order format"
-    },
-    {
-      "permissionName" : "order_format.all",
-      "displayName" : "All order format perms",
-      "description" : "All permissions for the order format",
-      "subPermissions" : [
-        "order_format.collection.get",
-        "order_format.item.post",
-        "order_format.item.get",
-        "order_format.item.put",
-        "order_format.item.delete"
-      ]
-    },
-    {
-      "permissionName" : "order_type.collection.get",
-      "displayName" : "order_type-collection get",
-      "description" : "Get a collection of order types"
-    },
-    {
-      "permissionName" : "order_type.item.post",
-      "displayName" : "order_type-item post",
-      "description" : "Create a new order type"
-    },
-    {
-      "permissionName" : "order_type.item.get",
-      "displayName" : "order_type-item get",
-      "description" : "Fetch an order type"
-    },
-    {
-      "permissionName" : "order_type.item.put",
-      "displayName" : "order_type-item put",
-      "description" : "Update an order type"
-    },
-    {
-      "permissionName" : "order_type.item.delete",
-      "displayName" : "order_type-item delete",
-      "description" : "Delete an order type"
-    },
-    {
-      "permissionName" : "order_type.all",
-      "displayName" : "All order type perms",
-      "description" : "All permissions for the order type",
-      "subPermissions" : [
-        "order_type.collection.get",
-        "order_type.item.post",
-        "order_type.item.get",
-        "order_type.item.put",
-        "order_type.item.delete"
-      ]
-    },
-    {
-      "permissionName" : "payment_status.collection.get",
-      "displayName" : "payment_status-collection get",
-      "description" : "Get a collection of payment_statuses"
-    },
-    {
-      "permissionName" : "payment_status.item.post",
-      "displayName" : "payment_status-item post",
-      "description" : "Create a new payment_status"
-    },
-    {
-      "permissionName" : "payment_status.item.get",
-      "displayName" : "payment_status-item get",
-      "description" : "Fetch an payment_status"
-    },
-    {
-      "permissionName" : "payment_status.item.put",
-      "displayName" : "payment_status-item put",
-      "description" : "Update an order type"
-    },
-    {
-      "permissionName" : "payment_status.item.delete",
-      "displayName" : "payment_status-item delete",
-      "description" : "Delete an payment_status"
-    },
-    {
-      "permissionName" : "payment_status.all",
-      "displayName" : "All payment_status perms",
-      "description" : "All permissions for the payment_status",
-      "subPermissions" : [
-        "payment_status.collection.get",
-        "payment_status.item.post",
-        "payment_status.item.get",
-        "payment_status.item.put",
-        "payment_status.item.delete"
-      ]
-    },
-    {
       "permissionName" : "physical.collection.get",
       "displayName" : "physical-collection get",
       "description" : "Get a collection of physicals"
@@ -1355,43 +916,6 @@
         "purchase_order.item.get",
         "purchase_order.item.put",
         "purchase_order.item.delete"
-      ]
-    },
-    {
-      "permissionName" : "receipt_status.collection.get",
-      "displayName" : "receipt_status-collection get",
-      "description" : "Get a collection of receipt status"
-    },
-    {
-      "permissionName" : "receipt_status.item.post",
-      "displayName" : "receipt_status-item post",
-      "description" : "Create a new receipt status"
-    },
-    {
-      "permissionName" : "receipt_status.item.get",
-      "displayName" : "receipt_status-item get",
-      "description" : "Fetch a receipt status"
-    },
-    {
-      "permissionName" : "receipt_status.item.put",
-      "displayName" : "receipt_status-item put",
-      "description" : "Update a receipt status"
-    },
-    {
-      "permissionName" : "receipt_status.item.delete",
-      "displayName" : "receipt_status-item delete",
-      "description" : "Delete a receipt status"
-    },
-    {
-      "permissionName" : "receipt_status.all",
-      "displayName" : "All receipt status perms",
-      "description" : "All permissions for the receipt status",
-      "subPermissions" : [
-        "receipt_status.collection.get",
-        "receipt_status.item.post",
-        "receipt_status.item.get",
-        "receipt_status.item.put",
-        "receipt_status.item.delete"
       ]
     },
     {
@@ -1543,49 +1067,10 @@
       ]
     },
     {
-      "permissionName" : "workflow_status.collection.get",
-      "displayName" : "workflow_status-collection get",
-      "description" : "Get a collection of workflow statuses"
-    },
-    {
-      "permissionName" : "workflow_status.item.post",
-      "displayName" : "workflow_status-item post",
-      "description" : "Create a new workflow status"
-    },
-    {
-      "permissionName" : "workflow_status.item.get",
-      "displayName" : "workflow_status-item get",
-      "description" : "Fetch a workflow status"
-    },
-    {
-      "permissionName" : "workflow_status.item.put",
-      "displayName" : "workflow_status-item put",
-      "description" : "Update a workflow status"
-    },
-    {
-      "permissionName" : "workflow_status.item.delete",
-      "displayName" : "workflow_status-item delete",
-      "description" : "Delete a workflow status"
-    },
-    {
-      "permissionName" : "workflow_status.all",
-      "displayName" : "All workflow status perms",
-      "description" : "All permissions for the workflow status",
-      "subPermissions" : [
-        "workflow_status.collection.get",
-        "workflow_status.item.post",
-        "workflow_status.item.get",
-        "workflow_status.item.put",
-        "workflow_status.item.delete"
-      ]
-    },
-    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
       "subPermissions" : [
-        "acquisition_method.all",
-        "activation_status.all",
         "adjustment.all",
         "alert.all",
         "claim.all",
@@ -1595,18 +1080,13 @@
         "eresource.all",
         "license.all",
         "location.all",
-        "order_format.all",
-        "order_type.all",
-        "payment_status.all",
         "physical.all",
         "po_line.all",
         "purchase_order.all",
-        "receipt_status.all",
         "renewal.all",
         "reporting_code.all",
         "source.all",
-        "vendor_detail.all",
-        "workflow_status.all"
+        "vendor_detail.all"
       ]
     }
   ],

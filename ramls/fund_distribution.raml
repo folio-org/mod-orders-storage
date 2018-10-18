@@ -1,11 +1,11 @@
 #%RAML 0.8
-title: "Sample-Module"
-baseUri: http://github.com/org/folio/sample-module
+title: "mod-funds"
+baseUri: https://github.com/folio-org/mod-funds
 version: v1
 
 documentation:
-  - title: Sample Module
-    content: <b>CRUD API</b>
+  - title: mod-funds (Fund Distributions)
+    content: <b>CRUD APIs used to manage fund-distributions.</b>
 
 schemas:
   - fund_distribution.json: !include acq-models/mod-orders-storage/schemas/fund_distribution.json
@@ -22,15 +22,16 @@ resourceTypes:
   - collection: !include raml-util/rtypes/collection.raml
   - collection-item: !include raml-util/rtypes/item-collection.raml
 
+
 /fund_distribution:
   type:
     collection:
       exampleCollection: !include acq-models/mod-orders-storage/examples/fund_distribution_collection.sample
-      exampleItem: !include acq-models/mod-orders-storage/examples/fund_distribution_post.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/fund_distribution_get.sample
       schemaCollection: fund_distribution_collection
       schemaItem: fund_distribution.json
   get:
-    description: Get list of fund_distributions
+    description: Get list of fund distributions
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable

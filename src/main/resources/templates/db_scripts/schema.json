@@ -48,20 +48,6 @@
   ],
   "tables": [
     {
-      "tableName": "acquisition_method",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "activation_status",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
       "tableName": "adjustment",
       "generateId": true,
       "fromModuleVersion": 1.0,
@@ -84,13 +70,6 @@
     },
     {
       "tableName": "cost",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "currency",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
@@ -125,35 +104,7 @@
       "populateJsonWithId": true
     },
     {
-      "tableName": "order_format",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "order_type",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "payment_status",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
       "tableName": "physical",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "receipt_status",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
@@ -188,30 +139,11 @@
       "populateJsonWithId": true
     },
     {
-      "tableName": "workflow_status",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
       "tableName": "purchase_order",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
-      "foreignKeys": [
-        {
-          "fieldName": "po_workflow_status_id",
-          "targetTable": "workflow_status",
-          "tOps": "ADD"
-        },
-        {
-          "fieldName": "po_receipt_status",
-          "targetTable": "receipt_status",
-          "tOps": "ADD"
-        }
-      ]
+      "populateJsonWithId": true
     },
     {
       "tableName": "po_line",
