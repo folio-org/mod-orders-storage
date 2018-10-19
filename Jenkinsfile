@@ -2,7 +2,7 @@ buildMvn {
   publishModDescriptor = 'yes'
   publishAPI = 'yes'
   mvnDeploy = 'yes'
-  runLintRamlCop = 'no'
+  runLintRamlCop = 'yes'
 
   doDocker = {
     buildJavaDocker {

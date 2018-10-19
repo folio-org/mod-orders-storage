@@ -1,6 +1,0 @@
-{ "code": "P","description":"Pending" }
-{ "code": "AR","description":"Awaiting receipt" }
-{ "code": "PR","description":"Partially received" }
-{ "code": "FR","description":"Fully received" }
-{ "code": "RNR","description":"Receipt not required" }
-{ "code": "C","description":"Cancelled" }
