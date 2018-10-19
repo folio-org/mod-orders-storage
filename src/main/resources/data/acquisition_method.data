@@ -1,9 +1,0 @@
-{ "code": "P","description":"Purchase" }
-{ "code": "PVA","description":"Purchase at Vendor System" }
-{ "code": "AP","description":"Approval Plan" }
-{ "code": "DEP","description":"Depository" }
-{ "code": "EXC","description":"Exchange" }
-{ "code": "G","description":"Gift" }
-{ "code": "T","description":"Technical" }
-{ "code": "DDA","description":"Demand Driven Acquisition (DDA)" }
-{ "code": "EBA","description":"Evidence Based Acquisitions (EBA)" }
