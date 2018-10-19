@@ -38,14 +38,14 @@ public class CreditsTest {
   private final String TENANT_NAME = "diku";
   private final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
 
-  private String moduleName;      // "mod_credits";
+  private String moduleName;      // "mod_orders_storage";
   private String moduleVersion;   // "1.0.0"
-  private String moduleId;        // "mod-credits-1.0.0"
+  private String moduleId;        // "mod-orders_storage-1.0.0"
 
 
   @Before
   public void before(TestContext context) {
-    logger.info("--- mod-credits-test: START ");
+    logger.info("--- mod-orders-storage-test: START ");
     vertx = Vertx.vertx();
 
     moduleName = PomReader.INSTANCE.getModuleName();
@@ -89,27 +89,26 @@ public class CreditsTest {
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       async.complete();
-      logger.info("--- mod-credits-test: END ");
+      logger.info("--- mod-orders-storage-test: END ");
     });
   }
 
   // Validates that there are zero credit records in the DB
   private void verifyCollection() {
 
-    // Validate that credit_type is prepopulated with 4 records
-    // and this particular call returns all 4
-    getData("credit_type").then()
-      .log().ifValidationFails()
-      .statusCode(200)
-      .body("total_records", equalTo(4))
-      .body("credit_types.size()", is(4));
-
-    // Verify that there are no existing credit records
-    getData("credit").then()
+    // Validate that there are no existing purchase_orders
+    getData("purchase_order").then()
       .log().ifValidationFails()
       .statusCode(200)
       .body("total_records", equalTo(0))
-      .body("credits", empty());
+      .body("purchase_orders", empty());
+
+    // Verify that there are no existing po_lines
+    getData("po_line").then()
+      .log().ifValidationFails()
+      .statusCode(200)
+      .body("total_records", equalTo(0))
+      .body("po_lines", empty());
   }
 
   @Test
@@ -118,45 +117,45 @@ public class CreditsTest {
     try {
 
       // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-      logger.info("--- mod-credits-test: Preparing test tenant");
+      logger.info("--- mod-orders-storage-test: Preparing test tenant");
       prepareTenant();
 
-      logger.info("--- mod-credits-test: Verifying database's initial state ... ");
+      logger.info("--- mod-orders-storage-test: Verifying database's initial state ... ");
       verifyCollection();
 
-      logger.info("--- mod-credits-test: Creating credit type ... ");
-      String creditTypeSample = getFile("credit_type.sample");
-      Response response = postData("credit_type", creditTypeSample);
+      logger.info("--- mod-orders-storage-test: Creating purchase order ... ");
+      String purchaseOrderSample = getFile("purchase_order.sample");
+      Response response = postData("purchase_order", purchaseOrderSample);
       response.then().log().ifValidationFails()
         .statusCode(201)
-        .body("value", equalTo("Other"));
-      String creditTypeSampleId = response.then().extract().path("id");
+        .body("order_type", equalTo("Ongoing"));
+      String purchaseOrderSampleId = response.then().extract().path("id");
 
-      logger.info("--- mod-credits-test: Verifying only 1 credit type was created ... ");
-      getData("credit_type").then().log().ifValidationFails()
+      logger.info("--- mod-order-storage-test: Verifying only 1 purchase order was created ... ");
+      getData("purchase_order").then().log().ifValidationFails()
         .statusCode(200)
         .body("total_records", equalTo(5));
 
-      logger.info("--- mod-credits-test: Fetching credit type with ID: "+ creditTypeSampleId);
-      getDataById("credit_type", creditTypeSampleId).then().log().ifValidationFails()
+      logger.info("--- mod-order-storage-test: Fetching purchase order with ID: "+ purchaseOrderSampleId);
+      getDataById("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
         .statusCode(200)
-        .body("id", equalTo(creditTypeSampleId));
+        .body("id", equalTo(purchaseOrderSampleId));
 
-      logger.info("--- mod-credits-test: Editing credit type with ID: "+ creditTypeSampleId);
-      JSONObject catJSON = new JSONObject(creditTypeSample);
-      catJSON.put("id", creditTypeSampleId);
-      catJSON.put("value", "Gift");
-      response = putData("credit_type", creditTypeSampleId, catJSON.toString());
+      logger.info("--- mod-orders-storage-test: Editing purchase order with ID: "+ purchaseOrderSampleId);
+      JSONObject catJSON = new JSONObject(purchaseOrderSample);
+      catJSON.put("id", purchaseOrderSampleId);
+      catJSON.put("order_type", "Gift");
+      response = putData("purchase_order", purchaseOrderSampleId, catJSON.toString());
       response.then().log().ifValidationFails()
         .statusCode(204);
 
-      logger.info("--- mod-credits-test: Fetching credit type with ID: "+ creditTypeSampleId);
-      getDataById("credit_type", creditTypeSampleId).then()
+      logger.info("--- mod-orders-storage-test: Fetching purchase order with ID: "+ purchaseOrderSampleId);
+      getDataById("purchase_order", purchaseOrderSampleId).then()
         .statusCode(200).log().ifValidationFails()
 
         .body("value", equalTo("Gift"));
 
-      logger.info("--- mod-credits-test: Creating credit ... ");
+      logger.info("--- mod-order-storage-test: Creating purchase order line ... ");
 
       String creditSample = //getFile("credit.sample");
 
