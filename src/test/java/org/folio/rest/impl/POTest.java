@@ -29,7 +29,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(VertxUnitRunner.class)
-public class CreditsTest {
+public class POTest {
   private Vertx vertx;
   private Async async;
   private final Logger logger = LoggerFactory.getLogger("okapi");
@@ -93,7 +93,7 @@ public class CreditsTest {
     });
   }
 
-  // Validates that there are zero credit records in the DB
+  // Validates that there are zero purchase order records in the DB
   private void verifyCollection() {
 
     // Validate that there are no existing purchase_orders
@@ -152,57 +152,16 @@ public class CreditsTest {
       logger.info("--- mod-orders-storage-test: Fetching purchase order with ID: "+ purchaseOrderSampleId);
       getDataById("purchase_order", purchaseOrderSampleId).then()
         .statusCode(200).log().ifValidationFails()
+        .body("order_type", equalTo("Gift"));
 
-        .body("value", equalTo("Gift"));
 
-      logger.info("--- mod-order-storage-test: Creating purchase order line ... ");
-
-      String creditSample = //getFile("credit.sample");
-
-        "{\"id\": null, \"amount\": 1500.00, \"credit_type_id\":\"" + creditTypeSampleId + "\"," +
-        " \"currency\":\"CAD\", \"description\":\"Christmas donations\", \"note\":\"2017 tax year\"," +
-        " \"po_id\":\"676ecd31-7ca3-3d8d-9bbf-rd94dff5f5d5\"}";
-
-      response = postData("credit", creditSample);
-      response.then().log().ifValidationFails()
-        .statusCode(201)
-        .body("description", equalTo("Christmas donations"));
-      String creditId = response.then().extract().path("id");
-
-      logger.info("--- mod-credits-test: Verifying only 1 credit was created ... ");
-      getData("credit").then().log().ifValidationFails()
-        .statusCode(200)
-        .body("total_records", equalTo(1));
-
-      logger.info("--- mod-credits-test: Fetching credit with ID : "+ creditId);
-      getDataById("credit", creditId).then().log().ifValidationFails()
-        .statusCode(200)
-        .body("id", equalTo(creditId));
-
-      logger.info("--- mod-credits-test: Editing credit with ID :"+ creditId);
-      JSONObject creditJSON = new JSONObject(creditSample);
-      creditJSON.put("id", creditId);
-      creditJSON.put("description", "Xmas donations");
-      response = putData("credit", creditId, creditJSON.toString());
-      response.then().log().ifValidationFails()
-        .statusCode(204);
-
-      logger.info("--- mod-credits-test: Fetching credit with ID :"+ creditId);
-      getDataById("credit", creditId).then().log().ifValidationFails()
-        .statusCode(200)
-        .body("description", equalTo("Xmas donations"));
-
-      logger.info("--- mod-credits-test: Deleting credit with id ... ");
-      deleteData("credit", creditId).then().log().ifValidationFails()
-        .statusCode(204);
-
-      logger.info("--- mod-credits-test: Deleting credit type with ID ... ");
-      deleteData("credit_type", creditTypeSampleId).then().log().ifValidationFails()
+      logger.info("--- mod-orders-storage-test: Deleting purchase order with ID: "+ purchaseOrderSampleId);
+      deleteData("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
         .statusCode(204);
 
     }
     catch (Exception e) {
-      context.fail("--- mod-credits-test: ERROR: " + e.getMessage());
+      context.fail("--- mod-orders-storage-test: ERROR: " + e.getMessage());
     }
     async.complete();
   }

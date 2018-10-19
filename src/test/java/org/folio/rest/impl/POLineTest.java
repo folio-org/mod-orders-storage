@@ -29,7 +29,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(VertxUnitRunner.class)
-public class CreditsTest {
+public class POLinesTest {
   private Vertx vertx;
   private Async async;
   private final Logger logger = LoggerFactory.getLogger("okapi");
@@ -38,14 +38,14 @@ public class CreditsTest {
   private final String TENANT_NAME = "diku";
   private final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
 
-  private String moduleName;      // "mod_credits";
+  private String moduleName;      // "mod_orders_storage";
   private String moduleVersion;   // "1.0.0"
-  private String moduleId;        // "mod-credits-1.0.0"
+  private String moduleId;        // "mod-orders-storage-1.0.0"
 
 
   @Before
   public void before(TestContext context) {
-    logger.info("--- mod-credits-test: START ");
+    logger.info("--- mod-orders-storage-test: START ");
     vertx = Vertx.vertx();
 
     moduleName = PomReader.INSTANCE.getModuleName();
@@ -89,27 +89,19 @@ public class CreditsTest {
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       async.complete();
-      logger.info("--- mod-credits-test: END ");
+      logger.info("--- mod-orders-storage-test: END ");
     });
   }
 
-  // Validates that there are zero credit records in the DB
+  // Validates that there are zero po_line records in the DB
   private void verifyCollection() {
 
-    // Validate that credit_type is prepopulated with 4 records
-    // and this particular call returns all 4
-    getData("credit_type").then()
-      .log().ifValidationFails()
-      .statusCode(200)
-      .body("total_records", equalTo(4))
-      .body("credit_types.size()", is(4));
-
-    // Verify that there are no existing credit records
-    getData("credit").then()
+    // Verify that there are no existing po_line records
+    getData("po_line").then()
       .log().ifValidationFails()
       .statusCode(200)
       .body("total_records", equalTo(0))
-      .body("credits", empty());
+      .body("po_lines", empty());
   }
 
   @Test
@@ -118,92 +110,50 @@ public class CreditsTest {
     try {
 
       // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-      logger.info("--- mod-credits-test: Preparing test tenant");
+      logger.info("--- mod-orders-storage-test: Preparing test tenant");
       prepareTenant();
 
-      logger.info("--- mod-credits-test: Verifying database's initial state ... ");
+      logger.info("--- mod-orders-storage-test: Verifying database's initial state ... ");
       verifyCollection();
 
-      logger.info("--- mod-credits-test: Creating credit type ... ");
-      String creditTypeSample = getFile("credit_type.sample");
-      Response response = postData("credit_type", creditTypeSample);
+      logger.info("--- mod-storage-test: Creating PO line ... ");
+      String poLineSample = getFile("po_line.sample");
+      Response response = postData("po_line", poLineSample);
       response.then().log().ifValidationFails()
         .statusCode(201)
-        .body("value", equalTo("Other"));
-      String creditTypeSampleId = response.then().extract().path("id");
+        .body("description", equalTo("ABCDEFGH"));
+      String poLineSampleId = response.then().extract().path("id");
 
-      logger.info("--- mod-credits-test: Verifying only 1 credit type was created ... ");
-      getData("credit_type").then().log().ifValidationFails()
+      logger.info("--- mod-orders-storage-test: Verifying only 1 PO line was created ... ");
+      getData("po_line").then().log().ifValidationFails()
         .statusCode(200)
         .body("total_records", equalTo(5));
 
-      logger.info("--- mod-credits-test: Fetching credit type with ID: "+ creditTypeSampleId);
-      getDataById("credit_type", creditTypeSampleId).then().log().ifValidationFails()
+      logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
+      getDataById("po_line", poLineSampleId).then().log().ifValidationFails()
         .statusCode(200)
-        .body("id", equalTo(creditTypeSampleId));
+        .body("id", equalTo(poLineSampleId));
 
-      logger.info("--- mod-credits-test: Editing credit type with ID: "+ creditTypeSampleId);
-      JSONObject catJSON = new JSONObject(creditTypeSample);
-      catJSON.put("id", creditTypeSampleId);
-      catJSON.put("value", "Gift");
-      response = putData("credit_type", creditTypeSampleId, catJSON.toString());
+      logger.info("--- mod-orders-storage-test: Editing PO line with ID: "+ poLineSampleId);
+      JSONObject catJSON = new JSONObject(poLineSample);
+      catJSON.put("id", poLineSampleId);
+      catJSON.put("description", "Gift");
+      response = putData("po_line", poLineSampleId, catJSON.toString());
       response.then().log().ifValidationFails()
         .statusCode(204);
 
-      logger.info("--- mod-credits-test: Fetching credit type with ID: "+ creditTypeSampleId);
-      getDataById("credit_type", creditTypeSampleId).then()
+      logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
+      getDataById("po_line", poLineSampleId).then()
         .statusCode(200).log().ifValidationFails()
+        .body("description", equalTo("Gift"));
 
-        .body("value", equalTo("Gift"));
-
-      logger.info("--- mod-credits-test: Creating credit ... ");
-
-      String creditSample = //getFile("credit.sample");
-
-        "{\"id\": null, \"amount\": 1500.00, \"credit_type_id\":\"" + creditTypeSampleId + "\"," +
-        " \"currency\":\"CAD\", \"description\":\"Christmas donations\", \"note\":\"2017 tax year\"," +
-        " \"po_id\":\"676ecd31-7ca3-3d8d-9bbf-rd94dff5f5d5\"}";
-
-      response = postData("credit", creditSample);
-      response.then().log().ifValidationFails()
-        .statusCode(201)
-        .body("description", equalTo("Christmas donations"));
-      String creditId = response.then().extract().path("id");
-
-      logger.info("--- mod-credits-test: Verifying only 1 credit was created ... ");
-      getData("credit").then().log().ifValidationFails()
-        .statusCode(200)
-        .body("total_records", equalTo(1));
-
-      logger.info("--- mod-credits-test: Fetching credit with ID : "+ creditId);
-      getDataById("credit", creditId).then().log().ifValidationFails()
-        .statusCode(200)
-        .body("id", equalTo(creditId));
-
-      logger.info("--- mod-credits-test: Editing credit with ID :"+ creditId);
-      JSONObject creditJSON = new JSONObject(creditSample);
-      creditJSON.put("id", creditId);
-      creditJSON.put("description", "Xmas donations");
-      response = putData("credit", creditId, creditJSON.toString());
-      response.then().log().ifValidationFails()
-        .statusCode(204);
-
-      logger.info("--- mod-credits-test: Fetching credit with ID :"+ creditId);
-      getDataById("credit", creditId).then().log().ifValidationFails()
-        .statusCode(200)
-        .body("description", equalTo("Xmas donations"));
-
-      logger.info("--- mod-credits-test: Deleting credit with id ... ");
-      deleteData("credit", creditId).then().log().ifValidationFails()
-        .statusCode(204);
-
-      logger.info("--- mod-credits-test: Deleting credit type with ID ... ");
-      deleteData("credit_type", creditTypeSampleId).then().log().ifValidationFails()
+      logger.info("--- mod-orders-storages-test: Deleting PO line with ID ... ");
+      deleteData("po_line", poLineSampleId).then().log().ifValidationFails()
         .statusCode(204);
 
     }
     catch (Exception e) {
-      context.fail("--- mod-credits-test: ERROR: " + e.getMessage());
+      context.fail("--- mod-orders-storage-test: ERROR: " + e.getMessage());
     }
     async.complete();
   }
