@@ -128,13 +128,13 @@ public class POTest {
       Response response = postData("purchase_order", purchaseOrderSample);
       response.then().log().ifValidationFails()
         .statusCode(201)
-        .body("order_type", equalTo("Ongoing"));
+        .body("po_number", equalTo("268758"));
       String purchaseOrderSampleId = response.then().extract().path("id");
 
       logger.info("--- mod-order-storage-test: Verifying only 1 purchase order was created ... ");
       getData("purchase_order").then().log().ifValidationFails()
         .statusCode(200)
-        .body("total_records", equalTo(5));
+        .body("total_records", equalTo(1));
 
       logger.info("--- mod-order-storage-test: Fetching purchase order with ID: "+ purchaseOrderSampleId);
       getDataById("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
@@ -144,20 +144,21 @@ public class POTest {
       logger.info("--- mod-orders-storage-test: Editing purchase order with ID: "+ purchaseOrderSampleId);
       JSONObject catJSON = new JSONObject(purchaseOrderSample);
       catJSON.put("id", purchaseOrderSampleId);
-      catJSON.put("order_type", "Gift");
+      catJSON.put("po_number", "666666");
       response = putData("purchase_order", purchaseOrderSampleId, catJSON.toString());
       response.then().log().ifValidationFails()
         .statusCode(204);
 
       logger.info("--- mod-orders-storage-test: Fetching purchase order with ID: "+ purchaseOrderSampleId);
-      getDataById("purchase_order", purchaseOrderSampleId).then()
-        .statusCode(200).log().ifValidationFails()
-        .body("order_type", equalTo("Gift"));
+      getDataById("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
+        .statusCode(200)
+        .body("po_number", equalTo("666666"));
 
-
+      
       logger.info("--- mod-orders-storage-test: Deleting purchase order with ID: "+ purchaseOrderSampleId);
       deleteData("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
         .statusCode(204);
+
 
     }
     catch (Exception e) {
