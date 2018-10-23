@@ -64,7 +64,8 @@ public class POTest {
       PostgresClient.getInstance(vertx).dropCreateDatabase(TENANT_NAME + "_" + PomReader.INSTANCE.getModuleName());
 
     } catch (Exception e) {
-      e.printStackTrace();
+      //e.printStackTrace();
+      logger.info(e);
       context.fail(e);
       return;
     }
@@ -154,7 +155,7 @@ public class POTest {
         .statusCode(200)
         .body("po_number", equalTo("666666"));
 
-      
+
       logger.info("--- mod-orders-storage-test: Deleting purchase order with ID: "+ purchaseOrderSampleId);
       deleteData("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
         .statusCode(204);

@@ -64,7 +64,8 @@ public class POLineTest {
       PostgresClient.getInstance(vertx).dropCreateDatabase(TENANT_NAME + "_" + PomReader.INSTANCE.getModuleName());
 
     } catch (Exception e) {
-      e.printStackTrace();
+      //e.printStackTrace();
+      logger.info(e);
       context.fail(e);
       return;
     }
