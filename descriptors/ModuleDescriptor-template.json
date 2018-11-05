@@ -251,37 +251,6 @@
       ]
     },
     {
-      "id": "payment_status",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/payment_status",
-          "permissionsRequired": ["payment_status.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/payment_status",
-          "permissionsRequired": ["payment_status.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/payment_status/{id}",
-          "permissionsRequired": ["payment_status.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/payment_status/{id}",
-          "permissionsRequired": ["payment_status.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/payment_status/{id}",
-          "permissionsRequired": ["payment_status.item.delete"]
-        }
-      ]
-    },
-    {
       "id": "physical",
       "version": "1.0",
       "handlers": [
