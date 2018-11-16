@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 title: "Sample-Module"
 baseUri: http://github.com/org/folio/sample-module
 version: v1
@@ -7,20 +7,19 @@ documentation:
   - title: Sample Module
     content: <b>CRUD API</b>
 
-schemas:
-  - license.json: !include acq-models/mod-orders-storage/schemas/license.json
-  - license_collection: !include acq-models/mod-orders-storage/schemas/license_collection.json
+types:
+    license: !include acq-models/mod-orders-storage/schemas/license.json
+    license_collection: !include acq-models/mod-orders-storage/schemas/license_collection.json
 
 traits:
-  - secured: !include raml-util/traits/auth.raml
-  - orderable: !include raml-util/traits/orderable.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
-  - language: !include raml-util/traits/language.raml
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /license:
   type:
@@ -28,7 +27,7 @@ resourceTypes:
       exampleCollection: !include acq-models/mod-orders-storage/examples/license_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/license_post.sample
       schemaCollection: license_collection
-      schemaItem: license.json
+      schemaItem: license
   get:
     description: Get list of licenses
     is: [
@@ -39,4 +38,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/license_get.sample
-        schema: license.json
+        type: license

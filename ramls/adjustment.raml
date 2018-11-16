@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 title: "Orders-Module"
 baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
@@ -7,20 +7,19 @@ documentation:
   - title: mod-orders (Adjustment)
     content: <b>CRUD APIs used to manage adjustments.</b>
 
-schemas:
-  - adjustment.json: !include acq-models/mod-orders-storage/schemas/adjustment.json
-  - adjustment_collection: !include acq-models/mod-orders-storage/schemas/adjustment_collection.json
+types:
+    adjustment: !include acq-models/mod-orders-storage/schemas/adjustment.json
+    adjustment_collection: !include acq-models/mod-orders-storage/schemas/adjustment_collection.json
 
 traits:
-  - secured: !include raml-util/traits/auth.raml
-  - orderable: !include raml-util/traits/orderable.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
-  - language: !include raml-util/traits/language.raml
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /adjustment:
   type:
@@ -28,7 +27,7 @@ resourceTypes:
       exampleCollection: !include acq-models/mod-orders-storage/examples/adjustment_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/adjustment_get.sample
       schemaCollection: adjustment_collection
-      schemaItem: adjustment.json
+      schemaItem: adjustment
   get:
     description: Get list of alerts
     is: [
@@ -39,4 +38,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/adjustment_get.sample
-        schema: adjustment.json
+        type: adjustment

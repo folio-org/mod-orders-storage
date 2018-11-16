@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 title: "Sample-Module"
 baseUri: http://github.com/org/folio/sample-module
 version: v1
@@ -7,20 +7,19 @@ documentation:
   - title: Sample Module
     content: <b>CRUD API</b>
 
-schemas:
-  - location.json: !include acq-models/mod-orders-storage/schemas/location.json
-  - location_collection: !include acq-models/mod-orders-storage/schemas/location_collection.json
+types:
+    location: !include acq-models/mod-orders-storage/schemas/location.json
+    location_collection: !include acq-models/mod-orders-storage/schemas/location_collection.json
 
 traits:
-  - secured: !include raml-util/traits/auth.raml
-  - orderable: !include raml-util/traits/orderable.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
-  - language: !include raml-util/traits/language.raml
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /location:
   type:
@@ -28,7 +27,7 @@ resourceTypes:
       exampleCollection: !include acq-models/mod-orders-storage/examples/location_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/location_post.sample
       schemaCollection: location_collection
-      schemaItem: location.json
+      schemaItem: location
   get:
     description: Get list of locations
     is: [
@@ -39,4 +38,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/location_get.sample
-        schema: location.json
+        type: location

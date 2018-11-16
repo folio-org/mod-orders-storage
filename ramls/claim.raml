@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 title: "Sample-Module"
 baseUri: http://github.com/org/folio/sample-module
 version: v1
@@ -7,20 +7,19 @@ documentation:
   - title: Sample Module
     content: <b>CRUD API</b>
 
-schemas:
-  - claim.json: !include acq-models/mod-orders-storage/schemas/claim.json
-  - claim_collection: !include acq-models/mod-orders-storage/schemas/claim_collection.json
+types:
+    claim: !include acq-models/mod-orders-storage/schemas/claim.json
+    claim_collection: !include acq-models/mod-orders-storage/schemas/claim_collection.json
 
 traits:
-  - secured: !include raml-util/traits/auth.raml
-  - orderable: !include raml-util/traits/orderable.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
-  - language: !include raml-util/traits/language.raml
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /claim:
   type:
@@ -28,7 +27,7 @@ resourceTypes:
       exampleCollection: !include acq-models/mod-orders-storage/examples/claim_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/claim_post.sample
       schemaCollection: claim_collection
-      schemaItem: claim.json
+      schemaItem: claim
   get:
     description: Get list of alerts
     is: [
@@ -39,4 +38,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/claim_get.sample
-        schema: claim.json
+        type: claim

@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 title: "mod-orders"
 baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
@@ -7,20 +7,19 @@ documentation:
   - title: mod-orders
     content: <b>This module implements the CRUD interface</b>
 
-schemas:
-  - po_line.json: !include acq-models/mod-orders-storage/schemas/po_line.json
-  - po_line_collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
+types:
+    po_line: !include acq-models/mod-orders-storage/schemas/po_line.json
+    po_line_collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
 
 traits:
-  - secured: !include raml-util/traits/auth.raml
-  - orderable: !include raml-util/traits/orderable.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
-  - language: !include raml-util/traits/language.raml
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /po_line:
   type:
@@ -28,7 +27,7 @@ resourceTypes:
       exampleCollection: !include acq-models/mod-orders-storage/examples/po_line_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/po_line_post.sample
       schemaCollection: po_line_collection
-      schemaItem: po_line.json
+      schemaItem: po_line
   get:
     description: Get list of purchase orders
     is: [
@@ -39,5 +38,5 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/po_line_post.sample
-        schema: po_line.json
+        type: po_line
 

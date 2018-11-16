@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0
 title: "Sample-Module"
 baseUri: http://github.com/org/folio/sample-module
 version: v1
@@ -7,20 +7,19 @@ documentation:
   - title: Sample Module
     content: <b>CRUD API</b>
 
-schemas:
-  - source.json: !include acq-models/mod-orders-storage/schemas/source.json
-  - source_collection: !include acq-models/mod-orders-storage/schemas/source_collection.json
+types:
+    source: !include acq-models/mod-orders-storage/schemas/source.json
+    source_collection: !include acq-models/mod-orders-storage/schemas/source_collection.json
 
 traits:
-  - secured: !include raml-util/traits/auth.raml
-  - orderable: !include raml-util/traits/orderable.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
-  - language: !include raml-util/traits/language.raml
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /source:
   type:
@@ -28,7 +27,7 @@ resourceTypes:
       exampleCollection: !include acq-models/mod-orders-storage/examples/source_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/source_post.sample
       schemaCollection: source_collection
-      schemaItem: source.json
+      schemaItem: source
   get:
     description: Get list of sources
     is: [
@@ -39,4 +38,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/source_get.sample
-        schema: source.json
+        type: source
