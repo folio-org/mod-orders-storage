@@ -1,4 +1,4 @@
-#%RAML 0.8
+#%RAML 1.0 
 title: "mod-orders-storage"
 baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1
@@ -7,20 +7,19 @@ documentation:
   - title: mod-orders
     content: <b>This module implements the CRUD interface</b>
 
-schemas:
-  - purchase_order.json: !include acq-models/mod-orders-storage/schemas/purchase_order.json
-  - purchase_order_collection: !include acq-models/mod-orders-storage/schemas/purchase_order_collection.json
+types:
+    purchase_order: !include acq-models/mod-orders-storage/schemas/purchase_order.json
+    purchase_order_collection: !include acq-models/mod-orders-storage/schemas/purchase_order_collection.json
 
 traits:
-  - secured: !include raml-util/traits/auth.raml
-  - orderable: !include raml-util/traits/orderable.raml
-  - pageable:  !include raml-util/traits/pageable.raml
-  - searchable: !include raml-util/traits/searchable.raml
-  - language: !include raml-util/traits/language.raml
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  - collection: !include raml-util/rtypes/collection.raml
-  - collection-item: !include raml-util/rtypes/item-collection.raml
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /purchase_order:
   type:
@@ -28,7 +27,7 @@ resourceTypes:
       exampleCollection: !include acq-models/mod-orders-storage/examples/purchase_order_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/purchase_order_get.sample
       schemaCollection: purchase_order_collection
-      schemaItem: purchase_order.json
+      schemaItem: purchase_order
   get:
     description: Get list of purchase orders
     is: [
@@ -39,5 +38,5 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/purchase_order_get.sample
-        schema: purchase_order.json
+        schema: purchase_order
 

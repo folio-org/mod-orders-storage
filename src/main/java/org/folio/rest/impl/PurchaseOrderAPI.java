@@ -1,18 +1,19 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.*;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.AsyncResult;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.core.Response;
+
 import org.folio.rest.RestVerticle;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.folio.rest.jaxrs.resource.PurchaseOrderResource;
+import org.folio.rest.jaxrs.resource.PurchaseOrder;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
@@ -20,265 +21,267 @@ import org.folio.rest.tools.utils.OutStream;
 import org.folio.rest.tools.utils.TenantTool;
 import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
 
-import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
-public class PurchaseOrderAPI implements PurchaseOrderResource {
-    private static final String PURCHASE_ORDER_TABLE = "purchase_order";
-    private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/purchase_order/";
+public class PurchaseOrderAPI implements PurchaseOrder {
+  private static final String PURCHASE_ORDER_TABLE = "purchase_order";
+  private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/purchase_order/";
 
-    private static final Logger log = LoggerFactory.getLogger(PurchaseOrderAPI.class);
-    private final Messages messages = Messages.getInstance();
-    private String idFieldName = "id";
+  private static final Logger log = LoggerFactory.getLogger(PurchaseOrderAPI.class);
+  private final Messages messages = Messages.getInstance();
+  private String idFieldName = "id";
 
-    private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
-        AsyncResult<Response> result = Future.succeededFuture(response);
-        handler.handle(result);
-    }
+  private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
+    AsyncResult<Response> result = Future.succeededFuture(response);
+    handler.handle(result);
+  }
 
-    private boolean isInvalidUUID (String errorMessage) {
-        return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
-    }
+  private boolean isInvalidUUID(String errorMessage) {
+    return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
+  }
 
-    public PurchaseOrderAPI(Vertx vertx, String tenantId) {
-        PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
-    }
+  public PurchaseOrderAPI(Vertx vertx, String tenantId) {
+    PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
+  }
 
-    @Override
-    public void getPurchaseOrder(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-        vertxContext.runOnContext((Void v) -> {
-            try {
-                String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
+  @Override
+  public void getPurchaseOrder(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    vertxContext.runOnContext((Void v) -> {
+      try {
+        String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
-                String[] fieldList = {"*"};
-                CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", PURCHASE_ORDER_TABLE));
-                CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
-                        .setLimit(new Limit(limit))
-                        .setOffset(new Offset(offset));
+        String[] fieldList = { "*" };
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", PURCHASE_ORDER_TABLE));
+        CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
+          .setLimit(new Limit(limit))
+          .setOffset(new Offset(offset));
 
-                PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PURCHASE_ORDER_TABLE, PurchaseOrder.class, fieldList, cql, true, false, reply -> {
-                    try {
-                        if (reply.succeeded()) {
-                            PurchaseOrderCollection collection = new PurchaseOrderCollection();
-                            @SuppressWarnings("unchecked")
-                            List<PurchaseOrder> results = (List<PurchaseOrder>)reply.result().getResults();
-                            collection.setPurchaseOrders(results);
-                            Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
-                            collection.setTotalRecords(totalRecords);
-                            Integer first = 0, last = 0;
-                            if (results.size() > 0) {
-                                first = offset + 1;
-                                last = offset + results.size();
-                            }
-                            collection.setFirst(first);
-                            collection.setLast(last);
-                            asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse.withJsonOK(
-                                    collection)));
-                        }
-                        else{
-                            log.error(reply.cause().getMessage(), reply.cause());
-                            asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
-                                    .withPlainBadRequest(reply.cause().getMessage())));
-                        }
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                        asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
-                                .withPlainInternalServerError(messages.getMessage(
-                                        lang, MessageConsts.InternalServerError))));
-                    }
-                });
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                String message = messages.getMessage(lang, MessageConsts.InternalServerError);
-                if(e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")){
-                    message = " CQL parse error " + e.getLocalizedMessage();
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PURCHASE_ORDER_TABLE,
+            org.folio.rest.jaxrs.model.PurchaseOrder.class,
+            fieldList, cql, true, false, reply -> {
+              try {
+                if (reply.succeeded()) {
+                  PurchaseOrderCollection collection = new PurchaseOrderCollection();
+                  List<org.folio.rest.jaxrs.model.PurchaseOrder> results = reply.result().getResults();
+                  collection.setPurchaseOrders(results);
+                  Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
+                  collection.setTotalRecords(totalRecords);
+                  Integer first = 0;
+                  Integer last = 0;
+                  if (!results.isEmpty()) {
+                    first = offset + 1;
+                    last = offset + results.size();
+                  }
+                  collection.setFirst(first);
+                  collection.setLast(last);
+                  asyncResultHandler
+                    .handle(Future.succeededFuture(GetPurchaseOrderResponse.respond200WithApplicationJson(
+                        collection)));
+                } else {
+                  log.error(reply.cause().getMessage(), reply.cause());
+                  asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
+                    .respond400WithTextPlain(reply.cause().getMessage())));
                 }
+              } catch (Exception e) {
+                log.error(e.getMessage(), e);
                 asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
-                        .withPlainInternalServerError(message)));
-            }
-        });
-    }
+                  .respond500WithTextPlain(messages.getMessage(
+                      lang, MessageConsts.InternalServerError))));
+              }
+            });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+        String message = messages.getMessage(lang, MessageConsts.InternalServerError);
+        if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
+          message = " CQL parse error " + e.getLocalizedMessage();
+        }
+        asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
+          .respond500WithTextPlain(message)));
+      }
+    });
+  }
 
-    @Override
-    public void postPurchaseOrder(String lang, PurchaseOrder entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-        vertxContext.runOnContext(v -> {
+  @Override
+  public void postPurchaseOrder(String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
+      Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    vertxContext.runOnContext(v -> {
 
-            try {
-                String id = UUID.randomUUID().toString();
-                if(entity.getId() == null){
-                    entity.setId(id);
+      try {
+        String id = UUID.randomUUID().toString();
+        if (entity.getId() == null) {
+          entity.setId(id);
+        } else {
+          id = entity.getId();
+        }
+
+        String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
+            PURCHASE_ORDER_TABLE, id, entity,
+            reply -> {
+              try {
+                if (reply.succeeded()) {
+                  String persistenceId = reply.result();
+                  entity.setId(persistenceId);
+                  OutStream stream = new OutStream();
+                  stream.setData(entity);
+
+                  Response response = PostPurchaseOrderResponse
+                    .respond201WithApplicationJson(stream, PostPurchaseOrderResponse.headersFor201()
+                      .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
+                  respond(asyncResultHandler, response);
+                } else {
+                  log.error(reply.cause().getMessage(), reply.cause());
+                  Response response = PostPurchaseOrderResponse
+                    .respond500WithTextPlain(reply.cause().getMessage());
+                  respond(asyncResultHandler, response);
                 }
-                else{
-                    id = entity.getId();
-                }
-
-                String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-                PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-                        PURCHASE_ORDER_TABLE, id, entity,
-                        reply -> {
-                            try {
-                                if (reply.succeeded()) {
-                                    String persistenceId = reply.result();
-                                    entity.setId(persistenceId);
-                                    OutStream stream = new OutStream();
-                                    stream.setData(entity);
-
-                                    Response response = PostPurchaseOrderResponse.withJsonCreated(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId, stream);
-                                    respond(asyncResultHandler, response);
-                                }
-                                else {
-                                    log.error(reply.cause().getMessage(), reply.cause());
-                                    Response response = PostPurchaseOrderResponse.withPlainInternalServerError(reply.cause().getMessage());
-                                    respond(asyncResultHandler, response);
-                                }
-                            }
-                            catch (Exception e) {
-                                log.error(e.getMessage(), e);
-
-                                Response response = PostPurchaseOrderResponse.withPlainInternalServerError(e.getMessage());
-                                respond(asyncResultHandler, response);
-                            }
-
-                        }
-                );
-            }
-            catch (Exception e) {
+              } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-                Response response = PostPurchaseOrderResponse.withPlainInternalServerError(errMsg);
+                Response response = PostPurchaseOrderResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
-            }
+              }
 
-        });
-    }
+            });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
 
-    @Override
-    public void getPurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-        vertxContext.runOnContext(v -> {
-            try {
-                String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
+        String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
+        Response response = PostPurchaseOrderResponse.respond500WithTextPlain(errMsg);
+        respond(asyncResultHandler, response);
+      }
 
-                String idArgument = String.format("'%s'", id);
-                Criterion c = new Criterion(
-                        new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
+    });
+  }
 
-                PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PURCHASE_ORDER_TABLE, PurchaseOrder.class, c, true,
-                        reply -> {
-                            try {
-                                if (reply.succeeded()) {
-                                    @SuppressWarnings("unchecked")
-                                    List<PurchaseOrder> results = (List<PurchaseOrder>) reply.result().getResults();
-                                    if(results.isEmpty()){
-                                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
-                                                .withPlainNotFound(id)));
-                                    }
-                                    else{
-                                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
-                                                .withJsonOK(results.get(0))));
-                                    }
-                                }
-                                else{
-                                    log.error(reply.cause().getMessage(), reply.cause());
-                                    if (isInvalidUUID(reply.cause().getMessage())) {
-                                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
-                                                .withPlainNotFound(id)));
-                                    }
-                                    else{
-                                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
-                                                .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
-                                    }
-                                }
-                            } catch (Exception e) {
-                                log.error(e.getMessage(), e);
-                                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
-                                        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
-                            }
-                        });
-            } catch (Exception e) {
+  @Override
+  public void getPurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    vertxContext.runOnContext(v -> {
+      try {
+        String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+
+        String idArgument = String.format("'%s'", id);
+        Criterion c = new Criterion(
+            new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
+
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PURCHASE_ORDER_TABLE,
+            org.folio.rest.jaxrs.model.PurchaseOrder.class, c,
+            true,
+            reply -> {
+              try {
+                if (reply.succeeded()) {
+                  List<org.folio.rest.jaxrs.model.PurchaseOrder> results = reply.result().getResults();
+                  if (results.isEmpty()) {
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                      .respond404WithTextPlain(id)));
+                  } else {
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                      .respond200WithApplicationJson(results.get(0))));
+                  }
+                } else {
+                  log.error(reply.cause().getMessage(), reply.cause());
+                  if (isInvalidUUID(reply.cause().getMessage())) {
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                      .respond404WithTextPlain(id)));
+                  } else {
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                      .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                  }
+                }
+              } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
-                        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
-            }
-        });
-    }
+                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+              }
+            });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+          .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+      }
+    });
+  }
 
-    @Override
-    public void deletePurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-        String tenantId = TenantTool.tenantId(okapiHeaders);
+  @Override
+  public void deletePurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+
+    try {
+      vertxContext.runOnContext(v -> {
+        PostgresClient postgresClient = PostgresClient.getInstance(
+            vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
         try {
-            vertxContext.runOnContext(v -> {
-                PostgresClient postgresClient = PostgresClient.getInstance(
-                        vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
-
-                try {
-                    postgresClient.delete(PURCHASE_ORDER_TABLE, id, reply -> {
-                        if (reply.succeeded()) {
-                            asyncResultHandler.handle(Future.succeededFuture(
-                                    PurchaseOrderResource.DeletePurchaseOrderByIdResponse.noContent()
-                                            .build()));
-                        } else {
-                            asyncResultHandler.handle(Future.succeededFuture(
-                                    PurchaseOrderResource.DeletePurchaseOrderByIdResponse.
-                                            withPlainInternalServerError(reply.cause().getMessage())));
-                        }
-                    });
-                } catch (Exception e) {
-                    asyncResultHandler.handle(Future.succeededFuture(
-                            PurchaseOrderResource.DeletePurchaseOrderByIdResponse.
-                                    withPlainInternalServerError(e.getMessage())));
-                }
-            });
+          postgresClient.delete(PURCHASE_ORDER_TABLE, id, reply -> {
+            if (reply.succeeded()) {
+              asyncResultHandler.handle(Future.succeededFuture(
+                  PurchaseOrder.DeletePurchaseOrderByIdResponse.noContent()
+                    .build()));
+            } else {
+              asyncResultHandler.handle(Future.succeededFuture(
+                  PurchaseOrder.DeletePurchaseOrderByIdResponse
+                    .respond500WithTextPlain(reply.cause().getMessage())));
+            }
+          });
+        } catch (Exception e) {
+          asyncResultHandler.handle(Future.succeededFuture(
+              PurchaseOrder.DeletePurchaseOrderByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
-        catch(Exception e) {
-            asyncResultHandler.handle(Future.succeededFuture(
-                    PurchaseOrderResource.DeletePurchaseOrderByIdResponse.
-                            withPlainInternalServerError(e.getMessage())));
-        }
+      });
+    } catch (Exception e) {
+      asyncResultHandler.handle(Future.succeededFuture(
+          PurchaseOrder.DeletePurchaseOrderByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
+  }
 
-    @Override
-    public void putPurchaseOrderById(String id, String lang, PurchaseOrder entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) throws Exception {
-        vertxContext.runOnContext(v -> {
-            String tenantId = TenantTool.calculateTenantId( okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT) );
-            try {
-                if(entity.getId() == null){
-                    entity.setId(id);
+  @Override
+  public void putPurchaseOrderById(String id, String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
+      Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    vertxContext.runOnContext(v -> {
+      String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+      try {
+        if (entity.getId() == null) {
+          entity.setId(id);
+        }
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
+            PURCHASE_ORDER_TABLE, entity, id,
+            reply -> {
+              try {
+                if (reply.succeeded()) {
+                  if (reply.result().getUpdated() == 0) {
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+                      .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
+                  } else {
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+                      .respond204()));
+                  }
+                } else {
+                  log.error(reply.cause().getMessage());
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+                    .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
-                PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-                        PURCHASE_ORDER_TABLE, entity, id,
-                        reply -> {
-                            try {
-                                if (reply.succeeded()) {
-                                    if (reply.result().getUpdated() == 0) {
-                                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
-                                                .withPlainNotFound(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
-                                    }
-                                    else{
-                                        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
-                                                .withNoContent()));
-                                    }
-                                }
-                                else{
-                                    log.error (reply.cause().getMessage());
-                                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
-                                            .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
-                                }
-                            } catch (Exception e) {
-                                log.error(e.getMessage(), e);
-                                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
-                                        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
-                            }
-                        });
-            } catch (Exception e) {
+              } catch (Exception e) {
                 log.error(e.getMessage(), e);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
-                        .withPlainInternalServerError(messages.getMessage(lang, MessageConsts.InternalServerError))));
-            }
-        });
-    }
-
+                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+              }
+            });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+          .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+      }
+    });
+  }
 }
