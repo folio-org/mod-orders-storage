@@ -5,7 +5,7 @@ version: v1
 
 documentation:
   - title: mod-orders
-    content: <b>This module implements the CRUD interface</b>
+    content: <b>Get list of purchase orders API</b>
 
 types:
     purchase_order: !include acq-models/mod-orders-storage/schemas/purchase_order.json
@@ -18,12 +18,11 @@ traits:
     language: !include raml-util/traits/language.raml
 
 resourceTypes:
-    collection: !include raml-util/rtypes/collection.raml
-    collection-item: !include raml-util/rtypes/item-collection.raml
+    collection-get: !include raml-util/rtypes/collection-get.raml
 
-/purchase_order:
+/orders:
   type:
-    collection:
+    collection-get:
       exampleCollection: !include acq-models/mod-orders-storage/examples/purchase_order_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/purchase_order_get.sample
       schemaCollection: purchase_order_collection
@@ -34,8 +33,3 @@ resourceTypes:
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
     ]
-  /{id}:
-    type:
-      collection-item:
-        exampleItem: !include acq-models/mod-orders-storage/examples/purchase_order_get.sample
-        schema: purchase_order

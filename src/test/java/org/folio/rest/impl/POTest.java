@@ -137,6 +137,11 @@ public class POTest {
         .statusCode(200)
         .body("total_records", equalTo(1));
 
+      logger.info("--- mod-order-storage-test: Verifying only 1 purchase order was created from orders endpoint... ");
+      getData("orders").then().log().ifValidationFails()
+        .statusCode(200)
+        .body("total_records", equalTo(1));
+
       logger.info("--- mod-order-storage-test: Fetching purchase order with ID: "+ purchaseOrderSampleId);
       getDataById("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
         .statusCode(200)
