@@ -340,6 +340,11 @@
           "methods": ["DELETE"],
           "pathPattern": "/purchase_order/{id}",
           "permissionsRequired": ["purchase_order.item.delete"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders",
+          "permissionsRequired": ["purchase_order.collection.get"]
         }
       ]
     },
