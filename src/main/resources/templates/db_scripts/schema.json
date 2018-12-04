@@ -1,4 +1,26 @@
 {
+  "scripts": [
+    {
+      "run": "after",
+      "snippet": "COPY purchase_order (jsonb) FROM 'data/purchaseOrders.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY adjustments (jsonb) FROM 'data/adjustments.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY claims (jsonb) FROM 'data/claims.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY costs (jsonb) FROM 'data/costs.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    }
+  ],
   "tables": [
     {
       "tableName": "adjustment",
