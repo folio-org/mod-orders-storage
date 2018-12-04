@@ -101,7 +101,7 @@ public class POTest {
     getData("purchase_order").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(3));
+      .body("total_records", equalTo(15));
       //.body("purchase_orders", empty());
 
 
@@ -109,8 +109,8 @@ public class POTest {
     getData("po_line").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0))
-      .body("po_lines", empty());
+      .body("total_records", equalTo(1));
+      //.body("po_lines", empty());
   }
 
   @Test

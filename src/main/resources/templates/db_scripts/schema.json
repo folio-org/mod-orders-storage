@@ -7,17 +7,22 @@
     },
     {
       "run": "after",
-      "snippet": "COPY adjustments (jsonb) FROM 'data/adjustments.data' ENCODING 'UTF8';",
+      "snippet": "COPY po_line (jsonb) FROM 'data/poLines.data' ENCODING 'UTF8';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY claims (jsonb) FROM 'data/claims.data' ENCODING 'UTF8';",
+      "snippet": "COPY adjustment (jsonb) FROM 'data/adjustments.data' ENCODING 'UTF8';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY costs (jsonb) FROM 'data/costs.data' ENCODING 'UTF8';",
+      "snippet": "COPY claim (jsonb) FROM 'data/claims.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY cost (jsonb) FROM 'data/costs.data' ENCODING 'UTF8';",
       "fromModuleVersion": "1.0"
     }
   ],
