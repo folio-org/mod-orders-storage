@@ -7,11 +7,6 @@
     },
     {
       "run": "after",
-      "snippet": "COPY po_line (jsonb) FROM 'data/poLines.data' ENCODING 'UTF8';",
-      "fromModuleVersion": "1.0"
-    },
-    {
-      "run": "after",
       "snippet": "COPY adjustment (jsonb) FROM 'data/adjustments.data' ENCODING 'UTF8';",
       "fromModuleVersion": "1.0"
     },
@@ -23,6 +18,51 @@
     {
       "run": "after",
       "snippet": "COPY cost (jsonb) FROM 'data/costs.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY details (jsonb) FROM 'data/details.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY eresource (jsonb) FROM 'data/eresource.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY fund_distribution (jsonb) FROM 'data/fundDistribution.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY location (jsonb) FROM 'data/location.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY physical (jsonb) FROM 'data/physical.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY renewal (jsonb) FROM 'data/renewal.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY source (jsonb) FROM 'data/source.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY vendor_detail (jsonb) FROM 'data/vendorDetail.data' ENCODING 'UTF8';",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
+      "snippet": "COPY po_line (jsonb) FROM 'data/poLines.data' ENCODING 'UTF8';",
       "fromModuleVersion": "1.0"
     }
   ],
@@ -64,6 +104,13 @@
     },
     {
       "tableName": "eresource",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
+      "tableName": "fund_distribution",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
