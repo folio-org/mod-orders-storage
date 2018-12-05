@@ -1,1 +1,6 @@
 {"id": "9e414baa-8cf2-4916-a90f-d1da4009e06e","cycle": "One Year","interval": 12,"manual_renewal": true,"review_period": 60,"renewal_date": "2018-07-07T00:00:00.000Z","po_line_id": "50fb6ae0-cdf1-11e8-a8d5-f2801f1b9fd1"}
+{"id": "0e414baa-8cf2-4916-a90f-d1da4009e08e","cycle": "Manual","interval": 0,"manual_renewal": true,"review_period": 90,"renewal_date": "2018-07-19T00:00:00.000Z","po_line_id": "90fb53f2-cdf1-11e8-a8d5-f2801f1b9fd1"}
+{"id": "ae414baa-8cf2-4916-a90f-d1da4009e06e","cycle": "One Year","interval": 12,"manual_renewal": true,"review_period": 60,"renewal_date": "2018-07-18T00:00:00.000Z","po_line_id": "a0fb5514-cdf1-11e8-a8d5-f2801f1b9fd1"}
+{"id": "be414baa-8cf2-4916-a90f-d1da4009e03e","cycle": "Manual","interval": 0,"manual_renewal": true,"review_period": 0,"renewal_date": "2018-07-18T00:00:00.000Z","po_line_id": "b0fb580c-cdf1-11e8-a8d5-f2801f1b9fd1"}
+{"id": "ce414baa-8cf2-4916-a90f-d1da4009e05e","cycle": "Manual","interval": 0,"manual_renewal": true,"review_period": 0,"renewal_date": null,"po_line_id": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1"}
+{"id": "de414baa-8cf2-4916-a90f-d1da4009e04e","cycle": "Two Years","interval": 12,"manual_renewal": true,"review_period": 90,"renewal_date": "2020-07-19T00:00:00.000Z","po_line_id": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1"}
