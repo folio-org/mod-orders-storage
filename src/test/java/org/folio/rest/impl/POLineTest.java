@@ -128,7 +128,7 @@ public class POLineTest {
       logger.info("--- mod-orders-storage-test: Verifying only 1 PO line was created ... ");
       getData("po_line").then().log().ifValidationFails()
         .statusCode(200)
-        .body("total_records", equalTo(15));
+        .body("total_records", equalTo(17));
 
       logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
       getDataById("po_line", poLineSampleId).then().log().ifValidationFails()
