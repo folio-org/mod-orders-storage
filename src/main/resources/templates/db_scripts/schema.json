@@ -177,14 +177,7 @@
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
-      "foreignKeys": [
-        {
-          "fieldName": "purchase_order_id",
-          "targetTable": "purchase_order",
-          "tOps": "ADD"
-        }
-      ]
+      "populateJsonWithId": true
     }
   ]
 }

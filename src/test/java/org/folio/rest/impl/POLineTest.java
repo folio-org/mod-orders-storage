@@ -101,8 +101,8 @@ public class POLineTest {
     getData("po_line").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0))
-      .body("po_lines", empty());
+      .body("total_records", equalTo(16));
+      //.body("po_lines", empty());
   }
 
   @Test
@@ -110,47 +110,47 @@ public class POLineTest {
     async = context.async();
     try {
 
-//      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-//      logger.info("--- mod-orders-storage-test: Preparing test tenant");
-//      prepareTenant();
-//
-//      logger.info("--- mod-orders-storage-test: Verifying database's initial state ... ");
-//      verifyCollection();
-//
-//      logger.info("--- mod-storage-test: Creating PO line ... ");
-//      String poLineSample = getFile("po_line.sample");
-//      Response response = postData("po_line", poLineSample);
-//      response.then().log().ifValidationFails()
-//        .statusCode(201)
-//        .body("description", equalTo("ABCDEFGH"));
-//      String poLineSampleId = response.then().extract().path("id");
-//
-//      logger.info("--- mod-orders-storage-test: Verifying only 1 PO line was created ... ");
-//      getData("po_line").then().log().ifValidationFails()
-//        .statusCode(200)
-//        .body("total_records", equalTo(1));
-//
-//      logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
-//      getDataById("po_line", poLineSampleId).then().log().ifValidationFails()
-//        .statusCode(200)
-//        .body("id", equalTo(poLineSampleId));
-//
-//      logger.info("--- mod-orders-storage-test: Editing PO line with ID: "+ poLineSampleId);
-//      JSONObject catJSON = new JSONObject(poLineSample);
-//      catJSON.put("id", poLineSampleId);
-//      catJSON.put("description", "Gift");
-//      response = putData("po_line", poLineSampleId, catJSON.toString());
-//      response.then().log().ifValidationFails()
-//        .statusCode(204);
-//
-//      logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
-//      getDataById("po_line", poLineSampleId).then()
-//        .statusCode(200).log().ifValidationFails()
-//        .body("description", equalTo("Gift"));
-//
-//      logger.info("--- mod-orders-storages-test: Deleting PO line with ID ... ");
-//      deleteData("po_line", poLineSampleId).then().log().ifValidationFails()
-//        .statusCode(204);
+      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
+      logger.info("--- mod-orders-storage-test: Preparing test tenant");
+      prepareTenant();
+
+      logger.info("--- mod-orders-storage-test: Verifying database's initial state ... ");
+      verifyCollection();
+
+      logger.info("--- mod-storage-test: Creating PO line ... ");
+      String poLineSample = getFile("po_line.sample");
+      Response response = postData("po_line", poLineSample);
+      response.then().log().ifValidationFails()
+        .statusCode(201)
+        .body("description", equalTo("ABCDEFGH"));
+      String poLineSampleId = response.then().extract().path("id");
+
+      logger.info("--- mod-orders-storage-test: Verifying only 1 PO line was created ... ");
+      getData("po_line").then().log().ifValidationFails()
+        .statusCode(200)
+        .body("total_records", equalTo(15));
+
+      logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
+      getDataById("po_line", poLineSampleId).then().log().ifValidationFails()
+        .statusCode(200)
+        .body("id", equalTo(poLineSampleId));
+
+      logger.info("--- mod-orders-storage-test: Editing PO line with ID: "+ poLineSampleId);
+      JSONObject catJSON = new JSONObject(poLineSample);
+      catJSON.put("id", poLineSampleId);
+      catJSON.put("description", "Gift");
+      response = putData("po_line", poLineSampleId, catJSON.toString());
+      response.then().log().ifValidationFails()
+        .statusCode(204);
+
+      logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
+      getDataById("po_line", poLineSampleId).then()
+        .statusCode(200).log().ifValidationFails()
+        .body("description", equalTo("Gift"));
+
+      logger.info("--- mod-orders-storages-test: Deleting PO line with ID ... ");
+      deleteData("po_line", poLineSampleId).then().log().ifValidationFails()
+        .statusCode(204);
 
     }
     catch (Exception e) {
