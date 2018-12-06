@@ -101,8 +101,8 @@ public class POLineTest {
     getData("po_line").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0))
-      .body("po_lines", empty());
+      .body("total_records", equalTo(16));
+      //.body("po_lines", empty());
   }
 
   @Test
@@ -128,7 +128,7 @@ public class POLineTest {
       logger.info("--- mod-orders-storage-test: Verifying only 1 PO line was created ... ");
       getData("po_line").then().log().ifValidationFails()
         .statusCode(200)
-        .body("total_records", equalTo(1));
+        .body("total_records", equalTo(17));
 
       logger.info("--- mod-orders-storage-test: Fetching PO line with ID: "+ poLineSampleId);
       getDataById("po_line", poLineSampleId).then().log().ifValidationFails()

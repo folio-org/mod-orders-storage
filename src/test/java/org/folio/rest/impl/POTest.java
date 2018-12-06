@@ -101,15 +101,14 @@ public class POTest {
     getData("purchase_order").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0))
-      .body("purchase_orders", empty());
+      .body("total_records", equalTo(14));
+
 
     // Verify that there are no existing po_lines
     getData("po_line").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0))
-      .body("po_lines", empty());
+      .body("total_records", equalTo(16));
   }
 
   @Test
@@ -135,12 +134,12 @@ public class POTest {
       logger.info("--- mod-order-storage-test: Verifying only 1 purchase order was created ... ");
       getData("purchase_order").then().log().ifValidationFails()
         .statusCode(200)
-        .body("total_records", equalTo(1));
+        .body("total_records", equalTo(15));
 
       logger.info("--- mod-order-storage-test: Verifying only 1 purchase order was created from orders endpoint... ");
       getData("orders").then().log().ifValidationFails()
         .statusCode(200)
-        .body("total_records", equalTo(1));
+        .body("total_records", equalTo(15));
 
       logger.info("--- mod-order-storage-test: Fetching purchase order with ID: "+ purchaseOrderSampleId);
       getDataById("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
@@ -160,11 +159,9 @@ public class POTest {
         .statusCode(200)
         .body("po_number", equalTo("666666"));
 
-
       logger.info("--- mod-orders-storage-test: Deleting purchase order with ID: "+ purchaseOrderSampleId);
       deleteData("purchase_order", purchaseOrderSampleId).then().log().ifValidationFails()
         .statusCode(204);
-
 
     }
     catch (Exception e) {
