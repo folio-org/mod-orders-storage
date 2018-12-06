@@ -138,16 +138,15 @@ public class DetailTest {
 
       logger.info("--- mod-orders-storage Details test: Fetching updated Detail with ID: " + detailSampleId);
       testFetchingUpdatedDetail(detailSampleId);
-
-    } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: Detail API ERROR: " + e.getMessage(), e);
-    } finally {
+      
       logger.info("--- mod-orders-storage Details test: Deleting Detail with ID");
       testDeleteDetail(detailSampleId);
 
       logger.info("--- mod-orders-storage Details test: Verify Detail is deleted with ID ");
       testVerifyDetailDeletion(detailSampleId);
-    }
+    } catch (Exception e) {
+      logger.error("--- mod-orders-storage-test: Detail API ERROR: " + e.getMessage(), e);
+    } 
   }
 
   private void testVerifyDetailDeletion(String detailSampleId) {

@@ -136,16 +136,15 @@ public class CostTest {
 
       logger.info("--- mod-orders-storage Cost test: Fetching updated Cost with ID: " + costSampleId);
       testFetchingUpdatedCost(costSampleId);
-
-    } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: Cost API ERROR: " + e.getMessage(), e);
-    } finally {
+      
       logger.info("--- mod-orders-storages Cost test: Deleting Cost with ID");
       testDeleteCost(costSampleId);
 
       logger.info("--- mod-orders-storages Cost test: Verify Cost is deleted with ID ");
       testVerifyCostDeletion(costSampleId);
-    }
+    } catch (Exception e) {
+      logger.error("--- mod-orders-storage-test: Cost API ERROR: " + e.getMessage(), e);
+    } 
   }
 
   private void testVerifyCostDeletion(String costSampleId) {

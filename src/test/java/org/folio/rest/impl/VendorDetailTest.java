@@ -140,15 +140,15 @@ public class VendorDetailTest {
       logger.info("--- mod-orders-storage Vendor Details test: Fetching updated Vendor Detail with ID: "
           + vendorDetailSampleId);
       testFetchingUpdatedVendorDetail(vendorDetailSampleId);
-
-    } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: Vendor Details API ERROR: " + e.getMessage(), e);
-    } finally {
+ 
       logger.info("--- mod-orders-storage Vendor Details test: Deleting Vendor Detail with ID");
       testDeleteVendorDetail(vendorDetailSampleId);
 
       logger.info("--- mod-orders-storage Vendor Details test: Verify Vendor Detail is deleted with ID ");
       testVerifyVendorDetailDeletion(vendorDetailSampleId);
+      
+    } catch (Exception e) {
+      logger.error("--- mod-orders-storage-test: Vendor Details API ERROR: " + e.getMessage(), e);
     }
   }
 
