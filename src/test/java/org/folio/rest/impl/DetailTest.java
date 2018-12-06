@@ -121,6 +121,7 @@ public class DetailTest {
       Response response = postData("details", detailSample);
       detailSampleId = response.then().extract().path("id");
 
+      logger.info("--- mod-orders-storage Details test: Valid Receiving Note exists ... ");
       testValidReceivingNoteExists(response);
 
       logger.info("--- mod-orders-storage Details test: Verifying only 1 detail was created ... ");

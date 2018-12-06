@@ -119,6 +119,7 @@ public class CostTest {
       Response response = postData("cost", costSample);
       costSampleId = response.then().extract().path("id");
 
+      logger.info("--- mod-orders-storage Cost test: Valid currency exists ... ");
       testValidCurrencyExists(response);
 
       logger.info("--- mod-orders-storage Cost test: Verifying only 1 cost was created ... ");

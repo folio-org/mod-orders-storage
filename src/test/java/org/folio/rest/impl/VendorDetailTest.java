@@ -121,6 +121,7 @@ public class VendorDetailTest {
       Response response = postData("vendor_detail", vendorDetailSample);
       vendorDetailSampleId = response.then().extract().path("id");
 
+      logger.info("--- mod-orders-storage Vendor Details test: Valid Vendor account exists ... ");
       testValidVendorAccountExists(response);
 
       logger.info("--- mod-orders-storage Vendor Details test: Verifying only 1 vendor detail was created ... ");
