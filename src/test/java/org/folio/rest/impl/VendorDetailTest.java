@@ -106,7 +106,7 @@ public class VendorDetailTest {
   }
 
   @Test
-  public void testDetail() {
+  public void testVendorDetails() {
     try {
 
       // Initialize the tenant-schema
