@@ -38,10 +38,10 @@ public class CostTest {
   private final String TENANT_NAME = "diku";
   private final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
 
-  private String moduleName;      // "mod_orders_storage";
-  private String moduleVersion;   // "1.0.0"
-  private String moduleId;        // "mod-orders_storage-1.0.0"
-  private String costSampleId;    // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String moduleName; // "mod_orders_storage";
+  private String moduleVersion; // "1.0.0"
+  private String moduleId; // "mod-orders_storage-1.0.0"
+  private String costSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
 
   @Before
   public void before(TestContext context) {

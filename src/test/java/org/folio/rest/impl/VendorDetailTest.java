@@ -29,7 +29,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(VertxUnitRunner.class)
-public class DetailTest {
+public class VendorDetailTest {
   private Vertx vertx;
   private Async async;
   private final Logger logger = LoggerFactory.getLogger("okapi");
@@ -37,17 +37,17 @@ public class DetailTest {
 
   private final String TENANT_NAME = "diku";
   private final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
-  private final String INVALID_DETAIL_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
+  private final String INVALID_VENDOR_DETAIL_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
   private String moduleName; // "mod_orders_storage";
   private String moduleVersion; // "1.0.0"
   private String moduleId; // "mod-orders_storage-1.0.0"
-  private String detailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String vendorDetailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
 
 
   @Before
   public void before(TestContext context) {
-    logger.info("--- mod-orders-storage Detail test: START ");
+    logger.info("--- mod-orders-storage Vendor Details test: START ");
     vertx = Vertx.vertx();
 
     moduleName = PomReader.INSTANCE.getModuleName();
@@ -91,15 +91,15 @@ public class DetailTest {
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       async.complete();
-      logger.info("--- mod-orders-storage Detail test: END ");
+      logger.info("--- mod-orders-storage Vendor Details test: END ");
     });
   }
   
-  // Validates that there are zero detail records in the DB
+  // Validates that there are zero vendor detail records in the DB
   private void verifyCollection() {
 
-    // Verify that there are no existing detail records
-    getData("details").then()
+    // Verify that there are no existing vendor detail records
+    getData("vendor_detail").then()
       .log().ifValidationFails()
       .statusCode(200)
       .body("total_records", equalTo(0));
@@ -110,92 +110,94 @@ public class DetailTest {
     try {
 
       // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Details test: Preparing test tenant");
+      logger.info("--- mod-orders-storage Vendor Details test: Preparing test tenant");
       prepareTenant();
 
-      logger.info("--- mod-orders-storage Details test: Verifying database's initial state ... ");
+      logger.info("--- mod-orders-storage Vendor Details test: Verifying database's initial state ... ");
       verifyCollection();
 
-      logger.info("--- mod-orders-storage Details test: Creating Details ... ");
-      String detailSample = getFile("details.sample");
-      Response response = postData("details", detailSample);
-      detailSampleId = response.then().extract().path("id");
+      logger.info("--- mod-orders-storage Vendor Details test: Creating Vendor Details ... ");
+      String vendorDetailSample = getFile("vendor_detail.sample");
+      Response response = postData("vendor_detail", vendorDetailSample);
+      vendorDetailSampleId = response.then().extract().path("id");
 
-      testValidReceivingNoteExists(response);
+      testValidVendorAccountExists(response);
 
-      logger.info("--- mod-orders-storage Details test: Verifying only 1 detail was created ... ");
-      testDetailCreated();
+      logger.info("--- mod-orders-storage Vendor Details test: Verifying only 1 vendor detail was created ... ");
+      testVendorDetailCreated();
 
-      logger.info("--- mod-orders-storage Details test: Fetching Detail with ID: " + detailSampleId);
-      testDetailSuccessfullyFetched(detailSampleId);
+      logger
+          .info("--- mod-orders-storage Vendor Details test: Fetching Vendor Detail with ID: " + vendorDetailSampleId);
+      testVendorDetailSuccessfullyFetched(vendorDetailSampleId);
 
-      logger.info("--- mod-orders-storage Details test: Invalid Detail: " + detailSampleId);
-      testInvalidDetailId();
+      logger.info("--- mod-orders-storage Vendor Details test: Invalid Vendor Detail: " + INVALID_VENDOR_DETAIL_ID);
+      testInvalidVendorDetailId();
 
-      logger.info("--- mod-orders-storage Details test: Editing Detail with ID: " + detailSampleId);
-      testDetailEdit(detailSample, detailSampleId);
+      logger.info("--- mod-orders-storage Vendor Details test: Editing Vendor Detail with ID: " + vendorDetailSampleId);
+      testVendorDetailEdit(vendorDetailSample, vendorDetailSampleId);
 
-      logger.info("--- mod-orders-storage Details test: Fetching updated Detail with ID: " + detailSampleId);
-      testFetchingUpdatedDetail(detailSampleId);
+      logger.info("--- mod-orders-storage Vendor Details test: Fetching updated Vendor Detail with ID: "
+          + vendorDetailSampleId);
+      testFetchingUpdatedVendorDetail(vendorDetailSampleId);
 
     } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: Detail API ERROR: " + e.getMessage(), e);
+      logger.error("--- mod-orders-storage-test: Vendor Details API ERROR: " + e.getMessage(), e);
     } finally {
-      logger.info("--- mod-orders-storage Details test: Deleting Detail with ID");
-      testDeleteDetail(detailSampleId);
+      logger.info("--- mod-orders-storage Vendor Details test: Deleting Vendor Detail with ID");
+      testDeleteVendorDetail(vendorDetailSampleId);
 
-      logger.info("--- mod-orders-storage Details test: Verify Detail is deleted with ID ");
-      testVerifyDetailDeletion(detailSampleId);
+      logger.info("--- mod-orders-storage Vendor Details test: Verify Vendor Detail is deleted with ID ");
+      testVerifyVendorDetailDeletion(vendorDetailSampleId);
     }
   }
 
-  private void testVerifyDetailDeletion(String detailSampleId) {
-    getDataById("details", detailSampleId).then()
+  private void testVerifyVendorDetailDeletion(String vendorDetailSampleId) {
+    getDataById("vendor_detail", vendorDetailSampleId).then()
     .statusCode(404);
   }
 
-  private void testDeleteDetail(String detailSampleId) {
-    deleteData("details", detailSampleId).then().log().ifValidationFails()
+  private void testDeleteVendorDetail(String vendorDetailSampleId) {
+    deleteData("vendor_detail", vendorDetailSampleId).then().log().ifValidationFails()
     .statusCode(204);
   }
 
-  private void testFetchingUpdatedDetail(String detailSampleId) {
-    getDataById("details", detailSampleId).then()
+  private void testFetchingUpdatedVendorDetail(String vendorDetailSampleId) {
+    getDataById("vendor_detail", vendorDetailSampleId).then()
     .statusCode(200).log().ifValidationFails()
-    .body("receiving_note", equalTo("Update receiving note"));
+    .body("note_from_vendor", equalTo("Update note from vendor"));
   }
 
-  private void testDetailEdit(String detailSample, String detailSampleId) {
-    JSONObject catJSON = new JSONObject(detailSample);
-    catJSON.put("id", detailSampleId);
-    catJSON.put("receiving_note", "Update receiving note");
-    Response response = putData("details", detailSampleId, catJSON.toString());
+  private void testVendorDetailEdit(String vendorDetailSample, String vendorDetailSampleId) {
+    JSONObject catJSON = new JSONObject(vendorDetailSample);
+    catJSON.put("id", vendorDetailSampleId);
+    catJSON.put("note_from_vendor", "Update note from vendor");
+    Response response = putData("vendor_detail", vendorDetailSampleId, catJSON.toString());
     response.then().log().ifValidationFails()
-      .statusCode(204);
+    .statusCode(204);
   }
   
-  private void testInvalidDetailId() {    
-    logger.info("--- mod-orders-storage-test: Fetching invalid Detail with ID return 404: "+ INVALID_DETAIL_ID);
-    getDataById("details", INVALID_DETAIL_ID).then().log().ifValidationFails()
+  private void testInvalidVendorDetailId() {    
+    logger.info("--- mod-orders-storage-test: Fetching invalid Vendor Detail with ID return 404: "+ INVALID_VENDOR_DETAIL_ID);
+    getDataById("details", INVALID_VENDOR_DETAIL_ID).then().log().ifValidationFails()
     .statusCode(404);
   }
 
-  private void testDetailSuccessfullyFetched(String detailSampleId) {
-    getDataById("details", detailSampleId).then().log().ifValidationFails()
+  private void testVendorDetailSuccessfullyFetched(String vendorDetailSampleId) {
+    getDataById("vendor_detail", vendorDetailSampleId).then().log().ifValidationFails()
     .statusCode(200)
-    .body("id", equalTo(detailSampleId));
+    .body("id", equalTo(vendorDetailSampleId));
   }
 
-  private void testDetailCreated() {
-    getData("details").then().log().ifValidationFails()
+  private void testVendorDetailCreated() {
+    getData("vendor_detail").then().log().ifValidationFails()
     .statusCode(200)
     .body("total_records", equalTo(1));
   }
 
-  private void testValidReceivingNoteExists(Response response) {
+  private void testValidVendorAccountExists(Response response) {
     response.then().log().ifValidationFails()
     .statusCode(201)
-    .assertThat().body("receiving_note", equalTo("ABCDEFGHIJKL"));
+    .assertThat().body("vendor_account", equalTo("8910-25"));
   }
 
   private void prepareTenant() {
