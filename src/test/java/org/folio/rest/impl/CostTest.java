@@ -92,7 +92,7 @@ public class CostTest {
       logger.info("--- mod-orders-storage Cost test: END ");
     });
   }
-  
+
   // Validates that there are zero cost records in the DB
   private void verifyCollection() {
 
@@ -100,7 +100,7 @@ public class CostTest {
     getData("cost").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0));
+      .body("total_records", equalTo(16));
   }
 
   @Test
@@ -172,10 +172,10 @@ public class CostTest {
     response.then().log().ifValidationFails()
       .statusCode(204);
   }
-  
+
   private void testInvalidCostId() {
     final String INVALID_COST_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
-    
+
     logger.info("--- mod-orders-storage-test: Fetching invalid Cost with ID return 404: "+ INVALID_COST_ID);
     getDataById("cost", "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
     .statusCode(404);
@@ -190,7 +190,7 @@ public class CostTest {
   private void testCostCreated() {
     getData("cost").then().log().ifValidationFails()
     .statusCode(200)
-    .body("total_records", equalTo(1));
+    .body("total_records", equalTo(17));
   }
 
   private void testValidCurrencyExists(Response response) {
@@ -208,7 +208,7 @@ public class CostTest {
       .post("/_/tenant")
       .then().log().ifValidationFails();
   }
-  
+
   private String getFile(String filename) {
     String value;
     try {
@@ -228,14 +228,14 @@ public class CostTest {
       .body(input)
       .post(endpoint);
   }
-  
+
   private Response getData(String endpoint) {
     return given()
       .header("X-Okapi-Tenant", TENANT_NAME)
       .contentType(ContentType.JSON)
       .get(endpoint);
   }
-  
+
   private Response getDataById(String endpoint, String id) {
     return given()
       .pathParam("id", id)
@@ -243,7 +243,7 @@ public class CostTest {
       .contentType(ContentType.JSON)
       .get(endpoint + "/{id}");
   }
-  
+
   private Response putData(String endpoint, String id, String input) {
     return given()
       .pathParam("id", id)
@@ -252,7 +252,7 @@ public class CostTest {
       .body(input)
       .put(endpoint + "/{id}");
   }
-  
+
   private Response deleteData(String endpoint, String id) {
     return given()
       .pathParam("id", id)

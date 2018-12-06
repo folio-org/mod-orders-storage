@@ -94,7 +94,7 @@ public class VendorDetailTest {
       logger.info("--- mod-orders-storage Vendor Details test: END ");
     });
   }
-  
+
   // Validates that there are zero vendor detail records in the DB
   private void verifyCollection() {
 
@@ -102,7 +102,7 @@ public class VendorDetailTest {
     getData("vendor_detail").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0));
+      .body("total_records", equalTo(16));
   }
 
   @Test
@@ -176,8 +176,8 @@ public class VendorDetailTest {
     response.then().log().ifValidationFails()
     .statusCode(204);
   }
-  
-  private void testInvalidVendorDetailId() {    
+
+  private void testInvalidVendorDetailId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Vendor Detail with ID return 404: "+ INVALID_VENDOR_DETAIL_ID);
     getDataById("details", INVALID_VENDOR_DETAIL_ID).then().log().ifValidationFails()
     .statusCode(404);
@@ -192,7 +192,7 @@ public class VendorDetailTest {
   private void testVendorDetailCreated() {
     getData("vendor_detail").then().log().ifValidationFails()
     .statusCode(200)
-    .body("total_records", equalTo(1));
+    .body("total_records", equalTo(17));
   }
 
   private void testValidVendorAccountExists(Response response) {
@@ -210,7 +210,7 @@ public class VendorDetailTest {
       .post("/_/tenant")
       .then().log().ifValidationFails();
   }
-  
+
   private String getFile(String filename) {
     String value;
     try {
@@ -230,14 +230,14 @@ public class VendorDetailTest {
       .body(input)
       .post(endpoint);
   }
-  
+
   private Response getData(String endpoint) {
     return given()
       .header("X-Okapi-Tenant", TENANT_NAME)
       .contentType(ContentType.JSON)
       .get(endpoint);
   }
-  
+
   private Response getDataById(String endpoint, String id) {
     return given()
       .pathParam("id", id)
@@ -245,7 +245,7 @@ public class VendorDetailTest {
       .contentType(ContentType.JSON)
       .get(endpoint + "/{id}");
   }
-  
+
   private Response putData(String endpoint, String id, String input) {
     return given()
       .pathParam("id", id)
@@ -254,7 +254,7 @@ public class VendorDetailTest {
       .body(input)
       .put(endpoint + "/{id}");
   }
-  
+
   private Response deleteData(String endpoint, String id) {
     return given()
       .pathParam("id", id)

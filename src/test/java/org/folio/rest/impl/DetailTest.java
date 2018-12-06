@@ -94,7 +94,7 @@ public class DetailTest {
       logger.info("--- mod-orders-storage Detail test: END ");
     });
   }
-  
+
   // Validates that there are zero detail records in the DB
   private void verifyCollection() {
 
@@ -102,7 +102,7 @@ public class DetailTest {
     getData("details").then()
       .log().ifValidationFails()
       .statusCode(200)
-      .body("total_records", equalTo(0));
+      .body("total_records", equalTo(16));
   }
 
   @Test
@@ -174,8 +174,8 @@ public class DetailTest {
     response.then().log().ifValidationFails()
       .statusCode(204);
   }
-  
-  private void testInvalidDetailId() {    
+
+  private void testInvalidDetailId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Detail with ID return 404: "+ INVALID_DETAIL_ID);
     getDataById("details", INVALID_DETAIL_ID).then().log().ifValidationFails()
     .statusCode(404);
@@ -190,7 +190,7 @@ public class DetailTest {
   private void testDetailCreated() {
     getData("details").then().log().ifValidationFails()
     .statusCode(200)
-    .body("total_records", equalTo(1));
+    .body("total_records", equalTo(17));
   }
 
   private void testValidReceivingNoteExists(Response response) {
@@ -208,7 +208,7 @@ public class DetailTest {
       .post("/_/tenant")
       .then().log().ifValidationFails();
   }
-  
+
   private String getFile(String filename) {
     String value;
     try {
@@ -228,14 +228,14 @@ public class DetailTest {
       .body(input)
       .post(endpoint);
   }
-  
+
   private Response getData(String endpoint) {
     return given()
       .header("X-Okapi-Tenant", TENANT_NAME)
       .contentType(ContentType.JSON)
       .get(endpoint);
   }
-  
+
   private Response getDataById(String endpoint, String id) {
     return given()
       .pathParam("id", id)
@@ -243,7 +243,7 @@ public class DetailTest {
       .contentType(ContentType.JSON)
       .get(endpoint + "/{id}");
   }
-  
+
   private Response putData(String endpoint, String id, String input) {
     return given()
       .pathParam("id", id)
@@ -252,7 +252,7 @@ public class DetailTest {
       .body(input)
       .put(endpoint + "/{id}");
   }
-  
+
   private Response deleteData(String endpoint, String id) {
     return given()
       .pathParam("id", id)
