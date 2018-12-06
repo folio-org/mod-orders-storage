@@ -29,7 +29,7 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @RunWith(VertxUnitRunner.class)
-public class CostTest {
+public class DetailTest {
   private Vertx vertx;
   private Async async;
   private final Logger logger = LoggerFactory.getLogger("okapi");
@@ -37,15 +37,17 @@ public class CostTest {
 
   private final String TENANT_NAME = "diku";
   private final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
+  private final String INVALID_DETAIL_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
   private String moduleName;      // "mod_orders_storage";
   private String moduleVersion;   // "1.0.0"
   private String moduleId;        // "mod-orders_storage-1.0.0"
-  private String costSampleId;    // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String detailSampleId;  // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+
 
   @Before
   public void before(TestContext context) {
-    logger.info("--- mod-orders-storage Cost test: START ");
+    logger.info("--- mod-orders-storage Detail test: START ");
     vertx = Vertx.vertx();
 
     moduleName = PomReader.INSTANCE.getModuleName();
@@ -89,113 +91,113 @@ public class CostTest {
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       async.complete();
-      logger.info("--- mod-orders-storage Cost test: END ");
+      logger.info("--- mod-orders-storage Detail test: END ");
     });
   }
   
-  // Validates that there are zero cost records in the DB
+  // Validates that there are zero detail records in the DB
   private void verifyCollection() {
 
-    // Verify that there are no existing cost records
-    getData("cost").then()
+    // Verify that there are no existing detail records
+    getData("details").then()
       .log().ifValidationFails()
       .statusCode(200)
       .body("total_records", equalTo(0));
   }
 
   @Test
-  public void testCost() {
+  public void testDetail() {
     try {
 
       // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Cost test: Preparing test tenant");
+      logger.info("--- mod-orders-storage Details test: Preparing test tenant");
       prepareTenant();
 
-      logger.info("--- mod-orders-storage Cost test: Verifying database's initial state ... ");
+      testDeleteDetail("13104601-74d1-4384-af58-0dd295a08829");
+
+      logger.info("--- mod-orders-storage Details test: Verifying database's initial state ... ");
       verifyCollection();
 
-      logger.info("--- mod-orders-storage Cost test: Creating Cost ... ");
-      String costSample = getFile("cost.sample");
-      Response response = postData("cost", costSample);
-      costSampleId = response.then().extract().path("id");
+      logger.info("--- mod-orders-storage Details test: Creating Details ... ");
+      String detailSample = getFile("details.sample");
+      Response response = postData("details", detailSample);
+      detailSampleId = response.then().extract().path("id");
 
-      testValidCurrencyExists(response);
+      testValidReceivingNoteExists(response);
 
-      logger.info("--- mod-orders-storage Cost test: Verifying only 1 cost was created ... ");
-      testCostCreated();
+      logger.info("--- mod-orders-storage Details test: Verifying only 1 detail was created ... ");
+      testDetailCreated();
 
-      logger.info("--- mod-orders-storage Cost test: Fetching Cost with ID: " + costSampleId);
-      testCostSuccessfullyFetched(costSampleId);
+      logger.info("--- mod-orders-storage Details test: Fetching Detail with ID: " + detailSampleId);
+      testDetailSuccessfullyFetched(detailSampleId);
 
-      logger.info("--- mod-orders-storage Cost test: Invalid Cost: " + costSampleId);
-      testInvalidCostId();
+      logger.info("--- mod-orders-storage Details test: Invalid Detail: " + detailSampleId);
+      testInvalidDetailId();
 
-      logger.info("--- mod-orders-storage Cost test: Editing Cost with ID: " + costSampleId);
-      testCostEdit(costSample, costSampleId);
+      logger.info("--- mod-orders-storage Details test: Editing Detail with ID: " + detailSampleId);
+      testDetailEdit(detailSample, detailSampleId);
 
-      logger.info("--- mod-orders-storage Cost test: Fetching updated Cost with ID: " + costSampleId);
-      testFetchingUpdatedCost(costSampleId);
+      logger.info("--- mod-orders-storage Details test: Fetching updated Detail with ID: " + detailSampleId);
+      testFetchingUpdatedDetail(detailSampleId);
 
     } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: Cost API ERROR: " + e.getMessage(), e);
+      logger.error("--- mod-orders-storage-test: Detail API ERROR: " + e.getMessage(), e);
     } finally {
-      logger.info("--- mod-orders-storages Cost test: Deleting Cost with ID");
-      testDeleteCost(costSampleId);
+      logger.info("--- mod-orders-storage Details test: Deleting Detail with ID");
+      testDeleteDetail(detailSampleId);
 
-      logger.info("--- mod-orders-storages Cost test: Verify Cost is deleted with ID ");
-      testVerifyCostDeletion(costSampleId);
+      logger.info("--- mod-orders-storage Details test: Verify Detail is deleted with ID ");
+      testVerifyDetailDeletion(detailSampleId);
     }
   }
 
-  private void testVerifyCostDeletion(String costSampleId) {
-    getDataById("cost", costSampleId).then()
+  private void testVerifyDetailDeletion(String detailSampleId) {
+    getDataById("details", detailSampleId).then()
     .statusCode(404);
   }
 
-  private void testDeleteCost(String costSampleId) {
-    deleteData("cost", costSampleId).then().log().ifValidationFails()
+  private void testDeleteDetail(String detailSampleId) {
+    deleteData("details", detailSampleId).then().log().ifValidationFails()
     .statusCode(204);
   }
 
-  private void testFetchingUpdatedCost(String costSampleId) {
-    getDataById("cost", costSampleId).then()
+  private void testFetchingUpdatedDetail(String detailSampleId) {
+    getDataById("details", detailSampleId).then()
     .statusCode(200).log().ifValidationFails()
-    .body("currency", equalTo("USD"));
+    .body("receiving_note", equalTo("Update receiving note"));
   }
 
-  private void testCostEdit(String costSample, String costSampleId) {
-    JSONObject catJSON = new JSONObject(costSample);
-    catJSON.put("id", costSampleId);
-    catJSON.put("list_price", 99.99);
-    Response response = putData("cost", costSampleId, catJSON.toString());
+  private void testDetailEdit(String detailSample, String detailSampleId) {
+    JSONObject catJSON = new JSONObject(detailSample);
+    catJSON.put("id", detailSampleId);
+    catJSON.put("receiving_note", "Update receiving note");
+    Response response = putData("details", detailSampleId, catJSON.toString());
     response.then().log().ifValidationFails()
       .statusCode(204);
   }
   
-  private void testInvalidCostId() {
-    final String INVALID_COST_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
-    
-    logger.info("--- mod-orders-storage-test: Fetching invalid Cost with ID return 404: "+ INVALID_COST_ID);
-    getDataById("cost", "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+  private void testInvalidDetailId() {    
+    logger.info("--- mod-orders-storage-test: Fetching invalid Detail with ID return 404: "+ INVALID_DETAIL_ID);
+    getDataById("details", "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
     .statusCode(404);
   }
 
-  private void testCostSuccessfullyFetched(String costSampleId) {
-    getDataById("cost", costSampleId).then().log().ifValidationFails()
+  private void testDetailSuccessfullyFetched(String detailSampleId) {
+    getDataById("details", detailSampleId).then().log().ifValidationFails()
     .statusCode(200)
-    .body("id", equalTo(costSampleId));
+    .body("id", equalTo(detailSampleId));
   }
 
-  private void testCostCreated() {
-    getData("cost").then().log().ifValidationFails()
+  private void testDetailCreated() {
+    getData("details").then().log().ifValidationFails()
     .statusCode(200)
     .body("total_records", equalTo(1));
   }
 
-  private void testValidCurrencyExists(Response response) {
+  private void testValidReceivingNoteExists(Response response) {
     response.then().log().ifValidationFails()
     .statusCode(201)
-    .assertThat().body("currency", equalTo("USD"));
+    .assertThat().body("receiving_note", equalTo("ABCDEFGHIJKL"));
   }
 
   private void prepareTenant() {
