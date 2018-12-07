@@ -99,7 +99,7 @@ public class POLineTest {
 
     // Verify that there are no existing po_line records
     getData("po_line").then()
-      .log().ifValidationFails()
+      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
       //.body("po_lines", empty());

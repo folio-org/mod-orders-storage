@@ -100,7 +100,7 @@ public class VendorDetailTest {
 
     // Verify that there are no existing vendor detail records
     getData("vendor_detail").then()
-      .log().ifValidationFails()
+      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
   }
