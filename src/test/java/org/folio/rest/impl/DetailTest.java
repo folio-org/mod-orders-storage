@@ -100,7 +100,7 @@ public class DetailTest {
 
     // Verify that there are no existing detail records
     getData("details").then()
-      .log().ifValidationFails()
+      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
   }
