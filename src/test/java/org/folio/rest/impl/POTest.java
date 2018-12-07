@@ -99,14 +99,14 @@ public class POTest {
 
     // Validate that there are no existing purchase_orders
     getData("purchase_order").then()
-      .log().ifValidationFails()
+      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(14));
 
 
     // Verify that there are no existing po_lines
     getData("po_line").then()
-      .log().ifValidationFails()
+      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
   }

@@ -98,7 +98,7 @@ public class CostTest {
 
     // Verify that there are no existing cost records
     getData("cost").then()
-      .log().ifValidationFails()
+      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
   }
