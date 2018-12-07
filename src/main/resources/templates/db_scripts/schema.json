@@ -2,67 +2,67 @@
   "scripts": [
     {
       "run": "after",
-      "snippet": "COPY diku_mod_orders_storage.purchase_order (id, jsonb) FROM 'data/purchaseOrders.data' ENCODING 'UTF8'  DELIMITER E'\t';",
+      "snippet": "COPY diku_mod_orders_storage.purchase_order (id, jsonb) FROM 'data/purchaseOrders.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY adjustment (jsonb) FROM 'data/adjustments.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.adjustment (id, jsonb) FROM 'data/adjustments.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY claim (jsonb) FROM 'data/claims.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.claim (id, jsonb) FROM 'data/claims.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY cost (jsonb) FROM 'data/costs.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.cost (id, jsonb) FROM 'data/costs.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY details (jsonb) FROM 'data/details.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.details (id, jsonb) FROM 'data/details.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY eresource (jsonb) FROM 'data/eresource.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.eresource (id, jsonb) FROM 'data/eresource.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY fund_distribution (jsonb) FROM 'data/fundDistribution.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.fund_distribution (id, jsonb) FROM 'data/fundDistribution.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY location (jsonb) FROM 'data/location.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.location (id, jsonb) FROM 'data/location.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY physical (jsonb) FROM 'data/physical.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.physical (id, jsonb) FROM 'data/physical.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY renewal (jsonb) FROM 'data/renewal.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.renewal (id, jsonb) FROM 'data/renewal.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY source (jsonb) FROM 'data/source.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.source (id, jsonb) FROM 'data/source.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY vendor_detail (jsonb) FROM 'data/vendorDetail.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.vendor_detail (id, jsonb) FROM 'data/vendorDetail.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
       "run": "after",
-      "snippet": "COPY po_line (jsonb) FROM 'data/poLines.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.po_line (id, jsonb) FROM 'data/poLines.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     }
   ],
