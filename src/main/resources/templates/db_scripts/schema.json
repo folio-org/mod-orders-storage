@@ -2,7 +2,7 @@
   "scripts": [
     {
       "run": "after",
-      "snippet": "COPY purchase_order (jsonb) FROM 'data/purchaseOrders.data' ENCODING 'UTF8';",
+      "snippet": "COPY diku_mod_orders_storage.purchase_order (id, jsonb) FROM 'data/purchaseOrders.data' ENCODING 'UTF8'  DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
     {
