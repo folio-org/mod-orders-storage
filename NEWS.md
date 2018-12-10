@@ -1,5 +1,7 @@
-## 1.0.1 - Unreleased
+## 1.0.1 - Released
 * [MODORDSTOR-20](https://issues.folio.org/browse/MODORDSTOR-20) - Migrate to RAML1.0 and RMB 23
+* Purchase order and po_line reference data
+
 
 ## 1.0.0
 CRUD APIs for the following endpoints:
