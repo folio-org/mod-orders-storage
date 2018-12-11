@@ -1,113 +1,111 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.response.Header;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
+import com.jayway.restassured.response.Response;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.folio.rest.RestVerticle;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.junit.After;
-import org.junit.Before;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.hamcrest.Matchers.equalTo;
+
 @RunWith(VertxUnitRunner.class)
-public class FundDistributionTest {
+public class FundDistributionTest extends OrdersStorageTest {
 
-  private Vertx vertx;
-  private Async async;
-  private final Logger logger = LoggerFactory.getLogger("okapi");
-  private final int port = Integer.parseInt(System.getProperty("port", "8081"));
+  private static final String FUND_DISTRIBUTION_ENDPOINT = "fund_distribution";
+  private static final String INVALID_FUND_DISTRIBUTION_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
-  private final String TENANT_NAME = "diku";
-  private final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
-
-  private String moduleName; // "mod_orders_storage";
-  private String moduleVersion; // "1.0.0"
-  private String moduleId; // "mod-orders_storage-1.0.0"
-  private String costSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-
-
-  @Before
-  public void before(TestContext context) {
-    logger.info("--- mod-orders-storage Cost test: START ");
-    vertx = Vertx.vertx();
-
-    moduleName = PomReader.INSTANCE.getModuleName();
-    moduleVersion = PomReader.INSTANCE.getVersion();
-
-    moduleId = String.format("%s-%s", moduleName, moduleVersion);
-
-    // RMB returns a 'normalized' name, with underscores
-    moduleId = moduleId.replaceAll("_", "-");
-
+  @Test
+  public void testFundDistribution() {
     try {
-      // Run this test in embedded postgres mode
-      // IMPORTANT: Later we will initialize the schema by calling the tenant interface.
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-      PostgresClient.getInstance(vertx).dropCreateDatabase(TENANT_NAME + "_" + PomReader.INSTANCE.getModuleName());
+
+      // Initialize the tenant-schema
+      logger.info("--- mod-orders-storage FundDistribution test: Preparing test tenant");
+      prepareTenant();
+
+      logger.info("--- mod-orders-storage FundDistribution test: Verifying database's initial state ... ");
+      verifyCollection(FUND_DISTRIBUTION_ENDPOINT);
+
+      logger.info("--- mod-orders-storage FundDistribution test: Creating FundDistribution ... ");
+      String fundDistrSample = getFile("fund_distribution.sample");
+      Response response = postData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSample);
+      sampleId = response.then().extract().path("id");
+
+      logger.info("--- mod-orders-storage FundDistribution test: Valid currency exists ... ");
+      testValidCodeExists(response);
+
+      logger.info("--- mod-orders-storage FundDistribution test: Verifying only 1 FundDistribution was created ... ");
+      testFundDistributionCreated();
+
+      logger.info("--- mod-orders-storage FundDistribution test: Fetching FundDistribution with ID: " + sampleId);
+      testFundDistributionSuccessfullyFetched(sampleId);
+
+      logger.info("--- mod-orders-storage FundDistribution test: Invalid FundDistribution: " + sampleId);
+      testInvalidFundDistributionId();
+
+      logger.info("--- mod-orders-storage FundDistribution test: Editing FundDistribution with ID: " + sampleId);
+      testFundDistributionEdit(fundDistrSample, sampleId);
+
+      logger.info("--- mod-orders-storage FundDistribution test: Fetching updated FundDistribution with ID: " + sampleId);
+      testFetchingUpdatedFundDistribution(sampleId);
 
     } catch (Exception e) {
-      logger.info(e);
-      context.fail(e);
-      return;
+      logger.error("--- mod-orders-storage-test: FundDistribution API ERROR: " + e.getMessage(), e);
+    } finally {
+      logger.info("--- mod-orders-storages FundDistribution test: Deleting FundDistribution with ID");
+      testDeleteFundDistribution(sampleId);
+
+      logger.info("--- mod-orders-storages FundDistribution test: Verify FundDistribution is deleted with ID ");
+      testVerifyFundDistributionDeletion(sampleId);
     }
-
-    // Deploy a verticle
-    JsonObject conf = new JsonObject()
-      .put(HttpClientMock2.MOCK_MODE, "true")
-      .put("http.port", port);
-    DeploymentOptions opt = new DeploymentOptions()
-      .setConfig(conf);
-    vertx.deployVerticle(RestVerticle.class.getName(),
-      opt, context.asyncAssertSuccess());
-
-    // Set the default headers for the API calls to be tested
-    RestAssured.port = port;
-    RestAssured.baseURI = "http://localhost";
   }
 
-  @After
-  public void after(TestContext context) {
-    async = context.async();
-    vertx.close(res -> {   // This logs a stack trace, ignore it.
-      PostgresClient.stopEmbeddedPostgres();
-      async.complete();
-      logger.info("--- mod-orders-storage Cost test: END ");
-    });
+  private void testVerifyFundDistributionDeletion(String fundDistrSampleId) {
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
+      .statusCode(404);
   }
 
-  @Test
-  public void testGetFundDistribution() {
-
+  private void testDeleteFundDistribution(String fundDistrSampleId) {
+    deleteData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then().log().ifValidationFails()
+      .statusCode(204);
   }
 
-  @Test
-  public void testPostFundDistribution() {
-
+  private void testFetchingUpdatedFundDistribution(String fundDistrSampleId) {
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
+      .statusCode(200).log().ifValidationFails()
+      .body("code", equalTo("HIST"));
   }
 
-  @Test
-  public void testPutFundDistribution() {
-
+  private void testFundDistributionEdit(String fundDistrSample, String fundDistrSampleId) {
+    JSONObject catJSON = new JSONObject(fundDistrSample);
+    catJSON.put("id", fundDistrSampleId);
+    catJSON.put("code", "HIST");
+    Response response = putData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId, catJSON.toString());
+    response.then().log().ifValidationFails()
+      .statusCode(204);
   }
 
-  @Test
-  public void testDeleteFundDistribution() {
-
+  private void testInvalidFundDistributionId() {
+    logger.info("--- mod-orders-storage-test: Fetching invalid FundDistribution with ID return 404: " + INVALID_FUND_DISTRIBUTION_ID);
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, INVALID_FUND_DISTRIBUTION_ID).then().log().ifValidationFails()
+      .statusCode(404);
   }
 
-  @Test
-  public void testGetFundDistributionById() {
-
+  private void testFundDistributionSuccessfullyFetched(String fundDistrSampleId) {
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then().log().ifValidationFails()
+      .statusCode(200)
+      .body("id", equalTo(fundDistrSampleId));
   }
+
+  private void testFundDistributionCreated() {
+    getData(FUND_DISTRIBUTION_ENDPOINT).then().log().ifValidationFails()
+      .statusCode(200)
+      .body("total_records", equalTo(17));
+  }
+
+  private void testValidCodeExists(Response response) {
+    response.then().log().ifValidationFails()
+      .statusCode(201)
+      .assertThat().body("code", equalTo("HIST"));
+  }
+
 }
