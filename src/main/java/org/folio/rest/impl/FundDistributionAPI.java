@@ -27,7 +27,7 @@ import java.util.UUID;
 public class FundDistributionAPI implements OrdersStorageFundDistribution {
 
   private static final String FUND_DISTRIBUTION_TABLE = "fund_distribution";
-  private static final String FUND_DISTRIBUTION_LOCATION_PREFIX = "/fund_distribution/";
+  private static final String FUND_DISTRIBUTION_LOCATION_PREFIX = "/orders-storage/fund_distribution/";
 
   private static final Logger log = LoggerFactory.getLogger(FundDistributionAPI.class);
   private final Messages messages = Messages.getInstance();

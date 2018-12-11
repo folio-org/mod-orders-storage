@@ -133,27 +133,27 @@
         {
           "methods": ["GET"],
           "pathPattern": "/orders-storage/fund_distribution",
-          "permissionsRequired": ["fund_distribution.collection.get"]
+          "permissionsRequired": ["orders_storage_fund_distribution.collection.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/orders-storage/fund_distribution",
-          "permissionsRequired": ["fund_distribution.item.post"]
+          "permissionsRequired": ["orders_storage_fund_distribution.item.post"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/orders-storage/fund_distribution/{id}",
-          "permissionsRequired": ["fund_distribution.item.get"]
+          "permissionsRequired": ["orders_storage_fund_distribution.item.get"]
         },
         {
           "methods": ["PUT"],
           "pathPattern": "/orders-storage/fund_distribution/{id}",
-          "permissionsRequired": ["fund_distribution.item.put"]
+          "permissionsRequired": ["orders_storage_fund_distribution.item.put"]
         },
         {
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/fund_distribution/{id}",
-          "permissionsRequired": ["fund_distribution.item.delete"]
+          "permissionsRequired": ["orders_storage_fund_distribution.item.delete"]
         }
       ]
     },
@@ -739,40 +739,40 @@
       ]
     },
     {
-      "permissionName" : "fund_distribution.collection.get",
-      "displayName" : "fund_distribution-collection get",
+      "permissionName" : "orders_storage_fund_distribution.collection.get",
+      "displayName" : "orders_storage_fund_distribution-collection get",
       "description" : "Get a collection of fund distributions"
     },
     {
-      "permissionName" : "fund_distribution.item.post",
-      "displayName" : "fund_distribution-item post",
+      "permissionName" : "orders_storage_fund_distribution.item.post",
+      "displayName" : "orders_storage_fund_distribution-item post",
       "description" : "Create a new fund distribution"
     },
     {
-      "permissionName" : "fund_distribution.item.get",
-      "displayName" : "fund_distribution-item get",
+      "permissionName" : "orders_storage_fund_distribution.item.get",
+      "displayName" : "orders_storage_fund_distribution-item get",
       "description" : "Fetch a fund distribution"
     },
     {
-      "permissionName" : "fund_distribution.item.put",
-      "displayName" : "fund_distribution-item put",
-      "description" : "Update a fund_distribution"
+      "permissionName" : "orders_storage_fund_distribution.item.put",
+      "displayName" : "orders_storage_fund_distribution-item put",
+      "description" : "Update a fund distribution"
     },
     {
-      "permissionName" : "fund_distribution.item.delete",
-      "displayName" : "fund_distribution-item delete",
-      "description" : "Delete a fund_distribution"
+      "permissionName" : "orders_storage_fund_distribution.item.delete",
+      "displayName" : "orders_storage_fund_distribution-item delete",
+      "description" : "Delete a fund distribution"
     },
     {
-      "permissionName" : "fund_distribution.all",
+      "permissionName" : "orders_storage_fund_distribution.all",
       "displayName" : "All fund distribution perms",
       "description" : "All permissions for the fund distribution",
       "subPermissions" : [
-        "fund_distribution.collection.get",
-        "fund_distribution.item.post",
-        "fund_distribution.item.get",
-        "fund_distribution.item.put",
-        "fund_distribution.item.delete"
+        "orders_storage_fund_distribution.collection.get",
+        "orders_storage_fund_distribution.item.post",
+        "orders_storage_fund_distribution.item.get",
+        "orders_storage_fund_distribution.item.put",
+        "orders_storage_fund_distribution.item.delete"
       ]
     },
     {
@@ -1120,7 +1120,7 @@
         "currency.all",
         "details.all",
         "eresource.all",
-        "fund_distribution",
+        "orders_storage_fund_distribution.all",
         "license.all",
         "location.all",
         "physical.all",
