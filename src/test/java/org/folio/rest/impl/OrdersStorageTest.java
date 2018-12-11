@@ -24,7 +24,7 @@ import java.io.InputStream;
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
-public class OrdersStorageTest {
+public abstract class OrdersStorageTest {
 
   private Vertx vertx;
   private Async async;
@@ -119,20 +119,6 @@ public class OrdersStorageTest {
       .statusCode(200)
       .body("total_records", equalTo(16));
   }
-
-/*
-  void callInvalidEndpoint() {
-    // Verify that there are no existing  records
-    String resp = getData(INVALID_ENDPOINT)
-      .then()
-        .log().all()
-        .statusCode(400)
-        .extract()
-        .asString();
-
-    Assert.assertEquals(resp, String.format("Invalid URL path requested %s", INVALID_ENDPOINT));
-  }
-*/
 
   Response getData(String endpoint) {
     return given()
