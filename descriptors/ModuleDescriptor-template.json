@@ -127,32 +127,32 @@
       ]
     },
     {
-      "id": "fund_distribution",
+      "id": "orders_storage_fund_distribution",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/fund_distribution",
+          "pathPattern": "/orders-storage/fund_distribution",
           "permissionsRequired": ["fund_distribution.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/details",
+          "pathPattern": "/orders-storage/fund_distribution",
           "permissionsRequired": ["fund_distribution.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/fund_distribution/{id}",
+          "pathPattern": "/orders-storage/fund_distribution/{id}",
           "permissionsRequired": ["fund_distribution.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/fund_distribution/{id}",
+          "pathPattern": "/orders-storage/fund_distribution/{id}",
           "permissionsRequired": ["fund_distribution.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/fund_distribution/{id}",
+          "pathPattern": "/orders-storage/fund_distribution/{id}",
           "permissionsRequired": ["fund_distribution.item.delete"]
         }
       ]

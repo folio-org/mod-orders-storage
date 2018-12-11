@@ -34,6 +34,8 @@ public class OrdersStorageTest {
   final String TENANT_NAME = "diku";
   final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
 
+  private static final String INVALID_ENDPOINT = "invalidEndpoint";
+
   String moduleName; // "mod_orders_storage";
   String moduleVersion; // "1.0.0"
   String moduleId; // "mod-orders_storage-1.0.0"
@@ -117,6 +119,20 @@ public class OrdersStorageTest {
       .statusCode(200)
       .body("total_records", equalTo(16));
   }
+
+/*
+  void callInvalidEndpoint() {
+    // Verify that there are no existing  records
+    String resp = getData(INVALID_ENDPOINT)
+      .then()
+        .log().all()
+        .statusCode(400)
+        .extract()
+        .asString();
+
+    Assert.assertEquals(resp, String.format("Invalid URL path requested %s", INVALID_ENDPOINT));
+  }
+*/
 
   Response getData(String endpoint) {
     return given()
