@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LicenseCollection;
 import org.folio.rest.jaxrs.resource.License;
 import org.folio.rest.persist.PostgresClient;
@@ -51,6 +52,7 @@ public class LicenseAPI implements License {
   }
 
   @Override
+  @Validate
   public void getLicense(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
@@ -107,6 +109,7 @@ public class LicenseAPI implements License {
   }
 
   @Override
+  @Validate
   public void postLicense(String lang, org.folio.rest.jaxrs.model.License entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {

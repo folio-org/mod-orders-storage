@@ -4,12 +4,12 @@ baseUri: http://github.com/org/folio/mod-orders-storage
 version: v1
 
 documentation:
-  - title: License
-    content: <b>CRUD API</b>
+  - title: Pieces
+    content: <b>CRUD API to manage Pieces</b>
 
 types:
-    license: !include acq-models/mod-orders-storage/schemas/license.json
-    license_collection: !include acq-models/mod-orders-storage/schemas/license_collection.json
+    piece: !include acq-models/mod-orders-storage/schemas/piece.json
+    piece_collection: !include acq-models/mod-orders-storage/schemas/piece_collection.json
     UUID:
      type: string
      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -24,15 +24,15 @@ resourceTypes:
     collection: !include raml-util/rtypes/collection.raml
     collection-item: !include raml-util/rtypes/item-collection.raml
 
-/license:
+/orders-storage/pieces:
   type:
     collection:
-      exampleCollection: !include acq-models/mod-orders-storage/examples/license_collection.sample
-      exampleItem: !include acq-models/mod-orders-storage/examples/license_post.sample
-      schemaCollection: license_collection
-      schemaItem: license
+      exampleCollection: !include acq-models/mod-orders-storage/examples/piece_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/piece_post.sample
+      schemaCollection: piece_collection
+      schemaItem: piece
   get:
-    description: Get list of licenses
+    description: Get list of pieces
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
@@ -40,9 +40,9 @@ resourceTypes:
   /{id}:
     uriParameters:
       id:
-        description: The UUID of a License
+        description: The UUID of a Piece
         type: UUID
     type:
       collection-item:
-        exampleItem: !include acq-models/mod-orders-storage/examples/license_get.sample
-        schema: license
+        exampleItem: !include acq-models/mod-orders-storage/examples/piece_get.sample
+        schema: piece

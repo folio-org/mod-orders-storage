@@ -5,4 +5,4 @@
 [submodule "ramls/acq-models"]
 	path = ramls/acq-models
 	url = https://github.com/folio-org/acq-models.git
-        branch = master
+    branch = MODORDERS-30

@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.resource.PoLine;
 import org.folio.rest.persist.PostgresClient;
@@ -51,6 +52,7 @@ public class PoLineAPI implements PoLine {
   }
 
   @Override
+  @Validate
   public void getPoLine(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
@@ -106,6 +108,7 @@ public class PoLineAPI implements PoLine {
   }
 
   @Override
+  @Validate
   public void postPoLine(String lang, org.folio.rest.jaxrs.model.PoLine entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -157,6 +160,7 @@ public class PoLineAPI implements PoLine {
   }
 
   @Override
+  @Validate
   public void getPoLineById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -205,6 +209,7 @@ public class PoLineAPI implements PoLine {
   }
 
   @Override
+  @Validate
   public void deletePoLineById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
@@ -237,6 +242,7 @@ public class PoLineAPI implements PoLine {
   }
 
   @Override
+  @Validate
   public void putPoLineById(String id, String lang, org.folio.rest.jaxrs.model.PoLine entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {

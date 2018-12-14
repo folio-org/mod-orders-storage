@@ -313,6 +313,37 @@
       ]
     },
     {
+      "id": "orders-storage.pieces",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/pieces",
+          "permissionsRequired": ["orders-storage.pieces.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/pieces",
+          "permissionsRequired": ["orders-storage.pieces.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/pieces/{id}",
+          "permissionsRequired": ["orders-storage.pieces.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/pieces/{id}",
+          "permissionsRequired": ["orders-storage.pieces.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/pieces/{id}",
+          "permissionsRequired": ["orders-storage.pieces.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "po_line",
       "version": "1.0",
       "handlers": [
@@ -887,6 +918,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.pieces.collection.get",
+      "displayName" : "orders-storage.pieces-collection get",
+      "description" : "Get a collection of pieces"
+    },
+    {
+      "permissionName" : "orders-storage.pieces.item.post",
+      "displayName" : "orders-storage.pieces-item post",
+      "description" : "Create a new pieces"
+    },
+    {
+      "permissionName" : "orders-storage.pieces.item.get",
+      "displayName" : "orders-storage.pieces-item get",
+      "description" : "Fetch a piece"
+    },
+    {
+      "permissionName" : "orders-storage.pieces.item.put",
+      "displayName" : "orders-storage.pieces-item put",
+      "description" : "Update a piece"
+    },
+    {
+      "permissionName" : "orders-storage.pieces.item.delete",
+      "displayName" : "orders-storage.pieces-item delete",
+      "description" : "Delete a piece"
+    },
+    {
+      "permissionName" : "orders-storage.pieces.all",
+      "displayName" : "All orders-storage pieces perms",
+      "description" : "All permissions for the orders-storage-pieces",
+      "subPermissions" : [
+        "orders-storage.pieces.collection.get",
+        "orders-storage.pieces.item.post",
+        "orders-storage.pieces.item.get",
+        "orders-storage.pieces.item.put",
+        "orders-storage.pieces.item.delete"
+      ]
+    },
+    {
       "permissionName" : "po_line.collection.get",
       "displayName" : "po_line-collection get",
       "description" : "Get a collection of po_lines"
@@ -1124,6 +1192,7 @@
         "license.all",
         "location.all",
         "physical.all",
+        "orders-storage.pieces.all",
         "po_line.all",
         "purchase_order.all",
         "renewal.all",

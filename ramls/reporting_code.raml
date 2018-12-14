@@ -1,6 +1,6 @@
 #%RAML 1.0
-title: "Sample-Module"
-baseUri: http://github.com/org/folio/sample-module
+title: "Orders Storage"
+baseUri: http://github.com/org/folio/mod-orders-storage
 version: v1
 
 documentation:
@@ -10,6 +10,9 @@ documentation:
 types:
     reporting_code: !include acq-models/mod-orders-storage/schemas/reporting_code.json
     reporting_code_collection: !include acq-models/mod-orders-storage/schemas/reporting_code_collection.json
+    UUID:
+     type: string
+     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 
 traits:
     orderable: !include raml-util/traits/orderable.raml
@@ -35,6 +38,10 @@ resourceTypes:
       pageable
     ]
   /{id}:
+    uriParameters:
+      id:
+        description: The UUID of a Reporting Code
+        type: UUID
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/reporting_code_post.sample
