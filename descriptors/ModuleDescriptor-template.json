@@ -127,33 +127,33 @@
       ]
     },
     {
-      "id": "orders_storage_fund_distribution",
+      "id": "orders-storage.fund-distribution",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/orders-storage/fund_distribution",
-          "permissionsRequired": ["orders_storage_fund_distribution.collection.get"]
+          "pathPattern": "/orders-storage/fund_distributions",
+          "permissionsRequired": ["orders-storage.fund-distribution.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/orders-storage/fund_distribution",
-          "permissionsRequired": ["orders_storage_fund_distribution.item.post"]
+          "pathPattern": "/orders-storage/fund_distributions",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/orders-storage/fund_distribution/{id}",
-          "permissionsRequired": ["orders_storage_fund_distribution.item.get"]
+          "pathPattern": "/orders-storage/fund_distributions/{id}",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/orders-storage/fund_distribution/{id}",
-          "permissionsRequired": ["orders_storage_fund_distribution.item.put"]
+          "pathPattern": "/orders-storage/fund_distributions/{id}",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/orders-storage/fund_distribution/{id}",
-          "permissionsRequired": ["orders_storage_fund_distribution.item.delete"]
+          "pathPattern": "/orders-storage/fund_distributions/{id}",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.delete"]
         }
       ]
     },
@@ -739,40 +739,40 @@
       ]
     },
     {
-      "permissionName" : "orders_storage_fund_distribution.collection.get",
-      "displayName" : "orders_storage_fund_distribution-collection get",
+      "permissionName" : "orders-storage.fund-distribution.collection.get",
+      "displayName" : "orders-storage.fund-distribution-collection get",
       "description" : "Get a collection of fund distributions"
     },
     {
-      "permissionName" : "orders_storage_fund_distribution.item.post",
-      "displayName" : "orders_storage_fund_distribution-item post",
+      "permissionName" : "orders-storage.fund-distribution.item.post",
+      "displayName" : "orders-storage.fund-distribution-item post",
       "description" : "Create a new fund distribution"
     },
     {
-      "permissionName" : "orders_storage_fund_distribution.item.get",
-      "displayName" : "orders_storage_fund_distribution-item get",
+      "permissionName" : "orders-storage.fund-distribution.item.get",
+      "displayName" : "orders-storage.fund-distribution-item get",
       "description" : "Fetch a fund distribution"
     },
     {
-      "permissionName" : "orders_storage_fund_distribution.item.put",
-      "displayName" : "orders_storage_fund_distribution-item put",
+      "permissionName" : "orders-storage.fund-distribution.item.put",
+      "displayName" : "orders-storage.fund-distribution-item put",
       "description" : "Update a fund distribution"
     },
     {
-      "permissionName" : "orders_storage_fund_distribution.item.delete",
-      "displayName" : "orders_storage_fund_distribution-item delete",
+      "permissionName" : "orders-storage.fund-distribution.item.delete",
+      "displayName" : "orders-storage.fund-distribution-item delete",
       "description" : "Delete a fund distribution"
     },
     {
-      "permissionName" : "orders_storage_fund_distribution.all",
+      "permissionName" : "orders-storage.fund-distribution.all",
       "displayName" : "All fund distribution perms",
       "description" : "All permissions for the fund distribution",
       "subPermissions" : [
-        "orders_storage_fund_distribution.collection.get",
-        "orders_storage_fund_distribution.item.post",
-        "orders_storage_fund_distribution.item.get",
-        "orders_storage_fund_distribution.item.put",
-        "orders_storage_fund_distribution.item.delete"
+        "orders-storage.fund-distribution.collection.get",
+        "orders-storage.fund-distribution.item.post",
+        "orders-storage.fund-distribution.item.get",
+        "orders-storage.fund-distribution.item.put",
+        "orders-storage.fund-distribution.item.delete"
       ]
     },
     {
@@ -1120,7 +1120,7 @@
         "currency.all",
         "details.all",
         "eresource.all",
-        "orders_storage_fund_distribution.all",
+        "orders-storage.fund-distribution.all",
         "license.all",
         "location.all",
         "physical.all",
