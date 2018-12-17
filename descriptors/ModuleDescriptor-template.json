@@ -127,6 +127,37 @@
       ]
     },
     {
+      "id": "orders-storage.fund-distribution",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/fund_distributions",
+          "permissionsRequired": ["orders-storage.fund-distribution.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/fund_distributions",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/fund_distributions/{id}",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/fund_distributions/{id}",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/fund_distributions/{id}",
+          "permissionsRequired": ["orders-storage.fund-distribution.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "details",
       "version": "1.0",
       "handlers": [
@@ -708,6 +739,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.fund-distribution.collection.get",
+      "displayName" : "orders-storage.fund-distribution-collection get",
+      "description" : "Get a collection of fund distributions"
+    },
+    {
+      "permissionName" : "orders-storage.fund-distribution.item.post",
+      "displayName" : "orders-storage.fund-distribution-item post",
+      "description" : "Create a new fund distribution"
+    },
+    {
+      "permissionName" : "orders-storage.fund-distribution.item.get",
+      "displayName" : "orders-storage.fund-distribution-item get",
+      "description" : "Fetch a fund distribution"
+    },
+    {
+      "permissionName" : "orders-storage.fund-distribution.item.put",
+      "displayName" : "orders-storage.fund-distribution-item put",
+      "description" : "Update a fund distribution"
+    },
+    {
+      "permissionName" : "orders-storage.fund-distribution.item.delete",
+      "displayName" : "orders-storage.fund-distribution-item delete",
+      "description" : "Delete a fund distribution"
+    },
+    {
+      "permissionName" : "orders-storage.fund-distribution.all",
+      "displayName" : "All fund distribution perms",
+      "description" : "All permissions for the fund distribution",
+      "subPermissions" : [
+        "orders-storage.fund-distribution.collection.get",
+        "orders-storage.fund-distribution.item.post",
+        "orders-storage.fund-distribution.item.get",
+        "orders-storage.fund-distribution.item.put",
+        "orders-storage.fund-distribution.item.delete"
+      ]
+    },
+    {
       "permissionName" : "license.collection.get",
       "displayName" : "license-collection get",
       "description" : "Get a collection of licenses"
@@ -1052,6 +1120,7 @@
         "currency.all",
         "details.all",
         "eresource.all",
+        "orders-storage.fund-distribution.all",
         "license.all",
         "location.all",
         "physical.all",
