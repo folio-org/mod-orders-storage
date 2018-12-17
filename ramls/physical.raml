@@ -4,7 +4,7 @@ baseUri: http://github.com/org/folio/mod-orders-storage
 version: v1
 
 documentation:
-  - title: Physical
+  - title: Physicals
     content: <b>CRUD API</b>
 
 types:
@@ -32,7 +32,7 @@ resourceTypes:
       schemaCollection: physical_collection
       schemaItem: physical
   get:
-    description: Get list of locationss
+    description: Get list of physicals
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable

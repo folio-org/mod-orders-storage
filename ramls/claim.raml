@@ -4,7 +4,7 @@ baseUri: http://github.com/org/folio/mod-orders-storage
 version: v1
 
 documentation:
-  - title: Claim
+  - title: Claims
     content: <b>CRUD API</b>
 
 types:
@@ -32,7 +32,7 @@ resourceTypes:
       schemaCollection: claim_collection
       schemaItem: claim
   get:
-    description: Get list of alerts
+    description: Get list of claims
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
