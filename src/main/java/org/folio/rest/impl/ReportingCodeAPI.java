@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ReportingCodeCollection;
-import org.folio.rest.jaxrs.resource.ReportingCode;
+import org.folio.rest.jaxrs.resource.OrdersStorageReportingCodes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +30,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class ReportingCodeAPI implements ReportingCode {
+public class ReportingCodeAPI implements OrdersStorageReportingCodes {
   private static final String VENDOR_TABLE = "reporting_code";
-  private static final String VENDOR_LOCATION_PREFIX = "/reporting_code/";
+  private static final String VENDOR_LOCATION_PREFIX = "/orders-storage/reporting_codes/";
 
   private static final Logger log = LoggerFactory.getLogger(VendorDetailAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +53,7 @@ public class ReportingCodeAPI implements ReportingCode {
 
   @Override
   @Validate
-  public void getReportingCode(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageReportingCodes(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -82,16 +82,16 @@ public class ReportingCodeAPI implements ReportingCode {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(ReportingCode.GetReportingCodeResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageReportingCodes.GetOrdersStorageReportingCodesResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(ReportingCode.GetReportingCodeResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageReportingCodes.GetOrdersStorageReportingCodesResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(ReportingCode.GetReportingCodeResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageReportingCodes.GetOrdersStorageReportingCodesResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class ReportingCodeAPI implements ReportingCode {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(ReportingCode.GetReportingCodeResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageReportingCodes.GetOrdersStorageReportingCodesResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +109,7 @@ public class ReportingCodeAPI implements ReportingCode {
 
   @Override
   @Validate
-  public void postReportingCode(String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
+  public void postOrdersStorageReportingCodes(String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -132,20 +132,20 @@ public class ReportingCodeAPI implements ReportingCode {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = ReportingCode.PostReportingCodeResponse.respond201WithApplicationJson(stream,
-                      ReportingCode.PostReportingCodeResponse.headersFor201()
+                  Response response = OrdersStorageReportingCodes.PostOrdersStorageReportingCodesResponse.respond201WithApplicationJson(stream,
+                      OrdersStorageReportingCodes.PostOrdersStorageReportingCodesResponse.headersFor201()
                         .withLocation(VENDOR_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = ReportingCode.PostReportingCodeResponse
+                  Response response = OrdersStorageReportingCodes.PostOrdersStorageReportingCodesResponse
                     .respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = ReportingCode.PostReportingCodeResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageReportingCodes.PostOrdersStorageReportingCodesResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -154,7 +154,7 @@ public class ReportingCodeAPI implements ReportingCode {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = ReportingCode.PostReportingCodeResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageReportingCodes.PostOrdersStorageReportingCodesResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -163,7 +163,7 @@ public class ReportingCodeAPI implements ReportingCode {
 
   @Override
   @Validate
-  public void getReportingCodeById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageReportingCodesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -180,31 +180,31 @@ public class ReportingCodeAPI implements ReportingCode {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.ReportingCode> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetReportingCodeByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageReportingCodesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetReportingCodeByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageReportingCodesByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetReportingCodeByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageReportingCodesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetReportingCodeByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageReportingCodesByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetReportingCodeByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageReportingCodesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetReportingCodeByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageReportingCodesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -212,7 +212,7 @@ public class ReportingCodeAPI implements ReportingCode {
 
   @Override
   @Validate
-  public void deleteReportingCodeById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageReportingCodesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -225,27 +225,27 @@ public class ReportingCodeAPI implements ReportingCode {
           postgresClient.delete(VENDOR_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  ReportingCode.DeleteReportingCodeByIdResponse.noContent()
+                  OrdersStorageReportingCodes.DeleteOrdersStorageReportingCodesByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  ReportingCode.DeleteReportingCodeByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageReportingCodes.DeleteOrdersStorageReportingCodesByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              ReportingCode.DeleteReportingCodeByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageReportingCodes.DeleteOrdersStorageReportingCodesByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          ReportingCode.DeleteReportingCodeByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageReportingCodes.DeleteOrdersStorageReportingCodesByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putReportingCodeById(String id, String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
+  public void putOrdersStorageReportingCodesById(String id, String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -259,26 +259,26 @@ public class ReportingCodeAPI implements ReportingCode {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutReportingCodeByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageReportingCodesByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutReportingCodeByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageReportingCodesByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutReportingCodeByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageReportingCodesByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutReportingCodeByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageReportingCodesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutReportingCodeByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageReportingCodesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

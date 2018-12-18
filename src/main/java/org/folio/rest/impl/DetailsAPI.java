@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.DetailsCollection;
-import org.folio.rest.jaxrs.resource.Details;
+import org.folio.rest.jaxrs.resource.OrdersStorageDetails;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +30,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class DetailsAPI implements Details {
+public class DetailsAPI implements OrdersStorageDetails {
   private static final String DETAIL_TABLE = "details";
-  private static final String DETAIL_LOCATION_PREFIX = "/details/";
+  private static final String DETAIL_LOCATION_PREFIX = "/orders-storage/details/";
 
   private static final Logger log = LoggerFactory.getLogger(DetailsAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +53,7 @@ public class DetailsAPI implements Details {
 
   @Override
   @Validate
-  public void getDetails(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageDetails(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -82,16 +82,16 @@ public class DetailsAPI implements Details {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Details.GetDetailsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageDetails.GetOrdersStorageDetailsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Details.GetDetailsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageDetails.GetOrdersStorageDetailsResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Details.GetDetailsResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageDetails.GetOrdersStorageDetailsResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class DetailsAPI implements Details {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Details.GetDetailsResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageDetails.GetOrdersStorageDetailsResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +109,7 @@ public class DetailsAPI implements Details {
 
   @Override
   @Validate
-  public void postDetails(String lang, org.folio.rest.jaxrs.model.Details entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageDetails(String lang, org.folio.rest.jaxrs.model.Details entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -132,18 +132,18 @@ public class DetailsAPI implements Details {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = Details.PostDetailsResponse.respond201WithApplicationJson(stream,
-                      Details.PostDetailsResponse.headersFor201().withLocation(DETAIL_LOCATION_PREFIX + persistenceId));
+                  Response response = OrdersStorageDetails.PostOrdersStorageDetailsResponse.respond201WithApplicationJson(stream,
+                      OrdersStorageDetails.PostOrdersStorageDetailsResponse.headersFor201().withLocation(DETAIL_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = Details.PostDetailsResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageDetails.PostOrdersStorageDetailsResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = Details.PostDetailsResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageDetails.PostOrdersStorageDetailsResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -152,7 +152,7 @@ public class DetailsAPI implements Details {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = Details.PostDetailsResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageDetails.PostOrdersStorageDetailsResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -161,7 +161,7 @@ public class DetailsAPI implements Details {
 
   @Override
   @Validate
-  public void getDetailsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageDetailsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -178,31 +178,31 @@ public class DetailsAPI implements Details {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.Details> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageDetailsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageDetailsByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageDetailsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageDetailsByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetDetailsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageDetailsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetDetailsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageDetailsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -210,7 +210,7 @@ public class DetailsAPI implements Details {
 
   @Override
   @Validate
-  public void deleteDetailsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageDetailsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -223,27 +223,27 @@ public class DetailsAPI implements Details {
           postgresClient.delete(DETAIL_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Details.DeleteDetailsByIdResponse.noContent()
+                  OrdersStorageDetails.DeleteOrdersStorageDetailsByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Details.DeleteDetailsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageDetails.DeleteOrdersStorageDetailsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              Details.DeleteDetailsByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageDetails.DeleteOrdersStorageDetailsByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          Details.DeleteDetailsByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageDetails.DeleteOrdersStorageDetailsByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putDetailsById(String id, String lang, org.folio.rest.jaxrs.model.Details entity,
+  public void putOrdersStorageDetailsById(String id, String lang, org.folio.rest.jaxrs.model.Details entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -257,26 +257,26 @@ public class DetailsAPI implements Details {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageDetailsByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageDetailsByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutDetailsByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageDetailsByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutDetailsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageDetailsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutDetailsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageDetailsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

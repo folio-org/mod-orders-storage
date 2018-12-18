@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.folio.rest.jaxrs.resource.PurchaseOrder;
+import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +30,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class PurchaseOrderAPI implements PurchaseOrder {
+public class PurchaseOrderAPI implements OrdersStoragePurchaseOrders {
   private static final String PURCHASE_ORDER_TABLE = "purchase_order";
-  private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/purchase_order/";
+  private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase_orders/";
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrderAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +53,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
 
   @Override
   @Validate
-  public void getPurchaseOrder(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePurchaseOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -84,16 +84,16 @@ public class PurchaseOrderAPI implements PurchaseOrder {
                   collection.setFirst(first);
                   collection.setLast(last);
                   asyncResultHandler
-                    .handle(Future.succeededFuture(GetPurchaseOrderResponse.respond200WithApplicationJson(
+                    .handle(Future.succeededFuture(GetOrdersStoragePurchaseOrdersResponse.respond200WithApplicationJson(
                         collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
+                  asyncResultHandler.handle(Future.succeededFuture(GetOrdersStoragePurchaseOrdersResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
+                asyncResultHandler.handle(Future.succeededFuture(GetOrdersStoragePurchaseOrdersResponse
                   .respond500WithTextPlain(messages.getMessage(
                       lang, MessageConsts.InternalServerError))));
               }
@@ -104,7 +104,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(Future.succeededFuture(GetPurchaseOrderResponse
+        asyncResultHandler.handle(Future.succeededFuture(GetOrdersStoragePurchaseOrdersResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -112,7 +112,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
 
   @Override
   @Validate
-  public void postPurchaseOrder(String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
+  public void postOrdersStoragePurchaseOrders(String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -136,20 +136,20 @@ public class PurchaseOrderAPI implements PurchaseOrder {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = PostPurchaseOrderResponse
-                    .respond201WithApplicationJson(stream, PostPurchaseOrderResponse.headersFor201()
+                  Response response = PostOrdersStoragePurchaseOrdersResponse
+                    .respond201WithApplicationJson(stream, PostOrdersStoragePurchaseOrdersResponse.headersFor201()
                       .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = PostPurchaseOrderResponse
+                  Response response = PostOrdersStoragePurchaseOrdersResponse
                     .respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = PostPurchaseOrderResponse.respond500WithTextPlain(e.getMessage());
+                Response response = PostOrdersStoragePurchaseOrdersResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -158,7 +158,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = PostPurchaseOrderResponse.respond500WithTextPlain(errMsg);
+        Response response = PostOrdersStoragePurchaseOrdersResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -167,7 +167,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
 
   @Override
   @Validate
-  public void getPurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -185,31 +185,31 @@ public class PurchaseOrderAPI implements PurchaseOrder {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.PurchaseOrder> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePurchaseOrdersByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePurchaseOrdersByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePurchaseOrdersByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePurchaseOrdersByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePurchaseOrdersByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPurchaseOrderByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePurchaseOrdersByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -217,7 +217,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
 
   @Override
   @Validate
-  public void deletePurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -230,28 +230,28 @@ public class PurchaseOrderAPI implements PurchaseOrder {
           postgresClient.delete(PURCHASE_ORDER_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  PurchaseOrder.DeletePurchaseOrderByIdResponse.noContent()
+                  OrdersStoragePurchaseOrders.DeleteOrdersStoragePurchaseOrdersByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  PurchaseOrder.DeletePurchaseOrderByIdResponse
+                  OrdersStoragePurchaseOrders.DeleteOrdersStoragePurchaseOrdersByIdResponse
                     .respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              PurchaseOrder.DeletePurchaseOrderByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStoragePurchaseOrders.DeleteOrdersStoragePurchaseOrdersByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          PurchaseOrder.DeletePurchaseOrderByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStoragePurchaseOrders.DeleteOrdersStoragePurchaseOrdersByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putPurchaseOrderById(String id, String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
+  public void putOrdersStoragePurchaseOrdersById(String id, String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -266,26 +266,26 @@ public class PurchaseOrderAPI implements PurchaseOrder {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPurchaseOrderByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

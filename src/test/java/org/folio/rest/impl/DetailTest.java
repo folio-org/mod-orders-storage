@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.equalTo;
 public class DetailTest extends OrdersStorageTest {
 
   private final static String INVALID_DETAIL_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
-  private final static String DETAILS_ENDPOINT = "details";
+  private final static String DETAILS_ENDPOINT = "/orders-storage/details";
 
   // Validates that there are zero detail records in the DB
   private void verifyCollection() {

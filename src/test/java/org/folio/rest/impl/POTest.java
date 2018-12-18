@@ -12,9 +12,9 @@ import static org.hamcrest.Matchers.equalTo;
 @RunWith(VertxUnitRunner.class)
 public class POTest extends OrdersStorageTest {
 
-  private static final String PO_ENDPOINT = "purchase_order";
-  
-  
+  private static final String PO_ENDPOINT = "/orders-storage/purchase_orders";
+
+
   // Validates that there are zero purchase order records in the DB
   private void verifyCollection() {
 

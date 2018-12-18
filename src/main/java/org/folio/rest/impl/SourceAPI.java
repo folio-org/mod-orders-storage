@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.SourceCollection;
-import org.folio.rest.jaxrs.resource.Source;
+import org.folio.rest.jaxrs.resource.OrdersStorageSources;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +30,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class SourceAPI implements Source {
+public class SourceAPI implements OrdersStorageSources {
   private static final String SOURCE_TABLE = "source";
-  private static final String SOURCE_LOCATION_PREFIX = "/source/";
+  private static final String SOURCE_LOCATION_PREFIX = "/orders-storage/sources/";
 
   private static final Logger log = LoggerFactory.getLogger(SourceAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +53,7 @@ public class SourceAPI implements Source {
 
   @Override
   @Validate
-  public void getSource(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageSources(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -82,16 +82,16 @@ public class SourceAPI implements Source {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Source.GetSourceResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageSources.GetOrdersStorageSourcesResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Source.GetSourceResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageSources.GetOrdersStorageSourcesResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Source.GetSourceResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageSources.GetOrdersStorageSourcesResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class SourceAPI implements Source {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Source.GetSourceResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageSources.GetOrdersStorageSourcesResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +109,7 @@ public class SourceAPI implements Source {
 
   @Override
   @Validate
-  public void postSource(String lang, org.folio.rest.jaxrs.model.Source entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageSources(String lang, org.folio.rest.jaxrs.model.Source entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -132,18 +132,18 @@ public class SourceAPI implements Source {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = Source.PostSourceResponse.respond201WithApplicationJson(stream,
-                      Source.PostSourceResponse.headersFor201().withLocation(SOURCE_LOCATION_PREFIX + persistenceId));
+                  Response response = OrdersStorageSources.PostOrdersStorageSourcesResponse.respond201WithApplicationJson(stream,
+                      OrdersStorageSources.PostOrdersStorageSourcesResponse.headersFor201().withLocation(SOURCE_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = Source.PostSourceResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageSources.PostOrdersStorageSourcesResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = Source.PostSourceResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageSources.PostOrdersStorageSourcesResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -152,7 +152,7 @@ public class SourceAPI implements Source {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = Source.PostSourceResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageSources.PostOrdersStorageSourcesResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -161,7 +161,7 @@ public class SourceAPI implements Source {
 
   @Override
   @Validate
-  public void getSourceById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageSourcesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -178,31 +178,31 @@ public class SourceAPI implements Source {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.Source> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetSourceByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageSourcesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetSourceByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageSourcesByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetSourceByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageSourcesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetSourceByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageSourcesByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetSourceByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageSourcesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetSourceByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageSourcesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -210,7 +210,7 @@ public class SourceAPI implements Source {
 
   @Override
   @Validate
-  public void deleteSourceById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageSourcesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -223,27 +223,27 @@ public class SourceAPI implements Source {
           postgresClient.delete(SOURCE_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Source.DeleteSourceByIdResponse.noContent()
+                  OrdersStorageSources.DeleteOrdersStorageSourcesByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Source.DeleteSourceByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageSources.DeleteOrdersStorageSourcesByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              Source.DeleteSourceByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageSources.DeleteOrdersStorageSourcesByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          Source.DeleteSourceByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageSources.DeleteOrdersStorageSourcesByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putSourceById(String id, String lang, org.folio.rest.jaxrs.model.Source entity,
+  public void putOrdersStorageSourcesById(String id, String lang, org.folio.rest.jaxrs.model.Source entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -257,26 +257,26 @@ public class SourceAPI implements Source {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutSourceByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageSourcesByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutSourceByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageSourcesByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutSourceByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageSourcesByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutSourceByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageSourcesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutSourceByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageSourcesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

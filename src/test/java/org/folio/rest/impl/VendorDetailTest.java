@@ -10,7 +10,7 @@ import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
 public class VendorDetailTest extends OrdersStorageTest {
-  private final static String VENDOR_DETAIL_ENDPOINT = "vendor_detail";
+  private final static String VENDOR_DETAIL_ENDPOINT = "/orders-storage/vendor_details";
   private final static String INVALID_VENDOR_DETAIL_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
   @Test

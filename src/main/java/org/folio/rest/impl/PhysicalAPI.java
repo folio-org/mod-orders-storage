@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PhysicalCollection;
-import org.folio.rest.jaxrs.resource.Physical;
+import org.folio.rest.jaxrs.resource.OrdersStoragePhysicals;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +30,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class PhysicalAPI implements Physical {
+public class PhysicalAPI implements OrdersStoragePhysicals {
   private static final String PHYSICAL_TABLE = "physical";
-  private static final String PHYSICAL_LOCATION_PREFIX = "/physical/";
+  private static final String PHYSICAL_LOCATION_PREFIX = "/orders-storage/physicals/";
 
   private static final Logger log = LoggerFactory.getLogger(PhysicalAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +53,7 @@ public class PhysicalAPI implements Physical {
 
   @Override
   @Validate
-  public void getPhysical(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePhysicals(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -82,16 +82,16 @@ public class PhysicalAPI implements Physical {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Physical.GetPhysicalResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Physical.GetPhysicalResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Physical.GetPhysicalResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class PhysicalAPI implements Physical {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Physical.GetPhysicalResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +109,7 @@ public class PhysicalAPI implements Physical {
 
   @Override
   @Validate
-  public void postPhysical(String lang, org.folio.rest.jaxrs.model.Physical entity, Map<String, String> okapiHeaders,
+  public void postOrdersStoragePhysicals(String lang, org.folio.rest.jaxrs.model.Physical entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -132,19 +132,19 @@ public class PhysicalAPI implements Physical {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = Physical.PostPhysicalResponse.respond201WithApplicationJson(stream,
-                      Physical.PostPhysicalResponse.headersFor201()
+                  Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond201WithApplicationJson(stream,
+                      OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.headersFor201()
                         .withLocation(PHYSICAL_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = Physical.PostPhysicalResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = Physical.PostPhysicalResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -153,7 +153,7 @@ public class PhysicalAPI implements Physical {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = Physical.PostPhysicalResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -162,7 +162,7 @@ public class PhysicalAPI implements Physical {
 
   @Override
   @Validate
-  public void getPhysicalById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePhysicalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -179,31 +179,31 @@ public class PhysicalAPI implements Physical {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.Physical> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPhysicalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPhysicalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPhysicalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPhysicalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPhysicalByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetPhysicalByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -211,7 +211,7 @@ public class PhysicalAPI implements Physical {
 
   @Override
   @Validate
-  public void deletePhysicalById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStoragePhysicalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -224,27 +224,27 @@ public class PhysicalAPI implements Physical {
           postgresClient.delete(PHYSICAL_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Physical.DeletePhysicalByIdResponse.noContent()
+                  OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Physical.DeletePhysicalByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              Physical.DeletePhysicalByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          Physical.DeletePhysicalByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putPhysicalById(String id, String lang, org.folio.rest.jaxrs.model.Physical entity,
+  public void putOrdersStoragePhysicalsById(String id, String lang, org.folio.rest.jaxrs.model.Physical entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -258,26 +258,26 @@ public class PhysicalAPI implements Physical {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPhysicalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPhysicalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPhysicalByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPhysicalByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutPhysicalByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

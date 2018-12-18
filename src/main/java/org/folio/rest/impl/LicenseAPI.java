@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.LicenseCollection;
-import org.folio.rest.jaxrs.resource.License;
+import org.folio.rest.jaxrs.resource.OrdersStorageLicenses;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +30,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class LicenseAPI implements License {
-  private static final String LICENSE_TABLE = "fund";
-  private static final String LICENSE_LOCATION_PREFIX = "/fund/";
+public class LicenseAPI implements OrdersStorageLicenses {
+  private static final String LICENSE_TABLE = "license";
+  private static final String LICENSE_LOCATION_PREFIX = "/orders-storage/licenses/";
 
   private static final Logger log = LoggerFactory.getLogger(LicenseAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +53,7 @@ public class LicenseAPI implements License {
 
   @Override
   @Validate
-  public void getLicense(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageLicenses(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -83,16 +83,16 @@ public class LicenseAPI implements License {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(License.GetLicenseResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLicenses.GetOrdersStorageLicensesResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(License.GetLicenseResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLicenses.GetOrdersStorageLicensesResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(License.GetLicenseResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLicenses.GetOrdersStorageLicensesResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -102,7 +102,7 @@ public class LicenseAPI implements License {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(License.GetLicenseResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLicenses.GetOrdersStorageLicensesResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -110,7 +110,7 @@ public class LicenseAPI implements License {
 
   @Override
   @Validate
-  public void postLicense(String lang, org.folio.rest.jaxrs.model.License entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageLicenses(String lang, org.folio.rest.jaxrs.model.License entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -133,19 +133,19 @@ public class LicenseAPI implements License {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = License.PostLicenseResponse
-                    .respond201WithApplicationJson(stream, License.PostLicenseResponse.headersFor201()
+                  Response response = OrdersStorageLicenses.PostOrdersStorageLicensesResponse
+                    .respond201WithApplicationJson(stream, OrdersStorageLicenses.PostOrdersStorageLicensesResponse.headersFor201()
                       .withLocation(LICENSE_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = License.PostLicenseResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageLicenses.PostOrdersStorageLicensesResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = License.PostLicenseResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageLicenses.PostOrdersStorageLicensesResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -154,7 +154,7 @@ public class LicenseAPI implements License {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = License.PostLicenseResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageLicenses.PostOrdersStorageLicensesResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -162,7 +162,7 @@ public class LicenseAPI implements License {
   }
 
   @Override
-  public void getLicenseById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageLicensesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -179,38 +179,38 @@ public class LicenseAPI implements License {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.License> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetLicenseByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLicensesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetLicenseByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLicensesByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetLicenseByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLicensesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetLicenseByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLicensesByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetLicenseByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLicensesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetLicenseByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLicensesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
   }
 
   @Override
-  public void deleteLicenseById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageLicensesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -223,26 +223,26 @@ public class LicenseAPI implements License {
           postgresClient.delete(LICENSE_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  License.DeleteLicenseByIdResponse.noContent()
+                  OrdersStorageLicenses.DeleteOrdersStorageLicensesByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  License.DeleteLicenseByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageLicenses.DeleteOrdersStorageLicensesByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              License.DeleteLicenseByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageLicenses.DeleteOrdersStorageLicensesByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          License.DeleteLicenseByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageLicenses.DeleteOrdersStorageLicensesByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
-  public void putLicenseById(String id, String lang, org.folio.rest.jaxrs.model.License entity,
+  public void putOrdersStorageLicensesById(String id, String lang, org.folio.rest.jaxrs.model.License entity,
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -257,26 +257,26 @@ public class LicenseAPI implements License {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutLicenseByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLicensesByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutLicenseByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLicensesByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutLicenseByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLicensesByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutLicenseByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLicensesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutLicenseByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLicensesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

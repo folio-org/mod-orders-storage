@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.RenewalCollection;
-import org.folio.rest.jaxrs.resource.Renewal;
+import org.folio.rest.jaxrs.resource.OrdersStorageRenewals;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +30,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class RenewalAPI implements Renewal {
+public class RenewalAPI implements OrdersStorageRenewals {
   private static final String RENEWAL_TABLE = "renewal";
-  private static final String RENEWAL_LOCATION_PREFIX = "/renewal/";
+  private static final String RENEWAL_LOCATION_PREFIX = "/orders-storage/renewals/";
 
   private static final Logger log = LoggerFactory.getLogger(RenewalAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +53,7 @@ public class RenewalAPI implements Renewal {
 
   @Override
   @Validate
-  public void getRenewal(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageRenewals(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -82,16 +82,16 @@ public class RenewalAPI implements Renewal {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Renewal.GetRenewalResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Renewal.GetRenewalResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Renewal.GetRenewalResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class RenewalAPI implements Renewal {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Renewal.GetRenewalResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +109,7 @@ public class RenewalAPI implements Renewal {
 
   @Override
   @Validate
-  public void postRenewal(String lang, org.folio.rest.jaxrs.model.Renewal entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageRenewals(String lang, org.folio.rest.jaxrs.model.Renewal entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -132,19 +132,19 @@ public class RenewalAPI implements Renewal {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = Renewal.PostRenewalResponse
-                    .respond201WithApplicationJson(stream, Renewal.PostRenewalResponse.headersFor201()
+                  Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse
+                    .respond201WithApplicationJson(stream, OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.headersFor201()
                       .withLocation(RENEWAL_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = Renewal.PostRenewalResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = Renewal.PostRenewalResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -153,7 +153,7 @@ public class RenewalAPI implements Renewal {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = Renewal.PostRenewalResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -162,7 +162,7 @@ public class RenewalAPI implements Renewal {
 
   @Override
   @Validate
-  public void getRenewalById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageRenewalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -179,31 +179,31 @@ public class RenewalAPI implements Renewal {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.Renewal> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetRenewalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetRenewalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetRenewalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetRenewalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetRenewalByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetRenewalByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -211,7 +211,7 @@ public class RenewalAPI implements Renewal {
 
   @Override
   @Validate
-  public void deleteRenewalById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageRenewalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -224,27 +224,27 @@ public class RenewalAPI implements Renewal {
           postgresClient.delete(RENEWAL_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Renewal.DeleteRenewalByIdResponse.noContent()
+                  OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Renewal.DeleteRenewalByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              Renewal.DeleteRenewalByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          Renewal.DeleteRenewalByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putRenewalById(String id, String lang, org.folio.rest.jaxrs.model.Renewal entity,
+  public void putOrdersStorageRenewalsById(String id, String lang, org.folio.rest.jaxrs.model.Renewal entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -258,26 +258,26 @@ public class RenewalAPI implements Renewal {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutRenewalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutRenewalByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutRenewalByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutRenewalByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutRenewalByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

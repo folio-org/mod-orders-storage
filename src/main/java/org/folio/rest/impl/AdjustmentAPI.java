@@ -8,8 +8,9 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.Adjustment;
 import org.folio.rest.jaxrs.model.AdjustmentCollection;
-import org.folio.rest.jaxrs.resource.Adjustment;
+import org.folio.rest.jaxrs.resource.OrdersStorageAdjustments;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,9 +31,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class AdjustmentAPI implements Adjustment {
+public class AdjustmentAPI implements OrdersStorageAdjustments {
   private static final String ADJUSTMENT_TABLE = "adjustment";
-  private static final String ADJUSTMENT_LOCATION_PREFIX = "/adjustment/";
+  private static final String ADJUSTMENT_LOCATION_PREFIX = "/orders-storage/adjustments/";
 
   private static final Logger log = LoggerFactory.getLogger(AdjustmentAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -53,7 +54,7 @@ public class AdjustmentAPI implements Adjustment {
 
   @Override
   @Validate
-  public void getAdjustment(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageAdjustments(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -82,16 +83,16 @@ public class AdjustmentAPI implements Adjustment {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageAdjustments.GetOrdersStorageAdjustmentsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageAdjustments.GetOrdersStorageAdjustmentsResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageAdjustments.GetOrdersStorageAdjustmentsResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +102,7 @@ public class AdjustmentAPI implements Adjustment {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageAdjustments.GetOrdersStorageAdjustmentsResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +110,7 @@ public class AdjustmentAPI implements Adjustment {
 
   @Override
   @Validate
-  public void postAdjustment(String lang, org.folio.rest.jaxrs.model.Adjustment entity,
+  public void postOrdersStorageAdjustments(String lang, org.folio.rest.jaxrs.model.Adjustment entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -132,20 +133,20 @@ public class AdjustmentAPI implements Adjustment {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = Adjustment.PostAdjustmentResponse.respond201WithApplicationJson(stream,
-                      Adjustment.PostAdjustmentResponse.headersFor201()
+                  Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.respond201WithApplicationJson(stream,
+                      OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.headersFor201()
                         .withLocation(ADJUSTMENT_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = Adjustment.PostAdjustmentResponse
+                  Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse
                     .respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = Adjustment.PostAdjustmentResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -154,7 +155,7 @@ public class AdjustmentAPI implements Adjustment {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = Adjustment.PostAdjustmentResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -163,7 +164,7 @@ public class AdjustmentAPI implements Adjustment {
 
   @Override
   @Validate
-  public void getAdjustmentById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageAdjustmentsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -180,31 +181,31 @@ public class AdjustmentAPI implements Adjustment {
                 if (reply.succeeded()) {
                   List<org.folio.rest.jaxrs.model.Adjustment> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -212,7 +213,7 @@ public class AdjustmentAPI implements Adjustment {
 
   @Override
   @Validate
-  public void deleteAdjustmentById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageAdjustmentsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -225,27 +226,27 @@ public class AdjustmentAPI implements Adjustment {
           postgresClient.delete(ADJUSTMENT_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Adjustment.DeleteAdjustmentByIdResponse.noContent()
+                  OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Adjustment.DeleteAdjustmentByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              Adjustment.DeleteAdjustmentByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          Adjustment.DeleteAdjustmentByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putAdjustmentById(String id, String lang, org.folio.rest.jaxrs.model.Adjustment entity,
+  public void putOrdersStorageAdjustmentsById(String id, String lang, org.folio.rest.jaxrs.model.Adjustment entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -259,26 +260,26 @@ public class AdjustmentAPI implements Adjustment {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
