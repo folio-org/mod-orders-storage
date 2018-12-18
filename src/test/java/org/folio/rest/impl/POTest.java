@@ -26,7 +26,7 @@ public class POTest extends OrdersStorageTest {
 
 
     // Verify that there are no existing po_lines
-    getData("po_line").then()
+    getData("/orders-storage/po_lines").then()
       .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
