@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ReportingCodeCollection;
 import org.folio.rest.jaxrs.resource.ReportingCode;
 import org.folio.rest.persist.PostgresClient;
@@ -51,6 +52,7 @@ public class ReportingCodeAPI implements ReportingCode {
   }
 
   @Override
+  @Validate
   public void getReportingCode(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
@@ -106,6 +108,7 @@ public class ReportingCodeAPI implements ReportingCode {
   }
 
   @Override
+  @Validate
   public void postReportingCode(String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -159,6 +162,7 @@ public class ReportingCodeAPI implements ReportingCode {
   }
 
   @Override
+  @Validate
   public void getReportingCodeById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -207,6 +211,7 @@ public class ReportingCodeAPI implements ReportingCode {
   }
 
   @Override
+  @Validate
   public void deleteReportingCodeById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
@@ -239,6 +244,7 @@ public class ReportingCodeAPI implements ReportingCode {
   }
 
   @Override
+  @Validate
   public void putReportingCodeById(String id, String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {

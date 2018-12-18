@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.SourceCollection;
 import org.folio.rest.jaxrs.resource.Source;
 import org.folio.rest.persist.PostgresClient;
@@ -51,6 +52,7 @@ public class SourceAPI implements Source {
   }
 
   @Override
+  @Validate
   public void getSource(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
@@ -106,6 +108,7 @@ public class SourceAPI implements Source {
   }
 
   @Override
+  @Validate
   public void postSource(String lang, org.folio.rest.jaxrs.model.Source entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -157,6 +160,7 @@ public class SourceAPI implements Source {
   }
 
   @Override
+  @Validate
   public void getSourceById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -205,6 +209,7 @@ public class SourceAPI implements Source {
   }
 
   @Override
+  @Validate
   public void deleteSourceById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
@@ -237,6 +242,7 @@ public class SourceAPI implements Source {
   }
 
   @Override
+  @Validate
   public void putSourceById(String id, String lang, org.folio.rest.jaxrs.model.Source entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {

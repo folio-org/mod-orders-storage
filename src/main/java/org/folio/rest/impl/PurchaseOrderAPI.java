@@ -7,6 +7,7 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.PurchaseOrder;
 import org.folio.rest.persist.PostgresClient;
@@ -51,6 +52,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
   }
 
   @Override
+  @Validate
   public void getPurchaseOrder(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
@@ -109,6 +111,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
   }
 
   @Override
+  @Validate
   public void postPurchaseOrder(String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
@@ -163,6 +166,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
   }
 
   @Override
+  @Validate
   public void getPurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
@@ -212,6 +216,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
   }
 
   @Override
+  @Validate
   public void deletePurchaseOrderById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
@@ -245,6 +250,7 @@ public class PurchaseOrderAPI implements PurchaseOrder {
   }
 
   @Override
+  @Validate
   public void putPurchaseOrderById(String id, String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity,
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {

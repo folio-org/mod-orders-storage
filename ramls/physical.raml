@@ -1,15 +1,18 @@
 #%RAML 1.0
-title: "Sample-Module"
-baseUri: http://github.com/org/folio/sample-module
+title: "Orders Storage"
+baseUri: http://github.com/org/folio/mod-orders-storage
 version: v1
 
 documentation:
-  - title: Sample Module
+  - title: Physicals
     content: <b>CRUD API</b>
 
 types:
     physical: !include acq-models/mod-orders-storage/schemas/physical.json
     physical_collection: !include acq-models/mod-orders-storage/schemas/physical_collection.json
+    UUID:
+     type: string
+     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 
 traits:
     orderable: !include raml-util/traits/orderable.raml
@@ -29,12 +32,16 @@ resourceTypes:
       schemaCollection: physical_collection
       schemaItem: physical
   get:
-    description: Get list of locationss
+    description: Get list of physicals
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
     ]
   /{id}:
+    uriParameters:
+      id:
+        description: The UUID of a Location
+        type: UUID
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/physical_get.sample

@@ -1,15 +1,18 @@
 #%RAML 1.0
-title: "Sample-Module"
-baseUri: http://github.com/org/folio/sample-module
+title: "Orders Storage"
+baseUri: http://github.com/org/folio/mod-orders-storage
 version: v1
 
 documentation:
-  - title: Sample Module
+  - title: Cost
     content: <b>CRUD API</b>
 
 types:
     cost: !include acq-models/mod-orders-storage/schemas/cost.json
     cost_collection: !include acq-models/mod-orders-storage/schemas/cost_collection.json
+    UUID:
+     type: string
+     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 
 traits:
     orderable: !include raml-util/traits/orderable.raml
@@ -29,12 +32,16 @@ resourceTypes:
       schemaCollection: cost_collection
       schemaItem: cost
   get:
-    description: Get list of alerts
+    description: Get list of costs
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
     ]
   /{id}:
+    uriParameters:
+      id:
+        description: The UUID of a Cost
+        type: UUID
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/cost_get.sample

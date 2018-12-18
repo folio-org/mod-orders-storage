@@ -5,3 +5,6 @@
 /src/main/java/org/folio/rest/jaxrs/*
 /src/main/java/storage/model/*
 
+/bin/
+/.project
+/.classpath
