@@ -87,7 +87,7 @@ public class VendorDetailTest extends OrdersStorageTest {
 
   private void testInvalidVendorDetailId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Vendor Detail with ID return 404: " + INVALID_VENDOR_DETAIL_ID);
-    getDataById("details", INVALID_VENDOR_DETAIL_ID).then().log().ifValidationFails()
+    getDataById(VENDOR_DETAIL_ENDPOINT, INVALID_VENDOR_DETAIL_ID).then().log().ifValidationFails()
       .statusCode(404);
   }
 
