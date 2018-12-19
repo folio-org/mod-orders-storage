@@ -8,7 +8,6 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.Adjustment;
 import org.folio.rest.jaxrs.model.AdjustmentCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageAdjustments;
 import org.folio.rest.persist.PostgresClient;

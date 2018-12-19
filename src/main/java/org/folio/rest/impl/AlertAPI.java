@@ -10,8 +10,6 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.AlertCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageAlerts;
-import org.folio.rest.jaxrs.resource.OrdersStorageAlerts.PutOrdersStorageAlertsByIdResponse;
-import org.folio.rest.jaxrs.resource.OrdersStorageAlerts;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
