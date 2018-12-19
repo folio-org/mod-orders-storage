@@ -21,7 +21,14 @@ public class PiecesTest extends OrdersStorageTest{
   private String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static final String PIECES_ENDPOINT ="/orders-storage/pieces";
 
-
+  @Override
+  void verifyCollection(String endpoint) {
+    // Verify that there are no existing  records
+    getData(endpoint).then()
+      .log().all()
+      .statusCode(200)
+      .body("total_records", equalTo(0));
+  }
 
   @Test
   public void testpiece() {
