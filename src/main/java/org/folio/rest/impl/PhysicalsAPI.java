@@ -8,8 +8,8 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.VendorDetailCollection;
-import org.folio.rest.jaxrs.resource.OrdersStorageVendorDetails;
+import org.folio.rest.jaxrs.model.PhysicalCollection;
+import org.folio.rest.jaxrs.resource.OrdersStoragePhysicals;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,11 +30,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class VendorDetailAPI implements OrdersStorageVendorDetails {
-  private static final String VENDOR_TABLE = "vendor_detail";
-  private static final String VENDOR_LOCATION_PREFIX = "/orders-storage/vendor_details/";
+public class PhysicalsAPI implements OrdersStoragePhysicals {
+  private static final String PHYSICAL_TABLE = "physical";
+  private static final String PHYSICAL_LOCATION_PREFIX = "/orders-storage/physicals/";
 
-  private static final Logger log = LoggerFactory.getLogger(VendorDetailAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(PhysicalsAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
@@ -47,31 +47,31 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
     return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
-  public VendorDetailAPI(Vertx vertx, String tenantId) {
+  public PhysicalsAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
   @Override
   @Validate
-  public void getOrdersStorageVendorDetails(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePhysicals(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         String[] fieldList = { "*" };
-        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", VENDOR_TABLE));
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", PHYSICAL_TABLE));
         CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
           .setLimit(new Limit(limit))
           .setOffset(new Offset(offset));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(VENDOR_TABLE,
-            org.folio.rest.jaxrs.model.VendorDetail.class, fieldList, cql, true, false, reply -> {
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PHYSICAL_TABLE,
+            org.folio.rest.jaxrs.model.Physical.class, fieldList, cql, true, false, reply -> {
               try {
                 if (reply.succeeded()) {
-                  VendorDetailCollection collection = new VendorDetailCollection();
-                  List<org.folio.rest.jaxrs.model.VendorDetail> results = reply.result().getResults();
-                  collection.setVendorDetails(results);
+                  PhysicalCollection collection = new PhysicalCollection();
+                  List<org.folio.rest.jaxrs.model.Physical> results = reply.result().getResults();
+                  collection.setPhysicals(results);
                   Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                   collection.setTotalRecords(totalRecords);
                   Integer first = 0;
@@ -82,16 +82,16 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageVendorDetails.GetOrdersStorageVendorDetailsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageVendorDetails.GetOrdersStorageVendorDetailsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageVendorDetails.GetOrdersStorageVendorDetailsResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageVendorDetails.GetOrdersStorageVendorDetailsResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,8 +109,8 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
 
   @Override
   @Validate
-  public void postOrdersStorageVendorDetails(String lang, org.folio.rest.jaxrs.model.VendorDetail entity,
-      Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void postOrdersStoragePhysicals(String lang, org.folio.rest.jaxrs.model.Physical entity, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
       try {
@@ -123,7 +123,7 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
 
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
         PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            VENDOR_TABLE, id, entity,
+            PHYSICAL_TABLE, id, entity,
             reply -> {
               try {
                 if (reply.succeeded()) {
@@ -132,20 +132,19 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = OrdersStorageVendorDetails.PostOrdersStorageVendorDetailsResponse.respond201WithApplicationJson(stream,
-                      OrdersStorageVendorDetails.PostOrdersStorageVendorDetailsResponse.headersFor201()
-                        .withLocation(VENDOR_LOCATION_PREFIX + persistenceId));
+                  Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond201WithApplicationJson(stream,
+                      OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.headersFor201()
+                        .withLocation(PHYSICAL_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = OrdersStorageVendorDetails.PostOrdersStorageVendorDetailsResponse
-                    .respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = OrdersStorageVendorDetails.PostOrdersStorageVendorDetailsResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -154,7 +153,7 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = OrdersStorageVendorDetails.PostOrdersStorageVendorDetailsResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -163,7 +162,7 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
 
   @Override
   @Validate
-  public void getOrdersStorageVendorDetailsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePhysicalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -173,38 +172,38 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
         Criterion c = new Criterion(
             new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(VENDOR_TABLE,
-            org.folio.rest.jaxrs.model.VendorDetail.class, c, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PHYSICAL_TABLE,
+            org.folio.rest.jaxrs.model.Physical.class, c, true,
             reply -> {
               try {
                 if (reply.succeeded()) {
-                  List<org.folio.rest.jaxrs.model.VendorDetail> results = reply.result().getResults();
+                  List<org.folio.rest.jaxrs.model.Physical> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageVendorDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageVendorDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageVendorDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageVendorDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageVendorDetailsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageVendorDetailsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -212,7 +211,7 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
 
   @Override
   @Validate
-  public void deleteOrdersStorageVendorDetailsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStoragePhysicalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -222,30 +221,30 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
             vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
         try {
-          postgresClient.delete(VENDOR_TABLE, id, reply -> {
+          postgresClient.delete(PHYSICAL_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStorageVendorDetails.DeleteOrdersStorageVendorDetailsByIdResponse.noContent()
+                  OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStorageVendorDetails.DeleteOrdersStorageVendorDetailsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              OrdersStorageVendorDetails.DeleteOrdersStorageVendorDetailsByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          OrdersStorageVendorDetails.DeleteOrdersStorageVendorDetailsByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putOrdersStorageVendorDetailsById(String id, String lang, org.folio.rest.jaxrs.model.VendorDetail entity,
+  public void putOrdersStoragePhysicalsById(String id, String lang, org.folio.rest.jaxrs.model.Physical entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -254,31 +253,31 @@ public class VendorDetailAPI implements OrdersStorageVendorDetails {
           entity.setId(id);
         }
         PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            VENDOR_TABLE, entity, id,
+            PHYSICAL_TABLE, entity, id,
             reply -> {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageVendorDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageVendorDetailsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageVendorDetailsByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageVendorDetailsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageVendorDetailsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

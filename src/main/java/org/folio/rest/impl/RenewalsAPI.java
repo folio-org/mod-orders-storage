@@ -8,8 +8,8 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.PhysicalCollection;
-import org.folio.rest.jaxrs.resource.OrdersStoragePhysicals;
+import org.folio.rest.jaxrs.model.RenewalCollection;
+import org.folio.rest.jaxrs.resource.OrdersStorageRenewals;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,11 +30,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class PhysicalAPI implements OrdersStoragePhysicals {
-  private static final String PHYSICAL_TABLE = "physical";
-  private static final String PHYSICAL_LOCATION_PREFIX = "/orders-storage/physicals/";
+public class RenewalsAPI implements OrdersStorageRenewals {
+  private static final String RENEWAL_TABLE = "renewal";
+  private static final String RENEWAL_LOCATION_PREFIX = "/orders-storage/renewals/";
 
-  private static final Logger log = LoggerFactory.getLogger(PhysicalAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(RenewalsAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
@@ -47,31 +47,31 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
     return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
-  public PhysicalAPI(Vertx vertx, String tenantId) {
+  public RenewalsAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
   @Override
   @Validate
-  public void getOrdersStoragePhysicals(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageRenewals(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         String[] fieldList = { "*" };
-        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", PHYSICAL_TABLE));
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", RENEWAL_TABLE));
         CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
           .setLimit(new Limit(limit))
           .setOffset(new Offset(offset));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PHYSICAL_TABLE,
-            org.folio.rest.jaxrs.model.Physical.class, fieldList, cql, true, false, reply -> {
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(RENEWAL_TABLE,
+            org.folio.rest.jaxrs.model.Renewal.class, fieldList, cql, true, false, reply -> {
               try {
                 if (reply.succeeded()) {
-                  PhysicalCollection collection = new PhysicalCollection();
-                  List<org.folio.rest.jaxrs.model.Physical> results = reply.result().getResults();
-                  collection.setPhysicals(results);
+                  RenewalCollection collection = new RenewalCollection();
+                  List<org.folio.rest.jaxrs.model.Renewal> results = reply.result().getResults();
+                  collection.setRenewals(results);
                   Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                   collection.setTotalRecords(totalRecords);
                   Integer first = 0;
@@ -82,16 +82,16 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePhysicals.GetOrdersStoragePhysicalsResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +109,7 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
 
   @Override
   @Validate
-  public void postOrdersStoragePhysicals(String lang, org.folio.rest.jaxrs.model.Physical entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageRenewals(String lang, org.folio.rest.jaxrs.model.Renewal entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -123,7 +123,7 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
 
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
         PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            PHYSICAL_TABLE, id, entity,
+            RENEWAL_TABLE, id, entity,
             reply -> {
               try {
                 if (reply.succeeded()) {
@@ -132,19 +132,19 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond201WithApplicationJson(stream,
-                      OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.headersFor201()
-                        .withLocation(PHYSICAL_LOCATION_PREFIX + persistenceId));
+                  Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse
+                    .respond201WithApplicationJson(stream, OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.headersFor201()
+                      .withLocation(RENEWAL_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -153,7 +153,7 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = OrdersStoragePhysicals.PostOrdersStoragePhysicalsResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -162,7 +162,7 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
 
   @Override
   @Validate
-  public void getOrdersStoragePhysicalsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageRenewalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -172,38 +172,38 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
         Criterion c = new Criterion(
             new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(PHYSICAL_TABLE,
-            org.folio.rest.jaxrs.model.Physical.class, c, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(RENEWAL_TABLE,
+            org.folio.rest.jaxrs.model.Renewal.class, c, true,
             reply -> {
               try {
                 if (reply.succeeded()) {
-                  List<org.folio.rest.jaxrs.model.Physical> results = reply.result().getResults();
+                  List<org.folio.rest.jaxrs.model.Renewal> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStoragePhysicalsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -211,7 +211,7 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
 
   @Override
   @Validate
-  public void deleteOrdersStoragePhysicalsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageRenewalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -221,30 +221,30 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
             vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
         try {
-          postgresClient.delete(PHYSICAL_TABLE, id, reply -> {
+          postgresClient.delete(RENEWAL_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.noContent()
+                  OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          OrdersStoragePhysicals.DeleteOrdersStoragePhysicalsByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putOrdersStoragePhysicalsById(String id, String lang, org.folio.rest.jaxrs.model.Physical entity,
+  public void putOrdersStorageRenewalsById(String id, String lang, org.folio.rest.jaxrs.model.Renewal entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -253,31 +253,31 @@ public class PhysicalAPI implements OrdersStoragePhysicals {
           entity.setId(id);
         }
         PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            PHYSICAL_TABLE, entity, id,
+            RENEWAL_TABLE, entity, id,
             reply -> {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePhysicalsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

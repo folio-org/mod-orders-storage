@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class FundDistributionAPI implements OrdersStorageFundDistributions {
+public class FundDistributionsAPI implements OrdersStorageFundDistributions {
 
   private static final String FUND_DISTRIBUTION_TABLE = "fund_distribution";
   private static final String FUND_DISTRIBUTION_LOCATION_PREFIX = "/orders-storage/fund_distributions/";
 
-  private static final Logger log = LoggerFactory.getLogger(FundDistributionAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(FundDistributionsAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
@@ -42,7 +42,7 @@ public class FundDistributionAPI implements OrdersStorageFundDistributions {
     return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
-  public FundDistributionAPI(Vertx vertx, String tenantId) {
+  public FundDistributionsAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 

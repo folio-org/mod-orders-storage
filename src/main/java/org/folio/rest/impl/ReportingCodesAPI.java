@@ -30,11 +30,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class ReportingCodeAPI implements OrdersStorageReportingCodes {
+public class ReportingCodesAPI implements OrdersStorageReportingCodes {
   private static final String VENDOR_TABLE = "reporting_code";
   private static final String VENDOR_LOCATION_PREFIX = "/orders-storage/reporting_codes/";
 
-  private static final Logger log = LoggerFactory.getLogger(VendorDetailAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(VendorDetailsAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
@@ -47,7 +47,7 @@ public class ReportingCodeAPI implements OrdersStorageReportingCodes {
     return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
-  public ReportingCodeAPI(Vertx vertx, String tenantId) {
+  public ReportingCodesAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 

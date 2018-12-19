@@ -8,8 +8,8 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.LocationCollection;
-import org.folio.rest.jaxrs.resource.OrdersStorageLocations;
+import org.folio.rest.jaxrs.model.EresourceCollection;
+import org.folio.rest.jaxrs.resource.OrdersStorageEresources;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -30,11 +30,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class LocationAPI implements OrdersStorageLocations {
-  private static final String LOCATION_TABLE = "location";
-  private static final String LOCATION_LOCATION_PREFIX = "/orders-storage/locations/";
+public class EresourcesAPI implements OrdersStorageEresources {
+  private static final String ERESOURCE_TABLE = "eresource";
+  private static final String ERESOURCE_LOCATION_PREFIX = "/orders-storage/eresources/";
 
-  private static final Logger log = LoggerFactory.getLogger(LocationAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(EresourcesAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
@@ -47,31 +47,31 @@ public class LocationAPI implements OrdersStorageLocations {
     return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
-  public LocationAPI(Vertx vertx, String tenantId) {
+  public EresourcesAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
   @Override
   @Validate
-  public void getOrdersStorageLocations(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageEresources(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         String[] fieldList = { "*" };
-        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", LOCATION_TABLE));
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", ERESOURCE_TABLE));
         CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
           .setLimit(new Limit(limit))
           .setOffset(new Offset(offset));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(LOCATION_TABLE,
-            org.folio.rest.jaxrs.model.Location.class, fieldList, cql, true, false, reply -> {
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(ERESOURCE_TABLE,
+            org.folio.rest.jaxrs.model.Eresource.class, fieldList, cql, true, false, reply -> {
               try {
                 if (reply.succeeded()) {
-                  LocationCollection collection = new LocationCollection();
-                  List<org.folio.rest.jaxrs.model.Location> results = reply.result().getResults();
-                  collection.setLocations(results);
+                  EresourceCollection collection = new EresourceCollection();
+                  List<org.folio.rest.jaxrs.model.Eresource> results = reply.result().getResults();
+                  collection.setEresources(results);
                   Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                   collection.setTotalRecords(totalRecords);
                   Integer first = 0;
@@ -82,16 +82,16 @@ public class LocationAPI implements OrdersStorageLocations {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLocations.GetOrdersStorageLocationsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLocations.GetOrdersStorageLocationsResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLocations.GetOrdersStorageLocationsResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +101,7 @@ public class LocationAPI implements OrdersStorageLocations {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageLocations.GetOrdersStorageLocationsResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +109,7 @@ public class LocationAPI implements OrdersStorageLocations {
 
   @Override
   @Validate
-  public void postOrdersStorageLocations(String lang, org.folio.rest.jaxrs.model.Location entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageEresources(String lang, org.folio.rest.jaxrs.model.Eresource entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -123,7 +123,7 @@ public class LocationAPI implements OrdersStorageLocations {
 
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
         PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            LOCATION_TABLE, id, entity,
+            ERESOURCE_TABLE, id, entity,
             reply -> {
               try {
                 if (reply.succeeded()) {
@@ -132,19 +132,20 @@ public class LocationAPI implements OrdersStorageLocations {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = OrdersStorageLocations.PostOrdersStorageLocationsResponse.respond201WithApplicationJson(stream,
-                      OrdersStorageLocations.PostOrdersStorageLocationsResponse.headersFor201()
-                        .withLocation(LOCATION_LOCATION_PREFIX + persistenceId));
+                  Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse
+                    .respond201WithApplicationJson(stream, OrdersStorageEresources.PostOrdersStorageEresourcesResponse.headersFor201()
+                      .withLocation(ERESOURCE_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = OrdersStorageLocations.PostOrdersStorageLocationsResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse
+                    .respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = OrdersStorageLocations.PostOrdersStorageLocationsResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -153,7 +154,7 @@ public class LocationAPI implements OrdersStorageLocations {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = OrdersStorageLocations.PostOrdersStorageLocationsResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -162,7 +163,7 @@ public class LocationAPI implements OrdersStorageLocations {
 
   @Override
   @Validate
-  public void getOrdersStorageLocationsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageEresourcesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -172,38 +173,38 @@ public class LocationAPI implements OrdersStorageLocations {
         Criterion c = new Criterion(
             new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(LOCATION_TABLE,
-            org.folio.rest.jaxrs.model.Location.class, c, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(ERESOURCE_TABLE,
+            org.folio.rest.jaxrs.model.Eresource.class, c, true,
             reply -> {
               try {
                 if (reply.succeeded()) {
-                  List<org.folio.rest.jaxrs.model.Location> results = reply.result().getResults();
+                  List<org.folio.rest.jaxrs.model.Eresource> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLocationsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLocationsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLocationsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLocationsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLocationsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageLocationsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -211,7 +212,7 @@ public class LocationAPI implements OrdersStorageLocations {
 
   @Override
   @Validate
-  public void deleteOrdersStorageLocationsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageEresourcesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -221,30 +222,30 @@ public class LocationAPI implements OrdersStorageLocations {
             vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
         try {
-          postgresClient.delete(LOCATION_TABLE, id, reply -> {
+          postgresClient.delete(ERESOURCE_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStorageLocations.DeleteOrdersStorageLocationsByIdResponse.noContent()
+                  OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStorageLocations.DeleteOrdersStorageLocationsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              OrdersStorageLocations.DeleteOrdersStorageLocationsByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          OrdersStorageLocations.DeleteOrdersStorageLocationsByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putOrdersStorageLocationsById(String id, String lang, org.folio.rest.jaxrs.model.Location entity,
+  public void putOrdersStorageEresourcesById(String id, String lang, org.folio.rest.jaxrs.model.Eresource entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -253,31 +254,31 @@ public class LocationAPI implements OrdersStorageLocations {
           entity.setId(id);
         }
         PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            LOCATION_TABLE, entity, id,
+            ERESOURCE_TABLE, entity, id,
             reply -> {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLocationsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLocationsByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLocationsByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLocationsByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageLocationsByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

@@ -30,11 +30,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class LicenseAPI implements OrdersStorageLicenses {
+public class LicensesAPI implements OrdersStorageLicenses {
   private static final String LICENSE_TABLE = "license";
   private static final String LICENSE_LOCATION_PREFIX = "/orders-storage/licenses/";
 
-  private static final Logger log = LoggerFactory.getLogger(LicenseAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(LicensesAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
@@ -47,7 +47,7 @@ public class LicenseAPI implements OrdersStorageLicenses {
     return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
-  public LicenseAPI(Vertx vertx, String tenantId) {
+  public LicensesAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 

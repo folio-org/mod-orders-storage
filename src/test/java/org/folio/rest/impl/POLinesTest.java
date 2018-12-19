@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
-public class POLineTest extends OrdersStorageTest {
+public class POLinesTest extends OrdersStorageTest {
 
   private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
 

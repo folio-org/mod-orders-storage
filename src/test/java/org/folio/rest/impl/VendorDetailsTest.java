@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
-public class VendorDetailTest extends OrdersStorageTest {
+public class VendorDetailsTest extends OrdersStorageTest {
   private final static String VENDOR_DETAIL_ENDPOINT = "/orders-storage/vendor_details";
   private final static String INVALID_VENDOR_DETAIL_ID = "2cfd76d6-4dfe-4468-8940-8009ad3feecd";
 
