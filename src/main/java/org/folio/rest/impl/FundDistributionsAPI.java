@@ -23,6 +23,8 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import static org.folio.rest.utils.HelperUtils.isInvalidUUID;
+import static org.folio.rest.utils.HelperUtils.respond;
 
 public class FundDistributionsAPI implements OrdersStorageFundDistributions {
 
@@ -33,14 +35,6 @@ public class FundDistributionsAPI implements OrdersStorageFundDistributions {
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
-  private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
-    AsyncResult<Response> result = Future.succeededFuture(response);
-    handler.handle(result);
-  }
-
-  private boolean isInvalidUUID(String errorMessage) {
-    return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
-  }
 
   public FundDistributionsAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);

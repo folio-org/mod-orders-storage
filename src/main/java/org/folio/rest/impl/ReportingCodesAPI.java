@@ -30,6 +30,10 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+import static org.folio.rest.utils.HelperUtils.isInvalidUUID;
+import static org.folio.rest.utils.HelperUtils.respond;
+
+
 public class ReportingCodesAPI implements OrdersStorageReportingCodes {
   private static final String VENDOR_TABLE = "reporting_code";
   private static final String VENDOR_LOCATION_PREFIX = "/orders-storage/reporting_codes/";
@@ -38,14 +42,6 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
-  private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
-    AsyncResult<Response> result = Future.succeededFuture(response);
-    handler.handle(result);
-  }
-
-  private boolean isInvalidUUID(String errorMessage) {
-    return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
-  }
 
   public ReportingCodesAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);

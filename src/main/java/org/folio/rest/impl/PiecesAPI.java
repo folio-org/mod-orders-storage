@@ -30,6 +30,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import static org.folio.rest.utils.HelperUtils.isInvalidUUID;
+import static org.folio.rest.utils.HelperUtils.respond;
 
 public class PiecesAPI implements OrdersStoragePieces {
   private static final String PIECES_TABLE = "pieces";
@@ -42,15 +44,6 @@ public class PiecesAPI implements OrdersStoragePieces {
 
   public PiecesAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
-  }
-
-  private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
-    AsyncResult<Response> result = Future.succeededFuture(response);
-    handler.handle(result);
-  }
-
-  private boolean isInvalidUUID(String errorMessage) {
-    return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
   @Override
