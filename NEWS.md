@@ -1,5 +1,6 @@
 ## 1.1.0 - Unreleased
-
+ https://issues.folio.org/browse/MODORDSTOR-29 - Moving Renewals from po_line level to PO level and deleting Renewals API
+ 
 ## 1.0.2 - Released 
 * Omit tenant/schema from reference data COPY scripts executed when enabling the module for a tenant.
 
