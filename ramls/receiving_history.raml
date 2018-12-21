@@ -1,0 +1,32 @@
+#%RAML 1.0
+title: "mod-orders-storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1
+
+documentation:
+  - title: Receiving History
+    content: <b>Get list of receiving history API</b>
+
+types:
+    receiving_history: !include acq-models/mod-orders-storage/schemas/receiving_history.json
+    receiving_history_collection: !include acq-models/mod-orders-storage/schemas/receiving_history_collection.json
+
+traits:
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
+
+resourceTypes:
+    collection-get: !include raml-util/rtypes/collection-get.raml
+
+/receiving_history:
+  type:
+    collection-get:
+      exampleCollection: !include acq-models/mod-orders-storage/examples/receiving_history_collection.sample
+      schemaCollection: receiving_history_collection
+  get:
+    description: Get list of receiving history
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
