@@ -9,9 +9,9 @@ import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
-public class VendorDetailTest extends OrdersStorageTest {
-  private final static String VENDOR_DETAIL_ENDPOINT = "vendor_detail";
-  private final static String INVALID_VENDOR_DETAIL_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
+public class VendorDetailsTest extends OrdersStorageTest {
+  private final static String VENDOR_DETAIL_ENDPOINT = "/orders-storage/vendor_details";
+  private final static String INVALID_VENDOR_DETAIL_ID = "2cfd76d6-4dfe-4468-8940-8009ad3feecd";
 
   @Test
   public void testVendorDetails() {
@@ -87,7 +87,7 @@ public class VendorDetailTest extends OrdersStorageTest {
 
   private void testInvalidVendorDetailId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Vendor Detail with ID return 404: " + INVALID_VENDOR_DETAIL_ID);
-    getDataById("details", INVALID_VENDOR_DETAIL_ID).then().log().ifValidationFails()
+    getDataById(VENDOR_DETAIL_ENDPOINT, INVALID_VENDOR_DETAIL_ID).then().log().ifValidationFails()
       .statusCode(404);
   }
 

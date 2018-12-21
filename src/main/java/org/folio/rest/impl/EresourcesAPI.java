@@ -8,8 +8,8 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.CostCollection;
-import org.folio.rest.jaxrs.resource.Cost;
+import org.folio.rest.jaxrs.model.EresourceCollection;
+import org.folio.rest.jaxrs.resource.OrdersStorageEresources;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -29,49 +29,43 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import static org.folio.rest.utils.HelperUtils.isInvalidUUID;
+import static org.folio.rest.utils.HelperUtils.respond;
 
-public class CostAPI implements Cost {
-  private static final String COST_TABLE = "cost";
-  private static final String COST_LOCATION_PREFIX = "/cost/";
+public class EresourcesAPI implements OrdersStorageEresources {
+  private static final String ERESOURCE_TABLE = "eresource";
+  private static final String ERESOURCE_LOCATION_PREFIX = "/orders-storage/eresources/";
 
-  private static final Logger log = LoggerFactory.getLogger(CostAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(EresourcesAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
-  private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
-    AsyncResult<Response> result = Future.succeededFuture(response);
-    handler.handle(result);
-  }
 
-  private boolean isInvalidUUID(String errorMessage) {
-    return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
-  }
-
-  public CostAPI(Vertx vertx, String tenantId) {
+  public EresourcesAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
   @Override
   @Validate
-  public void getCost(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageEresources(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         String[] fieldList = { "*" };
-        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", COST_TABLE));
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", ERESOURCE_TABLE));
         CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
           .setLimit(new Limit(limit))
           .setOffset(new Offset(offset));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(COST_TABLE,
-            org.folio.rest.jaxrs.model.Cost.class, fieldList, cql, true, false, reply -> {
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(ERESOURCE_TABLE,
+            org.folio.rest.jaxrs.model.Eresource.class, fieldList, cql, true, false, reply -> {
               try {
                 if (reply.succeeded()) {
-                  CostCollection collection = new CostCollection();
-                  List<org.folio.rest.jaxrs.model.Cost> results = reply.result().getResults();
-                  collection.setCosts(results);
+                  EresourceCollection collection = new EresourceCollection();
+                  List<org.folio.rest.jaxrs.model.Eresource> results = reply.result().getResults();
+                  collection.setEresources(results);
                   Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                   collection.setTotalRecords(totalRecords);
                   Integer first = 0;
@@ -82,16 +76,16 @@ public class CostAPI implements Cost {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Cost.GetCostResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Cost.GetCostResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Cost.GetCostResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +95,7 @@ public class CostAPI implements Cost {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Cost.GetCostResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageEresources.GetOrdersStorageEresourcesResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,7 +103,7 @@ public class CostAPI implements Cost {
 
   @Override
   @Validate
-  public void postCost(String lang, org.folio.rest.jaxrs.model.Cost entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageEresources(String lang, org.folio.rest.jaxrs.model.Eresource entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
@@ -123,7 +117,7 @@ public class CostAPI implements Cost {
 
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
         PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            COST_TABLE, id, entity,
+            ERESOURCE_TABLE, id, entity,
             reply -> {
               try {
                 if (reply.succeeded()) {
@@ -132,18 +126,20 @@ public class CostAPI implements Cost {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = Cost.PostCostResponse.respond201WithApplicationJson(stream,
-                      Cost.PostCostResponse.headersFor201().withLocation(COST_LOCATION_PREFIX + persistenceId));
+                  Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse
+                    .respond201WithApplicationJson(stream, OrdersStorageEresources.PostOrdersStorageEresourcesResponse.headersFor201()
+                      .withLocation(ERESOURCE_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = Cost.PostCostResponse.respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse
+                    .respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = Cost.PostCostResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -152,7 +148,7 @@ public class CostAPI implements Cost {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = Cost.PostCostResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageEresources.PostOrdersStorageEresourcesResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -161,7 +157,7 @@ public class CostAPI implements Cost {
 
   @Override
   @Validate
-  public void getCostById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageEresourcesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -171,39 +167,38 @@ public class CostAPI implements Cost {
         Criterion c = new Criterion(
             new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(COST_TABLE,
-            org.folio.rest.jaxrs.model.Cost.class, c, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(ERESOURCE_TABLE,
+            org.folio.rest.jaxrs.model.Eresource.class, c, true,
             reply -> {
               try {
                 if (reply.succeeded()) {
-                  List<org.folio.rest.jaxrs.model.Cost> results = reply.result()
-                    .getResults();
+                  List<org.folio.rest.jaxrs.model.Eresource> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetCostByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetCostByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetCostByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetCostByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetCostByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetCostByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageEresourcesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -211,7 +206,7 @@ public class CostAPI implements Cost {
 
   @Override
   @Validate
-  public void deleteCostById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageEresourcesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -221,30 +216,30 @@ public class CostAPI implements Cost {
             vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
         try {
-          postgresClient.delete(COST_TABLE, id, reply -> {
+          postgresClient.delete(ERESOURCE_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Cost.DeleteCostByIdResponse.noContent()
+                  OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Cost.DeleteCostByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              Cost.DeleteCostByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          Cost.DeleteCostByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageEresources.DeleteOrdersStorageEresourcesByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putCostById(String id, String lang, org.folio.rest.jaxrs.model.Cost entity,
+  public void putOrdersStorageEresourcesById(String id, String lang, org.folio.rest.jaxrs.model.Eresource entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -253,31 +248,31 @@ public class CostAPI implements Cost {
           entity.setId(id);
         }
         PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            COST_TABLE, entity, id,
+            ERESOURCE_TABLE, entity, id,
             reply -> {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutCostByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutCostByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutCostByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutCostByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutCostByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageEresourcesByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });

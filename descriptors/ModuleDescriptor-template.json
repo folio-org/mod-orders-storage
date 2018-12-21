@@ -3,312 +3,312 @@
   "name": "Orders CRUD module",
   "provides": [
     {
-      "id": "adjustment",
+      "id": "orders-storage.adjustments",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/adjustment",
-          "permissionsRequired": ["adjustment.collection.get"]
+          "pathPattern": "/orders-storage/adjustments",
+          "permissionsRequired": ["orders-storage.adjustments.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/adjustment",
-          "permissionsRequired": ["adjustment.item.post"]
+          "pathPattern": "/orders-storage/adjustments",
+          "permissionsRequired": ["orders-storage.adjustments.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/adjustment/{id}",
-          "permissionsRequired": ["adjustment.item.get"]
+          "pathPattern": "/orders-storage/adjustments/{id}",
+          "permissionsRequired": ["orders-storage.adjustments.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/adjustment/{id}",
-          "permissionsRequired": ["adjustment.item.put"]
+          "pathPattern": "/orders-storage/adjustments/{id}",
+          "permissionsRequired": ["orders-storage.adjustments.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/adjustment/{id}",
-          "permissionsRequired": ["adjustment.item.delete"]
+          "pathPattern": "/orders-storage/adjustments/{id}",
+          "permissionsRequired": ["orders-storage.adjustments.item.delete"]
         }
       ]
     },
     {
-      "id": "alert",
+      "id": "orders-storage.alerts",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/alert",
-          "permissionsRequired": ["alert.collection.get"]
+          "pathPattern": "/orders-storage/alerts",
+          "permissionsRequired": ["orders-storage.alerts.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/alert",
-          "permissionsRequired": ["alert.item.post"]
+          "pathPattern": "/orders-storage/alerts",
+          "permissionsRequired": ["orders-storage.alerts.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/alert/{id}",
-          "permissionsRequired": ["alert.item.get"]
+          "pathPattern": "/orders-storage/alerts/{id}",
+          "permissionsRequired": ["orders-storage.alerts.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/alert/{id}",
-          "permissionsRequired": ["alert.item.put"]
+          "pathPattern": "/orders-storage/alerts/{id}",
+          "permissionsRequired": ["orders-storage.alerts.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/alert/{id}",
-          "permissionsRequired": ["alert.item.delete"]
+          "pathPattern": "/orders-storage/alerts/{id}",
+          "permissionsRequired": ["orders-storage.alerts.item.delete"]
         }
       ]
     },
     {
-      "id": "claim",
+      "id": "orders-storage.claims",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/claim",
-          "permissionsRequired": ["claim.collection.get"]
+          "pathPattern": "/orders-storage/claims",
+          "permissionsRequired": ["orders-storage.claims.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/claim",
-          "permissionsRequired": ["claim.item.post"]
+          "pathPattern": "/orders-storage/claims",
+          "permissionsRequired": ["orders-storage.claims.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/claim/{id}",
-          "permissionsRequired": ["claim.item.get"]
+          "pathPattern": "/orders-storage/claims/{id}",
+          "permissionsRequired": ["orders-storage.claims.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/claim/{id}",
-          "permissionsRequired": ["claim.item.put"]
+          "pathPattern": "/orders-storage/claims/{id}",
+          "permissionsRequired": ["orders-storage.claims.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/claim/{id}",
-          "permissionsRequired": ["claim.item.delete"]
+          "pathPattern": "/orders-storage/claims/{id}",
+          "permissionsRequired": ["orders-storage.claims.item.delete"]
         }
       ]
     },
     {
-      "id": "cost",
+      "id": "orders-storage.costs",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/cost",
-          "permissionsRequired": ["cost.collection.get"]
+          "pathPattern": "/orders-storage/costs",
+          "permissionsRequired": ["orders-storage.costs.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/cost",
-          "permissionsRequired": ["cost.item.post"]
+          "pathPattern": "/orders-storage/costs",
+          "permissionsRequired": ["orders-storage.costs.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/cost/{id}",
-          "permissionsRequired": ["cost.item.get"]
+          "pathPattern": "/orders-storage/costs/{id}",
+          "permissionsRequired": ["orders-storage.costs.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/cost/{id}",
-          "permissionsRequired": ["cost.item.put"]
+          "pathPattern": "/orders-storage/costs/{id}",
+          "permissionsRequired": ["orders-storage.costs.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/cost/{id}",
-          "permissionsRequired": ["cost.item.delete"]
+          "pathPattern": "/orders-storage/costs/{id}",
+          "permissionsRequired": ["orders-storage.costs.item.delete"]
         }
       ]
     },
     {
-      "id": "orders-storage.fund-distribution",
+      "id": "orders-storage.fund-distributions",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
           "pathPattern": "/orders-storage/fund_distributions",
-          "permissionsRequired": ["orders-storage.fund-distribution.collection.get"]
+          "permissionsRequired": ["orders-storage.fund-distributions.collection.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/orders-storage/fund_distributions",
-          "permissionsRequired": ["orders-storage.fund-distribution.item.post"]
+          "permissionsRequired": ["orders-storage.fund-distributions.item.post"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/orders-storage/fund_distributions/{id}",
-          "permissionsRequired": ["orders-storage.fund-distribution.item.get"]
+          "permissionsRequired": ["orders-storage.fund-distributions.item.get"]
         },
         {
           "methods": ["PUT"],
           "pathPattern": "/orders-storage/fund_distributions/{id}",
-          "permissionsRequired": ["orders-storage.fund-distribution.item.put"]
+          "permissionsRequired": ["orders-storage.fund-distributions.item.put"]
         },
         {
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/fund_distributions/{id}",
-          "permissionsRequired": ["orders-storage.fund-distribution.item.delete"]
+          "permissionsRequired": ["orders-storage.fund-distributions.item.delete"]
         }
       ]
     },
     {
-      "id": "details",
+      "id": "orders-storage.details",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/details",
-          "permissionsRequired": ["details.collection.get"]
+          "pathPattern": "/orders-storage/details",
+          "permissionsRequired": ["orders-storage.details.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/details",
-          "permissionsRequired": ["details.item.post"]
+          "pathPattern": "/orders-storage/details",
+          "permissionsRequired": ["orders-storage.details.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/details/{id}",
-          "permissionsRequired": ["details.item.get"]
+          "pathPattern": "/orders-storage/details/{id}",
+          "permissionsRequired": ["orders-storage.details.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/details/{id}",
-          "permissionsRequired": ["details.item.put"]
+          "pathPattern": "/orders-storage/details/{id}",
+          "permissionsRequired": ["orders-storage.details.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/details/{id}",
-          "permissionsRequired": ["details.item.delete"]
+          "pathPattern": "/orders-storage/details/{id}",
+          "permissionsRequired": ["orders-storage.details.item.delete"]
         }
       ]
     },
     {
-      "id": "eresource",
+      "id": "orders-storage.eresources",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/eresource",
-          "permissionsRequired": ["eresource.collection.get"]
+          "pathPattern": "/orders-storage/eresources",
+          "permissionsRequired": ["orders-storage.eresources.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/eresource",
-          "permissionsRequired": ["eresource.item.post"]
+          "pathPattern": "/orders-storage/eresources",
+          "permissionsRequired": ["orders-storage.eresources.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/eresource/{id}",
-          "permissionsRequired": ["eresource.item.get"]
+          "pathPattern": "/orders-storage/eresources/{id}",
+          "permissionsRequired": ["orders-storage.eresources.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/eresource/{id}",
-          "permissionsRequired": ["eresource.item.put"]
+          "pathPattern": "/orders-storage/eresources/{id}",
+          "permissionsRequired": ["orders-storage.eresources.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/eresource/{id}",
-          "permissionsRequired": ["eresource.item.delete"]
+          "pathPattern": "/orders-storage/eresources/{id}",
+          "permissionsRequired": ["orders-storage.eresources.item.delete"]
         }
       ]
     },
     {
-      "id": "license",
+      "id": "orders-storage.licenses",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/license",
-          "permissionsRequired": ["license.collection.get"]
+          "pathPattern": "/orders-storage/licenses",
+          "permissionsRequired": ["orders-storage.licenses.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/license",
-          "permissionsRequired": ["license.item.post"]
+          "pathPattern": "/orders-storage/licenses",
+          "permissionsRequired": ["orders-storage.licenses.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/license/{id}",
-          "permissionsRequired": ["license.item.get"]
+          "pathPattern": "/orders-storage/licenses/{id}",
+          "permissionsRequired": ["orders-storage.licenses.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/license/{id}",
-          "permissionsRequired": ["license.item.put"]
+          "pathPattern": "/orders-storage/licenses/{id}",
+          "permissionsRequired": ["orders-storage.licenses.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/license/{id}",
-          "permissionsRequired": ["license.item.delete"]
+          "pathPattern": "/orders-storage/licenses/{id}",
+          "permissionsRequired": ["orders-storage.licenses.item.delete"]
         }
       ]
     },
     {
-      "id": "location",
+      "id": "orders-storage.locations",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/location",
-          "permissionsRequired": ["location.collection.get"]
+          "pathPattern": "/orders-storage/locations",
+          "permissionsRequired": ["orders-storage.locations.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/location",
-          "permissionsRequired": ["location.item.post"]
+          "pathPattern": "/orders-storage/locations",
+          "permissionsRequired": ["orders-storage.locations.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/location/{id}",
-          "permissionsRequired": ["location.item.get"]
+          "pathPattern": "/orders-storage/locations/{id}",
+          "permissionsRequired": ["orders-storage.locations.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/location/{id}",
-          "permissionsRequired": ["location.item.put"]
+          "pathPattern": "/orders-storage/locations/{id}",
+          "permissionsRequired": ["orders-storage.locations.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/location/{id}",
-          "permissionsRequired": ["location.item.delete"]
+          "pathPattern": "/orders-storage/locations/{id}",
+          "permissionsRequired": ["orders-storage.locations.item.delete"]
         }
       ]
     },
     {
-      "id": "physical",
+      "id": "orders-storage.physicals",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/physical",
-          "permissionsRequired": ["physical.collection.get"]
+          "pathPattern": "/orders-storage/physicals",
+          "permissionsRequired": ["orders-storage.physicals.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/physical",
-          "permissionsRequired": ["physical.item.post"]
+          "pathPattern": "/orders-storage/physicals",
+          "permissionsRequired": ["orders-storage.physicals.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/physical/{id}",
-          "permissionsRequired": ["physical.item.get"]
+          "pathPattern": "/orders-storage/physicals/{id}",
+          "permissionsRequired": ["orders-storage.physicals.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/physical/{id}",
-          "permissionsRequired": ["physical.item.put"]
+          "pathPattern": "/orders-storage/physicals/{id}",
+          "permissionsRequired": ["orders-storage.physicals.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/physical/{id}",
-          "permissionsRequired": ["physical.item.delete"]
+          "pathPattern": "/orders-storage/physicals/{id}",
+          "permissionsRequired": ["orders-storage.physicals.item.delete"]
         }
       ]
     },
@@ -344,193 +344,193 @@
       ]
     },
     {
-      "id": "po_line",
+      "id": "orders-storage.po_lines",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/po_line",
-          "permissionsRequired": ["po_line.collection.get"]
+          "pathPattern": "/orders-storage/po_lines",
+          "permissionsRequired": ["orders-storage.po_lines.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/po_line",
-          "permissionsRequired": ["po_line.item.post"]
+          "pathPattern": "/orders-storage/po_lines",
+          "permissionsRequired": ["orders-storage.po_lines.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/po_line/{id}",
-          "permissionsRequired": ["po_line.item.get"]
+          "pathPattern": "/orders-storage/po_lines/{id}",
+          "permissionsRequired": ["orders-storage.po_lines.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/po_line/{id}",
-          "permissionsRequired": ["po_line.item.put"]
+          "pathPattern": "/orders-storage/po_lines/{id}",
+          "permissionsRequired": ["orders-storage.po_lines.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/po_line/{id}",
-          "permissionsRequired": ["po_line.item.delete"]
+          "pathPattern": "/orders-storage/po_lines/{id}",
+          "permissionsRequired": ["orders-storage.po_lines.item.delete"]
         }
       ]
     },
     {
-      "id": "purchase_order",
+      "id": "orders-storage.purchase_orders",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/purchase_order",
-          "permissionsRequired": ["purchase_order.collection.get"]
+          "pathPattern": "/orders-storage/purchase_orders",
+          "permissionsRequired": ["orders-storage.purchase_orders.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/purchase_order",
-          "permissionsRequired": ["purchase_order.item.post"]
+          "pathPattern": "/orders-storage/purchase_orders",
+          "permissionsRequired": ["orders-storage.purchase_orders.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/purchase_order/{id}",
-          "permissionsRequired": ["purchase_order.item.get"]
+          "pathPattern": "/orders-storage/purchase_orders/{id}",
+          "permissionsRequired": ["orders-storage.purchase_orders.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/purchase_order/{id}",
-          "permissionsRequired": ["purchase_order.item.put"]
+          "pathPattern": "/orders-storage/purchase_orders/{id}",
+          "permissionsRequired": ["orders-storage.purchase_orders.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/purchase_order/{id}",
-          "permissionsRequired": ["purchase_order.item.delete"]
+          "pathPattern": "/orders-storage/purchase_orders/{id}",
+          "permissionsRequired": ["orders-storage.purchase_orders.item.delete"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/orders",
-          "permissionsRequired": ["purchase_order.collection.get"]
+          "permissionsRequired": ["orders-storage.purchase_orders.collection.get"]
         }
       ]
     },
     {
-      "id": "renewal",
+      "id": "orders-storage.renewals",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/renewal",
-          "permissionsRequired": ["renewal.collection.get"]
+          "pathPattern": "/orders-storage/renewals",
+          "permissionsRequired": ["orders-storage.renewals.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/renewal",
-          "permissionsRequired": ["renewal.item.post"]
+          "pathPattern": "/orders-storage/renewals",
+          "permissionsRequired": ["orders-storage.renewals.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/renewal/{id}",
-          "permissionsRequired": ["renewal.item.get"]
+          "pathPattern": "/orders-storage/renewals/{id}",
+          "permissionsRequired": ["orders-storage.renewals.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/renewal/{id}",
-          "permissionsRequired": ["renewal.item.put"]
+          "pathPattern": "/orders-storage/renewals/{id}",
+          "permissionsRequired": ["orders-storage.renewals.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/renewal/{id}",
-          "permissionsRequired": ["renewal.item.delete"]
+          "pathPattern": "/orders-storage/renewals/{id}",
+          "permissionsRequired": ["orders-storage.renewals.item.delete"]
         }
       ]
     },
     {
-      "id": "reporting_code",
+      "id": "orders-storage.reporting_codes",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/reporting_code",
-          "permissionsRequired": ["reporting_code.collection.get"]
+          "pathPattern": "/orders-storage/reporting_codes",
+          "permissionsRequired": ["orders-storage.reporting_codes.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/reporting_code",
-          "permissionsRequired": ["reporting_code.item.post"]
+          "pathPattern": "/orders-storage/reporting_codes",
+          "permissionsRequired": ["orders-storage.reporting_codes.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/reporting_code/{id}",
-          "permissionsRequired": ["reporting_code.item.get"]
+          "pathPattern": "/orders-storage/reporting_codes/{id}",
+          "permissionsRequired": ["orders-storage.reporting_codes.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/reporting_code/{id}",
-          "permissionsRequired": ["reporting_code.item.put"]
+          "pathPattern": "/orders-storage/reporting_codes/{id}",
+          "permissionsRequired": ["orders-storage.reporting_codes.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/reporting_code/{id}",
-          "permissionsRequired": ["reporting_code.item.delete"]
+          "pathPattern": "/orders-storage/reporting_codes/{id}",
+          "permissionsRequired": ["orders-storage.reporting_codes.item.delete"]
         }
       ]
     },
     {
-      "id": "source",
+      "id": "orders-storage.sources",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/source",
-          "permissionsRequired": ["source.collection.get"]
+          "pathPattern": "/orders-storage/sources",
+          "permissionsRequired": ["orders-storage.sources.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/source",
-          "permissionsRequired": ["source.item.post"]
+          "pathPattern": "/orders-storage/sources",
+          "permissionsRequired": ["orders-storage.sources.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/source/{id}",
-          "permissionsRequired": ["source.item.get"]
+          "pathPattern": "/orders-storage/sources/{id}",
+          "permissionsRequired": ["orders-storage.sources.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/source/{id}",
-          "permissionsRequired": ["source.item.put"]
+          "pathPattern": "/orders-storage/sources/{id}",
+          "permissionsRequired": ["orders-storage.sources.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/source/{id}",
-          "permissionsRequired": ["source.item.delete"]
+          "pathPattern": "/orders-storage/sources/{id}",
+          "permissionsRequired": ["orders-storage.sources.item.delete"]
         }
       ]
     },
     {
-      "id": "vendor_detail",
+      "id": "orders-storage.vendor_details",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/vendor_detail",
-          "permissionsRequired": ["vendor_detail.collection.get"]
+          "pathPattern": "/orders-storage/vendor_details",
+          "permissionsRequired": ["orders-storage.vendor_details.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/vendor_detail",
-          "permissionsRequired": ["vendor_detail.item.post"]
+          "pathPattern": "/orders-storage/vendor_details",
+          "permissionsRequired": ["orders-storage.vendor_details.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/vendor_detail/{id}",
-          "permissionsRequired": ["vendor_detail.item.get"]
+          "pathPattern": "/orders-storage/vendor_details/{id}",
+          "permissionsRequired": ["orders-storage.vendor_details.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/vendor_detail/{id}",
-          "permissionsRequired": ["vendor_detail.item.put"]
+          "pathPattern": "/orders-storage/vendor_details/{id}",
+          "permissionsRequired": ["orders-storage.vendor_details.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/vendor_detail/{id}",
-          "permissionsRequired": ["vendor_detail.item.delete"]
+          "pathPattern": "/orders-storage/vendor_details/{id}",
+          "permissionsRequired": ["orders-storage.vendor_details.item.delete"]
         }
       ]
     },
@@ -548,373 +548,373 @@
   ],
   "permissionSets" : [
     {
-      "permissionName" : "adjustment.collection.get",
+      "permissionName" : "orders-storage.adjustments.collection.get",
       "displayName" : "adjustment-collection get",
       "description" : "Get a collection of adjustments"
     },
     {
-      "permissionName" : "adjustment.item.post",
+      "permissionName" : "orders-storage.adjustments.item.post",
       "displayName" : "adjustment-item post",
       "description" : "Create a new adjustment"
     },
     {
-      "permissionName" : "adjustment.item.get",
+      "permissionName" : "orders-storage.adjustments.item.get",
       "displayName" : "adjustment-item get",
       "description" : "Fetch an adjustment"
     },
     {
-      "permissionName" : "adjustment.item.put",
+      "permissionName" : "orders-storage.adjustments.item.put",
       "displayName" : "adjustment-item put",
       "description" : "Update an adjustment"
     },
     {
-      "permissionName" : "adjustment.item.delete",
+      "permissionName" : "orders-storage.adjustments.item.delete",
       "displayName" : "adjustment-item delete",
       "description" : "Delete an adjustment"
     },
     {
-      "permissionName" : "adjustment.all",
+      "permissionName" : "orders-storage.adjustments.all",
       "displayName" : "All adjustment perms",
       "description" : "All permissions for the adjustment",
       "subPermissions" : [
-        "adjustment.collection.get",
-        "adjustment.item.post",
-        "adjustment.item.get",
-        "adjustment.item.put",
-        "adjustment.item.delete"
+        "orders-storage.adjustments.collection.get",
+        "orders-storage.adjustments.item.post",
+        "orders-storage.adjustments.item.get",
+        "orders-storage.adjustments.item.put",
+        "orders-storage.adjustments.item.delete"
       ]
     },
     {
-      "permissionName" : "alert.collection.get",
+      "permissionName" : "orders-storage.alerts.collection.get",
       "displayName" : "alert-collection get",
       "description" : "Get a collection of alerts"
     },
     {
-      "permissionName" : "alert.item.post",
+      "permissionName" : "orders-storage.alerts.item.post",
       "displayName" : "alert-item post",
       "description" : "Create a new alert"
     },
     {
-      "permissionName" : "alert.item.get",
+      "permissionName" : "orders-storage.alerts.item.get",
       "displayName" : "alert-item get",
       "description" : "Fetch an alert"
     },
     {
-      "permissionName" : "alert.item.put",
+      "permissionName" : "orders-storage.alerts.item.put",
       "displayName" : "alert-item put",
       "description" : "Update an alert"
     },
     {
-      "permissionName" : "alert.item.delete",
+      "permissionName" : "orders-storage.alerts.item.delete",
       "displayName" : "alert-item delete",
       "description" : "Delete an alert"
     },
     {
-      "permissionName" : "alert.all",
+      "permissionName" : "orders-storage.alerts.all",
       "displayName" : "All alert perms",
       "description" : "All permissions for the alert",
       "subPermissions" : [
-        "alert.collection.get",
-        "alert.item.post",
-        "alert.item.get",
-        "alert.item.put",
-        "alert.item.delete"
+        "orders-storage.alerts.collection.get",
+        "orders-storage.alerts.item.post",
+        "orders-storage.alerts.item.get",
+        "orders-storage.alerts.item.put",
+        "orders-storage.alerts.item.delete"
       ]
     },
     {
-      "permissionName" : "claim.collection.get",
+      "permissionName" : "orders-storage.claims.collection.get",
       "displayName" : "claim-collection get",
       "description" : "Get a collection of claims"
     },
     {
-      "permissionName" : "claim.item.post",
+      "permissionName" : "orders-storage.claims.item.post",
       "displayName" : "claim-item post",
       "description" : "Create a new claim"
     },
     {
-      "permissionName" : "claim.item.get",
+      "permissionName" : "orders-storage.claims.item.get",
       "displayName" : "claim-item get",
       "description" : "Fetch a claim"
     },
     {
-      "permissionName" : "claim.item.put",
+      "permissionName" : "orders-storage.claims.item.put",
       "displayName" : "claim-item put",
       "description" : "Update a claim"
     },
     {
-      "permissionName" : "claim.item.delete",
+      "permissionName" : "orders-storage.claims.item.delete",
       "displayName" : "claim-item delete",
       "description" : "Delete a claim"
     },
     {
-      "permissionName" : "claim.all",
+      "permissionName" : "orders-storage.claims.all",
       "displayName" : "All claim perms",
       "description" : "All permissions for the claim",
       "subPermissions" : [
-        "claim.collection.get",
-        "claim.item.post",
-        "claim.item.get",
-        "claim.item.put",
-        "claim.item.delete"
+        "orders-storage.claims.collection.get",
+        "orders-storage.claims.item.post",
+        "orders-storage.claims.item.get",
+        "orders-storage.claims.item.put",
+        "orders-storage.claims.item.delete"
       ]
     },
     {
-      "permissionName" : "cost.collection.get",
+      "permissionName" : "orders-storage.costs.collection.get",
       "displayName" : "cost-collection get",
       "description" : "Get a collection of costs"
     },
     {
-      "permissionName" : "cost.item.post",
+      "permissionName" : "orders-storage.costs.item.post",
       "displayName" : "cost-item post",
       "description" : "Create a new cost"
     },
     {
-      "permissionName" : "cost.item.get",
+      "permissionName" : "orders-storage.costs.item.get",
       "displayName" : "cost-item get",
       "description" : "Fetch a cost"
     },
     {
-      "permissionName" : "cost.item.put",
+      "permissionName" : "orders-storage.costs.item.put",
       "displayName" : "cost-item put",
       "description" : "Update a cost"
     },
     {
-      "permissionName" : "cost.item.delete",
+      "permissionName" : "orders-storage.costs.item.delete",
       "displayName" : "cost-item delete",
       "description" : "Delete a cost"
     },
     {
-      "permissionName" : "cost.all",
+      "permissionName" : "orders-storage.costs.all",
       "displayName" : "All cost perms",
       "description" : "All permissions for the cost",
       "subPermissions" : [
-        "cost.collection.get",
-        "cost.item.post",
-        "cost.item.get",
-        "cost.item.put",
-        "cost.item.delete"
+        "orders-storage.costs.collection.get",
+        "orders-storage.costs.item.post",
+        "orders-storage.costs.item.get",
+        "orders-storage.costs.item.put",
+        "orders-storage.costs.item.delete"
       ]
     },
     {
-      "permissionName" : "details.collection.get",
+      "permissionName" : "orders-storage.details.collection.get",
       "displayName" : "details-collection get",
       "description" : "Get a collection of details"
     },
     {
-      "permissionName" : "details.item.post",
+      "permissionName" : "orders-storage.details.item.post",
       "displayName" : "details-item post",
       "description" : "Create a new details"
     },
     {
-      "permissionName" : "details.item.get",
+      "permissionName" : "orders-storage.details.item.get",
       "displayName" : "details-item get",
       "description" : "Fetch a details"
     },
     {
-      "permissionName" : "details.item.put",
+      "permissionName" : "orders-storage.details.item.put",
       "displayName" : "details-item put",
       "description" : "Update a details"
     },
     {
-      "permissionName" : "details.item.delete",
+      "permissionName" : "orders-storage.details.item.delete",
       "displayName" : "details-item delete",
       "description" : "Delete a details"
     },
     {
-      "permissionName" : "details.all",
+      "permissionName" : "orders-storage.details.all",
       "displayName" : "All details perms",
       "description" : "All permissions for the details",
       "subPermissions" : [
-        "details.collection.get",
-        "details.item.post",
-        "details.item.get",
-        "details.item.put",
-        "details.item.delete"
+        "orders-storage.details.collection.get",
+        "orders-storage.details.item.post",
+        "orders-storage.details.item.get",
+        "orders-storage.details.item.put",
+        "orders-storage.details.item.delete"
       ]
     },
     {
-      "permissionName" : "eresource.collection.get",
+      "permissionName" : "orders-storage.eresources.collection.get",
       "displayName" : "eresource-collection get",
       "description" : "Get a collection of eresources"
     },
     {
-      "permissionName" : "eresource.item.post",
+      "permissionName" : "orders-storage.eresources.item.post",
       "displayName" : "eresource-item post",
       "description" : "Create a new eresource"
     },
     {
-      "permissionName" : "eresource.item.get",
+      "permissionName" : "orders-storage.eresources.item.get",
       "displayName" : "eresource-item get",
       "description" : "Fetch an eresource"
     },
     {
-      "permissionName" : "eresource.item.put",
+      "permissionName" : "orders-storage.eresources.item.put",
       "displayName" : "eresource-item put",
       "description" : "Update an eresource"
     },
     {
-      "permissionName" : "eresource.item.delete",
+      "permissionName" : "orders-storage.eresources.item.delete",
       "displayName" : "eresource-item delete",
       "description" : "Delete an eresource"
     },
     {
-      "permissionName" : "eresource.all",
+      "permissionName" : "orders-storage.eresources.all",
       "displayName" : "All eresource perms",
       "description" : "All permissions for the eresource",
       "subPermissions" : [
-        "eresource.collection.get",
-        "eresource.item.post",
-        "eresource.item.get",
-        "eresource.item.put",
-        "eresource.item.delete"
+        "orders-storage.eresources.collection.get",
+        "orders-storage.eresources.item.post",
+        "orders-storage.eresources.item.get",
+        "orders-storage.eresources.item.put",
+        "orders-storage.eresources.item.delete"
       ]
     },
     {
-      "permissionName" : "orders-storage.fund-distribution.collection.get",
-      "displayName" : "orders-storage.fund-distribution-collection get",
+      "permissionName" : "orders-storage.fund-distributions.collection.get",
+      "displayName" : "orders-storage.fund-distributions-collection get",
       "description" : "Get a collection of fund distributions"
     },
     {
-      "permissionName" : "orders-storage.fund-distribution.item.post",
-      "displayName" : "orders-storage.fund-distribution-item post",
+      "permissionName" : "orders-storage.fund-distributions.item.post",
+      "displayName" : "orders-storage.fund-distributions-item post",
       "description" : "Create a new fund distribution"
     },
     {
-      "permissionName" : "orders-storage.fund-distribution.item.get",
-      "displayName" : "orders-storage.fund-distribution-item get",
+      "permissionName" : "orders-storage.fund-distributions.item.get",
+      "displayName" : "orders-storage.fund-distributions-item get",
       "description" : "Fetch a fund distribution"
     },
     {
-      "permissionName" : "orders-storage.fund-distribution.item.put",
-      "displayName" : "orders-storage.fund-distribution-item put",
+      "permissionName" : "orders-storage.fund-distributions.item.put",
+      "displayName" : "orders-storage.fund-distributions-item put",
       "description" : "Update a fund distribution"
     },
     {
-      "permissionName" : "orders-storage.fund-distribution.item.delete",
-      "displayName" : "orders-storage.fund-distribution-item delete",
+      "permissionName" : "orders-storage.fund-distributions.item.delete",
+      "displayName" : "orders-storage.fund-distributions-item delete",
       "description" : "Delete a fund distribution"
     },
     {
-      "permissionName" : "orders-storage.fund-distribution.all",
+      "permissionName" : "orders-storage.fund-distributions.all",
       "displayName" : "All fund distribution perms",
       "description" : "All permissions for the fund distribution",
       "subPermissions" : [
-        "orders-storage.fund-distribution.collection.get",
-        "orders-storage.fund-distribution.item.post",
-        "orders-storage.fund-distribution.item.get",
-        "orders-storage.fund-distribution.item.put",
-        "orders-storage.fund-distribution.item.delete"
+        "orders-storage.fund-distributions.collection.get",
+        "orders-storage.fund-distributions.item.post",
+        "orders-storage.fund-distributions.item.get",
+        "orders-storage.fund-distributions.item.put",
+        "orders-storage.fund-distributions.item.delete"
       ]
     },
     {
-      "permissionName" : "license.collection.get",
+      "permissionName" : "orders-storage.licenses.collection.get",
       "displayName" : "license-collection get",
       "description" : "Get a collection of licenses"
     },
     {
-      "permissionName" : "license.item.post",
+      "permissionName" : "orders-storage.licenses.item.post",
       "displayName" : "license-item post",
       "description" : "Create a new license"
     },
     {
-      "permissionName" : "license.item.get",
+      "permissionName" : "orders-storage.licenses.item.get",
       "displayName" : "license-item get",
       "description" : "Fetch a license"
     },
     {
-      "permissionName" : "license.item.put",
+      "permissionName" : "orders-storage.licenses.item.put",
       "displayName" : "license-item put",
       "description" : "Update a license"
     },
     {
-      "permissionName" : "license.item.delete",
+      "permissionName" : "orders-storage.licenses.item.delete",
       "displayName" : "license-item delete",
       "description" : "Delete a license"
     },
     {
-      "permissionName" : "license.all",
+      "permissionName" : "orders-storage.licenses.all",
       "displayName" : "All license perms",
       "description" : "All permissions for the license",
       "subPermissions" : [
-        "license.collection.get",
-        "license.item.post",
-        "license.item.get",
-        "license.item.put",
-        "license.item.delete"
+        "orders-storage.licenses.collection.get",
+        "orders-storage.licenses.item.post",
+        "orders-storage.licenses.item.get",
+        "orders-storage.licenses.item.put",
+        "orders-storage.licenses.item.delete"
       ]
     },
     {
-      "permissionName" : "location.collection.get",
+      "permissionName" : "orders-storage.locations.collection.get",
       "displayName" : "location-collection get",
       "description" : "Get a collection of locations"
     },
     {
-      "permissionName" : "location.item.post",
+      "permissionName" : "orders-storage.locations.item.post",
       "displayName" : "location-item post",
       "description" : "Create a new location"
     },
     {
-      "permissionName" : "location.item.get",
+      "permissionName" : "orders-storage.locations.item.get",
       "displayName" : "location-item get",
       "description" : "Fetch a location"
     },
     {
-      "permissionName" : "location.item.put",
+      "permissionName" : "orders-storage.locations.item.put",
       "displayName" : "location-item put",
       "description" : "Update a location"
     },
     {
-      "permissionName" : "location.item.delete",
+      "permissionName" : "orders-storage.locations.item.delete",
       "displayName" : "location-item delete",
       "description" : "Delete a location"
     },
     {
-      "permissionName" : "location.all",
+      "permissionName" : "orders-storage.locations.all",
       "displayName" : "All location perms",
       "description" : "All permissions for the location",
       "subPermissions" : [
-        "location.collection.get",
-        "location.item.post",
-        "location.item.get",
-        "location.item.put",
-        "location.item.delete"
+        "orders-storage.locations.collection.get",
+        "orders-storage.locations.item.post",
+        "orders-storage.locations.item.get",
+        "orders-storage.locations.item.put",
+        "orders-storage.locations.item.delete"
       ]
     },
     {
-      "permissionName" : "physical.collection.get",
+      "permissionName" : "orders-storage.physicals.collection.get",
       "displayName" : "physical-collection get",
       "description" : "Get a collection of physicals"
     },
     {
-      "permissionName" : "physical.item.post",
+      "permissionName" : "orders-storage.physicals.item.post",
       "displayName" : "physical-item post",
       "description" : "Create a new physical"
     },
     {
-      "permissionName" : "physical.item.get",
+      "permissionName" : "orders-storage.physicals.item.get",
       "displayName" : "physical-item get",
       "description" : "Fetch a physical"
     },
     {
-      "permissionName" : "physical.item.put",
+      "permissionName" : "orders-storage.physicals.item.put",
       "displayName" : "physical-item put",
       "description" : "Update a physical"
     },
     {
-      "permissionName" : "physical.item.delete",
+      "permissionName" : "orders-storage.physicals.item.delete",
       "displayName" : "physical-item delete",
       "description" : "Delete a physical"
     },
     {
-      "permissionName" : "physical.all",
+      "permissionName" : "orders-storage.physicals.all",
       "displayName" : "All physical perms",
       "description" : "All permissions for the physical",
       "subPermissions" : [
-        "physical.collection.get",
-        "physical.item.post",
-        "physical.item.get",
-        "physical.item.put",
-        "physical.item.delete"
+        "orders-storage.physicals.collection.get",
+        "orders-storage.physicals.item.post",
+        "orders-storage.physicals.item.get",
+        "orders-storage.physicals.item.put",
+        "orders-storage.physicals.item.delete"
       ]
     },
     {
@@ -955,225 +955,225 @@
       ]
     },
     {
-      "permissionName" : "po_line.collection.get",
+      "permissionName" : "orders-storage.po_lines.collection.get",
       "displayName" : "po_line-collection get",
       "description" : "Get a collection of po_lines"
     },
     {
-      "permissionName" : "po_line.item.post",
+      "permissionName" : "orders-storage.po_lines.item.post",
       "displayName" : "po_line-item post",
       "description" : "Create a new po_line"
     },
     {
-      "permissionName" : "po_line.item.get",
+      "permissionName" : "orders-storage.po_lines.item.get",
       "displayName" : "po_line-item get",
       "description" : "Fetch a po_line"
     },
     {
-      "permissionName" : "po_line.item.put",
+      "permissionName" : "orders-storage.po_lines.item.put",
       "displayName" : "po_line-item put",
       "description" : "Update a purchase order line"
     },
     {
-      "permissionName" : "po_line.item.delete",
+      "permissionName" : "orders-storage.po_lines.item.delete",
       "displayName" : "po_line-item delete",
       "description" : "Delete a po line"
     },
     {
-      "permissionName" : "po_line.all",
+      "permissionName" : "orders-storage.po_lines.all",
       "displayName" : "All po line perms",
       "description" : "All permissions for the po line",
       "subPermissions" : [
-        "po_line.collection.get",
-        "po_line.item.post",
-        "po_line.item.get",
-        "po_line.item.put",
-        "po_line.item.delete"
+        "orders-storage.po_lines.collection.get",
+        "orders-storage.po_lines.item.post",
+        "orders-storage.po_lines.item.get",
+        "orders-storage.po_lines.item.put",
+        "orders-storage.po_lines.item.delete"
       ]
     },
     {
-      "permissionName" : "purchase_order.collection.get",
+      "permissionName" : "orders-storage.purchase_orders.collection.get",
       "displayName" : "purchase_order-collection get",
       "description" : "Get a collection of purchase orders"
     },
     {
-      "permissionName" : "purchase_order.item.post",
+      "permissionName" : "orders-storage.purchase_orders.item.post",
       "displayName" : "purchase_order-item post",
       "description" : "Create a new purchase_order"
     },
     {
-      "permissionName" : "purchase_order.item.get",
+      "permissionName" : "orders-storage.purchase_orders.item.get",
       "displayName" : "purchase_order-item get",
       "description" : "Fetch a purchase_order"
     },
     {
-      "permissionName" : "purchase_order.item.put",
+      "permissionName" : "orders-storage.purchase_orders.item.put",
       "displayName" : "purchase_order-item put",
       "description" : "Update a purchase order"
     },
     {
-      "permissionName" : "purchase_order.item.delete",
+      "permissionName" : "orders-storage.purchase_orders.item.delete",
       "displayName" : "purchase_order-item delete",
       "description" : "Delete a purchase order"
     },
     {
-      "permissionName" : "purchase_order.all",
+      "permissionName" : "orders-storage.purchase_orders.all",
       "displayName" : "All purchase order perms",
       "description" : "All permissions for the purchase order",
       "subPermissions" : [
-        "purchase_order.collection.get",
-        "purchase_order.item.post",
-        "purchase_order.item.get",
-        "purchase_order.item.put",
-        "purchase_order.item.delete"
+        "orders-storage.purchase_orders.collection.get",
+        "orders-storage.purchase_orders.item.post",
+        "orders-storage.purchase_orders.item.get",
+        "orders-storage.purchase_orders.item.put",
+        "orders-storage.purchase_orders.item.delete"
       ]
     },
     {
-      "permissionName" : "renewal.collection.get",
+      "permissionName" : "orders-storage.renewals.collection.get",
       "displayName" : "renewal-collection get",
       "description" : "Get a collection of renewals"
     },
     {
-      "permissionName" : "renewal.item.post",
+      "permissionName" : "orders-storage.renewals.item.post",
       "displayName" : "renewal-item post",
       "description" : "Create a new renewal"
     },
     {
-      "permissionName" : "renewal.item.get",
+      "permissionName" : "orders-storage.renewals.item.get",
       "displayName" : "renewal-item get",
       "description" : "Fetch a renewal"
     },
     {
-      "permissionName" : "renewal.item.put",
+      "permissionName" : "orders-storage.renewals.item.put",
       "displayName" : "renewal-item put",
       "description" : "Update a renewal"
     },
     {
-      "permissionName" : "renewal.item.delete",
+      "permissionName" : "orders-storage.renewals.item.delete",
       "displayName" : "renewal-item delete",
       "description" : "Delete a renewal"
     },
     {
-      "permissionName" : "renewal.all",
+      "permissionName" : "orders-storage.renewals.all",
       "displayName" : "All renewal perms",
       "description" : "All permissions for the renewal",
       "subPermissions" : [
-        "renewal.collection.get",
-        "renewal.item.post",
-        "renewal.item.get",
-        "renewal.item.put",
-        "renewal.item.delete"
+        "orders-storage.renewals.collection.get",
+        "orders-storage.renewals.item.post",
+        "orders-storage.renewals.item.get",
+        "orders-storage.renewals.item.put",
+        "orders-storage.renewals.item.delete"
       ]
     },
     {
-      "permissionName" : "reporting_code.collection.get",
+      "permissionName" : "orders-storage.reporting_codes.collection.get",
       "displayName" : "reporting_code-collection get",
       "description" : "Get a collection of reporting_codes"
     },
     {
-      "permissionName" : "reporting_code.item.post",
+      "permissionName" : "orders-storage.reporting_codes.item.post",
       "displayName" : "reporting_code-item post",
       "description" : "Create a new reporting_code"
     },
     {
-      "permissionName" : "reporting_code.item.get",
+      "permissionName" : "orders-storage.reporting_codes.item.get",
       "displayName" : "reporting_code-item get",
       "description" : "Fetch a reporting_code"
     },
     {
-      "permissionName" : "reporting_code.item.put",
+      "permissionName" : "orders-storage.reporting_codes.item.put",
       "displayName" : "reporting_code-item put",
       "description" : "Update a reporting_code"
     },
     {
-      "permissionName" : "reporting_code.item.delete",
+      "permissionName" : "orders-storage.reporting_codes.item.delete",
       "displayName" : "reporting_code-item delete",
       "description" : "Delete a reporting_code"
     },
     {
-      "permissionName" : "reporting_code.all",
+      "permissionName" : "orders-storage.reporting_codes.all",
       "displayName" : "All reporting_code perms",
       "description" : "All permissions for the reporting_code",
       "subPermissions" : [
-        "reporting_code.collection.get",
-        "reporting_code.item.post",
-        "reporting_code.item.get",
-        "reporting_code.item.put",
-        "reporting_code.item.delete"
+        "orders-storage.reporting_codes.collection.get",
+        "orders-storage.reporting_codes.item.post",
+        "orders-storage.reporting_codes.item.get",
+        "orders-storage.reporting_codes.item.put",
+        "orders-storage.reporting_codes.item.delete"
       ]
     },
     {
-      "permissionName" : "source.collection.get",
+      "permissionName" : "orders-storage.sources.collection.get",
       "displayName" : "source-collection get",
       "description" : "Get a collection of sourcs"
     },
     {
-      "permissionName" : "source.item.post",
+      "permissionName" : "orders-storage.sources.item.post",
       "displayName" : "source-item post",
       "description" : "Create a new ource"
     },
     {
-      "permissionName" : "source.item.get",
+      "permissionName" : "orders-storage.sources.item.get",
       "displayName" : "source-item get",
       "description" : "Fetch a source"
     },
     {
-      "permissionName" : "source.item.put",
+      "permissionName" : "orders-storage.sources.item.put",
       "displayName" : "source-item put",
       "description" : "Update a source"
     },
     {
-      "permissionName" : "source.item.delete",
+      "permissionName" : "orders-storage.sources.item.delete",
       "displayName" : "source-item delete",
       "description" : "Delete a source"
     },
     {
-      "permissionName" : "source.all",
+      "permissionName" : "orders-storage.sources.all",
       "displayName" : "All source perms",
       "description" : "All permissions for the source",
       "subPermissions" : [
-        "source.collection.get",
-        "source.item.post",
-        "source.item.get",
-        "source.item.put",
-        "source.item.delete"
+        "orders-storage.sources.collection.get",
+        "orders-storage.sources.item.post",
+        "orders-storage.sources.item.get",
+        "orders-storage.sources.item.put",
+        "orders-storage.sources.item.delete"
       ]
     },
     {
-      "permissionName" : "vendor_detail.collection.get",
+      "permissionName" : "orders-storage.vendor_details.collection.get",
       "displayName" : "vendor_detail-collection get",
       "description" : "Get a collection of vendor_details"
     },
     {
-      "permissionName" : "vendor_detail.item.post",
+      "permissionName" : "orders-storage.vendor_details.item.post",
       "displayName" : "vendor_detail-item post",
       "description" : "Create a new vendor_detail"
     },
     {
-      "permissionName" : "vendor_detail.item.get",
+      "permissionName" : "orders-storage.vendor_details.item.get",
       "displayName" : "vendor_detail-item get",
       "description" : "Fetch a vendor_detail"
     },
     {
-      "permissionName" : "vendor_detail.item.put",
+      "permissionName" : "orders-storage.vendor_details.item.put",
       "displayName" : "vendor_detail-item put",
       "description" : "Update a vendor_detail"
     },
     {
-      "permissionName" : "vendor_detail.item.delete",
+      "permissionName" : "orders-storage.vendor_details.item.delete",
       "displayName" : "vendor_detail-item delete",
       "description" : "Delete a vendor_detail"
     },
     {
-      "permissionName" : "vendor_detail.all",
+      "permissionName" : "orders-storage.vendor_details.all",
       "displayName" : "All vendor_detail perms",
       "description" : "All permissions for the vendor_detail",
       "subPermissions" : [
-        "vendor_detail.collection.get",
-        "vendor_detail.item.post",
-        "vendor_detail.item.get",
-        "vendor_detail.item.put",
-        "vendor_detail.item.delete"
+        "orders-storage.vendor_details.collection.get",
+        "orders-storage.vendor_details.item.post",
+        "orders-storage.vendor_details.item.get",
+        "orders-storage.vendor_details.item.put",
+        "orders-storage.vendor_details.item.delete"
       ]
     },
     {
@@ -1181,24 +1181,23 @@
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
       "subPermissions" : [
-        "adjustment.all",
-        "alert.all",
-        "claim.all",
-        "cost.all",
-        "currency.all",
-        "details.all",
-        "eresource.all",
-        "orders-storage.fund-distribution.all",
-        "license.all",
-        "location.all",
-        "physical.all",
+        "orders-storage.adjustments.all",
+        "orders-storage.alerts.all",
+        "orders-storage.claims.all",
+        "orders-storage.costs.all",
+        "orders-storage.details.all",
+        "orders-storage.eresources.all",
+        "orders-storage.fund-distributions.all",
+        "orders-storage.licenses.all",
+        "orders-storage.locations.all",
+        "orders-storage.physicals.all",
         "orders-storage.pieces.all",
-        "po_line.all",
-        "purchase_order.all",
-        "renewal.all",
-        "reporting_code.all",
-        "source.all",
-        "vendor_detail.all"
+        "orders-storage.po_lines.all",
+        "orders-storage.purchase_orders.all",
+        "orders-storage.renewals.all",
+        "orders-storage.reporting_codes.all",
+        "orders-storage.sources.all",
+        "orders-storage.vendor_details.all"
       ]
     }
   ],
