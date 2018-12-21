@@ -35,8 +35,8 @@ import static org.folio.rest.utils.HelperUtils.respond;
 
 
 public class ReportingCodesAPI implements OrdersStorageReportingCodes {
-  private static final String VENDOR_TABLE = "reporting_code";
-  private static final String VENDOR_LOCATION_PREFIX = "/orders-storage/reporting_codes/";
+  private static final String REPORTINGCODE_TABLE = "reporting_code";
+  private static final String REPORTINGCODE_LOCATION_PREFIX = "/orders-storage/reporting_codes/";
 
   private static final Logger log = LoggerFactory.getLogger(VendorDetailsAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -56,12 +56,12 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         String[] fieldList = { "*" };
-        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", VENDOR_TABLE));
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", REPORTINGCODE_TABLE));
         CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
           .setLimit(new Limit(limit))
           .setOffset(new Offset(offset));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(VENDOR_TABLE,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(REPORTINGCODE_TABLE,
             org.folio.rest.jaxrs.model.ReportingCode.class, fieldList, cql, true, false, reply -> {
               try {
                 if (reply.succeeded()) {
@@ -119,7 +119,7 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
 
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
         PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            VENDOR_TABLE, id, entity,
+            REPORTINGCODE_TABLE, id, entity,
             reply -> {
               try {
                 if (reply.succeeded()) {
@@ -130,7 +130,7 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
 
                   Response response = OrdersStorageReportingCodes.PostOrdersStorageReportingCodesResponse.respond201WithApplicationJson(stream,
                       OrdersStorageReportingCodes.PostOrdersStorageReportingCodesResponse.headersFor201()
-                        .withLocation(VENDOR_LOCATION_PREFIX + persistenceId));
+                        .withLocation(REPORTINGCODE_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
@@ -169,7 +169,7 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
         Criterion c = new Criterion(
             new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(VENDOR_TABLE,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(REPORTINGCODE_TABLE,
             org.folio.rest.jaxrs.model.ReportingCode.class, c, true,
             reply -> {
               try {
@@ -218,7 +218,7 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
             vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
         try {
-          postgresClient.delete(VENDOR_TABLE, id, reply -> {
+          postgresClient.delete(REPORTINGCODE_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
                   OrdersStorageReportingCodes.DeleteOrdersStorageReportingCodesByIdResponse.noContent()
@@ -250,7 +250,7 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
           entity.setId(id);
         }
         PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            VENDOR_TABLE, entity, id,
+            REPORTINGCODE_TABLE, entity, id,
             reply -> {
               try {
                 if (reply.succeeded()) {
