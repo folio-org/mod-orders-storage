@@ -9,7 +9,7 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.folio.rest.jaxrs.resource.OrdersStorageOrders;
+import org.folio.rest.jaxrs.resource.Orders;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
@@ -26,7 +26,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class OrdersAPI implements OrdersStorageOrders {
+public class OrdersAPI implements Orders {
 
   private static final Logger log = LoggerFactory.getLogger(OrdersAPI.class);
   private static final String ORDERS_TABLE = "purchase_order";
@@ -34,7 +34,7 @@ public class OrdersAPI implements OrdersStorageOrders {
 
   @Override
   @Validate
-  public void getOrdersStorageOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -64,15 +64,15 @@ public class OrdersAPI implements OrdersStorageOrders {
                 collection.setFirst(first);
                 collection.setLast(last);
                 asyncResultHandler
-                  .handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.OrdersStorageOrders.GetOrdersStorageOrdersResponse.respond200WithApplicationJson(collection)));
+                  .handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.Orders.GetOrdersResponse.respond200WithApplicationJson(collection)));
               } else {
                 log.error(reply.cause().getMessage(), reply.cause());
-                asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.OrdersStorageOrders.GetOrdersStorageOrdersResponse
+                asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.Orders.GetOrdersResponse
                   .respond400WithTextPlain(reply.cause().getMessage())));
               }
             } catch (Exception e) {
               log.error(e.getMessage(), e);
-              asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.OrdersStorageOrders.GetOrdersStorageOrdersResponse.respond500WithTextPlain(messages.getMessage(
+              asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.Orders.GetOrdersResponse.respond500WithTextPlain(messages.getMessage(
                   lang, MessageConsts.InternalServerError))));
             }
           });
@@ -82,7 +82,7 @@ public class OrdersAPI implements OrdersStorageOrders {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.OrdersStorageOrders.GetOrdersStorageOrdersResponse
+        asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.Orders.GetOrdersResponse
           .respond500WithTextPlain(message)));
       }
     });
