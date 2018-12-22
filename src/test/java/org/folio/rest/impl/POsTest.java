@@ -14,7 +14,7 @@ public class POsTest extends OrdersStorageTest {
 
   private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
   private static final String PO_ENDPOINT = "/orders-storage/purchase_orders";
-  private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
+  private static final String ORDERS_ENDPOINT = "/orders";
 
 
   // Validates that there are zero purchase order records in the DB
