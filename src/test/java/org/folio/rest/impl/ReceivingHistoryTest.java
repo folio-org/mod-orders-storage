@@ -11,6 +11,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 @RunWith(VertxUnitRunner.class)
 public class ReceivingHistoryTest extends OrdersStorageTest{
+  
   private final Logger logger = LoggerFactory.getLogger("okapi");
 
   private static final String RECEIVING_HISTORY_ENDPOINT ="/orders-storage/receiving_history";

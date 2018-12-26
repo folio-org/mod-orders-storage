@@ -8,7 +8,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
-import org.folio.rest.jaxrs.resource.ReceivingHistory;
+import org.folio.rest.jaxrs.resource.OrdersStorageReceivingHistory;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
@@ -24,7 +24,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-public class ReceivingHistoryAPI implements ReceivingHistory {
+public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
 
   private static final Logger log = LoggerFactory.getLogger(ReceivingHistoryAPI.class);
   private static final String RECEIVING_HISTORY_TABLE = "receiving_history";
@@ -32,7 +32,7 @@ public class ReceivingHistoryAPI implements ReceivingHistory {
 
   @Override
   @Validate
-  public void getReceivingHistory(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageReceivingHistory(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
@@ -62,11 +62,11 @@ public class ReceivingHistoryAPI implements ReceivingHistory {
                 }
                 collection.setFirst(first);
                 collection.setLast(last);
-                asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.ReceivingHistory.GetReceivingHistoryResponse.respond200WithApplicationJson(collection)));
+                asyncResultHandler.handle(Future.succeededFuture(OrdersStorageReceivingHistory.GetOrdersStorageReceivingHistoryResponse.respond200WithApplicationJson(collection)));
               }
               else {
                 log.error(reply.cause().getMessage(), reply.cause());
-                asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.ReceivingHistory.GetReceivingHistoryResponse.respond400WithTextPlain(reply.cause().getMessage())));
+                asyncResultHandler.handle(Future.succeededFuture(OrdersStorageReceivingHistory.GetOrdersStorageReceivingHistoryResponse.respond400WithTextPlain(reply.cause().getMessage())));
               }
             });
       } catch (Exception e) {
@@ -75,7 +75,7 @@ public class ReceivingHistoryAPI implements ReceivingHistory {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.ReceivingHistory.GetReceivingHistoryResponse.respond500WithTextPlain(message)));
+        asyncResultHandler.handle(Future.succeededFuture(OrdersStorageReceivingHistory.GetOrdersStorageReceivingHistoryResponse.respond500WithTextPlain(message)));
       }
     });
   }
