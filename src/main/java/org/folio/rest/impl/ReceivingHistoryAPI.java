@@ -27,7 +27,7 @@ import io.vertx.core.logging.LoggerFactory;
 public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
 
   private static final Logger log = LoggerFactory.getLogger(ReceivingHistoryAPI.class);
-  private static final String RECEIVING_HISTORY_TABLE = "receiving_history";
+  private static final String RECEIVING_HISTORY_TABLE = "receiving_history_view";
   private final Messages messages = Messages.getInstance();
 
   @Override
