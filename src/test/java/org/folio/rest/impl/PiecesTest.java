@@ -19,20 +19,16 @@ public class PiecesTest extends OrdersStorageTest{
   private final String INVALID_PIECE_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
   private String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private String piecesEndpoint ="/orders-storage/pieces";
+  private static final String PIECES_ENDPOINT ="/orders-storage/pieces";
 
-
-
-  // Validates that there are zero piece records in the DB
-  private void verifyCollection() {
-
-    // Verify that there are no existing piece records
-    getData(piecesEndpoint).then()
+  @Override
+  void verifyCollection(String endpoint) {
+    // Verify that there are no existing  records
+    getData(endpoint).then()
       .log().all()
       .statusCode(200)
       .body("total_records", equalTo(0));
   }
-
 
   @Test
   public void testpiece() {
@@ -43,11 +39,11 @@ public class PiecesTest extends OrdersStorageTest{
       prepareTenant();
 
       logger.info("--- mod-orders-storage pieces test: Verifying database's initial state ... ");
-      verifyCollection();
+      verifyCollection(PIECES_ENDPOINT);
 
       logger.info("--- mod-orders-storage pieces test: Creating Pieces ... ");
       String pieceSample = getFile("pieces.sample");
-      Response response = postData(piecesEndpoint, pieceSample);
+      Response response = postData(PIECES_ENDPOINT, pieceSample);
       piecesSampleId = response.then().extract().path("id");
 
       logger.info("--- mod-orders-storage pieces test: Valid Caption exists ... ");
@@ -80,17 +76,17 @@ public class PiecesTest extends OrdersStorageTest{
   }
 
   private void testVerifyPieceDeletion(String piecesSampleId) {
-    getDataById(piecesEndpoint, piecesSampleId).then()
+    getDataById(PIECES_ENDPOINT, piecesSampleId).then()
     .statusCode(404);
   }
 
   private void testDeletePiece(String piecesSampleId) {
-    deleteData(piecesEndpoint, piecesSampleId).then().log().ifValidationFails()
+    deleteData(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
     .statusCode(204);
   }
 
   private void testFetchingUpdatedpiece(String piecesSampleId) {
-    getDataById(piecesEndpoint, piecesSampleId).then()
+    getDataById(PIECES_ENDPOINT, piecesSampleId).then()
     .statusCode(200).log().ifValidationFails()
     .body("comment", equalTo("Update Comment"));
   }
@@ -99,25 +95,25 @@ public class PiecesTest extends OrdersStorageTest{
     JSONObject catJSON = new JSONObject(pieceSample);
     catJSON.put("id", piecesSampleId);
     catJSON.put("comment", "Update Comment");
-    Response response = putData(piecesEndpoint, piecesSampleId, catJSON.toString());
+    Response response = putData(PIECES_ENDPOINT, piecesSampleId, catJSON.toString());
     response.then().log().ifValidationFails()
       .statusCode(204);
   }
 
   private void testInvalidPieceId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Piece with ID return 404: "+ INVALID_PIECE_ID);
-    getDataById(piecesEndpoint, INVALID_PIECE_ID).then().log().ifValidationFails()
+    getDataById(PIECES_ENDPOINT, INVALID_PIECE_ID).then().log().ifValidationFails()
     .statusCode(404);
   }
 
   private void testpieceSuccessfullyFetched(String piecesSampleId) {
-    getDataById(piecesEndpoint, piecesSampleId).then().log().ifValidationFails()
+    getDataById(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("id", equalTo(piecesSampleId));
   }
 
   private void testPieceCreated() {
-    getData(piecesEndpoint).then().log().ifValidationFails()
+    getData(PIECES_ENDPOINT).then().log().ifValidationFails()
     .statusCode(200)
     .body("total_records", equalTo(1));
   }

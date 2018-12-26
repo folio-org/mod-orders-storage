@@ -9,9 +9,9 @@ import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
-public class CostTest extends OrdersStorageTest {
+public class CostsTest extends OrdersStorageTest {
 
-  private final static String COST_ENDPOINT = "cost";
+  private final static String COST_ENDPOINT = "/orders-storage/costs";
   private final static String INVALID_COST_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
   @Test

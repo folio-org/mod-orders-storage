@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
-public class FundDistributionTest extends OrdersStorageTest {
+public class FundDistributionsTest extends OrdersStorageTest {
 
   private static final String FUND_DISTRIBUTION_ENDPOINT = "orders-storage/fund_distributions";
   private static final String INVALID_FUND_DISTRIBUTION_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";

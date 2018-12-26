@@ -10,11 +10,13 @@ import org.junit.runner.RunWith;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
-public class POTest extends OrdersStorageTest {
+public class POsTest extends OrdersStorageTest {
 
-  private static final String PO_ENDPOINT = "purchase_order";
-  
-  
+  private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
+  private static final String PO_ENDPOINT = "/orders-storage/purchase_orders";
+  private static final String ORDERS_ENDPOINT = "/orders";
+
+
   // Validates that there are zero purchase order records in the DB
   private void verifyCollection() {
 
@@ -26,7 +28,7 @@ public class POTest extends OrdersStorageTest {
 
 
     // Verify that there are no existing po_lines
-    getData("po_line").then()
+    getData(PO_LINE_ENDPOINT).then()
       .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
@@ -57,7 +59,7 @@ public class POTest extends OrdersStorageTest {
         .body("total_records", equalTo(15));
 
       logger.info("--- mod-order-storage-test: Verifying only 1 purchase order was created from orders endpoint... ");
-      getData("orders").then().log().ifValidationFails()
+      getData(ORDERS_ENDPOINT).then().log().ifValidationFails()
         .statusCode(200)
         .body("total_records", equalTo(15));
 

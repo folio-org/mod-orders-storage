@@ -8,8 +8,8 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.AdjustmentCollection;
-import org.folio.rest.jaxrs.resource.Adjustment;
+import org.folio.rest.jaxrs.model.RenewalCollection;
+import org.folio.rest.jaxrs.resource.OrdersStorageRenewals;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -29,49 +29,43 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import static org.folio.rest.utils.HelperUtils.isInvalidUUID;
+import static org.folio.rest.utils.HelperUtils.respond;
 
-public class AdjustmentAPI implements Adjustment {
-  private static final String ADJUSTMENT_TABLE = "adjustment";
-  private static final String ADJUSTMENT_LOCATION_PREFIX = "/adjustment/";
+public class RenewalsAPI implements OrdersStorageRenewals {
+  private static final String RENEWAL_TABLE = "renewal";
+  private static final String RENEWAL_LOCATION_PREFIX = "/orders-storage/renewals/";
 
-  private static final Logger log = LoggerFactory.getLogger(AdjustmentAPI.class);
+  private static final Logger log = LoggerFactory.getLogger(RenewalsAPI.class);
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
-  public AdjustmentAPI(Vertx vertx, String tenantId) {
+
+  public RenewalsAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
-  }
-
-  private static void respond(Handler<AsyncResult<Response>> handler, Response response) {
-    AsyncResult<Response> result = Future.succeededFuture(response);
-    handler.handle(result);
-  }
-
-  private boolean isInvalidUUID(String errorMessage) {
-    return (errorMessage != null && errorMessage.contains("invalid input syntax for uuid"));
   }
 
   @Override
   @Validate
-  public void getAdjustment(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageRenewals(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
 
         String[] fieldList = { "*" };
-        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", ADJUSTMENT_TABLE));
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", RENEWAL_TABLE));
         CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
           .setLimit(new Limit(limit))
           .setOffset(new Offset(offset));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(ADJUSTMENT_TABLE,
-            org.folio.rest.jaxrs.model.Adjustment.class, fieldList, cql, true, false, reply -> {
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(RENEWAL_TABLE,
+            org.folio.rest.jaxrs.model.Renewal.class, fieldList, cql, true, false, reply -> {
               try {
                 if (reply.succeeded()) {
-                  AdjustmentCollection collection = new AdjustmentCollection();
-                  List<org.folio.rest.jaxrs.model.Adjustment> results = reply.result().getResults();
-                  collection.setAdjustments(results);
+                  RenewalCollection collection = new RenewalCollection();
+                  List<org.folio.rest.jaxrs.model.Renewal> results = reply.result().getResults();
+                  collection.setRenewals(results);
                   Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                   collection.setTotalRecords(totalRecords);
                   Integer first = 0;
@@ -82,16 +76,16 @@ public class AdjustmentAPI implements Adjustment {
                   }
                   collection.setFirst(first);
                   collection.setLast(last);
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                     .respond400WithTextPlain(reply.cause().getMessage())));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
@@ -101,7 +95,7 @@ public class AdjustmentAPI implements Adjustment {
         if (e.getCause() != null && e.getCause().getClass().getSimpleName().endsWith("CQLParseException")) {
           message = " CQL parse error " + e.getLocalizedMessage();
         }
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(Adjustment.GetAdjustmentResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageRenewals.GetOrdersStorageRenewalsResponse
           .respond500WithTextPlain(message)));
       }
     });
@@ -109,8 +103,8 @@ public class AdjustmentAPI implements Adjustment {
 
   @Override
   @Validate
-  public void postAdjustment(String lang, org.folio.rest.jaxrs.model.Adjustment entity,
-      Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void postOrdersStorageRenewals(String lang, org.folio.rest.jaxrs.model.Renewal entity, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
 
       try {
@@ -123,7 +117,7 @@ public class AdjustmentAPI implements Adjustment {
 
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
         PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            ADJUSTMENT_TABLE, id, entity,
+            RENEWAL_TABLE, id, entity,
             reply -> {
               try {
                 if (reply.succeeded()) {
@@ -132,20 +126,19 @@ public class AdjustmentAPI implements Adjustment {
                   OutStream stream = new OutStream();
                   stream.setData(entity);
 
-                  Response response = Adjustment.PostAdjustmentResponse.respond201WithApplicationJson(stream,
-                      Adjustment.PostAdjustmentResponse.headersFor201()
-                        .withLocation(ADJUSTMENT_LOCATION_PREFIX + persistenceId));
+                  Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse
+                    .respond201WithApplicationJson(stream, OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.headersFor201()
+                      .withLocation(RENEWAL_LOCATION_PREFIX + persistenceId));
                   respond(asyncResultHandler, response);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = Adjustment.PostAdjustmentResponse
-                    .respond500WithTextPlain(reply.cause().getMessage());
+                  Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(reply.cause().getMessage());
                   respond(asyncResultHandler, response);
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
 
-                Response response = Adjustment.PostAdjustmentResponse.respond500WithTextPlain(e.getMessage());
+                Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(e.getMessage());
                 respond(asyncResultHandler, response);
               }
 
@@ -154,7 +147,7 @@ public class AdjustmentAPI implements Adjustment {
         log.error(e.getMessage(), e);
 
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = Adjustment.PostAdjustmentResponse.respond500WithTextPlain(errMsg);
+        Response response = OrdersStorageRenewals.PostOrdersStorageRenewalsResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
 
@@ -163,7 +156,7 @@ public class AdjustmentAPI implements Adjustment {
 
   @Override
   @Validate
-  public void getAdjustmentById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageRenewalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       try {
@@ -173,38 +166,38 @@ public class AdjustmentAPI implements Adjustment {
         Criterion c = new Criterion(
             new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
 
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(ADJUSTMENT_TABLE,
-            org.folio.rest.jaxrs.model.Adjustment.class, c, true,
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(RENEWAL_TABLE,
+            org.folio.rest.jaxrs.model.Renewal.class, c, true,
             reply -> {
               try {
                 if (reply.succeeded()) {
-                  List<org.folio.rest.jaxrs.model.Adjustment> results = reply.result().getResults();
+                  List<org.folio.rest.jaxrs.model.Renewal> results = reply.result().getResults();
                   if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond200WithApplicationJson(results.get(0))));
                   }
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(id)));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                       .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                   }
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetAdjustmentByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageRenewalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
@@ -212,7 +205,7 @@ public class AdjustmentAPI implements Adjustment {
 
   @Override
   @Validate
-  public void deleteAdjustmentById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageRenewalsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -222,30 +215,30 @@ public class AdjustmentAPI implements Adjustment {
             vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
 
         try {
-          postgresClient.delete(ADJUSTMENT_TABLE, id, reply -> {
+          postgresClient.delete(RENEWAL_TABLE, id, reply -> {
             if (reply.succeeded()) {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Adjustment.DeleteAdjustmentByIdResponse.noContent()
+                  OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.noContent()
                     .build()));
             } else {
               asyncResultHandler.handle(Future.succeededFuture(
-                  Adjustment.DeleteAdjustmentByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
+                  OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
             }
           });
         } catch (Exception e) {
           asyncResultHandler.handle(Future.succeededFuture(
-              Adjustment.DeleteAdjustmentByIdResponse.respond500WithTextPlain(e.getMessage())));
+              OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(e.getMessage())));
         }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(
-          Adjustment.DeleteAdjustmentByIdResponse.respond500WithTextPlain(e.getMessage())));
+          OrdersStorageRenewals.DeleteOrdersStorageRenewalsByIdResponse.respond500WithTextPlain(e.getMessage())));
     }
   }
 
   @Override
   @Validate
-  public void putAdjustmentById(String id, String lang, org.folio.rest.jaxrs.model.Adjustment entity,
+  public void putOrdersStorageRenewalsById(String id, String lang, org.folio.rest.jaxrs.model.Renewal entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
       String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
@@ -254,34 +247,33 @@ public class AdjustmentAPI implements Adjustment {
           entity.setId(id);
         }
         PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            ADJUSTMENT_TABLE, entity, id,
+            RENEWAL_TABLE, entity, id,
             reply -> {
               try {
                 if (reply.succeeded()) {
                   if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                       .respond204()));
                   }
                 } else {
                   log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                     .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
                 }
               } catch (Exception e) {
                 log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
             });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutAdjustmentByIdResponse
+        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageRenewalsByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
   }
-
 }
