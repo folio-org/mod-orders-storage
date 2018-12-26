@@ -64,7 +64,12 @@
       "run": "after",
       "snippet": "COPY po_line (id, jsonb) FROM 'data/poLines.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
-    }
+    },
+    {
+      "run": "after",
+      "snippet": "CREATE OR REPLACE VIEW receiving_history_view AS SELECT piece.id AS id, json_build_object('id', piece.jsonb->>'id', 'po_line_number', po_line.jsonb->>'po_line_number', 'title', po_line.jsonb->>'title', 'receiving_note', details.jsonb->>'receiving_note') AS jsonb FROM piece LEFT OUTER JOIN po_line ON piece.jsonb->>'id' = po_line.jsonb->>'id' LEFT OUTER JOIN details ON details.jsonb->>'po_line_id' = po_line.jsonb->>'id';",
+      "fromModuleVersion": "1.0"
+    }    
   ],
   "tables": [
     {
