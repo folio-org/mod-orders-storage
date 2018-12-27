@@ -19,7 +19,7 @@
   "po_number": "268758",
   "re_encumber": false,
   "renewal_interval": 182,
-  "renewal_cycle": "6 Months",
+  "renewal_cycle": "Manual",
   "manual_renewal": true,
   "renewal_review_period": 30,
   "renewal_date": "2019-04-09T00:00:00.000Z",
