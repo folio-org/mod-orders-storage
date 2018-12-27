@@ -87,7 +87,7 @@ public abstract class OrdersStorageTest {
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       async.complete();
-      logger.info("--- mod-orders-storage Cost test: END ");
+      logger.info("--- mod-orders-storage test: END ");
     });
   }
 
