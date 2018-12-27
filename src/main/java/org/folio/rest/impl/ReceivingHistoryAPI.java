@@ -27,7 +27,7 @@ import io.vertx.core.logging.LoggerFactory;
 public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
 
   private static final Logger log = LoggerFactory.getLogger(ReceivingHistoryAPI.class);
-  private static final String RECEIVING_HISTORY_TABLE = "receiving_history_view";
+  private static final String RECEIVING_HISTORY_VIEW_TABLE = "receiving_history_view";
   private final Messages messages = Messages.getInstance();
 
   @Override
@@ -40,12 +40,12 @@ public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
       
         String[] fieldList = { "*" };
             
-        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", RECEIVING_HISTORY_TABLE));
+        CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", RECEIVING_HISTORY_VIEW_TABLE));
         CQLWrapper cql = new CQLWrapper(cql2PgJSON, query)
             .setLimit(new Limit(limit))
             .setOffset(new Offset(offset));
         
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(RECEIVING_HISTORY_TABLE, 
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(RECEIVING_HISTORY_VIEW_TABLE, 
             org.folio.rest.jaxrs.model.ReceivingHistory.class,
             fieldList, cql, true, false, reply -> {
               if(reply.succeeded()) {

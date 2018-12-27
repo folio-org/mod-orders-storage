@@ -19,8 +19,8 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private final Logger logger = LoggerFactory.getLogger("okapi");
 
   private String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private String detailSampleId;
-  private String poLineSampleId;
+  private String detailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String poLineSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving_history";
   private static final String PIECES_ENDPOINT = "/orders-storage/pieces";
@@ -30,7 +30,6 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   @Test
   public void testReceivingHistory() {
     try {
-
       // Initialize the tenant-schema
       logger.info("--- mod-orders-storage receiving_history test: Preparing test tenant ...");
       prepareTenant();
