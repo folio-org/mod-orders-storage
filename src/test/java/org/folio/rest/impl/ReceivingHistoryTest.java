@@ -35,7 +35,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
       prepareTenant();
 
       logger.info("--- mod-orders-storage receiving_history test: Verifying database's initial state ... ");
-      verifyViewCollection(RECEIVING_HISTORY_ENDPOINT);
+      verifyViewCollection(RECEIVING_HISTORY_ENDPOINT, 0);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating receiving_history view ...");
 
@@ -52,7 +52,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
       testVerifyDetailCreated();
 
       logger.info("--- mod-orders-storage pieces test: Verify receiving_history view created ...");
-      verifyReceivingHistoryViewCreated(RECEIVING_HISTORY_ENDPOINT);
+      verifyViewCollection(RECEIVING_HISTORY_ENDPOINT, 1);
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
@@ -80,19 +80,19 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   }
   
   private void testCreateDetail() {
-    String detailSample = getFile("details_for_view.sample");
+    String detailSample = getFile("details.sample");
     Response detailResponse = postData(DETAILS_ENDPOINT, detailSample);
     detailSampleId = detailResponse.then().extract().path("id");
   }
 
   private void testCreatePiece() {
-    String pieceSample = getFile("pieces_for_view.sample");
+    String pieceSample = getFile("pieces.sample");
     Response response = postData(PIECES_ENDPOINT, pieceSample);
     piecesSampleId = response.then().extract().path("id");
   }
   
   private void testCreatePoLine() {
-    String poLineSample = getFile("po_line_for_view.sample");
+    String poLineSample = getFile("po_line.sample");
     Response response = postData(PO_LINE_ENDPOINT, poLineSample);
     response.then().log().ifValidationFails()
       .statusCode(201)
@@ -118,20 +118,12 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
     .body("total_records", equalTo(1));
   }
   
-  void verifyViewCollection(String endpoint) {
+  void verifyViewCollection(String endpoint, int expectedCount) {
     // Verify that there are no existing records in View
     getViewData(endpoint).then()
       .log().all()
       .statusCode(200)
-      .body("total_records", equalTo(0));
-  }
-
-  void verifyReceivingHistoryViewCreated(String endpoint) {
-    // Verify that there exists record in View
-    getViewData(endpoint).then()
-      .log().all()
-      .statusCode(200)
-      .body("total_records", equalTo(1));
+      .body("total_records", equalTo(expectedCount));
   }
   
   Response getViewData(String endpoint) {
