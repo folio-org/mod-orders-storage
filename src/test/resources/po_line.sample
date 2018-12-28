@@ -54,5 +54,9 @@
     "ABCDEFGHIJKLMNO"
   ],
   "title": "Kayak Fishing in the Northern Gulf Coast",
-  "vendor_detail": "d5065f0d-fb88-4d23-b0c1-57e754fba40e"
+  "vendor_detail": "d5065f0d-fb88-4d23-b0c1-57e754fba40e",
+  "metadata": {
+    "createdDate": "2018-07-19T00:00:00.000+0000",
+    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
+  }
 }

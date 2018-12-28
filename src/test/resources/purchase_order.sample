@@ -3,8 +3,6 @@
   "adjustment": "9b3be694-6716-4e14-b81d-8d76f0ae4146",
   "approved": true,
   "assigned_to": "ab18897b-0e40-4f31-896b-9c9adc979a88",
-  "created": "2010-10-08T03:53:00.000Z",
-  "created_by": "ab18897b-0e40-4f31-896b-9c9adc979a88",
   "manual_po": false,
   "notes": [
     "ABCDEFGHIJKLMNO",
@@ -15,5 +13,9 @@
   "re_encumber": false,
   "total_estimated_price": 49.98,
   "total_items": 2,
-  "vendor": "168f8a86-d26c-406e-813f-c7527f241ac3"
+  "vendor": "168f8a86-d26c-406e-813f-c7527f241ac3",
+  "metadata": {
+    "createdDate": "2018-07-19T00:00:00.000+0000",
+    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
+  }
 }
