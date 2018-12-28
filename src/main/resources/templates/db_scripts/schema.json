@@ -67,7 +67,7 @@
     },
     {
       "run": "after",
-      "snippet": "CREATE SEQUENCE IF NOT EXISTS po_number START WITH 10000 MAXVALUE 9999999999999999 CACHE 1 NO CYCLE;'\t';",
+      "snippet": "CREATE SEQUENCE IF NOT EXISTS po_number MAXVALUE 9999999999999999 START WITH 10000 CACHE 1 NO CYCLE;'\t';",
       "fromModuleVersion": "1.0"
     }
   ],

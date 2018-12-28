@@ -535,6 +535,17 @@
       ]
     },
     {
+      "id": "orders-storage.po_number",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/po_number",
+          "permissionsRequired": ["orders-storage.po_number.get"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.0",
       "interfaceType": "system",
@@ -1198,6 +1209,44 @@
         "orders-storage.reporting_codes.all",
         "orders-storage.sources.all",
         "orders-storage.vendor_details.all"
+      ]
+    },
+    {
+      "permissionName" : "orders-storage.po_number.get",
+      "displayName" : "po_number get",
+      "description" : "Get a generated PO number"
+    },
+    {
+      "permissionName" : "orders-storage.po_number.all",
+      "displayName" : "All po_number perms",
+      "description" : "All permissions for the PO number",
+      "subPermissions" : [
+        "orders-storage.po_number.get"
+      ]
+    },
+    {
+      "permissionName" : "orders-storage.module.all",
+      "displayName" : "All orders-storage-module perms",
+      "description" : "All permissions for the orders-storage module",
+      "subPermissions" : [
+        "orders-storage.adjustments.all",
+        "orders-storage.alerts.all",
+        "orders-storage.claims.all",
+        "orders-storage.costs.all",
+        "orders-storage.details.all",
+        "orders-storage.eresources.all",
+        "orders-storage.fund-distributions.all",
+        "orders-storage.licenses.all",
+        "orders-storage.locations.all",
+        "orders-storage.physicals.all",
+        "orders-storage.pieces.all",
+        "orders-storage.po_lines.all",
+        "orders-storage.purchase_orders.all",
+        "orders-storage.renewals.all",
+        "orders-storage.reporting_codes.all",
+        "orders-storage.sources.all",
+        "orders-storage.vendor_details.all",
+        "orders-storage.po_number.all"
       ]
     }
   ],
