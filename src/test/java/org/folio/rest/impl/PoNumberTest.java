@@ -1,24 +1,35 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
+import static org.hamcrest.Matchers.containsString;
+
+@RunWith(VertxUnitRunner.class)
 public class PoNumberTest extends OrdersStorageTest {
 
-  private static final String FUND_DISTRIBUTION_ENDPOINT = "orders-storage/po_number";
+  private static final String PO_NUMBER_ENDPOINT = "orders-storage/po_number";
 
   @Test
-  public void testFundDistribution() {
+  public void testGetPoNumberOk() {
     // Initialize the tenant-schema
-    logger.info("--- mod-orders-storage FundDistribution test: Preparing test tenant");
+    logger.info("--- mod-orders-storage PoNumber test: Preparing test tenant");
     prepareTenant();
 
-    logger.info("--- mod-orders-storage FundDistribution test: Verifying database's initial state ... ");
-    verifyCollection(FUND_DISTRIBUTION_ENDPOINT);
+    getData(PO_NUMBER_ENDPOINT)
+      .then()
+        .body(containsString("\"po_number\""));
+  }
 
-    logger.info("--- mod-orders-storage FundDistribution test: Creating FundDistribution ... ");
-    String fundDistrSample = getFile("fund_distribution.sample");
-    Response response = postData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSample);
-    sampleId = response.then().extract().path("id");
+  @Test
+  public void testGetPoNumberWrongPath() {
+    // Initialize the tenant-schema
+    logger.info("--- mod-orders-storage PoNumber test: Preparing test tenant");
+    prepareTenant();
+
+    getData(PO_NUMBER_ENDPOINT + "/123")
+      .then()
+        .body(containsString("Invalid URL path requested"));
   }
 }
