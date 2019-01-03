@@ -1,0 +1,11 @@
+{
+  "access_provider": "ba3f3d45-247d-41f6-8dc9-6488adcad329",
+  "activated": false,
+  "activation_due": 10,
+  "create_inventory": true,
+  "expected_activation": "2018-10-09T00:00:00.000Z",
+  "license": "7c063655-b384-4a6f-b367-3c2f95f7a49c",
+  "trial": false,
+  "user_limit": 10,
+  "po_line_id": "8c778aee-97fa-4586-b131-3ea588a728e2"
+}
