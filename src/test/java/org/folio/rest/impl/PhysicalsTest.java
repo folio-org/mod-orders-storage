@@ -111,5 +111,4 @@ public class PhysicalsTest extends OrdersStorageTest {
       .statusCode(201)
       .assertThat().body("material_supplier", equalTo("73d14bc5-d131-48c6-b380-f8e62f63c8b6"));
   }
-
 }

@@ -97,7 +97,6 @@ public class POLinesTest extends OrdersStorageTest {
     .body("id", equalTo(poLineSampleId));
   }
 
-  
   private void testPolineCreated() {
     getData(PO_LINE_ENDPOINT).then().log().ifValidationFails()
     .statusCode(200)
