@@ -64,18 +64,7 @@
       "run": "after",
       "snippet": "COPY po_line (id, jsonb) FROM 'data/poLines.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
-    },
-    {
-      "run": "after",
-      "snippet": "CREATE SEQUENCE IF NOT EXISTS po_number MAXVALUE 9999999999999999 START WITH 10000 CACHE 1 NO CYCLE;",
-      "fromModuleVersion": "1.0"
-    },
-    {
-      "run": "after",
-      "snippet": "GRANT USAGE ON SEQUENCE po_number TO diku_mod_orders_storage;",
-      "fromModuleVersion": "1.0"
     }
-
   ],
   "tables": [
     {
@@ -188,7 +177,8 @@
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true
+      "populateJsonWithId": true,
+      "customSnippetPath": "createPoNumberSequence.sql"
     },
     {
       "tableName": "po_line",
