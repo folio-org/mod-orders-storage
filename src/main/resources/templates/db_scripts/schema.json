@@ -47,11 +47,6 @@
     },
     {
       "run": "after",
-      "snippet": "COPY renewal (id, jsonb) FROM 'data/renewal.data' ENCODING 'UTF8' DELIMITER E'\t';",
-      "fromModuleVersion": "1.0"
-    },
-    {
-      "run": "after",
       "snippet": "COPY source (id, jsonb) FROM 'data/source.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
@@ -144,13 +139,6 @@
     },
     {
       "tableName": "pieces",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
-      "tableName": "renewal",
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
