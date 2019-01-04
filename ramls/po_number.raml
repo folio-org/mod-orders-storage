@@ -25,11 +25,6 @@ traits:
         body:
           application/json:
             type: po_number
-      400:
-        description: "Bad request, e.g. malformed request body or query parameter"
-        body:
-          text/plain:
-            example: "Unable to generate purchase order number"
       500:
         description: "Internal server error, e.g. due to misconfiguration"
         body:
