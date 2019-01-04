@@ -411,37 +411,6 @@
       ]
     },
     {
-      "id": "orders-storage.renewals",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/renewals",
-          "permissionsRequired": ["orders-storage.renewals.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/orders-storage/renewals",
-          "permissionsRequired": ["orders-storage.renewals.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/renewals/{id}",
-          "permissionsRequired": ["orders-storage.renewals.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/orders-storage/renewals/{id}",
-          "permissionsRequired": ["orders-storage.renewals.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/orders-storage/renewals/{id}",
-          "permissionsRequired": ["orders-storage.renewals.item.delete"]
-        }
-      ]
-    },
-    {
       "id": "orders-storage.reporting_codes",
       "version": "1.0",
       "handlers": [
@@ -1029,43 +998,6 @@
       ]
     },
     {
-      "permissionName" : "orders-storage.renewals.collection.get",
-      "displayName" : "renewal-collection get",
-      "description" : "Get a collection of renewals"
-    },
-    {
-      "permissionName" : "orders-storage.renewals.item.post",
-      "displayName" : "renewal-item post",
-      "description" : "Create a new renewal"
-    },
-    {
-      "permissionName" : "orders-storage.renewals.item.get",
-      "displayName" : "renewal-item get",
-      "description" : "Fetch a renewal"
-    },
-    {
-      "permissionName" : "orders-storage.renewals.item.put",
-      "displayName" : "renewal-item put",
-      "description" : "Update a renewal"
-    },
-    {
-      "permissionName" : "orders-storage.renewals.item.delete",
-      "displayName" : "renewal-item delete",
-      "description" : "Delete a renewal"
-    },
-    {
-      "permissionName" : "orders-storage.renewals.all",
-      "displayName" : "All renewal perms",
-      "description" : "All permissions for the renewal",
-      "subPermissions" : [
-        "orders-storage.renewals.collection.get",
-        "orders-storage.renewals.item.post",
-        "orders-storage.renewals.item.get",
-        "orders-storage.renewals.item.put",
-        "orders-storage.renewals.item.delete"
-      ]
-    },
-    {
       "permissionName" : "orders-storage.reporting_codes.collection.get",
       "displayName" : "reporting_code-collection get",
       "description" : "Get a collection of reporting_codes"
@@ -1194,7 +1126,6 @@
         "orders-storage.pieces.all",
         "orders-storage.po_lines.all",
         "orders-storage.purchase_orders.all",
-        "orders-storage.renewals.all",
         "orders-storage.reporting_codes.all",
         "orders-storage.sources.all",
         "orders-storage.vendor_details.all"
