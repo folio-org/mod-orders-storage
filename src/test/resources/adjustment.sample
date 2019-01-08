@@ -1,0 +1,12 @@
+{
+  "credit": 1.0,
+  "discount": 1.0,
+  "insurance": 0.5,
+  "invoice_id": "2d6d495c-c237-476f-aa48-57f7cbf74ca4",
+  "overhead": 1.0,
+  "shipment": 1.0,
+  "tax_1": 0.75,
+  "tax_2": 0.75,
+  "use_pro_rate": false,
+  "po_line_id": "8c778aee-97fa-4586-b131-3ea588a728e2"
+}
