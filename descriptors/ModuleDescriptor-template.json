@@ -411,6 +411,17 @@
       ]
     },
     {
+      "id": "orders-storage.receiving_history",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/receiving_history",
+          "permissionsRequired": ["orders-storage.receiving_history.collection.get"]
+        }
+      ]
+    },
+    {
       "id": "orders-storage.reporting_codes",
       "version": "1.0",
       "handlers": [

@@ -1,0 +1,61 @@
+{
+  "id": "1a902141-d8c6-4cf3-8a19-193eca007478",
+  "acquisition_method": "Purchase At Vendor System",
+  "adjustment": "6e4bb6f6-4e60-476d-9a63-1ddf6c0b634b",
+  "alerts": [
+    "6c576118-3da7-4b30-b9b9-3678ac4fe9a4"
+  ],
+  "cancellation_restriction": false,
+  "cancellation_restriction_note": "Cancellation Note",
+  "claims": [
+    "e00e0c93-9f96-47af-ad31-36744de00c89"
+  ],
+  "collection": false,
+  "contributors": [
+    {
+      "contributor": "Ed Mashburn",
+      "contributor_type": "99ad4cf4-5809-49ef-936c-1990bf3b6f48"
+    }
+  ],
+  "cost": "858ad25a-af03-439d-a250-9108ce7a12ab",
+  "description": "description for po_line receiving_history view",
+  "details": "69a6fad2-a0b2-46f7-97b6-f0e63ef3b263",
+  "donor": "ABCDEFGHIJKLM",
+  "eresource": "3ec58ae9-262b-414d-8964-6377e16d46d6",
+  "fund_distribution": [
+    "fc731cd5-e84c-409e-a9b0-b24c74eb45ad"
+  ],
+  "location": "28862c99-46fe-4e41-aebc-442e90699441",
+  "order_format": "Physical Resource",
+  "owner": "ABCDEFGHIJKLMNOPQRSTUVWXYZABC",
+  "payment_status": "Awaiting Payment",
+  "physical": "3b791acc-5151-4f17-8006-eb6196edf627",
+  "po_line_description": "ABCDEFGHIJKLMNOPQRSTUVWXY",
+  "po_line_number": "268758-03",
+  "po_line_workflow_status": "Open",
+  "publication_date": "2017",
+  "publisher": "Schiffer Publishing",
+  "receipt_date": "2018-10-09T00:00:00.000Z",
+  "receipt_status": "Awaiting Receipt",
+  "reporting_codes": [
+    "07c03c98-0feb-4042-8be8-f5b9c18706f4",
+    "c2f1695d-ceb4-4205-ae8b-01857a2ce491",
+    "74dd0f68-7e78-4cb4-a090-f9cad23cf750"
+  ],
+  "requester": "Leo Bulero",
+  "rush": true,
+  "selector": "ABCD",
+  "source": "8d2aa69f-c2d5-4566-9597-85f8abffcfd0",
+  "tags": [
+    "ABCDEFGHIJKLMNOPQRSTU",
+    "ABCDEFG",
+    "ABCDEFGHIJKLMNOPQRSTU",
+    "ABCDEFGHIJKLMNO"
+  ],
+  "title": "Skiing in the Colorado",
+  "vendor_detail": "5986ff60-aaaa-4b85-9113-7958e0184196",
+  "metadata": {
+    "createdDate": "2018-07-19T00:00:00.000+0000",
+    "createdByUserId": "a71e6232-5b50-45b2-887b-b4b4ec4aaf70"
+  }
+}
