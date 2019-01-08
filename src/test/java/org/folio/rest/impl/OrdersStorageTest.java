@@ -28,7 +28,7 @@ public abstract class OrdersStorageTest {
 
   private Vertx vertx;
   private Async async;
-  final Logger logger = LoggerFactory.getLogger("okapi");
+  final Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
   final int port = Integer.parseInt(System.getProperty("port", "8081"));
 
   final String TENANT_NAME = "diku";
