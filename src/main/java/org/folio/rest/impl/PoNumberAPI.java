@@ -44,7 +44,7 @@ public class PoNumberAPI implements OrdersStoragePoNumber {
             } else {
               log.error(reply.cause().getMessage(), reply.cause());
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePoNumber.GetOrdersStoragePoNumberResponse
-                .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                .respond400WithTextPlain(reply.cause().getMessage())));
             }
           } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -59,6 +59,5 @@ public class PoNumberAPI implements OrdersStoragePoNumber {
           .respond500WithTextPlain(message)));
       }
     });
-
   }
 }
