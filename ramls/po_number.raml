@@ -1,0 +1,37 @@
+#%RAML 1.0
+title: "Orders Storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1
+
+documentation:
+  - title: Purchase Order Number
+    content: <b>API used to manage PO number.</b>
+
+types:
+  po_number: !include acq-models/mod-orders-storage/schemas/po_number.json
+  UUID:
+    type: string
+    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+traits:
+    language: !include raml-util/traits/language.raml
+
+/orders-storage/po_number:
+  get:
+    is: [language]
+    description: Get generated purchase order number
+    responses:
+      200:
+        body:
+          application/json:
+            type: po_number
+      400:
+        description: "Bad request, e.g. malformed request body or query parameter"
+        body:
+          text/plain:
+            example: "Unable to generate purchase order number"
+      500:
+        description: "Internal server error, e.g. due to misconfiguration"
+        body:
+          text/plain:
+            example: "internal server error, contact administrator"
