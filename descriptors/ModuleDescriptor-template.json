@@ -411,13 +411,13 @@
       ]
     },
     {
-      "id": "orders-storage.receiving_history",
+      "id": "orders-storage.receiving-history",
       "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/orders-storage/receiving_history",
-          "permissionsRequired": ["orders-storage.receiving_history.collection.get"]
+          "pathPattern": "/orders-storage/receiving-history",
+          "permissionsRequired": ["orders-storage.receiving-history.collection.get"]
         }
       ]
     },
@@ -1009,6 +1009,19 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.receiving-history.collection.get",
+      "displayName" : "orders-storage.receiving-history-collection get",
+      "description" : "Get a collection of receiving-history"
+    },
+    {
+      "permissionName" : "orders-storage.receiving-history.all",
+      "displayName" : "All orders-storage receiving-history perms",
+      "description" : "All permissions for the orders-storage-receiving-history",
+      "subPermissions" : [
+        "orders-storage.receiving-history.collection.get"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.reporting_codes.collection.get",
       "displayName" : "reporting_code-collection get",
       "description" : "Get a collection of reporting_codes"
@@ -1137,6 +1150,7 @@
         "orders-storage.pieces.all",
         "orders-storage.po_lines.all",
         "orders-storage.purchase_orders.all",
+        "orders-storage.receiving-history.all",
         "orders-storage.reporting_codes.all",
         "orders-storage.sources.all",
         "orders-storage.vendor_details.all"

@@ -8,8 +8,8 @@ documentation:
     content: <b>Get list of receiving history API</b>
 
 types:
-    receiving_history: !include acq-models/mod-orders-storage/schemas/receiving_history.json
-    receiving_history_collection: !include acq-models/mod-orders-storage/schemas/receiving_history_collection.json
+    receiving-history: !include acq-models/mod-orders-storage/schemas/receiving_history.json
+    receiving-history-collection: !include acq-models/mod-orders-storage/schemas/receiving_history_collection.json
 
 traits:
     pageable:  !include raml-util/traits/pageable.raml
@@ -19,11 +19,11 @@ traits:
 resourceTypes:
     collection-get: !include raml-util/rtypes/collection-get.raml
 
-/orders-storage/receiving_history:
+/orders-storage/receiving-history:
   type:
     collection-get:
       exampleCollection: !include acq-models/mod-orders-storage/examples/receiving_history_collection.sample
-      schemaCollection: receiving_history_collection
+      schemaCollection: receiving-history-collection
   get:
     description: Get list of receiving history
     is: [

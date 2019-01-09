@@ -25,7 +25,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private static String detailSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
 
-  private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving_history";
+  private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
   private static final String PIECES_ENDPOINT = "/orders-storage/pieces";
   private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
   private static final String DETAILS_ENDPOINT = "/orders-storage/details";
