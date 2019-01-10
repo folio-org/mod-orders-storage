@@ -34,8 +34,6 @@ public abstract class OrdersStorageTest {
   final String TENANT_NAME = "diku";
   final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
 
-  private static final String INVALID_ENDPOINT = "invalidEndpoint";
-
   String moduleName; // "mod_orders_storage";
   String moduleVersion; // "1.0.0"
   String moduleId; // "mod-orders_storage-1.0.0"
@@ -87,7 +85,7 @@ public abstract class OrdersStorageTest {
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       async.complete();
-      logger.info("--- mod-orders-storage Cost test: END ");
+      logger.info("--- mod-orders-storage test: END ");
     });
   }
 
