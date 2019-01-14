@@ -1,5 +1,22 @@
-## 1.1.0 - Unreleased
- https://issues.folio.org/browse/MODORDSTOR-29 - Moving Renewals from po_line level to PO level and deleting Renewals API
+## 1.1.0 - Released
+
+### Stories
+
+* [MODORDSTOR-18](https://issues.folio.org/browse/MODORDSTOR-18) - Refactor API to be less confusing
+* [MODORDSTOR-19](https://issues.folio.org/browse/MODORDSTOR-19) - Implement fund_distribution API
+* [MODORDSTOR-27](https://issues.folio.org/browse/MODORDSTOR-27) & [MODORDSTOR-29](https://issues.folio.org/browse/MODORDSTOR-29) - Move 'renewals' to purchase_order
+* [MODORDSTOR-28](https://issues.folio.org/browse/MODORDSTOR-28) - Improved unit test coverage
+* [MODORDSTOR-30](https://issues.folio.org/browse/MODORDSTOR-30) - Add piece API
+* [MODORDSTOR-31](https://issues.folio.org/browse/MODORDSTOR-31) - Add receiving_history API
+* [MODORDSTOR-33](https://issues.folio.org/browse/MODORDSTOR-33) & [MODORDSTOR-34](https://issues.folio.org/browse/MODORDSTOR-34)- Add po_number API 
+
+### Bug Fixes
+
+* [MODORDSTOR-35](https://issues.folio.org/browse/MODORDSTOR-35) 
+* [MODORDSTOR-36](https://issues.folio.org/browse/MODORDSTOR-36)  
+* [MODORDSTOR-38](https://issues.folio.org/browse/MODORDSTOR-38)  
+* [MODORDSTOR-39](https://issues.folio.org/browse/MODORDSTOR-39)  
+* [MODORDSTOR-40](https://issues.folio.org/browse/MODORDSTOR-40)  
  
 ## 1.0.2 - Released 
 * Omit tenant/schema from reference data COPY scripts executed when enabling the module for a tenant.
