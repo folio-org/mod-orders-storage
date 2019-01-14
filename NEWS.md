@@ -1,4 +1,6 @@
-## 1.1.0 - Released
+## 2.0.0 - Released
+
+This release was originally slated to be 1.1.0, but since this release contains significant refactoring of the APIs, the major version number is being bumped.
 
 ### Stories
 
