@@ -4,7 +4,7 @@
   "provides": [
     {
       "id": "orders-storage.adjustments",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -35,7 +35,7 @@
     },
     {
       "id": "orders-storage.alerts",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -66,7 +66,7 @@
     },
     {
       "id": "orders-storage.claims",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -97,7 +97,7 @@
     },
     {
       "id": "orders-storage.costs",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -128,7 +128,7 @@
     },
     {
       "id": "orders-storage.fund-distributions",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -159,7 +159,7 @@
     },
     {
       "id": "orders-storage.details",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -190,7 +190,7 @@
     },
     {
       "id": "orders-storage.eresources",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -221,7 +221,7 @@
     },
     {
       "id": "orders-storage.licenses",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -252,7 +252,7 @@
     },
     {
       "id": "orders-storage.locations",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -283,7 +283,7 @@
     },
     {
       "id": "orders-storage.physicals",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -345,7 +345,7 @@
     },
     {
       "id": "orders-storage.po_lines",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -376,7 +376,7 @@
     },
     {
       "id": "orders-storage.purchase_orders",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -423,7 +423,7 @@
     },
     {
       "id": "orders-storage.reporting_codes",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -454,7 +454,7 @@
     },
     {
       "id": "orders-storage.sources",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -485,7 +485,7 @@
     },
     {
       "id": "orders-storage.vendor_details",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
