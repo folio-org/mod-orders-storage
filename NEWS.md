@@ -4,6 +4,8 @@
 
 The sole purpose of this release is to bring the interface versions in the RAML files inline with those in the module descriptor.
 
+* [MODORDSTOR-43](https://issues.folio.org/browse/MODORDSTOR-43)
+
 ## 2.0.0 - Released
 
 This release was originally slated to be 1.1.0, but since this release contains significant refactoring of the APIs, the major version number is being bumped.
