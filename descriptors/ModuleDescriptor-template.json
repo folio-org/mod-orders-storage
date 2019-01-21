@@ -402,11 +402,6 @@
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/purchase_orders/{id}",
           "permissionsRequired": ["orders-storage.purchase_orders.item.delete"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders",
-          "permissionsRequired": ["orders-storage.purchase_orders.collection.get"]
         }
       ]
     },

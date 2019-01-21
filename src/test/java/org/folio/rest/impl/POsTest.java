@@ -14,7 +14,6 @@ public class POsTest extends OrdersStorageTest {
 
   private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
   private static final String PO_ENDPOINT = "/orders-storage/purchase_orders";
-  private static final String ORDERS_ENDPOINT = "/orders";
   private final static String INVALID_PO_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
 
@@ -56,9 +55,6 @@ public class POsTest extends OrdersStorageTest {
 
       logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created ... ");
       testPOCreated();
-
-      logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created from orders endpoint... ");
-      testPOCreatedFromOrders();
 
       logger.info("--- mod-order-storage PO test: Fetching purchase order with ID: " + sampleId);
       testPOSuccessfullyFetched(sampleId);
@@ -117,12 +113,6 @@ public class POsTest extends OrdersStorageTest {
     getDataById(PO_ENDPOINT, purchaseOrderSampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("id", equalTo(purchaseOrderSampleId));
-  }
-
-  private void testPOCreatedFromOrders() {
-    getData(ORDERS_ENDPOINT).then().log().ifValidationFails()
-    .statusCode(200)
-    .body("total_records", equalTo(15));
   }
 
   private void testPOCreated() {
