@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +75,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
+      fail();
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
       testDeleteDetail(detailSampleId);
@@ -160,10 +162,10 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
 	  .body("receiving_history[1].title", equalTo("Skiing in the Colorado"))
 	  .body("receiving_history[0].poLineId", equalTo("d471d766-8dbb-4609-999a-02681dea6c22"))
 	  .body("receiving_history[1].poLineId", equalTo("2fe6c2dd-3700-4a53-a624-1159cfd7f8ce"))
-	  .body("receiving_history[0].po_line_number", equalTo("268758-03"))
-	  .body("receiving_history[1].po_line_number", equalTo("268500-03"))
-	  .body("receiving_history[0].receiving_note", equalTo("ABCDEFGHIJKL"))
-	  .body("receiving_history[1].receiving_note", equalTo("details for view"));
+	  .body("receiving_history[0].poLineNumber", equalTo("268758-03"))
+	  .body("receiving_history[1].poLineNumber", equalTo("268500-03"))
+	  .body("receiving_history[0].receivingNote", equalTo("ABCDEFGHIJKL"))
+	  .body("receiving_history[1].receivingNote", equalTo("details for view"));
   }
 
   Response getViewData(String endpoint) {
