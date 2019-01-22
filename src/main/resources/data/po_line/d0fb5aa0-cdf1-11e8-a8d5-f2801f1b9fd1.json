@@ -1,0 +1,49 @@
+{
+  "id": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkin_items": true,
+  "instance_id": "36174ed4-0e30-4d61-566b-9c9adc573a99",
+  "agreement_id": "36174ed4-0r60-6g81-258b-7b5aaf573a58",
+  "purchase_order_id": "589a6016-3463-49f6-8aa2-dc315d0665fd",
+  "acquisition_method": "Purchase",
+  "adjustment": "896336cf-eb47-4e09-9e28-e25aa464adb7",
+  "alerts": [],
+  "cancellation_restriction": false,
+  "cancellation_restriction_note": "",
+  "claims": [
+    "87c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "collection": false,
+  "cost": "87c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "description": "",
+  "details": "87c5d792-04be-11e9-a8d5-f2801f1b9fd1",
+  "donor": "",
+  "eresource": "87c5d806-cabe-11e8-a8d5-f2801f1b9fd1",
+  "fund_distribution": [
+    "8de2cef0-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "location": "87c5d9ea-cabe-11e8-a8d5-f2801f1b9f07",
+  "order_format": "Physical Resource",
+  "owner": "Acquisitions - Serials",
+  "payment_status": "Pending",
+  "physical": "d0fb78be-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "po_line_description": "",
+  "po_line_number": "1",
+  "po_line_workflow_status": "Pending",
+  "publication_date": "2018",
+  "publisher": "Plenum Press",
+  "receipt_date": null,
+  "receipt_status": "Pending",
+  "reporting_codes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "",
+  "source": "8b4b2f41-c5c6-4280-858e-33fba452a534",
+  "tags": [],
+  "title": "Advances in astronautical science",
+  "vendor_detail": "d0fb90ec-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "metadata": {
+    "createdDate": "2018-07-19T00:00:00Z",
+    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

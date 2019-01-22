@@ -1,0 +1,12 @@
+{
+  "id": "c7c5d812-cabe-11e8-a8d5-f2801f1b9fd1",
+  "activated": true,
+  "activation_due": 0,
+  "create_inventory": false,
+  "trial": false,
+  "expected_activation": "2014-07-06T00:00:00.000Z",
+  "user_limit": 1,
+  "access_provider": "1dcd4c64-4df2-4396-9ad5-387302336c93",
+  "po_line_id": "12fb63b0-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "license": "09cld8be-cabe-11e8-a8d5-108201f1b9fd1"
+}

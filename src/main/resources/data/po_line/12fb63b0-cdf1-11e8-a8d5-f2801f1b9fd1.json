@@ -1,0 +1,49 @@
+{
+  "id": "12fb63b0-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkin_items": false,
+  "instance_id": "41197500-0e30-4d61-566b-9c9adc573a99",
+  "agreement_id": "41197500-0r60-6g81-258b-7b5aaf573a58",
+  "purchase_order_id": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
+  "acquisition_method": "Purchase",
+  "adjustment": "c96336cf-eb47-4b09-9e28-e25aa464adb7",
+  "alerts": [],
+  "cancellation_restriction": false,
+  "cancellation_restriction_note": "",
+  "claims": [
+    "c7c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "collection": false,
+  "cost": "c7c5d792-cabe-11dd-a8d5-f2801f1b9fd1",
+  "description": "",
+  "details": "c7c5d792-10be-11e9-a8d5-f2801f1b9fd1",
+  "donor": "",
+  "eresource": "c7c5d812-cabe-11e8-a8d5-f2801f1b9fd1",
+  "fund_distribution": [
+    "12e2d472-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "location": "c7c5d9ea-cabe-11e8-a8d5-f2801f1b9f13",
+  "order_format": "Electronic Resource",
+  "owner": "LTS E-Resources & Serials",
+  "payment_status": "Awaiting Payment",
+  "physical": "12fb81ec-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "po_line_description": "",
+  "po_line_number": "1",
+  "po_line_workflow_status": "Closed",
+  "publication_date": "",
+  "publisher": "John Wiley & Sons, Inc.",
+  "receipt_date": null,
+  "receipt_status": "Fully Received",
+  "reporting_codes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Woods",
+  "source": "cb4b2f41-c5c6-4280-858e-33fba452a114",
+  "tags": [],
+  "title": "Roitt`s essential immunology / Peter J. Delves, Seamus J. Martin, Dennis R. Burton, Ivan M. Roitt.",
+  "vendor_detail": "12fb922c-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "metadata": {
+    "createdDate": "2014-07-06T00:00:00Z",
+    "createdByUserId": "28d10cfc-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "id": "87c5d792-04be-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "start with v. 162",
+  "product_ids": [
+    {
+      "product_id": "0065-3438",
+      "product_id_type": "ISSN"
+    }
+  ],
+  "material_types": [
+    "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": "2018-07-01T00:00:00.000Z",
+  "subscription_interval": 1095,
+  "subscription_to": "2021-06-30T00:00:00.000Z",
+  "po_line_id": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

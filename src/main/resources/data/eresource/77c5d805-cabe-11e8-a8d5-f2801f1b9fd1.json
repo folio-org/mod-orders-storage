@@ -1,0 +1,12 @@
+{
+  "id": "77c5d805-cabe-11e8-a8d5-f2801f1b9fd1",
+  "activated": false,
+  "activation_due": 0,
+  "create_inventory": false,
+  "trial": false,
+  "expected_activation": null,
+  "user_limit": 0,
+  "access_provider": "a1f045a9-22c9-4705-8953-d15438017346",
+  "po_line_id": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "license": "09cld8be-cabe-11e8-a8d5-038201f1b9fd1"
+}
