@@ -171,7 +171,7 @@
       "fromModuleVersion": 1.0,
       "withMetadata": true,
       "populateJsonWithId": true,
-      "customSnippetPath": "createPoNumberSequence.sql"
+      "customSnippetPath": "purchase_order_table.sql"
     },
     {
       "tableName": "po_line",

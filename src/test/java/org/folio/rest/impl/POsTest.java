@@ -49,6 +49,11 @@ public class POsTest extends OrdersStorageTest {
       logger.info("--- mod-orders-storage PO test: Creating purchase order ... ");
       String purchaseOrderSample = getFile("purchase_order.sample");
       Response response = postData(PO_ENDPOINT, purchaseOrderSample);
+
+      logger.info("--- mod-orders-storage PO test: Creating purchase order with the same po_number ... ");
+      Response samePoNumberErrorResponse = postData(PO_ENDPOINT, purchaseOrderSample);
+      testPoNumberUniqness(samePoNumberErrorResponse, context);
+
       sampleId = response.then().extract().path("id");
       
       logger.info("--- mod-orders-storage PO test: Valid po_number exists ... ");
@@ -67,23 +72,27 @@ public class POsTest extends OrdersStorageTest {
       testInvalidPOId();
       
       logger.info("--- mod-orders-storage PO test: Editing purchase order with ID: " + sampleId);
-      testPOEdit(purchaseOrderSample, sampleId);
+      testPOEdit(purchaseOrderSample);
 
       logger.info("--- mod-orders-storage PO test: Fetching updated purchase order with ID: " + sampleId);
-      testFetchingUpdatedPO(sampleId);
+      testFetchingUpdatedPO();
  
     } catch (Exception e) {
       context.fail("--- mod-orders-storage PO test: ERROR: " + e.getMessage());
     }  finally {
       logger.info("--- mod-orders-storage PO test: Deleting purchase order with ID: " + sampleId);
-      testDeletePO(sampleId);
+      testDeletePO();
 
       logger.info("--- mod-orders-storages PO test: Verify PO is deleted with ID ");
       testVerifyPODeletion(sampleId);
     }
   }
-  
-  private void testDeletePO(String purchaseOrderSampleId) {
+
+  private void testPoNumberUniqness(Response response, TestContext context) {
+    context.assertTrue(response.getBody().asString().contains("duplicate key value violates unique constraint \"purchase_order_po_number_idx\""));
+  }
+
+  private void testDeletePO() {
     deleteData(PO_ENDPOINT, sampleId).then().log().ifValidationFails()
     .statusCode(204);
   }
@@ -93,17 +102,17 @@ public class POsTest extends OrdersStorageTest {
       .statusCode(404);
   }
   
-  private void testFetchingUpdatedPO(String purchaseOrderSampleId) {
+  private void testFetchingUpdatedPO() {
     getDataById(PO_ENDPOINT, sampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("po_number", equalTo("666666"));
   }
 
-  private void testPOEdit(String purchaseOrderSample, String purchaseOrderSampleId) {
+  private void testPOEdit(String purchaseOrderSample) {
     JSONObject catJSON = new JSONObject(purchaseOrderSample);
-    catJSON.put("id", purchaseOrderSampleId);
+    catJSON.put("id", sampleId);
     catJSON.put("po_number", "666666");
-    Response response = putData(PO_ENDPOINT, purchaseOrderSampleId, catJSON.toString());
+    Response response = putData(PO_ENDPOINT, sampleId, catJSON.toString());
     response.then().log().ifValidationFails()
       .statusCode(204);
   }
@@ -134,7 +143,7 @@ public class POsTest extends OrdersStorageTest {
   private void testValidPONumberExists(Response response) {
     response.then().log().ifValidationFails()
     .statusCode(201)
-    .body("po_number", equalTo("268758"));
+    .body("po_number", equalTo("268759"));
   }
 
 }
