@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -66,6 +67,7 @@ public class PiecesTest extends OrdersStorageTest{
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: piece API ERROR: " + e.getMessage(), e);
+      fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage pieces test: Deleting piece with ID");
       testDeletePiece(piecesSampleId);

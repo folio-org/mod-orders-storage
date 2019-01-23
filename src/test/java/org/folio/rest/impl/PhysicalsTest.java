@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 @RunWith(VertxUnitRunner.class)
 public class PhysicalsTest extends OrdersStorageTest {
@@ -52,6 +53,7 @@ public class PhysicalsTest extends OrdersStorageTest {
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: Physical API ERROR: " + e.getMessage(), e);
+      fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storages Physical test: Deleting Physical with ID");
       testDeletePhysical(sampleId);
