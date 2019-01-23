@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 @RunWith(VertxUnitRunner.class)
 public class CostsTest extends OrdersStorageTest {
@@ -50,6 +51,7 @@ public class CostsTest extends OrdersStorageTest {
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: Cost API ERROR: " + e.getMessage(), e);
+      fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storages Cost test: Deleting Cost with ID");
       testDeleteCost(sampleId);

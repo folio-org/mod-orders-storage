@@ -75,7 +75,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
-      fail();
+      fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
       testDeleteDetail(detailSampleId);
