@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public class TenantSampleDataApi extends TenantAPI {
   private static final String FILE_PROTOCOL = "file";
   private static final String JAR_PROTOCOL = "jar";
 
-  private Context context;
+
   private static final List<String> TABLES_NAME_LIST = Collections.unmodifiableList(Arrays.asList(
     "purchase_order", "adjustment", "claim", "cost",
     "details", "eresource", "fund_distribution", "location",
@@ -53,10 +52,9 @@ public class TenantSampleDataApi extends TenantAPI {
   @Override
   public void postTenant(TenantAttributes entity, Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
     log.info("postTenant");
-    this.context = context;
     super.postTenant(entity, headers, res -> {
       if (res.succeeded()) {
-        loadReferenceData(headers, handlers);
+        loadSampleData(headers, context, handlers);
       } else {
         handlers.handle(res);
       }
@@ -117,9 +115,8 @@ public class TenantSampleDataApi extends TenantAPI {
     return path.substring(5, path.indexOf('!'));
   }
 
-  private void loadReferenceData(Map<String, String> headers, Handler<AsyncResult<Response>> handler) {
-
-    loadRef(headers, TABLES_NAME_LIST.iterator(), res -> {
+  private void loadSampleData(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
+    loadRef(headers, context, res -> {
       if (res.failed()) {
         handler.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
           .respond500WithTextPlain(res.cause().getLocalizedMessage())));
@@ -130,22 +127,18 @@ public class TenantSampleDataApi extends TenantAPI {
     });
   }
 
-  private void loadRef(Map<String, String> headers, Iterator<String> it, Handler<AsyncResult<Response>> handler) {
-    if (!it.hasNext()) {
-      handler.handle(Future.succeededFuture());
-    } else {
-      String endPoint = it.next();
-      loadRef(headers, endPoint, x -> {
+  private void loadRef(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
+    for (String table : TABLES_NAME_LIST) {
+      loadRef(headers, context, table, x -> {
         if (x.failed()) {
           handler.handle(Future.failedFuture(x.cause()));
-        } else {
-          loadRef(headers, it, handler);
         }
       });
     }
+    handler.handle(Future.succeededFuture());
   }
 
-  private void loadRef(Map<String, String> headers, String table, Handler<AsyncResult<Void>> handler) {
+  private void loadRef(Map<String, String> headers, Context context, String table, Handler<AsyncResult<Void>> handler) {
     log.info("loadRef {} begin", table);
     List<String> jsonList = new LinkedList<>();
     try {
@@ -189,6 +182,5 @@ public class TenantSampleDataApi extends TenantAPI {
     String schema = PostgresClient.convertToPsqlStandard(tenant);
     return String.format(INSERT_IF_NOT_EXIST, schema, table, id, json);
   }
-
 
 }
