@@ -2,6 +2,11 @@
   "scripts": [
     {
       "run": "after",
+      "snippet": "TRUNCATE  purchase_order, adjustment, claim, cost, details, eresource, fund_distribution, location, physical, source, vendor_detail, po_line;",
+      "fromModuleVersion": "1.0"
+    },
+    {
+      "run": "after",
       "snippet": "COPY purchase_order (id, jsonb) FROM 'data/purchaseOrders.data' ENCODING 'UTF8' DELIMITER E'\t';",
       "fromModuleVersion": "1.0"
     },
@@ -64,7 +69,7 @@
       "run": "after",
       "snippet": "CREATE OR REPLACE VIEW receiving_history_view AS SELECT pieces.id AS id, json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'itemId', pieces.jsonb->>'itemId', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'po_line_number', 'receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title', 'receivingNote', details.jsonb->>'receiving_note', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement') AS jsonb FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb->>'poLineId' = po_line.jsonb->>'id' LEFT OUTER JOIN details ON details.jsonb->>'po_line_id' = po_line.jsonb->>'id';",
       "fromModuleVersion": "1.0"
-    }    
+    }
   ],
   "tables": [
     {
