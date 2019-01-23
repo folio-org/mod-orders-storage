@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 @RunWith(VertxUnitRunner.class)
 public class DetailsTest extends OrdersStorageTest {
@@ -51,6 +52,7 @@ public class DetailsTest extends OrdersStorageTest {
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: Detail API ERROR: " + e.getMessage(), e);
+      fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage Details test: Deleting Detail with ID");
       testDeleteDetail(sampleId);
