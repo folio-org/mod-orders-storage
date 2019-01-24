@@ -33,6 +33,7 @@ public abstract class OrdersStorageTest {
 
   final String TENANT_NAME = "diku";
   final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
+  Header URLTO_HEADER;
 
   String moduleName; // "mod_orders_storage";
   String moduleVersion; // "1.0.0"
@@ -77,6 +78,7 @@ public abstract class OrdersStorageTest {
     // Set the default headers for the API calls to be tested
     RestAssured.port = port;
     RestAssured.baseURI = "http://localhost";
+    URLTO_HEADER = new Header("X-Okapi-Url-to",RestAssured.baseURI+":"+RestAssured.port);
   }
 
   @After
@@ -100,7 +102,7 @@ public abstract class OrdersStorageTest {
 
     given()
       .header(TENANT_HEADER)
-      .header(new Header("X-Okapi-Url-to",RestAssured.baseURI+":"+RestAssured.port))
+      .header(URLTO_HEADER)
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
       .post("/_/tenant")
