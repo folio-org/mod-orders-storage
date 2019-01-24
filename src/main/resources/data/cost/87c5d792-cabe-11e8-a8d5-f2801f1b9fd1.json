@@ -1,1 +1,9 @@
-{"id": "87c5d792-cabe-11e8-a8d5-f2801f1b9fd1","list_price": 900.00,"currency": "USD","quantity_physical": 1,"quantity_electronic": 0,"po_line_estimated_price": 900.00,"po_line_id": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1"}
+{
+  "id": "87c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "list_price": 900.00,
+  "currency": "USD",
+  "quantity_physical": 1,
+  "quantity_electronic": 0,
+  "po_line_estimated_price": 900.00,
+  "po_line_id": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

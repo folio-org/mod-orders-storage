@@ -23,8 +23,6 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,17 +42,16 @@ public class TenantSampleDataApi extends TenantAPI {
   private static final String JAR_PROTOCOL = "jar";
 
 
-  private static final List<String> TABLES_NAME_LIST = Collections.unmodifiableList(Arrays.asList(
-    "purchase_order", "adjustment", "claim", "cost",
+  private static final String[] TABLES_NAMES = new String[] {"purchase_order", "adjustment", "claim", "cost",
     "details", "eresource", "fund_distribution", "location",
-    "physical", "source", "vendor_detail", "po_line"));
+    "physical", "source", "vendor_detail", "po_line"};
 
   @Override
   public void postTenant(TenantAttributes entity, Map<String, String> headers, Handler<AsyncResult<Response>> handlers, Context context) {
     log.info("postTenant");
     super.postTenant(entity, headers, res -> {
       if (res.succeeded()) {
-        loadSampleData(headers, context, handlers);
+        loadAllSampleData(headers, context, handlers);
       } else {
         handlers.handle(res);
       }
@@ -115,8 +112,8 @@ public class TenantSampleDataApi extends TenantAPI {
     return path.substring(5, path.indexOf('!'));
   }
 
-  private void loadSampleData(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
-    loadRef(headers, context, res -> {
+  private void loadAllSampleData(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
+    loadSampleData(headers, context, res -> {
       if (res.failed()) {
         handler.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
           .respond500WithTextPlain(res.cause().getLocalizedMessage())));
@@ -127,9 +124,9 @@ public class TenantSampleDataApi extends TenantAPI {
     });
   }
 
-  private void loadRef(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
-    for (String table : TABLES_NAME_LIST) {
-      loadRef(headers, context, table, x -> {
+  private void loadSampleData(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
+    for (String table : TABLES_NAMES) {
+      loadSampleData(headers, context, table, x -> {
         if (x.failed()) {
           handler.handle(Future.failedFuture(x.cause()));
         }
@@ -138,8 +135,8 @@ public class TenantSampleDataApi extends TenantAPI {
     handler.handle(Future.succeededFuture());
   }
 
-  private void loadRef(Map<String, String> headers, Context context, String table, Handler<AsyncResult<Void>> handler) {
-    log.info("loadRef {} begin", table);
+  private void loadSampleData(Map<String, String> headers, Context context, String table, Handler<AsyncResult<Void>> handler) {
+    log.info("load sample data for {} begin", table);
     List<String> jsonList = new LinkedList<>();
     try {
       List<InputStream> streams = getStreamsFromClassPathDir("data/" + table);
@@ -158,20 +155,24 @@ public class TenantSampleDataApi extends TenantAPI {
     List<Future> futures = new LinkedList<>();
     for (String json : jsonList) {
       String tenant =  headers.get("X-Okapi-Tenant");
-      Future<Void> future = Future.future();
-      PostgresClient.getInstance(context.owner(), tenant)
-        .execute(buildInsertIfNotExistQuery(json, tenant, table), updateResult -> handle(future, updateResult));
-      futures.add(future);
+      PostgresClient client = PostgresClient.getInstance(context.owner(), tenant);
+      futures.add(insertIntoDBIfNotExist(client, buildInsertIfNotExistQuery(json, tenant, table)));
     }
     CompositeFuture.all(futures).setHandler(asyncResult -> {
-      log.info("loadRef {} done. success={}", table, asyncResult.succeeded());
-      handle(handler, asyncResult);
+      log.info("load sample data for {} done. success={}", table, asyncResult.succeeded());
+      handleResult(handler, asyncResult);
     });
   }
 
-  private void handle(Handler<AsyncResult<Void>> asyncResultHandler, AsyncResult<?> asyncResult) {
+  private Future insertIntoDBIfNotExist(PostgresClient postgresClient, String query) {
+    Future<Void> future = Future.future();
+    postgresClient.execute(query, updateResult -> handleResult(future, updateResult));
+    return future;
+  }
+
+  private void handleResult(Handler<AsyncResult<Void>> asyncResultHandler, AsyncResult<?> asyncResult) {
     if (asyncResult.failed()) {
-      asyncResultHandler.handle(Future.failedFuture(asyncResult.cause().getLocalizedMessage()));
+      asyncResultHandler.handle(Future.failedFuture(asyncResult.cause()));
     } else {
       asyncResultHandler.handle(Future.succeededFuture());
     }
