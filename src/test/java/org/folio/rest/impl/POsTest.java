@@ -7,6 +7,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 @RunWith(VertxUnitRunner.class)
@@ -52,7 +53,7 @@ public class POsTest extends OrdersStorageTest {
 
       logger.info("--- mod-orders-storage PO test: Creating purchase order with the same po_number ... ");
       Response samePoNumberErrorResponse = postData(PO_ENDPOINT, purchaseOrderSample);
-      testPoNumberUniqness(samePoNumberErrorResponse, context);
+      testPoNumberUniqness(samePoNumberErrorResponse);
 
       sampleId = response.then().extract().path("id");
       
@@ -88,8 +89,11 @@ public class POsTest extends OrdersStorageTest {
     }
   }
 
-  private void testPoNumberUniqness(Response response, TestContext context) {
-    context.assertTrue(response.getBody().asString().contains("duplicate key value violates unique constraint \"purchase_order_po_number_idx\""));
+  private void testPoNumberUniqness(Response response) {
+    response
+      .then()
+       .statusCode(500)
+       .body(containsString("duplicate key value violates unique constraint \"purchase_order_po_number_idx\""));
   }
 
   private void testDeletePO() {
