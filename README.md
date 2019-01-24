@@ -12,11 +12,12 @@ This is the Orders storage module.
 ## PREPARATION
 
 Tenant Initialization
+
 A tenant can be initialized in the following ways and a parameter can be passed to control the Sample data load
 If no parameters are passed the sample data will not be loaded. 
 The module supports v1.2 of the Okapi _tenant interface. This version of the interface allows Okapi to pass tenant initialization parameters using the tenantParameters key. Currently, the only parameter supported is the loadReference key, which will cause the module to load reference data for the tenant if set to true. Here is an example of passing the parameter to the module via Okapi's /_/proxy/tenants/<tenantId>/install endpoint:
 
-Enabling via okapi
+ENABLING VIA OKAPI:
 curl -w '\n' -X POST -d '[ { "id": "mod-orders-storage-3.0.0", "action": "enable" } ]' http://localhost:9130/_/proxy/tenants/test-tenant/install?tenantParameters=loadSample=true
 This results in a post to the module's _tenant API with the following structure:
 
@@ -30,9 +31,9 @@ This results in a post to the module's _tenant API with the following structure:
   ]
 }
 
-Command Line: java -jar target/mod-orders-storage-fat.jar loadSample=true
+COMMAND LINE: java -jar target/mod-orders-storage-fat.jar loadSample=true
 
-Standalone:
+STANDALONE:
 A post to http://localhost:8081/_/tenant
 {
 	"module_to": "mod-orders-storage-3.0.0-SNAPSHOT",
