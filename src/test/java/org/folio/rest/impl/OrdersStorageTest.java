@@ -1,16 +1,21 @@
 package org.folio.rest.impl;
 
+import static com.jayway.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.equalTo;
+
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
@@ -18,11 +23,6 @@ import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.junit.After;
 import org.junit.Before;
-
-import java.io.InputStream;
-
-import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
 
 public abstract class OrdersStorageTest {
 
@@ -90,11 +90,19 @@ public abstract class OrdersStorageTest {
   }
 
   void prepareTenant() {
-    String tenants = "{\"module_to\":\"" + moduleId + "\"}";
+    JsonArray parameterArray = new JsonArray();
+    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
+
+    JsonObject jo=new JsonObject();
+    jo.put("module_to", moduleId);
+    jo.put("parameters", parameterArray);
+
+
     given()
       .header(TENANT_HEADER)
+      .header(new Header("X-Okapi-Url-to",RestAssured.baseURI+":"+RestAssured.port))
       .contentType(ContentType.JSON)
-      .body(tenants)
+      .body(jo.encodePrettily())
       .post("/_/tenant")
       .then().log().ifValidationFails();
   }
