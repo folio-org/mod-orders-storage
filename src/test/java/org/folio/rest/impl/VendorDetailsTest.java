@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 @RunWith(VertxUnitRunner.class)
 public class VendorDetailsTest extends OrdersStorageTest {
@@ -51,6 +52,7 @@ public class VendorDetailsTest extends OrdersStorageTest {
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: Vendor Details API ERROR: " + e.getMessage(), e);
+      fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage Vendor Details test: Deleting Vendor Detail with ID");
       testDeleteVendorDetail(sampleId);

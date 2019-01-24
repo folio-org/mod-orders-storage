@@ -2,9 +2,9 @@
   "id": "5e317dc2-deeb-4429-b2a1-91e5cd0fd5f7",
   "caption": "Tutorial Volume 5",
   "comment": "Special Edition",
-  "item_id": "522a501a-56b5-48d9-b28a-3a8f02482d97",
-  "po_line_id": "d471d766-8dbb-4609-999a-02681dea6c22",
-  "receiving_status": "Expected",
+  "itemId": "522a501a-56b5-48d9-b28a-3a8f02482d97",
+  "poLineId": "d471d766-8dbb-4609-999a-02681dea6c22",
+  "receivingStatus": "Expected",
   "supplement": true,
-  "received_date": "2018-10-10T00:00:00.000Z"
+  "receivedDate": "2018-10-10T00:00:00.000Z"
 }

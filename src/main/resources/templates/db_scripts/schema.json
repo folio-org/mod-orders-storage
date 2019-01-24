@@ -2,7 +2,7 @@
   "scripts": [
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW receiving_history_view AS SELECT pieces.id AS id, json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'item_id', pieces.jsonb->>'item_id', 'po_line_id', pieces.jsonb->>'po_line_id', 'po_line_number', po_line.jsonb->>'po_line_number', 'received_date', pieces.jsonb->>'received_date', 'title', po_line.jsonb->>'title', 'receiving_note', details.jsonb->>'receiving_note', 'receiving_status', pieces.jsonb->>'receiving_status', 'supplement', pieces.jsonb->>'supplement') AS jsonb FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb->>'po_line_id' = po_line.jsonb->>'id' LEFT OUTER JOIN details ON details.jsonb->>'po_line_id' = po_line.jsonb->>'id';",
+      "snippet": "CREATE OR REPLACE VIEW receiving_history_view AS SELECT pieces.id AS id, json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'itemId', pieces.jsonb->>'itemId', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'po_line_number', 'receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title', 'receivingNote', details.jsonb->>'receiving_note', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement') AS jsonb FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb->>'poLineId' = po_line.jsonb->>'id' LEFT OUTER JOIN details ON details.jsonb->>'po_line_id' = po_line.jsonb->>'id';",
       "fromModuleVersion": "1.0"
     }
   ],

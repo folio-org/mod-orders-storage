@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
 
 @RunWith(VertxUnitRunner.class)
 public class AdjustmentsTest extends OrdersStorageTest {
@@ -50,6 +51,7 @@ public class AdjustmentsTest extends OrdersStorageTest {
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: Adjustment API ERROR: " + e.getMessage(), e);
+      fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storages Adjustment test: Deleting Adjustment with ID");
       testDeleteAdjustment(sampleId);
