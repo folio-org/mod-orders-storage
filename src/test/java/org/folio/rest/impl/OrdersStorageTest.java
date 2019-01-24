@@ -93,16 +93,16 @@ public abstract class OrdersStorageTest {
     JsonArray parameterArray = new JsonArray();
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
 
-    JsonObject jo=new JsonObject();
-    jo.put("module_to", moduleId);
-    jo.put("parameters", parameterArray);
+    JsonObject jsonBody=new JsonObject();
+    jsonBody.put("module_to", moduleId);
+    jsonBody.put("parameters", parameterArray);
 
 
     given()
       .header(TENANT_HEADER)
       .header(new Header("X-Okapi-Url-to",RestAssured.baseURI+":"+RestAssured.port))
       .contentType(ContentType.JSON)
-      .body(jo.encodePrettily())
+      .body(jsonBody.encodePrettily())
       .post("/_/tenant")
       .then().log().ifValidationFails();
   }
