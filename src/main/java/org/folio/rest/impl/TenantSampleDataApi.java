@@ -5,6 +5,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.jaxrs.model.TenantAttributes;
@@ -23,7 +24,9 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +54,7 @@ public class TenantSampleDataApi extends TenantAPI {
     log.info("postTenant");
     super.postTenant(entity, headers, res -> {
       if (res.succeeded()) {
-        loadAllSampleData(headers, context, handlers);
+        loadAllSampleData(headers, handlers);
       } else {
         handlers.handle(res);
       }
@@ -112,8 +115,9 @@ public class TenantSampleDataApi extends TenantAPI {
     return path.substring(5, path.indexOf('!'));
   }
 
-  private void loadAllSampleData(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
-    loadSampleData(headers, context, res -> {
+  private void loadAllSampleData(Map<String, String> headers, Handler<AsyncResult<Response>> handler) {
+    Iterator<String> it = Arrays.asList(TABLES_NAMES).iterator();
+    loadSampleData(headers, it, res -> {
       if (res.failed()) {
         handler.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
           .respond500WithTextPlain(res.cause().getLocalizedMessage())));
@@ -124,18 +128,23 @@ public class TenantSampleDataApi extends TenantAPI {
     });
   }
 
-  private void loadSampleData(Map<String, String> headers, Context context, Handler<AsyncResult<Response>> handler) {
-    for (String table : TABLES_NAMES) {
-      loadSampleData(headers, context, table, x -> {
+  private void loadSampleData(Map<String, String> headers, Iterator<String> it, Handler<AsyncResult<Response>> handler) {
+
+    if (!it.hasNext()) {
+      handler.handle(Future.succeededFuture());
+    } else {
+      String table = it.next();
+      loadSampleData(headers, table, x -> {
         if (x.failed()) {
           handler.handle(Future.failedFuture(x.cause()));
+        } else {
+          loadSampleData(headers, it, handler);
         }
       });
     }
-    handler.handle(Future.succeededFuture());
   }
 
-  private void loadSampleData(Map<String, String> headers, Context context, String table, Handler<AsyncResult<Void>> handler) {
+  private void loadSampleData(Map<String, String> headers,  String table, Handler<AsyncResult<Void>> handler) {
     log.info("load sample data for {} begin", table);
     List<String> jsonList = new LinkedList<>();
     try {
@@ -154,7 +163,7 @@ public class TenantSampleDataApi extends TenantAPI {
 
     List<Future> futures = new LinkedList<>();
     String tenant =  headers.get("X-Okapi-Tenant");
-    PostgresClient client = PostgresClient.getInstance(context.owner(), tenant);
+    PostgresClient client = PostgresClient.getInstance(Vertx.vertx(), tenant);
     for (String json : jsonList) {
       futures.add(insertIntoDBIfNotExist(client, buildInsertIfNotExistQuery(json, tenant, table)));
     }
