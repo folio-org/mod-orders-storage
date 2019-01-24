@@ -23,19 +23,13 @@ import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 
 public class TenantReferenceAPI extends TenantAPI {
-
-  private static final String JAR_PROTOCOL = "jar";
-
-  private static final String FILE_PROTOCOL = "file";
-
-  private static final String RESOURCES_PATH = "data/";
-
-  private static final String ORDERS_STORAGE_PREFIX_URL = "/orders-storage/";
-
-  private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
-
   private static final Logger log = LoggerFactory.getLogger(TenantReferenceAPI.class);
 
+  private static final String JAR_PROTOCOL = "jar";
+  private static final String FILE_PROTOCOL = "file";
+  private static final String RESOURCES_PATH = "data/";
+  private static final String ORDERS_STORAGE_PREFIX_URL = "/orders-storage/";
+  private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private HttpClient httpClient;
 
 
@@ -162,7 +156,6 @@ public class TenantReferenceAPI extends TenantAPI {
     for (String json : jsonList) {
       Future<Void> future = Future.future();
       futures.add(future);
-
       postData(headers, endPointUrl, json, future);
     }
     CompositeFuture.all(futures).setHandler(asyncResult -> {
@@ -175,13 +168,12 @@ public class TenantReferenceAPI extends TenantAPI {
     });
   }
 
-
-  private void postData(Map<String, String> headers, final String endPointUrl, String json, Future<Void> f) {
+  private void postData(Map<String, String> headers, final String endPointUrl, String json, Future<Void> future) {
     HttpClientRequest req = httpClient.postAbs(endPointUrl, responseHandler -> {
       if (responseHandler.statusCode() >= 200 && responseHandler.statusCode() <= 299) {
-        f.handle(Future.succeededFuture());
+        future.handle(Future.succeededFuture());
       } else {
-        f.handle(Future.failedFuture("POST " + endPointUrl + " returned status " + responseHandler.statusCode()));
+        future.handle(Future.failedFuture("POST " + endPointUrl + " returned status " + responseHandler.statusCode()));
       }
     });
     for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
