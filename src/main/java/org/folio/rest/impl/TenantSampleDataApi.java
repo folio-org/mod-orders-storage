@@ -153,13 +153,15 @@ public class TenantSampleDataApi extends TenantAPI {
     }
 
     List<Future> futures = new LinkedList<>();
+    String tenant =  headers.get("X-Okapi-Tenant");
+    PostgresClient client = PostgresClient.getInstance(context.owner(), tenant);
     for (String json : jsonList) {
-      String tenant =  headers.get("X-Okapi-Tenant");
-      PostgresClient client = PostgresClient.getInstance(context.owner(), tenant);
       futures.add(insertIntoDBIfNotExist(client, buildInsertIfNotExistQuery(json, tenant, table)));
     }
+
     CompositeFuture.all(futures).setHandler(asyncResult -> {
       log.info("load sample data for {} done. success={}", table, asyncResult.succeeded());
+      client.closeClient(event -> log.info("Postgres client close success {}", event.succeeded()));
       handleResult(handler, asyncResult);
     });
   }
