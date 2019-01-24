@@ -21,7 +21,7 @@ The module supports v1.2 of the Okapi _tenant interface. This version of the int
 * ENABLING VIA OKAPI:
 curl -w '\n' -X POST -d '[ { "id": "mod-orders-storage-3.0.0", "action": "enable" } ]' http://localhost:9130/_/proxy/tenants/test-tenant/install?tenantParameters=loadSample=true
 This results in a post to the module's _tenant API with the following structure:
-
+```
 {
   "module_to": "mod-orders-storage-3.3.0",
   "parameters": [
@@ -31,12 +31,14 @@ This results in a post to the module's _tenant API with the following structure:
     }
   ]
 }
+```
 
 * COMMAND LINE: 
 java -jar target/mod-orders-storage-fat.jar loadSample=true
 
 * STANDALONE:
 A post to http://localhost:8081/_/tenant
+```
 {
 	"module_to": "mod-orders-storage-3.0.0-SNAPSHOT",
 	"parameters": [
@@ -45,10 +47,11 @@ A post to http://localhost:8081/_/tenant
       "value": "true"
     }
     ]
-
 }
+```
 
 The priority for the parameters in in the order Tenant Parameters > Command Line argument > Default value
+
 Note: Unlike the tenant parameters the command Line argument will be applicable for all the tenants
 
 
