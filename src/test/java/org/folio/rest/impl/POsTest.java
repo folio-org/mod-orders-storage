@@ -93,7 +93,7 @@ public class POsTest extends OrdersStorageTest {
     response
       .then()
        .statusCode(500)
-       .body(containsString("duplicate key value violates unique constraint \"purchase_order_po_number_idx\""));
+       .body(containsString("duplicate key value violates unique constraint \"purchase_order_po_number_unique_idx\""));
   }
 
   private void testDeletePO() {
