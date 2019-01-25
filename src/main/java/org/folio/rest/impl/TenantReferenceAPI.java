@@ -38,19 +38,19 @@ public class TenantReferenceAPI extends TenantAPI {
 
   private HttpClient httpClient;
   private boolean isUpdateModule;
+  //if a system parameter is passed from command line, ex: loadSample=true that value is considered,
+  //Priority of Parameter Tenant Attributes > command line parameter > default (false)
+  private boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE,
+      "false"));
 
 
   @Override
   public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
     log.info("postTenant");
-
     httpClient = cntxt.owner().createHttpClient();
     isUpdateModule = !StringUtils.isEmpty(tenantAttributes.getModuleFrom());
     super.postTenant(tenantAttributes, headers, res -> {
-      //if a system parameter is passed from command line, ex: loadSample=true that value is considered,
-      //Priority of Parameter Tenant Attributes > command line parameter > default (false)
-      boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE,
-          "false"));
+
       List<Parameter> parameters = tenantAttributes.getParameters();
       for (Parameter parameter : parameters) {
         if (PARAMETER_LOAD_SAMPLE.equals(parameter.getKey())
@@ -191,6 +191,12 @@ public class TenantReferenceAPI extends TenantAPI {
         future.handle(Future.failedFuture("POST " + endPointUrl + " returned status " + responseHandler.statusCode()));
       }
     });
+    writeData(headers, json, req);
+  }
+
+
+
+  private void writeData(Map<String, String> headers, String json, HttpClientRequest req) {
     for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
       String header = headerEntry.getKey();
       if (header.startsWith("X-") || header.startsWith("x-")) {
@@ -218,15 +224,7 @@ public class TenantReferenceAPI extends TenantAPI {
         future.handle(Future.failedFuture("PUT" + endPointUrl + " returned status " + responseHandler.statusCode()));
       }
     });
-    for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
-      String header = headerEntry.getKey();
-      if (header.startsWith("X-") || header.startsWith("x-")) {
-        req.headers().add(header, headerEntry.getValue());
-      }
-    }
-    req.headers().add("Content-Type", "application/json");
-    req.headers().add("Accept", "application/json, text/plain");
-    req.end(json);
+    writeData(headers, json, req);
   }
 
   private List<InputStream> getStreamsfromClassPathDir(String directoryName) throws URISyntaxException, IOException {
