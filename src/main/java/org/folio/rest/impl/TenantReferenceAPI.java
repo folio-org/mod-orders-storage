@@ -3,12 +3,17 @@ package org.folio.rest.impl;
 import static java.util.stream.Collectors.toList;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 
+import freemarker.template.utility.StringUtil;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -18,7 +23,9 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import javax.ws.rs.core.Response;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 
@@ -30,7 +37,9 @@ public class TenantReferenceAPI extends TenantAPI {
   private static final String RESOURCES_PATH = "data/";
   private static final String ORDERS_STORAGE_PREFIX_URL = "/orders-storage/";
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
+
   private HttpClient httpClient;
+  private boolean isUpdateModule;
 
 
   @Override
@@ -38,6 +47,7 @@ public class TenantReferenceAPI extends TenantAPI {
     log.info("postTenant");
 
     httpClient = cntxt.owner().createHttpClient();
+    isUpdateModule = !StringUtils.isEmpty(tenantAttributes.getModuleFrom());
     super.postTenant(tenantAttributes, headers, res -> {
       //if a system parameter is passed from command line, ex: loadSample=true that value is considered,
       //Priority of Parameter Tenant Attributes > command line parameter > default (false)
@@ -58,6 +68,8 @@ public class TenantReferenceAPI extends TenantAPI {
       }
     }, cntxt);
   }
+
+
 
   private void loadSampleData(Map<String, String> headers, Handler<AsyncResult<Response>> hndlr) {
 
@@ -157,7 +169,10 @@ public class TenantReferenceAPI extends TenantAPI {
     for (String json : jsonList) {
       Future<Void> future = Future.future();
       futures.add(future);
-      postData(headers, endPointUrl, json, future);
+      if(isUpdateModule)
+        putData(headers, endPointUrl, json, future);
+      else
+        postData(headers, endPointUrl, json, future);
     }
     CompositeFuture.all(futures).setHandler(asyncResult -> {
       log.info("Sample Data load {} done. success={}", endPoint, asyncResult.succeeded());
@@ -175,6 +190,32 @@ public class TenantReferenceAPI extends TenantAPI {
         future.handle(Future.succeededFuture());
       } else {
         future.handle(Future.failedFuture("POST " + endPointUrl + " returned status " + responseHandler.statusCode()));
+      }
+    });
+    for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
+      String header = headerEntry.getKey();
+      if (header.startsWith("X-") || header.startsWith("x-")) {
+        req.headers().add(header, headerEntry.getValue());
+      }
+    }
+    req.headers().add("Content-Type", "application/json");
+    req.headers().add("Accept", "application/json, text/plain");
+    req.end(json);
+  }
+
+
+  private void putData(Map<String, String> headers, final String endPointUrl, String json, Future<Void> future) {
+    JsonObject jsonBody= new JsonObject(json);
+    String id = jsonBody.getString("id");
+
+    HttpClientRequest req = httpClient.putAbs(endPointUrl+"/"+id, responseHandler -> {
+      if (responseHandler.statusCode() >= 200 && responseHandler.statusCode() <= 299) {
+        future.handle(Future.succeededFuture());
+      } else if(responseHandler.statusCode() == 404) {
+        postData(headers, endPointUrl, json, future);
+
+      } else {
+        future.handle(Future.failedFuture("PUT" + endPointUrl + " returned status " + responseHandler.statusCode()));
       }
     });
     for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
@@ -237,14 +278,14 @@ public class TenantReferenceAPI extends TenantAPI {
 
 
   @Override
-  public void getTenant(Map<String, String> map, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
+  public void getTenant(Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
     log.info("getTenant");
-    super.getTenant(map, hndlr, cntxt);
+    super.getTenant(headers, hndlr, cntxt);
   }
 
   @Override
-  public void deleteTenant(Map<String, String> map, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
+  public void deleteTenant(Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
     log.info("deleteTenant");
-    super.deleteTenant(map, hndlr, cntxt);
+    super.deleteTenant(headers, hndlr, cntxt);
   }
 }
