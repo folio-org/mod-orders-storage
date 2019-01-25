@@ -46,7 +46,7 @@ public class TenantReferenceAPI extends TenantAPI {
       List<Parameter> parameters = tenantAttributes.getParameters();
       for (Parameter parameter : parameters) {
         if (PARAMETER_LOAD_SAMPLE.equals(parameter.getKey())
-          && "true".equals(parameter.getValue())) {
+          && "true".equalsIgnoreCase(parameter.getValue())) {
           loadSample = true;
         }
       }
@@ -84,7 +84,7 @@ public class TenantReferenceAPI extends TenantAPI {
   /**
    * Read the sub directories under "data/" which contains data to be loaded from jar or Path
    *
-   * @return
+   * @return List<String>
    * @throws URISyntaxException
    * @throws IOException
    */
@@ -121,6 +121,7 @@ public class TenantReferenceAPI extends TenantAPI {
       });
     }
   }
+
   /**
    * For Each Sub-Directory under "data/", load all the files present
    *
