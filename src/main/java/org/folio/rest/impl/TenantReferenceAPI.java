@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import static java.util.stream.Collectors.toList;
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 
-import freemarker.template.utility.StringUtil;
 import io.vertx.core.*;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -23,7 +22,6 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import javax.ws.rs.core.Response;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.folio.rest.jaxrs.model.Parameter;
@@ -61,7 +59,8 @@ public class TenantReferenceAPI extends TenantAPI {
         }
       }
       log.info("postTenant loadSampleData=" + loadSample);
-      if (res.succeeded() && loadSample) {
+      // Handle a scenario where update on a non-existent tenant returns a succeeded future with 400
+      if (res.succeeded() && res.result().getStatus() >= 200 && res.result().getStatus() <= 299 && loadSample) {
         loadSampleData(headers, hndlr);
       } else {
         hndlr.handle(res);
@@ -212,6 +211,7 @@ public class TenantReferenceAPI extends TenantAPI {
       if (responseHandler.statusCode() >= 200 && responseHandler.statusCode() <= 299) {
         future.handle(Future.succeededFuture());
       } else if(responseHandler.statusCode() == 404) {
+        // If the module is being upgraded and the sample data was not already present then insert it
         postData(headers, endPointUrl, json, future);
 
       } else {
