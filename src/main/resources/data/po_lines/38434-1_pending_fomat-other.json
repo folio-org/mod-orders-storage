@@ -18,7 +18,7 @@
   "description": "",
   "details": "b7c5d792-07be-11e9-a8d5-f2801f1b9fd1",
   "donor": "",
-  "eresource": "b7c5d809-cabe-11e8-a8d5-f2801f1b9fd1",
+  "eresource": "",
   "fund_distribution": [
     "11e2d2c4-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
@@ -26,7 +26,7 @@
   "order_format": "Other",
   "owner": "Monographs",
   "payment_status": "Pending",
-  "physical": "11fb7f80-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "physical": "",
   "po_line_description": "",
   "po_line_number": "38434-1",
   "publication_date": "1989",
