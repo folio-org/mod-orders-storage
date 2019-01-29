@@ -33,6 +33,6 @@ public class PoNumberTest extends OrdersStorageTest {
       .statusCode(200)
       .extract()
       .response()
-      .path("po_number"));
+      .path("sequenceNumber"));
   }
 }
