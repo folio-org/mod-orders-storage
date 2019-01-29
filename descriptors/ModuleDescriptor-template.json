@@ -526,6 +526,17 @@
       ]
     },
     {
+      "id": "orders-storage.po_line_number",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/po-line-number",
+          "permissionsRequired": ["orders-storage.po_line_number.get"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.0",
       "interfaceType": "system",
