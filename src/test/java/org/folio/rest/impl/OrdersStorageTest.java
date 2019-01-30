@@ -26,6 +26,7 @@ import org.junit.Before;
 
 public abstract class OrdersStorageTest {
 
+  protected static final String TENANT_ENDPOINT = "/_/tenant";
   private Vertx vertx;
   private Async async;
   final Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
@@ -53,19 +54,6 @@ public abstract class OrdersStorageTest {
     // RMB returns a 'normalized' name, with underscores
     moduleId = moduleId.replaceAll("_", "-");
 
-    try {
-      // Run this test in embedded postgres mode
-      // IMPORTANT: Later we will initialize the schema by calling the tenant interface.
-      PostgresClient.setIsEmbedded(true);
-      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-      PostgresClient.getInstance(vertx).dropCreateDatabase(TENANT_NAME + "_" + PomReader.INSTANCE.getModuleName());
-
-    } catch (Exception e) {
-      logger.info(e);
-      context.fail(e);
-      return;
-    }
-
     // Deploy a verticle
     JsonObject conf = new JsonObject()
       .put(HttpClientMock2.MOCK_MODE, "true")
@@ -79,10 +67,24 @@ public abstract class OrdersStorageTest {
     RestAssured.port = port;
     RestAssured.baseURI = "http://localhost";
     URLTO_HEADER = new Header("X-Okapi-Url-to",RestAssured.baseURI+":"+RestAssured.port);
+
+
+    try {
+      // Run this test in embedded postgres mode
+      PostgresClient.setIsEmbedded(true);
+      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+      prepareTenant();
+    } catch (Exception e) {
+      logger.info(e);
+      context.fail(e);
+      return;
+    }
+
   }
 
   @After
   public void after(TestContext context) {
+    deleteTenant();
     async = context.async();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
@@ -91,7 +93,8 @@ public abstract class OrdersStorageTest {
     });
   }
 
-  void prepareTenant() {
+
+  public void prepareTenant() {
     JsonArray parameterArray = new JsonArray();
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
 
@@ -105,8 +108,19 @@ public abstract class OrdersStorageTest {
       .header(URLTO_HEADER)
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
-      .post("/_/tenant")
+      .post(TENANT_ENDPOINT)
       .then().log().ifValidationFails();
+  }
+
+
+  void deleteTenant()
+  {
+    given()
+    .header("X-Okapi-Tenant", TENANT_NAME)
+    .contentType(ContentType.JSON)
+    .delete(TENANT_ENDPOINT)
+    .then().log().ifValidationFails()
+    .statusCode(204);
   }
 
   String getFile(String filename) {
