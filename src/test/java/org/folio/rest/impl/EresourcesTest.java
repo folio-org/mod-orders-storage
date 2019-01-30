@@ -19,10 +19,6 @@ public class EresourcesTest extends OrdersStorageTest {
   public void testEresource() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Eresource test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage Eresource test: Verifying database's initial state ... ");
       verifyCollection(ERESOURCE_ENDPOINT);
 

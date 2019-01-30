@@ -35,10 +35,6 @@ public class PiecesTest extends OrdersStorageTest{
   public void testpiece() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage pieces test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage pieces test: Verifying database's initial state ... ");
       verifyCollection(PIECES_ENDPOINT);
 

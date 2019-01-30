@@ -20,10 +20,6 @@ public class DetailsTest extends OrdersStorageTest {
   public void testDetail() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Details test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage Details test: Verifying database's initial state ... ");
       verifyCollection(DETAILS_ENDPOINT);
 

@@ -19,10 +19,6 @@ public class POLinesTest extends OrdersStorageTest {
   public void tests(TestContext context) {
     try {
 
-      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-      logger.info("--- mod-orders-storage-test PO line test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage-test PO line test: Verifying database's initial state ... ");
       verifyCollection(PO_LINE_ENDPOINT);
 
@@ -42,13 +38,13 @@ public class POLinesTest extends OrdersStorageTest {
 
       logger.info("--- mod-orders-storage PO line test: Invalid PO line: " + INVALID_PO_LINE_ID);
       testInvalidPolineId();
-      
+
       logger.info("--- mod-orders-storage PO line test: Editing PO line with ID: " + sampleId);
       testPolineEdit(poLineSample, sampleId);
 
       logger.info("--- mod-orders-storage PO line test: Fetching PO line with ID: " + sampleId);
       testFetchingUpdatedPoline(sampleId);
-      
+
     } catch (Exception e) {
       context.fail("--- mod-orders-storage PO line test: ERROR: " + e.getMessage());
     } finally {
@@ -75,7 +71,7 @@ public class POLinesTest extends OrdersStorageTest {
     .statusCode(200).log().ifValidationFails()
     .body("description", equalTo("Gift"));
   }
-  
+
   private void testPolineEdit(String poLineSample, String poLineSampleId) {
     JSONObject catJSON = new JSONObject(poLineSample);
     catJSON.put("id", poLineSampleId);

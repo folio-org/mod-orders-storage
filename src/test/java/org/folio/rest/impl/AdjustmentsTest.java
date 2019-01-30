@@ -19,10 +19,6 @@ public class AdjustmentsTest extends OrdersStorageTest {
   public void testAdjustment() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Adjustment test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage Adjustment test: Verifying database's initial state ... ");
       verifyCollection(ADJUSTMENT_ENDPOINT);
 
