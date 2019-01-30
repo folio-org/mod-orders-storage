@@ -1,18 +1,17 @@
 package org.folio.rest.impl;
 
-import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
-
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.folio.rest.jaxrs.model.ReceivingHistory;
+import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @RunWith(VertxUnitRunner.class)
 public class ReceivingHistoryTest extends OrdersStorageTest {
@@ -101,7 +100,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
 
   void verifyViewCollectionBefore(String endpoint, int expectedCount) {
     // Verify that there are no existing records in View
-    getViewData(endpoint).then()
+    getData(endpoint).then()
       .log().all()
       .statusCode(200)
       .body("total_records", equalTo(expectedCount));
@@ -143,32 +142,39 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   }
 
   private void verifyViewCollectionAfter(String endpoint, int expectedCount) {
-	getViewData(endpoint).then()
-	  .log().all()
-	  .statusCode(200)
-	  .body("total_records", equalTo(expectedCount))
-	  .body("receiving_history[0].caption", equalTo("Tutorial Volume 5"))
-	  .body("receiving_history[1].caption", equalTo("Tutorial Volume 6"))
-	  .body("receiving_history[0].comment", equalTo("Special Edition"))
-	  .body("receiving_history[1].comment", equalTo("Limited Edition"))
-	  .body("receiving_history[0].itemId", equalTo("522a501a-56b5-48d9-b28a-3a8f02482d97"))
-	  .body("receiving_history[1].itemId", equalTo("15447c41-bc6a-4600-96a4-a1ce7f44c62a"))
-	  .body("receiving_history[0].supplement", equalTo(true))
-	  .body("receiving_history[1].supplement", equalTo(false))
-	  .body("receiving_history[0].title", equalTo("Kayak Fishing in the Northern Gulf Coast"))
-	  .body("receiving_history[1].title", equalTo("Skiing in the Colorado"))
-	  .body("receiving_history[0].poLineId", equalTo("d471d766-8dbb-4609-999a-02681dea6c22"))
-	  .body("receiving_history[1].poLineId", equalTo("2fe6c2dd-3700-4a53-a624-1159cfd7f8ce"))
-	  .body("receiving_history[0].poLineNumber", equalTo("268758-03"))
-	  .body("receiving_history[1].poLineNumber", equalTo("268500-03"))
-	  .body("receiving_history[0].receivingNote", equalTo("ABCDEFGHIJKL"))
-	  .body("receiving_history[1].receivingNote", equalTo("details for view"));
+
+   ReceivingHistoryCollection receivingHistory = getData(endpoint)
+       .then()
+       .statusCode(200)
+       .extract()
+       .response()
+       .as(ReceivingHistoryCollection.class);
+
+       assertEquals(expectedCount, receivingHistory.getReceivingHistory().size());
+
+       for(ReceivingHistory history:receivingHistory.getReceivingHistory()) {
+         if(history.getItemId().equals("522a501a-56b5-48d9-b28a-3a8f02482d97")) {
+           assertEquals("Tutorial Volume 5", history.getCaption());
+           assertEquals("Special Edition", history.getComment());
+           assertEquals(true, history.getSupplement());
+           assertEquals("Kayak Fishing in the Northern Gulf Coast", history.getTitle());
+           assertEquals("d471d766-8dbb-4609-999a-02681dea6c22", history.getPoLineId());
+           assertEquals("268758-03", history.getPoLineNumber());
+           assertEquals( "ABCDEFGHIJKL", history.getReceivingNote());
+         }
+
+         if(history.getItemId().equals("15447c41-bc6a-4600-96a4-a1ce7f44c62a")) {
+           assertEquals("Tutorial Volume 6", history.getCaption());
+           assertEquals("Limited Edition", history.getComment());
+           assertEquals(false, history.getSupplement());
+           assertEquals("Skiing in the Colorado", history.getTitle());
+           assertEquals("2fe6c2dd-3700-4a53-a624-1159cfd7f8ce", history.getPoLineId());
+           assertEquals("268500-03", history.getPoLineNumber());
+           assertEquals("details for view", history.getReceivingNote());
+         }
+       }
   }
 
-  Response getViewData(String endpoint) {
-    return given()
-      .header("X-Okapi-Tenant", TENANT_NAME)
-      .contentType(ContentType.JSON)
-      .get(endpoint);
-  }
+
+
 }
