@@ -1,0 +1,13 @@
+{
+  "id": "496336cf-eb47-4e09-9e28-e35aa464adb7",
+  "credit": 0.0,
+  "discount": 0.0,
+  "insurance": 0.0,
+  "invoice_id": "e493e18e-9147-4d6c-860e-2a8a9adac815",
+  "overhead": 0.0,
+  "shipment": 0.0,
+  "tax_1": 0.0,
+  "tax_2": 0.0,
+  "use_pro_rate": false,
+  "po_line_id": "90fb53f2-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

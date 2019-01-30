@@ -1,0 +1,48 @@
+{
+  "id": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkin_items": false,
+  "instance_id": "e094b9a1-e61b-409c-909b-64b8c767fd50",
+  "agreement_id": "7324c8eb-5e81-4109-812b-411c26ef09f2",
+  "purchase_order_id": "1ab7ef6a-d1d4-4a4f-90a2-882aed18af14",
+  "acquisition_method": "Purchase",
+  "adjustment": "296336cf-eb47-4e09-9e28-e25aa484abb7",
+  "alerts": [],
+  "cancellation_restriction": false,
+  "cancellation_restriction_note": "",
+  "claims": [
+    "17c5d666-cabe-11e8-a8d5-f2811f1b9fd1"
+  ],
+  "collection": false,
+  "cost": "17c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "description": "",
+  "details": "17c5d792-cabe-11e9-a8d5-f2801f1b9fd1",
+  "donor": "",
+  "eresource": "17c5d8be-cabe-11e8-a9d5-f2801f1b9fd1",
+  "fund_distribution": [
+    "1de2c22a-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "location": "17c5d9ea-cabe-11e8-a8d5-f2801f1b9fd1",
+  "order_format": "Physical Resource",
+  "owner": "LTS Acquisitions",
+  "payment_status": "Awaiting Payment",
+  "physical": "5ee243f9-72e5-4464-bdbc-43a21873d648",
+  "po_line_description": "",
+  "po_line_number": "268758-02",
+  "publication_date": "2011",
+  "publisher": "Tapir Academic Press",
+  "receipt_date": null,
+  "receipt_status": "Awaiting Receipt",
+  "reporting_codes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Stevens",
+  "source": "024b6f40-c5c6-4280-858e-33fba452a334",
+  "tags": [],
+  "title": "Taxes, tributes and tributary lands in the making of Scandinavian kingdoms in the Middle Ages",
+  "vendor_detail": "60fb88ea-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "metadata": {
+    "createdDate": "2018-06-29T00:00:00Z",
+    "createdByUserId": "28d0f99c-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}
