@@ -21,10 +21,6 @@ public class PhysicalsTest extends OrdersStorageTest {
   public void testPhysical() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Physical test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage Physical test: Verifying database's initial state ... ");
       verifyCollection(PHYSICAL_ENDPOINT);
 

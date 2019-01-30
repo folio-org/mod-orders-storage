@@ -41,9 +41,6 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   @Test
   public void testReceivingHistory() {
     try {
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage receiving_history test: Preparing test tenant ...");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage receiving_history test: Before receiving_history View creation ... ");
       verifyViewCollectionBefore(RECEIVING_HISTORY_ENDPOINT, 0);

@@ -153,7 +153,7 @@ public class TenantReferenceAPI extends TenantAPI {
     try {
       List<InputStream> streams = getStreamsfromClassPathDir(RESOURCES_PATH + endPoint);
       for (InputStream stream : streams) {
-        jsonList.add(IOUtils.toString(stream, "UTF-8"));
+        jsonList.add(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
       }
     } catch (URISyntaxException ex) {
       handler.handle(Future.failedFuture("URISyntaxException for path " + endPoint + " ex=" + ex.getLocalizedMessage()));

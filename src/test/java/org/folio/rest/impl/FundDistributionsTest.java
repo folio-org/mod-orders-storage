@@ -19,10 +19,6 @@ public class FundDistributionsTest extends OrdersStorageTest {
   public void testFundDistribution() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage FundDistribution test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage FundDistribution test: Verifying database's initial state ... ");
       verifyCollection(FUND_DISTRIBUTION_ENDPOINT);
 

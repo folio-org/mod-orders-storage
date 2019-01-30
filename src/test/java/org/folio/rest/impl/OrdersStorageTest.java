@@ -34,11 +34,14 @@ public abstract class OrdersStorageTest {
 
   final String TENANT_NAME = "diku";
   final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
-  Header URLTO_HEADER;
 
-  String moduleName; // "mod_orders_storage";
-  String moduleVersion; // "1.0.0"
-  String moduleId; // "mod-orders_storage-1.0.0"
+  Header URLTO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
+
+
+  String moduleName = PomReader.INSTANCE.getModuleName(); // "mod_orders_storage";
+  String moduleVersion = PomReader.INSTANCE.getVersion(); // "1.0.0"
+  // RMB returns a 'normalized' name, with underscores
+  String moduleId = String.format("%s-%s", moduleName, moduleVersion).replaceAll("_", "-"); // "mod-orders_storage-1.0.0"
   String sampleId;
 
   @Before
@@ -46,13 +49,6 @@ public abstract class OrdersStorageTest {
     logger.info("--- mod-orders-storage test: START ");
     vertx = Vertx.vertx();
 
-    moduleName = PomReader.INSTANCE.getModuleName();
-    moduleVersion = PomReader.INSTANCE.getVersion();
-
-    moduleId = String.format("%s-%s", moduleName, moduleVersion);
-
-    // RMB returns a 'normalized' name, with underscores
-    moduleId = moduleId.replaceAll("_", "-");
 
     // Deploy a verticle
     JsonObject conf = new JsonObject()
@@ -66,14 +62,14 @@ public abstract class OrdersStorageTest {
     // Set the default headers for the API calls to be tested
     RestAssured.port = port;
     RestAssured.baseURI = "http://localhost";
-    URLTO_HEADER = new Header("X-Okapi-Url-to",RestAssured.baseURI+":"+RestAssured.port);
 
 
     try {
       // Run this test in embedded postgres mode
       PostgresClient.setIsEmbedded(true);
       PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-      prepareTenant();
+      //load the data using the /_/tenant interface
+      prepareTenant(TENANT_HEADER, true);
     } catch (Exception e) {
       logger.info(e);
       context.fail(e);
@@ -84,7 +80,7 @@ public abstract class OrdersStorageTest {
 
   @After
   public void after(TestContext context) {
-    deleteTenant();
+
     async = context.async();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
@@ -94,9 +90,10 @@ public abstract class OrdersStorageTest {
   }
 
 
-  public void prepareTenant() {
+
+  public void prepareTenant(Header tenantHeader, boolean loadSample) {
     JsonArray parameterArray = new JsonArray();
-    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
+    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", loadSample));
 
     JsonObject jsonBody=new JsonObject();
     jsonBody.put("module_to", moduleId);
@@ -104,7 +101,7 @@ public abstract class OrdersStorageTest {
 
 
     given()
-      .header(TENANT_HEADER)
+      .header(tenantHeader)
       .header(URLTO_HEADER)
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
@@ -112,11 +109,11 @@ public abstract class OrdersStorageTest {
       .then().log().ifValidationFails();
   }
 
-
-  void deleteTenant()
+  void deleteTenant(Header tenantHeader)
   {
+    logger.info("Deleting Tenant: "+tenantHeader.getValue());
     given()
-    .header("X-Okapi-Tenant", TENANT_NAME)
+    .header(tenantHeader)
     .contentType(ContentType.JSON)
     .delete(TENANT_ENDPOINT)
     .then().log().ifValidationFails()

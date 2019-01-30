@@ -19,10 +19,6 @@ public class CostsTest extends OrdersStorageTest {
   public void testCost() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Cost test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage Cost test: Verifying database's initial state ... ");
       verifyCollection(COST_ENDPOINT);
 

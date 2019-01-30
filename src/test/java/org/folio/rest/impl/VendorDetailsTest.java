@@ -18,10 +18,6 @@ public class VendorDetailsTest extends OrdersStorageTest {
   public void testVendorDetails() {
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Vendor Details test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage Vendor Details test: Verifying database's initial state ... ");
       verifyCollection(VENDOR_DETAIL_ENDPOINT);
 

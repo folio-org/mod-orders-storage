@@ -39,10 +39,6 @@ public class POsTest extends OrdersStorageTest {
   public void tests(TestContext context) {
     try {
 
-      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-      logger.info("--- mod-orders-storage PO test: Preparing test tenant");
-      prepareTenant();
-
       logger.info("--- mod-orders-storage PO test: Verifying database's initial state ... ");
       verifyCollection();
 
@@ -50,7 +46,7 @@ public class POsTest extends OrdersStorageTest {
       String purchaseOrderSample = getFile("purchase_order.sample");
       Response response = postData(PO_ENDPOINT, purchaseOrderSample);
       sampleId = response.then().extract().path("id");
-      
+
       logger.info("--- mod-orders-storage PO test: Valid po_number exists ... ");
       testValidPONumberExists(response);
 
@@ -65,13 +61,13 @@ public class POsTest extends OrdersStorageTest {
 
       logger.info("--- mod-orders-storage PO test: Fetching invalid PO with ID return 404: " + INVALID_PO_ID);
       testInvalidPOId();
-      
+
       logger.info("--- mod-orders-storage PO test: Editing purchase order with ID: " + sampleId);
       testPOEdit(purchaseOrderSample, sampleId);
 
       logger.info("--- mod-orders-storage PO test: Fetching updated purchase order with ID: " + sampleId);
       testFetchingUpdatedPO(sampleId);
- 
+
     } catch (Exception e) {
       context.fail("--- mod-orders-storage PO test: ERROR: " + e.getMessage());
     }  finally {
@@ -82,7 +78,7 @@ public class POsTest extends OrdersStorageTest {
       testVerifyPODeletion(sampleId);
     }
   }
-  
+
   private void testDeletePO(String purchaseOrderSampleId) {
     deleteData(PO_ENDPOINT, sampleId).then().log().ifValidationFails()
     .statusCode(204);
@@ -92,7 +88,7 @@ public class POsTest extends OrdersStorageTest {
     getDataById(PO_ENDPOINT, purchaseOrderSampleId).then()
       .statusCode(404);
   }
-  
+
   private void testFetchingUpdatedPO(String purchaseOrderSampleId) {
     getDataById(PO_ENDPOINT, sampleId).then().log().ifValidationFails()
     .statusCode(200)
