@@ -22,9 +22,11 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private static String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static String detailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static String poLineSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private static String purchaseOrderSampleId;
   private static String piecesSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static String detailSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private static String purchaseOrderSampleId2;
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
   private static final String PIECES_ENDPOINT = "/orders-storage/pieces";
@@ -38,8 +40,8 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private final String poLineSample2 = getFile("po_line_for_view.sample");
   private final String pieceSample = getFile("pieces.sample");
   private final String pieceSample2 = getFile("piece_for_view.sample");
-  private final String poSample = getFile("purchase_order.sample");
-  private final String poSample2 = getFile("purchase_order_for_view.sample");
+  private final String purchaseOrderSample = getFile("purchase_order.sample");
+  private final String purchaseOrderSample2 = getFile("purchase_order_for_view.sample");
 
   @Test
   public void testReceivingHistory() {
@@ -72,6 +74,11 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
       detailSampleId2 = testCreateDetail(detailSample2);
       testVerifyDetailCreated();
 
+      logger.info("--- mod-orders-storage receiving_history test: Creating Purchase Order 1...");
+      purchaseOrderSampleId = testCreatePurchaseOrder(purchaseOrderSample);
+      logger.info("--- mod-orders-storage receiving_history test: Creating Purchase Order 2...");
+      purchaseOrderSampleId2 = testCreatePurchaseOrder(purchaseOrderSample2);
+      testVerifyPurchaseOrderCreated();
 
       logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
       verifyViewCollectionAfter(RECEIVING_HISTORY_ENDPOINT, 2);
@@ -84,9 +91,11 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
       testDeleteDetail(detailSampleId);
       testDeletePoLine(poLineSampleId);
       testDeletePieces(piecesSampleId);
+      testDeletePurchaseOrder(purchaseOrderSampleId);
       testDeleteDetail(detailSampleId2);
       testDeletePoLine(poLineSampleId2);
       testDeletePieces(piecesSampleId2);
+      testDeletePurchaseOrder(purchaseOrderSampleId2);
     }
   }
 
@@ -98,6 +107,11 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private void testDeletePoLine(String poLineSampleId) {
     deleteData(PO_LINE_ENDPOINT, poLineSampleId).then().log().ifValidationFails()
     .statusCode(204);
+  }
+
+  private void testDeletePurchaseOrder(String purchaseOrderSampleId) {
+    deleteData(PURCHASE_ORDER_ENDPOINT, purchaseOrderSampleId).then().log().ifValidationFails()
+      .statusCode(204);
   }
 
   private void testDeletePieces(String piecesSampleId) {
@@ -130,6 +144,13 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
     return response.then().extract().path("id");
   }
 
+  private String testCreatePurchaseOrder(String purchaseOrderSample) {
+    Response response = postData(PURCHASE_ORDER_ENDPOINT, purchaseOrderSample);
+    response.then().log().ifValidationFails()
+      .statusCode(201);
+    return response.then().extract().path("id");
+  }
+
   private void testVerifyDetailCreated() {
     getData(DETAILS_ENDPOINT).then().log().ifValidationFails()
     .statusCode(200)
@@ -146,6 +167,12 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
     getData(PIECES_ENDPOINT).then().log().ifValidationFails()
     .statusCode(200)
     .body("total_records", equalTo(2));
+  }
+
+  private void testVerifyPurchaseOrderCreated() {
+    getData(PURCHASE_ORDER_ENDPOINT).then().log().ifValidationFails()
+      .statusCode(200)
+      .body("total_records", equalTo(18));
   }
 
   private void verifyViewCollectionAfter(String endpoint, int expectedCount) {

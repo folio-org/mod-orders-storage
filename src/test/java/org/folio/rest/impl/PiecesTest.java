@@ -32,7 +32,7 @@ public class PiecesTest extends OrdersStorageTest{
   }
 
   @Test
-  public void testpiece() {
+  public void testPiece() {
     try {
 
       // Initialize the tenant-schema
@@ -54,7 +54,7 @@ public class PiecesTest extends OrdersStorageTest{
       testPieceCreated();
 
       logger.info("--- mod-orders-storage pieces test: Fetching piece with ID: " + piecesSampleId);
-      testpieceSuccessfullyFetched(piecesSampleId);
+      testPieceSuccessfullyFetched(piecesSampleId);
 
       logger.info("--- mod-orders-storage pieces test: Invalid Piece Id: ");
       testInvalidPieceId();
@@ -108,7 +108,7 @@ public class PiecesTest extends OrdersStorageTest{
     .statusCode(404);
   }
 
-  private void testpieceSuccessfullyFetched(String piecesSampleId) {
+  private void testPieceSuccessfullyFetched(String piecesSampleId) {
     getDataById(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("id", equalTo(piecesSampleId));
