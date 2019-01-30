@@ -1,5 +1,11 @@
 ## 3.0.0 - Unreleased
 
+## 2.0.2 - Released
+
+This is a patch release to resolve an issue where the loading of sample data was preventing the module from being upgraded.
+
+* [MODORDSTOR-44](https://issues.folio.org/browse/MODORDSTOR-44)
+
 ## 2.0.1 - Released
 
 The sole purpose of this release is to bring the interface versions in the RAML files inline with those in the module descriptor.
