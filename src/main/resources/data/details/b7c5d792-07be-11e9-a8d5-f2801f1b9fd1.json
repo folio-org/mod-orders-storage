@@ -1,0 +1,17 @@
+{
+  "id": "b7c5d792-07be-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "",
+  "product_ids": [
+    {
+      "product_id": "",
+      "product_id_type": "Other Standard Identifier"
+    }
+  ],
+  "material_types": [
+    "fde2e82c-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": null,
+  "subscription_interval": 0,
+  "subscription_to": null,
+  "po_line_id": "11fb627a-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

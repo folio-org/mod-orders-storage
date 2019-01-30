@@ -1,0 +1,26 @@
+{
+  "id": "c27e60f9-6361-44c1-976e-0c4821a33a7d",
+  "approved": true,
+  "notes": [
+    "Cataloging record service"
+  ],
+  "manual_po": true,
+  "po_number": "38434",
+  "order_type": "Ongoing",
+  "re_encumber": false,
+  "renewal": {
+    "cycle": "6 Months",
+    "interval": 182,
+    "manual_renewal": true,
+    "review_period": 30,
+    "renewal_date": "2019-04-09T00:00:00.000Z"
+  },
+  "total_estimated_price": 0.00,
+  "total_items": 1,
+  "vendor": "50fb922c-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "workflow_status": "Pending",
+  "metadata": {
+    "createdDate": "2014-09-22T00:00:00Z",
+    "createdByUserId": "28d10afe-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

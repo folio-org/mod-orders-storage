@@ -1,0 +1,48 @@
+{
+  "id": "80fb5168-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "Second edition",
+  "checkin_items": true,
+  "instance_id": "b3b731f8-9e01-4309-96b2-5ce6ca423eb5",
+  "agreement_id": "44683de8-e2cf-42bc-af9e-7eca992934b6",
+  "purchase_order_id": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
+  "acquisition_method": "Purchase",
+  "adjustment": "216336cf-eb47-4e09-9e28-e25aa484abb7",
+  "alerts": [],
+  "cancellation_restriction": false,
+  "cancellation_restriction_note": "",
+  "claims": [
+    "37c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "collection": false,
+  "cost": "37c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "description": "",
+  "details": "37c5d792-cabe-11e9-a8d5-f2801f1b9fd1",
+  "donor": "",
+  "eresource": "37c5d8bc-cabe-11e8-a8d5-f2801f1b9fd1",
+  "fund_distribution": [
+    "3de2c626-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "location": "37c5d97a-cabe-11e8-a8d5-f2801f1b9fd1",
+  "order_format": "Physical Resource",
+  "owner": "LTS Acquisitions",
+  "payment_status": "Awaiting Payment",
+  "physical": "e50e9bcd-210e-4f4d-8949-aa9e7205f989",
+  "po_line_description": "",
+  "po_line_number": "36547-1",
+  "publication_date": "2011",
+  "publisher": "Tapir Academic Press",
+  "receipt_date": null,
+  "receipt_status": "Awaiting Receipt",
+  "reporting_codes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Brown",
+  "source": "3b4b6f41-c5c6-4280-858e-33fba452a334",
+  "tags": [],
+  "title": "Kayak Fishing in the Northern Gulf Coast",
+  "vendor_detail": "80fb88ea-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "metadata": {
+    "createdDate": "2019-05-15T00:00:00Z",
+    "createdByUserId": "28d0fb04-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}
