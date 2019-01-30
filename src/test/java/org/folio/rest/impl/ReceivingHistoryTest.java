@@ -30,6 +30,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private static final String PIECES_ENDPOINT = "/orders-storage/pieces";
   private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
   private static final String DETAILS_ENDPOINT = "/orders-storage/details";
+  private static final String PURCHASE_ORDER_ENDPOINT = "/orders-storage/purchase_orders";
 
   private final String detailSample = getFile("details.sample");
   private final String detailSample2 = getFile("detail_for_view.sample");
@@ -37,6 +38,8 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private final String poLineSample2 = getFile("po_line_for_view.sample");
   private final String pieceSample = getFile("pieces.sample");
   private final String pieceSample2 = getFile("piece_for_view.sample");
+  private final String poSample = getFile("purchase_order.sample");
+  private final String poSample2 = getFile("purchase_order_for_view.sample");
 
   @Test
   public void testReceivingHistory() {

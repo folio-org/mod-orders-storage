@@ -1164,7 +1164,8 @@
         "orders-storage.receiving-history.all",
         "orders-storage.reporting_codes.all",
         "orders-storage.sources.all",
-        "orders-storage.vendor_details.all"
+        "orders-storage.vendor_details.all",
+        "orders-storage.receiving-history.collection.get"
       ]
     },
     {
