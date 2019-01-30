@@ -63,7 +63,6 @@ public abstract class OrdersStorageTest {
     RestAssured.port = port;
     RestAssured.baseURI = "http://localhost";
 
-
     try {
       // Run this test in embedded postgres mode
       PostgresClient.setIsEmbedded(true);
@@ -80,7 +79,7 @@ public abstract class OrdersStorageTest {
 
   @After
   public void after(TestContext context) {
-
+    deleteTenant(TENANT_HEADER);
     async = context.async();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
@@ -106,7 +105,8 @@ public abstract class OrdersStorageTest {
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
       .post(TENANT_ENDPOINT)
-      .then().log().ifValidationFails();
+      .then().log().ifValidationFails()
+      .statusCode(201);
   }
 
   void deleteTenant(Header tenantHeader)
