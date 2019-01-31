@@ -1,9 +1,0 @@
-{
-  "id": "d7c5d792-cabe-11aa-a8d5-f2801f1b9fd1",
-  "list_price": 3000.00,
-  "currency": "USD",
-  "quantity_physical": 0,
-  "quantity_electronic": 1,
-  "po_line_estimated_price": 3000.00,
-  "po_line_id": "13fb64dc-cdf1-11e8-a8d5-f2801f1b9fd1"
-}
