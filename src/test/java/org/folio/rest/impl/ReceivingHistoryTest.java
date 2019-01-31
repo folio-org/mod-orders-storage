@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -87,17 +86,17 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   }
 
   private void testDeleteDetail(String detailSampleId) {
-    deleteData(DETAILS_ENDPOINT, detailSampleId).then().log().ifValidationFails()
+    deleteData(DETAILS_ENDPOINT, detailSampleId).then()
     .statusCode(204);
   }
 
   private void testDeletePoLine(String poLineSampleId) {
-    deleteData(PO_LINE_ENDPOINT, poLineSampleId).then().log().ifValidationFails()
+    deleteData(PO_LINE_ENDPOINT, poLineSampleId).then()
     .statusCode(204);
   }
 
   private void testDeletePieces(String piecesSampleId) {
-    deleteData(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
+    deleteData(PIECES_ENDPOINT, piecesSampleId).then()
     .statusCode(204);
   }
 
@@ -121,25 +120,25 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
 
   private String testCreatePoLine(String poLineSample) {
     Response response = postData(PO_LINE_ENDPOINT, poLineSample);
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201);
     return response.then().extract().path("id");
   }
 
   private void testVerifyDetailCreated() {
-    getData(DETAILS_ENDPOINT).then().log().ifValidationFails()
+    getData(DETAILS_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(18));
   }
 
   private void testVerifyPoLineCreated() {
-    getData(PO_LINE_ENDPOINT).then().log().ifValidationFails()
+    getData(PO_LINE_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(18));
   }
 
   private void testVerifyPieceCreated() {
-    getData(PIECES_ENDPOINT).then().log().ifValidationFails()
+    getData(PIECES_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(2));
   }

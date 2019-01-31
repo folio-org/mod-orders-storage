@@ -63,13 +63,13 @@ public class EresourcesTest extends OrdersStorageTest {
   }
 
   private void testDeleteEresource(String eresourceSampleId) {
-    deleteData(ERESOURCE_ENDPOINT, eresourceSampleId).then().log().ifValidationFails()
+    deleteData(ERESOURCE_ENDPOINT, eresourceSampleId).then()
       .statusCode(204);
   }
 
   private void testFetchingUpdatedEresource(String eresourceSampleId) {
     getDataById(ERESOURCE_ENDPOINT, eresourceSampleId).then()
-      .statusCode(200).log().ifValidationFails()
+      .statusCode(200)
       .body("user_limit", equalTo(10));
   }
 
@@ -78,30 +78,30 @@ public class EresourcesTest extends OrdersStorageTest {
     catJSON.put("id", eresourceSampleId);
     catJSON.put("user_limit", 10);
     Response response = putData(ERESOURCE_ENDPOINT, eresourceSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidEresourceId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Eresource with ID return 404: " + INVALID_ERESOURCE_ID);
-    getDataById(ERESOURCE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(ERESOURCE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testEresourceSuccessfullyFetched(String eresourceSampleId) {
-    getDataById(ERESOURCE_ENDPOINT, eresourceSampleId).then().log().ifValidationFails()
+    getDataById(ERESOURCE_ENDPOINT, eresourceSampleId).then()
       .statusCode(200)
       .body("id", equalTo(eresourceSampleId));
   }
 
   private void testEresourceCreated() {
-    getData(ERESOURCE_ENDPOINT).then().log().ifValidationFails()
+    getData(ERESOURCE_ENDPOINT).then()
       .statusCode(200)
       .body("total_records", equalTo(17));
   }
 
   private void testValidCreateInventoryExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201)
       .assertThat().body("create_inventory", equalTo(true));
   }

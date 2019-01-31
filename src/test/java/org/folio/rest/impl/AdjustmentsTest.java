@@ -63,13 +63,13 @@ public class AdjustmentsTest extends OrdersStorageTest {
   }
 
   private void testDeleteAdjustment(String adjustmentSampleId) {
-    deleteData(ADJUSTMENT_ENDPOINT, adjustmentSampleId).then().log().ifValidationFails()
+    deleteData(ADJUSTMENT_ENDPOINT, adjustmentSampleId).then()
       .statusCode(204);
   }
 
   private void testFetchingUpdatedAdjustment(String adjustmentSampleId) {
     getDataById(ADJUSTMENT_ENDPOINT, adjustmentSampleId).then()
-      .statusCode(200).log().ifValidationFails()
+      .statusCode(200)
       .body("credit", equalTo(1.50f));
   }
 
@@ -78,31 +78,31 @@ public class AdjustmentsTest extends OrdersStorageTest {
     catJSON.put("id", adjustmentSampleId);
     catJSON.put("credit", 1.50f);
     Response response = putData(ADJUSTMENT_ENDPOINT, adjustmentSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidAdjustmentId() {
 
     logger.info("--- mod-orders-storage-test: Fetching invalid Adjustment with ID return 404: " + INVALID_ADJUSTMENT_ID);
-    getDataById(ADJUSTMENT_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(ADJUSTMENT_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testAdjustmentSuccessfullyFetched(String adjustmentSampleId) {
-    getDataById(ADJUSTMENT_ENDPOINT, adjustmentSampleId).then().log().ifValidationFails()
+    getDataById(ADJUSTMENT_ENDPOINT, adjustmentSampleId).then()
       .statusCode(200)
       .body("id", equalTo(adjustmentSampleId));
   }
 
   private void testAdjustmentCreated() {
-    getData(ADJUSTMENT_ENDPOINT).then().log().ifValidationFails()
+    getData(ADJUSTMENT_ENDPOINT).then()
       .statusCode(200)
       .body("total_records", equalTo(17));
   }
 
   private void testValidCreditExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201)
       .assertThat().body("credit", equalTo(1.0f));
   }

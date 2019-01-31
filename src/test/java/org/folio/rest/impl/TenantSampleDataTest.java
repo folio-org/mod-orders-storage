@@ -22,7 +22,7 @@ public class TenantSampleDataTest extends OrdersStorageTest{
   public void isTenantCreated()
   {
     getData(TENANT_ENDPOINT).
-    then().log().ifValidationFails()
+    then()
     .assertThat()
     .statusCode(200);
   }
@@ -46,13 +46,17 @@ public class TenantSampleDataTest extends OrdersStorageTest{
 
   @Test
   public void failIfNoUrlToHeader(){
+    JsonArray parameterArray = new JsonArray();
+    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
+
     given()
-    .header(ANOTHER_TENANT_HEADER)
+    .header(new Header("X-Okapi-Tenant", "noURL"))
     .contentType(ContentType.JSON)
+    .body(prepareTenantBody(parameterArray, false).encodePrettily())
     .post(TENANT_ENDPOINT)
-    .then().log().ifValidationFails()
+    .then()
     .assertThat()
-    .statusCode(400);
+    .statusCode(500);
   }
 
   public void upgradeTenantWithSampleDataLoad() {
@@ -61,7 +65,7 @@ public class TenantSampleDataTest extends OrdersStorageTest{
     JsonArray parameterArray = new JsonArray();
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
 
-    JsonObject jsonBody = prepareTenantBody(parameterArray);
+    JsonObject jsonBody = prepareTenantBody(parameterArray, true);
     postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
     .assertThat()
       .statusCode(201);
@@ -73,7 +77,7 @@ public class TenantSampleDataTest extends OrdersStorageTest{
     JsonArray parameterArray = new JsonArray();
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "false"));
 
-    JsonObject jsonBody = prepareTenantBody(parameterArray);
+    JsonObject jsonBody = prepareTenantBody(parameterArray, true);
     postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
     .assertThat()
       .statusCode(200);
@@ -86,7 +90,7 @@ public class TenantSampleDataTest extends OrdersStorageTest{
     JsonArray parameterArray = new JsonArray();
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "false"));
 
-    JsonObject jsonBody = prepareTenantBody(parameterArray);
+    JsonObject jsonBody = prepareTenantBody(parameterArray, true);
     postToTenant(NONEXISTENT_TENANT_HEADER, jsonBody)
       .assertThat()
       .statusCode(400);
@@ -99,14 +103,16 @@ public class TenantSampleDataTest extends OrdersStorageTest{
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
       .post(TENANT_ENDPOINT)
-      .then().log().ifValidationFails();
+      .then();
   }
 
-  private JsonObject prepareTenantBody(JsonArray parameterArray) {
+  private JsonObject prepareTenantBody(JsonArray parameterArray, boolean isUpgrade) {
     JsonObject jsonBody=new JsonObject();
     jsonBody.put("module_to", moduleId);
-    jsonBody.put("module_from", moduleId);
     jsonBody.put("parameters", parameterArray);
+    if(isUpgrade)
+     jsonBody.put("module_from", moduleId);
     return jsonBody;
   }
+
 }

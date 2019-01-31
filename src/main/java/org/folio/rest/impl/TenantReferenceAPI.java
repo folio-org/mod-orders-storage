@@ -46,7 +46,7 @@ public class TenantReferenceAPI extends TenantAPI {
 
   @Override
   public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
-    log.info("postTenant");
+    log.info("postTenant for:"+headers.get("X-Okapi-Tenant"));
     httpClient = cntxt.owner().createHttpClient();
     isUpdateModule = !StringUtils.isEmpty(tenantAttributes.getModuleFrom());
     super.postTenant(tenantAttributes, headers, res -> {
@@ -144,7 +144,7 @@ public class TenantReferenceAPI extends TenantAPI {
     log.info("load Sample data for: " + endPoint + " begin");
     String okapiUrl = headers.get("X-Okapi-Url-to");
     if (okapiUrl == null) {
-      log.warn("No X-Okapi-Url-to. Headers: " + headers);
+      log.warn("Cannot Post sample data without X-Okapi-Url-to. Headers: " + headers);
       handler.handle(Future.failedFuture("No X-Okapi-Url-to header"));
       return;
     }

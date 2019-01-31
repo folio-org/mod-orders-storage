@@ -62,13 +62,13 @@ public class POLinesTest extends OrdersStorageTest {
   }
 
   private void testDeletePoline(String sampleId) {
-    deleteData(PO_LINE_ENDPOINT, sampleId).then().log().ifValidationFails()
+    deleteData(PO_LINE_ENDPOINT, sampleId).then()
       .statusCode(204);
   }
 
   private void testFetchingUpdatedPoline(String poLineSampleId) {
     getDataById(PO_LINE_ENDPOINT, poLineSampleId).then()
-    .statusCode(200).log().ifValidationFails()
+    .statusCode(200)
     .body("description", equalTo("Gift"));
   }
 
@@ -77,30 +77,30 @@ public class POLinesTest extends OrdersStorageTest {
     catJSON.put("id", poLineSampleId);
     catJSON.put("description", "Gift");
     Response response = putData(PO_LINE_ENDPOINT, poLineSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidPolineId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid PO line with ID return 404: " + INVALID_PO_LINE_ID);
-    getDataById(PO_LINE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(PO_LINE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testPolineSuccessfullyFetched(String poLineSampleId) {
-    getDataById(PO_LINE_ENDPOINT, poLineSampleId).then().log().ifValidationFails()
+    getDataById(PO_LINE_ENDPOINT, poLineSampleId).then()
     .statusCode(200)
     .body("id", equalTo(poLineSampleId));
   }
 
   private void testPolineCreated() {
-    getData(PO_LINE_ENDPOINT).then().log().ifValidationFails()
+    getData(PO_LINE_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(17));
   }
 
   private void testValidDescriptionExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
     .statusCode(201)
     .body("description", equalTo("ABCDEFGH"));
   }

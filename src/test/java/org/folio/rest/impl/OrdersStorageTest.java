@@ -21,34 +21,32 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 public abstract class OrdersStorageTest {
 
   protected static final String TENANT_ENDPOINT = "/_/tenant";
-  private Vertx vertx;
-  private Async async;
-  final Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
-  final int port = Integer.parseInt(System.getProperty("port", "8081"));
+  private static Vertx vertx;
+  private static Async async;
+  final static Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
+  final static int port = Integer.parseInt(System.getProperty("port", "8081"));
 
-  final String TENANT_NAME = "diku";
-  final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
+  final static String TENANT_NAME = "diku";
+  final static Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
+  final static Header URLTO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
 
-  Header URLTO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
 
-
-  String moduleName = PomReader.INSTANCE.getModuleName(); // "mod_orders_storage";
-  String moduleVersion = PomReader.INSTANCE.getVersion(); // "1.0.0"
+  final static String moduleName = PomReader.INSTANCE.getModuleName(); // "mod_orders_storage";
+  final static String moduleVersion = PomReader.INSTANCE.getVersion(); // "1.0.0"
   // RMB returns a 'normalized' name, with underscores
-  String moduleId = String.format("%s-%s", moduleName, moduleVersion).replaceAll("_", "-"); // "mod-orders_storage-1.0.0"
+  final static String moduleId = String.format("%s-%s", moduleName, moduleVersion).replaceAll("_", "-"); // "mod-orders_storage-1.0.0"
   String sampleId;
 
-  @Before
-  public void before(TestContext context) {
+  @BeforeClass
+  public static void before(TestContext context) {
     logger.info("--- mod-orders-storage test: START ");
     vertx = Vertx.vertx();
-
 
     // Deploy a verticle
     JsonObject conf = new JsonObject()
@@ -62,6 +60,7 @@ public abstract class OrdersStorageTest {
     // Set the default headers for the API calls to be tested
     RestAssured.port = port;
     RestAssured.baseURI = "http://localhost";
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
     try {
       // Run this test in embedded postgres mode
@@ -70,27 +69,31 @@ public abstract class OrdersStorageTest {
       //load the data using the /_/tenant interface
       prepareTenant(TENANT_HEADER, true);
     } catch (Exception e) {
-      logger.info(e);
-      context.fail(e);
-      return;
+        logger.info(e);
+        context.fail(e);
+        return;
     }
 
   }
 
-  @After
-  public void after(TestContext context) {
-    deleteTenant(TENANT_HEADER);
+  @AfterClass
+  public static void after(TestContext context) {
+    try {
+      deleteTenant(TENANT_HEADER);
+    }
+    finally {
     async = context.async();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       async.complete();
       logger.info("--- mod-orders-storage test: END ");
     });
+    }
   }
 
 
 
-  public void prepareTenant(Header tenantHeader, boolean loadSample) {
+  public static void prepareTenant(Header tenantHeader, boolean loadSample) {
     JsonArray parameterArray = new JsonArray();
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", loadSample));
 
@@ -102,21 +105,22 @@ public abstract class OrdersStorageTest {
     given()
       .header(tenantHeader)
       .header(URLTO_HEADER)
+      .header(new Header("X-Okapi-User-id", tenantHeader.getValue()))
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
       .post(TENANT_ENDPOINT)
-      .then().log().ifValidationFails()
+      .then()
       .statusCode(201);
   }
 
-  void deleteTenant(Header tenantHeader)
+  static void  deleteTenant(Header tenantHeader)
   {
     logger.info("Deleting Tenant: "+tenantHeader.getValue());
     given()
     .header(tenantHeader)
     .contentType(ContentType.JSON)
     .delete(TENANT_ENDPOINT)
-    .then().log().ifValidationFails()
+    .then()
     .statusCode(204);
   }
 

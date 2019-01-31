@@ -65,13 +65,13 @@ public class PhysicalsTest extends OrdersStorageTest {
   }
 
   private void testDeletePhysical(String physicalSampleId) {
-    deleteData(PHYSICAL_ENDPOINT, physicalSampleId).then().log().ifValidationFails()
+    deleteData(PHYSICAL_ENDPOINT, physicalSampleId).then()
       .statusCode(204);
   }
 
   private void testFetchingUpdatedPhysical(String physicalSampleId) {
     getDataById(PHYSICAL_ENDPOINT, physicalSampleId).then()
-      .statusCode(200).log().ifValidationFails()
+      .statusCode(200)
       .body("volumes[0]", equalTo("vol. 2"));
   }
 
@@ -82,30 +82,30 @@ public class PhysicalsTest extends OrdersStorageTest {
     array.put("vol. 2");
     catJSON.put("volumes", array);
     Response response = putData(PHYSICAL_ENDPOINT, physicalSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidPhysicalId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Physical with ID return 404: " + INVALID_PHYSICAL_ID);
-    getDataById(PHYSICAL_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(PHYSICAL_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testPhysicalSuccessfullyFetched(String physicalSampleId) {
-    getDataById(PHYSICAL_ENDPOINT, physicalSampleId).then().log().ifValidationFails()
+    getDataById(PHYSICAL_ENDPOINT, physicalSampleId).then()
       .statusCode(200)
       .body("id", equalTo(physicalSampleId));
   }
 
   private void testPhysicalCreated() {
-    getData(PHYSICAL_ENDPOINT).then().log().ifValidationFails()
+    getData(PHYSICAL_ENDPOINT).then()
       .statusCode(200)
       .body("total_records", equalTo(17));
   }
 
   private void testValidMaterialSupplierExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201)
       .assertThat().body("material_supplier", equalTo("73d14bc5-d131-48c6-b380-f8e62f63c8b6"));
   }

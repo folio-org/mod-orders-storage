@@ -63,13 +63,13 @@ public class FundDistributionsTest extends OrdersStorageTest {
   }
 
   private void testDeleteFundDistribution(String fundDistrSampleId) {
-    deleteData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then().log().ifValidationFails()
+    deleteData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
       .statusCode(204);
   }
 
   private void testFetchingUpdatedFundDistribution(String fundDistrSampleId) {
     getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
-      .statusCode(200).log().ifValidationFails()
+      .statusCode(200)
       .body("code", equalTo("HIST"));
   }
 
@@ -78,30 +78,30 @@ public class FundDistributionsTest extends OrdersStorageTest {
     catJSON.put("id", fundDistrSampleId);
     catJSON.put("code", "HIST");
     Response response = putData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidFundDistributionId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid FundDistribution with ID return 404: " + INVALID_FUND_DISTRIBUTION_ID);
-    getDataById(FUND_DISTRIBUTION_ENDPOINT, INVALID_FUND_DISTRIBUTION_ID).then().log().ifValidationFails()
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, INVALID_FUND_DISTRIBUTION_ID).then()
       .statusCode(404);
   }
 
   private void testFundDistributionSuccessfullyFetched(String fundDistrSampleId) {
-    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then().log().ifValidationFails()
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
       .statusCode(200)
       .body("id", equalTo(fundDistrSampleId));
   }
 
   private void testFundDistributionCreated() {
-    getData(FUND_DISTRIBUTION_ENDPOINT).then().log().ifValidationFails()
+    getData(FUND_DISTRIBUTION_ENDPOINT).then()
       .statusCode(200)
       .body("total_records", equalTo(17));
   }
 
   private void testValidCodeExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201)
       .assertThat().body("code", equalTo("HIST"));
   }

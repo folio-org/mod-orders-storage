@@ -64,13 +64,13 @@ public class DetailsTest extends OrdersStorageTest {
   }
 
   private void testDeleteDetail(String detailSampleId) {
-    deleteData(DETAILS_ENDPOINT, detailSampleId).then().log().ifValidationFails()
+    deleteData(DETAILS_ENDPOINT, detailSampleId).then()
     .statusCode(204);
   }
 
   private void testFetchingUpdatedDetail(String detailSampleId) {
     getDataById(DETAILS_ENDPOINT, detailSampleId).then()
-    .statusCode(200).log().ifValidationFails()
+    .statusCode(200)
     .body("receiving_note", equalTo("Update receiving note"));
   }
 
@@ -79,30 +79,30 @@ public class DetailsTest extends OrdersStorageTest {
     catJSON.put("id", detailSampleId);
     catJSON.put("receiving_note", "Update receiving note");
     Response response = putData(DETAILS_ENDPOINT, detailSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidDetailId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Detail with ID return 404: "+ INVALID_DETAIL_ID);
-    getDataById(DETAILS_ENDPOINT, INVALID_DETAIL_ID).then().log().ifValidationFails()
+    getDataById(DETAILS_ENDPOINT, INVALID_DETAIL_ID).then()
     .statusCode(404);
   }
 
   private void testDetailSuccessfullyFetched(String detailSampleId) {
-    getDataById(DETAILS_ENDPOINT, detailSampleId).then().log().ifValidationFails()
+    getDataById(DETAILS_ENDPOINT, detailSampleId).then()
     .statusCode(200)
     .body("id", equalTo(detailSampleId));
   }
 
   private void testDetailCreated() {
-    getData(DETAILS_ENDPOINT).then().log().ifValidationFails()
+    getData(DETAILS_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(17));
   }
 
   private void testValidReceivingNoteExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
     .statusCode(201)
     .assertThat().body("receiving_note", equalTo("ABCDEFGHIJKL"));
   }
