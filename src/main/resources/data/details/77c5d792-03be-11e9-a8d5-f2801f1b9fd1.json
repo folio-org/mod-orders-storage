@@ -1,0 +1,17 @@
+{
+  "id": "77c5d792-03be-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "v. 1-6 in 10 parts",
+  "product_ids": [
+    {
+      "product_id": "9781868885015",
+      "product_id_type": "ISBN"
+    }
+  ],
+  "material_types": [
+    "fde2e21e-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": null,
+  "subscription_interval": 0,
+  "subscription_to": null,
+  "po_line_id": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

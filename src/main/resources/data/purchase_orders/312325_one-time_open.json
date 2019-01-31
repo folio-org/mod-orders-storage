@@ -1,0 +1,22 @@
+{
+  "id": "f4dc647c-ec82-442e-b13d-f9505b7ce8e9",
+  "approved": true,
+  "notes": [
+    "DXiao",
+    "DHalling",
+    "Mary Ann Barker barker@tamu.edu",
+    "Licensing <1-year streaming license>"
+  ],
+  "manual_po": false,
+  "po_number": "312325",
+  "order_type": "One-Time",
+  "re_encumber": false,
+  "total_estimated_price": 150.00,
+  "total_items": 1,
+  "vendor": "50fb8a2a-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "workflow_status": "Open",
+  "metadata": {
+    "createdDate": "2018-07-13T00:00:00Z",
+    "createdByUserId": "28d11576-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

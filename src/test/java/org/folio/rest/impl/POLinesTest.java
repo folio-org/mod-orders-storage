@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
@@ -18,10 +18,6 @@ public class POLinesTest extends OrdersStorageTest {
   @Test
   public void tests(TestContext context) {
     try {
-
-      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-      logger.info("--- mod-orders-storage-test PO line test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage-test PO line test: Verifying database's initial state ... ");
       verifyCollection(PO_LINE_ENDPOINT);
@@ -42,13 +38,13 @@ public class POLinesTest extends OrdersStorageTest {
 
       logger.info("--- mod-orders-storage PO line test: Invalid PO line: " + INVALID_PO_LINE_ID);
       testInvalidPolineId();
-      
+
       logger.info("--- mod-orders-storage PO line test: Editing PO line with ID: " + sampleId);
       testPolineEdit(poLineSample, sampleId);
 
       logger.info("--- mod-orders-storage PO line test: Fetching PO line with ID: " + sampleId);
       testFetchingUpdatedPoline(sampleId);
-      
+
     } catch (Exception e) {
       context.fail("--- mod-orders-storage PO line test: ERROR: " + e.getMessage());
     } finally {
@@ -66,45 +62,45 @@ public class POLinesTest extends OrdersStorageTest {
   }
 
   private void testDeletePoline(String sampleId) {
-    deleteData(PO_LINE_ENDPOINT, sampleId).then().log().ifValidationFails()
+    deleteData(PO_LINE_ENDPOINT, sampleId).then()
       .statusCode(204);
   }
 
   private void testFetchingUpdatedPoline(String poLineSampleId) {
     getDataById(PO_LINE_ENDPOINT, poLineSampleId).then()
-    .statusCode(200).log().ifValidationFails()
+    .statusCode(200)
     .body("description", equalTo("Gift"));
   }
-  
+
   private void testPolineEdit(String poLineSample, String poLineSampleId) {
     JSONObject catJSON = new JSONObject(poLineSample);
     catJSON.put("id", poLineSampleId);
     catJSON.put("description", "Gift");
     Response response = putData(PO_LINE_ENDPOINT, poLineSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidPolineId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid PO line with ID return 404: " + INVALID_PO_LINE_ID);
-    getDataById(PO_LINE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(PO_LINE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testPolineSuccessfullyFetched(String poLineSampleId) {
-    getDataById(PO_LINE_ENDPOINT, poLineSampleId).then().log().ifValidationFails()
+    getDataById(PO_LINE_ENDPOINT, poLineSampleId).then()
     .statusCode(200)
     .body("id", equalTo(poLineSampleId));
   }
 
   private void testPolineCreated() {
-    getData(PO_LINE_ENDPOINT).then().log().ifValidationFails()
+    getData(PO_LINE_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(17));
   }
 
   private void testValidDescriptionExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
     .statusCode(201)
     .body("description", equalTo("ABCDEFGH"));
   }

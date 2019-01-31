@@ -1,0 +1,48 @@
+{
+  "id": "70fb4e66-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkin_items": false,
+  "instance_id": "25733ba9-49b7-406f-ba56-3dc4e84e24a8",
+  "agreement_id": "05da8d23-d630-44ed-b61d-e780665c9efb",
+  "purchase_order_id": "1ab7ef6a-d1d4-4a4f-90a2-882aed18af14",
+  "acquisition_method": "Purchase",
+  "adjustment": "206336cf-eb47-4e09-9e28-e25aa484abb7",
+  "alerts": [],
+  "cancellation_restriction": false,
+  "cancellation_restriction_note": "",
+  "claims": [
+    "27c5d666-cabe-18e8-a8d5-f2801f1b9fd1"
+  ],
+  "collection": false,
+  "cost": "27c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "description": "",
+  "details": "27c5d792-cabe-11e9-a8d5-f2801f199fd1",
+  "donor": "",
+  "eresource": "27c5d8be-cabe-11e8-a8d5-f2801f1b9fd1",
+  "fund_distribution": [
+    "2de2c39c-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "location": "27c5d9ea-cabe-11c8-a8d5-f2801f1b9fd1",
+  "order_format": "Physical Resource",
+  "owner": "LTS Acquisitions",
+  "payment_status": "Awaiting Payment",
+  "physical": "6ee243f9-72e5-4464-bd6c-43a21873d648",
+  "po_line_description": "",
+  "po_line_number": "268758-01",
+  "publication_date": "2011",
+  "publisher": "Tapir Academic Press",
+  "receipt_date": null,
+  "receipt_status": "Awaiting Receipt",
+  "reporting_codes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Brown",
+  "source": "22dbff41-c5c6-4280-858e-33fba452a334",
+  "tags": [],
+  "title": "Alabama Women: Their Lives and Times",
+  "vendor_detail": "70fb88ea-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "metadata": {
+    "createdDate": "2018-06-29T00:00:00Z",
+    "createdByUserId": "28d0f99c-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

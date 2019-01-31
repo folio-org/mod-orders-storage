@@ -7,8 +7,7 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.jayway.restassured.response.Response;
-
+import io.restassured.response.Response;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -34,10 +33,6 @@ public class PiecesTest extends OrdersStorageTest{
   @Test
   public void testpiece() {
     try {
-
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage pieces test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage pieces test: Verifying database's initial state ... ");
       verifyCollection(PIECES_ENDPOINT);
@@ -83,13 +78,13 @@ public class PiecesTest extends OrdersStorageTest{
   }
 
   private void testDeletePiece(String piecesSampleId) {
-    deleteData(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
+    deleteData(PIECES_ENDPOINT, piecesSampleId).then()
     .statusCode(204);
   }
 
   private void testFetchingUpdatedpiece(String piecesSampleId) {
     getDataById(PIECES_ENDPOINT, piecesSampleId).then()
-    .statusCode(200).log().ifValidationFails()
+    .statusCode(200)
     .body("comment", equalTo("Update Comment"));
   }
 
@@ -98,30 +93,30 @@ public class PiecesTest extends OrdersStorageTest{
     catJSON.put("id", piecesSampleId);
     catJSON.put("comment", "Update Comment");
     Response response = putData(PIECES_ENDPOINT, piecesSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidPieceId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Piece with ID return 404: "+ INVALID_PIECE_ID);
-    getDataById(PIECES_ENDPOINT, INVALID_PIECE_ID).then().log().ifValidationFails()
+    getDataById(PIECES_ENDPOINT, INVALID_PIECE_ID).then()
     .statusCode(404);
   }
 
   private void testpieceSuccessfullyFetched(String piecesSampleId) {
-    getDataById(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
+    getDataById(PIECES_ENDPOINT, piecesSampleId).then()
     .statusCode(200)
     .body("id", equalTo(piecesSampleId));
   }
 
   private void testPieceCreated() {
-    getData(PIECES_ENDPOINT).then().log().ifValidationFails()
+    getData(PIECES_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(1));
   }
 
   private void testValidCaptionExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
     .statusCode(201)
     .assertThat().body("caption", equalTo("Tutorial Volume 5"));
   }

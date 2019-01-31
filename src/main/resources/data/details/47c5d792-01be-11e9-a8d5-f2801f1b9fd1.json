@@ -1,0 +1,17 @@
+{
+  "id": "47c5d792-01be-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "",
+  "product_ids": [
+    {
+      "product_id": "12357",
+      "product_id_type": "Vendor Title Number"
+    }
+  ],
+  "material_types": [
+    "fde2de86-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": "2018-07-20T00:00:00.000Z",
+  "subscription_interval": 1095,
+  "subscription_to": "2021-07-19T00:00:00.000Z",
+  "po_line_id": "90fb53f2-cdf1-11e8-a8d5-f2801f1b9fd1"
+}
