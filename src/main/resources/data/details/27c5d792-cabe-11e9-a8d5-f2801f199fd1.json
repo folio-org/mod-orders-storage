@@ -1,0 +1,17 @@
+{
+  "id": "27c5d792-cabe-11e9-a8d5-f2801f199fd1",
+  "receiving_note": "",
+  "product_ids": [
+    {
+      "product_id": "9780820350790",
+      "product_id_type": "ISBN"
+    }
+  ],
+  "material_types": [
+    "fde2dc42-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": null,
+  "subscription_interval": 0,
+  "subscription_to": null,
+  "po_line_id": "70fb4e66-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

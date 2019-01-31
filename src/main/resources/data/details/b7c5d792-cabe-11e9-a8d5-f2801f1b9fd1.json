@@ -1,0 +1,17 @@
+{
+  "id": "b7c5d792-cabe-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "Renewal, access continuous",
+  "product_ids": [
+    {
+      "product_id": "4005000",
+      "product_id_type": "Vendor Title Number"
+    }
+  ],
+  "material_types": [
+    "fde2db02-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": "2018-08-01T00:00:00.000Z",
+  "subscription_interval": 365,
+  "subscription_to": "2019-07-31T00:00:00.000Z",
+  "po_line_id": "50fb6ae0-cdf1-11e8-a8d5-f2801f1b9fd1"
+}
