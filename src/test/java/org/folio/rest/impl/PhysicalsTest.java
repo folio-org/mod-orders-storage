@@ -61,10 +61,9 @@ public class PhysicalsTest extends OrdersStorageTest {
 
   @Override
   void verifyCollection(String endpoint) {
-    // Verify that there are no existing  records
+    // Verify the existing  records
     getData(endpoint).then()
       .assertThat()
-      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(10));
   }
