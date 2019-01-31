@@ -37,7 +37,6 @@ public class PiecesTest extends OrdersStorageTest{
 
       // Initialize the tenant-schema
       logger.info("--- mod-orders-storage pieces test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage pieces test: Verifying database's initial state ... ");
       verifyCollection(PIECES_ENDPOINT);
@@ -51,7 +50,7 @@ public class PiecesTest extends OrdersStorageTest{
       testValidCaptionExists(response);
 
       logger.info("--- mod-orders-storage pieces test: Verifying only 1 piece was created ... ");
-      testPieceCreated();
+      testEntityCreated(PIECES_ENDPOINT, 1);
 
       logger.info("--- mod-orders-storage pieces test: Fetching piece with ID: " + piecesSampleId);
       testPieceSuccessfullyFetched(piecesSampleId);
@@ -70,21 +69,11 @@ public class PiecesTest extends OrdersStorageTest{
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage pieces test: Deleting piece with ID");
-      testDeletePiece(piecesSampleId);
+      deleteData(PIECES_ENDPOINT, piecesSampleId);
 
       logger.info("--- mod-orders-storage pieces test: Verify piece is deleted with ID ");
-      testVerifyPieceDeletion(piecesSampleId);
+      testVerifyEntityDeletion(PIECES_ENDPOINT, piecesSampleId);
     }
-  }
-
-  private void testVerifyPieceDeletion(String piecesSampleId) {
-    getDataById(PIECES_ENDPOINT, piecesSampleId).then()
-    .statusCode(404);
-  }
-
-  private void testDeletePiece(String piecesSampleId) {
-    deleteData(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
-    .statusCode(204);
   }
 
   private void testFetchingUpdatedpiece(String piecesSampleId) {
@@ -112,12 +101,6 @@ public class PiecesTest extends OrdersStorageTest{
     getDataById(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("id", equalTo(piecesSampleId));
-  }
-
-  private void testPieceCreated() {
-    getData(PIECES_ENDPOINT).then().log().ifValidationFails()
-    .statusCode(200)
-    .body("total_records", equalTo(1));
   }
 
   private void testValidCaptionExists(Response response) {

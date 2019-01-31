@@ -38,11 +38,11 @@ public class POsTest extends OrdersStorageTest {
 
   @Test
   public void tests(TestContext context) {
+    String sampleId = null;
     try {
 
       // IMPORTANT: Call the tenant interface to initialize the tenant-schema
       logger.info("--- mod-orders-storage PO test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage PO test: Verifying database's initial state ... ");
       verifyCollection();
@@ -56,12 +56,12 @@ public class POsTest extends OrdersStorageTest {
       testPoNumberUniqness(samePoNumberErrorResponse);
 
       sampleId = response.then().extract().path("id");
-      
+
       logger.info("--- mod-orders-storage PO test: Valid po_number exists ... ");
       testValidPONumberExists(response);
 
       logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created ... ");
-      testPOCreated();
+      testEntityCreated(PO_ENDPOINT, 15);
 
       logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created from orders endpoint... ");
       testPOCreatedFromOrders();
@@ -71,21 +71,21 @@ public class POsTest extends OrdersStorageTest {
 
       logger.info("--- mod-orders-storage PO test: Fetching invalid PO with ID return 404: " + INVALID_PO_ID);
       testInvalidPOId();
-      
+
       logger.info("--- mod-orders-storage PO test: Editing purchase order with ID: " + sampleId);
-      testPOEdit(purchaseOrderSample);
+      testPOEdit(purchaseOrderSample, sampleId);
 
       logger.info("--- mod-orders-storage PO test: Fetching updated purchase order with ID: " + sampleId);
-      testFetchingUpdatedPO();
- 
+      testFetchingUpdatedPO(sampleId);
+
     } catch (Exception e) {
       context.fail("--- mod-orders-storage PO test: ERROR: " + e.getMessage());
     }  finally {
       logger.info("--- mod-orders-storage PO test: Deleting purchase order with ID: " + sampleId);
-      testDeletePO();
+      deleteData(PO_ENDPOINT, sampleId);
 
       logger.info("--- mod-orders-storages PO test: Verify PO is deleted with ID ");
-      testVerifyPODeletion(sampleId);
+      testVerifyEntityDeletion(PO_ENDPOINT, sampleId);
     }
   }
 
@@ -96,23 +96,13 @@ public class POsTest extends OrdersStorageTest {
        .body(containsString("duplicate key value violates unique constraint \"purchase_order_po_number_unique_idx\""));
   }
 
-  private void testDeletePO() {
-    deleteData(PO_ENDPOINT, sampleId).then().log().ifValidationFails()
-    .statusCode(204);
-  }
-
-  private void testVerifyPODeletion(String purchaseOrderSampleId) {
-    getDataById(PO_ENDPOINT, purchaseOrderSampleId).then()
-      .statusCode(404);
-  }
-  
-  private void testFetchingUpdatedPO() {
+  private void testFetchingUpdatedPO(String sampleId) {
     getDataById(PO_ENDPOINT, sampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("po_number", equalTo("666666"));
   }
 
-  private void testPOEdit(String purchaseOrderSample) {
+  private void testPOEdit(String purchaseOrderSample, String sampleId) {
     JSONObject catJSON = new JSONObject(purchaseOrderSample);
     catJSON.put("id", sampleId);
     catJSON.put("po_number", "666666");
@@ -134,12 +124,6 @@ public class POsTest extends OrdersStorageTest {
 
   private void testPOCreatedFromOrders() {
     getData(ORDERS_ENDPOINT).then().log().ifValidationFails()
-    .statusCode(200)
-    .body("total_records", equalTo(15));
-  }
-
-  private void testPOCreated() {
-    getData(PO_ENDPOINT).then().log().ifValidationFails()
     .statusCode(200)
     .body("total_records", equalTo(15));
   }

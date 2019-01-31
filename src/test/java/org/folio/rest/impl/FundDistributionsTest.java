@@ -17,11 +17,11 @@ public class FundDistributionsTest extends OrdersStorageTest {
 
   @Test
   public void testFundDistribution() {
+    String sampleId = null;
     try {
 
       // Initialize the tenant-schema
       logger.info("--- mod-orders-storage FundDistribution test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage FundDistribution test: Verifying database's initial state ... ");
       verifyCollection(FUND_DISTRIBUTION_ENDPOINT);
@@ -35,7 +35,7 @@ public class FundDistributionsTest extends OrdersStorageTest {
       testValidCodeExists(response);
 
       logger.info("--- mod-orders-storage FundDistribution test: Verifying only 1 FundDistribution was created ... ");
-      testFundDistributionCreated();
+      testEntityCreated(FUND_DISTRIBUTION_ENDPOINT, 17);
 
       logger.info("--- mod-orders-storage FundDistribution test: Fetching FundDistribution with ID: " + sampleId);
       testFundDistributionSuccessfullyFetched(sampleId);
@@ -54,21 +54,11 @@ public class FundDistributionsTest extends OrdersStorageTest {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storages FundDistribution test: Deleting FundDistribution with ID");
-      testDeleteFundDistribution(sampleId);
+      deleteData(FUND_DISTRIBUTION_ENDPOINT, sampleId);
 
       logger.info("--- mod-orders-storages FundDistribution test: Verify FundDistribution is deleted with ID ");
-      testVerifyFundDistributionDeletion(sampleId);
+      testVerifyEntityDeletion(FUND_DISTRIBUTION_ENDPOINT, sampleId);
     }
-  }
-
-  private void testVerifyFundDistributionDeletion(String fundDistrSampleId) {
-    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
-      .statusCode(404);
-  }
-
-  private void testDeleteFundDistribution(String fundDistrSampleId) {
-    deleteData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then().log().ifValidationFails()
-      .statusCode(204);
   }
 
   private void testFetchingUpdatedFundDistribution(String fundDistrSampleId) {
@@ -96,12 +86,6 @@ public class FundDistributionsTest extends OrdersStorageTest {
     getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then().log().ifValidationFails()
       .statusCode(200)
       .body("id", equalTo(fundDistrSampleId));
-  }
-
-  private void testFundDistributionCreated() {
-    getData(FUND_DISTRIBUTION_ENDPOINT).then().log().ifValidationFails()
-      .statusCode(200)
-      .body("total_records", equalTo(17));
   }
 
   private void testValidCodeExists(Response response) {

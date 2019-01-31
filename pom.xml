@@ -21,6 +21,8 @@
     <raml-module-builder.version>23.3.0</raml-module-builder.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <postgres.driver.version>9.4.1212</postgres.driver.version>
+    <junit.jupiter.version>5.3.1</junit.jupiter.version>
+    <vertx.version>3.5.4</vertx.version>
   </properties>
 
   <repositories>
@@ -81,6 +83,24 @@
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
+      <version>${vertx.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

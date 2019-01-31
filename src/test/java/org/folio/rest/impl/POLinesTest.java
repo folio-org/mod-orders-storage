@@ -17,11 +17,11 @@ public class POLinesTest extends OrdersStorageTest {
 
   @Test
   public void tests(TestContext context) {
+    String sampleId = null;
     try {
 
       // IMPORTANT: Call the tenant interface to initialize the tenant-schema
       logger.info("--- mod-orders-storage-test PO line test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage-test PO line test: Verifying database's initial state ... ");
       verifyCollection(PO_LINE_ENDPOINT);
@@ -35,47 +35,37 @@ public class POLinesTest extends OrdersStorageTest {
       testValidDescriptionExists(response);
 
       logger.info("--- mod-orders-storage PO line test: Verifying only 1 PO line was created ... ");
-      testPolineCreated();
+      testEntityCreated(PO_LINE_ENDPOINT, 17);
 
       logger.info("--- mod-orders-storage PO line test: Fetching PO line with ID: " + sampleId);
       testPolineSuccessfullyFetched(sampleId);
 
       logger.info("--- mod-orders-storage PO line test: Invalid PO line: " + INVALID_PO_LINE_ID);
       testInvalidPolineId();
-      
+
       logger.info("--- mod-orders-storage PO line test: Editing PO line with ID: " + sampleId);
       testPolineEdit(poLineSample, sampleId);
 
       logger.info("--- mod-orders-storage PO line test: Fetching PO line with ID: " + sampleId);
-      testFetchingUpdatedPoline(sampleId);
-      
+      testFetchingUpdatedPoLine(sampleId);
+
     } catch (Exception e) {
       context.fail("--- mod-orders-storage PO line test: ERROR: " + e.getMessage());
     } finally {
       logger.info("--- mod-orders-storages PO line test: Deleting PO line with ID");
-      testDeletePoline(sampleId);
+      deleteData(PO_LINE_ENDPOINT, sampleId);
 
       logger.info("--- mod-orders-storages PO line test: Verify PO line is deleted with ID ");
-      testVerifyPolineDeletion(sampleId);
+      testVerifyEntityDeletion(PO_LINE_ENDPOINT, sampleId);
     }
   }
 
-  private void testVerifyPolineDeletion(String sampleId) {
-    getDataById(PO_LINE_ENDPOINT, sampleId).then()
-    .statusCode(404);
-  }
-
-  private void testDeletePoline(String sampleId) {
-    deleteData(PO_LINE_ENDPOINT, sampleId).then().log().ifValidationFails()
-      .statusCode(204);
-  }
-
-  private void testFetchingUpdatedPoline(String poLineSampleId) {
+  private void testFetchingUpdatedPoLine(String poLineSampleId) {
     getDataById(PO_LINE_ENDPOINT, poLineSampleId).then()
     .statusCode(200).log().ifValidationFails()
     .body("description", equalTo("Gift"));
   }
-  
+
   private void testPolineEdit(String poLineSample, String poLineSampleId) {
     JSONObject catJSON = new JSONObject(poLineSample);
     catJSON.put("id", poLineSampleId);
@@ -95,12 +85,6 @@ public class POLinesTest extends OrdersStorageTest {
     getDataById(PO_LINE_ENDPOINT, poLineSampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("id", equalTo(poLineSampleId));
-  }
-
-  private void testPolineCreated() {
-    getData(PO_LINE_ENDPOINT).then().log().ifValidationFails()
-    .statusCode(200)
-    .body("total_records", equalTo(17));
   }
 
   private void testValidDescriptionExists(Response response) {

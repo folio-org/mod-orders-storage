@@ -18,11 +18,12 @@ public class DetailsTest extends OrdersStorageTest {
 
   @Test
   public void testDetail() {
+    String sampleId = null;
     try {
 
       // Initialize the tenant-schema
       logger.info("--- mod-orders-storage Details test: Preparing test tenant");
-      prepareTenant();
+
 
       logger.info("--- mod-orders-storage Details test: Verifying database's initial state ... ");
       verifyCollection(DETAILS_ENDPOINT);
@@ -36,7 +37,7 @@ public class DetailsTest extends OrdersStorageTest {
       testValidReceivingNoteExists(response);
 
       logger.info("--- mod-orders-storage Details test: Verifying only 1 detail was created ... ");
-      testDetailCreated();
+      testEntityCreated(DETAILS_ENDPOINT, 17);
 
       logger.info("--- mod-orders-storage Details test: Fetching Detail with ID: " + sampleId);
       testDetailSuccessfullyFetched(sampleId);
@@ -55,21 +56,11 @@ public class DetailsTest extends OrdersStorageTest {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage Details test: Deleting Detail with ID");
-      testDeleteDetail(sampleId);
+      deleteData(DETAILS_ENDPOINT, sampleId);
 
       logger.info("--- mod-orders-storage Details test: Verify Detail is deleted with ID ");
-      testVerifyDetailDeletion(sampleId);
+      testVerifyEntityDeletion(DETAILS_ENDPOINT, sampleId);
     }
-  }
-
-  private void testVerifyDetailDeletion(String detailSampleId) {
-    getDataById(DETAILS_ENDPOINT, detailSampleId).then()
-    .statusCode(404);
-  }
-
-  private void testDeleteDetail(String detailSampleId) {
-    deleteData(DETAILS_ENDPOINT, detailSampleId).then().log().ifValidationFails()
-    .statusCode(204);
   }
 
   private void testFetchingUpdatedDetail(String detailSampleId) {
@@ -97,12 +88,6 @@ public class DetailsTest extends OrdersStorageTest {
     getDataById(DETAILS_ENDPOINT, detailSampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("id", equalTo(detailSampleId));
-  }
-
-  private void testDetailCreated() {
-    getData(DETAILS_ENDPOINT).then().log().ifValidationFails()
-    .statusCode(200)
-    .body("total_records", equalTo(17));
   }
 
   private void testValidReceivingNoteExists(Response response) {

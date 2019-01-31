@@ -17,11 +17,12 @@ public class EresourcesTest extends OrdersStorageTest {
 
   @Test
   public void testEresource() {
+    String sampleId = null;
     try {
 
       // Initialize the tenant-schema
       logger.info("--- mod-orders-storage Eresource test: Preparing test tenant");
-      prepareTenant();
+
 
       logger.info("--- mod-orders-storage Eresource test: Verifying database's initial state ... ");
       verifyCollection(ERESOURCE_ENDPOINT);
@@ -35,7 +36,7 @@ public class EresourcesTest extends OrdersStorageTest {
       testValidCreateInventoryExists(response);
 
       logger.info("--- mod-orders-storage Eresource test: Verifying only 1 Eresource was created ... ");
-      testEresourceCreated();
+      testEntityCreated(ERESOURCE_ENDPOINT, 17);
 
       logger.info("--- mod-orders-storage Eresource test: Fetching Eresource with ID: " + sampleId);
       testEresourceSuccessfullyFetched(sampleId);
@@ -54,21 +55,11 @@ public class EresourcesTest extends OrdersStorageTest {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storages Eresource test: Deleting Eresource with ID");
-      testDeleteEresource(sampleId);
+      deleteData(ERESOURCE_ENDPOINT, sampleId);
 
       logger.info("--- mod-orders-storages Eresource test: Verify Eresource is deleted with ID ");
-      testVerifyEresourceDeletion(sampleId);
+      testVerifyEntityDeletion(ERESOURCE_ENDPOINT, sampleId);
     }
-  }
-
-  private void testVerifyEresourceDeletion(String eresourceSampleId) {
-    getDataById(ERESOURCE_ENDPOINT, eresourceSampleId).then()
-      .statusCode(404);
-  }
-
-  private void testDeleteEresource(String eresourceSampleId) {
-    deleteData(ERESOURCE_ENDPOINT, eresourceSampleId).then().log().ifValidationFails()
-      .statusCode(204);
   }
 
   private void testFetchingUpdatedEresource(String eresourceSampleId) {
@@ -96,12 +87,6 @@ public class EresourcesTest extends OrdersStorageTest {
     getDataById(ERESOURCE_ENDPOINT, eresourceSampleId).then().log().ifValidationFails()
       .statusCode(200)
       .body("id", equalTo(eresourceSampleId));
-  }
-
-  private void testEresourceCreated() {
-    getData(ERESOURCE_ENDPOINT).then().log().ifValidationFails()
-      .statusCode(200)
-      .body("total_records", equalTo(17));
   }
 
   private void testValidCreateInventoryExists(Response response) {

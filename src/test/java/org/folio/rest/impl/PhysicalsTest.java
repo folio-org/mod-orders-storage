@@ -19,11 +19,11 @@ public class PhysicalsTest extends OrdersStorageTest {
 
   @Test
   public void testPhysical() {
+    String sampleId = null;
     try {
 
       // Initialize the tenant-schema
       logger.info("--- mod-orders-storage Physical test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage Physical test: Verifying database's initial state ... ");
       verifyCollection(PHYSICAL_ENDPOINT);
@@ -37,7 +37,7 @@ public class PhysicalsTest extends OrdersStorageTest {
       testValidMaterialSupplierExists(response);
 
       logger.info("--- mod-orders-storage Physical test: Verifying only 1 Physical was created ... ");
-      testPhysicalCreated();
+      testEntityCreated(PHYSICAL_ENDPOINT, 17);
 
       logger.info("--- mod-orders-storage Physical test: Fetching Physical with ID: " + sampleId);
       testPhysicalSuccessfullyFetched(sampleId);
@@ -56,21 +56,11 @@ public class PhysicalsTest extends OrdersStorageTest {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storages Physical test: Deleting Physical with ID");
-      testDeletePhysical(sampleId);
+      deleteData(PHYSICAL_ENDPOINT, sampleId);
 
       logger.info("--- mod-orders-storages Physical test: Verify Physical is deleted with ID ");
-      testVerifyPhysicalDeletion(sampleId);
+      testVerifyEntityDeletion(PHYSICAL_ENDPOINT, sampleId);
     }
-  }
-
-  private void testVerifyPhysicalDeletion(String physicalSampleId) {
-    getDataById(PHYSICAL_ENDPOINT, physicalSampleId).then()
-      .statusCode(404);
-  }
-
-  private void testDeletePhysical(String physicalSampleId) {
-    deleteData(PHYSICAL_ENDPOINT, physicalSampleId).then().log().ifValidationFails()
-      .statusCode(204);
   }
 
   private void testFetchingUpdatedPhysical(String physicalSampleId) {
@@ -100,12 +90,6 @@ public class PhysicalsTest extends OrdersStorageTest {
     getDataById(PHYSICAL_ENDPOINT, physicalSampleId).then().log().ifValidationFails()
       .statusCode(200)
       .body("id", equalTo(physicalSampleId));
-  }
-
-  private void testPhysicalCreated() {
-    getData(PHYSICAL_ENDPOINT).then().log().ifValidationFails()
-      .statusCode(200)
-      .body("total_records", equalTo(17));
   }
 
   private void testValidMaterialSupplierExists(Response response) {

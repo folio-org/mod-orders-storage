@@ -10,11 +10,11 @@ public class PoNumberTest extends OrdersStorageTest {
 
   private static final String PO_NUMBER_ENDPOINT = "orders-storage/po_number";
 
+
   @Test
   public void testGetPoNumberOk(TestContext testContext) {
     // Initialize the tenant-schema
     logger.info("--- mod-orders-storage PoNumber test: Preparing test tenant");
-    prepareTenant();
 
     int po_number1 = getPoNumberAsInt();
     logger.info("--- mod-orders-storage Generated po_number1: " + po_number1);
