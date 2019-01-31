@@ -1,10 +1,10 @@
 package org.folio.rest.impl;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.ValidatableResponse;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.response.ValidatableResponse;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -23,6 +23,7 @@ public class TenantSampleDataTest extends OrdersStorageTest{
   {
     getData(TENANT_ENDPOINT).
     then().log().ifValidationFails()
+    .assertThat()
     .statusCode(200);
   }
 
@@ -50,6 +51,7 @@ public class TenantSampleDataTest extends OrdersStorageTest{
     .contentType(ContentType.JSON)
     .post(TENANT_ENDPOINT)
     .then().log().ifValidationFails()
+    .assertThat()
     .statusCode(400);
   }
 
@@ -60,7 +62,8 @@ public class TenantSampleDataTest extends OrdersStorageTest{
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
 
     JsonObject jsonBody = prepareTenantBody(parameterArray);
-    postToTenant(jsonBody)
+    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
+    .assertThat()
       .statusCode(201);
   }
 
@@ -71,7 +74,8 @@ public class TenantSampleDataTest extends OrdersStorageTest{
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "false"));
 
     JsonObject jsonBody = prepareTenantBody(parameterArray);
-    postToTenant(jsonBody)
+    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
+    .assertThat()
       .statusCode(200);
   }
 
@@ -83,19 +87,14 @@ public class TenantSampleDataTest extends OrdersStorageTest{
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "false"));
 
     JsonObject jsonBody = prepareTenantBody(parameterArray);
-    given()
-      .header(NONEXISTENT_TENANT_HEADER)
-      .header(URLTO_HEADER)
-      .contentType(ContentType.JSON)
-      .body(jsonBody.encodePrettily())
-      .post(TENANT_ENDPOINT)
-      .then().log().ifValidationFails()
+    postToTenant(NONEXISTENT_TENANT_HEADER, jsonBody)
+      .assertThat()
       .statusCode(400);
   }
 
-  private ValidatableResponse postToTenant(JsonObject jsonBody) {
+  private ValidatableResponse postToTenant(Header tenantHeader, JsonObject jsonBody) {
     return given()
-      .header(ANOTHER_TENANT_HEADER)
+      .header(tenantHeader)
       .header(URLTO_HEADER)
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())

@@ -4,7 +4,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -36,6 +38,7 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private final String poLineSample2 = getFile("po_line_for_view.sample");
   private final String pieceSample = getFile("pieces.sample");
   private final String pieceSample2 = getFile("piece_for_view.sample");
+  private static final String APPLICATION_JSON = "application/json";
 
   @Test
   public void testReceivingHistory() {
@@ -143,12 +146,17 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
 
   private void verifyViewCollectionAfter(String endpoint, int expectedCount) {
 
-   ReceivingHistoryCollection receivingHistory = getData(endpoint)
+   final ReceivingHistoryCollection receivingHistory = RestAssured
+       .with()
+        .header(TENANT_HEADER)
+        .get(endpoint)
        .then()
+       .contentType(APPLICATION_JSON)
+       .log().all()
        .statusCode(200)
        .extract()
-       .response()
-       .as(ReceivingHistoryCollection.class);
+        .response()
+         .as(ReceivingHistoryCollection.class);
 
        assertEquals(expectedCount, receivingHistory.getReceivingHistory().size());
 

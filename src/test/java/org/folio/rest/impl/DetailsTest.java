@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -25,7 +25,7 @@ public class DetailsTest extends OrdersStorageTest {
 
       logger.info("--- mod-orders-storage Details test: Creating Details ... ");
       String detailSample = getFile("details.sample");
-      Response response = postData(DETAILS_ENDPOINT, detailSample);
+      io.restassured.response.Response response = postData(DETAILS_ENDPOINT, detailSample);
       sampleId = response.then().extract().path("id");
 
       logger.info("--- mod-orders-storage Details test: Valid Receiving Note exists ... ");

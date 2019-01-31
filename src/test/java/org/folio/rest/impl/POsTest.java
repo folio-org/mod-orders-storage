@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
