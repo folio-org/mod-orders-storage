@@ -282,6 +282,17 @@
       ]
     },
     {
+      "id": "orders-storage.orders",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/orders",
+          "permissionsRequired": ["orders-storage.orders.collection.get"]
+        }
+      ]
+    },
+    {
       "id": "orders-storage.physicals",
       "version": "2.0",
       "handlers": [
@@ -872,6 +883,19 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.orders.collection.get",
+      "displayName" : "Orders get",
+      "description" : "Fetch Purchase Order collection"
+    },
+    {
+      "permissionName" : "orders-storage.orders.all",
+      "displayName" : "All orders perms",
+      "description" : "All permissions for the Orders",
+      "subPermissions" : [
+           "orders-storage.orders.collection.get"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.physicals.collection.get",
       "displayName" : "physical-collection get",
       "description" : "Get a collection of physicals"
@@ -1144,30 +1168,6 @@
       ]
     },
     {
-      "permissionName" : "orders-storage.module.all",
-      "displayName" : "All orders-storage-module perms",
-      "description" : "All permissions for the orders-storage module",
-      "subPermissions" : [
-        "orders-storage.adjustments.all",
-        "orders-storage.alerts.all",
-        "orders-storage.claims.all",
-        "orders-storage.costs.all",
-        "orders-storage.details.all",
-        "orders-storage.eresources.all",
-        "orders-storage.fund-distributions.all",
-        "orders-storage.licenses.all",
-        "orders-storage.locations.all",
-        "orders-storage.physicals.all",
-        "orders-storage.pieces.all",
-        "orders-storage.po_lines.all",
-        "orders-storage.purchase_orders.all",
-        "orders-storage.receiving-history.all",
-        "orders-storage.reporting_codes.all",
-        "orders-storage.sources.all",
-        "orders-storage.vendor_details.all"
-      ]
-    },
-    {
       "permissionName" : "orders-storage.po_number.get",
       "displayName" : "po_number get",
       "description" : "Get a generated PO number"
@@ -1194,15 +1194,16 @@
         "orders-storage.fund-distributions.all",
         "orders-storage.licenses.all",
         "orders-storage.locations.all",
+        "orders-storage.orders.all",
         "orders-storage.physicals.all",
         "orders-storage.pieces.all",
         "orders-storage.po_lines.all",
+        "orders-storage.po_number.all",
         "orders-storage.purchase_orders.all",
-        "orders-storage.renewals.all",
+        "orders-storage.receiving-history.all",
         "orders-storage.reporting_codes.all",
         "orders-storage.sources.all",
-        "orders-storage.vendor_details.all",
-        "orders-storage.po_number.all"
+        "orders-storage.vendor_details.all"
       ]
     }
   ],
