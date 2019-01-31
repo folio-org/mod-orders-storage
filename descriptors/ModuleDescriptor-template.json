@@ -282,17 +282,6 @@
       ]
     },
     {
-      "id": "orders-storage.orders",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/orders",
-          "permissionsRequired": ["orders-storage.orders.collection.get"]
-        }
-      ]
-    },
-    {
       "id": "orders-storage.physicals",
       "version": "2.0",
       "handlers": [
@@ -883,19 +872,6 @@
       ]
     },
     {
-      "permissionName" : "orders-storage.orders.collection.get",
-      "displayName" : "Orders get",
-      "description" : "Fetch Purchase Order collection"
-    },
-    {
-      "permissionName" : "orders-storage.orders.all",
-      "displayName" : "All orders perms",
-      "description" : "All permissions for the Orders",
-      "subPermissions" : [
-           "orders-storage.orders.collection.get"
-      ]
-    },
-    {
       "permissionName" : "orders-storage.physicals.collection.get",
       "displayName" : "physical-collection get",
       "description" : "Get a collection of physicals"
@@ -1194,7 +1170,6 @@
         "orders-storage.fund-distributions.all",
         "orders-storage.licenses.all",
         "orders-storage.locations.all",
-        "orders-storage.orders.all",
         "orders-storage.physicals.all",
         "orders-storage.pieces.all",
         "orders-storage.po_lines.all",
