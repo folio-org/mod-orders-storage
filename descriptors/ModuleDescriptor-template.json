@@ -1192,6 +1192,19 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.po_line_number.get",
+      "displayName" : "po_line_number get",
+      "description" : "Get a POLine number"
+    },
+    {
+      "permissionName" : "orders-storage.po_line_number.all",
+      "displayName" : "All po_line_number perms",
+      "description" : "All permissions for the POLine number",
+      "subPermissions" : [
+        "orders-storage.po_line_number.get"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -1213,7 +1226,8 @@
         "orders-storage.reporting_codes.all",
         "orders-storage.sources.all",
         "orders-storage.vendor_details.all",
-        "orders-storage.po_number.all"
+        "orders-storage.po_number.all",
+        "orders-storage.po_line_number.all"
       ]
     }
   ],
