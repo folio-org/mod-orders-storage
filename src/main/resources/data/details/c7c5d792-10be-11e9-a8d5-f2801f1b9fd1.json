@@ -1,0 +1,17 @@
+{
+  "id": "c7c5d792-10be-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "",
+  "product_ids": [
+    {
+      "product_id": "9781118416068",
+      "product_id_type": "ISBN"
+    }
+  ],
+  "material_types": [
+    "fde2e958-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": null,
+  "subscription_interval": 0,
+  "subscription_to": null,
+  "po_line_id": "12fb63b0-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

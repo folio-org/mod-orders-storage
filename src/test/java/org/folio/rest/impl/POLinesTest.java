@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
@@ -19,9 +19,6 @@ public class POLinesTest extends OrdersStorageTest {
   public void tests(TestContext context) {
     String sampleId = null;
     try {
-
-      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-      logger.info("--- mod-orders-storage-test PO line test: Preparing test tenant");
 
       logger.info("--- mod-orders-storage-test PO line test: Verifying database's initial state ... ");
       verifyCollection(PO_LINE_ENDPOINT);
@@ -62,7 +59,7 @@ public class POLinesTest extends OrdersStorageTest {
 
   private void testFetchingUpdatedPoLine(String poLineSampleId) {
     getDataById(PO_LINE_ENDPOINT, poLineSampleId).then()
-    .statusCode(200).log().ifValidationFails()
+    .statusCode(200)
     .body("description", equalTo("Gift"));
   }
 
@@ -71,24 +68,24 @@ public class POLinesTest extends OrdersStorageTest {
     catJSON.put("id", poLineSampleId);
     catJSON.put("description", "Gift");
     Response response = putData(PO_LINE_ENDPOINT, poLineSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidPolineId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid PO line with ID return 404: " + INVALID_PO_LINE_ID);
-    getDataById(PO_LINE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(PO_LINE_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testPolineSuccessfullyFetched(String poLineSampleId) {
-    getDataById(PO_LINE_ENDPOINT, poLineSampleId).then().log().ifValidationFails()
+    getDataById(PO_LINE_ENDPOINT, poLineSampleId).then()
     .statusCode(200)
     .body("id", equalTo(poLineSampleId));
   }
 
   private void testValidDescriptionExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
     .statusCode(201)
     .body("description", equalTo("ABCDEFGH"));
   }

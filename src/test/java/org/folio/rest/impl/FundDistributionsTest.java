@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -19,9 +19,6 @@ public class FundDistributionsTest extends OrdersStorageTest {
   public void testFundDistribution() {
     String sampleId = null;
     try {
-
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage FundDistribution test: Preparing test tenant");
 
       logger.info("--- mod-orders-storage FundDistribution test: Verifying database's initial state ... ");
       verifyCollection(FUND_DISTRIBUTION_ENDPOINT);
@@ -63,7 +60,7 @@ public class FundDistributionsTest extends OrdersStorageTest {
 
   private void testFetchingUpdatedFundDistribution(String fundDistrSampleId) {
     getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
-      .statusCode(200).log().ifValidationFails()
+      .statusCode(200)
       .body("code", equalTo("HIST"));
   }
 
@@ -72,24 +69,24 @@ public class FundDistributionsTest extends OrdersStorageTest {
     catJSON.put("id", fundDistrSampleId);
     catJSON.put("code", "HIST");
     Response response = putData(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidFundDistributionId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid FundDistribution with ID return 404: " + INVALID_FUND_DISTRIBUTION_ID);
-    getDataById(FUND_DISTRIBUTION_ENDPOINT, INVALID_FUND_DISTRIBUTION_ID).then().log().ifValidationFails()
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, INVALID_FUND_DISTRIBUTION_ID).then()
       .statusCode(404);
   }
 
   private void testFundDistributionSuccessfullyFetched(String fundDistrSampleId) {
-    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then().log().ifValidationFails()
+    getDataById(FUND_DISTRIBUTION_ENDPOINT, fundDistrSampleId).then()
       .statusCode(200)
       .body("id", equalTo(fundDistrSampleId));
   }
 
   private void testValidCodeExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201)
       .assertThat().body("code", equalTo("HIST"));
   }

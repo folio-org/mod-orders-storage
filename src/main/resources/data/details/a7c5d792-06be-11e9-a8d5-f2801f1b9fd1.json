@@ -1,0 +1,17 @@
+{
+  "id": "a7c5d792-06be-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "2 copies",
+  "product_ids": [
+    {
+      "product_id": "9780133973488",
+      "product_id_type": "ISBN"
+    }
+  ],
+  "material_types": [
+    "fde2e700-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": null,
+  "subscription_interval": 0,
+  "subscription_to": null,
+  "po_line_id": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

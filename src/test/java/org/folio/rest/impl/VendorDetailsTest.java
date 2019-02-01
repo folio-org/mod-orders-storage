@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -19,9 +19,6 @@ public class VendorDetailsTest extends OrdersStorageTest {
   public void testVendorDetails() {
     String sampleId = null;
     try {
-
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Vendor Details test: Preparing test tenant");
 
       logger.info("--- mod-orders-storage Vendor Details test: Verifying database's initial state ... ");
       verifyCollection(VENDOR_DETAIL_ENDPOINT);
@@ -65,7 +62,7 @@ public class VendorDetailsTest extends OrdersStorageTest {
 
   private void testFetchingUpdatedVendorDetail(String vendorDetailSampleId) {
     getDataById(VENDOR_DETAIL_ENDPOINT, vendorDetailSampleId).then()
-      .statusCode(200).log().ifValidationFails()
+      .statusCode(200)
       .body("note_from_vendor", equalTo("Update note from vendor"));
   }
 
@@ -74,24 +71,24 @@ public class VendorDetailsTest extends OrdersStorageTest {
     catJSON.put("id", vendorDetailSampleId);
     catJSON.put("note_from_vendor", "Update note from vendor");
     Response response = putData(VENDOR_DETAIL_ENDPOINT, vendorDetailSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidVendorDetailId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Vendor Detail with ID return 404: " + INVALID_VENDOR_DETAIL_ID);
-    getDataById(VENDOR_DETAIL_ENDPOINT, INVALID_VENDOR_DETAIL_ID).then().log().ifValidationFails()
+    getDataById(VENDOR_DETAIL_ENDPOINT, INVALID_VENDOR_DETAIL_ID).then()
       .statusCode(404);
   }
 
   private void testVendorDetailSuccessfullyFetched(String vendorDetailSampleId) {
-    getDataById(VENDOR_DETAIL_ENDPOINT, vendorDetailSampleId).then().log().ifValidationFails()
+    getDataById(VENDOR_DETAIL_ENDPOINT, vendorDetailSampleId).then()
       .statusCode(200)
       .body("id", equalTo(vendorDetailSampleId));
   }
 
   private void testValidVendorAccountExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201)
       .assertThat().body("vendor_account", equalTo("8910-25"));
   }

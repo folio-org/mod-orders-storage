@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -21,16 +21,12 @@ public class DetailsTest extends OrdersStorageTest {
     String sampleId = null;
     try {
 
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Details test: Preparing test tenant");
-
-
       logger.info("--- mod-orders-storage Details test: Verifying database's initial state ... ");
       verifyCollection(DETAILS_ENDPOINT);
 
       logger.info("--- mod-orders-storage Details test: Creating Details ... ");
       String detailSample = getFile("details.sample");
-      Response response = postData(DETAILS_ENDPOINT, detailSample);
+      io.restassured.response.Response response = postData(DETAILS_ENDPOINT, detailSample);
       sampleId = response.then().extract().path("id");
 
       logger.info("--- mod-orders-storage Details test: Valid Receiving Note exists ... ");
@@ -65,7 +61,7 @@ public class DetailsTest extends OrdersStorageTest {
 
   private void testFetchingUpdatedDetail(String detailSampleId) {
     getDataById(DETAILS_ENDPOINT, detailSampleId).then()
-    .statusCode(200).log().ifValidationFails()
+    .statusCode(200)
     .body("receiving_note", equalTo("Update receiving note"));
   }
 
@@ -74,24 +70,24 @@ public class DetailsTest extends OrdersStorageTest {
     catJSON.put("id", detailSampleId);
     catJSON.put("receiving_note", "Update receiving note");
     Response response = putData(DETAILS_ENDPOINT, detailSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidDetailId() {
     logger.info("--- mod-orders-storage-test: Fetching invalid Detail with ID return 404: "+ INVALID_DETAIL_ID);
-    getDataById(DETAILS_ENDPOINT, INVALID_DETAIL_ID).then().log().ifValidationFails()
+    getDataById(DETAILS_ENDPOINT, INVALID_DETAIL_ID).then()
     .statusCode(404);
   }
 
   private void testDetailSuccessfullyFetched(String detailSampleId) {
-    getDataById(DETAILS_ENDPOINT, detailSampleId).then().log().ifValidationFails()
+    getDataById(DETAILS_ENDPOINT, detailSampleId).then()
     .statusCode(200)
     .body("id", equalTo(detailSampleId));
   }
 
   private void testValidReceivingNoteExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
     .statusCode(201)
     .assertThat().body("receiving_note", equalTo("ABCDEFGHIJKL"));
   }

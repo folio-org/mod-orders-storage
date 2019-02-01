@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
@@ -41,8 +41,6 @@ public class POsTest extends OrdersStorageTest {
     String sampleId = null;
     try {
 
-      // IMPORTANT: Call the tenant interface to initialize the tenant-schema
-      logger.info("--- mod-orders-storage PO test: Preparing test tenant");
 
       logger.info("--- mod-orders-storage PO test: Verifying database's initial state ... ");
       verifyCollection();
@@ -107,29 +105,29 @@ public class POsTest extends OrdersStorageTest {
     catJSON.put("id", sampleId);
     catJSON.put("po_number", "666666");
     Response response = putData(PO_ENDPOINT, sampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidPOId() {
-    getDataById(PO_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(PO_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testPOSuccessfullyFetched(String purchaseOrderSampleId) {
-    getDataById(PO_ENDPOINT, purchaseOrderSampleId).then().log().ifValidationFails()
+    getDataById(PO_ENDPOINT, purchaseOrderSampleId).then()
     .statusCode(200)
     .body("id", equalTo(purchaseOrderSampleId));
   }
 
   private void testPOCreatedFromOrders() {
-    getData(ORDERS_ENDPOINT).then().log().ifValidationFails()
+    getData(ORDERS_ENDPOINT).then()
     .statusCode(200)
     .body("total_records", equalTo(15));
   }
 
   private void testValidPONumberExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
     .statusCode(201)
     .body("po_number", equalTo("268759"));
   }

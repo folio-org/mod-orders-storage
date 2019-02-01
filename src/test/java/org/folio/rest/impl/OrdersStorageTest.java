@@ -1,9 +1,12 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.response.Header;
-import com.jayway.restassured.response.Response;
+import static org.hamcrest.Matchers.equalTo;
+import static io.restassured.RestAssured.given;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.response.Response;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -12,6 +15,9 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
+import io.vertx.ext.unit.Async;
+import io.vertx.ext.unit.TestContext;
+import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
@@ -34,11 +40,18 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 @ExtendWith(VertxExtension.class)
 @TestInstance(PER_CLASS)
 public class OrdersStorageTest {
 
+  protected static final String TENANT_ENDPOINT = "/_/tenant";
+  private static Vertx vertx;
+  private static Async async;
+  final static Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
+  final static int port = Integer.parseInt(System.getProperty("port", "8081"));
   static final Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
   static final int port = Integer.parseInt(System.getProperty("port", "8081"));
 
@@ -73,16 +86,37 @@ public class OrdersStorageTest {
     // Set the default headers for the API calls to be tested
     RestAssured.port = port;
     RestAssured.baseURI = "http://localhost";
+    RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+
+    try {
+      // Run this test in embedded postgres mode
+      PostgresClient.setIsEmbedded(true);
+      PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+      //load the data using the /_/tenant interface
+      prepareTenant(TENANT_HEADER, true);
+    } catch (Exception e) {
+        logger.info(e);
+        context.fail(e);
+        return;
+    }
+
   }
 
   @AfterAll
   public void after(Vertx vertx, VertxTestContext context) {
+    try {
+      deleteTenant(TENANT_HEADER);
+    }
+    finally {
+    async = context.async();
     vertx.close(res -> {   // This logs a stack trace, ignore it.
       PostgresClient.stopEmbeddedPostgres();
       context.completeNow();
       logger.info("--- mod-orders-storage test: END ");
     });
+    }
   }
+
 
   @BeforeEach
   public void prepareTenant(Vertx vertx, VertxTestContext context) {
@@ -101,8 +135,20 @@ public class OrdersStorageTest {
       context.failNow(e);
       return;
     }
+
+  public static void prepareTenant(Header tenantHeader, boolean loadSample) {
+    JsonArray parameterArray = new JsonArray();
+    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", loadSample));
+
+    JsonObject jsonBody=new JsonObject();
+    jsonBody.put("module_to", moduleId);
+    jsonBody.put("parameters", parameterArray);
+
+
     given()
-      .header(TENANT_HEADER)
+      .header(tenantHeader)
+      .header(URLTO_HEADER)
+      .header(new Header("X-Okapi-User-id", tenantHeader.getValue()))
       .contentType(ContentType.JSON)
       .body(tenants)
       .post("/_/tenant")
@@ -155,6 +201,21 @@ public class OrdersStorageTest {
       logger.info("--- mod-orders-storages {} test: Verify {} is deleted with ID: {}", subObject.name(), subObject.name(), sampleId);
       testVerifyEntityDeletion(subObject.getEndpoint(), sampleId);
     }
+      .body(jsonBody.encodePrettily())
+      .post(TENANT_ENDPOINT)
+      .then()
+      .statusCode(201);
+  }
+
+  static void  deleteTenant(Header tenantHeader)
+  {
+    logger.info("Deleting Tenant: "+tenantHeader.getValue());
+    given()
+    .header(tenantHeader)
+    .contentType(ContentType.JSON)
+    .delete(TENANT_ENDPOINT)
+    .then()
+    .statusCode(204);
   }
 
   String getFile(String filename) {

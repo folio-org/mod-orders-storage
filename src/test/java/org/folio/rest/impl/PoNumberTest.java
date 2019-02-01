@@ -13,8 +13,6 @@ public class PoNumberTest extends OrdersStorageTest {
 
   @Test
   public void testGetPoNumberOk(TestContext testContext) {
-    // Initialize the tenant-schema
-    logger.info("--- mod-orders-storage PoNumber test: Preparing test tenant");
 
     int po_number1 = getPoNumberAsInt();
     logger.info("--- mod-orders-storage Generated po_number1: " + po_number1);
