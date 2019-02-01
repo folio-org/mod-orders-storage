@@ -1,18 +1,17 @@
 package org.folio.rest.impl;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.fail;
-
-import org.json.JSONObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import io.restassured.response.Response;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.json.JSONObject;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
-@RunWith(VertxUnitRunner.class)
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
+
+@TestInstance(PER_CLASS)
 public class PiecesTest extends OrdersStorageTest{
   private final Logger logger = LoggerFactory.getLogger("okapi");
 
@@ -21,21 +20,13 @@ public class PiecesTest extends OrdersStorageTest{
   private String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static final String PIECES_ENDPOINT ="/orders-storage/pieces";
 
-  @Override
-  void verifyCollection(String endpoint) {
-    // Verify that there are no existing  records
-    getData(endpoint).then()
-      .log().all()
-      .statusCode(200)
-      .body("total_records", equalTo(0));
-  }
 
   @Test
   public void testPiece() {
     try {
 
       logger.info("--- mod-orders-storage pieces test: Verifying database's initial state ... ");
-      verifyCollection(PIECES_ENDPOINT);
+      verifyCollectionQuantity(PIECES_ENDPOINT, 0);
 
       logger.info("--- mod-orders-storage pieces test: Creating Pieces ... ");
       String pieceSample = getFile("pieces.sample");
@@ -46,7 +37,7 @@ public class PiecesTest extends OrdersStorageTest{
       testValidCaptionExists(response);
 
       logger.info("--- mod-orders-storage pieces test: Verifying only 1 piece was created ... ");
-      testEntityCreated(PIECES_ENDPOINT, 1);
+      verifyCollectionQuantity(PIECES_ENDPOINT, 1);
 
       logger.info("--- mod-orders-storage pieces test: Fetching piece with ID: " + piecesSampleId);
       testPieceSuccessfullyFetched(piecesSampleId);

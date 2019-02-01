@@ -1,8 +1,5 @@
 package org.folio.rest.impl;
 
-import static org.hamcrest.Matchers.equalTo;
-import static io.restassured.RestAssured.given;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
@@ -15,9 +12,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import io.vertx.ext.unit.Async;
-import io.vertx.ext.unit.TestContext;
-import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
@@ -28,39 +22,31 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
-import static com.jayway.restassured.RestAssured.given;
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 
 @ExtendWith(VertxExtension.class)
-@TestInstance(PER_CLASS)
-public class OrdersStorageTest {
+public abstract class OrdersStorageTest {
 
   protected static final String TENANT_ENDPOINT = "/_/tenant";
-  private static Vertx vertx;
-  private static Async async;
   final static Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
   final static int port = Integer.parseInt(System.getProperty("port", "8081"));
-  static final Logger logger = LoggerFactory.getLogger(OrdersStorageTest.class);
-  static final int port = Integer.parseInt(System.getProperty("port", "8081"));
+
 
   static final String TENANT_NAME = "diku";
   static final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
+  final static Header URLTO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
 
   static String moduleId; // "mod-orders_storage-1.0.0"
 
-  private final static String NON_EXISTED_ID = "bad500aa-aaaa-500a-aaaa-aaaaaaaaaaaa";
+  final static String NON_EXISTED_ID = "bad500aa-aaaa-500a-aaaa-aaaaaaaaaaaa";
 
   @BeforeAll
   public void before(Vertx vertx, VertxTestContext context) {
@@ -96,7 +82,7 @@ public class OrdersStorageTest {
       prepareTenant(TENANT_HEADER, true);
     } catch (Exception e) {
         logger.info(e);
-        context.fail(e);
+        context.failNow(e);
         return;
     }
 
@@ -108,12 +94,11 @@ public class OrdersStorageTest {
       deleteTenant(TENANT_HEADER);
     }
     finally {
-    async = context.async();
-    vertx.close(res -> {   // This logs a stack trace, ignore it.
-      PostgresClient.stopEmbeddedPostgres();
-      context.completeNow();
-      logger.info("--- mod-orders-storage test: END ");
-    });
+      vertx.close(res -> {   // This logs a stack trace, ignore it.
+        PostgresClient.stopEmbeddedPostgres();
+        context.completeNow();
+        logger.info("--- mod-orders-storage test: END ");
+      });
     }
   }
 
@@ -122,7 +107,6 @@ public class OrdersStorageTest {
   public void prepareTenant(Vertx vertx, VertxTestContext context) {
     // Initialize the tenant-schema
     logger.info("--- mod-orders-storage test: Preparing test tenant");
-    String tenants = "{\"module_to\":\"" + moduleId + "\"}";
     try {
       // Run this test in embedded postgres mode
       // IMPORTANT: Later we will initialize the schema by calling the tenant interface.
@@ -135,6 +119,8 @@ public class OrdersStorageTest {
       context.failNow(e);
       return;
     }
+    context.completeNow();
+  }
 
   public static void prepareTenant(Header tenantHeader, boolean loadSample) {
     JsonArray parameterArray = new JsonArray();
@@ -150,61 +136,11 @@ public class OrdersStorageTest {
       .header(URLTO_HEADER)
       .header(new Header("X-Okapi-User-id", tenantHeader.getValue()))
       .contentType(ContentType.JSON)
-      .body(tenants)
-      .post("/_/tenant")
-      .then().log().ifValidationFails();
-    context.completeNow();
-  }
-
-  @ParameterizedTest
-  @EnumSource(SubObjects.class)
-  public void testSubObjects(SubObjects subObject) {
-    String sampleId = null;
-    try {
-
-      logger.info("--- mod-orders-storage {} test: Verifying database's initial state ... ", subObject.name());
-      verifyCollection(subObject.getEndpoint());
-
-      logger.info("--- mod-orders-storage {} test: Creating {} ... ", subObject.name(), subObject.name());
-      String sample = getFile(subObject.getSampleFileName());
-      Response response = postData(subObject.getEndpoint(), sample);
-      sampleId = response.then().extract().path("id");
-
-      logger.info("--- mod-orders-storage {} test: Valid fields exists ... ", subObject.name());
-      testAllFieldsExists(response, sample);
-
-      logger.info("--- mod-orders-storage {} test: Verifying only 1 adjustment was created ... ", subObject.name());
-      testEntityCreated(subObject.getEndpoint(), 17);
-
-      logger.info("--- mod-orders-storage {} test: Fetching {} with ID: {}", subObject.name(), subObject.name(), sampleId);
-      testEntitySuccessfullyFetched(subObject.getEndpoint(), sampleId);
-
-      logger.info("--- mod-orders-storage {} test: Invalid {}: {}", subObject.name(), subObject.name(), NON_EXISTED_ID);
-      testFetchEntityWithNonExistedId(subObject.getEndpoint());
-
-      logger.info("--- mod-orders-storage {} test: Editing {} with ID: {}", subObject.name(), subObject.name(), sampleId);
-      JsonObject catJSON = new JsonObject(sample);
-      catJSON.put("id", sampleId);
-      catJSON.put(subObject.getUpdatedFieldName(), subObject.getUpdatedFieldValue());
-      testEntityEdit(subObject.getEndpoint(), catJSON.toString(), sampleId);
-
-      logger.info("--- mod-orders-storage {} test: Fetching updated {} with ID: {}", subObject.name(), subObject.name(), sampleId);
-      testFetchingUpdatedEntity(sampleId, subObject);
-
-    } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: {} API ERROR: {}", subObject.name(), e.getMessage());
-      fail(e.getMessage());
-    } finally {
-      logger.info("--- mod-orders-storages {} test: Deleting {} with ID: {}", subObject.name(), subObject.name(), sampleId);
-      deleteData(subObject.getEndpoint(), sampleId);
-
-      logger.info("--- mod-orders-storages {} test: Verify {} is deleted with ID: {}", subObject.name(), subObject.name(), sampleId);
-      testVerifyEntityDeletion(subObject.getEndpoint(), sampleId);
-    }
       .body(jsonBody.encodePrettily())
       .post(TENANT_ENDPOINT)
       .then()
       .statusCode(201);
+
   }
 
   static void  deleteTenant(Header tenantHeader)
@@ -229,12 +165,12 @@ public class OrdersStorageTest {
     return value;
   }
 
-  void verifyCollection(String endpoint) {
+  void verifyCollectionQuantity(String endpoint, int quantity) {
     // Verify that there are no existing  records
     getData(endpoint).then()
       .log().all()
       .statusCode(200)
-      .body("total_records", equalTo(16));
+      .body("total_records", equalTo(quantity));
   }
 
   Response getData(String endpoint) {
@@ -247,11 +183,6 @@ public class OrdersStorageTest {
   void testVerifyEntityDeletion(String endpoint, String id) {
     getDataById(endpoint, id).then()
       .statusCode(404);
-  }
-  void testEntityCreated(String endpoint, int expectedQuantity) {
-    getData(endpoint).then().log().ifValidationFails()
-      .statusCode(200)
-      .body("total_records", equalTo(expectedQuantity));
   }
 
   Response getDataById(String endpoint, String id) {
@@ -301,7 +232,7 @@ public class OrdersStorageTest {
       .statusCode(204);
   }
 
-  private void testEntityEdit(String endpoint, String entitySample, String id) {
+  void testEntityEdit(String endpoint, String entitySample, String id) {
     putData(endpoint, id, entitySample)
       .then()
         .log()
@@ -309,7 +240,7 @@ public class OrdersStorageTest {
         .statusCode(204);
   }
 
-  private void testFetchingUpdatedEntity(String id, SubObjects subObject) {
+  void testFetchingUpdatedEntity(String id, SubObjects subObject) {
     String existedValue = getDataById(subObject.getEndpoint(), id).then()
       .statusCode(200)
       .log()
@@ -321,32 +252,27 @@ public class OrdersStorageTest {
     assertEquals(existedValue, subObject.getUpdatedFieldValue());
   }
 
-  private void testFetchEntityWithNonExistedId(String endpoint) {
+  void testFetchEntityWithNonExistedId(String endpoint) {
     getDataById(endpoint, NON_EXISTED_ID).then().log().ifValidationFails()
       .statusCode(404);
   }
 
-  private void testEntitySuccessfullyFetched(String endpoint, String id) {
+  void testEntitySuccessfullyFetched(String endpoint, String id) {
     getDataById(endpoint, id).then().log().ifValidationFails()
       .statusCode(200)
       .body("id", equalTo(id));
   }
 
-  private void testAllFieldsExists(Map<String, Object> extracted, String sample) {
-    JsonObject jsonObject = new JsonObject(sample);
-    Set<String> fieldsNames = jsonObject.fieldNames();
+  void testAllFieldsExists(JsonObject extracted, String sample) {
+    JsonObject sampleObject = new JsonObject(sample);
+    Set<String> fieldsNames = sampleObject.fieldNames();
     for (String fieldName : fieldsNames) {
-      Object field = jsonObject.getValue(fieldName);
-      if (field instanceof JsonArray) {
-        testAllFieldsExists((Map) extracted.get(fieldName), jsonObject.getValue(fieldName).toString());
-      } else {
-        assertEquals(jsonObject.getValue(fieldName).toString(), extracted.get(fieldName).toString());
-      }
+      assertEquals(sampleObject.getValue(fieldName).toString(), extracted.getValue(fieldName).toString());
     }
   }
 
-  private Map<String, Object> extractMapFromResponse(Response response) {
-    return response.then().log().ifValidationFails().statusCode(201).extract().body().jsonPath().get();
+  JsonObject extractJsonObjectResponse(Response response) {
+    return new JsonObject((Map) response.then().log().ifValidationFails().statusCode(201).extract().body().jsonPath().get());
   }
 
 }

@@ -1,16 +1,21 @@
 package org.folio.rest.impl;
 
 import io.restassured.response.Response;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
 
+import static org.folio.rest.impl.SubObjects.PO_LINE;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@RunWith(VertxUnitRunner.class)
+@TestInstance(PER_CLASS)
 public class POsTest extends OrdersStorageTest {
 
   private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
@@ -23,21 +28,15 @@ public class POsTest extends OrdersStorageTest {
   private void verifyCollection() {
 
     // Validate that there are no existing purchase_orders
-    getData(PO_ENDPOINT).then()
-      .log().all()
-      .statusCode(200)
-      .body("total_records", equalTo(14));
-
+    verifyCollectionQuantity(PO_ENDPOINT, 14);
 
     // Verify that there are no existing po_lines
-    getData(PO_LINE_ENDPOINT).then()
-      .log().all()
-      .statusCode(200)
-      .body("total_records", equalTo(16));
+    verifyCollectionQuantity(PO_LINE.getEndpoint(), PO_LINE.getInitialQuantity());
+
   }
 
   @Test
-  public void tests(TestContext context) {
+  public void tests() {
     String sampleId = null;
     try {
 
@@ -50,7 +49,9 @@ public class POsTest extends OrdersStorageTest {
       Response response = postData(PO_ENDPOINT, purchaseOrderSample);
 
       logger.info("--- mod-orders-storage PO test: Creating purchase order with the same po_number ... ");
-      Response samePoNumberErrorResponse = postData(PO_ENDPOINT, purchaseOrderSample);
+      JsonObject object = new JsonObject(purchaseOrderSample);
+      object.remove("id");
+      Response samePoNumberErrorResponse = postData(PO_ENDPOINT, object.toString());
       testPoNumberUniqness(samePoNumberErrorResponse);
 
       sampleId = response.then().extract().path("id");
@@ -59,7 +60,7 @@ public class POsTest extends OrdersStorageTest {
       testValidPONumberExists(response);
 
       logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created ... ");
-      testEntityCreated(PO_ENDPOINT, 15);
+      verifyCollectionQuantity(PO_ENDPOINT, 15);
 
       logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created from orders endpoint... ");
       testPOCreatedFromOrders();
@@ -77,7 +78,8 @@ public class POsTest extends OrdersStorageTest {
       testFetchingUpdatedPO(sampleId);
 
     } catch (Exception e) {
-      context.fail("--- mod-orders-storage PO test: ERROR: " + e.getMessage());
+      logger.error("--- mod-orders-storage PO test: ERROR " + e.getMessage(), e);
+      fail(e.getMessage());
     }  finally {
       logger.info("--- mod-orders-storage PO test: Deleting purchase order with ID: " + sampleId);
       deleteData(PO_ENDPOINT, sampleId);

@@ -35,7 +35,7 @@
   "publication_date": "2017",
   "publisher": "Schiffer Publishing",
   "purchase_order_id": "2ba7ef6a-d1d4-4a4f-90a2-882aed18af16",
-  "receipt_date": "2018-10-09T00:00:00.000Z",
+  "receipt_date": "2018-10-09T00:00:00.000+0000",
   "receipt_status": "Awaiting Receipt",
   "reporting_codes": [
     "07c03c98-0feb-4042-8be8-f5b9c18706f4",
@@ -53,9 +53,5 @@
     "ABCDEFGHIJKLMNO"
   ],
   "title": "Skiing in the Colorado",
-  "vendor_detail": "5986ff60-aaaa-4b85-9113-7958e0184196",
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00.000+0000",
-    "createdByUserId": "a71e6232-5b50-45b2-887b-b4b4ec4aaf70"
-  }
+  "vendor_detail": "5986ff60-aaaa-4b85-9113-7958e0184196"
 }
