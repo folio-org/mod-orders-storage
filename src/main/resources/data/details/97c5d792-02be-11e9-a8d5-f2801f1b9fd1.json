@@ -1,0 +1,17 @@
+{
+  "id": "97c5d792-02be-11e9-a8d5-f2801f1b9fd1",
+  "receiving_note": "",
+  "product_ids": [
+    {
+      "product_id": "7659CH",
+      "product_id_type": "Vendor Title Number"
+    }
+  ],
+  "material_types": [
+    "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "subscription_from": null,
+  "subscription_interval": 0,
+  "subscription_to": null,
+  "po_line_id": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

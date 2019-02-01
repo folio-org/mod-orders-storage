@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import com.jayway.restassured.response.Response;
+import io.restassured.response.Response;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -18,10 +18,6 @@ public class CostsTest extends OrdersStorageTest {
   @Test
   public void testCost() {
     try {
-
-      // Initialize the tenant-schema
-      logger.info("--- mod-orders-storage Cost test: Preparing test tenant");
-      prepareTenant();
 
       logger.info("--- mod-orders-storage Cost test: Verifying database's initial state ... ");
       verifyCollection(COST_ENDPOINT);
@@ -67,13 +63,13 @@ public class CostsTest extends OrdersStorageTest {
   }
 
   private void testDeleteCost(String costSampleId) {
-    deleteData(COST_ENDPOINT, costSampleId).then().log().ifValidationFails()
+    deleteData(COST_ENDPOINT, costSampleId).then()
       .statusCode(204);
   }
 
   private void testFetchingUpdatedCost(String costSampleId) {
     getDataById(COST_ENDPOINT, costSampleId).then()
-      .statusCode(200).log().ifValidationFails()
+      .statusCode(200)
       .body("currency", equalTo("USD"));
   }
 
@@ -82,31 +78,31 @@ public class CostsTest extends OrdersStorageTest {
     catJSON.put("id", costSampleId);
     catJSON.put("list_price", 99.99);
     Response response = putData(COST_ENDPOINT, costSampleId, catJSON.toString());
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(204);
   }
 
   private void testInvalidCostId() {
 
     logger.info("--- mod-orders-storage-test: Fetching invalid Cost with ID return 404: " + INVALID_COST_ID);
-    getDataById(COST_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then().log().ifValidationFails()
+    getDataById(COST_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
   private void testCostSuccessfullyFetched(String costSampleId) {
-    getDataById(COST_ENDPOINT, costSampleId).then().log().ifValidationFails()
+    getDataById(COST_ENDPOINT, costSampleId).then()
       .statusCode(200)
       .body("id", equalTo(costSampleId));
   }
 
   private void testCostCreated() {
-    getData(COST_ENDPOINT).then().log().ifValidationFails()
+    getData(COST_ENDPOINT).then()
       .statusCode(200)
       .body("total_records", equalTo(17));
   }
 
   private void testValidCurrencyExists(Response response) {
-    response.then().log().ifValidationFails()
+    response.then()
       .statusCode(201)
       .assertThat().body("currency", equalTo("USD"));
   }
