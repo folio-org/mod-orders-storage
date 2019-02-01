@@ -131,18 +131,25 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
     assertEquals(receivingHistory.getTotalRecords(), expectedCount);
     List<ReceivingHistory> receivingHistories = receivingHistory.getReceivingHistory();
     for (int i = 0; i < receivingHistories.size(); i++) {
-      assertEquals(receivingHistories.get(i).getCaption(), pieces[i].getCaption());
-      assertEquals(receivingHistories.get(i).getComment(), pieces[i].getComment());
-      assertEquals(receivingHistories.get(i).getItemId(), pieces[i].getItemId());
-      assertEquals(receivingHistories.get(i).getSupplement(), pieces[i].getSupplement());
-      assertEquals(receivingHistories.get(i).getTitle(), poLines[i].getTitle());
-      assertEquals(receivingHistories.get(i).getPoLineId(), pieces[i].getPoLineId());
-      assertEquals(receivingHistories.get(i).getPoLineNumber(), poLines[i].getPoLineNumber());
-      assertEquals(receivingHistories.get(i).getReceivingNote(), details[i].getReceivingNote());
-      assertEquals(receivingHistories.get(i).getPurchaseOrderId(), poLines[i].getPurchaseOrderId());
-      assertEquals(receivingHistories.get(i).getDateOrdered(), purchaseOrders[i].getDateOrdered());
-
+      if (receivingHistories.get(i).getId().equals(pieces[i].getId())) {
+        verifyFields(pieces[i], poLines[i], details[i], purchaseOrders[i], receivingHistories.get(i));
+      } else {
+        verifyFields(pieces[i], poLines[i], details[i], purchaseOrders[i], receivingHistories.get(receivingHistories.size() - i -1));
+      }
     }
+  }
+
+  private void verifyFields(Piece pieces, PoLine poLines, Details details, PurchaseOrder purchaseOrders, ReceivingHistory receivingHistories) {
+    assertEquals(receivingHistories.getCaption(), pieces.getCaption());
+    assertEquals(receivingHistories.getComment(), pieces.getComment());
+    assertEquals(receivingHistories.getItemId(), pieces.getItemId());
+    assertEquals(receivingHistories.getSupplement(), pieces.getSupplement());
+    assertEquals(receivingHistories.getTitle(), poLines.getTitle());
+    assertEquals(receivingHistories.getPoLineId(), pieces.getPoLineId());
+    assertEquals(receivingHistories.getPoLineNumber(), poLines.getPoLineNumber());
+    assertEquals(receivingHistories.getReceivingNote(), details.getReceivingNote());
+    assertEquals(receivingHistories.getPurchaseOrderId(), poLines.getPurchaseOrderId());
+    assertEquals(receivingHistories.getDateOrdered(), purchaseOrders.getDateOrdered());
   }
 }
 
