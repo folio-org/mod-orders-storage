@@ -257,6 +257,11 @@ public abstract class OrdersStorageTest {
       .statusCode(404);
   }
 
+  void testInvalidCQLQuery(String endpoint) {
+    getData(endpoint).then().log().ifValidationFails()
+      .statusCode(400);
+  }
+
   void testEntitySuccessfullyFetched(String endpoint, String id) {
     getDataById(endpoint, id).then().log().ifValidationFails()
       .statusCode(200)
