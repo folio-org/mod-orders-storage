@@ -24,6 +24,7 @@ public class PoNumberTest extends TestBase {
     logger.info("--- mod-orders-storage Generated po_number2: " + poNumber2);
     long poNumber3 = getPoNumberAsInt();
     logger.info("--- mod-orders-storage Generated po_number3: " + poNumber3);
+
     //ensure that the numbers returned are in fact sequential
     assertEquals(1, poNumber3 - poNumber2);
     assertEquals(1, poNumber2 - poNumber1);
