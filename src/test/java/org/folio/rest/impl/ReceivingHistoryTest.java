@@ -17,8 +17,7 @@ import java.net.URL;
 import java.util.List;
 
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
-import static org.folio.rest.impl.SubObjects.DETAIL;
-import static org.folio.rest.impl.SubObjects.PO_LINE;
+import static org.folio.rest.utils.TestEntities.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -26,20 +25,16 @@ public class ReceivingHistoryTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(ReceivingHistoryTest.class);
 
-  private static String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private static String detailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private static String poLineSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private static String purchaseOrderSampleId;
-  private static String piecesSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private static String detailSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private static String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private static String purchaseOrderSampleId2;
+  private String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String detailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String poLineSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String purchaseOrderSampleId;
+  private String piecesSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String detailSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String purchaseOrderSampleId2;
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
-  private static final String PIECES_ENDPOINT = "/orders-storage/pieces";
-  private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
-  private static final String DETAILS_ENDPOINT = "/orders-storage/details";
-  private static final String PURCHASE_ORDER_ENDPOINT = "/orders-storage/purchase_orders";
 
   private final String detailSample = getFile("details.sample");
   private final String detailSample2 = getFile("detail_for_view.sample");
@@ -51,7 +46,7 @@ public class ReceivingHistoryTest extends TestBase {
   private final String purchaseOrderSample2 = getFile("purchase_order_for_view.sample");
   private static final String APPLICATION_JSON = "application/json";
 
-  private static final int CREATED_ENTITIES_QUANTITY = 2;
+  private static final Integer CREATED_ENTITIES_QUANTITY = 2;
 
 
   @Test
@@ -63,51 +58,51 @@ public class ReceivingHistoryTest extends TestBase {
 
       logger.info("--- mod-orders-storage receiving_history test: Creating receiving_history View ...");
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
-      piecesSampleId = createEntity(PIECES_ENDPOINT, pieceSample);
+      piecesSampleId = createEntity(PIECE.getEndpoint(), pieceSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
-      piecesSampleId2 = createEntity(PIECES_ENDPOINT, pieceSample2);
+      piecesSampleId2 = createEntity(PIECE.getEndpoint(), pieceSample2);
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, CREATED_ENTITIES_QUANTITY);
 
 
       logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 1...");
-      poLineSampleId = createEntity(PO_LINE_ENDPOINT, poLineSample);
+      poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 2 ...");
-      poLineSampleId2 = createEntity(PO_LINE_ENDPOINT, poLineSample2);
+      poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Detail 1...");
-      detailSampleId = createEntity(DETAILS_ENDPOINT, detailSample);
+      detailSampleId = createEntity(DETAIL.getEndpoint(), detailSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Detail 2 ...");
-      detailSampleId2 = createEntity(DETAILS_ENDPOINT, detailSample2);
+      detailSampleId2 = createEntity(DETAIL.getEndpoint(), detailSample2);
       verifyCollectionQuantity(DETAIL.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Purchase Order 1...");
-      purchaseOrderSampleId = createEntity(PURCHASE_ORDER_ENDPOINT, purchaseOrderSample);
+      purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Purchase Order 2...");
-      purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER_ENDPOINT, purchaseOrderSample2);
-      verifyCollectionQuantity(PURCHASE_ORDER_ENDPOINT, CREATED_ENTITIES_QUANTITY);
+      purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
+      verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
-      verifyViewCollectionAfter(storageUrl(RECEIVING_HISTORY_ENDPOINT), CREATED_ENTITIES_QUANTITY);
+      verifyViewCollectionAfter(storageUrl(RECEIVING_HISTORY_ENDPOINT));
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
-      deleteData(DETAILS_ENDPOINT, detailSampleId);
-      deleteData(PO_LINE.getEndpoint(), poLineSampleId);
-      deleteData(PIECES_ENDPOINT, piecesSampleId);
-      deleteData(PURCHASE_ORDER_ENDPOINT, purchaseOrderSampleId);
-      deleteData(DETAILS_ENDPOINT, detailSampleId2);
-      deleteData(PO_LINE.getEndpoint(), poLineSampleId2);
-      deleteData(PIECES_ENDPOINT, piecesSampleId2);
-      deleteData(PURCHASE_ORDER_ENDPOINT, purchaseOrderSampleId2);
+      deleteData(DETAIL.getEndpointWithId(), detailSampleId);
+      deleteData(PO_LINE.getEndpointWithId(), poLineSampleId);
+      deleteData(PIECE.getEndpointWithId(), piecesSampleId);
+      deleteData(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
+      deleteData(DETAIL.getEndpointWithId(), detailSampleId2);
+      deleteData(PO_LINE.getEndpointWithId(), poLineSampleId2);
+      deleteData(PIECE.getEndpointWithId(), piecesSampleId2);
+      deleteData(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
     }
   }
 
-  private void verifyViewCollectionAfter(URL endpoint, Integer expectedCount) {
+  private void verifyViewCollectionAfter(URL endpoint) {
     Piece[] pieces = new Piece[] {new JsonObject(pieceSample).mapTo(Piece.class), new JsonObject(pieceSample2).mapTo(Piece.class)};
     PoLine[] poLines = new PoLine[] {new JsonObject(poLineSample).mapTo(PoLine.class), new JsonObject(poLineSample2).mapTo(PoLine.class)};
     Details[] details = new Details[] {new JsonObject(detailSample).mapTo(Details.class), new JsonObject(detailSample2).mapTo(Details.class)};
@@ -125,7 +120,7 @@ public class ReceivingHistoryTest extends TestBase {
             .response()
               .as(ReceivingHistoryCollection.class);
 
-    assertEquals(receivingHistory.getTotalRecords(), expectedCount);
+    assertEquals(receivingHistory.getTotalRecords(), CREATED_ENTITIES_QUANTITY);
     List<ReceivingHistory> receivingHistories = receivingHistory.getReceivingHistory();
     for (int i = 0; i < receivingHistories.size(); i++) {
       if (receivingHistories.get(i).getId().equals(pieces[i].getId())) {

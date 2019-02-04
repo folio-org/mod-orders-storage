@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import java.net.MalformedURLException;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 
 public class PoNumberTest extends TestBase {
@@ -18,23 +18,23 @@ public class PoNumberTest extends TestBase {
   @Test
   public void testGetPoNumberOk() throws MalformedURLException {
 
-    int po_number1 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number1: " + po_number1);
-    int po_number2 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number2: " + po_number2);
-    int po_number3 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number3: " + po_number3);
+    long poNumber1 = getPoNumberAsInt();
+    logger.info("--- mod-orders-storage Generated po_number1: " + poNumber1);
+    long poNumber2 = getPoNumberAsInt();
+    logger.info("--- mod-orders-storage Generated po_number2: " + poNumber2);
+    long poNumber3 = getPoNumberAsInt();
+    logger.info("--- mod-orders-storage Generated po_number3: " + poNumber3);
     //ensure that the numbers returned are in fact sequential
-    assertTrue(po_number3 - po_number2 == 1);
-    assertTrue(po_number2 - po_number1 == 1);
+    assertEquals(1, poNumber3 - poNumber2);
+    assertEquals(1, poNumber2 - poNumber1);
   }
 
   private int getPoNumberAsInt() throws MalformedURLException {
     return new Integer(getData(PO_NUMBER_ENDPOINT)
       .then()
-      .statusCode(200)
-      .extract()
-      .response()
-      .path("poNumber"));
+        .statusCode(200)
+        .extract()
+          .response()
+            .path("sequenceNumber"));
   }
 }

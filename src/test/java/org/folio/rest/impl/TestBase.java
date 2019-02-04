@@ -6,9 +6,11 @@ import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.io.IOUtils;
+import org.folio.rest.utils.TestEntities;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
@@ -17,9 +19,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import static io.restassured.RestAssured.given;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * When not run from StorageTestSuite then this class invokes StorageTestSuite.before() and
@@ -28,15 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public abstract class TestBase {
 
-  final static String NON_EXISTED_ID = "bad500aa-aaaa-500a-aaaa-aaaaaaaaaaaa";
-  static final String TENANT_NAME = "diku";
-  static final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_NAME);
-  protected static final String TENANT_ENDPOINT = "/_/tenant";
+  static final String NON_EXISTED_ID = "bad500aa-aaaa-500a-aaaa-aaaaaaaaaaaa";
+  private static final String TENANT_NAME = "diku";
+  static final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
 
   private static boolean invokeStorageTestSuiteAfter = false;
 
   @BeforeClass
-  public static void testBaseBeforeClass() throws Exception {
+  public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     Vertx vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
       invokeStorageTestSuiteAfter = true;
@@ -74,8 +76,9 @@ public abstract class TestBase {
   }
 
   void testVerifyEntityDeletion(String endpoint, String id) throws MalformedURLException {
-    getDataById(endpoint, id).then()
-      .statusCode(404);
+    getDataById(endpoint, id)
+      .then()
+        .statusCode(404);
   }
 
   Response getDataById(String endpoint, String id) throws MalformedURLException {
@@ -83,7 +86,7 @@ public abstract class TestBase {
       .pathParam("id", id)
       .header(TENANT_HEADER)
       .contentType(ContentType.JSON)
-      .get(storageUrl(endpoint) + "/{id}");
+      .get(storageUrl(endpoint));
   }
 
   Response postData(String endpoint, String input) throws MalformedURLException {
@@ -95,16 +98,12 @@ public abstract class TestBase {
       .post(storageUrl(endpoint));
   }
 
-  /**
-   * @param endpoint
-   * @param entity
-   * @return id of created entity
-   */
   String createEntity(String endpoint, String entity) throws MalformedURLException {
-    Response response = postData(endpoint, entity);
-    response.then().log().ifValidationFails()
-      .statusCode(201);
-    return response.then().extract().path("id");
+    return postData(endpoint, entity)
+      .then().log().ifValidationFails()
+        .statusCode(201)
+        .extract()
+          .path("id");
   }
 
   Response putData(String endpoint, String id, String input) throws MalformedURLException {
@@ -113,7 +112,7 @@ public abstract class TestBase {
       .header(TENANT_HEADER)
       .contentType(ContentType.JSON)
       .body(input)
-      .put(storageUrl(endpoint) + "/{id}");
+      .put(storageUrl(endpoint));
   }
 
   void deleteData(String endpoint, String id) throws MalformedURLException {
@@ -121,27 +120,25 @@ public abstract class TestBase {
       .pathParam("id", id)
       .header(TENANT_HEADER)
       .contentType(ContentType.JSON)
-      .delete(storageUrl(endpoint) + "/{id}").then().log().ifValidationFails()
-      .statusCode(204);
+      .delete(storageUrl(endpoint))
+        .then().log().ifValidationFails()
+          .statusCode(204);
   }
 
   void testEntityEdit(String endpoint, String entitySample, String id) throws MalformedURLException {
     putData(endpoint, id, entitySample)
-      .then()
-      .log()
-      .ifValidationFails()
+      .then().log().ifValidationFails()
       .statusCode(204);
   }
 
-  void testFetchingUpdatedEntity(String id, SubObjects subObject) throws MalformedURLException {
-    String existedValue = getDataById(subObject.getEndpoint(), id).then()
-      .statusCode(200)
-      .log()
-      .ifValidationFails()
-      .extract()
-      .body()
-      .jsonPath()
-      .get(subObject.getUpdatedFieldName()).toString();
+  void testFetchingUpdatedEntity(String id, TestEntities subObject) throws MalformedURLException {
+    String existedValue = getDataById(subObject.getEndpointWithId(), id)
+      .then()
+        .statusCode(200).log().ifValidationFails()
+        .extract()
+          .body()
+            .jsonPath()
+              .get(subObject.getUpdatedFieldName()).toString();
     assertEquals(existedValue, subObject.getUpdatedFieldValue());
   }
 
@@ -156,16 +153,22 @@ public abstract class TestBase {
   }
 
   void testEntitySuccessfullyFetched(String endpoint, String id) throws MalformedURLException {
-    getDataById(endpoint, id).then().log().ifValidationFails()
-      .statusCode(200)
-      .body("id", equalTo(id));
+    getDataById(endpoint, id)
+      .then().log().ifValidationFails()
+        .statusCode(200)
+        .body("id", equalTo(id));
   }
 
-  void testAllFieldsExists(JsonObject extracted, String sample) {
-    JsonObject sampleObject = new JsonObject(sample);
+  void testAllFieldsExists(JsonObject extracted, JsonObject sampleObject) {
     Set<String> fieldsNames = sampleObject.fieldNames();
     for (String fieldName : fieldsNames) {
-      assertEquals(sampleObject.getValue(fieldName).toString(), extracted.getValue(fieldName).toString());
+      Object sampleField = sampleObject.getValue(fieldName);
+      if (sampleField instanceof JsonObject) {
+        testAllFieldsExists((JsonObject) sampleField, (JsonObject) extracted.getValue(fieldName));
+      } else {
+        assertEquals(sampleObject.getValue(fieldName).toString(), extracted.getValue(fieldName).toString());
+      }
+
     }
   }
 
@@ -174,10 +177,11 @@ public abstract class TestBase {
   }
 
   String getFile(String filename) {
-    String value;
-    try {
-      InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename);
-      value = IOUtils.toString(inputStream, "UTF-8");
+    String value = "";
+    try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename)) {
+      if (inputStream != null) {
+        value = IOUtils.toString(inputStream, "UTF-8");
+      }
     } catch (Exception e) {
       value = "";
     }

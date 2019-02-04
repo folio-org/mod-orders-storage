@@ -1,10 +1,8 @@
 package org.folio.rest.impl;
 
-import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -18,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
@@ -26,30 +25,34 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static io.restassured.RestAssured.given;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
+import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
+
 
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-  PiecesTest.class,
   PoNumberTest.class,
-  POsTest.class,
   ReceivingHistoryTest.class,
-  SubObjectsTest.class,
-  TenantSampleDataTest.class
+  EntitiesCrudTest.class,
+  TenantSampleDataTest.class,
+  PurchaseOrderNumberUniquenessTest.class
 })
 
 public class StorageTestSuite {
-  final static Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
+  private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
 
-  public static final String TENANT_ID = "diku";
-  static final Header TENANT_HEADER = new Header("X-Okapi-Tenant", TENANT_ID);
-  protected static final String TENANT_ENDPOINT = "/_/tenant";
+  private static final String TENANT_ID = "diku";
+  private static final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TENANT_ID);
+
 
   private static Vertx vertx;
-  private static int port;
+  private static int port = NetworkUtils.nextFreePort();
   static String moduleId;
-  static Header URLTO_HEADER;
+  public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
+
+  private StorageTestSuite() {}
 
   public static URL storageUrl(String path) throws MalformedURLException {
     return new URL("http", "localhost", port, path);
@@ -60,8 +63,7 @@ public class StorageTestSuite {
   }
 
   @BeforeClass
-  public static void before()
-    throws Exception {
+  public static void before() throws IOException, InterruptedException, ExecutionException, TimeoutException {
 
     // tests expect English error messages only, no Danish/German/...
     Locale.setDefault(Locale.US);
@@ -75,12 +77,9 @@ public class StorageTestSuite {
 
     vertx = Vertx.vertx();
 
+    logger.info("Start embedded database");
     PostgresClient.setIsEmbedded(true);
     PostgresClient.getInstance(vertx).startEmbeddedPostgres();
-
-
-    port = NetworkUtils.nextFreePort();
-    URLTO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
 
     DeploymentOptions options = new DeploymentOptions();
 
@@ -89,15 +88,12 @@ public class StorageTestSuite {
 
     startVerticle(options);
 
-    prepareTenant(TENANT_HEADER, false);
+    prepareTenant(moduleId, TENANT_HEADER, false);
   }
 
   @AfterClass
-  public static void after()
-    throws InterruptedException,
-    ExecutionException,
-    TimeoutException,
-    MalformedURLException {
+  public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+    logger.info("Delete tenant");
     deleteTenant(TENANT_HEADER);
 
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
@@ -112,11 +108,14 @@ public class StorageTestSuite {
     });
 
     undeploymentComplete.get(20, TimeUnit.SECONDS);
+    logger.info("Stop database");
     PostgresClient.stopEmbeddedPostgres();
   }
 
   private static void startVerticle(DeploymentOptions options)
     throws InterruptedException, ExecutionException, TimeoutException {
+
+    logger.info("Start verticle");
 
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
 
@@ -131,37 +130,5 @@ public class StorageTestSuite {
 
     deploymentComplete.get(60, TimeUnit.SECONDS);
   }
-
-  static void prepareTenant(Header tenantHeader,  boolean loadSample) throws MalformedURLException {
-    JsonArray parameterArray = new JsonArray();
-    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", loadSample));
-
-    JsonObject jsonBody=new JsonObject();
-    jsonBody.put("module_to", moduleId);
-    jsonBody.put("parameters", parameterArray);
-
-    given()
-      .header(tenantHeader)
-      .header(URLTO_HEADER)
-      .contentType(ContentType.JSON)
-      .body(jsonBody.encodePrettily())
-      .post(storageUrl(TENANT_ENDPOINT))
-        .then()
-          .statusCode(201);
-
-  }
-
-  static void deleteTenant(Header tenantHeader)
-    throws MalformedURLException {
-
-    logger.info("Deleting Tenant: " + tenantHeader.getValue());
-    given()
-      .header(tenantHeader)
-      .contentType(ContentType.JSON)
-      .delete(storageUrl(TENANT_ENDPOINT))
-      .then()
-      .statusCode(204);
-  }
-
 
 }

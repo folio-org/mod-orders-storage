@@ -40,7 +40,7 @@ public class PoNumberAPI implements OrdersStoragePoNumber {
             if (reply.succeeded()) {
               String poNumber = reply.result().getResults().get(0).getList().get(0).toString();
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePoNumber.GetOrdersStoragePoNumberResponse
-                .respond200WithApplicationJson(new PoNumber().withPoNumber(poNumber))));
+                .respond200WithApplicationJson(new PoNumber().withSequenceNumber(poNumber))));
             } else {
               log.error(reply.cause().getMessage(), reply.cause());
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePoNumber.GetOrdersStoragePoNumberResponse

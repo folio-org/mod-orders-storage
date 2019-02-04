@@ -2,48 +2,41 @@ package org.folio.rest.impl;
 
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
-import io.restassured.response.ValidatableResponse;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.rest.utils.TenantApiTestUtil;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import static io.restassured.RestAssured.given;
-
-
-import static org.folio.rest.impl.StorageTestSuite.URLTO_HEADER;
-import static org.folio.rest.impl.StorageTestSuite.deleteTenant;
-import static org.folio.rest.impl.StorageTestSuite.moduleId;
-import static org.folio.rest.impl.StorageTestSuite.prepareTenant;
-import static org.folio.rest.impl.StorageTestSuite.storageUrl;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.impl.StorageTestSuite.*;
+import static org.folio.rest.utils.TenantApiTestUtil.*;
 
 
 public class TenantSampleDataTest extends TestBase{
 
   private final Logger logger = LoggerFactory.getLogger(TenantSampleDataTest.class);
 
-  final Header NONEXISTENT_TENANT_HEADER = new Header("X-Okapi-Tenant", "no_tenant");
-  final Header ANOTHER_TENANT_HEADER = new Header("X-Okapi-Tenant", "new_tenant");
+  private static final Header NONEXISTENT_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "no_tenant");
+  private static final Header ANOTHER_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "new_tenant");
 
 
   @Test
   public void isTenantCreated() throws MalformedURLException {
-    getData(TENANT_ENDPOINT).
-    then()
-    .assertThat()
-    .statusCode(200);
+    getData(TENANT_ENDPOINT)
+      .then()
+        .assertThat()
+          .statusCode(200);
   }
 
   @Test
-  public void sampleDataTests() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
+  public void sampleDataTests() throws MalformedURLException {
     try {
       logger.info("-- create a tenant with no sample data --");
-      prepareTenant(ANOTHER_TENANT_HEADER, false);
+      prepareTenant(moduleId, ANOTHER_TENANT_HEADER, false);
       logger.info("-- upgrade the tenant with sample data, so that it will be inserted now --");
       upgradeTenantWithSampleDataLoad();
       logger.info("-- upgrade the tenant again with no sample data, so the previously inserted data stays in tact --");
@@ -57,73 +50,48 @@ public class TenantSampleDataTest extends TestBase{
 
   @Test
   public void failIfNoUrlToHeader() throws MalformedURLException {
-    JsonArray parameterArray = new JsonArray();
-    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
-
+    JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(moduleId, true, false);
     given()
-    .header(new Header("X-Okapi-Tenant", "noURL"))
-    .contentType(ContentType.JSON)
-    .body(prepareTenantBody(parameterArray, false).encodePrettily())
-    .post(storageUrl(TENANT_ENDPOINT))
-    .then()
-    .assertThat()
-    .statusCode(500);
-  }
-
-  public void upgradeTenantWithSampleDataLoad() throws MalformedURLException {
-
-    logger.info("upgrading Module");
-    JsonArray parameterArray = new JsonArray();
-    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "true"));
-
-    JsonObject jsonBody = prepareTenantBody(parameterArray, true);
-    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
-    .assertThat()
-      .statusCode(201);
-  }
-
-  public void upgradeTenantWithNoSampleDataLoad() throws MalformedURLException {
-
-    logger.info("upgrading Module");
-    JsonArray parameterArray = new JsonArray();
-    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "false"));
-
-    JsonObject jsonBody = prepareTenantBody(parameterArray, true);
-    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
-    .assertThat()
-      .statusCode(200);
-  }
-
-
-  public void upgradeNonExistentTenant() throws MalformedURLException {
-
-    logger.info("upgrading Module");
-    JsonArray parameterArray = new JsonArray();
-    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", "false"));
-
-    JsonObject jsonBody = prepareTenantBody(parameterArray, true);
-    postToTenant(NONEXISTENT_TENANT_HEADER, jsonBody)
-      .assertThat()
-      .statusCode(400);
-  }
-
-  private ValidatableResponse postToTenant(Header tenantHeader, JsonObject jsonBody) throws MalformedURLException {
-    return given()
-      .header(tenantHeader)
-      .header(URLTO_HEADER)
+      .header(new Header(OKAPI_HEADER_TENANT, "noURL"))
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
       .post(storageUrl(TENANT_ENDPOINT))
-      .then();
+        .then()
+          .assertThat()
+            .statusCode(500);
   }
 
-  private JsonObject prepareTenantBody(JsonArray parameterArray, boolean isUpgrade) {
-    JsonObject jsonBody=new JsonObject();
-    jsonBody.put("module_to", moduleId);
-    jsonBody.put("parameters", parameterArray);
-    if(isUpgrade)
-     jsonBody.put("module_from", moduleId);
-    return jsonBody;
+  private void upgradeTenantWithSampleDataLoad() throws MalformedURLException {
+
+    logger.info("upgrading Module with sample");
+
+    JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(moduleId, true, true);
+    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
+      .assertThat()
+        .statusCode(201);
   }
+
+  private void upgradeTenantWithNoSampleDataLoad() throws MalformedURLException {
+
+    logger.info("upgrading Module without sample data");
+
+    JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(moduleId, false, true);
+    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
+      .assertThat()
+        .statusCode(200);
+  }
+
+
+  private void upgradeNonExistentTenant() throws MalformedURLException {
+
+    logger.info("upgrading Module for non existed tenant");
+
+    JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(moduleId, false, true);
+    postToTenant(NONEXISTENT_TENANT_HEADER, jsonBody)
+      .assertThat()
+        .statusCode(400);
+  }
+
+
 
 }
