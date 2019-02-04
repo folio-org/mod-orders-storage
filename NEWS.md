@@ -1,5 +1,7 @@
 ## 3.0.0 - Unreleased
 
+* [MODORDSTOR-45](https://issues.folio.org/browse/MODORDSTOR-45) - Build API for PO line numbers.
+
 ## 2.0.2 - Released
 
 This is a patch release to resolve an issue where the loading of sample data was preventing the module from being upgraded.
