@@ -120,7 +120,7 @@ public class ReceivingHistoryTest extends TestBase {
             .response()
               .as(ReceivingHistoryCollection.class);
 
-    assertEquals(receivingHistory.getTotalRecords(), CREATED_ENTITIES_QUANTITY);
+    assertEquals(CREATED_ENTITIES_QUANTITY, receivingHistory.getTotalRecords());
     List<ReceivingHistory> receivingHistories = receivingHistory.getReceivingHistory();
     for (int i = 0; i < receivingHistories.size(); i++) {
       if (receivingHistories.get(i).getId().equals(pieces[i].getId())) {
