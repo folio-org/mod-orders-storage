@@ -1,22 +1,22 @@
 package org.folio.rest.impl;
 
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.runner.RunWith;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.junit.Test;
+
+import java.net.MalformedURLException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@TestInstance(PER_CLASS)
-public class PoNumberTest extends OrdersStorageTest {
 
-  private static final String PO_NUMBER_ENDPOINT = "orders-storage/po_number";
+public class PoNumberTest extends TestBase {
+  private final Logger logger = LoggerFactory.getLogger(PoNumberTest.class);
+
+  private static final String PO_NUMBER_ENDPOINT = "/orders-storage/po_number";
 
 
   @Test
-  public void testGetPoNumberOk() {
+  public void testGetPoNumberOk() throws MalformedURLException {
 
     int po_number1 = getPoNumberAsInt();
     logger.info("--- mod-orders-storage Generated po_number1: " + po_number1);
@@ -29,7 +29,7 @@ public class PoNumberTest extends OrdersStorageTest {
     assertTrue(po_number2 - po_number1 == 1);
   }
 
-  private int getPoNumberAsInt() {
+  private int getPoNumberAsInt() throws MalformedURLException {
     return new Integer(getData(PO_NUMBER_ENDPOINT)
       .then()
       .statusCode(200)

@@ -1,40 +1,34 @@
 package org.folio.rest.impl;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.ws.rs.core.Response;
-
-import org.folio.rest.RestVerticle;
-import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.AdjustmentCollection;
-import org.folio.rest.jaxrs.resource.OrdersStorageAdjustments;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.Criteria.Criteria;
-import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.Criteria.Limit;
-import org.folio.rest.persist.Criteria.Offset;
-import org.folio.rest.persist.cql.CQLWrapper;
-import org.folio.rest.tools.messages.MessageConsts;
-import org.folio.rest.tools.messages.Messages;
-import org.folio.rest.tools.utils.OutStream;
-import org.folio.rest.tools.utils.TenantTool;
-import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import static org.folio.rest.utils.HelperUtils.isInvalidUUID;
-import static org.folio.rest.utils.HelperUtils.respond;
+import org.folio.rest.RestVerticle;
+import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.Adjustment;
+import org.folio.rest.jaxrs.model.AdjustmentCollection;
+import org.folio.rest.jaxrs.resource.OrdersStorageAdjustments;
+import org.folio.rest.jaxrs.resource.OrdersStorageAlerts;
+import org.folio.rest.persist.Criteria.Limit;
+import org.folio.rest.persist.Criteria.Offset;
+import org.folio.rest.persist.PgUtil;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.cql.CQLWrapper;
+import org.folio.rest.tools.messages.MessageConsts;
+import org.folio.rest.tools.messages.Messages;
+import org.folio.rest.tools.utils.TenantTool;
+import org.z3950.zing.cql.cql2pgjson.CQL2PgJSON;
+
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
 
 public class AdjustmentsAPI implements OrdersStorageAdjustments {
   private static final String ADJUSTMENT_TABLE = "adjustment";
-  private static final String ADJUSTMENT_LOCATION_PREFIX = "/orders-storage/adjustments/";
+
 
   private static final Logger log = LoggerFactory.getLogger(AdjustmentsAPI.class);
   private final Messages messages = Messages.getInstance();
@@ -104,177 +98,28 @@ public class AdjustmentsAPI implements OrdersStorageAdjustments {
   @Validate
   public void postOrdersStorageAdjustments(String lang, org.folio.rest.jaxrs.model.Adjustment entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext(v -> {
-
-      try {
-        String id = UUID.randomUUID().toString();
-        if (entity.getId() == null) {
-          entity.setId(id);
-        } else {
-          id = entity.getId();
-        }
-
-        String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            ADJUSTMENT_TABLE, id, entity,
-            reply -> {
-              try {
-                if (reply.succeeded()) {
-                  String persistenceId = reply.result();
-                  entity.setId(persistenceId);
-                  OutStream stream = new OutStream();
-                  stream.setData(entity);
-
-                  Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.respond201WithApplicationJson(stream,
-                      OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.headersFor201()
-                        .withLocation(ADJUSTMENT_LOCATION_PREFIX + persistenceId));
-                  respond(asyncResultHandler, response);
-                } else {
-                  log.error(reply.cause().getMessage(), reply.cause());
-                  Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse
-                    .respond500WithTextPlain(reply.cause().getMessage());
-                  respond(asyncResultHandler, response);
-                }
-              } catch (Exception e) {
-                log.error(e.getMessage(), e);
-
-                Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.respond500WithTextPlain(e.getMessage());
-                respond(asyncResultHandler, response);
-              }
-
-            });
-      } catch (Exception e) {
-        log.error(e.getMessage(), e);
-
-        String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
-        Response response = OrdersStorageAdjustments.PostOrdersStorageAdjustmentsResponse.respond500WithTextPlain(errMsg);
-        respond(asyncResultHandler, response);
-      }
-
-    });
+    PgUtil.post(ADJUSTMENT_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageAdjustmentsResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
   public void getOrdersStorageAdjustmentsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext(v -> {
-      try {
-        String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-
-        String idArgument = String.format("'%s'", id);
-        Criterion c = new Criterion(
-            new Criteria().addField(idFieldName).setJSONB(false).setOperation("=").setValue(idArgument));
-
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).get(ADJUSTMENT_TABLE,
-            org.folio.rest.jaxrs.model.Adjustment.class, c, true,
-            reply -> {
-              try {
-                if (reply.succeeded()) {
-                  List<org.folio.rest.jaxrs.model.Adjustment> results = reply.result().getResults();
-                  if (results.isEmpty()) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
-                      .respond404WithTextPlain(id)));
-                  } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
-                      .respond200WithApplicationJson(results.get(0))));
-                  }
-                } else {
-                  log.error(reply.cause().getMessage(), reply.cause());
-                  if (isInvalidUUID(reply.cause().getMessage())) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
-                      .respond404WithTextPlain(id)));
-                  } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
-                      .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-                  }
-                }
-              } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
-                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-              }
-            });
-      } catch (Exception e) {
-        log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(GetOrdersStorageAdjustmentsByIdResponse
-          .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-      }
-    });
+    PgUtil.getById(ADJUSTMENT_TABLE, Adjustment.class, id, okapiHeaders,vertxContext, GetOrdersStorageAdjustmentsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
   public void deleteOrdersStorageAdjustmentsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    String tenantId = TenantTool.tenantId(okapiHeaders);
-
-    try {
-      vertxContext.runOnContext(v -> {
-        PostgresClient postgresClient = PostgresClient.getInstance(
-            vertxContext.owner(), TenantTool.calculateTenantId(tenantId));
-
-        try {
-          postgresClient.delete(ADJUSTMENT_TABLE, id, reply -> {
-            if (reply.succeeded()) {
-              asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.noContent()
-                    .build()));
-            } else {
-              asyncResultHandler.handle(Future.succeededFuture(
-                  OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.respond500WithTextPlain(reply.cause().getMessage())));
-            }
-          });
-        } catch (Exception e) {
-          asyncResultHandler.handle(Future.succeededFuture(
-              OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.respond500WithTextPlain(e.getMessage())));
-        }
-      });
-    } catch (Exception e) {
-      asyncResultHandler.handle(Future.succeededFuture(
-          OrdersStorageAdjustments.DeleteOrdersStorageAdjustmentsByIdResponse.respond500WithTextPlain(e.getMessage())));
-    }
+    PgUtil.deleteById(ADJUSTMENT_TABLE, id, okapiHeaders, vertxContext, OrdersStorageAlerts.DeleteOrdersStorageAlertsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
   public void putOrdersStorageAdjustmentsById(String id, String lang, org.folio.rest.jaxrs.model.Adjustment entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext(v -> {
-      String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-      try {
-        if (entity.getId() == null) {
-          entity.setId(id);
-        }
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            ADJUSTMENT_TABLE, entity, id,
-            reply -> {
-              try {
-                if (reply.succeeded()) {
-                  if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
-                      .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
-                  } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
-                      .respond204()));
-                  }
-                } else {
-                  log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
-                    .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-                }
-              } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
-                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-              }
-            });
-      } catch (Exception e) {
-        log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStorageAdjustmentsByIdResponse
-          .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-      }
-    });
+    PgUtil.put(ADJUSTMENT_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageAdjustmentsByIdResponse.class, asyncResultHandler);
   }
 
 }

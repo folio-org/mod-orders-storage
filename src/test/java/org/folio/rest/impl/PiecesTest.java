@@ -4,16 +4,17 @@ import io.restassured.response.Response;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.json.JSONObject;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.Test;
+
+import java.net.MalformedURLException;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@TestInstance(PER_CLASS)
-public class PiecesTest extends OrdersStorageTest{
-  private final Logger logger = LoggerFactory.getLogger("okapi");
+
+
+public class PiecesTest extends TestBase{
+  private final Logger logger = LoggerFactory.getLogger(PiecesTest.class);
 
   private final String INVALID_PIECE_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
@@ -22,7 +23,7 @@ public class PiecesTest extends OrdersStorageTest{
 
 
   @Test
-  public void testPiece() {
+  public void testPiece() throws MalformedURLException {
     try {
 
       logger.info("--- mod-orders-storage pieces test: Verifying database's initial state ... ");
@@ -63,13 +64,13 @@ public class PiecesTest extends OrdersStorageTest{
     }
   }
 
-  private void testFetchingUpdatedpiece(String piecesSampleId) {
+  private void testFetchingUpdatedpiece(String piecesSampleId) throws MalformedURLException {
     getDataById(PIECES_ENDPOINT, piecesSampleId).then()
     .statusCode(200)
     .body("comment", equalTo("Update Comment"));
   }
 
-  private void testPieceEdit(String pieceSample, String piecesSampleId) {
+  private void testPieceEdit(String pieceSample, String piecesSampleId) throws MalformedURLException {
     JSONObject catJSON = new JSONObject(pieceSample);
     catJSON.put("id", piecesSampleId);
     catJSON.put("comment", "Update Comment");
@@ -78,13 +79,13 @@ public class PiecesTest extends OrdersStorageTest{
       .statusCode(204);
   }
 
-  private void testInvalidPieceId() {
+  private void testInvalidPieceId() throws MalformedURLException {
     logger.info("--- mod-orders-storage-test: Fetching invalid Piece with ID return 404: "+ INVALID_PIECE_ID);
     getDataById(PIECES_ENDPOINT, INVALID_PIECE_ID).then()
     .statusCode(404);
   }
 
-  private void testPieceSuccessfullyFetched(String piecesSampleId) {
+  private void testPieceSuccessfullyFetched(String piecesSampleId) throws MalformedURLException {
     getDataById(PIECES_ENDPOINT, piecesSampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("id", equalTo(piecesSampleId));

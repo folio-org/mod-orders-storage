@@ -2,41 +2,39 @@ package org.folio.rest.impl;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.json.JSONObject;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.runner.RunWith;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.junit.Test;
+
+import java.net.MalformedURLException;
 
 import static org.folio.rest.impl.SubObjects.PO_LINE;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@TestInstance(PER_CLASS)
-public class POsTest extends OrdersStorageTest {
 
-  private static final String PO_LINE_ENDPOINT = "/orders-storage/po_lines";
+public class POsTest extends TestBase {
+  private final Logger logger = LoggerFactory.getLogger(POsTest.class);
+
+
   private static final String PO_ENDPOINT = "/orders-storage/purchase_orders";
-  private static final String ORDERS_ENDPOINT = "/orders";
   private final static String INVALID_PO_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
 
 
   // Validates that there are zero purchase order records in the DB
-  private void verifyCollection() {
+  private void verifyCollection() throws MalformedURLException {
 
     // Validate that there are no existing purchase_orders
-    verifyCollectionQuantity(PO_ENDPOINT, 14);
+    verifyCollectionQuantity(PO_ENDPOINT, 0);
 
     // Verify that there are no existing po_lines
-    verifyCollectionQuantity(PO_LINE.getEndpoint(), PO_LINE.getInitialQuantity());
+    verifyCollectionQuantity(PO_LINE.getEndpoint(), 0);
 
   }
 
   @Test
-  public void tests() {
+  public void tests() throws MalformedURLException {
     String sampleId = null;
     try {
 
@@ -60,7 +58,7 @@ public class POsTest extends OrdersStorageTest {
       testValidPONumberExists(response);
 
       logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created ... ");
-      verifyCollectionQuantity(PO_ENDPOINT, 15);
+      verifyCollectionQuantity(PO_ENDPOINT, 1);
 
       logger.info("--- mod-order-storage PO test: Verifying only 1 purchase order was created from orders endpoint... ");
       testPOCreatedFromOrders();
@@ -92,18 +90,18 @@ public class POsTest extends OrdersStorageTest {
   private void testPoNumberUniqness(Response response) {
     response
       .then()
-       .statusCode(500)
+       .statusCode(400)
        .body(containsString("duplicate key value violates unique constraint \"purchase_order_po_number_unique_idx\""));
   }
 
-  private void testFetchingUpdatedPO(String sampleId) {
+  private void testFetchingUpdatedPO(String sampleId) throws MalformedURLException {
     getDataById(PO_ENDPOINT, sampleId).then().log().ifValidationFails()
     .statusCode(200)
     .body("po_number", equalTo("666666"));
   }
 
-  private void testPOEdit(String purchaseOrderSample, String sampleId) {
-    JSONObject catJSON = new JSONObject(purchaseOrderSample);
+  private void testPOEdit(String purchaseOrderSample, String sampleId) throws MalformedURLException {
+    JsonObject catJSON = new JsonObject(purchaseOrderSample);
     catJSON.put("id", sampleId);
     catJSON.put("po_number", "666666");
     Response response = putData(PO_ENDPOINT, sampleId, catJSON.toString());
@@ -111,21 +109,21 @@ public class POsTest extends OrdersStorageTest {
       .statusCode(204);
   }
 
-  private void testInvalidPOId() {
+  private void testInvalidPOId() throws MalformedURLException {
     getDataById(PO_ENDPOINT, "5b2b33c6-7e3e-41b7-8c79-e245140d8add").then()
       .statusCode(404);
   }
 
-  private void testPOSuccessfullyFetched(String purchaseOrderSampleId) {
+  private void testPOSuccessfullyFetched(String purchaseOrderSampleId) throws MalformedURLException {
     getDataById(PO_ENDPOINT, purchaseOrderSampleId).then()
     .statusCode(200)
     .body("id", equalTo(purchaseOrderSampleId));
   }
 
-  private void testPOCreatedFromOrders() {
-    getData(ORDERS_ENDPOINT).then()
+  private void testPOCreatedFromOrders() throws MalformedURLException {
+    getData(PO_ENDPOINT).then()
     .statusCode(200)
-    .body("total_records", equalTo(15));
+    .body("total_records", equalTo(1));
   }
 
   private void testValidPONumberExists(Response response) {

@@ -10,22 +10,21 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.Test;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
+import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 import static org.folio.rest.impl.SubObjects.DETAIL;
 import static org.folio.rest.impl.SubObjects.PO_LINE;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@TestInstance(PER_CLASS)
-public class ReceivingHistoryTest extends OrdersStorageTest {
+public class ReceivingHistoryTest extends TestBase {
 
-  private final Logger logger = LoggerFactory.getLogger("okapi");
+  private final Logger logger = LoggerFactory.getLogger(ReceivingHistoryTest.class);
 
   private static String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private static String detailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
@@ -52,47 +51,45 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
   private final String purchaseOrderSample2 = getFile("purchase_order_for_view.sample");
   private static final String APPLICATION_JSON = "application/json";
 
-  private static final int INITIAL_PIECES_QUANTITY = 0;
-  private static final int INITIAL_PURCHASE_ORDERS_QUANTITY = 14;
   private static final int CREATED_ENTITIES_QUANTITY = 2;
 
 
   @Test
-  public void testReceivingHistory() {
+  public void testReceivingHistory() throws MalformedURLException {
     try {
 
       logger.info("--- mod-orders-storage receiving_history test: Before receiving_history View creation ... ");
-      verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, INITIAL_PIECES_QUANTITY);
+      verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, 0);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating receiving_history View ...");
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
       piecesSampleId = createEntity(PIECES_ENDPOINT, pieceSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
       piecesSampleId2 = createEntity(PIECES_ENDPOINT, pieceSample2);
-      verifyCollectionQuantity(PIECES_ENDPOINT, INITIAL_PIECES_QUANTITY + CREATED_ENTITIES_QUANTITY);
+      verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, CREATED_ENTITIES_QUANTITY);
 
 
       logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 1...");
       poLineSampleId = createEntity(PO_LINE_ENDPOINT, poLineSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 2 ...");
       poLineSampleId2 = createEntity(PO_LINE_ENDPOINT, poLineSample2);
-      verifyCollectionQuantity(PO_LINE.getEndpoint(), PO_LINE.getInitialQuantity() + CREATED_ENTITIES_QUANTITY);
+      verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Detail 1...");
       detailSampleId = createEntity(DETAILS_ENDPOINT, detailSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Detail 2 ...");
       detailSampleId2 = createEntity(DETAILS_ENDPOINT, detailSample2);
-      verifyCollectionQuantity(DETAIL.getEndpoint(), DETAIL.getInitialQuantity() + CREATED_ENTITIES_QUANTITY);
+      verifyCollectionQuantity(DETAIL.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Purchase Order 1...");
       purchaseOrderSampleId = createEntity(PURCHASE_ORDER_ENDPOINT, purchaseOrderSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Purchase Order 2...");
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER_ENDPOINT, purchaseOrderSample2);
-      verifyCollectionQuantity(PURCHASE_ORDER_ENDPOINT, INITIAL_PURCHASE_ORDERS_QUANTITY + CREATED_ENTITIES_QUANTITY);
+      verifyCollectionQuantity(PURCHASE_ORDER_ENDPOINT, CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
-      verifyViewCollectionAfter(RECEIVING_HISTORY_ENDPOINT, INITIAL_PIECES_QUANTITY + CREATED_ENTITIES_QUANTITY);
+      verifyViewCollectionAfter(storageUrl(RECEIVING_HISTORY_ENDPOINT), CREATED_ENTITIES_QUANTITY);
 
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
@@ -100,17 +97,17 @@ public class ReceivingHistoryTest extends OrdersStorageTest {
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
       deleteData(DETAILS_ENDPOINT, detailSampleId);
-      deleteData(PO_LINE_ENDPOINT, poLineSampleId);
+      deleteData(PO_LINE.getEndpoint(), poLineSampleId);
       deleteData(PIECES_ENDPOINT, piecesSampleId);
       deleteData(PURCHASE_ORDER_ENDPOINT, purchaseOrderSampleId);
       deleteData(DETAILS_ENDPOINT, detailSampleId2);
-      deleteData(PO_LINE_ENDPOINT, poLineSampleId2);
+      deleteData(PO_LINE.getEndpoint(), poLineSampleId2);
       deleteData(PIECES_ENDPOINT, piecesSampleId2);
       deleteData(PURCHASE_ORDER_ENDPOINT, purchaseOrderSampleId2);
     }
   }
 
-  private void verifyViewCollectionAfter(String endpoint, Integer expectedCount) {
+  private void verifyViewCollectionAfter(URL endpoint, Integer expectedCount) {
     Piece[] pieces = new Piece[] {new JsonObject(pieceSample).mapTo(Piece.class), new JsonObject(pieceSample2).mapTo(Piece.class)};
     PoLine[] poLines = new PoLine[] {new JsonObject(poLineSample).mapTo(PoLine.class), new JsonObject(poLineSample2).mapTo(PoLine.class)};
     Details[] details = new Details[] {new JsonObject(detailSample).mapTo(Details.class), new JsonObject(detailSample2).mapTo(Details.class)};

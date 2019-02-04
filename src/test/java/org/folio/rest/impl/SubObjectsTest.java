@@ -4,28 +4,38 @@ import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
-import org.folio.rest.jaxrs.model.Adjustment;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.net.MalformedURLException;
 
 import static io.restassured.RestAssured.given;
+import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 import static org.junit.Assert.fail;
-import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
-@TestInstance(PER_CLASS)
-public class SubObjectsTest extends OrdersStorageTest {
+@RunWith(Parameterized.class)
+public class SubObjectsTest extends TestBase {
+
+  private final Logger logger = LoggerFactory.getLogger(SubObjectsTest.class);
 
   final Header NONEXISTENT_TENANT_HEADER = new Header("X-Okapi-Tenant", "no_tenant");
+  @Parameterized.Parameter public SubObjects subObject;
 
-  @ParameterizedTest
-  @EnumSource(SubObjects.class)
-  public void testPositiveCasesSubObjects(SubObjects subObject) {
+  @Parameterized.Parameters
+  public static SubObjects[] data() {
+    return SubObjects.values();
+  }
+
+  @Test
+  public void testPositiveCasesSubObjects() throws MalformedURLException {
     String sampleId = null;
     try {
 
       logger.info(String.format("--- mod-orders-storage %s test: Verifying database's initial state ... ", subObject.name()));
-      verifyCollectionQuantity(subObject.getEndpoint(), subObject.getInitialQuantity());
+      verifyCollectionQuantity(subObject.getEndpoint(), 0);
 
       logger.info(String.format("--- mod-orders-storage %s test: Creating %s ... ", subObject.name(), subObject.name()));
       String sample = getFile(subObject.getSampleFileName());
@@ -36,7 +46,7 @@ public class SubObjectsTest extends OrdersStorageTest {
       testAllFieldsExists(extractJsonObjectResponse(response), sample);
 
       logger.info(String.format("--- mod-orders-storage %s test: Verifying only 1 adjustment was created ... ", subObject.name()));
-      verifyCollectionQuantity(subObject.getEndpoint(), subObject.getInitialQuantity() + 1);
+      verifyCollectionQuantity(subObject.getEndpoint(),1);
 
       logger.info(String.format("--- mod-orders-storage %s test: Fetching %s with ID: %s", subObject.name(), subObject.name(), sampleId));
       testEntitySuccessfullyFetched(subObject.getEndpoint(), sampleId);
@@ -63,27 +73,58 @@ public class SubObjectsTest extends OrdersStorageTest {
 
   }
 
-  @ParameterizedTest
-  @EnumSource(value = SubObjects.class, names = {"ADJUSTMENT"})
-  void testSubObjectsNegativeCases(SubObjects subObject) {
+  @Test
+  public void testSubObjectsNegativeCases() throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Invalid %s: %s", subObject.name(), subObject.name(), NON_EXISTED_ID));
     testFetchEntityWithNonExistedId(subObject.getEndpoint());
 
     logger.info(String.format("--- mod-orders-storage %s test: Invalid %s: %s", subObject.name(), subObject.name(), NON_EXISTED_ID));
     testInvalidCQLQuery(subObject.getEndpoint() + "?query=abraCadabra");
 
-    postData(subObject.getEndpoint(), "").then().statusCode(400);
-
-    postDataWithNonExistedTenant(subObject.getEndpoint(),  getFile(subObject.getSampleFileName()));
   }
 
-  void postDataWithNonExistedTenant(String endpoint, String input) {
+  void postDataWithNonExistedTenant(String endpoint, String input) throws MalformedURLException {
+
     given()
-      .header("X-Okapi-Tenant", NONEXISTENT_TENANT_HEADER)
+      .header(NONEXISTENT_TENANT_HEADER)
       .accept(ContentType.JSON)
       .contentType(ContentType.JSON)
       .body(input)
-      .post(endpoint)
+      .post(storageUrl(endpoint))
+      .then().statusCode(500);
+  }
+
+  void getDataWithNonExistedTenant(String endpoint, String id) throws MalformedURLException {
+    given()
+      .pathParam("id", id)
+      .header(NONEXISTENT_TENANT_HEADER)
+      .get(storageUrl(endpoint) + "/{id}")
+      .then().statusCode(500);
+  }
+
+  void getDataWithNonExistedTenant(String endpoint) throws MalformedURLException {
+    given()
+      .header(NONEXISTENT_TENANT_HEADER)
+      .get(storageUrl(endpoint))
+      .then().statusCode(400);
+  }
+
+  void deleteDataWithNonExistedTenant(String endpoint, String id) throws MalformedURLException {
+    given()
+      .pathParam("id", id)
+      .header( NONEXISTENT_TENANT_HEADER)
+      .delete(storageUrl(endpoint) + "/{id}")
+      .then().statusCode(500);
+  }
+
+  void editDataWithNonExistedTenant(String endpoint, String input, String id) throws MalformedURLException {
+    given()
+      .pathParam("id", id)
+      .header(NONEXISTENT_TENANT_HEADER)
+      .accept("application/json, text/plain")
+      .contentType(ContentType.JSON)
+      .body(input)
+      .put(storageUrl(endpoint) + "/{id}")
       .then().statusCode(500);
   }
 }
