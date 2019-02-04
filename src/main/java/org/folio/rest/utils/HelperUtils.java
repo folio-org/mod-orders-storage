@@ -8,6 +8,9 @@ import io.vertx.core.Handler;
 
 public class HelperUtils {
 
+  private static final String POL_NUMBER_PREFIX = "polNumber_";
+  private static final String QUOTES_SYMBOL = "\"";
+
   private HelperUtils() {
 
   }
@@ -21,5 +24,31 @@ public class HelperUtils {
     handler.handle(result);
   }
 
+  public enum SequenceQuery {
 
+    CREATE_SEQUENCE {
+      @Override
+      public String getQuery(String purchaseOrderId) {
+        return "CREATE SEQUENCE " + constructSequenceName(purchaseOrderId) + " MINVALUE 1 MAXVALUE 999";
+      }
+    },
+    GET_POL_NUMBER_FROM_SEQUENCE {
+      @Override
+      public String getQuery(String purchaseOrderId) {
+        return "SELECT * FROM NEXTVAL('" + constructSequenceName(purchaseOrderId) + "')";
+      }
+    },
+    DROP_SEQUENCE {
+      @Override
+      public String getQuery(String purchaseOrderId) {
+        return "DROP SEQUENCE IF EXISTS " + constructSequenceName(purchaseOrderId);
+      }
+    };
+
+    private static String constructSequenceName(String purchaseOrderId) {
+      return QUOTES_SYMBOL + POL_NUMBER_PREFIX + purchaseOrderId + QUOTES_SYMBOL;
+    }
+
+    public abstract String getQuery(String purchaseOrderId);
+  }
 }

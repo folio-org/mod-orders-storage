@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.PostgresClient;
@@ -29,6 +30,9 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+
+import static org.folio.rest.utils.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
+import static org.folio.rest.utils.HelperUtils.SequenceQuery.DROP_SEQUENCE;
 import static org.folio.rest.utils.HelperUtils.isInvalidUUID;
 import static org.folio.rest.utils.HelperUtils.respond;
 
@@ -128,11 +132,20 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
                   entity.setId(persistenceId);
                   OutStream stream = new OutStream();
                   stream.setData(entity);
-
-                  Response response = PostOrdersStoragePurchaseOrdersResponse
-                    .respond201WithApplicationJson(stream, PostOrdersStoragePurchaseOrdersResponse.headersFor201()
-                      .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
-                  respond(asyncResultHandler, response);
+                  PostgresClient.getInstance(vertxContext.owner(), tenantId).execute(CREATE_SEQUENCE.getQuery(entity.getId()),
+                    createSequenceReply -> {
+                      if(createSequenceReply.succeeded()) {
+                        Response response = PostOrdersStoragePurchaseOrdersResponse
+                          .respond201WithApplicationJson(stream, PostOrdersStoragePurchaseOrdersResponse.headersFor201()
+                            .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
+                        respond(asyncResultHandler, response);
+                      } else {
+                        // TODO Transactionality (???) --> Roll-back PO creation?
+                        log.error(createSequenceReply.cause().getMessage(), createSequenceReply.cause());
+                        respond(asyncResultHandler, PostOrdersStoragePurchaseOrdersResponse
+                          .respond500WithTextPlain(createSequenceReply.cause().getMessage()));
+                      }
+                  });
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   Response response = PostOrdersStoragePurchaseOrdersResponse
@@ -262,8 +275,23 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
                     asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-                      .respond204()));
+                    PurchaseOrder.WorkflowStatus status = entity.getWorkflowStatus();
+                    if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
+                      PostgresClient.getInstance(vertxContext.owner(), tenantId).select(DROP_SEQUENCE.getQuery(entity.getId()), sequenceDeleteReply -> {
+                        if (sequenceDeleteReply.succeeded()) {
+                          asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+                            .respond204()));
+                        } else {
+                          // TODO Transactionality (???) --> Roll-back PO update?
+                          log.error(reply.cause().getMessage());
+                          asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+                            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                        }
+                      });
+                    } else {
+                      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+                        .respond204()));
+                    }
                   }
                 } else {
                   log.error(reply.cause().getMessage());

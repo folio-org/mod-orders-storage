@@ -17,6 +17,12 @@ traits:
   get:
     is: [language]
     description: Get purchase order line number
+    queryParameters:
+      purchaseOrderId:
+        description: Purchase Order Id
+        type:        string
+        required:    true
+        example:     "8ad4b87b-9b47-4199-b0c3-5480745c6b41"
     responses:
       200:
         body:
