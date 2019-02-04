@@ -1,0 +1,9 @@
+{
+  "id": "c0fb765c-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "material_supplier": "fb9f16d1-9564-4c0f-abd3-9890e00ba318",
+  "receipt_due": "2018-08-31T00:00:00.000Z",
+  "volumes": [
+    "vol. 6"
+  ],
+  "po_line_id": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

@@ -1,0 +1,50 @@
+{
+  "id": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkin_items": false,
+  "instance_id": "85122745-9347-46a6-956a-4cd5e6d6ca25",
+  "agreement_id": "7cd9210e-c871-4421-8d37-b8603be6d037",
+  "purchase_order_id": "f4dc647c-ec82-442e-b13d-f9505b7ce8e9",
+  "acquisition_method": "Purchase At Vendor System",
+  "adjustment": "f96336cf-eb47-4e09-9e28-e25aa464adb7",
+  "alerts": [],
+  "cancellation_restriction": false,
+  "cancellation_restriction_note": "",
+  "claims": [
+    "daac8dee-f5c1-41d2-b673-58005c1d7f29"
+  ],
+  "collection": false,
+  "cost": "f7c5d792-cabe-11ff-a8d5-f2801f1b9fd1",
+  "description": "",
+  "details": "f7c5d792-11be-11e9-a8d5-f2801f1b9fd1",
+  "donor": "",
+  "eresource": "f7c5d813-cabe-11e8-a8d5-f2801f1b9fd1",
+  "fund_distribution": [
+    "15e2d864-cde3-11e8-a8d5-f2801f1b9fd1"
+  ],
+  "location": "f7c5d9ea-cabe-11e8-a8d5-f2801f1b9f14",
+  "order_format": "Electronic Resource",
+  "owner": "Evans",
+  "payment_status": "Awaiting Payment",
+  "physical": "15fb857a-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "po_line_description": "",
+  "po_line_number": "312325-1",
+  "publication_date": "2013",
+  "publisher": "Berkeley Films",
+  "receipt_date": null,
+  "receipt_status": "Fully Received",
+  "reporting_codes": [],
+  "requester": "msmith",
+  "rush": false,
+  "selector": "dhalling",
+  "source": "fb4b2f41-c5c6-4280-858e-33fba452a124",
+  "tags": [
+    "streaming_video"
+  ],
+  "title": "At Berkeley",
+  "vendor_detail": "15fb8a2a-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "metadata": {
+    "createdDate": "2018-07-13T00:00:00Z",
+    "createdByUserId": "28d11576-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}
