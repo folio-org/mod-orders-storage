@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import io.vertx.ext.sql.UpdateResult;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
@@ -132,20 +133,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
                   entity.setId(persistenceId);
                   OutStream stream = new OutStream();
                   stream.setData(entity);
-                  PostgresClient.getInstance(vertxContext.owner(), tenantId).execute(CREATE_SEQUENCE.getQuery(entity.getId()),
-                    createSequenceReply -> {
-                      if(createSequenceReply.succeeded()) {
-                        Response response = PostOrdersStoragePurchaseOrdersResponse
-                          .respond201WithApplicationJson(stream, PostOrdersStoragePurchaseOrdersResponse.headersFor201()
-                            .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
-                        respond(asyncResultHandler, response);
-                      } else {
-                        // TODO Transactionality (???) --> Roll-back PO creation?
-                        log.error(createSequenceReply.cause().getMessage(), createSequenceReply.cause());
-                        respond(asyncResultHandler, PostOrdersStoragePurchaseOrdersResponse
-                          .respond500WithTextPlain(createSequenceReply.cause().getMessage()));
-                      }
-                  });
+                  processCreateSequence(entity, asyncResultHandler, vertxContext, tenantId, persistenceId, stream);
                 } else {
                   log.error(reply.cause().getMessage(), reply.cause());
                   Response response = PostOrdersStoragePurchaseOrdersResponse
@@ -275,23 +263,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
                     asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
                       .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
                   } else {
-                    PurchaseOrder.WorkflowStatus status = entity.getWorkflowStatus();
-                    if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
-                      PostgresClient.getInstance(vertxContext.owner(), tenantId).select(DROP_SEQUENCE.getQuery(entity.getId()), sequenceDeleteReply -> {
-                        if (sequenceDeleteReply.succeeded()) {
-                          asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-                            .respond204()));
-                        } else {
-                          // TODO Transactionality (???) --> Roll-back PO update?
-                          log.error(reply.cause().getMessage());
-                          asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-                            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-                        }
-                      });
-                    } else {
-                      asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-                        .respond204()));
-                    }
+                    processDropSequence(lang, entity, asyncResultHandler, vertxContext, tenantId, reply);
                   }
                 } else {
                   log.error(reply.cause().getMessage());
@@ -310,5 +282,44 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
+  }
+
+  private void processCreateSequence(PurchaseOrder entity, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext,
+                                     String tenantId, String persistenceId, OutStream stream) {
+    PostgresClient.getInstance(vertxContext.owner(), tenantId).execute(CREATE_SEQUENCE.getQuery(entity.getId()),
+      createSequenceReply -> {
+        if(createSequenceReply.succeeded()) {
+          Response response = PostOrdersStoragePurchaseOrdersResponse
+            .respond201WithApplicationJson(stream, PostOrdersStoragePurchaseOrdersResponse.headersFor201()
+              .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
+          respond(asyncResultHandler, response);
+        } else {
+          // TODO Transactionality (???) --> Roll-back PO creation?
+          log.error(createSequenceReply.cause().getMessage(), createSequenceReply.cause());
+          respond(asyncResultHandler, PostOrdersStoragePurchaseOrdersResponse
+            .respond500WithTextPlain(createSequenceReply.cause().getMessage()));
+        }
+      });
+  }
+
+  private void processDropSequence(String lang, PurchaseOrder entity, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext,
+                                   String tenantId, AsyncResult<UpdateResult> reply) {
+    PurchaseOrder.WorkflowStatus status = entity.getWorkflowStatus();
+    if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
+      PostgresClient.getInstance(vertxContext.owner(), tenantId).select(DROP_SEQUENCE.getQuery(entity.getId()), sequenceDeleteReply -> {
+        if (sequenceDeleteReply.succeeded()) {
+          asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+            .respond204()));
+        } else {
+          // TODO Transactionality (???) --> Roll-back PO update?
+          log.error(reply.cause().getMessage());
+          asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+        }
+      });
+    } else {
+      asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+        .respond204()));
+    }
   }
 }
