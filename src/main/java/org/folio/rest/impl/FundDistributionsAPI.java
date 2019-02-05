@@ -61,14 +61,6 @@ public class FundDistributionsAPI implements OrdersStorageFundDistributions {
                 collection.setFundDistributions(results);
                 int totalRecords = reply.result().getResultInfo().getTotalRecords();
                 collection.setTotalRecords(totalRecords);
-                int first = 0;
-                int last = 0;
-                if (!results.isEmpty()) {
-                  first = offset + 1;
-                  last = offset + results.size();
-                }
-                collection.setFirst(first);
-                collection.setLast(last);
                 asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageFundDistributions.GetOrdersStorageFundDistributionsResponse
                   .respond200WithApplicationJson(collection)));
               } else {

@@ -55,14 +55,6 @@ public class OrdersAPI implements Orders {
                 collection.setPurchaseOrders(results);
                 Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                 collection.setTotalRecords(totalRecords);
-                Integer first = 0;
-                Integer last = 0;
-                if (!results.isEmpty()) {
-                  first = offset + 1;
-                  last = offset + results.size();
-                }
-                collection.setFirst(first);
-                collection.setLast(last);
                 asyncResultHandler
                   .handle(Future.succeededFuture(org.folio.rest.jaxrs.resource.Orders.GetOrdersResponse.respond200WithApplicationJson(collection)));
               } else {

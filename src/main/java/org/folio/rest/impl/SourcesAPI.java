@@ -68,14 +68,6 @@ public class SourcesAPI implements OrdersStorageSources {
                   collection.setSources(results);
                   Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                   collection.setTotalRecords(totalRecords);
-                  Integer first = 0;
-                  Integer last = 0;
-                  if (!results.isEmpty()) {
-                    first = offset + 1;
-                    last = offset + results.size();
-                  }
-                  collection.setFirst(first);
-                  collection.setLast(last);
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageSources.GetOrdersStorageSourcesResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
