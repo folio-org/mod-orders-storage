@@ -22,6 +22,7 @@ public class TenantSampleDataTest extends TestBase{
 
   private static final Header NONEXISTENT_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "no_tenant");
   private static final Header ANOTHER_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "new_tenant");
+  private static final Header ANOTHER_TENANT_HEADER_WITHOUT_UPGRADE = new Header(OKAPI_HEADER_TENANT, "no_upgrade_tenant");
 
 
   @Test
@@ -64,18 +65,19 @@ public class TenantSampleDataTest extends TestBase{
   @Test
   public void testLoadSampleDataWithoutUpgrade() throws MalformedURLException {
     logger.info("load sample date");
-
-    JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(moduleId, true, false);
-    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
-      .assertThat()
-      .statusCode(201);
-
+    try{
+      JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(moduleId, true, false);
+      postToTenant(ANOTHER_TENANT_HEADER_WITHOUT_UPGRADE, jsonBody)
+        .assertThat()
+          .statusCode(201);
+    } finally {
+      deleteTenant(ANOTHER_TENANT_HEADER_WITHOUT_UPGRADE);
+    }
   }
 
   private void upgradeTenantWithSampleDataLoad() throws MalformedURLException {
 
     logger.info("upgrading Module with sample");
-
     JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(moduleId, true, true);
     postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
       .assertThat()
@@ -102,7 +104,5 @@ public class TenantSampleDataTest extends TestBase{
       .assertThat()
         .statusCode(400);
   }
-
-
 
 }
