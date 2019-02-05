@@ -67,14 +67,6 @@ public class AlertsAPI implements OrdersStorageAlerts {
                   collection.setAlerts(results);
                   Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
                   collection.setTotalRecords(totalRecords);
-                  Integer first = 0;
-                  Integer last = 0;
-                  if (!results.isEmpty()) {
-                    first = offset + 1;
-                    last = offset + results.size();
-                  }
-                  collection.setFirst(first);
-                  collection.setLast(last);
                   asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStorageAlerts.GetOrdersStorageAlertsResponse
                     .respond200WithApplicationJson(collection)));
                 } else {
