@@ -11,7 +11,6 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Adjustment;
 import org.folio.rest.jaxrs.model.AdjustmentCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageAdjustments;
-import org.folio.rest.jaxrs.resource.OrdersStorageAlerts;
 import org.folio.rest.persist.Criteria.Limit;
 import org.folio.rest.persist.Criteria.Offset;
 import org.folio.rest.persist.PgUtil;
@@ -112,7 +111,7 @@ public class AdjustmentsAPI implements OrdersStorageAdjustments {
   @Validate
   public void deleteOrdersStorageAdjustmentsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.deleteById(ADJUSTMENT_TABLE, id, okapiHeaders, vertxContext, OrdersStorageAlerts.DeleteOrdersStorageAlertsByIdResponse.class, asyncResultHandler);
+    PgUtil.deleteById(ADJUSTMENT_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStorageAdjustmentsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
