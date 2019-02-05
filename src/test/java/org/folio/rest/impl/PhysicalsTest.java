@@ -59,6 +59,15 @@ public class PhysicalsTest extends OrdersStorageTest {
     }
   }
 
+  @Override
+  void verifyCollection(String endpoint) {
+    // Verify the existing  records
+    getData(endpoint).then()
+      .assertThat()
+      .statusCode(200)
+      .body("total_records", equalTo(10));
+  }
+
   private void testVerifyPhysicalDeletion(String physicalSampleId) {
     getDataById(PHYSICAL_ENDPOINT, physicalSampleId).then()
       .statusCode(404);
@@ -101,7 +110,7 @@ public class PhysicalsTest extends OrdersStorageTest {
   private void testPhysicalCreated() {
     getData(PHYSICAL_ENDPOINT).then()
       .statusCode(200)
-      .body("total_records", equalTo(17));
+      .body("total_records", equalTo(11));
   }
 
   private void testValidMaterialSupplierExists(Response response) {
