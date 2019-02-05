@@ -91,15 +91,21 @@ public class ReceivingHistoryTest extends TestBase {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
-      deleteData(DETAIL.getEndpointWithId(), detailSampleId);
-      deleteData(PO_LINE.getEndpointWithId(), poLineSampleId);
-      deleteData(PIECE.getEndpointWithId(), piecesSampleId);
-      deleteData(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
-      deleteData(DETAIL.getEndpointWithId(), detailSampleId2);
-      deleteData(PO_LINE.getEndpointWithId(), poLineSampleId2);
-      deleteData(PIECE.getEndpointWithId(), piecesSampleId2);
-      deleteData(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
+      deleteDataSuccess(DETAIL.getEndpointWithId(), detailSampleId);
+      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
+      deleteDataSuccess(PIECE.getEndpointWithId(), piecesSampleId);
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
+      deleteDataSuccess(DETAIL.getEndpointWithId(), detailSampleId2);
+      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
+      deleteDataSuccess(PIECE.getEndpointWithId(), piecesSampleId2);
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
     }
+  }
+
+  @Test
+  public void testGetEntitiesWithInvalidCQLQuery() throws MalformedURLException {
+    logger.info("--- mod-orders-storage receiving history test: Invalid CQL query");
+    testInvalidCQLQuery(RECEIVING_HISTORY_ENDPOINT + "?query=invalid-query");
   }
 
   private void verifyViewCollectionAfter(URL endpoint) {

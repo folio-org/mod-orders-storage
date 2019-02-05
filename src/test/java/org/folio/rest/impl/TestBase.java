@@ -115,15 +115,20 @@ public abstract class TestBase {
       .put(storageUrl(endpoint));
   }
 
-  void deleteData(String endpoint, String id) throws MalformedURLException {
-    given()
+  void deleteDataSuccess(String endpoint, String id) throws MalformedURLException {
+    deleteData(endpoint, id)
+      .then().log().ifValidationFails()
+        .statusCode(204);
+  }
+
+  Response deleteData(String endpoint, String id) throws MalformedURLException {
+    return given()
       .pathParam("id", id)
       .header(TENANT_HEADER)
       .contentType(ContentType.JSON)
-      .delete(storageUrl(endpoint))
-        .then().log().ifValidationFails()
-          .statusCode(204);
+      .delete(storageUrl(endpoint));
   }
+
 
   void testEntityEdit(String endpoint, String entitySample, String id) throws MalformedURLException {
     putData(endpoint, id, entitySample)
@@ -140,11 +145,6 @@ public abstract class TestBase {
             .jsonPath()
               .get(subObject.getUpdatedFieldName()).toString();
     assertEquals(existedValue, subObject.getUpdatedFieldValue());
-  }
-
-  void testFetchEntityWithNonExistedId(String endpoint) throws MalformedURLException {
-    getDataById(endpoint, NON_EXISTED_ID).then().log().ifValidationFails()
-      .statusCode(404);
   }
 
   void testInvalidCQLQuery(String endpoint) throws MalformedURLException {

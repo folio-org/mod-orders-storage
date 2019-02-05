@@ -37,7 +37,7 @@ public class PurchaseOrderNumberUniquenessTest extends TestBase{
       fail(e.getMessage());
     } finally {
       logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", PURCHASE_ORDER.name(), PURCHASE_ORDER.name(), sampleId));
-      deleteData(PURCHASE_ORDER.getEndpointWithId(), sampleId);
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), sampleId);
     }
   }
 
