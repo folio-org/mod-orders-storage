@@ -15,14 +15,15 @@ import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 public class TenantApiTestUtil {
 
   public static final String TENANT_ENDPOINT = "/_/tenant";
+  private static final Header USER_ID_HEADER = new Header("X-Okapi-User-id", "28d0fb04-d137-11e8-a8d5-f2801f1b9fd1");
 
   private TenantApiTestUtil() {
 
   }
 
-  public static JsonObject prepareTenantBody(String moduleId, Boolean isLoadSampleData, boolean isUpgrade) {
+  public static JsonObject prepareTenantBody(String moduleId, String isLoadSampleData, boolean isUpgrade) {
     JsonArray parameterArray = new JsonArray();
-    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", isLoadSampleData.toString()));
+    parameterArray.add(new JsonObject().put("key", "loadSample").put("value", isLoadSampleData));
     JsonObject jsonBody = new JsonObject();
     jsonBody.put("module_to", moduleId);
     jsonBody.put("parameters", parameterArray);
@@ -31,7 +32,7 @@ public class TenantApiTestUtil {
     return jsonBody;
   }
 
-  public static void prepareTenant(String moduleId, Header tenantHeader, boolean isLoadSampleData) throws MalformedURLException {
+  public static void prepareTenant(String moduleId, Header tenantHeader, String isLoadSampleData) throws MalformedURLException {
     JsonObject jsonBody = prepareTenantBody(moduleId, isLoadSampleData, false);
     postToTenant(tenantHeader, jsonBody).statusCode(201);
   }
@@ -40,6 +41,7 @@ public class TenantApiTestUtil {
     return given()
       .header(tenantHeader)
       .header(URL_TO_HEADER)
+      .header(new Header("X-Okapi-User-id", tenantHeader.getValue()))
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
       .post(storageUrl(TENANT_ENDPOINT))

@@ -33,11 +33,12 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 @RunWith(Suite.class)
 
 @Suite.SuiteClasses({
-  PoNumberTest.class,
-  ReceivingHistoryTest.class,
   EntitiesCrudTest.class,
-  TenantSampleDataTest.class,
-  PurchaseOrderNumberUniquenessTest.class
+  OrdersAPITest.class,
+  PoNumberTest.class,
+  PurchaseOrderNumberUniquenessTest.class,
+  ReceivingHistoryTest.class,
+  TenantSampleDataTest.class
 })
 
 public class StorageTestSuite {
@@ -88,7 +89,7 @@ public class StorageTestSuite {
 
     startVerticle(options);
 
-    prepareTenant(moduleId, TENANT_HEADER, false);
+    prepareTenant(moduleId, TENANT_HEADER, "false");
   }
 
   @AfterClass

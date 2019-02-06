@@ -29,11 +29,9 @@ public class ReceivingHistoryTest extends TestBase {
   private String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private String detailSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private String poLineSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private String purchaseOrderSampleId;
   private String piecesSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private String detailSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private String purchaseOrderSampleId2;
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 

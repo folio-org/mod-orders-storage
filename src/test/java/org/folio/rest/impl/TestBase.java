@@ -59,20 +59,29 @@ public abstract class TestBase {
     }
   }
 
-
-  void verifyCollectionQuantity(String endpoint, int quantity) throws MalformedURLException {
-    // Verify that there are no existing  records
-    getData(endpoint).then()
+  void verifyCollectionQuantity(String endpoint, int quantity, Header tenantHeader) throws MalformedURLException {
+    getData(endpoint, tenantHeader)
+      .then()
       .log().all()
       .statusCode(200)
       .body("total_records", equalTo(quantity));
   }
 
-  Response getData(String endpoint) throws MalformedURLException {
+
+  void verifyCollectionQuantity(String endpoint, int quantity) throws MalformedURLException {
+    // Verify that there are no existing  records
+    verifyCollectionQuantity(endpoint, quantity,TENANT_HEADER);
+  }
+
+  Response getData(String endpoint, Header tenantHeader) throws MalformedURLException {
     return given()
-      .header(TENANT_HEADER)
+      .header(tenantHeader)
       .contentType(ContentType.JSON)
       .get(storageUrl(endpoint));
+  }
+
+  Response getData(String endpoint) throws MalformedURLException {
+    return getData(endpoint, TENANT_HEADER);
   }
 
   void testVerifyEntityDeletion(String endpoint, String id) throws MalformedURLException {
