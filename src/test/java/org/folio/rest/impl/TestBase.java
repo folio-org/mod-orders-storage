@@ -13,7 +13,6 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -183,10 +182,6 @@ public abstract class TestBase {
       }
 
     }
-  }
-
-  JsonObject extractJsonObjectResponse(Response response) {
-    return new JsonObject((Map) response.then().log().ifValidationFails().statusCode(201).extract().body().jsonPath().get());
   }
 
   String getFile(String filename) {

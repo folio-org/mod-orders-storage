@@ -39,7 +39,9 @@ public class EntitiesCrudTest extends TestBase {
       sampleId = response.then().extract().path("id");
 
       logger.info(String.format("--- mod-orders-storage %s test: Valid fields exists ... ", testEntity.name()));
-      testAllFieldsExists(extractJsonObjectResponse(response), new JsonObject(sample));
+      JsonObject sampleJson = convertToMatchingModelJson(sample, testEntity);
+      JsonObject responseJson = JsonObject.mapFrom(response.then().extract().response().as(testEntity.getClazz()));
+      testAllFieldsExists(responseJson, sampleJson);
 
       logger.info(String.format("--- mod-orders-storage %s test: Verifying only 1 adjustment was created ... ", testEntity.name()));
       verifyCollectionQuantity(testEntity.getEndpoint(),1);
@@ -67,6 +69,10 @@ public class EntitiesCrudTest extends TestBase {
       testVerifyEntityDeletion(testEntity.getEndpointWithId(), sampleId);
     }
 
+  }
+
+  private JsonObject convertToMatchingModelJson(String sample, TestEntities testEntity) {
+    return JsonObject.mapFrom(new JsonObject(sample).mapTo(testEntity.getClazz()));
   }
 
   @Test

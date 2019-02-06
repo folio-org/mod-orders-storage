@@ -3,7 +3,7 @@
   "activated": false,
   "activation_due": 10,
   "create_inventory": true,
-  "expected_activation": "2018-10-09T00:00:00.000+0000",
+  "expected_activation": "2018-10-09T00:00:00.000Z",
   "license": "7c063655-b384-4a6f-b367-3c2f95f7a49c",
   "trial": false,
   "user_limit": 10,

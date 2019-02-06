@@ -16,7 +16,7 @@
      "cycle": "6 Months",
      "interval": 182,
      "manual_renewal": true,
-     "renewal_date": "2019-04-09T00:00:00.000+0000",
+     "renewal_date": "2019-04-09T00:00:00.000Z",
      "review_period": 30
   },
   "total_estimated_price": 49.98,

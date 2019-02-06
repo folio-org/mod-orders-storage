@@ -9,8 +9,8 @@
   "material_types": [
     "f7e72403-2a13-43a4-a069-aaabe6c9dea8"
   ],
-  "subscription_from": "2018-10-09T00:00:00.000+0000",
+  "subscription_from": "2018-10-09T00:00:00.000Z",
   "subscription_interval": 824,
-  "subscription_to": "2020-10-09T00:00:00.000+0000",
+  "subscription_to": "2020-10-09T00:00:00.000Z",
   "po_line_id": "d471d766-8dbb-4609-999a-02681dea6c22"
 }
