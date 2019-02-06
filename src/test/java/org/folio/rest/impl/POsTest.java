@@ -65,7 +65,7 @@ public class POsTest extends OrdersStorageTest {
       verifyCollection();
 
       logger.info("--- mod-orders-storage PO test: Creating purchase order/POL number sequence ... ");
-      String purchaseOrderSample = getFile("purchase_order.sample");
+      String purchaseOrderSample = getFile("purchase_order_w_status_open.sample");
       Response response = postData(PO_ENDPOINT, purchaseOrderSample);
 
       logger.info("--- mod-orders-storage PO test: Testing POL numbers retrieving for existed PO ... ");
