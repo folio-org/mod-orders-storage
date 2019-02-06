@@ -131,9 +131,13 @@ public abstract class TestBase {
   }
 
   Response deleteData(String endpoint, String id) throws MalformedURLException {
+    return deleteData(endpoint, id, TENANT_HEADER);
+  }
+
+  Response deleteData(String endpoint, String id, Header tenantHeader) throws MalformedURLException {
     return given()
       .pathParam("id", id)
-      .header(TENANT_HEADER)
+      .header(tenantHeader)
       .contentType(ContentType.JSON)
       .delete(storageUrl(endpoint));
   }

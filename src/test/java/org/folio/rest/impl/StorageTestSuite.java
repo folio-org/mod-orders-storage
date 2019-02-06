@@ -8,7 +8,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.junit.AfterClass;
@@ -25,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 
@@ -44,13 +43,8 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 public class StorageTestSuite {
   private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
 
-  private static final String TENANT_ID = "diku";
-  private static final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TENANT_ID);
-
-
   private static Vertx vertx;
   private static int port = NetworkUtils.nextFreePort();
-  static String moduleId;
   public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
 
   private StorageTestSuite() {}
@@ -69,12 +63,6 @@ public class StorageTestSuite {
     // tests expect English error messages only, no Danish/German/...
     Locale.setDefault(Locale.US);
 
-    String moduleName = PomReader.INSTANCE.getModuleName();
-    String moduleVersion = PomReader.INSTANCE.getVersion();
-    moduleId = String.format("%s-%s", moduleName, moduleVersion);
-
-    // RMB returns a 'normalized' name, with underscores
-    moduleId = moduleId.replaceAll("_", "-");
 
     vertx = Vertx.vertx();
 
@@ -89,7 +77,7 @@ public class StorageTestSuite {
 
     startVerticle(options);
 
-    prepareTenant(moduleId, TENANT_HEADER, "false");
+    prepareTenant(TENANT_HEADER, false);
   }
 
   @AfterClass

@@ -20,7 +20,7 @@ public class EntitiesCrudTest extends TestBase {
 
   @Parameterized.Parameter public TestEntities testEntity;
 
-  @Parameterized.Parameters
+  @Parameterized.Parameters(name = "{index}:{0}")
   public static TestEntities[] data() {
     return TestEntities.values();
   }

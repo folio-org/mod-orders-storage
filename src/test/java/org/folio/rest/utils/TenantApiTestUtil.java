@@ -21,19 +21,19 @@ public class TenantApiTestUtil {
 
   }
 
-  public static JsonObject prepareTenantBody(String moduleId, String isLoadSampleData, boolean isUpgrade) {
+  public static JsonObject prepareTenantBody(boolean isLoadSampleData, boolean isUpgrade) {
     JsonArray parameterArray = new JsonArray();
     parameterArray.add(new JsonObject().put("key", "loadSample").put("value", isLoadSampleData));
     JsonObject jsonBody = new JsonObject();
-    jsonBody.put("module_to", moduleId);
+    jsonBody.put("module_to", "mod-orders-storage-1.0.0");
     jsonBody.put("parameters", parameterArray);
     if(isUpgrade)
-      jsonBody.put("module_from", moduleId);
+      jsonBody.put("module_from", "mod-orders-storage-1.0.0");
     return jsonBody;
   }
 
-  public static void prepareTenant(String moduleId, Header tenantHeader, String isLoadSampleData) throws MalformedURLException {
-    JsonObject jsonBody = prepareTenantBody(moduleId, isLoadSampleData, false);
+  public static void prepareTenant(Header tenantHeader, boolean isLoadSampleData) throws MalformedURLException {
+    JsonObject jsonBody = prepareTenantBody(isLoadSampleData, false);
     postToTenant(tenantHeader, jsonBody).statusCode(201);
   }
 
@@ -41,7 +41,7 @@ public class TenantApiTestUtil {
     return given()
       .header(tenantHeader)
       .header(URL_TO_HEADER)
-      .header(new Header("X-Okapi-User-id", tenantHeader.getValue()))
+      .header(USER_ID_HEADER)
       .contentType(ContentType.JSON)
       .body(jsonBody.encodePrettily())
       .post(storageUrl(TENANT_ENDPOINT))

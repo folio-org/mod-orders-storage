@@ -84,7 +84,7 @@ public class TenantReferenceAPI extends TenantAPI {
 
       try {
         // Get all the folders from data/ directory, and load data for those end points
-        List<String> list = getResourceEndPointsfromClassPathDir();
+        List<String> list = getResourceEndPointsFromClassPathDir();
 
         loadSampleData(headers, list.iterator(), res -> {
           if (res.failed()) {
@@ -109,18 +109,18 @@ public class TenantReferenceAPI extends TenantAPI {
    * @throws URISyntaxException
    * @throws IOException
    */
-  private List<String> getResourceEndPointsfromClassPathDir() throws URISyntaxException, IOException {
+  private List<String> getResourceEndPointsFromClassPathDir() throws URISyntaxException, IOException {
     URL url = Thread.currentThread().getContextClassLoader().getResource(RESOURCES_PATH);
     List<String> list = new ArrayList<>();
     if (url != null) {
       if (url.getProtocol().equals(FILE_PROTOCOL)) {
-        for (File filename : getFilesfromPath(url)) {
+        for (File filename : getFilesFromPath(url)) {
           list.add(filename.getName());
         }
       } else if (url.getProtocol().equals(JAR_PROTOCOL)) {
         return getAPINamesFromJar(RESOURCES_PATH,url)
-        .stream().filter(filesList-> !filesList.endsWith(".json"))
-        .map(directory->directory.substring(5, directory.length() - 1)).collect(toList());
+        .stream().filter(filesList -> !filesList.endsWith(".json"))
+        .map(directory -> directory.substring(5, directory.length() - 1)).collect(toList());
       }
     }
     return list;
@@ -161,7 +161,7 @@ public class TenantReferenceAPI extends TenantAPI {
     log.info("load Sample Data....................");
     List<String> jsonList = new LinkedList<>();
     try {
-      List<InputStream> streams = getStreamsfromClassPathDir(RESOURCES_PATH + endPoint);
+      List<InputStream> streams = getStreamsFromClassPathDir(RESOURCES_PATH + endPoint);
       for (InputStream stream : streams) {
         jsonList.add(IOUtils.toString(stream, StandardCharsets.UTF_8.name()));
       }
@@ -178,7 +178,7 @@ public class TenantReferenceAPI extends TenantAPI {
     for (String json : jsonList) {
       Future<Void> future = Future.future();
       futures.add(future);
-      if(isUpdateModule)
+      if (isUpdateModule)
         putData(headers, endPointUrl, json, future);
       else
         postData(headers, endPointUrl, json, future);
@@ -237,13 +237,13 @@ public class TenantReferenceAPI extends TenantAPI {
     writeData(headers, json, req);
   }
 
-  private List<InputStream> getStreamsfromClassPathDir(String directoryName) throws URISyntaxException, IOException {
+  private List<InputStream> getStreamsFromClassPathDir(String directoryName) throws URISyntaxException, IOException {
     List<InputStream> streams = new LinkedList<>();
 
     URL url = Thread.currentThread().getContextClassLoader().getResource(directoryName);
     if (url != null) {
       if (url.getProtocol().equals(FILE_PROTOCOL)) {
-        for(File file: getFilesfromPath(url)) {
+        for(File file: getFilesFromPath(url)) {
           streams.add(new FileInputStream(file));
         }
       } else if (url.getProtocol().equals(JAR_PROTOCOL)) {
@@ -254,7 +254,7 @@ public class TenantReferenceAPI extends TenantAPI {
     return streams;
   }
 
-  private File[] getFilesfromPath(URL url)
+  private File[] getFilesFromPath(URL url)
       throws URISyntaxException {
     File file = Paths.get(url.toURI()).toFile();
     if (file != null) {
