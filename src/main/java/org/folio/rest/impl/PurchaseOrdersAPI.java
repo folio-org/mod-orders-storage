@@ -6,10 +6,8 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import io.vertx.ext.sql.UpdateResult;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.PostgresClient;
@@ -42,6 +40,8 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase_orders/";
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
+  private static final String JSONB_FIELD = "jsonb";
+  private static final String TRANSACTION_ROLL_BACKED_MSG = "Transaction roll-backed: %s";
   private final Messages messages = Messages.getInstance();
   private String idFieldName = "id";
 
@@ -116,46 +116,63 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     vertxContext.runOnContext(v -> {
 
       try {
-        String id = UUID.randomUUID().toString();
-        if (entity.getId() == null) {
-          entity.setId(id);
-        } else {
-          id = entity.getId();
-        }
-
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).save(
-            PURCHASE_ORDER_TABLE, id, entity,
-            reply -> {
-              try {
-                if (reply.succeeded()) {
-                  String persistenceId = reply.result();
-                  entity.setId(persistenceId);
-                  OutStream stream = new OutStream();
-                  stream.setData(entity);
-                  processCreateSequence(entity, asyncResultHandler, vertxContext, tenantId, persistenceId, stream);
-                } else {
-                  log.error(reply.cause().getMessage(), reply.cause());
+        PostgresClient client = PostgresClient.getInstance(vertxContext.owner(), tenantId);
+        client.startTx(transaction -> {
+          String id = UUID.randomUUID().toString();
+          if (entity.getId() == null) {
+            entity.setId(id);
+          } else {
+            id = entity.getId();
+          }
+          client.save(transaction, PURCHASE_ORDER_TABLE, id, entity, savePurchaseOrderReply -> {
+              if (savePurchaseOrderReply.succeeded()) {
+                String persistenceId = savePurchaseOrderReply.result();
+                entity.setId(persistenceId);
+                OutStream stream = new OutStream();
+                stream.setData(entity);
+                client.execute(transaction, CREATE_SEQUENCE.getQuery(entity.getId()), createSequenceReply -> {
+                  try {
+                    if (createSequenceReply.succeeded()) {
+                      client.endTx(transaction, endTransactionReply -> {
+                        Response response = PostOrdersStoragePurchaseOrdersResponse
+                          .respond201WithApplicationJson(stream, PostOrdersStoragePurchaseOrdersResponse.headersFor201()
+                            .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
+                        respond(asyncResultHandler, response);
+                      });
+                    } else {
+                      client.rollbackTx(transaction, rollbackTransactionReply -> {
+                        Throwable cause = createSequenceReply.cause();
+                        log.error(String.format(TRANSACTION_ROLL_BACKED_MSG, cause.getMessage()), cause);
+                        Response response = PostOrdersStoragePurchaseOrdersResponse
+                          .respond500WithTextPlain(createSequenceReply.cause().getMessage());
+                        respond(asyncResultHandler, response);
+                      });
+                    }
+                  } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                    Response response = PostOrdersStoragePurchaseOrdersResponse
+                      .respond500WithTextPlain(e.getMessage());
+                    respond(asyncResultHandler, response);
+                  }
+                });
+              } else {
+                client.rollbackTx(transaction, rollbackTransactionReply -> {
+                  Throwable cause = savePurchaseOrderReply.cause();
+                  log.error(String.format(TRANSACTION_ROLL_BACKED_MSG, cause.getMessage()), cause);
                   Response response = PostOrdersStoragePurchaseOrdersResponse
-                    .respond500WithTextPlain(reply.cause().getMessage());
+                    .respond500WithTextPlain(savePurchaseOrderReply.cause().getMessage());
                   respond(asyncResultHandler, response);
-                }
-              } catch (Exception e) {
-                log.error(e.getMessage(), e);
-
-                Response response = PostOrdersStoragePurchaseOrdersResponse.respond500WithTextPlain(e.getMessage());
-                respond(asyncResultHandler, response);
+                });
               }
-
-            });
+          });
+        });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-
         String errMsg = messages.getMessage(lang, MessageConsts.InternalServerError);
         Response response = PostOrdersStoragePurchaseOrdersResponse.respond500WithTextPlain(errMsg);
         respond(asyncResultHandler, response);
       }
-
     });
   }
 
@@ -249,77 +266,47 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext(v -> {
-      String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+
       try {
-        if (entity.getId() == null) {
-          entity.setId(id);
-        }
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).update(
-            PURCHASE_ORDER_TABLE, entity, id,
-            reply -> {
-              try {
-                if (reply.succeeded()) {
-                  if (reply.result().getUpdated() == 0) {
-                    asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-                      .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
-                  } else {
-                    processDropSequence(lang, entity, asyncResultHandler, vertxContext, tenantId, reply);
-                  }
+        String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+        PostgresClient client = PostgresClient.getInstance(vertxContext.owner(), tenantId);
+        client.startTx(transaction -> {
+          if (entity.getId() == null) {
+            entity.setId(id);
+          }
+          client.update(transaction, PURCHASE_ORDER_TABLE, entity, JSONB_FIELD, "WHERE purchase_order.id='" + id + "'",
+            false, updatePurchaseOrderReply -> {
+              if (updatePurchaseOrderReply.succeeded()) {
+                if (updatePurchaseOrderReply.result().getUpdated() == 0) {
+                  client.endTx(transaction, endTransactionReply -> asyncResultHandler
+                    .handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond204())));
                 } else {
-                  log.error(reply.cause().getMessage());
-                  asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-                    .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                  client.execute(transaction, DROP_SEQUENCE.getQuery(entity.getId()), sequenceDeleteReply -> {
+                      if (sequenceDeleteReply.succeeded()) {
+                        client.endTx(transaction, endTransactionReply -> asyncResultHandler
+                          .handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond204())));
+                      } else {
+                        client.rollbackTx(transaction, rollbackTransactionReply -> {
+                          Throwable cause = sequenceDeleteReply.cause();
+                          log.error(String.format(TRANSACTION_ROLL_BACKED_MSG, cause.getMessage()), cause);
+                          asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+                            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+                        });
+                      }
+                  });
                 }
-              } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+              } else {
+                log.error(updatePurchaseOrderReply.cause().getMessage());
+                asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
                   .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
               }
-            });
+          });
+        });
       } catch (Exception e) {
         log.error(e.getMessage(), e);
-        asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
+        asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
           .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
       }
     });
-  }
-
-  private void processCreateSequence(PurchaseOrder entity, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext,
-                                     String tenantId, String persistenceId, OutStream stream) {
-    PostgresClient.getInstance(vertxContext.owner(), tenantId).execute(CREATE_SEQUENCE.getQuery(entity.getId()),
-      createSequenceReply -> {
-        if(createSequenceReply.succeeded()) {
-          Response response = PostOrdersStoragePurchaseOrdersResponse
-            .respond201WithApplicationJson(stream, PostOrdersStoragePurchaseOrdersResponse.headersFor201()
-              .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + persistenceId));
-          respond(asyncResultHandler, response);
-        } else {
-          // TODO Transactionality (???) --> Roll-back PO creation?
-          log.error(createSequenceReply.cause().getMessage(), createSequenceReply.cause());
-          respond(asyncResultHandler, PostOrdersStoragePurchaseOrdersResponse
-            .respond500WithTextPlain(createSequenceReply.cause().getMessage()));
-        }
-      });
-  }
-
-  private void processDropSequence(String lang, PurchaseOrder entity, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext,
-                                   String tenantId, AsyncResult<UpdateResult> reply) {
-    PurchaseOrder.WorkflowStatus status = entity.getWorkflowStatus();
-    if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
-      PostgresClient.getInstance(vertxContext.owner(), tenantId).select(DROP_SEQUENCE.getQuery(entity.getId()), sequenceDeleteReply -> {
-        if (sequenceDeleteReply.succeeded()) {
-          asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-            .respond204()));
-        } else {
-          // TODO Transactionality (???) --> Roll-back PO update?
-          log.error(reply.cause().getMessage());
-          asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
-        }
-      });
-    } else {
-      asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse
-        .respond204()));
-    }
   }
 }
