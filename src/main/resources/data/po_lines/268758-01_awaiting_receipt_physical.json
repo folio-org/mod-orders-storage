@@ -21,7 +21,9 @@
   "fund_distribution": [
     "2de2c39c-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
-  "location": "27c5d9ea-cabe-11c8-a8d5-f2801f1b9fd1",
+  "locations": [
+    "27c5d9ea-cabe-11c8-a8d5-f2801f1b9fd1"
+  ],
   "order_format": "Physical Resource",
   "owner": "LTS Acquisitions",
   "payment_status": "Awaiting Payment",

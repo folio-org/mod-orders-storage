@@ -21,7 +21,9 @@
   "fund_distribution": [
     "11e2d2c4-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
-  "location": "b7c5d9ea-cabe-11e8-a8d5-f2801f1b9f10",
+  "locations": [
+    "b7c5d9ea-cabe-11e8-a8d5-f2801f1b9f10"
+  ],
   "order_format": "Other",
   "owner": "Monographs",
   "payment_status": "Pending",

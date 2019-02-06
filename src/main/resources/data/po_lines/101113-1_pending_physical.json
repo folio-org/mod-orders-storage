@@ -21,7 +21,9 @@
   "fund_distribution": [
     "7de2cd9c-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
-  "location": "77c5d9ea-cabe-11e8-a8d5-f2801f1b9f06",
+  "locations": [
+    "77c5d9ea-cabe-11e8-a8d5-f2801f1b9f06"
+  ],
   "order_format": "Physical Resource",
   "owner": "Acquisitions - Serials",
   "payment_status": "Pending",

@@ -22,7 +22,9 @@
   "fund_distribution": [
     "12e2d472-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
-  "location": "c7c5d9ea-cabe-11e8-a8d5-f2801f1b9f13",
+  "locations": [
+    "c7c5d9ea-cabe-11e8-a8d5-f2801f1b9f13"
+  ],
   "order_format": "Electronic Resource",
   "owner": "LTS E-Resources & Serials",
   "payment_status": "Awaiting Payment",
