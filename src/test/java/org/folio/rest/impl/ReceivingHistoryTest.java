@@ -1,12 +1,18 @@
 package org.folio.rest.impl;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import io.restassured.RestAssured;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
 import org.junit.Test;
@@ -32,6 +38,8 @@ public class ReceivingHistoryTest extends TestBase {
   private String piecesSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private String detailSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String purchaseOrderSampleId;
+  private String purchaseOrderSampleId2;
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
@@ -41,6 +49,8 @@ public class ReceivingHistoryTest extends TestBase {
   private final String poLineSample2 = getFile("po_line_for_view.sample");
   private final String pieceSample = getFile("pieces.sample");
   private final String pieceSample2 = getFile("piece_for_view.sample");
+  private final String purchaseOrderSample = getFile("purchase_order.sample");
+  private final String purchaseOrderSample2 = getFile("purchase_order_for_view.sample");
   private static final String APPLICATION_JSON = "application/json";
 
   private static final Integer CREATED_ENTITIES_QUANTITY = 2;
@@ -88,6 +98,8 @@ public class ReceivingHistoryTest extends TestBase {
       deleteDataSuccess(DETAIL.getEndpointWithId(), detailSampleId2);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PIECE.getEndpointWithId(), piecesSampleId2);
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
     }
   }
 
@@ -101,6 +113,7 @@ public class ReceivingHistoryTest extends TestBase {
     Piece[] pieces = new Piece[] {new JsonObject(pieceSample).mapTo(Piece.class), new JsonObject(pieceSample2).mapTo(Piece.class)};
     PoLine[] poLines = new PoLine[] {new JsonObject(poLineSample).mapTo(PoLine.class), new JsonObject(poLineSample2).mapTo(PoLine.class)};
     Details[] details = new Details[] {new JsonObject(detailSample).mapTo(Details.class), new JsonObject(detailSample2).mapTo(Details.class)};
+    PurchaseOrder[] purchaseOrders = new PurchaseOrder[] {new JsonObject(purchaseOrderSample).mapTo(PurchaseOrder.class), new JsonObject(purchaseOrderSample2).mapTo(PurchaseOrder.class)};
 
     final ReceivingHistoryCollection receivingHistory = RestAssured
       .with()
@@ -118,14 +131,14 @@ public class ReceivingHistoryTest extends TestBase {
     List<ReceivingHistory> receivingHistories = receivingHistory.getReceivingHistory();
     for (int i = 0; i < receivingHistories.size(); i++) {
       if (receivingHistories.get(i).getId().equals(pieces[i].getId())) {
-        verifyFields(pieces[i], poLines[i], details[i], receivingHistories.get(i));
+        verifyFields(pieces[i], poLines[i], details[i], purchaseOrders[i], receivingHistories.get(i));
       } else {
-        verifyFields(pieces[i], poLines[i], details[i], receivingHistories.get(receivingHistories.size() - i -1));
+        verifyFields(pieces[i], poLines[i], details[i], purchaseOrders[i], receivingHistories.get(receivingHistories.size() - i -1));
       }
     }
   }
 
-  private void verifyFields(Piece pieces, PoLine poLines, Details details, ReceivingHistory receivingHistories) {
+  private void verifyFields(Piece pieces, PoLine poLines, Details details, PurchaseOrder purchaseOrders, ReceivingHistory receivingHistories) {
     assertEquals(receivingHistories.getCaption(), pieces.getCaption());
     assertEquals(receivingHistories.getComment(), pieces.getComment());
     assertEquals(receivingHistories.getItemId(), pieces.getItemId());
@@ -134,9 +147,8 @@ public class ReceivingHistoryTest extends TestBase {
     assertEquals(receivingHistories.getPoLineId(), pieces.getPoLineId());
     assertEquals(receivingHistories.getPoLineNumber(), poLines.getPoLineNumber());
     assertEquals(receivingHistories.getReceivingNote(), details.getReceivingNote());
+    assertEquals(receivingHistories.getPurchaseOrderId(), poLines.getPurchaseOrderId());
+    assertEquals(receivingHistories.getDateOrdered(), purchaseOrders.getDateOrdered());
   }
+
 }
-
-
-
-
