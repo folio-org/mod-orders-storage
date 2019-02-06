@@ -138,9 +138,8 @@ public abstract class OrdersStorageTest {
   }
 
   void verifyCollection(String endpoint) {
-    // Verify that there are no existing  records
+    // Verify the existing  records
     getData(endpoint).then()
-      .log().all()
       .statusCode(200)
       .body("total_records", equalTo(16));
   }

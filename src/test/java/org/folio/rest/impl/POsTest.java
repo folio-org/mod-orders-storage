@@ -4,6 +4,7 @@ import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseExcepti
 import io.vertx.core.Vertx;
 import io.vertx.ext.sql.ResultSet;
 import io.restassured.response.Response;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.persist.PostgresClient;
@@ -75,7 +76,9 @@ public class POsTest extends OrdersStorageTest {
       testGetPoLineNumberForNonExistedPO("non-existed-po-id");
 
       logger.info("--- mod-orders-storage PO test: Creating purchase order with the same po_number ... ");
-      Response samePoNumberErrorResponse = postData(PO_ENDPOINT, purchaseOrderSample);
+      JsonObject jsonSample = new JsonObject(purchaseOrderSample);
+      jsonSample.remove("id");
+      Response samePoNumberErrorResponse = postData(PO_ENDPOINT, jsonSample.toString());
       testPoNumberUniqness(samePoNumberErrorResponse);
 
       logger.info("--- mod-orders-storage PO test: Valid po_number exists ... ");

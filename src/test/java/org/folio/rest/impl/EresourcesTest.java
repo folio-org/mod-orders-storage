@@ -57,6 +57,15 @@ public class EresourcesTest extends OrdersStorageTest {
     }
   }
 
+  @Override
+  void verifyCollection(String endpoint) {
+    // Verify the existing  records
+    getData(endpoint).then()
+      .assertThat()
+      .statusCode(200)
+      .body("total_records", equalTo(6));
+  }
+
   private void testVerifyEresourceDeletion(String eresourceSampleId) {
     getDataById(ERESOURCE_ENDPOINT, eresourceSampleId).then()
       .statusCode(404);
@@ -97,7 +106,7 @@ public class EresourcesTest extends OrdersStorageTest {
   private void testEresourceCreated() {
     getData(ERESOURCE_ENDPOINT).then()
       .statusCode(200)
-      .body("total_records", equalTo(17));
+      .body("total_records", equalTo(7));
   }
 
   private void testValidCreateInventoryExists(Response response) {
