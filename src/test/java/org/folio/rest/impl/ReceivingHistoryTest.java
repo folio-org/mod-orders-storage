@@ -1,11 +1,6 @@
 package org.folio.rest.impl;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import io.restassured.RestAssured;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -25,6 +20,7 @@ import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 import static org.folio.rest.utils.TestEntities.DETAIL;
 import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
+import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -70,19 +66,24 @@ public class ReceivingHistoryTest extends TestBase {
       piecesSampleId2 = createEntity(PIECE.getEndpoint(), pieceSample2);
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, CREATED_ENTITIES_QUANTITY);
 
-
       logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 1...");
       poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 2 ...");
       poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
-
       logger.info("--- mod-orders-storage receiving_history test: Creating Detail 1...");
       detailSampleId = createEntity(DETAIL.getEndpoint(), detailSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Detail 2 ...");
       detailSampleId2 = createEntity(DETAIL.getEndpoint(), detailSample2);
       verifyCollectionQuantity(DETAIL.getEndpoint(), CREATED_ENTITIES_QUANTITY);
+
+      logger.info("--- mod-orders-storage receiving_history test: Creating Purchase order 1...");
+      purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
+      logger.info("--- mod-orders-storage receiving_history test: Creating Detail 2 ...");
+      purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
+      verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
+
 
       logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
       verifyViewCollectionAfter(storageUrl(RECEIVING_HISTORY_ENDPOINT));
