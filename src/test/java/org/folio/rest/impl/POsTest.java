@@ -28,7 +28,7 @@ public class POsTest extends OrdersStorageTest {
   private static final String PO_ENDPOINT = "/orders-storage/purchase_orders";
   private static final String ORDERS_ENDPOINT = "/orders";
   private static final String PO_LINE_NUMBER_ENDPOINT = "/orders-storage/po-line-number";
-  private final static String INVALID_PO_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
+  private static final String INVALID_PO_ID = "5b2b33c6-7e3e-41b7-8c79-e245140d8add";
   private static final String SEQUENCE_ID = "\"polNumber_8ad4b87b-9b47-4199-b0c3-5480745c6b41\"";
 
   private static final String CREATE_SEQUENCE = "CREATE SEQUENCE " + SEQUENCE_ID;
@@ -59,7 +59,6 @@ public class POsTest extends OrdersStorageTest {
     try {
       logger.info("--- mod-orders-storage PO test: Testing of environment on Sequence support");
       testSequenceSupport();
-
 
       logger.info("--- mod-orders-storage PO test: Verifying database's initial state ... ");
       verifyCollection();

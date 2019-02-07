@@ -29,7 +29,7 @@ public class HelperUtils {
     CREATE_SEQUENCE {
       @Override
       public String getQuery(String purchaseOrderId) {
-        return "CREATE SEQUENCE " + constructSequenceName(purchaseOrderId) + " MINVALUE 1 MAXVALUE 999";
+        return "CREATE SEQUENCE IF NOT EXISTS " + constructSequenceName(purchaseOrderId) + " MINVALUE 1 MAXVALUE 999";
       }
     },
     GET_POL_NUMBER_FROM_SEQUENCE {
