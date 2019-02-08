@@ -26,7 +26,7 @@ public enum TestEntities {
   ERESOURCE("/orders-storage/eresources", Eresource.class, "eresource.sample", "user_limit", "10", 6),
   FUND_DISTRIBUTION("/orders-storage/fund_distributions", FundDistribution.class, "fund_distribution.sample", "code", "HIST", 16),
   LICENSE("/orders-storage/licenses", License.class, "license.sample", "code", "Code updated", 0),
-  LOCATION("/orders-storage/locations", Location.class, "location.sample", "quantity_electronic", "10", 16),
+  LOCATION("/orders-storage/locations", Location.class, "location.sample", "quantity_electronic", "10", 18),
   PHYSICAL("/orders-storage/physicals", Physical.class, "physical.sample", "material_supplier", "73d14bc5-d131-48c6-b380-111111111111", 10),
   PIECE("/orders-storage/pieces", Piece.class, "pieces.sample", "comment", "Update Comment", 0),
   PO_LINE("/orders-storage/po_lines", PoLine.class, "po_line.sample", "description", "Gift", 16),
