@@ -48,7 +48,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   @Override
   @Validate
   public void getOrdersStoragePurchaseOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
-                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PurchaseOrder.class, PurchaseOrderCollection.class, GetOrdersStoragePurchaseOrdersResponse.class);
       QueryHolder cql = new QueryHolder(PURCHASE_ORDER_TABLE, query, offset, limit, lang);
@@ -111,7 +111,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   @Override
   @Validate
   public void getOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
-                                                 Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(PURCHASE_ORDER_TABLE, PurchaseOrder.class, id, okapiHeaders,vertxContext, GetOrdersStoragePurchaseOrdersByIdResponse.class, asyncResultHandler);
   }
 
