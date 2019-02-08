@@ -22,7 +22,9 @@
   "fund_distribution": [
     "15e2d864-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
-  "location": "f7c5d9ea-cabe-11e8-a8d5-f2801f1b9f14",
+  "locations": [
+    "f7c5d9ea-cabe-11e8-a8d5-f2801f1b9f14"
+  ],
   "order_format": "Electronic Resource",
   "owner": "Evans",
   "payment_status": "Awaiting Payment",

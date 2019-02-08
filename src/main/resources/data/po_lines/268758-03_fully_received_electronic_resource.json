@@ -22,7 +22,9 @@
   "fund_distribution": [
     "fde2bf64-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
-  "location": "07c5d9ea-cabe-11e8-a8d5-f2801f1b9f01",
+  "locations": [
+    "07c5d9ea-cabe-11e8-a8d5-f2801f1b9f01"
+  ],
   "order_format": "Electronic Resource",
   "owner": "Technical Services Department",
   "payment_status": "Fully Paid",

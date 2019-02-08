@@ -21,7 +21,9 @@
   "fund_distribution": [
     "6de2cc52-cde3-11e8-a8d5-f2801f1b9fd1"
   ],
-  "location": "67c5d9ea-cabe-11e8-a8d5-f2801f1b9f08",
+  "locations": [
+    "67c5d9ea-cabe-11e8-a8d5-f2801f1b9f08"
+  ],
   "order_format": "Physical Resource",
   "owner": "Serials",
   "payment_status": "Payment Not Required",
