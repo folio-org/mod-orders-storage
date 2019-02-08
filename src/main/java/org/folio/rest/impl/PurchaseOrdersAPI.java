@@ -142,17 +142,23 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
                     .handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond404WithTextPlain(entity))));
                 } else {
                   try {
-                    client.execute(transaction, DROP_SEQUENCE.getQuery(entity.getId()), sequenceDeleteReply -> {
-                      if (sequenceDeleteReply.succeeded()) {
-                        client.endTx(transaction, endTransactionReply -> asyncResultHandler
-                          .handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond204())));
-                      } else {
-                        client.rollbackTx(transaction, rollbackTransactionReply -> {
-                          log.error(String.format(TRANSACTION_ROLL_BACKED_MSG, sequenceDeleteReply.cause()));
-                          respondPut500Error(lang, asyncResultHandler, sequenceDeleteReply.cause());
-                        });
-                      }
-                    });
+                    PurchaseOrder.WorkflowStatus status = entity.getWorkflowStatus();
+                    if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
+                      client.execute(transaction, DROP_SEQUENCE.getQuery(entity.getId()), sequenceDeleteReply -> {
+                        if (sequenceDeleteReply.succeeded()) {
+                          client.endTx(transaction, endTransactionReply -> asyncResultHandler
+                            .handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond204())));
+                        } else {
+                          client.rollbackTx(transaction, rollbackTransactionReply -> {
+                            log.error(String.format(TRANSACTION_ROLL_BACKED_MSG, sequenceDeleteReply.cause()));
+                            respondPut500Error(lang, asyncResultHandler, sequenceDeleteReply.cause());
+                          });
+                        }
+                      });
+                    } else {
+                      client.endTx(transaction, endTransactionReply -> asyncResultHandler
+                            .handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond204())));
+                    }
                   } catch (Exception e) {
                     client.rollbackTx(transaction, rollbackTransactionReply -> {
                       log.error(String.format(TRANSACTION_ROLL_BACKED_MSG, e));

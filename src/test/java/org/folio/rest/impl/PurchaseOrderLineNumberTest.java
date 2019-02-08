@@ -6,7 +6,6 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.sql.ResultSet;
 import io.restassured.response.Response;
-import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.persist.PostgresClient;
 import org.json.JSONObject;
@@ -44,7 +43,6 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       testSequenceSupport();
 
       logger.info("--- mod-orders-storage PO test: Creating purchase order/POL number sequence ... ");
-//      String purchaseOrderSample = getFile("purchase_order_w_status_open.sample");
       String purchaseOrderSample = getFile(PURCHASE_ORDER.getSampleFileName());
       Response response = postData(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
 
