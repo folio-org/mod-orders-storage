@@ -17,7 +17,7 @@ import org.folio.rest.tools.utils.TenantTool;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
-import static org.folio.rest.utils.HelperUtils.SequenceQuery.GET_POL_NUMBER_FROM_SEQUENCE;
+import static org.folio.rest.persist.HelperUtils.SequenceQuery.GET_POL_NUMBER_FROM_SEQUENCE;
 
 public class PoLineNumberAPI implements OrdersStoragePoLineNumber {
 
@@ -26,7 +26,7 @@ public class PoLineNumberAPI implements OrdersStoragePoLineNumber {
 
   @Override
   public void getOrdersStoragePoLineNumber(String purchaseOrderId, String lang, Map<String, String> okapiHeaders,
-                                           Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));

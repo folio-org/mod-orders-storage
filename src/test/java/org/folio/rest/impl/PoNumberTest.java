@@ -1,35 +1,41 @@
 package org.folio.rest.impl;
 
-import io.vertx.ext.unit.TestContext;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(VertxUnitRunner.class)
-public class PoNumberTest extends OrdersStorageTest {
+import java.net.MalformedURLException;
 
-  private static final String PO_NUMBER_ENDPOINT = "orders-storage/po_number";
+import static org.junit.Assert.assertEquals;
+
+
+public class PoNumberTest extends TestBase {
+  private final Logger logger = LoggerFactory.getLogger(PoNumberTest.class);
+
+  private static final String PO_NUMBER_ENDPOINT = "/orders-storage/po_number";
+
 
   @Test
-  public void testGetPoNumberOk(TestContext testContext) {
+  public void testGetPoNumberOk() throws MalformedURLException {
 
-    int po_number1 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number1: " + po_number1);
-    int po_number2 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number2: " + po_number2);
-    int po_number3 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number3: " + po_number3);
+    long poNumber1 = getPoNumberAsInt();
+    logger.info("--- mod-orders-storage Generated po_number1: " + poNumber1);
+    long poNumber2 = getPoNumberAsInt();
+    logger.info("--- mod-orders-storage Generated po_number2: " + poNumber2);
+    long poNumber3 = getPoNumberAsInt();
+    logger.info("--- mod-orders-storage Generated po_number3: " + poNumber3);
+
     //ensure that the numbers returned are in fact sequential
-    testContext.assertTrue(po_number3 - po_number2 == 1);
-    testContext.assertTrue(po_number2 - po_number1 == 1);
+    assertEquals(1, poNumber3 - poNumber2);
+    assertEquals(1, poNumber2 - poNumber1);
   }
 
-  private int getPoNumberAsInt() {
+  private int getPoNumberAsInt() throws MalformedURLException {
     return new Integer(getData(PO_NUMBER_ENDPOINT)
       .then()
-      .statusCode(200)
-      .extract()
-      .response()
-      .path("sequenceNumber"));
+        .statusCode(200)
+        .extract()
+          .response()
+            .path("sequenceNumber"));
   }
 }
