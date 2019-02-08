@@ -73,6 +73,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
     JSONObject catJSON = new JSONObject(purchaseOrderSample);
     catJSON.put("id", sampleId);
     catJSON.put("po_number", "666666");
+    catJSON.put("workflow_status", "Open");
     Response response = putData(PO_ENDPOINT, sampleId, catJSON.toString());
     response.then()
       .statusCode(204);

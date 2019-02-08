@@ -100,7 +100,7 @@ public abstract class TestBase {
 
   Response getDataByParam(String endpoint, Map<String, Object> params) throws MalformedURLException {
     return given()
-      .parameters(params)
+      .params(params)
       .header(TENANT_HEADER)
       .contentType(ContentType.JSON)
       .get(storageUrl(endpoint));
