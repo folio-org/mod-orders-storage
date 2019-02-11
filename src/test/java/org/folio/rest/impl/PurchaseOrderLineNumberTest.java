@@ -69,6 +69,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), sampleId);
     }
   }
+
   private void testPOEdit(String purchaseOrderSample, String sampleId) throws MalformedURLException {
     JSONObject catJSON = new JSONObject(purchaseOrderSample);
     catJSON.put("id", sampleId);
