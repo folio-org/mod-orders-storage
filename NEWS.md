@@ -1,6 +1,7 @@
 ## 3.0.0 - Unreleased
 
-* [MODORDSTOR-46](https://issues.folio.org/browse/MODORDSTOR-46) po_number.json schema changed to sequence_number.json. PONumber endpoint interface should be increased to v2.
+* [MODORDSTOR-46](https://issues.folio.org/browse/MODORDSTOR-46) - Schema po_number.json changed to sequence_number.json. PONumber endpoint interface should be increased to v2.
+* [MODORDSTOR-45](https://issues.folio.org/browse/MODORDSTOR-45) - Build API for PO line numbers.
 
 ## 2.0.2 - Released
 

@@ -13,6 +13,7 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -92,6 +93,14 @@ public abstract class TestBase {
   Response getDataById(String endpoint, String id) throws MalformedURLException {
     return given()
       .pathParam("id", id)
+      .header(TENANT_HEADER)
+      .contentType(ContentType.JSON)
+      .get(storageUrl(endpoint));
+  }
+
+  Response getDataByParam(String endpoint, Map<String, Object> params) throws MalformedURLException {
+    return given()
+      .params(params)
       .header(TENANT_HEADER)
       .contentType(ContentType.JSON)
       .get(storageUrl(endpoint));
