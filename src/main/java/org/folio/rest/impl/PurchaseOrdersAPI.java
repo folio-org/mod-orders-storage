@@ -58,7 +58,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
         Future.succeededFuture(tx)
           .compose(this::startTx)
           .compose(this::createSequence)
-          .compose(t -> createPurchaseOrder(tx, entity, okapiHeaders, vertxContext))
+          .compose(t -> createPurchaseOrder(tx, okapiHeaders, vertxContext))
           .compose(this::endTx)
           .setHandler(reply -> {
             if (reply.failed()) {
@@ -177,9 +177,9 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     return future;
   }
 
-  private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx, PurchaseOrder entity, Map<String, String> okapiHeaders, Context vertxContext) {
+  private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx, Map<String, String> okapiHeaders, Context vertxContext) {
     Future<Tx<PurchaseOrder>> future = Future.future();
-    PgUtil.post(PURCHASE_ORDER_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStoragePurchaseOrdersResponse.class, reply -> {
+    PgUtil.post(PURCHASE_ORDER_TABLE, tx.entity, okapiHeaders, vertxContext, PostOrdersStoragePurchaseOrdersResponse.class, reply -> {
       if(reply.result().getStatus() != Response.Status.CREATED.getStatusCode()) {
         pgClient.rollbackTx(tx.getConnection(), rb -> future.fail(new HttpStatusException(reply.result().getStatus(), (String) reply.result().getEntity())));
       } else {
