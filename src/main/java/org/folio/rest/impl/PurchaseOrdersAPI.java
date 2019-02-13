@@ -5,6 +5,8 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 import org.folio.rest.annotations.Validate;
@@ -12,12 +14,14 @@ import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.EntitiesMetadataHolder;
+import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.QueryHolder;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
@@ -25,6 +29,7 @@ import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
+  private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
   static final String PURCHASE_ORDER_TABLE = "purchase_order";
   private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase_orders/";
   private PostgresClient pgClient;
@@ -33,8 +38,9 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
 
   public PurchaseOrdersAPI(Vertx vertx, String tenantId) {
-    PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
+    log.debug("Init PurchaseOrdersAPI creating PostgresClient");
     pgClient = PostgresClient.getInstance(vertx, tenantId);
+    pgClient.setIdField(idFieldName);
   }
 
   @Override
@@ -54,11 +60,12 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       vertxContext.runOnContext(v -> {
-        Tx<PurchaseOrder> tx = new Tx<>(entity);
-        Future.succeededFuture(tx)
+        log.debug("Creating a new purchase order");
+
+        Future.succeededFuture(new Tx<>(entity))
           .compose(this::startTx)
+          .compose(this::createPurchaseOrder)
           .compose(this::createSequence)
-          .compose(t -> createPurchaseOrder(tx, okapiHeaders, vertxContext))
           .compose(this::endTx)
           .setHandler(reply -> {
             if (reply.failed()) {
@@ -71,6 +78,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
                 asyncResultHandler.handle(Future.succeededFuture(PostOrdersStoragePurchaseOrdersResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
               }
             } else {
+              log.debug("Preparing response to client");
               asyncResultHandler.handle(Future.succeededFuture(PostOrdersStoragePurchaseOrdersResponse
                 .respond201WithApplicationJson(reply.result().getEntity(), PostOrdersStoragePurchaseOrdersResponse.headersFor201()
                   .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + reply.result().getEntity().getId()))));
@@ -100,27 +108,9 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   public void putOrdersStoragePurchaseOrdersById(String id, String lang, org.folio.rest.jaxrs.model.PurchaseOrder entity, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
-      vertxContext.runOnContext(v -> {
-        Tx<PurchaseOrder> tx = new Tx<>(entity);
-        Future.succeededFuture(tx)
-          .compose(this::startTx)
-          .compose(this::deleteSequence)
-          .compose(t -> updatePurchaseOrder(tx, id, entity, okapiHeaders, vertxContext))
-          .compose(this::endTx)
-          .setHandler(reply -> {
-            if (reply.failed()) {
-              HttpStatusException cause = (HttpStatusException) reply.cause();
-              if(cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
-                asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond400WithTextPlain(cause.getPayload())));
-              } else if (cause.getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
-                asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond404WithTextPlain(cause.getPayload())));
-              } else {
-                asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
-              }
-            } else {
-              asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond204()));
-            }
-          });
+      PgUtil.put(PURCHASE_ORDER_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStoragePurchaseOrdersByIdResponse.class, reply -> {
+        asyncResultHandler.handle(reply);
+        deleteSequence(entity);
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
@@ -130,11 +120,16 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
   private Future<Tx<PurchaseOrder>> createSequence(Tx<PurchaseOrder> tx) {
     Future<Tx<PurchaseOrder>> future = Future.future();
+
+    String orderId = tx.getEntity().getId();
+    log.debug("Creating POL number sequence for order with id={}", orderId);
     try {
-      pgClient.select(CREATE_SEQUENCE.getQuery(tx.getEntity().getId()), reply -> {
+      pgClient.execute(tx.getConnection(), CREATE_SEQUENCE.getQuery(orderId), reply -> {
         if (reply.failed()) {
-          future.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), reply.cause().getMessage()));
+          log.error("POL number sequence creation for order with id={} failed", reply.cause(), orderId);
+          pgClient.rollbackTx(tx.getConnection(), rb -> future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage())));
         } else {
+          log.debug("POL number sequence for order with id={} successfully created", orderId);
           future.complete(tx);
         }
       });
@@ -144,45 +139,41 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     return future;
   }
 
-  private Future<Tx<PurchaseOrder>> updatePurchaseOrder(Tx<PurchaseOrder> tx, String id, PurchaseOrder entity, Map<String, String> okapiHeaders, Context vertxContext) {
-    Future<Tx<PurchaseOrder>> future = Future.future();
-    PgUtil.put(PURCHASE_ORDER_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStoragePurchaseOrdersByIdResponse.class, reply -> {
-      if (reply.failed() || reply.result().getStatus() != Response.Status.NO_CONTENT.getStatusCode()) {
-        pgClient.rollbackTx(tx.getConnection(), rb -> future.fail(new HttpStatusException(reply.result().getStatus(), (String) reply.result().getEntity())));
-      } else {
-        future.complete(tx);
-      }
-    });
-    return future;
-  }
-
-  private Future<Tx<PurchaseOrder>> deleteSequence(Tx<PurchaseOrder> tx) {
-    Future<Tx<PurchaseOrder>> future = Future.future();
-    try {
-        PurchaseOrder.WorkflowStatus status = tx.getEntity().getWorkflowStatus();
-        if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
-          pgClient.execute(DROP_SEQUENCE.getQuery(tx.getEntity().getId()), reply -> {
-            if (reply.succeeded()) {
-              future.complete(tx);
-            } else {
-              future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
-            }
-          });
-        } else {
-          future.complete(tx);
+  private void deleteSequence(PurchaseOrder order) {
+    PurchaseOrder.WorkflowStatus status = order.getWorkflowStatus();
+    if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
+      // Try to drop sequence for the POL number but ignore failures
+      pgClient.execute(DROP_SEQUENCE.getQuery(order.getId()), reply -> {
+        if (reply.failed()) {
+          log.error("POL number sequence for order with id={} failed to be dropped", reply.cause(), order.getId());
         }
-    } catch (Exception e) {
-      future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()));
+      });
     }
-    return future;
   }
 
-  private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx, Map<String, String> okapiHeaders, Context vertxContext) {
+  private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx) {
     Future<Tx<PurchaseOrder>> future = Future.future();
-    PgUtil.post(PURCHASE_ORDER_TABLE, tx.entity, okapiHeaders, vertxContext, PostOrdersStoragePurchaseOrdersResponse.class, reply -> {
-      if(reply.result().getStatus() != Response.Status.CREATED.getStatusCode()) {
-        pgClient.rollbackTx(tx.getConnection(), rb -> future.fail(new HttpStatusException(reply.result().getStatus(), (String) reply.result().getEntity())));
+
+    PurchaseOrder order = tx.getEntity();
+    if (order.getId() == null) {
+      order.setId(UUID.randomUUID().toString());
+    }
+
+    log.debug("Creating new order with id={}", order.getId());
+
+    pgClient.save(tx.getConnection(), PURCHASE_ORDER_TABLE, order.getId(), order, reply -> {
+      if(reply.failed()) {
+        log.error("Purchase order creation with id={} failed", reply.cause(), order.getId());
+        pgClient.rollbackTx(tx.getConnection(), rb -> {
+          String badRequestMessage = PgExceptionUtil.badRequestMessage(reply.cause());
+          if (badRequestMessage != null) {
+            future.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+          } else {
+            future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
+          }
+        });
       } else {
+        log.debug("New order with id={} successfully created", order.getId());
         future.complete(tx);
       }
     });
@@ -191,6 +182,9 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
   private Future<Tx<PurchaseOrder>> startTx(Tx<PurchaseOrder> tx) {
     Future<Tx<PurchaseOrder>> future = Future.future();
+
+    log.debug("Start transaction");
+
     pgClient.startTx(sqlConnection -> {
       tx.setConnection(sqlConnection);
       future.complete(tx);
@@ -199,6 +193,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   }
 
   private Future<Tx<PurchaseOrder>> endTx(Tx<PurchaseOrder> tx) {
+    log.debug("End transaction");
     Future<Tx<PurchaseOrder>> future = Future.future();
     pgClient.endTx(tx.getConnection(), v -> future.complete(tx));
     return future;
