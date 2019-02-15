@@ -58,12 +58,4 @@ public class EntitiesMetadataHolder<T, E> {
   public Method getSetResultsMethod() throws NoSuchMethodException {
     return collectionClazz.getMethod(setResultMethodName, List.class);
   }
-
-  public Method getSetFirstMethod() throws NoSuchMethodException {
-    return collectionClazz.getMethod(SET_FIRST_METHOD_NAME, Integer.class);
-  }
-
-  public Method getSetLastMethod() throws NoSuchMethodException {
-    return collectionClazz.getMethod(SET_LAST_METHOD_NAME, Integer.class);
-  }
 }
