@@ -51,14 +51,6 @@ public class HelperUtils {
             setResults.invoke(collection, results);
             Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
             setTotalRecordsMethod.invoke(collection, totalRecords);
-            Integer first = 0;
-            Integer last = 0;
-            if (!results.isEmpty()) {
-              first = queryHolder.getOffset() + 1;
-              last = queryHolder.getOffset() + results.size();
-            }
-            entitiesMetadataHolder.getSetFirstMethod().invoke(collection, first);
-            entitiesMetadataHolder.getSetLastMethod().invoke(collection, last);
             asyncResultHandler.handle(response(collection, respond200, respond500));
           } else {
             asyncResultHandler.handle(response(reply.cause().getLocalizedMessage(), respond400, respond500));
