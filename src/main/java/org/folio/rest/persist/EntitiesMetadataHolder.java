@@ -12,8 +12,6 @@ public class EntitiesMetadataHolder<T, E> {
   private static final String RESPOND_500_WITH_TEXT_PLAIN       = "respond500WithTextPlain";
   private static final String SET_TOTAL_RECORDS_METHOD_NAME     = "setTotalRecords";
   private static final String SET_RESULT_METHOD_NAME_TEMPLATE   = "set%ss";
-  private static final String SET_FIRST_METHOD_NAME = "setFirst";
-  private static final String SET_LAST_METHOD_NAME = "setLast";
 
   private Class<T> clazz;
   private Class<E> collectionClazz;
@@ -57,13 +55,5 @@ public class EntitiesMetadataHolder<T, E> {
 
   public Method getSetResultsMethod() throws NoSuchMethodException {
     return collectionClazz.getMethod(setResultMethodName, List.class);
-  }
-
-  public Method getSetFirstMethod() throws NoSuchMethodException {
-    return collectionClazz.getMethod(SET_FIRST_METHOD_NAME, Integer.class);
-  }
-
-  public Method getSetLastMethod() throws NoSuchMethodException {
-    return collectionClazz.getMethod(SET_LAST_METHOD_NAME, Integer.class);
   }
 }
