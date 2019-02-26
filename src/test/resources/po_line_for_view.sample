@@ -28,7 +28,7 @@
   "locations": [
     "28862c99-46fe-4e41-aebc-442e90699441"
   ],
-  "order_format": "Physical Resource",
+  "order_format": "P/E Mix",
   "owner": "ABCDEFGHIJKLMNOPQRSTUVWXYZABC",
   "payment_status": "Awaiting Payment",
   "physical": "3b791acc-5151-4f17-8006-eb6196edf627",
@@ -38,7 +38,7 @@
   "publisher": "Schiffer Publishing",
   "purchase_order_id": "2ba7ef6a-d1d4-4a4f-90a2-882aed18af16",
   "receipt_date": "2018-10-09T00:00:00.000Z",
-  "receipt_status": "Awaiting Receipt",
+  "receipt_status": "Partially Received",
   "reporting_codes": [
     "07c03c98-0feb-4042-8be8-f5b9c18706f4",
     "c2f1695d-ceb4-4205-ae8b-01857a2ce491",
