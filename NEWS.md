@@ -1,7 +1,15 @@
-## 3.0.0 - Unreleased
+## 4.0.0 - Unreleased
 
-* [MODORDSTOR-46](https://issues.folio.org/browse/MODORDSTOR-46) - Schema po_number.json changed to sequence_number.json. PONumber endpoint interface should be increased to v2.
+## 3.0.0 - Released
+
+### Stories
+* [MODORDSTOR-41](https://issues.folio.org/browse/MODORDSTOR-41) - Fix sample data UUID references
+* [MODORDSTOR-42](https://issues.folio.org/browse/MODORDSTOR-42) - Add unique constraint and index for PO number field in DB
 * [MODORDSTOR-45](https://issues.folio.org/browse/MODORDSTOR-45) - Build API for PO line numbers.
+* [MODORDSTOR-46](https://issues.folio.org/browse/MODORDSTOR-46) - PO Number endpoint: schema po_number.json changed to sequence_number.json.
+* [MODORDSTOR-48](https://issues.folio.org/browse/MODORDSTOR-48) - Rework how sample data is loaded
+* [MODORDSTOR-53](https://issues.folio.org/browse/MODORDSTOR-53) - PO Line's `location` property is changed to `locations` i.e. from string to array of strings
+* [MODORDSTOR-55](https://issues.folio.org/browse/MODORDSTOR-55) - Remove `first`/`last` fields in all collection schemas and all APIs
 
 ## 2.0.2 - Released
 

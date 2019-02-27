@@ -1,7 +1,7 @@
 #%RAML 1.0
 title: "mod-orders"
 baseUri: http://github.com/folio-org/mod-orders-storage
-version: v2
+version: v3
 
 documentation:
   - title: PO Line
@@ -44,6 +44,6 @@ resourceTypes:
         type: UUID
     type:
       collection-item:
-        exampleItem: !include acq-models/mod-orders-storage/examples/po_line_post.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/po_line_get.sample
         schema: po_line
 
