@@ -84,7 +84,6 @@ public class ReceivingHistoryTest extends TestBase {
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
       verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
-
       logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
       verifyViewCollectionAfter(storageUrl(RECEIVING_HISTORY_ENDPOINT));
 
@@ -151,8 +150,8 @@ public class ReceivingHistoryTest extends TestBase {
     assertEquals(details.getReceivingNote(), receivingHistory.getReceivingNote());
     assertEquals(poLine.getPurchaseOrderId(), receivingHistory.getPurchaseOrderId());
     assertEquals(purchaseOrder.getDateOrdered(), receivingHistory.getDateOrdered());
-    assertEquals(poLine.getOrderFormat().value(), receivingHistory.getOrderFormat().value());
-    assertEquals(poLine.getReceiptStatus().value(), receivingHistory.getReceiptStatus().value());
+    assertEquals(poLine.getOrderFormat().value(), receivingHistory.getPoLineOrderFormat().value());
+    assertEquals(poLine.getReceiptStatus().value(), receivingHistory.getPoLineReceiptStatus().value());
   }
 
 }
