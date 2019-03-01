@@ -5,21 +5,21 @@
   "notes": [
     "Published twice a year"
   ],
-  "manual_po": true,
-  "po_number": "306857",
-  "order_type": "Ongoing",
-  "re_encumber": false,
+  "manualPo": true,
+  "poNumber": "306857",
+  "orderType": "Ongoing",
+  "reEncumber": false,
   "renewal": {
     "cycle": "6 Months",
     "interval": 182,
-    "manual_renewal": true,
-    "review_period": 30,
-    "renewal_date": "2019-04-09T00:00:00.000Z"
+    "manualRenewal": true,
+    "reviewPeriod": 30,
+    "renewalDate": "2019-04-09T00:00:00.000Z"
   },
-  "total_estimated_price": 800.00,
-  "total_items": 1,
+  "totalEstimatedPrice": 800.00,
+  "totalItems": 1,
   "vendor": "50fb90ec-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflow_status": "Open",
+  "workflowStatus": "Open",
   "metadata": {
     "createdDate": "2018-07-23T00:00:00Z",
     "createdByUserId": "28d11102-d137-11e8-a8d5-f2801f1b9fd1"

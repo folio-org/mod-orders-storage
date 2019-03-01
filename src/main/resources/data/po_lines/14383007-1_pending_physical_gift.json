@@ -1,49 +1,104 @@
 {
   "id": "b0fb580c-cdf1-11e8-a8d5-f2801f1b9fd1",
   "edition": "First edition",
-  "checkin_items": false,
-  "instance_id": "f8f9bd1d-fd9e-4faa-b3f4-63df23d72866",
-  "agreement_id": "e4b9bd57-c5be-4772-ba1c-9e693a81147b",
-  "purchase_order_id": "8c328a18-5761-4329-95f6-599412c32310",
-  "acquisition_method": "Gift",
-  "adjustment": "1a6336cf-eb47-4e09-9e28-e25aa464adb7",
+  "checkinItems": false,
+  "instanceId": "f8f9bd1d-fd9e-4faa-b3f4-63df23d72866",
+  "agreementId": "e4b9bd57-c5be-4772-ba1c-9e693a81147b",
+  "purchaseOrderId": "8c328a18-5761-4329-95f6-599412c32310",
+  "acquisitionMethod": "Gift",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "11619764-ed1d-4cc7-b850-36f770f99e16",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
   "alerts": [],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
   "claims": [
-    "67c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "claimed": true,
+      "grace": 0
+    }
   ],
   "collection": false,
-  "cost": "67c5d792-cabe-11bb-a8d5-f2801f1b9fd1",
+  "cost": {
+    "listPrice": 0.00,
+    "currency": "USD",
+    "quantityPhysical": 1,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 0.00
+  },
   "description": "",
-  "details": "67c5d792-05be-11e9-a8d5-f2801f1b9fd1",
+  "details": {
+    "receivingNote": "",
+    "productIds": [
+      {
+        "productId": "1234-8675",
+        "productIdType": "ISSN"
+      }
+    ],
+    "materialTypes": [
+      "fde2e0de-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
   "donor": "Tsuda College",
-  "fund_distribution": [
-    "6de2cc52-cde3-11e8-a8d5-f2801f1b9fd1"
+  "fundDistribution": [
+    {
+      "code": "GIFT-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08009"
+    }
   ],
   "locations": [
-    "67c5d9ea-cabe-11e8-a8d5-f2801f1b9f08"
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
   ],
-  "order_format": "Physical Resource",
+  "orderFormat": "Physical Resource",
   "owner": "Serials",
-  "payment_status": "Payment Not Required",
-  "physical": "b0fb745e-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "po_line_description": "",
-  "po_line_number": "14383007-1",
-  "publication_date": "1956",
+  "paymentStatus": "Payment Not Required",
+  "physical": {
+    "materialSupplier": "62ce93b0-c675-43d8-9d43-a4ee7177c8de",
+    "receiptDue": null,
+    "volumes": [
+      "vol. 1"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "14383007-1",
+  "publicationDate": "1956",
   "publisher": "Tsuda College",
-  "receipt_date": null,
-  "receipt_status": "Pending",
-  "reporting_codes": [],
+  "receiptDate": null,
+  "receiptStatus": "Pending",
+  "reportingCodes": [],
   "requester": "stp0",
   "rush": false,
   "selector": "ay",
-  "source": "6b4b2f41-c5c6-4280-858e-33fba452a634",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [
     "giftsubscription"
   ],
   "title": "The Tsuda Review",
-  "vendor_detail": "b0fb8c82-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendorDetail": {
+    "instructions": "no. 42 and continuations",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
   "metadata": {
     "createdDate": "2018-07-18T00:00:00Z",
     "createdByUserId": "28d10432-d137-11e8-a8d5-f2801f1b9fd1"

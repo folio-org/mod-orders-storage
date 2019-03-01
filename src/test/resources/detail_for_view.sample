@@ -1,16 +1,15 @@
 {
-  "receiving_note": "details for view",
-  "product_ids": [
+  "receivingNote": "details for view",
+  "productIds": [
     {
-      "product_id": "9780764354113",
-      "product_id_type": "ISBN"
+      "productId": "9780764354113",
+      "productId_type": "ISBN"
     }
   ],
-  "material_types": [
+  "materialTypes": [
     "329f4b3a-831f-4f0e-aea1-0eb487550615"
   ],
-  "subscription_from": "2019-01-09T00:00:00.000Z",
-  "subscription_interval": 600,
-  "subscription_to": "2020-10-09T00:00:00.000Z",
-  "po_line_id": "2fe6c2dd-3700-4a53-a624-1159cfd7f8ce"
+  "subscriptionFrom": "2019-01-09T00:00:00.000Z",
+  "subscriptionInterval": 600,
+  "subscriptionTo": "2020-10-09T00:00:00.000Z"
 }

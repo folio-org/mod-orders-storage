@@ -5,14 +5,14 @@
   "notes": [
     "DVD plus 3 years streaming"
   ],
-  "manual_po": false,
-  "po_number": "313000",
-  "order_type": "One-Time",
-  "re_encumber": false,
-  "total_estimated_price": 500.00,
-  "total_items": 7,
+  "manualPo": false,
+  "poNumber": "313000",
+  "orderType": "One-Time",
+  "reEncumber": false,
+  "totalEstimatedPrice": 500.00,
+  "totalItems": 7,
   "vendor": "50fb8a2a-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflow_status": "Open",
+  "workflowStatus": "Open",
   "metadata": {
     "createdDate": "2018-07-19T00:00:00Z",
     "createdByUserId": "28d100f4-d137-11e8-a8d5-f2801f1b9fd1"

@@ -1,46 +1,103 @@
 {
   "id": "a0fb5514-cdf1-11e8-a8d5-f2801f1b9fd1",
   "edition": "First edition",
-  "checkin_items": false,
-  "instance_id": "3c94fae6-b5e7-4854-bdf2-bc2ab663334c",
-  "agreement_id": "6af52c00-23ee-4460-a80b-027b4d61785d",
-  "purchase_order_id": "07f65192-44a4-483d-97aa-b137bbd96390",
-  "acquisition_method": "Purchase",
-  "adjustment": "596336cf-eb47-4e09-9e28-e20aa464adb7",
+  "checkinItems": false,
+  "instanceId": "3c94fae6-b5e7-4854-bdf2-bc2ab663334c",
+  "agreementId": "6af52c00-23ee-4460-a80b-027b4d61785d",
+  "purchaseOrderId": "07f65192-44a4-483d-97aa-b137bbd96390",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "2d6dc95c-c237-476f-aa48-57f7cbf74ca4",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
   "alerts": [],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
   "claims": [
-    "57c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "claimed": false,
+      "grace": 0
+    }
   ],
   "collection": true,
-  "cost": "57c3d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "cost": {
+    "listPrice": 200000.00,
+    "currency": "USD",
+    "quantityPhysical": 0,
+    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 200000.00
+  },
   "description": "",
-  "details": "57c5d792-cabe-11e9-a8d5-f2801f1b9fd1",
+  "details": {
+    "receivingNote": "Renewal, access continuous",
+    "productIds": [
+      {
+        "productId": "807922",
+        "productIdType": "Vendor Title Number"
+      }
+    ],
+    "materialTypes": [
+      "fde2dfb2-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": "2019-01-01T00:00:00.000Z",
+    "subscriptionInterval": 365,
+    "subscriptionTo": "2019-12-31T00:00:00.000Z"
+  },
   "donor": "",
-  "eresource": "57c5d803-cabe-11e8-a8d5-f2801f1b9fd1",
-  "fund_distribution": [
-    "5de2cad6-cde3-11e8-a8d5-f2801f1b9fd1"
+  "eresource": {
+    "activated": true,
+    "activationDue": 0,
+    "createInventory": false,
+    "trial": false,
+    "expectedActivation": "2019-01-01T00:00:00.000Z",
+    "userLimit": 0,
+    "accessProvider": "62ce93b0-c675-43d8-9d43-a4ee7177c8de"
+  },
+  "fundDistribution": [
+    {
+      "code": "ENDOW-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08008"
+    }
   ],
   "locations": [
-    "57c5d9ea-cabe-11e8-a8d5-f2801f1b9f04"
+    {
+      "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
   ],
-  "order_format": "Electronic Resource",
+  "orderFormat": "Electronic Resource",
   "owner": "Technical Services Department",
-  "payment_status": "Awaiting Payment",
-  "po_line_description": "",
-  "po_line_number": "S60402-80",
-  "publication_date": "2019",
+  "paymentStatus": "Awaiting Payment",
+  "poLineDescription": "",
+  "poLineNumber": "S60402-80",
+  "publicationDate": "2019",
   "publisher": "American Chemical Society",
-  "receipt_date": null,
-  "reporting_codes": [],
+  "receiptDate": null,
+  "reportingCodes": [],
   "requester": "",
   "rush": false,
   "selector": "Buchanan",
-  "source": "5b4b6f41-c5c6-4280-858e-33fba452a334",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [],
   "title": "American Chemical Society Web Editions",
-  "vendor_detail": "a0fb8b56-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
   "metadata": {
     "createdDate": "2018-07-18T00:00:00Z",
     "createdByUserId": "28d102a2-d137-11e8-a8d5-f2801f1b9fd1"

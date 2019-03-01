@@ -1,47 +1,102 @@
 {
   "id": "80fb5168-cdf1-11e8-a8d5-f2801f1b9fd1",
   "edition": "Second edition",
-  "checkin_items": true,
-  "instance_id": "b3b731f8-9e01-4309-96b2-5ce6ca423eb5",
-  "agreement_id": "44683de8-e2cf-42bc-af9e-7eca992934b6",
-  "purchase_order_id": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
-  "acquisition_method": "Purchase",
-  "adjustment": "216336cf-eb47-4e09-9e28-e25aa484abb7",
+  "checkinItems": true,
+  "instanceId": "b3b731f8-9e01-4309-96b2-5ce6ca423eb5",
+  "agreementId": "44683de8-e2cf-42bc-af9e-7eca992934b6",
+  "purchaseOrderId": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "366d495c-c237-476f-aa48-50f7cbf74ca4",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
   "alerts": [],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
   "claims": [
-    "37c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "claimed": false,
+      "grace": 90
+    }
   ],
   "collection": false,
-  "cost": "37c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "cost": {
+    "listPrice": 24.99,
+    "currency": "USD",
+    "quantityPhysical": 1,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 24.99
+  },
   "description": "",
-  "details": "37c5d792-cabe-11e9-a8d5-f2801f1b9fd1",
+  "details": {
+    "receivingNote": "",
+    "productIds": [
+      {
+        "productId": "9780764354113",
+        "productIdType": "ISBN"
+      }
+    ],
+    "materialTypes": [
+      "fde2dc42-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
   "donor": "",
-  "fund_distribution": [
-    "3de2c626-cde3-11e8-a8d5-f2801f1b9fd1"
+  "fundDistribution": [
+    {
+      "code": "USHIST-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08005"
+    }
   ],
   "locations": [
-    "37c5d97a-cabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
   ],
-  "order_format": "Physical Resource",
+  "orderFormat": "Physical Resource",
   "owner": "LTS Acquisitions",
-  "payment_status": "Awaiting Payment",
-  "physical": "e50e9bcd-210e-4f4d-8949-aa9e7205f989",
-  "po_line_description": "",
-  "po_line_number": "36547-1",
-  "publication_date": "2011",
+  "paymentStatus": "Awaiting Payment",
+  "physical": {
+    "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
+    "receiptDue": "2018-09-29T00:00:00.000Z",
+    "volumes": [
+      "vol. 1"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "36547-1",
+  "publicationDate": "2011",
   "publisher": "Tapir Academic Press",
-  "receipt_date": null,
-  "receipt_status": "Awaiting Receipt",
-  "reporting_codes": [],
+  "receiptDate": null,
+  "receiptStatus": "Awaiting Receipt",
+  "reportingCodes": [],
   "requester": "",
   "rush": false,
   "selector": "Brown",
-  "source": "3b4b6f41-c5c6-4280-858e-33fba452a334",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [],
   "title": "Kayak Fishing in the Northern Gulf Coast",
-  "vendor_detail": "80fb88ea-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
   "metadata": {
     "createdDate": "2019-05-15T00:00:00Z",
     "createdByUserId": "28d0fb04-d137-11e8-a8d5-f2801f1b9fd1"

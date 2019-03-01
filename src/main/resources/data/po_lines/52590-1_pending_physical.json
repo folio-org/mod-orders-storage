@@ -1,49 +1,106 @@
 {
   "id": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
   "edition": "First edition",
-  "checkin_items": false,
-  "instance_id": "422eceb4-a685-4e7d-9fd5-dbce563f32b2",
-  "agreement_id": "800b2f19-7134-4408-8145-3b04697b7de7",
-  "purchase_order_id": "0610be6d-0ddd-494b-b867-19f63d8b5d6d",
-  "acquisition_method": "Purchase",
-  "adjustment": "996336cf-eb47-4e09-9e28-e23aa464adb7",
+  "checkinItems": false,
+  "instanceId": "422eceb4-a685-4e7d-9fd5-dbce563f32b2",
+  "agreementId": "800b2f19-7134-4408-8145-3b04697b7de7",
+  "purchaseOrderId": "0610be6d-0ddd-494b-b867-19f63d8b5d6d",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "2bfcc7bc-f64d-441b-ae2d-844eff8d5992",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
   "alerts": [],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
   "claims": [
-    "97c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "claimed": true,
+      "grace": 0
+    }
   ],
   "collection": true,
-  "cost": "97c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "cost": {
+    "listPrice": 0.00,
+    "currency": "USD",
+    "quantityPhysical": 1,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 0.00
+  },
   "description": "",
-  "details": "97c5d792-02be-11e9-a8d5-f2801f1b9fd1",
+  "details": {
+    "receivingNote": "",
+    "productIds": [
+      {
+        "productId": "7659CH",
+        "productIdType": "Vendor Title Number"
+      }
+    ],
+    "materialTypes": [
+      "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
   "donor": "",
-  "fund_distribution": [
-    "fde2d17a-cde3-11e8-a8d5-f2801f1b9fd1"
+  "fundDistribution": [
+    {
+      "code": "STATE-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08012"
+    }
   ],
   "locations": [
-    "97c5d9ea-cabe-11e8-a8d5-f2801f1b9f03"
+    {
+      "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
   ],
-  "order_format": "Physical Resource",
+  "orderFormat": "Physical Resource",
   "owner": "Serials",
-  "payment_status": "Pending",
-  "physical": "e0fb7be8-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "po_line_description": "",
-  "po_line_number": "52590-1",
-  "publication_date": "1901",
+  "paymentStatus": "Pending",
+  "physical": {
+    "materialSupplier": "a1f045a9-22c9-4705-8953-d15438017346",
+    "receiptDue": null,
+    "volumes": [
+      "vol. 1"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "52590-1",
+  "publicationDate": "1901",
   "publisher": "London Topographical Society",
-  "receipt_date": null,
-  "receipt_status": "Pending",
-  "reporting_codes": [],
+  "receiptDate": null,
+  "receiptStatus": "Pending",
+  "reportingCodes": [],
   "requester": "",
   "rush": false,
   "selector": "sgw",
-  "source": "9b4b2f41-c5c6-4280-858e-33fba452a234",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [
     "membership"
   ],
   "title": "Membership",
-  "vendor_detail": "e0fb8c82-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendorDetail": {
+    "instructions": "1901 and continuation",
+    "noteFromVendor": "",
+    "refNumber": "96459125",
+    "refNumberType": "Supplier's unique order line reference number",
+    "vendorAccount": "B-Ser"
+  },
   "metadata": {
     "createdDate": "2015-07-08T00:00:00Z",
     "createdByUserId": "28d10afe-d137-11e8-a8d5-f2801f1b9fd1"

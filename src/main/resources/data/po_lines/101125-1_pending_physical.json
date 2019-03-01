@@ -1,47 +1,102 @@
 {
   "id": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
   "edition": "First edition",
-  "checkin_items": false,
-  "instance_id": "481bf4f1-62d6-4b45-8a30-2ffc7acfcc6b",
-  "agreement_id": "0a79add6-f1a3-44f8-b75d-092c0b729286",
-  "purchase_order_id": "9447d062-89ec-486e-a14b-572f3efb9f8c",
-  "acquisition_method": "Purchase",
-  "adjustment": "a96336cf-eb47-4e09-9e28-e2faa464adb7",
+  "checkinItems": false,
+  "instanceId": "481bf4f1-62d6-4b45-8a30-2ffc7acfcc6b",
+  "agreementId": "0a79add6-f1a3-44f8-b75d-092c0b729286",
+  "purchaseOrderId": "9447d062-89ec-486e-a14b-572f3efb9f8c",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "d30da72a-4969-4cbd-a256-3c65e8bd74c4",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
   "alerts": [],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
   "claims": [
-    "a7c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "claimed": false,
+      "grace": 0
+    }
   ],
   "collection": false,
-  "cost": "a7c5d792-cabe-11e8-a8d5-f2801f1b9fd1",
+  "cost": {
+    "listPrice": 200.00,
+    "currency": "USD",
+    "quantityPhysical": 2,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 200.00
+  },
   "description": "",
-  "details": "a7c5d792-06be-11e9-a8d5-f2801f1b9fd1",
+  "details": {
+    "receivingNote": "2 copies",
+    "productIds": [
+      {
+        "productId": "9780133973488",
+        "productIdType": "ISBN"
+      }
+    ],
+    "materialTypes": [
+      "fde2e700-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
   "donor": "",
-  "fund_distribution": [
-    "fde2d2c4-cde3-11e8-a8d5-f2801f1b9fd1"
+  "fundDistribution": [
+    {
+      "code": "USHIST-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08013"
+    }
   ],
   "locations": [
-    "a7c5d9ea-cabe-11e8-a8d5-f2801f1b9f09"
+    {
+      "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
+      "quantity": 2,
+      "quantityElectronic": 0,
+      "quantityPhysical": 2
+    }
   ],
-  "order_format": "Physical Resource",
+  "orderFormat": "Physical Resource",
   "owner": "Acquisitions - Monos",
-  "payment_status": "Pending",
-  "physical": "f0fb7d28-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "po_line_description": "",
-  "po_line_number": "101125-1",
-  "publication_date": "2015",
+  "paymentStatus": "Pending",
+  "physical": {
+    "materialSupplier": "c6836b28-b2b7-49f5-a9af-05bc88a003f7",
+    "receiptDue": "2018-07-31T00:00:00.000Z",
+    "volumes": [
+      "vol. 0"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "101125-1",
+  "publicationDate": "2015",
   "publisher": "Pearson",
-  "receipt_date": null,
-  "receipt_status": "Pending",
-  "reporting_codes": [],
+  "receiptDate": null,
+  "receiptStatus": "Pending",
+  "reportingCodes": [],
   "requester": "",
   "rush": false,
   "selector": "",
-  "source": "ab4b2f41-c5c6-4280-858e-33fba452a734",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [],
   "title": "Business and professional communication",
-  "vendor_detail": "f0fb88ea-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
   "metadata": {
     "createdDate": "2018-07-19T00:00:00Z",
     "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"

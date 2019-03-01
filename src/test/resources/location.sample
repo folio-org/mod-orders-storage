@@ -1,7 +1,6 @@
 {
-  "location_id": "a7c5d9ea-cabe-11e8-a8d5-f2901f1b9fd1",
-  "po_line_id": "d471d766-8dbb-4609-999a-02681dea6c22",
+  "locationId": "a7c5d9ea-cabe-11e8-a8d5-f2901f1b9fd1",
   "quantity": 1,
-  "quantity_electronic": 1,
-  "quantity_physical": 0
+  "quantityElectronic": 1,
+  "quantityPhysical": 0
 }

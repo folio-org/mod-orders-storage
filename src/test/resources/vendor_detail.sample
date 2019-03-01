@@ -1,8 +1,7 @@
 {
   "instructions": "ABCDEFG",
-  "note_from_vendor": "ABCDEFGHIKJKLMNOP",
-  "ref_number": "123456-78",
-  "ref_number_type": "Supplier's unique order line reference number",
-  "vendor_account": "8910-25",
-  "po_line_id": "e64c2756-6441-4db4-ac30-b45c0d2d2194"
+  "noteFromVendor": "ABCDEFGHIKJKLMNOP",
+  "refNumber": "123456-78",
+  "refNumberType": "Supplier's unique order line reference number",
+  "vendorAccount": "8910-25"
 }

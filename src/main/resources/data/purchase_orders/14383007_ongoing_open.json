@@ -2,21 +2,21 @@
   "id": "8c328a18-5761-4329-95f6-599412c32310",
   "approved": true,
   "dateOrdered": "2018-07-24T00:00:00Z",
-  "manual_po": true,
-  "po_number": "14383007",
-  "order_type": "Ongoing",
-  "re_encumber": false,
+  "manualPo": true,
+  "poNumber": "14383007",
+  "orderType": "Ongoing",
+  "reEncumber": false,
   "renewal": {
     "cycle": "6 Months",
     "interval": 182,
-    "manual_renewal": true,
-    "review_period": 30,
-    "renewal_date": "2019-04-09T00:00:00.000Z"
+    "manualRenewal": true,
+    "reviewPeriod": 30,
+    "renewalDate": "2019-04-09T00:00:00.000Z"
   },
-  "total_estimated_price": 0.00,
-  "total_items": 1,
+  "totalEstimatedPrice": 0.00,
+  "totalItems": 1,
   "vendor": "50fb8c82-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflow_status": "Open",
+  "workflowStatus": "Open",
   "metadata": {
     "createdDate": "2018-07-18T00:00:00Z",
     "createdByUserId": "28d10432-d137-11e8-a8d5-f2801f1b9fd1"

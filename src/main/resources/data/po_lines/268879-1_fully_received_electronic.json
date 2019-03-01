@@ -1,47 +1,106 @@
 {
   "id": "12fb63b0-cdf1-11e8-a8d5-f2801f1b9fd1",
   "edition": "First edition",
-  "checkin_items": false,
-  "instance_id": "507a176a-e139-4745-9d6b-8ef22d92c62f",
-  "agreement_id": "291e4a33-fc84-49c5-beac-661fc8bdd55e",
-  "purchase_order_id": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
-  "acquisition_method": "Purchase",
-  "adjustment": "c96336cf-eb47-4b09-9e28-e25aa464adb7",
+  "checkinItems": false,
+  "instanceId": "507a176a-e139-4745-9d6b-8ef22d92c62f",
+  "agreementId": "291e4a33-fc84-49c5-beac-661fc8bdd55e",
+  "purchaseOrderId": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "91a6af2e-491e-422a-8f52-dd86dc033ab2",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
   "alerts": [],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
   "claims": [
-    "c7c5d666-cabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "claimed": false,
+      "grace": 0
+    }
   ],
   "collection": false,
-  "cost": "c7c5d792-cabe-11dd-a8d5-f2801f1b9fd1",
+  "cost": {
+    "listPrice": 75.22,
+    "currency": "USD",
+    "quantityPhysical": 0,
+    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 75.22
+  },
   "description": "",
-  "details": "c7c5d792-10be-11e9-a8d5-f2801f1b9fd1",
+  "details": {
+    "receivingNote": "",
+    "productIds": [
+      {
+        "productId": "9781118416068",
+        "productIdType": "ISBN"
+      }
+    ],
+    "materialTypes": [
+      "fde2e958-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
   "donor": "",
-  "eresource": "c7c5d812-cabe-11e8-a8d5-f2801f1b9fd1",
-  "fund_distribution": [
-    "12e2d472-cde3-11e8-a8d5-f2801f1b9fd1"
+  "eresource": {
+    "activated": true,
+    "activationDue": 0,
+    "createInventory": false,
+    "trial": false,
+    "expectedActivation": "2014-07-06T00:00:00.000Z",
+    "userLimit": 1,
+    "accessProvider": "1dcd4c64-4df2-4396-9ad5-387302336c93"
+  },
+  "fundDistribution": [
+    {
+      "code": "MISCHIST-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08015"
+    }
   ],
   "locations": [
-    "c7c5d9ea-cabe-11e8-a8d5-f2801f1b9f13"
+    {
+      "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
   ],
-  "order_format": "Electronic Resource",
+  "orderFormat": "Electronic Resource",
   "owner": "LTS E-Resources & Serials",
-  "payment_status": "Awaiting Payment",
-  "po_line_description": "",
-  "po_line_number": "268879-1",
-  "publication_date": "1991",
+  "paymentStatus": "Awaiting Payment",
+  "poLineDescription": "",
+  "poLineNumber": "268879-1",
+  "publicationDate": "1991",
   "publisher": "John Wiley & Sons, Inc.",
-  "receipt_date": null,
-  "receipt_status": "Fully Received",
-  "reporting_codes": [],
+  "receiptDate": null,
+  "receiptStatus": "Fully Received",
+  "reportingCodes": [],
   "requester": "",
   "rush": false,
   "selector": "Woods",
-  "source": "cb4b2f41-c5c6-4280-858e-33fba452a114",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [],
   "title": "Roitt`s essential immunology / Peter J. Delves, Seamus J. Martin, Dennis R. Burton, Ivan M. Roitt.",
-  "vendor_detail": "12fb922c-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "refNumber": "999632785",
+    "refNumberType": "Supplier's unique order line reference number",
+    "vendorAccount": "12345-50"
+  },
   "metadata": {
     "createdDate": "2014-07-06T00:00:00Z",
     "createdByUserId": "28d10cfc-d137-11e8-a8d5-f2801f1b9fd1"

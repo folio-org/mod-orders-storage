@@ -1,47 +1,102 @@
 {
   "id": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
   "edition": "Second edition",
-  "checkin_items": false,
-  "instance_id": "f70b3e2c-299c-4a32-ae37-be7330dc80b1",
-  "agreement_id": "6bbc890c-0fa9-4ab3-802a-471ee18f72d5",
-  "purchase_order_id": "55b97a4a-6601-4488-84e1-8b0d47a3f523",
-  "acquisition_method": "Purchase",
-  "adjustment": "796336cf-eb47-4e09-9e28-e25aa464adb7",
+  "checkinItems": false,
+  "instanceId": "f70b3e2c-299c-4a32-ae37-be7330dc80b1",
+  "agreementId": "6bbc890c-0fa9-4ab3-802a-471ee18f72d5",
+  "purchaseOrderId": "55b97a4a-6601-4488-84e1-8b0d47a3f523",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "86948b53-1e52-4024-b48a-cb70b2b35238",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
   "alerts": [],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
   "claims": [
-    "77c5d666-eabe-11e8-a8d5-f2801f1b9fd1"
+    {
+      "claimed": false,
+      "grace": 0
+    }
   ],
   "collection": false,
-  "cost": "77c5d792-cabe-11cc-a8d5-f2801f1b9fd1",
+  "cost": {
+    "listPrice": 240.00,
+    "currency": "USD",
+    "quantityPhysical": 1,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 240.00
+  },
   "description": "",
-  "details": "77c5d792-03be-11e9-a8d5-f2801f1b9fd1",
+  "details": {
+    "receivingNote": "v. 1-6 in 10 parts",
+    "productIds": [
+      {
+        "productId": "9781868885015",
+        "productIdType": "ISBN"
+      }
+    ],
+    "materialTypes": [
+      "fde2e21e-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
   "donor": "",
-  "fund_distribution": [
-    "7de2cd9c-cde3-11e8-a8d5-f2801f1b9fd1"
+  "fundDistribution": [
+    {
+      "code": "STATE-MONOSER-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08010"
+    }
   ],
   "locations": [
-    "77c5d9ea-cabe-11e8-a8d5-f2801f1b9f06"
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
   ],
-  "order_format": "Physical Resource",
+  "orderFormat": "Physical Resource",
   "owner": "Acquisitions - Serials",
-  "payment_status": "Pending",
-  "physical": "c0fb765c-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "po_line_description": "",
-  "po_line_number": "101113-1",
-  "publication_date": "2010",
+  "paymentStatus": "Pending",
+  "physical": {
+    "materialSupplier": "fb9f16d1-9564-4c0f-abd3-9890e00ba318",
+    "receiptDue": "2018-08-31T00:00:00.000Z",
+    "volumes": [
+      "vol. 6"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "101113-1",
+  "publicationDate": "2010",
   "publisher": "Unisa Press",
-  "receipt_date": null,
-  "receipt_status": "Pending",
-  "reporting_codes": [],
+  "receiptDate": null,
+  "receiptStatus": "Pending",
+  "reportingCodes": [],
   "requester": "",
   "rush": false,
   "selector": "",
-  "source": "7b4b2f41-c5c6-4280-858e-33fba452a434",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [],
   "title": "The road to democracy in South Africa",
-  "vendor_detail": "c0fb8da4-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
   "metadata": {
     "createdDate": "2018-07-19T00:00:00Z",
     "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"

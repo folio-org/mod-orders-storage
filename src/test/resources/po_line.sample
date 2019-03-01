@@ -1,46 +1,105 @@
 {
   "id": "d471d766-8dbb-4609-999a-02681dea6c22",
-  "acquisition_method": "Purchase At Vendor System",
-  "adjustment": "1363467f-eb47-4e09-9e28-e25aa464adb7",
+  "acquisitionMethod": "Purchase At Vendor System",
+  "adjustment": {
+    "credit": 1.0,
+    "discount": 1.0,
+    "insurance": 0.5,
+    "invoiceId": "2d6d495c-c237-476f-aa48-57f7cbf74ca4",
+    "overhead": 1.0,
+    "shipment": 1.0,
+    "tax1": 0.75,
+    "tax2": 0.75,
+    "useProRate": false
+  },
   "alerts": [
     "9a665b22-9fe5-4c95-b4ee-837a5433c95d"
   ],
-  "cancellation_restriction": false,
-  "cancellation_restriction_note": "ABCDEFGHIJKLMNOPQRSTUVW",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "ABCDEFGHIJKLMNOPQRSTUVW",
   "claims": [
-    "f7d7d4e4-255e-46dc-9f08-b953fb1e872d"
+    {
+      "claimed": false,
+      "grace": 0
+    }
   ],
   "collection": false,
   "contributors": [
     {
       "contributor": "Ed Mashburn",
-      "contributor_type": "fbdd42a8-e47d-4694-b448-cc571d1b44c3"
+      "contributorType": "fbdd42a8-e47d-4694-b448-cc571d1b44c3"
     }
   ],
-  "cost": "e047212b-c94f-4cb1-84b0-367848381494",
+  "cost": {
+    "currency": "USD",
+    "listPrice": 24.99,
+    "quantityPhysical": 1,
+    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 49.98
+  },
   "description": "ABCDEFGH",
-  "details": "349d9438-12bd-4e2e-9eb6-dfa830ab99a4",
+  "details": {
+    "receivingNote": "ABCDEFGHIJKL",
+    "productIds": [
+      {
+        "productId": "9780764354113",
+        "productId_type": "ISBN"
+      }
+    ],
+    "materialTypes": [
+      "f7e72403-2a13-43a4-a069-aaabe6c9dea8"
+    ],
+    "subscriptionFrom": "2018-10-09T00:00:00.000Z",
+    "subscriptionInterval": 824,
+    "subscriptionTo": "2020-10-09T00:00:00.000Z"
+  },
   "donor": "ABCDEFGHIJKLM",
-  "eresource": "468b679c-378b-4009-9a17-a6711cefc85f",
-  "fund_distribution": [
-    "d10879e8-8c2d-4850-bcb9-0ec8e2e10021"
+  "eresource": {
+    "accessProvider": "ba3f3d45-247d-41f6-8dc9-6488adcad329",
+    "activated": false,
+    "activationDue": 10,
+    "createInventory": true,
+    "expectedActivation": "2018-10-09T00:00:00.000Z",
+    "license": {
+        "code": "Code 1",
+        "description": "License Agreement 1"
+    },
+    "trial": false,
+    "userLimit": 10
+  },
+  "fundDistribution": [
+    {
+      "code": "HIST",
+      "percentage": 80.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08ac3"
+    }
   ],
   "locations": [
-    "a4e65e03-99a4-4b39-8e6a-ae666ac52bea",
-    "77c5d9ea-cabe-11e8-a8d5-f2801f1b9f52"
+    {
+      "locationId": "a7c5d9ea-cabe-11e8-a8d5-f2901f1b9fd1",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
   ],
-  "order_format": "Physical Resource",
+  "orderFormat": "Physical Resource",
   "owner": "ABCDEFGHIJKLMNOPQRSTUVWXYZABC",
-  "payment_status": "Awaiting Payment",
-  "physical": "5ee243f9-72e5-4464-bdbc-43a21873d648",
-  "po_line_description": "ABCDEFGHIJKLMNOPQRSTUVWXY",
-  "po_line_number": "268758-03",
-  "publication_date": "2017",
+  "paymentStatus": "Awaiting Payment",
+  "physical": {
+    "volumes": [
+      "vol. 1"
+    ],
+    "materialSupplier": "73d14bc5-d131-48c6-b380-f8e62f63c8b6",
+    "receiptDue": "2018-10-10T00:00:00.000Z"
+  },
+  "poLineDescription": "ABCDEFGHIJKLMNOPQRSTUVWXY",
+  "poLineNumber": "268758-03",
+  "publicationDate": "2017",
   "publisher": "Schiffer Publishing",
-  "purchase_order_id": "1ba7ef6a-d1d4-4a4f-90a2-882aed18af16",
-  "receipt_date": "2018-10-09T00:00:00.000Z",
-  "receipt_status": "Awaiting Receipt",
-  "reporting_codes": [
+  "purchaseOrderId": "1ba7ef6a-d1d4-4a4f-90a2-882aed18af16",
+  "receiptDate": "2018-10-09T00:00:00.000Z",
+  "receiptStatus": "Awaiting Receipt",
+  "reportingCodes": [
     "5926dcd7-85f5-4504-8283-712595ebc38b",
     "fa316c04-8101-4e72-8aaf-01281bac718f",
     "ea68b696-3125-4940-bf91-1d128323473e"
@@ -48,7 +107,10 @@
   "requester": "Leo Bulero",
   "rush": true,
   "selector": "ABCD",
-  "source": "024b6f41-c5c6-4280-858e-33fba452a334",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
   "tags": [
     "ABCDEFGHIJKLMNOPQRSTU",
     "ABCDEFG",
@@ -56,5 +118,11 @@
     "ABCDEFGHIJKLMNO"
   ],
   "title": "Kayak Fishing in the Northern Gulf Coast",
-  "vendor_detail": "d5065f0d-fb88-4d23-b0c1-57e754fba40e"
+  "vendorDetail": {
+    "instructions": "ABCDEFG",
+    "noteFromVendor": "ABCDEFGHIKJKLMNOP",
+    "refNumber": "123456-78",
+    "refNumberType": "Supplier's unique order line reference number",
+    "vendorAccount": "8910-25"
+  }
 }
