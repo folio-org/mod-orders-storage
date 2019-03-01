@@ -84,7 +84,6 @@ public class ReceivingHistoryTest extends TestBase {
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
       verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
-
       logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
       verifyViewCollectionAfter(storageUrl(RECEIVING_HISTORY_ENDPOINT));
 
@@ -140,17 +139,19 @@ public class ReceivingHistoryTest extends TestBase {
   }
 
   private void verifyFields(Piece piece, PoLine poLine, Details details, PurchaseOrder purchaseOrder, ReceivingHistory receivingHistory) {
-    assertEquals(receivingHistory.getCaption(), piece.getCaption());
-    assertEquals(receivingHistory.getComment(), piece.getComment());
-    assertEquals(receivingHistory.getItemId(), piece.getItemId());
-    assertEquals(receivingHistory.getLocationId(), piece.getLocationId());
-    assertEquals(receivingHistory.getSupplement(), piece.getSupplement());
-    assertEquals(receivingHistory.getTitle(), poLine.getTitle());
-    assertEquals(receivingHistory.getPoLineId(), piece.getPoLineId());
-    assertEquals(receivingHistory.getPoLineNumber(), poLine.getPoLineNumber());
-    assertEquals(receivingHistory.getReceivingNote(), details.getReceivingNote());
-    assertEquals(receivingHistory.getPurchaseOrderId(), poLine.getPurchaseOrderId());
-    assertEquals(receivingHistory.getDateOrdered(), purchaseOrder.getDateOrdered());
+    assertEquals(piece.getCaption(), receivingHistory.getCaption());
+    assertEquals(piece.getComment(), receivingHistory.getComment());
+    assertEquals(piece.getItemId(), receivingHistory.getItemId());
+    assertEquals(piece.getLocationId(), receivingHistory.getLocationId());
+    assertEquals(piece.getSupplement(), receivingHistory.getSupplement());
+    assertEquals(poLine.getTitle(), receivingHistory.getTitle());
+    assertEquals(piece.getPoLineId(), receivingHistory.getPoLineId());
+    assertEquals(poLine.getPoLineNumber(), receivingHistory.getPoLineNumber());
+    assertEquals(details.getReceivingNote(), receivingHistory.getReceivingNote());
+    assertEquals(poLine.getPurchaseOrderId(), receivingHistory.getPurchaseOrderId());
+    assertEquals(purchaseOrder.getDateOrdered(), receivingHistory.getDateOrdered());
+    assertEquals(poLine.getOrderFormat().value(), receivingHistory.getPoLineOrderFormat().value());
+    assertEquals(poLine.getReceiptStatus().value(), receivingHistory.getPoLineReceiptStatus().value());
   }
 
 }
