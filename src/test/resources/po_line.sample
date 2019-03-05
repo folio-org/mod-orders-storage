@@ -43,7 +43,7 @@
     "productIds": [
       {
         "productId": "9780764354113",
-        "productId_type": "ISBN"
+        "productIdType": "ISBN"
       }
     ],
     "materialTypes": [

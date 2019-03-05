@@ -51,7 +51,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       testGetPoLineNumberForExistedPO(sampleId);
 
       logger.info("--- mod-orders-storage PO test: Testing POL numbers retrieving for non-existed PO ... ");
-      //testGetPoLineNumberForNonExistedPO("non-existed-po-id");
+      testGetPoLineNumberForNonExistedPO("non-existed-po-id");
 
       logger.info("--- mod-orders-storage PO test: Editing purchase order with ID: " + sampleId);
       testPOEdit(purchaseOrderSample, sampleId);
@@ -73,8 +73,8 @@ public class PurchaseOrderLineNumberTest extends TestBase {
   private void testPOEdit(String purchaseOrderSample, String sampleId) throws MalformedURLException {
     JSONObject catJSON = new JSONObject(purchaseOrderSample);
     catJSON.put("id", sampleId);
-    catJSON.put("po_number", "666666");
-    catJSON.put("workflow_status", "Open");
+    catJSON.put("poNumber", "666666");
+    catJSON.put("workflowStatus", "Open");
     Response response = putData(PO_ENDPOINT, sampleId, catJSON.toString());
     response.then()
       .statusCode(204);
