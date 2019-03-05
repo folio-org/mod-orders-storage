@@ -43,7 +43,7 @@ public class ReceivingHistoryTest extends TestBase {
   private final String purchaseOrderSample2 = getFile("purchase_order_for_view.sample");
   private static final String APPLICATION_JSON = "application/json";
 
-  private static final Integer CREATED_ENTITIES_QUANTITY = 3;
+  private static final Integer CREATED_ENTITIES_QUANTITY = 2;
 
 
   @Test
@@ -131,9 +131,7 @@ public class ReceivingHistoryTest extends TestBase {
     assertEquals(receivingHistory.getSupplement(), piece.getSupplement());
     assertEquals(receivingHistory.getTitle(), poLine.getTitle());
     assertEquals(receivingHistory.getPoLineId(), piece.getPoLineId());
-    assertEquals(receivingHistory.getPoLineNumber(), poLine.getPoLineNumber());
-    assertEquals(receivingHistory.getPurchaseOrderId(), poLine.getPurchaseOrderId());
-    assertEquals(receivingHistory.getDateOrdered(), purchaseOrder.getDateOrdered());
+    assertEquals(receivingHistory.getPoLineId(), poLine.getId());
   }
 
 }
