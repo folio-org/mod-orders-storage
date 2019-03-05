@@ -43,7 +43,7 @@ public class ReceivingHistoryTest extends TestBase {
   private final String purchaseOrderSample2 = getFile("purchase_order_for_view.sample");
   private static final String APPLICATION_JSON = "application/json";
 
-  private static final Integer CREATED_ENTITIES_QUANTITY = 2;
+  private static final Integer CREATED_ENTITIES_QUANTITY = 3;
 
 
   @Test
