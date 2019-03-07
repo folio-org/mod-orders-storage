@@ -8,12 +8,12 @@ documentation:
     content: <b>API used to manage PO number.</b>
 
 types:
-  po_number: !include acq-models/mod-orders-storage/schemas/sequence_number.json
+  po-number: !include acq-models/mod-orders-storage/schemas/sequence_number.json
 
 traits:
     language: !include raml-util/traits/language.raml
 
-/orders-storage/po_number:
+/orders-storage/po-number:
   get:
     is: [language]
     description: Get generated purchase order number
@@ -21,7 +21,7 @@ traits:
       200:
         body:
           application/json:
-            type: po_number
+            type: po-number
       400:
         description: "Bad request, e.g. malformed request body or query parameter"
         body:

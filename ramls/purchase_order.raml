@@ -8,8 +8,8 @@ documentation:
     content: <b>This module implements the CRUD interface</b>
 
 types:
-    purchase_order: !include acq-models/mod-orders-storage/schemas/purchase_order.json
-    purchase_order_collection: !include acq-models/mod-orders-storage/schemas/purchase_order_collection.json
+    purchase-order: !include acq-models/mod-orders-storage/schemas/purchase_order.json
+    purchase-order-collection: !include acq-models/mod-orders-storage/schemas/purchase_order_collection.json
     UUID:
      type: string
      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -24,13 +24,13 @@ resourceTypes:
     collection: !include raml-util/rtypes/collection.raml
     collection-item: !include raml-util/rtypes/item-collection.raml
 
-/orders-storage/purchase_orders:
+/orders-storage/purchase-orders:
   type:
     collection:
       exampleCollection: !include acq-models/mod-orders-storage/examples/purchase_order_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/purchase_order_get.sample
-      schemaCollection: purchase_order_collection
-      schemaItem: purchase_order
+      schemaCollection: purchase-order-collection
+      schemaItem: purchase-order
   get:
     description: Get list of purchase orders
     is: [
@@ -45,4 +45,4 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/purchase_order_get.sample
-        schema: purchase_order
+        schema: purchase-order

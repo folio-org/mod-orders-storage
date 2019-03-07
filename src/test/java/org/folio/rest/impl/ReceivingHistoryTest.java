@@ -35,7 +35,7 @@ public class ReceivingHistoryTest extends TestBase {
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
-  private final String poLineSample = getFile("po_line.sample");
+  private final String poLineSample = getFile("po-line.sample");
   private final String poLineSample2 = getFile("po_line_for_view.sample");
   private final String pieceSample = getFile("pieces.sample");
   private final String pieceSample2 = getFile("piece_for_view.sample");

@@ -26,7 +26,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(PurchaseOrderNumberUniquenessTest.class);
 
-  private static final String PO_ENDPOINT = "/orders-storage/purchase_orders";
+  private static final String PO_ENDPOINT = "/orders-storage/purchase-orders";
   private static final String PO_LINE_NUMBER_ENDPOINT = "/orders-storage/po-line-number";
   private static final String SEQUENCE_ID = "\"polNumber_8ad4b87b-9b47-4199-b0c3-5480745c6b41\"";
 

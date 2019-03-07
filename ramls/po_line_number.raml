@@ -8,7 +8,7 @@ documentation:
     content: <b>API used to manage Purchase Order Line number.</b>
 
 types:
-  po_line_number: !include acq-models/mod-orders-storage/schemas/sequence_number.json
+  po-line-number: !include acq-models/mod-orders-storage/schemas/sequence_number.json
 
 traits:
     language: !include raml-util/traits/language.raml
@@ -27,7 +27,7 @@ traits:
       200:
         body:
           application/json:
-            type: po_line_number
+            type: po-line-number
       400:
         description: "Bad request, e.g. malformed request body or query parameter"
         body:

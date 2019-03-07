@@ -8,8 +8,8 @@ documentation:
     content: <b>This module implements the CRUD interface</b>
 
 types:
-    po_line: !include acq-models/mod-orders-storage/schemas/po_line.json
-    po_line_collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
+    po-line: !include acq-models/mod-orders-storage/schemas/po_line.json
+    po-line-collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
     UUID:
      type: string
      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -24,13 +24,13 @@ resourceTypes:
     collection: !include raml-util/rtypes/collection.raml
     collection-item: !include raml-util/rtypes/item-collection.raml
 
-/orders-storage/po_lines:
+/orders-storage/po-lines:
   type:
     collection:
       exampleCollection: !include acq-models/mod-orders-storage/examples/po_line_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/po_line_post.sample
-      schemaCollection: po_line_collection
-      schemaItem: po_line
+      schemaCollection: po-line-collection
+      schemaItem: po-line
   get:
     description: Get list of po lines
     is: [
@@ -45,5 +45,5 @@ resourceTypes:
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/po_line_post.sample
-        schema: po_line
+        schema: po-line
 

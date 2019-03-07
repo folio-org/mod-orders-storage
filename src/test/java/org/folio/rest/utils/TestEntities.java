@@ -9,9 +9,9 @@ import org.folio.rest.jaxrs.model.ReportingCode;
 public enum TestEntities {
   ALERT("/orders-storage/alerts", Alert.class, "alert.sample",  "alert", "Receipt overdue updated", 0),
   PIECE("/orders-storage/pieces", Piece.class, "pieces.sample", "comment", "Update Comment", 0),
-  PO_LINE("/orders-storage/po_lines", PoLine.class, "po_line.sample", "description", "Gift", 16),
-  PURCHASE_ORDER("/orders-storage/purchase_orders", PurchaseOrder.class, "purchase_order.sample", "poNumber", "666666", 14),
-  REPORTING_CODE("/orders-storage/reporting_codes", ReportingCode.class, "reporting_code.sample", "code", "CODE1", 0);
+  PO_LINE("/orders-storage/po-lines", PoLine.class, "po-line.sample", "description", "Gift", 16),
+  PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, "purchase_order.sample", "poNumber", "666666", 14),
+  REPORTING_CODE("/orders-storage/reporting-codes", ReportingCode.class, "reporting-code.sample", "code", "CODE1", 0);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;
