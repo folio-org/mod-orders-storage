@@ -66,7 +66,7 @@
     },
     {
       "id": "orders-storage.po-lines",
-      "version": "2.0",
+      "version": "3.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -97,7 +97,7 @@
     },
     {
       "id": "orders-storage.purchase-orders",
-      "version": "2.0",
+      "version": "3.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -144,7 +144,7 @@
     },
     {
       "id": "orders-storage.reporting-codes",
-      "version": "2.0",
+      "version": "3.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -175,7 +175,7 @@
     },
     {
       "id": "orders-storage.po-number",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -186,7 +186,7 @@
     },
     {
       "id": "orders-storage.po-line-number",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
