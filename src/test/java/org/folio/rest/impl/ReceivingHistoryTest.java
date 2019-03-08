@@ -36,11 +36,11 @@ public class ReceivingHistoryTest extends TestBase {
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
   private final String poLineSample = getFile("po-line.sample");
-  private final String poLineSample2 = getFile("po_line_for_view.sample");
+  private final String poLineSample2 = getFile("po-line-for-view.sample");
   private final String pieceSample = getFile("pieces.sample");
-  private final String pieceSample2 = getFile("piece_for_view.sample");
-  private final String purchaseOrderSample = getFile("purchase_order.sample");
-  private final String purchaseOrderSample2 = getFile("purchase_order_for_view.sample");
+  private final String pieceSample2 = getFile("piece-for-view.sample");
+  private final String purchaseOrderSample = getFile("purchase-order.sample");
+  private final String purchaseOrderSample2 = getFile("purchase-order-for-view.sample");
   private static final String APPLICATION_JSON = "application/json";
 
   private static final Integer CREATED_ENTITIES_QUANTITY = 2;
@@ -125,13 +125,19 @@ public class ReceivingHistoryTest extends TestBase {
   }
 
   private void verifyFields(Piece piece, PoLine poLine, PurchaseOrder purchaseOrder, ReceivingHistory receivingHistory) {
-    assertEquals(receivingHistory.getCaption(), piece.getCaption());
-    assertEquals(receivingHistory.getComment(), piece.getComment());
-    assertEquals(receivingHistory.getItemId(), piece.getItemId());
-    assertEquals(receivingHistory.getSupplement(), piece.getSupplement());
-    assertEquals(receivingHistory.getTitle(), poLine.getTitle());
-    assertEquals(receivingHistory.getPoLineId(), piece.getPoLineId());
-    assertEquals(receivingHistory.getPoLineId(), poLine.getId());
+    assertEquals(piece.getCaption(), receivingHistory.getCaption());
+    assertEquals(piece.getComment(), receivingHistory.getComment());
+    assertEquals(piece.getItemId(), receivingHistory.getItemId());
+    assertEquals(piece.getLocationId(), receivingHistory.getLocationId());
+    assertEquals(piece.getSupplement(), receivingHistory.getSupplement());
+    assertEquals(poLine.getTitle(), receivingHistory.getTitle());
+    assertEquals(piece.getPoLineId(), receivingHistory.getPoLineId());
+    assertEquals(poLine.getPoLineNumber(), receivingHistory.getPoLineNumber());
+    //assertEquals(poLine.getDetails().getReceivingNote(), receivingHistory.getReceivingNote());
+    assertEquals(poLine.getPurchaseOrderId(), receivingHistory.getPurchaseOrderId());
+    assertEquals(purchaseOrder.getDateOrdered(), receivingHistory.getDateOrdered());
+    assertEquals(poLine.getOrderFormat().value(), receivingHistory.getPoLineOrderFormat().value());
+    assertEquals(poLine.getReceiptStatus().value(), receivingHistory.getPoLineReceiptStatus().value());
   }
 
 }
