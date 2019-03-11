@@ -4,7 +4,7 @@
   "provides": [
     {
       "id": "orders-storage.alerts",
-      "version": "2.0",
+      "version": "3.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -35,7 +35,7 @@
     },
     {
       "id": "orders-storage.pieces",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -116,7 +116,7 @@
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/orders-storage/purchase-=orders/{id}",
+          "pathPattern": "/orders-storage/purchase-orders/{id}",
           "permissionsRequired": ["orders-storage.purchase-orders.item.put"]
         },
         {
@@ -133,7 +133,7 @@
     },
     {
       "id": "orders-storage.receiving-history",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -186,7 +186,7 @@
     },
     {
       "id": "orders-storage.po-line-number",
-      "version": "2.0",
+      "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
