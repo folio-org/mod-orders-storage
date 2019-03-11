@@ -10,6 +10,8 @@
   "claims": [
     "e00e0c93-9f96-47af-ad31-36744de00c89"
   ],
+  "checkin_items": true,
+  "instance_id": "8343e5a0-fed8-11e8-8eb2-f2801f1b9fd2",
   "collection": false,
   "contributors": [
     {
