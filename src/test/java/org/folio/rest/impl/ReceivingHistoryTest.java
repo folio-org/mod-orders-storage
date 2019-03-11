@@ -125,7 +125,6 @@ public class ReceivingHistoryTest extends TestBase {
   }
 
   private void verifyFields(Piece piece, PoLine poLine, PurchaseOrder purchaseOrder, ReceivingHistory receivingHistory) {
-    logger.info("poLine.Details: "+poLine.getDetails().getReceivingNote()+" vs "+receivingHistory.getReceivingNote());
     assertEquals(piece.getCaption(), receivingHistory.getCaption());
     assertEquals(piece.getComment(), receivingHistory.getComment());
     assertEquals(piece.getItemId(), receivingHistory.getItemId());
