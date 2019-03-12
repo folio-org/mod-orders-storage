@@ -1,0 +1,107 @@
+{
+  "id": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkinItems": false,
+  "agreementId": "7cd9210e-c871-4421-8d37-b8603be6d037",
+  "purchaseOrderId": "f4dc647c-ec82-442e-b13d-f9505b7ce8e9",
+  "acquisitionMethod": "Purchase At Vendor System",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "86948b53-1e52-4024-b48a-cb70b2b35238",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
+  "alerts": [],
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "claims": [
+    {
+      "claimed": false,
+      "grace": 0
+    }
+  ],
+  "collection": false,
+  "cost": {
+    "listPrice": 150.00,
+    "currency": "USD",
+    "quantityPhysical": 0,
+    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 150.00
+  },
+  "description": "",
+  "details": {
+    "receivingNote": "Access begins 7/16/18",
+    "productIds": [
+      {
+        "productId": "3257204",
+        "productIdType": "Publisher Number"
+      }
+    ],
+    "materialTypes": [
+      "fde2ee44-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
+  "donor": "",
+  "eresource": {
+    "activated": true,
+    "activationDue": 1,
+    "createInventory": false,
+    "trial": false,
+    "expectedActivation": "2018-07-17T00:00:00.000Z",
+    "userLimit": 0,
+    "accessProvider": "b554309d-7684-488d-a583-7e7eb1d77362"
+  },
+  "fundDistribution": [
+    {
+      "code": "UNIV-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08018"
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
+  ],
+  "orderFormat": "Electronic Resource",
+  "owner": "Evans",
+  "paymentStatus": "Awaiting Payment",
+  "poLineDescription": "",
+  "poLineNumber": "312325-1",
+  "publicationDate": "2013",
+  "publisher": "Berkeley Films",
+  "receiptDate": null,
+  "receiptStatus": "Fully Received",
+  "reportingCodes": [],
+  "requester": "msmith",
+  "rush": false,
+  "selector": "dhalling",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
+  "tags": [
+    "streaming_video"
+  ],
+  "title": "At Berkeley",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
+  "metadata": {
+    "createdDate": "2018-07-13T00:00:00Z",
+    "createdByUserId": "28d11576-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

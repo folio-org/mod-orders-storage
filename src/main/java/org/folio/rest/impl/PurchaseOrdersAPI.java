@@ -31,7 +31,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
   static final String PURCHASE_ORDER_TABLE = "purchase_order";
-  private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase_orders/";
+  private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase-orders/";
   private PostgresClient pgClient;
 
   private String idFieldName = "id";

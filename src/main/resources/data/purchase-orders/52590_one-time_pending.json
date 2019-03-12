@@ -1,0 +1,19 @@
+{
+  "id": "0610be6d-0ddd-494b-b867-19f63d8b5d6d",
+  "approved": true,
+  "notes": [
+    "2 titles received: Publication and London topographical record"
+  ],
+  "manualPo": false,
+  "poNumber": "52590",
+  "orderType": "One-Time",
+  "reEncumber": false,
+  "totalEstimatedPrice": 0.00,
+  "totalItems": 1,
+  "vendor": "50fb8c82-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "workflowStatus": "Pending",
+  "metadata": {
+    "createdDate": "2015-07-08T00:00:00Z",
+    "createdByUserId": "28d10afe-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

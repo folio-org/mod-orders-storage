@@ -1,0 +1,104 @@
+{
+  "id": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkinItems": true,
+  "instanceId": "e3872ee8-91b1-4204-bc43-488f6821bc7b",
+  "agreementId": "d4225afd-c449-4034-9847-1a43aa35d78e",
+  "purchaseOrderId": "589a6016-3463-49f6-8aa2-dc315d0665fd",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "aa730047-6dd1-4a59-9396-5e5d69085c23",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
+  "alerts": [],
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "claims": [
+    {
+      "claimed": false,
+      "grace": 0
+    }
+  ],
+  "collection": false,
+  "cost": {
+    "listPrice": 900.00,
+    "currency": "USD",
+    "quantityPhysical": 1,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 900.00
+  },
+  "description": "",
+  "details": {
+    "receivingNote": "start with v. 162",
+    "productIds": [
+      {
+        "productId": "0065-3438",
+        "productIdType": "ISSN"
+      }
+    ],
+    "materialTypes": [
+      "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": "2018-07-01T00:00:00.000Z",
+    "subscriptionInterval": 1095,
+    "subscriptionTo": "2021-06-30T00:00:00.000Z"
+  },
+  "donor": "",
+  "fundDistribution": [
+    {
+      "code": "STATE-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08011"
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "owner": "Acquisitions - Serials",
+  "paymentStatus": "Pending",
+  "physical": {
+    "materialSupplier": "a1f045a9-22c9-4705-8953-d15438017346",
+    "receiptDue": "2018-07-31T00:00:00.000Z",
+    "volumes": [
+      "vol. 0"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "101101-1",
+  "publicationDate": "2018",
+  "publisher": "Plenum Press",
+  "receiptDate": null,
+  "receiptStatus": "Pending",
+  "reportingCodes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
+  "tags": [],
+  "title": "Advances in astronautical science",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
+  "metadata": {
+    "createdDate": "2018-07-19T00:00:00Z",
+    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

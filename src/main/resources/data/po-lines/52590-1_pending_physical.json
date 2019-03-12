@@ -1,0 +1,108 @@
+{
+  "id": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkinItems": false,
+  "instanceId": "422eceb4-a685-4e7d-9fd5-dbce563f32b2",
+  "agreementId": "800b2f19-7134-4408-8145-3b04697b7de7",
+  "purchaseOrderId": "0610be6d-0ddd-494b-b867-19f63d8b5d6d",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "2bfcc7bc-f64d-441b-ae2d-844eff8d5992",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
+  "alerts": [],
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "claims": [
+    {
+      "claimed": true,
+      "grace": 0
+    }
+  ],
+  "collection": true,
+  "cost": {
+    "listPrice": 0.00,
+    "currency": "USD",
+    "quantityPhysical": 1,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 0.00
+  },
+  "description": "",
+  "details": {
+    "receivingNote": "",
+    "productIds": [
+      {
+        "productId": "7659CH",
+        "productIdType": "Vendor Title Number"
+      }
+    ],
+    "materialTypes": [
+      "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
+  "donor": "",
+  "fundDistribution": [
+    {
+      "code": "STATE-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08012"
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "owner": "Serials",
+  "paymentStatus": "Pending",
+  "physical": {
+    "materialSupplier": "a1f045a9-22c9-4705-8953-d15438017346",
+    "receiptDue": null,
+    "volumes": [
+      "vol. 1"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "52590-1",
+  "publicationDate": "1901",
+  "publisher": "London Topographical Society",
+  "receiptDate": null,
+  "receiptStatus": "Pending",
+  "reportingCodes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "sgw",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
+  "tags": [
+    "membership"
+  ],
+  "title": "Membership",
+  "vendorDetail": {
+    "instructions": "1901 and continuation",
+    "noteFromVendor": "",
+    "refNumber": "96459125",
+    "refNumberType": "Supplier's unique order line reference number",
+    "vendorAccount": "B-Ser"
+  },
+  "metadata": {
+    "createdDate": "2015-07-08T00:00:00Z",
+    "createdByUserId": "28d10afe-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

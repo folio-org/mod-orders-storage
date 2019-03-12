@@ -1,9 +1,0 @@
-{
-  "id": "90fb71e8-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "material_supplier": "09c30200-01ab-4ea1-9f7b-c2a767b4c660",
-  "receipt_due": "2018-08-19T00:00:00.000Z",
-  "volumes": [
-    "vol. 1"
-  ],
-  "po_line_id": "90fb53f2-cdf1-11e8-a8d5-f2801f1b9fd1"
-}

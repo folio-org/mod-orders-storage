@@ -1,0 +1,105 @@
+{
+  "id": "50fb6ae0-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkinItems": false,
+  "instanceId": "e4beffe4-e795-460b-ba87-bf1a259a8d84",
+  "agreementId": "4f8f02af-ca34-46aa-b62c-42409a24b6ab",
+  "purchaseOrderId": "1ab7ef6a-d1d4-4a4f-90a2-882aed18af14",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "2d6d495c-c237-476f-aa48-57f7cbf744a4",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
+  "alerts": [],
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "claims": [
+    {
+      "claimed": false,
+      "grace": 0
+    }
+  ],
+  "collection": false,
+  "cost": {
+    "listPrice": 342.00,
+    "currency": "USD",
+    "quantityPhysical": 0,
+    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 342.00
+  },
+  "description": "",
+  "details": {
+    "receivingNote": "Renewal, access continuous",
+    "productIds": [
+      {
+        "productId": "4005000",
+        "productIdType": "Vendor Title Number"
+      }
+    ],
+    "materialTypes": [
+      "fde2db02-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": "2018-08-01T00:00:00.000Z",
+    "subscriptionInterval": 365,
+    "subscriptionTo": "2019-07-31T00:00:00.000Z"
+  },
+  "donor": "",
+  "eresource": {
+    "activated": true,
+    "activationDue": 0,
+    "createInventory": false,
+    "trial": false,
+    "expectedActivation": "2018-08-01T00:00:00.000Z",
+    "userLimit": 0,
+    "accessProvider": "c8fdc4da-cb3e-4294-a90b-372e2495e84a"
+  },
+  "fundDistribution": [
+    {
+      "code": "STATE-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08001"
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
+  ],
+  "orderFormat": "Electronic Resource",
+  "owner": "Technical Services Department",
+  "paymentStatus": "Fully Paid",
+  "poLineDescription": "",
+  "poLineNumber": "268758-03",
+  "publicationDate": "2019",
+  "publisher": "Taylor & Francis",
+  "receiptDate": "2018-01-08T00:00:00.000Z",
+  "receiptStatus": "Fully Received",
+  "reportingCodes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Hartman",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
+  "title": "The American Statistician",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": "EBAUB12345"
+  },
+  "metadata": {
+    "createdDate": "2017-07-22T11:22:07Z",
+    "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b"
+  }
+}

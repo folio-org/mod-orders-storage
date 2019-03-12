@@ -1,0 +1,49 @@
+#%RAML 1.0
+title: "mod-orders"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v3
+
+documentation:
+  - title: PO Line
+    content: <b>This module implements the CRUD interface</b>
+
+types:
+    po-line: !include acq-models/mod-orders-storage/schemas/po_line.json
+    po-line-collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
+    UUID:
+     type: string
+     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+traits:
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
+
+resourceTypes:
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
+
+/orders-storage/po-lines:
+  type:
+    collection:
+      exampleCollection: !include acq-models/mod-orders-storage/examples/po_line_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/po_line_get.sample
+      schemaCollection: po-line-collection
+      schemaItem: po-line
+  get:
+    description: Get list of po lines
+    is: [
+      searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
+      pageable
+    ]
+  /{id}:
+    uriParameters:
+      id:
+        description: The UUID of a PO Line
+        type: UUID
+    type:
+      collection-item:
+        exampleItem: !include acq-models/mod-orders-storage/examples/po_line_get.sample
+        schema: po-line
+
