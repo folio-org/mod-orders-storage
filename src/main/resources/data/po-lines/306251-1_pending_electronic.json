@@ -1,0 +1,104 @@
+{
+  "id": "13fb64dc-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkinItems": false,
+  "agreementId": "38451d3a-9e30-4eb1-be32-3fae8e349580",
+  "purchaseOrderId": "e20af8c8-b07d-47a1-9ebd-f1187e9335bd",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "cc0f371f-3085-4123-96f2-00dc9fc9ea84",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
+  "alerts": [],
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "claims": [
+    {
+      "claimed": false,
+      "grace": 30
+    }
+  ],
+  "collection": true,
+  "cost": {
+    "listPrice": 3000.00,
+    "currency": "USD",
+    "quantityPhysical": 0,
+    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 3000.00
+  },
+  "description": "",
+  "details": {
+    "receivingNote": "two backfiles",
+    "productIds": [
+      {
+        "productId": "5456",
+        "productIdType": "Vendor Item Number"
+      }
+    ],
+    "materialTypes": [
+      "fde2ea7a-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
+  "donor": "",
+  "eresource": {
+    "activated": true,
+    "activationDue": 0,
+    "createInventory": false,
+    "trial": false,
+    "expectedActivation": "2018-06-30T00:00:00.000Z",
+    "userLimit": 0,
+    "accessProvider": "c8fdc4da-cb3e-4294-a90b-372e2495e84a"
+  },
+  "fundDistribution": [
+    {
+      "code": "GIFTS-ONE-TIME-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08016"
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
+  ],
+  "orderFormat": "Electronic Resource",
+  "owner": "Evans",
+  "paymentStatus": "Pending",
+  "poLineDescription": "",
+  "poLineNumber": "306251-1",
+  "publicationDate": "2000",
+  "publisher": "",
+  "receiptDate": null,
+  "receiptStatus": "Pending",
+  "reportingCodes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Lincoln",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
+  "title": "PDCnet Backfiles",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
+  "metadata": {
+    "createdDate": "2018-06-19T00:00:00Z",
+    "createdByUserId": "28d10f5e-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

@@ -64,7 +64,7 @@ public abstract class TestBase {
       .then()
       .log().all()
       .statusCode(200)
-      .body("total_records", equalTo(quantity));
+      .body("totalRecords", equalTo(quantity));
   }
 
 

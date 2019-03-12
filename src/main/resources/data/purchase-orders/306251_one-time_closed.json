@@ -1,0 +1,20 @@
+{
+  "id": "e20af8c8-b07d-47a1-9ebd-f1187e9335bd",
+  "approved": true,
+  "dateOrdered": "2018-06-20T00:00:00Z",
+  "notes": [
+    "CAC one time funding proposal by Bob Barker"
+  ],
+  "manualPo": false,
+  "poNumber": "306251",
+  "orderType": "One-Time",
+  "reEncumber": false,
+  "totalEstimatedPrice": 3000.00,
+  "totalItems": 1,
+  "vendor": "50fb90ec-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "workflowStatus": "Closed",
+  "metadata": {
+    "createdDate": "2018-06-19T00:00:00Z",
+    "createdByUserId": "28d10f5e-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

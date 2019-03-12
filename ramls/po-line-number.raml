@@ -1,0 +1,40 @@
+#%RAML 1.0
+title: "Orders Storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1
+
+documentation:
+  - title: Purchase Order Line Number
+    content: <b>API used to manage Purchase Order Line number.</b>
+
+types:
+  po-line-number: !include acq-models/common/schemas/sequence_number.json
+
+traits:
+    language: !include raml-util/traits/language.raml
+
+/orders-storage/po-line-number:
+  get:
+    is: [language]
+    description: Get purchase order line number
+    queryParameters:
+      purchaseOrderId:
+        description: Purchase Order Id
+        type:        string
+        required:    true
+        example:     "8ad4b87b-9b47-4199-b0c3-5480745c6b41"
+    responses:
+      200:
+        body:
+          application/json:
+            type: po-line-number
+      400:
+        description: "Bad request, e.g. malformed request body or query parameter"
+        body:
+          text/plain:
+            example: "Unable to generate purchase order line number"
+      500:
+        description: "Internal server error, e.g. due to misconfiguration"
+        body:
+          text/plain:
+            example: "Internal server error, contact Administrator"

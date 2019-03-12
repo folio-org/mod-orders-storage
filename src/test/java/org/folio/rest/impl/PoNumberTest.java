@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class PoNumberTest extends TestBase {
   private final Logger logger = LoggerFactory.getLogger(PoNumberTest.class);
 
-  private static final String PO_NUMBER_ENDPOINT = "/orders-storage/po_number";
+  private static final String PO_NUMBER_ENDPOINT = "/orders-storage/po-number";
 
 
   @Test

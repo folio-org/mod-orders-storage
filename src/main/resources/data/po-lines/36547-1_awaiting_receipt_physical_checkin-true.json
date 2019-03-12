@@ -1,0 +1,104 @@
+{
+  "id": "80fb5168-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "Second edition",
+  "checkinItems": true,
+  "instanceId": "b3b731f8-9e01-4309-96b2-5ce6ca423eb5",
+  "agreementId": "44683de8-e2cf-42bc-af9e-7eca992934b6",
+  "purchaseOrderId": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "366d495c-c237-476f-aa48-50f7cbf74ca4",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
+  "alerts": [],
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "claims": [
+    {
+      "claimed": false,
+      "grace": 90
+    }
+  ],
+  "collection": false,
+  "cost": {
+    "listPrice": 24.99,
+    "currency": "USD",
+    "quantityPhysical": 1,
+    "quantityElectronic": 0,
+    "poLineEstimatedPrice": 24.99
+  },
+  "description": "",
+  "details": {
+    "receivingNote": "",
+    "productIds": [
+      {
+        "productId": "9780764354113",
+        "productIdType": "ISBN"
+      }
+    ],
+    "materialTypes": [
+      "fde2dc42-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": null,
+    "subscriptionInterval": 0,
+    "subscriptionTo": null
+  },
+  "donor": "",
+  "fundDistribution": [
+    {
+      "code": "USHIST-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08005"
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "owner": "LTS Acquisitions",
+  "paymentStatus": "Awaiting Payment",
+  "physical": {
+    "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
+    "receiptDue": "2018-09-29T00:00:00.000Z",
+    "volumes": [
+      "vol. 1"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "36547-1",
+  "publicationDate": "2011",
+  "publisher": "Tapir Academic Press",
+  "receiptDate": null,
+  "receiptStatus": "Awaiting Receipt",
+  "reportingCodes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Brown",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
+  "tags": [],
+  "title": "Kayak Fishing in the Northern Gulf Coast",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
+  "metadata": {
+    "createdDate": "2019-05-15T00:00:00Z",
+    "createdByUserId": "28d0fb04-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "id": "a0fb5514-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "edition": "First edition",
+  "checkinItems": false,
+  "agreementId": "6af52c00-23ee-4460-a80b-027b4d61785d",
+  "purchaseOrderId": "07f65192-44a4-483d-97aa-b137bbd96390",
+  "acquisitionMethod": "Purchase",
+  "adjustment": {
+    "credit": 0.0,
+    "discount": 0.0,
+    "insurance": 0.0,
+    "invoiceId": "2d6dc95c-c237-476f-aa48-57f7cbf74ca4",
+    "overhead": 0.0,
+    "shipment": 0.0,
+    "tax1": 0.0,
+    "tax2": 0.0,
+    "useProRate": false
+  },
+  "alerts": [],
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "claims": [
+    {
+      "claimed": false,
+      "grace": 0
+    }
+  ],
+  "collection": true,
+  "cost": {
+    "listPrice": 200000.00,
+    "currency": "USD",
+    "quantityPhysical": 0,
+    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 200000.00
+  },
+  "description": "",
+  "details": {
+    "receivingNote": "Renewal, access continuous",
+    "productIds": [
+      {
+        "productId": "807922",
+        "productIdType": "Vendor Title Number"
+      }
+    ],
+    "materialTypes": [
+      "fde2dfb2-cde3-11e8-a8d5-f2801f1b9fd1"
+    ],
+    "subscriptionFrom": "2019-01-01T00:00:00.000Z",
+    "subscriptionInterval": 365,
+    "subscriptionTo": "2019-12-31T00:00:00.000Z"
+  },
+  "donor": "",
+  "eresource": {
+    "activated": true,
+    "activationDue": 0,
+    "createInventory": false,
+    "trial": false,
+    "expectedActivation": "2019-01-01T00:00:00.000Z",
+    "userLimit": 0,
+    "accessProvider": "62ce93b0-c675-43d8-9d43-a4ee7177c8de"
+  },
+  "fundDistribution": [
+    {
+      "code": "ENDOW-SUBN-FY19",
+      "percentage": 100.0,
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08008"
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
+  ],
+  "orderFormat": "Electronic Resource",
+  "owner": "Technical Services Department",
+  "paymentStatus": "Awaiting Payment",
+  "poLineDescription": "",
+  "poLineNumber": "S60402-80",
+  "publicationDate": "2019",
+  "publisher": "American Chemical Society",
+  "receiptDate": null,
+  "reportingCodes": [],
+  "requester": "",
+  "rush": false,
+  "selector": "Buchanan",
+  "source": {
+    "code": "",
+    "description": "Manually entered"
+  },
+  "tags": [],
+  "title": "American Chemical Society Web Editions",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  },
+  "metadata": {
+    "createdDate": "2018-07-18T00:00:00Z",
+    "createdByUserId": "28d102a2-d137-11e8-a8d5-f2801f1b9fd1"
+  }
+}
