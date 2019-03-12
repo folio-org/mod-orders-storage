@@ -38,6 +38,8 @@
     "quantityElectronic": 1,
     "poLineEstimatedPrice": 49.98
   },
+  "checkinItems": true,
+  "instanceId": "8343e5a0-fed8-11e8-8eb2-f2801f1b9fd2",
   "description": "description for po_line receiving_history view",
   "details": {
     "receivingNote": "ABCDEFGHIJKL",
