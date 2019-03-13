@@ -9,9 +9,11 @@ Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 This is the Orders storage module.
 
-## PREPARATION
+*NOTE*: This module is intended for internal use only.  Please use the APIs provided by mod-orders instead.  There is a lot of business logic in mod-orders that will be bypassed if talking directly to the storage layer. While this is mainly important for create/update/delete operations, it also includes get operations as well. For instance, summary information is calculated in the business logic module (mod-orders).
 
-### SAMPLE DATA LOAD
+## Preparation
+
+### Sample Data Loading
 
 Sample data can be optionally loaded during tenant initialization. By default, if no parameters are passed the sample data will not be loaded. 
 
@@ -50,7 +52,7 @@ DATA SOURCE
 The sample data lives in /resources/data folder. Each folder is named identical to the endpoint the data has to be loaded to. The TenantReferenceAPI will then be able to load data into the corresponding table using a POST to the endpoint
 
 
-### MODIFY DEFAULT SAMPLE DATA LOAD BEHAVIOR
+### Modifying default sample data loading behavior
 Sample data load behavior can be modified by passing a command line argument loadSample
 Unlike the tenant parameters the command Line argument will be applicable for all the tenants.
 
