@@ -54,7 +54,7 @@
   "eresource": {
     "activated": true,
     "activationDue": 1,
-    "createInventory": true,
+    "createInventory": "None",
     "trial": false,
     "expectedActivation": "2019-07-20T00:00:00.000Z",
     "userLimit": 0,
