@@ -1,17 +1,6 @@
 {
   "id": "2fe6c2dd-3700-4a53-a624-1159cfd7f8ce",
   "acquisitionMethod": "Purchase At Vendor System",
-  "adjustment": {
-    "credit": 1.0,
-    "discount": 1.0,
-    "insurance": 0.5,
-    "invoiceId": "2d6d495c-c237-476f-aa48-57f7cbf74ca4",
-    "overhead": 1.0,
-    "shipment": 1.0,
-    "tax1": 0.75,
-    "tax2": 0.75,
-    "useProRate": false
-  },
   "alerts": [
     "6c576118-3da7-4b30-b9b9-3678ac4fe9a4"
   ],
@@ -33,7 +22,10 @@
   "cost":
   {
     "currency": "USD",
-    "listPrice": 24.99,
+    "listUnitPrice": 24.99,
+    "discountType": "amount",
+    "discount": 5.00,
+    "listUnitPriceElectronic": 15,
     "quantityPhysical": 1,
     "quantityElectronic": 1,
     "poLineEstimatedPrice": 49.98
