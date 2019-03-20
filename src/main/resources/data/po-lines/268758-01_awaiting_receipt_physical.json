@@ -70,6 +70,7 @@
   "owner": "LTS Acquisitions",
   "paymentStatus": "Awaiting Payment",
   "physical": {
+    "createInventory": "Instance",
     "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
     "receiptDue": "2018-09-29T00:00:00.000Z",
     "volumes": [
