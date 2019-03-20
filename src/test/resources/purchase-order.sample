@@ -1,6 +1,5 @@
 {
   "id": "1ba7ef6a-d1d4-4a4f-90a2-882aed18af16",
-  "adjustment": "9b3be694-6716-4e14-b81d-8d76f0ae4146",
   "approved": true,
   "assignedTo": "ab18897b-0e40-4f31-896b-9c9adc979a88",
   "dateOrdered": "2018-09-09T00:00:00.000Z",
@@ -20,8 +19,6 @@
      "renewalDate": "2019-04-09T00:00:00.000Z",
      "reviewPeriod": 30
   },
-  "totalEstimatedPrice": 49.98,
-  "totalItems": 2,
   "vendor": "168f8a86-d26c-406e-813f-c7527f241ac3",
   "workflowStatus": "Pending"
 }
