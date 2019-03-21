@@ -24,6 +24,7 @@
     "listUnitPriceElectronic": 0.00,
     "quantityPhysical": 1,
     "quantityElectronic": 0,
+    "additionalCost": 0,
     "poLineEstimatedPrice": 24.49
   },
   "description": "",

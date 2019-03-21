@@ -23,7 +23,8 @@
     "listUnitPriceElectronic": 3000.00,
     "quantityPhysical": 0,
     "quantityElectronic": 2,
-    "poLineEstimatedPrice": 5950.00
+    "additionalCost": 10,
+    "poLineEstimatedPrice": 5960.00
   },
   "description": "",
   "details": {
