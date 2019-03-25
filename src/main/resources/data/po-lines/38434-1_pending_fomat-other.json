@@ -61,14 +61,6 @@
   "paymentStatus": "Pending",
   "poLineDescription": "",
   "poLineNumber": "38434-1",
-  "physical": {
-    "materialSupplier": "62ce93b0-c675-43d8-9d43-a4ee7177c8de",
-    "receiptDue": null,
-    "volumes": [
-      "vol. 1"
-    ],
-    "materialType": "4955149b-96be-4cae-a168-c98d2a73eb9f"
-  },
   "publicationDate": "1989",
   "publisher": "",
   "receiptDate": null,
