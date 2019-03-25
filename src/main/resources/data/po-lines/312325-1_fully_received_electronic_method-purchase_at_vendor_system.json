@@ -35,9 +35,6 @@
         "productIdType": "Publisher Number"
       }
     ],
-    "materialTypes": [
-      "fde2ee44-cde3-11e8-a8d5-f2801f1b9fd1"
-    ],
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
@@ -50,7 +47,8 @@
     "trial": false,
     "expectedActivation": "2018-07-17T00:00:00.000Z",
     "userLimit": 0,
-    "accessProvider": "b554309d-7684-488d-a583-7e7eb1d77362"
+    "accessProvider": "b554309d-7684-488d-a583-7e7eb1d77362",
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
   },
   "fundDistribution": [
     {
