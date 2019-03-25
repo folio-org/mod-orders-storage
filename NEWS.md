@@ -1,4 +1,16 @@
-## 4.0.0 - Unreleased
+## 5.0.0 - Unreleased
+
+## 4.0.0 - Released
+The primary focus of this release was to refactor Purchase Order Line model and related endpoints.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v3.0.0...v4.0.0)
+
+### Stories
+* [MODORDSTOR-67](https://issues.folio.org/browse/MODORDSTOR-67) - Updates to PO: removal of `adjustment`, `totalEstimatedPrice` and `totalItems`
+* [MODORDSTOR-66](https://issues.folio.org/browse/MODORDSTOR-66) - Updates to PO Line: updates to `cost` and removal of `adjustment`
+* [MODORDSTOR-61](https://issues.folio.org/browse/MODORDSTOR-61) - Receiving history: updates to support check-in flow
+* [MODORDSTOR-59](https://issues.folio.org/browse/MODORDSTOR-59) - Receiving history: additional data for receiving flow
+* [MODORDSTOR-58](https://issues.folio.org/browse/MODORDSTOR-58) - Refactor PO Line model and related endpoints
 
 ## 3.0.0 - Released
 
