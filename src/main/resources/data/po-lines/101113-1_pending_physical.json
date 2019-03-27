@@ -6,17 +6,6 @@
   "agreementId": "6bbc890c-0fa9-4ab3-802a-471ee18f72d5",
   "purchaseOrderId": "55b97a4a-6601-4488-84e1-8b0d47a3f523",
   "acquisitionMethod": "Purchase",
-  "adjustment": {
-    "credit": 0.0,
-    "discount": 0.0,
-    "insurance": 0.0,
-    "invoiceId": "86948b53-1e52-4024-b48a-cb70b2b35238",
-    "overhead": 0.0,
-    "shipment": 0.0,
-    "tax1": 0.0,
-    "tax2": 0.0,
-    "useProRate": false
-  },
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
@@ -28,11 +17,15 @@
   ],
   "collection": false,
   "cost": {
-    "listPrice": 240.00,
     "currency": "USD",
-    "quantityPhysical": 1,
+    "discount": 14.1,
+    "discountType": "percentage",
+    "listUnitPrice": 240.00,
+    "listUnitPriceElectronic": 0.00,
+    "quantityPhysical": 2,
     "quantityElectronic": 0,
-    "poLineEstimatedPrice": 240.00
+    "additionalCost": 0,
+    "poLineEstimatedPrice": 412.32
   },
   "description": "",
   "details": {

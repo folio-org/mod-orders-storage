@@ -9,9 +9,7 @@
   "poNumber": "313000",
   "orderType": "One-Time",
   "reEncumber": false,
-  "totalEstimatedPrice": 500.00,
-  "totalItems": 7,
-  "vendor": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "vendor": "50fb8a2a-cdf1-11e8-a8d5-f2801f1b9fd1",
   "workflowStatus": "Open",
   "metadata": {
     "createdDate": "2018-07-19T00:00:00Z",
