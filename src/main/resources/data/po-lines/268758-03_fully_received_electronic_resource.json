@@ -47,11 +47,11 @@
   "eresource": {
     "activated": true,
     "activationDue": 0,
-    "createInventory": false,
+    "createInventory": "None",
     "trial": false,
     "expectedActivation": "2018-08-01T00:00:00.000Z",
     "userLimit": 0,
-    "accessProvider": "c8fdc4da-cb3e-4294-a90b-372e2495e84a"
+    "accessProvider": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1"
   },
   "fundDistribution": [
     {

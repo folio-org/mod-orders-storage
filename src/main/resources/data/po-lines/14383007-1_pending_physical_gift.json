@@ -63,6 +63,7 @@
   "owner": "Serials",
   "paymentStatus": "Payment Not Required",
   "physical": {
+    "createInventory": "Instance, Holding",
     "materialSupplier": "62ce93b0-c675-43d8-9d43-a4ee7177c8de",
     "receiptDue": null,
     "volumes": [
