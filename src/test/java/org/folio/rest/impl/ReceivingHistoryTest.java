@@ -136,7 +136,7 @@ public class ReceivingHistoryTest extends TestBase {
     assertEquals(poLine.getDetails().getReceivingNote(), receivingHistory.getReceivingNote());
     assertEquals(poLine.getPurchaseOrderId(), receivingHistory.getPurchaseOrderId());
     assertEquals(purchaseOrder.getDateOrdered(), receivingHistory.getDateOrdered());
-    assertEquals(poLine.getOrderFormat().value(), receivingHistory.getPoLineOrderFormat().value());
+    assertEquals(piece.getFormat().value(), receivingHistory.getPieceFormat().value());
     assertEquals(poLine.getReceiptStatus().value(), receivingHistory.getPoLineReceiptStatus().value());
     assertEquals(poLine.getCheckinItems(), receivingHistory.getCheckin());
     assertEquals(poLine.getInstanceId(), receivingHistory.getInstanceId());
