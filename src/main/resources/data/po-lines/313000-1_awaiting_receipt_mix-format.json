@@ -47,11 +47,11 @@
   "eresource": {
     "activated": true,
     "activationDue": 1,
-    "createInventory": true,
+    "createInventory": "Instance, Holding, Item",
     "trial": false,
     "expectedActivation": "2019-07-20T00:00:00.000Z",
     "userLimit": 0,
-    "accessProvider": "09c30200-01ab-4ea1-9f7b-c2a767b4c660"
+    "accessProvider": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1"
   },
   "fundDistribution": [
     {
@@ -84,6 +84,7 @@
   "owner": "Cushing",
   "paymentStatus": "Pending",
   "physical": {
+    "createInventory": "Instance, Holding, Item",
     "materialSupplier": "09c30200-01ab-4ea1-9f7b-c2a767b4c660",
     "receiptDue": "2018-08-19T00:00:00.000Z",
     "volumes": [
