@@ -60,6 +60,7 @@
   "owner": "Cushing",
   "paymentStatus": "Pending",
   "physical": {
+    "createInventory": "None",
     "materialSupplier": "fa3cf2bb-5187-444c-b216-d43409874297",
     "receiptDue": null,
     "volumes": [

@@ -46,6 +46,22 @@
     "subscriptionTo": "2020-10-09T00:00:00.000Z"
   },
   "donor": "ABCDEFGHIJKLM",
+<<<<<<< HEAD
+=======
+  "eresource": {
+    "accessProvider": "ba3f3d45-247d-41f6-8dc9-6488adcad329",
+    "activated": false,
+    "activationDue": 10,
+    "createInventory": "Instance, Holding, Item",
+    "expectedActivation": "2018-10-09T00:00:00.000Z",
+    "license": {
+        "code": "Code 1",
+        "description": "License Agreement 1"
+    },
+    "trial": false,
+    "userLimit": 10
+  },
+>>>>>>> branch 'master' of https://github.com/folio-org/mod-orders-storage.git
   "fundDistribution": [
     {
       "code": "HIST",
