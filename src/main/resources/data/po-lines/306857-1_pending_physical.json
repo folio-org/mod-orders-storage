@@ -36,9 +36,6 @@
         "productIdType": "Vendor Item Number"
       }
     ],
-    "materialTypes": [
-      "fde2ea7a-cde3-11e8-a8d5-f2801f1b9fd1"
-    ],
     "subscriptionFrom": "2018-07-23T00:00:00.000Z",
     "subscriptionInterval": 365,
     "subscriptionTo": "2019-07-22T00:00:00.000Z"
@@ -68,7 +65,8 @@
     "receiptDue": null,
     "volumes": [
       "vol. 0"
-    ]
+    ],
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
   },
   "poLineDescription": "",
   "poLineNumber": "306857-1",

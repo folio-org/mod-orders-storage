@@ -35,9 +35,6 @@
         "productIdType": "Vendor Title Number"
       }
     ],
-    "materialTypes": [
-      "fde2dfb2-cde3-11e8-a8d5-f2801f1b9fd1"
-    ],
     "subscriptionFrom": "2019-01-01T00:00:00.000Z",
     "subscriptionInterval": 365,
     "subscriptionTo": "2019-12-31T00:00:00.000Z"
@@ -50,7 +47,8 @@
     "trial": false,
     "expectedActivation": "2019-01-01T00:00:00.000Z",
     "userLimit": 0,
-    "accessProvider": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1"
+    "accessProvider": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
   },
   "fundDistribution": [
     {

@@ -36,9 +36,6 @@
         "productIdType": "Other Standard Identifier"
       }
     ],
-    "materialTypes": [
-      "fde2e82c-cde3-11e8-a8d5-f2801f1b9fd1"
-    ],
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
@@ -62,6 +59,14 @@
   "orderFormat": "Other",
   "owner": "Monographs",
   "paymentStatus": "Pending",
+  "physical": {
+    "materialSupplier": "62ce93b0-c675-43d8-9d43-a4ee7177c8de",
+    "receiptDue": null,
+    "volumes": [
+      "vol. 1"
+    ],
+    "materialType": "4955149b-96be-4cae-a168-c98d2a73eb9f"
+  },
   "poLineDescription": "",
   "poLineNumber": "38434-1",
   "publicationDate": "1989",

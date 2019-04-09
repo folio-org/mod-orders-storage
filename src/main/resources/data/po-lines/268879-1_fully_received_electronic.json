@@ -36,9 +36,6 @@
         "productIdType": "ISBN"
       }
     ],
-    "materialTypes": [
-      "fde2e958-cde3-11e8-a8d5-f2801f1b9fd1"
-    ],
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
@@ -51,7 +48,8 @@
     "trial": false,
     "expectedActivation": "2014-07-06T00:00:00.000Z",
     "userLimit": 1,
-    "accessProvider": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1"
+    "accessProvider": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
   },
   "fundDistribution": [
     {

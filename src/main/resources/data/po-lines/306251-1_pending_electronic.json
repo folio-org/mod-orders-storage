@@ -35,9 +35,6 @@
         "productIdType": "Vendor Item Number"
       }
     ],
-    "materialTypes": [
-      "fde2ea7a-cde3-11e8-a8d5-f2801f1b9fd1"
-    ],
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
@@ -50,7 +47,8 @@
     "trial": false,
     "expectedActivation": "2018-06-30T00:00:00.000Z",
     "userLimit": 0,
-    "accessProvider": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1"
+    "accessProvider": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
   },
   "fundDistribution": [
     {

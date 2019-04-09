@@ -36,9 +36,6 @@
         "productIdType": "ISSN"
       }
     ],
-    "materialTypes": [
-      "fde2e0de-cde3-11e8-a8d5-f2801f1b9fd1"
-    ],
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
@@ -68,7 +65,8 @@
     "receiptDue": null,
     "volumes": [
       "vol. 1"
-    ]
+    ],
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
   },
   "poLineDescription": "",
   "poLineNumber": "14383007-1",
