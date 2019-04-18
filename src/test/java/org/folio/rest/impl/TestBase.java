@@ -112,12 +112,14 @@ public abstract class TestBase {
       .accept(ContentType.JSON)
       .contentType(ContentType.JSON)
       .body(input)
+      .log()
+      .all()
       .post(storageUrl(endpoint));
   }
 
   String createEntity(String endpoint, String entity) throws MalformedURLException {
     return postData(endpoint, entity)
-      .then().log().ifValidationFails()
+      .then().log().all()
         .statusCode(201)
         .extract()
           .path("id");

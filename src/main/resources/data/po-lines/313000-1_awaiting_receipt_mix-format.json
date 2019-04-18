@@ -48,7 +48,7 @@
     "trial": false,
     "expectedActivation": "2019-07-20T00:00:00.000Z",
     "userLimit": 0,
-    "accessProvider":  "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "accessProvider": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
     "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
   },
   "fundDistribution": [
@@ -112,9 +112,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00Z",
-    "createdByUserId": "28d100f4-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

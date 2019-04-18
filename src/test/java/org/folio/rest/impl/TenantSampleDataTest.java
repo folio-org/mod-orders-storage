@@ -89,8 +89,7 @@ public class TenantSampleDataTest extends TestBase{
 
   @Test
   public void testPartialSampleDataLoading() throws MalformedURLException {
-    logger.info("load sample date");
-
+    logger.info("load sample data");
     try{
       JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(true, false);
       postToTenant(PARTIAL_TENANT_HEADER, jsonBody)

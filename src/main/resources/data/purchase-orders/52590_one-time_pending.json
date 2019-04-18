@@ -9,9 +9,5 @@
   "orderType": "One-Time",
   "reEncumber": false,
   "vendor": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflowStatus": "Pending",
-  "metadata": {
-    "createdDate": "2015-07-08T00:00:00Z",
-    "createdByUserId": "28d10afe-d137-11e8-a8d5-f2801f1b9fd1"
-  }
+  "workflowStatus": "Pending"
 }
