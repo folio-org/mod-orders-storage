@@ -1,13 +1,11 @@
 {
   "id": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "agreementId": "7cd9210e-c871-4421-8d37-b8603be6d037",
-  "purchaseOrderId": "f4dc647c-ec82-442e-b13d-f9505b7ce8e9",
   "acquisitionMethod": "Purchase At Vendor System",
+  "agreementId": "7cd9210e-c871-4421-8d37-b8603be6d037",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -16,45 +14,46 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 11,
     "currency": "USD",
     "discount": 21,
     "discountType": "amount",
     "listUnitPrice": 0.00,
     "listUnitPriceElectronic": 150.00,
-    "quantityPhysical": 0,
+    "poLineEstimatedPrice": 140.00,
     "quantityElectronic": 1,
-    "additionalCost": 11,
-    "poLineEstimatedPrice": 140.00
+    "quantityPhysical": 0
   },
   "description": "",
   "details": {
-    "receivingNote": "Access begins 7/16/18",
     "productIds": [
       {
         "productId": "3257204",
         "productIdType": "Publisher Number"
       }
     ],
+    "receivingNote": "Access begins 7/16/18",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
   },
   "donor": "",
+  "edition": "First edition",
   "eresource": {
+    "accessProvider": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
     "activated": true,
     "activationDue": 1,
     "createInventory": "None",
-    "trial": false,
     "expectedActivation": "2018-07-17T00:00:00.000Z",
-    "userLimit": 0,
-    "accessProvider": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "trial": false,
+    "userLimit": 0
   },
   "fundDistribution": [
     {
       "code": "UNIV-SUBN-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08018"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08018",
+      "percentage": 100.0
     }
   ],
   "locations": [
@@ -65,6 +64,10 @@
       "quantityPhysical": 0
     }
   ],
+  "metadata": {
+    "createdByUserId": "28d11576-d137-11e8-a8d5-f2801f1b9fd1",
+    "createdDate": "2018-07-13T00:00:00Z"
+  },
   "orderFormat": "Electronic Resource",
   "owner": "Evans",
   "paymentStatus": "Awaiting Payment",
@@ -72,6 +75,7 @@
   "poLineNumber": "312325-1",
   "publicationDate": "2013",
   "publisher": "Berkeley Films",
+  "purchaseOrderId": "f4dc647c-ec82-442e-b13d-f9505b7ce8e9",
   "receiptDate": null,
   "receiptStatus": "Fully Received",
   "reportingCodes": [],
@@ -90,9 +94,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-13T00:00:00Z",
-    "createdByUserId": "28d11576-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

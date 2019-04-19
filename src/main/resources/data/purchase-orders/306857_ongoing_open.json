@@ -2,24 +2,24 @@
   "id": "e41e0161-2bc6-41f3-a6e7-34fc13250bf1",
   "approved": true,
   "dateOrdered": "2018-07-24T00:00:00Z",
+  "manualPo": true,
+  "metadata": {
+    "createdByUserId": "28d11102-d137-11e8-a8d5-f2801f1b9fd1",
+    "createdDate": "2018-07-23T00:00:00Z"
+  },
   "notes": [
     "Published twice a year"
   ],
-  "manualPo": true,
-  "poNumber": "306857",
   "orderType": "Ongoing",
+  "poNumber": "306857",
   "reEncumber": false,
   "renewal": {
     "cycle": "6 Months",
     "interval": 182,
     "manualRenewal": true,
-    "reviewPeriod": 30,
-    "renewalDate": "2019-04-09T00:00:00.000Z"
+    "renewalDate": "2019-04-09T00:00:00.000Z",
+    "reviewPeriod": 30
   },
   "vendor": "50fb6ae0-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflowStatus": "Open",
-  "metadata": {
-    "createdDate": "2018-07-23T00:00:00Z",
-    "createdByUserId": "28d11102-d137-11e8-a8d5-f2801f1b9fd1"
-  }
+  "workflowStatus": "Open"
 }

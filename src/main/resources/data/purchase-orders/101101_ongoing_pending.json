@@ -2,20 +2,20 @@
   "id": "589a6016-3463-49f6-8aa2-dc315d0665fd",
   "approved": true,
   "manualPo": true,
-  "poNumber": "101101",
+  "metadata": {
+    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1",
+    "createdDate": "2018-07-19T00:00:00Z"
+  },
   "orderType": "Ongoing",
+  "poNumber": "101101",
   "reEncumber": false,
   "renewal": {
     "cycle": "6 Months",
     "interval": 182,
     "manualRenewal": true,
-    "reviewPeriod": 30,
-    "renewalDate": "2019-04-09T00:00:00.000Z"
+    "renewalDate": "2019-04-09T00:00:00.000Z",
+    "reviewPeriod": 30
   },
   "vendor": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflowStatus": "Pending",
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00Z",
-    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
-  }
+  "workflowStatus": "Pending"
 }

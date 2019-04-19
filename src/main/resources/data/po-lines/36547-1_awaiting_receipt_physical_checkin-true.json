@@ -1,14 +1,11 @@
 {
   "id": "80fb5168-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "Second edition",
-  "checkinItems": true,
-  "instanceId": "b3b731f8-9e01-4309-96b2-5ce6ca423eb5",
-  "agreementId": "44683de8-e2cf-42bc-af9e-7eca992934b6",
-  "purchaseOrderId": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
   "acquisitionMethod": "Purchase",
+  "agreementId": "44683de8-e2cf-42bc-af9e-7eca992934b6",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": true,
   "claims": [
     {
       "claimed": false,
@@ -17,37 +14,39 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 2,
     "discountType": "percentage",
     "listUnitPrice": 24.99,
     "listUnitPriceElectronic": 0.00,
-    "quantityPhysical": 1,
+    "poLineEstimatedPrice": 24.49,
     "quantityElectronic": 0,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 24.49
+    "quantityPhysical": 1
   },
   "description": "",
   "details": {
-    "receivingNote": "",
     "productIds": [
       {
         "productId": "9780764354113",
         "productIdType": "ISBN"
       }
     ],
+    "receivingNote": "",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
   },
   "donor": "",
+  "edition": "Second edition",
   "fundDistribution": [
     {
       "code": "USHIST-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08005"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08005",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "b3b731f8-9e01-4309-96b2-5ce6ca423eb5",
   "locations": [
     {
       "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
@@ -56,22 +55,27 @@
       "quantityPhysical": 1
     }
   ],
+  "metadata": {
+    "createdByUserId": "28d0fb04-d137-11e8-a8d5-f2801f1b9fd1",
+    "createdDate": "2019-05-15T00:00:00Z"
+  },
   "orderFormat": "Physical Resource",
   "owner": "LTS Acquisitions",
   "paymentStatus": "Awaiting Payment",
   "physical": {
     "createInventory": "Instance, Holding",
     "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
     "receiptDue": "2018-09-29T00:00:00.000Z",
     "volumes": [
       "vol. 1"
-    ],
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ]
   },
   "poLineDescription": "",
   "poLineNumber": "36547-1",
   "publicationDate": "2011",
   "publisher": "Tapir Academic Press",
+  "purchaseOrderId": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
   "receiptDate": null,
   "receiptStatus": "Awaiting Receipt",
   "reportingCodes": [],
@@ -88,9 +92,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2019-05-15T00:00:00Z",
-    "createdByUserId": "28d0fb04-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

@@ -1,14 +1,11 @@
 {
   "id": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "instanceId": "481bf4f1-62d6-4b45-8a30-2ffc7acfcc6b",
-  "agreementId": "0a79add6-f1a3-44f8-b75d-092c0b729286",
-  "purchaseOrderId": "9447d062-89ec-486e-a14b-572f3efb9f8c",
   "acquisitionMethod": "Purchase",
+  "agreementId": "0a79add6-f1a3-44f8-b75d-092c0b729286",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -17,37 +14,39 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 21,
     "discountType": "percentage",
     "listUnitPrice": 200.00,
     "listUnitPriceElectronic": 0.00,
-    "quantityPhysical": 2,
+    "poLineEstimatedPrice": 316.00,
     "quantityElectronic": 0,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 316.00
+    "quantityPhysical": 2
   },
   "description": "",
   "details": {
-    "receivingNote": "2 copies",
     "productIds": [
       {
         "productId": "9780133973488",
         "productIdType": "ISBN"
       }
     ],
+    "receivingNote": "2 copies",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
   },
   "donor": "",
+  "edition": "First edition",
   "fundDistribution": [
     {
       "code": "USHIST-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08013"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08013",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "481bf4f1-62d6-4b45-8a30-2ffc7acfcc6b",
   "locations": [
     {
       "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
@@ -56,22 +55,27 @@
       "quantityPhysical": 2
     }
   ],
+  "metadata": {
+    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1",
+    "createdDate": "2018-07-19T00:00:00Z"
+  },
   "orderFormat": "Physical Resource",
   "owner": "Acquisitions - Monos",
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "Instance, Holding, Item",
     "materialSupplier": "c6836b28-b2b7-49f5-a9af-05bc88a003f7",
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
     "receiptDue": "2018-07-31T00:00:00.000Z",
     "volumes": [
       "vol. 0"
-    ],
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ]
   },
   "poLineDescription": "",
   "poLineNumber": "101125-1",
   "publicationDate": "2015",
   "publisher": "Pearson",
+  "purchaseOrderId": "9447d062-89ec-486e-a14b-572f3efb9f8c",
   "receiptDate": null,
   "receiptStatus": "Pending",
   "reportingCodes": [],
@@ -88,9 +92,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00Z",
-    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

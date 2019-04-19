@@ -3,13 +3,13 @@
   "approved": true,
   "dateOrdered": "2014-07-10T00:00:00Z",
   "manualPo": false,
-  "poNumber": "268879",
+  "metadata": {
+    "createdByUserId": "28d10cfc-d137-11e8-a8d5-f2801f1b9fd1",
+    "createdDate": "2014-07-06T00:00:00Z"
+  },
   "orderType": "One-Time",
+  "poNumber": "268879",
   "reEncumber": false,
   "vendor": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflowStatus": "Closed",
-  "metadata": {
-    "createdDate": "2014-07-06T00:00:00Z",
-    "createdByUserId": "28d10cfc-d137-11e8-a8d5-f2801f1b9fd1"
-  }
+  "workflowStatus": "Closed"
 }
