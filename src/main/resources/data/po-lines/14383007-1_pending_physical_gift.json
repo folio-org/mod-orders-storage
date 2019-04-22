@@ -55,10 +55,6 @@
       "quantityPhysical": 1
     }
   ],
-  "metadata": {
-    "createdByUserId": "28d10432-d137-11e8-a8d5-f2801f1b9fd1",
-    "createdDate": "2018-07-18T00:00:00Z"
-  },
   "orderFormat": "Physical Resource",
   "owner": "Serials",
   "paymentStatus": "Payment Not Required",

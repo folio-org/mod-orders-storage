@@ -3,10 +3,6 @@
   "approved": true,
   "dateOrdered": "2018-07-24T00:00:00Z",
   "manualPo": false,
-  "metadata": {
-    "createdByUserId": "28d102a2-d137-11e8-a8d5-f2801f1b9fd1",
-    "createdDate": "2018-07-18T00:00:00Z"
-  },
   "orderType": "Ongoing",
   "poNumber": "S60402",
   "reEncumber": false,

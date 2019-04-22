@@ -3,10 +3,6 @@
   "approved": true,
   "dateOrdered": "2018-06-30T00:00:00Z",
   "manualPo": false,
-  "metadata": {
-    "createdByUserId": "28d0f99c-d137-11e8-a8d5-f2801f1b9fd1",
-    "createdDate": "2018-06-29T00:00:00Z"
-  },
   "orderType": "One-Time",
   "poNumber": "268758",
   "reEncumber": false,

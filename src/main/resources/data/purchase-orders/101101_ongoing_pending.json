@@ -2,10 +2,6 @@
   "id": "589a6016-3463-49f6-8aa2-dc315d0665fd",
   "approved": true,
   "manualPo": true,
-  "metadata": {
-    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1",
-    "createdDate": "2018-07-19T00:00:00Z"
-  },
   "orderType": "Ongoing",
   "poNumber": "101101",
   "reEncumber": false,
