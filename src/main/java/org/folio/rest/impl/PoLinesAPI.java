@@ -16,6 +16,7 @@ import org.folio.rest.persist.QueryHolder;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
+import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class PoLinesAPI implements OrdersStoragePoLines {
@@ -33,7 +34,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<PoLine, PoLineCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PoLine.class, PoLineCollection.class, GetOrdersStoragePoLinesResponse.class);
-      QueryHolder cql = new QueryHolder(POLINE_TABLE, query, offset, limit, lang);
+      QueryHolder cql = new QueryHolder(POLINE_TABLE, JSONB, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }

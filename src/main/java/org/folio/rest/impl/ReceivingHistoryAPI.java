@@ -13,6 +13,7 @@ import org.folio.rest.persist.QueryHolder;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
+import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
@@ -25,7 +26,7 @@ public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<ReceivingHistory, ReceivingHistoryCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(ReceivingHistory.class, ReceivingHistoryCollection.class, GetOrdersStorageReceivingHistoryResponse.class, "setReceivingHistory");
-      QueryHolder cql = new QueryHolder(RECEIVING_HISTORY_VIEW_TABLE, query, offset, limit, lang);
+      QueryHolder cql = new QueryHolder(RECEIVING_HISTORY_VIEW_TABLE, JSONB, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }

@@ -16,6 +16,7 @@ import org.folio.rest.persist.QueryHolder;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
+import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class PiecesAPI implements OrdersStoragePieces {
@@ -33,7 +34,7 @@ public class PiecesAPI implements OrdersStoragePieces {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<Piece, PieceCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(Piece.class, PieceCollection.class, GetOrdersStoragePiecesResponse.class);
-      QueryHolder cql = new QueryHolder(PIECES_TABLE, query, offset, limit, lang);
+      QueryHolder cql = new QueryHolder(PIECES_TABLE, JSONB, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }

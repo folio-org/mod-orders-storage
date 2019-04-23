@@ -16,6 +16,7 @@ import org.folio.rest.persist.QueryHolder;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
+import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 
@@ -34,7 +35,7 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<ReportingCode, ReportingCodeCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(ReportingCode.class, ReportingCodeCollection.class, GetOrdersStorageReportingCodesResponse.class);
-      QueryHolder cql = new QueryHolder(REPORTING_CODE_TABLE, query, offset, limit, lang);
+      QueryHolder cql = new QueryHolder(REPORTING_CODE_TABLE, JSONB, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }

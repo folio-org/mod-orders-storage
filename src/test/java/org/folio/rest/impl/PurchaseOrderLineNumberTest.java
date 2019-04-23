@@ -1,11 +1,11 @@
 package org.folio.rest.impl;
 
 import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
+import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.sql.ResultSet;
-import io.restassured.response.Response;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.persist.PostgresClient;
 import org.json.JSONObject;

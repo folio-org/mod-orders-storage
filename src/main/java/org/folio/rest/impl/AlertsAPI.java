@@ -8,14 +8,15 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Alert;
 import org.folio.rest.jaxrs.model.AlertCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageAlerts;
-import org.folio.rest.persist.QueryHolder;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.QueryHolder;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
+import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class AlertsAPI implements OrdersStorageAlerts {
@@ -32,7 +33,7 @@ public class AlertsAPI implements OrdersStorageAlerts {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<Alert, AlertCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(Alert.class, AlertCollection.class, GetOrdersStorageAlertsResponse.class);
-      QueryHolder cql = new QueryHolder(ALERT_TABLE, query, offset, limit, lang);
+      QueryHolder cql = new QueryHolder(ALERT_TABLE, JSONB, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }
