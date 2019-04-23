@@ -21,6 +21,7 @@ import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistin
 public class OrdersAPI implements Orders {
 
   public static final String SEARCH_ORDERS_VIEW_TABLE = "orders_view";
+  public static final String SORT_FIELD = "poNumber";
 
   public OrdersAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField("id");
@@ -30,10 +31,9 @@ public class OrdersAPI implements Orders {
   @Validate
   public void getOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
-      String sortField = "poNumber";
       EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PurchaseOrder.class, PurchaseOrderCollection.class, Orders.GetOrdersResponse.class, "setPurchaseOrders");
       QueryHolder cql = new QueryHolder(SEARCH_ORDERS_VIEW_TABLE, METADATA, query, offset, limit, lang);
-      getEntitiesCollectionWithDistinctOn(entitiesMetadataHolder, cql, sortField, asyncResultHandler, vertxContext, okapiHeaders);
+      getEntitiesCollectionWithDistinctOn(entitiesMetadataHolder, cql, SORT_FIELD, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }
 }

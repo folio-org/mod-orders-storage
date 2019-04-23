@@ -38,7 +38,6 @@ public class HelperUtils {
     Method respond400 = getRespond400(entitiesMetadataHolder, asyncResultHandler);
     try {
       PostgresClient postgresClient = PgUtil.postgresClient(vertxContext, okapiHeaders);
-
       postgresClient.get(queryHolder.getTable(), entitiesMetadataHolder.getClazz(), fieldList, queryHolder.buildCQLQuery(), true, false,
         reply -> processDbReply(entitiesMetadataHolder, asyncResultHandler, respond500, respond400, reply));
     } catch (Exception e) {
@@ -48,7 +47,6 @@ public class HelperUtils {
   }
 
   public static <T, E> void getEntitiesCollectionWithDistinctOn(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, QueryHolder queryHolder, String sortField, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
-
     Method respond500 = getRespond500(entitiesMetadataHolder, asyncResultHandler);
     Method respond400 = getRespond400(entitiesMetadataHolder, asyncResultHandler);
     try {
