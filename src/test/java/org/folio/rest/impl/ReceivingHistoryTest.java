@@ -4,11 +4,7 @@ import io.restassured.RestAssured;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.folio.rest.jaxrs.model.Piece;
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.ReceivingHistory;
-import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
+import org.folio.rest.jaxrs.model.*;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
@@ -16,9 +12,7 @@ import java.net.URL;
 import java.util.List;
 
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
-import static org.folio.rest.utils.TestEntities.PIECE;
-import static org.folio.rest.utils.TestEntities.PO_LINE;
-import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
+import static org.folio.rest.utils.TestEntities.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -26,30 +20,28 @@ public class ReceivingHistoryTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(ReceivingHistoryTest.class);
 
-  private String piecesSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private String poLineSampleId; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private String piecesSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
-  private String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
+  private String piecesSampleId;
+  private String poLineSampleId;
+  private String piecesSampleId2;
+  private String poLineSampleId2;
   private String purchaseOrderSampleId;
   private String purchaseOrderSampleId2;
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
-  private final String poLineSample = getFile("po-line.sample");
-  private final String poLineSample2 = getFile("po-line-for-view.sample");
-  private final String pieceSample = getFile("pieces.sample");
-  private final String pieceSample2 = getFile("piece-for-view.sample");
-  private final String purchaseOrderSample = getFile("purchase-order.sample");
-  private final String purchaseOrderSample2 = getFile("purchase-order-for-view.sample");
+  private final String poLineSample = getFile("data/po-lines/268758-03_fully_received_electronic_resource.json");
+  private final String poLineSample2 = getFile("data/po-lines/14383007-1_pending_physical_gift.json");
+  private final String pieceSample = getFile("data/pieces/1a902141-d8c6-4cf3-8a19-193eca007478.json");
+  private final String pieceSample2 = getFile("data/pieces/5e317dc2-deeb-4429-b2a1-91e5cd0fd5f7.json");
+  private final String purchaseOrderSample = getFile("data/purchase-orders/268758_one-time_open.json");
+  private final String purchaseOrderSample2 = getFile("data/purchase-orders/14383007_ongoing_open.json");
   private static final String APPLICATION_JSON = "application/json";
 
   private static final Integer CREATED_ENTITIES_QUANTITY = 2;
 
-
   @Test
   public void testReceivingHistory() throws MalformedURLException {
     try {
-
       logger.info("--- mod-orders-storage receiving_history test: Before receiving_history View creation ... ");
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, 0);
 

@@ -2,13 +2,9 @@
   "id": "9447d062-89ec-486e-a14b-572f3efb9f8c",
   "approved": true,
   "manualPo": false,
-  "poNumber": "101125",
   "orderType": "One-Time",
+  "poNumber": "101125",
   "reEncumber": false,
   "vendor": "13fb64dc-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflowStatus": "Pending",
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00Z",
-    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
-  }
+  "workflowStatus": "Pending"
 }

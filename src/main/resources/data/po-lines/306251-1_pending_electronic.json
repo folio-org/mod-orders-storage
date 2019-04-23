@@ -1,13 +1,11 @@
 {
   "id": "13fb64dc-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "agreementId": "38451d3a-9e30-4eb1-be32-3fae8e349580",
-  "purchaseOrderId": "e20af8c8-b07d-47a1-9ebd-f1187e9335bd",
   "acquisitionMethod": "Purchase",
+  "agreementId": "38451d3a-9e30-4eb1-be32-3fae8e349580",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -16,45 +14,46 @@
   ],
   "collection": true,
   "cost": {
+    "additionalCost": 10,
     "currency": "USD",
     "discount": 50.0,
     "discountType": "amount",
     "listUnitPrice": 0.00,
     "listUnitPriceElectronic": 3000.00,
-    "quantityPhysical": 0,
+    "poLineEstimatedPrice": 5960.00,
     "quantityElectronic": 2,
-    "additionalCost": 10,
-    "poLineEstimatedPrice": 5960.00
+    "quantityPhysical": 0
   },
   "description": "",
   "details": {
-    "receivingNote": "two backfiles",
     "productIds": [
       {
         "productId": "5456",
         "productIdType": "Vendor Item Number"
       }
     ],
+    "receivingNote": "two backfiles",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
   },
   "donor": "",
+  "edition": "First edition",
   "eresource": {
+    "accessProvider": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1",
     "activated": true,
     "activationDue": 0,
     "createInventory": "None",
-    "trial": false,
     "expectedActivation": "2018-06-30T00:00:00.000Z",
-    "userLimit": 0,
-    "accessProvider": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "trial": false,
+    "userLimit": 0
   },
   "fundDistribution": [
     {
       "code": "GIFTS-ONE-TIME-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08016"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08016",
+      "percentage": 100.0
     }
   ],
   "locations": [
@@ -72,6 +71,7 @@
   "poLineNumber": "306251-1",
   "publicationDate": "2000",
   "publisher": "",
+  "purchaseOrderId": "e20af8c8-b07d-47a1-9ebd-f1187e9335bd",
   "receiptDate": null,
   "receiptStatus": "Pending",
   "reportingCodes": [],
@@ -87,9 +87,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-06-19T00:00:00Z",
-    "createdByUserId": "28d10f5e-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

@@ -1,14 +1,11 @@
 {
   "id": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "instanceId": "27f14a3a-dbfe-4056-a502-0f5ab037cd4a",
-  "agreementId": "bfdbf5e3-8d5f-4ec0-9aed-38c68fb89254",
-  "purchaseOrderId": "e41e0161-2bc6-41f3-a6e7-34fc13250bf1",
   "acquisitionMethod": "Purchase",
+  "agreementId": "bfdbf5e3-8d5f-4ec0-9aed-38c68fb89254",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -17,37 +14,39 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 20,
     "discountType": "amount",
     "listUnitPrice": 800.00,
     "listUnitPriceElectronic": 0.00,
-    "quantityPhysical": 1,
+    "poLineEstimatedPrice": 780.00,
     "quantityElectronic": 0,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 780.00
+    "quantityPhysical": 1
   },
   "description": "",
   "details": {
-    "receivingNote": "Cushing materials, do not mark",
     "productIds": [
       {
         "productId": "43",
         "productIdType": "Vendor Item Number"
       }
     ],
+    "receivingNote": "Cushing materials, do not mark",
     "subscriptionFrom": "2018-07-23T00:00:00.000Z",
     "subscriptionInterval": 365,
     "subscriptionTo": "2019-07-22T00:00:00.000Z"
   },
   "donor": "",
+  "edition": "First edition",
   "fundDistribution": [
     {
       "code": "GIFTS-ONE-TIME-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08017"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08017",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "27f14a3a-dbfe-4056-a502-0f5ab037cd4a",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -62,16 +61,17 @@
   "physical": {
     "createInventory": "None",
     "materialSupplier": "fa3cf2bb-5187-444c-b216-d43409874297",
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
     "receiptDue": null,
     "volumes": [
       "vol. 0"
-    ],
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ]
   },
   "poLineDescription": "",
   "poLineNumber": "306857-1",
   "publicationDate": "2017",
   "publisher": "",
+  "purchaseOrderId": "e41e0161-2bc6-41f3-a6e7-34fc13250bf1",
   "receiptDate": null,
   "receiptStatus": "Pending",
   "reportingCodes": [],
@@ -88,9 +88,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-23T00:00:00Z",
-    "createdByUserId": "28d11102-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

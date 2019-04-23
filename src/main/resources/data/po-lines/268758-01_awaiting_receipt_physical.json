@@ -1,14 +1,11 @@
 {
   "id": "70fb4e66-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "instanceId": "25733ba9-49b7-406f-ba56-3dc4e84e24a8",
-  "agreementId": "05da8d23-d630-44ed-b61d-e780665c9efb",
-  "purchaseOrderId": "1ab7ef6a-d1d4-4a4f-90a2-882aed18af14",
   "acquisitionMethod": "Purchase",
+  "agreementId": "05da8d23-d630-44ed-b61d-e780665c9efb",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -17,37 +14,39 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 1,
     "discountType": "percentage",
     "listUnitPrice": 34.95,
     "listUnitPriceElectronic": 0.00,
-    "quantityPhysical": 1,
+    "poLineEstimatedPrice": 34.60,
     "quantityElectronic": 0,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 34.60
+    "quantityPhysical": 1
   },
   "description": "",
   "details": {
-    "receivingNote": "",
     "productIds": [
       {
         "productId": "9780820350790",
         "productIdType": "ISBN"
       }
     ],
+    "receivingNote": "",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
   },
   "donor": "",
+  "edition": "First edition",
   "fundDistribution": [
     {
       "code": "USHIST-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08004"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08004",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "25733ba9-49b7-406f-ba56-3dc4e84e24a8",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -62,16 +61,17 @@
   "physical": {
     "createInventory": "Instance",
     "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
     "receiptDue": "2018-09-29T00:00:00.000Z",
     "volumes": [
       "vol. 1"
-    ],
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ]
   },
   "poLineDescription": "",
   "poLineNumber": "268758-01",
   "publicationDate": "2011",
   "publisher": "Tapir Academic Press",
+  "purchaseOrderId": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
   "receiptDate": null,
   "receiptStatus": "Awaiting Receipt",
   "reportingCodes": [],
@@ -88,9 +88,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-06-29T00:00:00Z",
-    "createdByUserId": "28d0f99c-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

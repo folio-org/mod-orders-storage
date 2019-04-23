@@ -1,13 +1,11 @@
 {
   "id": "a0fb5514-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "agreementId": "6af52c00-23ee-4460-a80b-027b4d61785d",
-  "purchaseOrderId": "07f65192-44a4-483d-97aa-b137bbd96390",
   "acquisitionMethod": "Purchase",
+  "agreementId": "6af52c00-23ee-4460-a80b-027b4d61785d",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -16,45 +14,46 @@
   ],
   "collection": true,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 200,
     "discountType": "amount",
     "listUnitPrice": 0.00,
     "listUnitPriceElectronic": 200000.00,
-    "quantityPhysical": 0,
+    "poLineEstimatedPrice": 199800.00,
     "quantityElectronic": 1,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 199800.00
+    "quantityPhysical": 0
   },
   "description": "",
   "details": {
-    "receivingNote": "Renewal, access continuous",
     "productIds": [
       {
         "productId": "807922",
         "productIdType": "Vendor Title Number"
       }
     ],
+    "receivingNote": "Renewal, access continuous",
     "subscriptionFrom": "2019-01-01T00:00:00.000Z",
     "subscriptionInterval": 365,
     "subscriptionTo": "2019-12-31T00:00:00.000Z"
   },
   "donor": "",
+  "edition": "First edition",
   "eresource": {
+    "accessProvider": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1",
     "activated": true,
     "activationDue": 0,
     "createInventory": "None",
-    "trial": false,
     "expectedActivation": "2019-01-01T00:00:00.000Z",
-    "userLimit": 0,
-    "accessProvider": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "trial": false,
+    "userLimit": 0
   },
   "fundDistribution": [
     {
       "code": "ENDOW-SUBN-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08008"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08008",
+      "percentage": 100.0
     }
   ],
   "locations": [
@@ -72,6 +71,7 @@
   "poLineNumber": "S60402-80",
   "publicationDate": "2019",
   "publisher": "American Chemical Society",
+  "purchaseOrderId": "07f65192-44a4-483d-97aa-b137bbd96390",
   "receiptDate": null,
   "reportingCodes": [],
   "requester": "",
@@ -87,9 +87,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-18T00:00:00Z",
-    "createdByUserId": "28d102a2-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

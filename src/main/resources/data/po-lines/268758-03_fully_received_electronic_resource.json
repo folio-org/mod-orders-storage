@@ -1,14 +1,11 @@
 {
   "id": "50fb6ae0-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "instanceId": "e4beffe4-e795-460b-ba87-bf1a259a8d84",
-  "agreementId": "4f8f02af-ca34-46aa-b62c-42409a24b6ab",
-  "purchaseOrderId": "1ab7ef6a-d1d4-4a4f-90a2-882aed18af14",
   "acquisitionMethod": "Purchase",
+  "agreementId": "4f8f02af-ca34-46aa-b62c-42409a24b6ab",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -17,47 +14,49 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 20,
     "discountType": "amount",
     "listUnitPrice": 0.00,
     "listUnitPriceElectronic": 342.00,
-    "quantityPhysical": 0,
+    "poLineEstimatedPrice": 322.00,
     "quantityElectronic": 1,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 322.00
+    "quantityPhysical": 0
   },
   "description": "",
   "details": {
-    "receivingNote": "Renewal, access continuous",
     "productIds": [
       {
         "productId": "4005000",
         "productIdType": "Vendor Title Number"
       }
     ],
+    "receivingNote": "Renewal, access continuous",
     "subscriptionFrom": "2018-08-01T00:00:00.000Z",
     "subscriptionInterval": 365,
     "subscriptionTo": "2019-07-31T00:00:00.000Z"
   },
   "donor": "",
+  "edition": "First edition",
   "eresource": {
+    "accessProvider": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
     "activated": true,
     "activationDue": 0,
     "createInventory": "None",
-    "trial": false,
     "expectedActivation": "2018-08-01T00:00:00.000Z",
-    "userLimit": 0,
-    "accessProvider": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "trial": false,
+    "userLimit": 0
   },
   "fundDistribution": [
     {
       "code": "STATE-SUBN-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08001"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08001",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "e4beffe4-e795-460b-ba87-bf1a259a8d84",
   "locations": [
     {
       "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
@@ -73,6 +72,7 @@
   "poLineNumber": "268758-03",
   "publicationDate": "2019",
   "publisher": "Taylor & Francis",
+  "purchaseOrderId": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
   "receiptDate": "2018-01-08T00:00:00.000Z",
   "receiptStatus": "Fully Received",
   "reportingCodes": [],
@@ -88,9 +88,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": "EBAUB12345"
-  },
-  "metadata": {
-    "createdDate": "2017-07-22T11:22:07Z",
-    "createdByUserId": "dee12548-9cee-45fa-bbae-675c1cc0ce3b"
   }
 }

@@ -1,14 +1,11 @@
 {
   "id": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "Second edition",
-  "checkinItems": false,
-  "instanceId": "f70b3e2c-299c-4a32-ae37-be7330dc80b1",
-  "agreementId": "6bbc890c-0fa9-4ab3-802a-471ee18f72d5",
-  "purchaseOrderId": "55b97a4a-6601-4488-84e1-8b0d47a3f523",
   "acquisitionMethod": "Purchase",
+  "agreementId": "6bbc890c-0fa9-4ab3-802a-471ee18f72d5",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -17,37 +14,39 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 14.1,
     "discountType": "percentage",
     "listUnitPrice": 240.00,
     "listUnitPriceElectronic": 0.00,
-    "quantityPhysical": 2,
+    "poLineEstimatedPrice": 412.32,
     "quantityElectronic": 0,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 412.32
+    "quantityPhysical": 2
   },
   "description": "",
   "details": {
-    "receivingNote": "v. 1-6 in 10 parts",
     "productIds": [
       {
         "productId": "9781868885015",
         "productIdType": "ISBN"
       }
     ],
+    "receivingNote": "v. 1-6 in 10 parts",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
   },
   "donor": "",
+  "edition": "Second edition",
   "fundDistribution": [
     {
       "code": "STATE-MONOSER-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08010"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08010",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "f70b3e2c-299c-4a32-ae37-be7330dc80b1",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -62,16 +61,17 @@
   "physical": {
     "createInventory": "Instance, Holding",
     "materialSupplier": "fb9f16d1-9564-4c0f-abd3-9890e00ba318",
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
     "receiptDue": "2018-08-31T00:00:00.000Z",
     "volumes": [
       "vol. 6"
-    ],
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ]
   },
   "poLineDescription": "",
   "poLineNumber": "101113-1",
   "publicationDate": "2010",
   "publisher": "Unisa Press",
+  "purchaseOrderId": "55b97a4a-6601-4488-84e1-8b0d47a3f523",
   "receiptDate": null,
   "receiptStatus": "Pending",
   "reportingCodes": [],
@@ -88,9 +88,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00Z",
-    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

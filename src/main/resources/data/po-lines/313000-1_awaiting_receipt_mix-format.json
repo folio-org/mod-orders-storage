@@ -1,14 +1,11 @@
 {
   "id": "90fb53f2-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "instanceId": "22fa742a-86e6-4bdf-98d5-4d0488f829c1",
-  "agreementId": "e332be88-2ba3-43f7-a245-f5136bf2ffce",
-  "purchaseOrderId": "05bdf3c8-01f0-4ddb-bd6c-6efd465f9e33",
   "acquisitionMethod": "Purchase",
+  "agreementId": "e332be88-2ba3-43f7-a245-f5136bf2ffce",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -17,47 +14,49 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 20,
     "discountType": "amount",
     "listUnitPrice": 500.00,
     "listUnitPriceElectronic": 0.00,
-    "quantityPhysical": 6,
+    "poLineEstimatedPrice": 2980.00,
     "quantityElectronic": 1,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 2980.00
+    "quantityPhysical": 6
   },
   "description": "",
   "details": {
-    "receivingNote": "",
     "productIds": [
       {
         "productId": "12357",
         "productIdType": "Vendor Title Number"
       }
     ],
+    "receivingNote": "",
     "subscriptionFrom": "2018-07-20T00:00:00.000Z",
     "subscriptionInterval": 1095,
     "subscriptionTo": "2021-07-19T00:00:00.000Z"
   },
   "donor": "",
+  "edition": "First edition",
   "eresource": {
+    "accessProvider": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
     "activated": true,
     "activationDue": 1,
     "createInventory": "Instance, Holding, Item",
-    "trial": false,
     "expectedActivation": "2019-07-20T00:00:00.000Z",
-    "userLimit": 0,
-    "accessProvider":  "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "trial": false,
+    "userLimit": 0
   },
   "fundDistribution": [
     {
       "code": "UNIV-SUBN-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08007"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08007",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "22fa742a-86e6-4bdf-98d5-4d0488f829c1",
   "locations": [
     {
       "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
@@ -83,16 +82,17 @@
   "paymentStatus": "Pending",
   "physical": {
     "materialSupplier": "09c30200-01ab-4ea1-9f7b-c2a767b4c660",
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
     "receiptDue": "2018-08-19T00:00:00.000Z",
     "volumes": [
       "vol. 1"
-    ],
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ]
   },
   "poLineDescription": "",
   "poLineNumber": "313000-1",
   "publicationDate": "2016",
   "publisher": "ro*co films",
+  "purchaseOrderId": "05bdf3c8-01f0-4ddb-bd6c-6efd465f9e33",
   "receiptDate": null,
   "receiptStatus": "Awaiting Receipt",
   "reportingCodes": [],
@@ -112,9 +112,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00Z",
-    "createdByUserId": "28d100f4-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

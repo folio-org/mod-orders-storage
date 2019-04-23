@@ -1,14 +1,11 @@
 {
   "id": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": true,
-  "instanceId": "e3872ee8-91b1-4204-bc43-488f6821bc7b",
-  "agreementId": "d4225afd-c449-4034-9847-1a43aa35d78e",
-  "purchaseOrderId": "589a6016-3463-49f6-8aa2-dc315d0665fd",
   "acquisitionMethod": "Purchase",
+  "agreementId": "d4225afd-c449-4034-9847-1a43aa35d78e",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": true,
   "claims": [
     {
       "claimed": false,
@@ -17,37 +14,39 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 13,
     "currency": "USD",
     "discount": 37,
     "discountType": "percentage",
     "listUnitPrice": 900.00,
     "listUnitPriceElectronic": 0.00,
-    "quantityPhysical": 1,
+    "poLineEstimatedPrice": 580.00,
     "quantityElectronic": 0,
-    "additionalCost": 13,
-    "poLineEstimatedPrice": 580.00
+    "quantityPhysical": 1
   },
   "description": "",
   "details": {
-    "receivingNote": "start with v. 162",
     "productIds": [
       {
         "productId": "0065-3438",
         "productIdType": "ISSN"
       }
     ],
+    "receivingNote": "start with v. 162",
     "subscriptionFrom": "2018-07-01T00:00:00.000Z",
     "subscriptionInterval": 1095,
     "subscriptionTo": "2021-06-30T00:00:00.000Z"
   },
   "donor": "",
+  "edition": "First edition",
   "fundDistribution": [
     {
       "code": "STATE-SUBN-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08011"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08011",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "e3872ee8-91b1-4204-bc43-488f6821bc7b",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -62,16 +61,17 @@
   "physical": {
     "createInventory": "Instance, Holding, Item",
     "materialSupplier": "a1f045a9-22c9-4705-8953-d15438017346",
+    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
     "receiptDue": "2018-07-31T00:00:00.000Z",
     "volumes": [
       "vol. 0"
-    ],
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1"
+    ]
   },
   "poLineDescription": "",
   "poLineNumber": "101101-1",
   "publicationDate": "2018",
   "publisher": "Plenum Press",
+  "purchaseOrderId": "589a6016-3463-49f6-8aa2-dc315d0665fd",
   "receiptDate": null,
   "receiptStatus": "Pending",
   "reportingCodes": [],
@@ -88,9 +88,5 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  },
-  "metadata": {
-    "createdDate": "2018-07-19T00:00:00Z",
-    "createdByUserId": "28d1057c-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }

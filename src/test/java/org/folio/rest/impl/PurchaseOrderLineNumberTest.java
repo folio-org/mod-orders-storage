@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 @RunWith(VertxUnitRunner.class)
 public class PurchaseOrderLineNumberTest extends TestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(PurchaseOrderNumberUniquenessTest.class);
+  private final Logger logger = LoggerFactory.getLogger(PurchaseOrderLineNumberTest.class);
 
   private static final String PO_ENDPOINT = "/orders-storage/purchase-orders";
   private static final String PO_LINE_NUMBER_ENDPOINT = "/orders-storage/po-line-number";

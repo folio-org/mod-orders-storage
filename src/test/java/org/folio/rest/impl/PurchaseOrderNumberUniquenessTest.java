@@ -12,14 +12,14 @@ import java.net.MalformedURLException;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.junit.Assert.fail;
 
-public class PurchaseOrderNumberUniquenessTest extends TestBase{
+public class PurchaseOrderNumberUniquenessTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(PurchaseOrderNumberUniquenessTest.class);
 
   @Test
   public void testPoNumberUniqueness() throws MalformedURLException {
 
-    String  sampleId = null;
+    String sampleId = null;
     try {
       String purchaseOrderSample = getFile(PURCHASE_ORDER.getSampleFileName());
 

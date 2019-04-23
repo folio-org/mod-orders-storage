@@ -1,14 +1,11 @@
 {
   "id": "12fb63b0-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "edition": "First edition",
-  "checkinItems": false,
-  "instanceId": "507a176a-e139-4745-9d6b-8ef22d92c62f",
-  "agreementId": "291e4a33-fc84-49c5-beac-661fc8bdd55e",
-  "purchaseOrderId": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
   "acquisitionMethod": "Purchase",
+  "agreementId": "291e4a33-fc84-49c5-beac-661fc8bdd55e",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
+  "checkinItems": false,
   "claims": [
     {
       "claimed": false,
@@ -17,47 +14,49 @@
   ],
   "collection": false,
   "cost": {
+    "additionalCost": 0,
     "currency": "USD",
     "discount": 5.1,
     "discountType": "amount",
     "listUnitPrice": 0.00,
     "listUnitPriceElectronic": 75.22,
-    "quantityPhysical": 0,
+    "poLineEstimatedPrice": 70.12,
     "quantityElectronic": 1,
-    "additionalCost": 0,
-    "poLineEstimatedPrice": 70.12
+    "quantityPhysical": 0
   },
   "description": "",
   "details": {
-    "receivingNote": "",
     "productIds": [
       {
         "productId": "9781118416068",
         "productIdType": "ISBN"
       }
     ],
+    "receivingNote": "",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
     "subscriptionTo": null
   },
   "donor": "",
+  "edition": "First edition",
   "eresource": {
+    "accessProvider": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
     "activated": true,
     "activationDue": 0,
     "createInventory": "None",
-    "trial": false,
     "expectedActivation": "2014-07-06T00:00:00.000Z",
-    "userLimit": 1,
-    "accessProvider": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa"
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "trial": false,
+    "userLimit": 1
   },
   "fundDistribution": [
     {
       "code": "MISCHIST-FY19",
-      "percentage": 100.0,
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08015"
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08015",
+      "percentage": 100.0
     }
   ],
+  "instanceId": "507a176a-e139-4745-9d6b-8ef22d92c62f",
   "locations": [
     {
       "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
@@ -73,6 +72,7 @@
   "poLineNumber": "268879-1",
   "publicationDate": "1991",
   "publisher": "John Wiley & Sons, Inc.",
+  "purchaseOrderId": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
   "receiptDate": null,
   "receiptStatus": "Fully Received",
   "reportingCodes": [],
@@ -91,9 +91,5 @@
     "refNumber": "999632785",
     "refNumberType": "Supplier's unique order line reference number",
     "vendorAccount": "12345-50"
-  },
-  "metadata": {
-    "createdDate": "2014-07-06T00:00:00Z",
-    "createdByUserId": "28d10cfc-d137-11e8-a8d5-f2801f1b9fd1"
   }
 }
