@@ -53,8 +53,8 @@ public class HelperUtils {
     Method respond400 = getRespond400(entitiesMetadataHolder, asyncResultHandler);
     try {
       Matcher matcher = orderBy.matcher(queryHolder.buildCQLQuery().toString());
-      String poNumber = wrapInLowerUnaccent(String.format("%s->>'%s'", queryHolder.getSearchField(), sortField));
-      String distinctOn = matcher.find() ? matcher.group(0) + ", " + poNumber : poNumber;
+      String inLowerUnaccentSortField = wrapInLowerUnaccent(String.format("%s->>'%s'", queryHolder.getSearchField(), sortField));
+      String distinctOn = matcher.find() ? matcher.group(0) + ", " + inLowerUnaccentSortField : inLowerUnaccentSortField;
       PostgresClient postgresClient = PgUtil.postgresClient(vertxContext, okapiHeaders);
       postgresClient.get(queryHolder.getTable(), entitiesMetadataHolder.getClazz(), JSONB, queryHolder.buildCQLQuery().toString(), true, false, false, null, distinctOn,
         reply -> processDbReply(entitiesMetadataHolder, asyncResultHandler, respond500, respond400, reply));
