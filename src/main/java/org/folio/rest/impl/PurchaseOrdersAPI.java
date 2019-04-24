@@ -23,7 +23,6 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
@@ -50,7 +49,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PurchaseOrder.class, PurchaseOrderCollection.class, GetOrdersStoragePurchaseOrdersResponse.class);
-      QueryHolder cql = new QueryHolder(PURCHASE_ORDER_TABLE, JSONB, query, offset, limit, lang);
+      QueryHolder cql = new QueryHolder(PURCHASE_ORDER_TABLE, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }

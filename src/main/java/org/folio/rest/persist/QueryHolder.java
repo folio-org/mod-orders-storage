@@ -24,6 +24,10 @@ public class QueryHolder {
     this.lang = lang;
   }
 
+  public QueryHolder(String table, String query, int offset, int limit, String lang) {
+    this(table, HelperUtils.JSONB, query, offset, limit, lang);
+  }
+
   public String getTable() {
 
     return table;
