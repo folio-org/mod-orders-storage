@@ -4,7 +4,11 @@ import io.restassured.RestAssured;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.folio.rest.jaxrs.model.*;
+import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.ReceivingHistory;
+import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
@@ -12,7 +16,9 @@ import java.net.URL;
 import java.util.List;
 
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
-import static org.folio.rest.utils.TestEntities.*;
+import static org.folio.rest.utils.TestEntities.PIECE;
+import static org.folio.rest.utils.TestEntities.PO_LINE;
+import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

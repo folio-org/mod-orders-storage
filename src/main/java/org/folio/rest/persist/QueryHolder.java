@@ -9,22 +9,32 @@ import org.z3950.zing.cql.cql2pgjson.FieldException;
 public class QueryHolder {
 
   private String table;
+  private String searchField;
   private String query;
   private int offset;
   private int limit;
   private String lang;
 
-  public QueryHolder(String table, String query, int offset, int limit, String lang) {
+  public QueryHolder(String table, String searchField, String query, int offset, int limit, String lang) {
     this.table = table;
+    this.searchField = searchField;
     this.query = query;
     this.offset = offset;
     this.limit = limit;
     this.lang = lang;
   }
 
+  public QueryHolder(String table, String query, int offset, int limit, String lang) {
+    this(table, HelperUtils.JSONB, query, offset, limit, lang);
+  }
+
   public String getTable() {
 
     return table;
+  }
+
+  public String getSearchField() {
+    return searchField;
   }
 
   public String getQuery() {
@@ -44,7 +54,7 @@ public class QueryHolder {
   }
 
   public CQLWrapper buildCQLQuery() throws FieldException {
-    CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.jsonb", table));
+    CQL2PgJSON cql2PgJSON = new CQL2PgJSON(String.format("%s.%s", table, searchField));
     return new CQLWrapper(cql2PgJSON, query)
       .setLimit(new Limit(limit))
       .setOffset(new Offset(offset));
