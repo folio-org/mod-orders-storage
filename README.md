@@ -67,7 +67,7 @@ For the APIs below separate views are created to enable queries that contain fie
 * /orders
    A separate view is created with a metadata column that combines the Purchase order and PO Line JSONs against which queries are executed.
    It returns the Purchase Order Collection results that match the query
-* /orders-storage/po-lines
+* /orders-storage/order-lines
    A separate view is created with a metadata column that combines the Purchase order and PO Line JSONs against which queries are executed.
    It returns the PO Line Collection results that match the query
 
