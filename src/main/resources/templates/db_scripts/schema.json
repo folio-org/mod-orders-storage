@@ -12,7 +12,7 @@
     },
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW order_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, po_line.jsonb || COALESCE(purchase_order.jsonb, '{}'::jsonb) AS metadata FROM po_line LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
+      "snippet": "CREATE OR REPLACE VIEW order_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, COALESCE(purchase_order.jsonb, '{}'::jsonb)||po_line.jsonb AS metadata FROM po_line LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
       "fromModuleVersion": "5.0"
     }
   ],
