@@ -29,12 +29,13 @@ public class SearchOrderLinesTest extends TestBase {
 
   @BeforeClass
   public static void before() throws MalformedURLException {
+    logger.info("Create a new tenant loading the sample data");
     prepareTenant(NEW_TENANT, true);
   }
 
   @AfterClass
   public static void after() throws MalformedURLException {
-    logger.info("Delete tenant");
+    logger.info("Delete the created \"polinesearch\" tenant");
     deleteTenant(NEW_TENANT);
   }
 
