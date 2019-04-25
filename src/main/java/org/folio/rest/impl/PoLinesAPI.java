@@ -1,9 +1,13 @@
 package org.folio.rest.impl;
 
+import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import java.util.Map;
+import javax.ws.rs.core.Response;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
@@ -13,14 +17,8 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.QueryHolder;
 
-import javax.ws.rs.core.Response;
-import java.util.Map;
-import static org.folio.rest.persist.HelperUtils.METADATA;
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
-
 public class PoLinesAPI implements OrdersStoragePoLines {
   private static final String POLINE_TABLE = "po_line";
-  private static final String POLINE_VIEW = "order_lines_view";
   private String idFieldName = "id";
 
 
@@ -34,7 +32,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<PoLine, PoLineCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PoLine.class, PoLineCollection.class, GetOrdersStoragePoLinesResponse.class);
-      QueryHolder cql = new QueryHolder(POLINE_VIEW, METADATA, query, offset, limit, lang);
+      QueryHolder cql = new QueryHolder(POLINE_TABLE, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }

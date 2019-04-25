@@ -23,7 +23,7 @@ import org.junit.Test;
 public class SearchOrderLinesTest extends TestBase {
   private static final Logger logger = LoggerFactory.getLogger(SearchOrderLinesTest.class);
 
-  private static final String ORDER_LINES_ENDPOINT = "/orders-storage/po-lines";
+  private static final String ORDER_LINES_ENDPOINT = "/orders-storage/order-lines";
   private static final String TENANT_NAME = "polinesearch";
   static final Header NEW_TENANT = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
 
