@@ -64,7 +64,7 @@ Note: The priority for the parameters in the order Tenant Parameters > Command L
 
 ### Search and Filtering on APIs
 For the APIs below separate views are created to enable queries that contain fields from Composite Purchase Order.
-* /orders
+* /orders-storage/orders
    A separate view is created with a metadata column that combines the Purchase order and PO Line JSONs against which queries are executed.
    It returns the Purchase Order Collection results that match the query
 * /orders-storage/order-lines
