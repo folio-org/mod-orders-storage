@@ -126,7 +126,7 @@
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/orders",
+          "pathPattern": "/orders-storage/orders",
           "permissionsRequired": ["orders-storage.purchase-orders.collection.get"]
         }
       ]

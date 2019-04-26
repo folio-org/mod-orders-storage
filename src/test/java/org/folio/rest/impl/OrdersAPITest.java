@@ -34,7 +34,7 @@ public class OrdersAPITest extends TestBase {
   private String purchaseOrderSampleId;
   private String purchaseOrderSampleId2;
 
-  private static final String ORDERS_ENDPOINT = "/orders";
+  private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
 
   private final String poLineSample = getFile("data/po-lines/268758-03_fully_received_electronic_resource.json");
   private final String poLineSample2 = getFile("data/po-lines/14383007-1_pending_physical_gift.json");
