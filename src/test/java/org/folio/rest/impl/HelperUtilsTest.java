@@ -53,6 +53,14 @@ public class HelperUtilsTest extends TestBase {
   }
 
   @Test
+  public void entitiesMetadataHolderRespond500FailTest() throws Exception {
+    EntitiesMetadataHolder holder = PowerMockito.mock(EntitiesMetadataHolder.class);
+    PowerMockito.doThrow(new NoSuchMethodException()).when(holder).getRespond500WithTextPlainMethod();
+    PowerMockito.whenNew(EntitiesMetadataHolder.class).withAnyArguments().thenReturn(holder);
+    get(storageUrl(ORDERS_ENDPOINT)).statusCode(HttpStatus.HTTP_INTERNAL_SERVER_ERROR.toInt()).contentType(TEXT_PLAIN);
+  }
+
+  @Test
   public void entitiesMetadataHolderRespond200FailTest() throws Exception {
     EntitiesMetadataHolder holder = PowerMockito.mock(EntitiesMetadataHolder.class);
     PowerMockito.doThrow(new NoSuchMethodException()).when(holder).getRespond200WithApplicationJson();
