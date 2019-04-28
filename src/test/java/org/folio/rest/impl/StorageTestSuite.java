@@ -7,6 +7,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.persist.EntitiesMetadataHolder;
+import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -14,6 +16,10 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -29,7 +35,10 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 
 
-@RunWith(Suite.class)
+@RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(Suite.class)
+@PowerMockIgnore({"javax.net.ssl.*", "org.apache.logging.log4j.*"})
+@PrepareForTest({PgUtil.class, EntitiesMetadataHolder.class, OrdersAPI.class})
 
 @Suite.SuiteClasses({
   EntitiesCrudTest.class,
@@ -38,7 +47,8 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
   PurchaseOrderLineNumberTest.class,
   PurchaseOrderNumberUniquenessTest.class,
   ReceivingHistoryTest.class,
-  TenantSampleDataTest.class
+  TenantSampleDataTest.class,
+  HelperUtilsTest.class
 })
 
 public class StorageTestSuite {
