@@ -69,7 +69,7 @@ public abstract class TestBase {
 
 
   void verifyCollectionQuantity(String endpoint, int quantity) throws MalformedURLException {
-    // Verify that there are no existing  records
+    // Verify that the specified quantity of records exist
     verifyCollectionQuantity(endpoint, quantity,TENANT_HEADER);
   }
 

@@ -38,7 +38,8 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
   PurchaseOrderLineNumberTest.class,
   PurchaseOrderNumberUniquenessTest.class,
   ReceivingHistoryTest.class,
-  TenantSampleDataTest.class
+  TenantSampleDataTest.class,
+  SearchOrderLinesTest.class
 })
 
 public class StorageTestSuite {
