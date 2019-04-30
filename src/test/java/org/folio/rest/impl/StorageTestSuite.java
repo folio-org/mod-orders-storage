@@ -47,6 +47,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
   PurchaseOrderLineNumberTest.class,
   PurchaseOrderNumberUniquenessTest.class,
   ReceivingHistoryTest.class,
+  SearchOrderLinesTest.class,
   TenantSampleDataTest.class,
   HelperUtilsTest.class
 })
