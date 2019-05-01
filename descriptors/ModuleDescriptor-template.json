@@ -196,6 +196,17 @@
       ]
     },
     {
+      "id": "orders-storage.order-lines",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/order-lines",
+          "permissionsRequired": ["orders-storage.order-lines.collection.get"]
+        }
+       ]
+    },
+    {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",
@@ -433,11 +444,25 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.order-lines.collection.get",
+      "displayName" : "order-lines get",
+      "description" : "Get a collection of PO lines"
+    },
+    {
+      "permissionName" : "orders-storage.order-lines.all",
+      "displayName" : "All order lines perms",
+      "description" : "All permissions for the Order lines",
+      "subPermissions" : [
+        "orders-storage.order-lines.collection.get"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
       "subPermissions" : [
         "orders-storage.alerts.all",
+        "orders-storage.order-lines.collection.get",
         "orders-storage.pieces.all",
         "orders-storage.po-lines.all",
         "orders-storage.po-number.all",
