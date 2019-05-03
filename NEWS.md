@@ -1,4 +1,4 @@
-## 5.1.0 - Unreleased
+## 6.0.0 - Unreleased
 
 ## 5.0.0 - Released
 The primary focus of this release was to accommodate increased flexibility in inventory integration and also provide endpoints for Purchase Order and Purchase Order Lines search and filtering based on complex criteria.
