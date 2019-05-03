@@ -92,6 +92,11 @@
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/po-lines/{id}",
           "permissionsRequired": ["orders-storage.po-lines.item.delete"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/order-lines",
+          "permissionsRequired": ["orders-storage.po-lines.collection.get"]
         }
       ]
     },
