@@ -35,7 +35,7 @@
     },
     {
       "id": "orders-storage.pieces",
-      "version": "2.0",
+      "version": "3.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -66,7 +66,7 @@
     },
     {
       "id": "orders-storage.po-lines",
-      "version": "4.0",
+      "version": "5.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -102,7 +102,7 @@
     },
     {
       "id": "orders-storage.purchase-orders",
-      "version": "4.0",
+      "version": "5.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -138,7 +138,7 @@
     },
     {
       "id": "orders-storage.receiving-history",
-      "version": "2.1",
+      "version": "3.0",
       "handlers": [
         {
           "methods": ["GET"],

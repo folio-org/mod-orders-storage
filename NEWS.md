@@ -1,4 +1,18 @@
-## 5.0.0 - Unreleased
+## 6.0.0 - Unreleased
+
+## 5.0.0 - Released
+The primary focus of this release was to accommodate increased flexibility in inventory integration and also provide endpoints for Purchase Order and Purchase Order Lines search and filtering based on complex criteria.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v4.0.0...v5.0.0)
+
+### Stories
+* [MODORDSTOR-73](https://issues.folio.org/browse/MODORDSTOR-73) - Implement `GET /orders-storage/order-lines` w/ search and filtering
+* [MODORDSTOR-70](https://issues.folio.org/browse/MODORDSTOR-70) - Make `poLine.checkinItems` default to `false`
+* [MODORDSTOR-69](https://issues.folio.org/browse/MODORDSTOR-69) - Need the ability to specify materialType for physical and E-resource
+* [MODORDSTOR-68](https://issues.folio.org/browse/MODORDSTOR-68) - Piece records should have format of the piece, not the poLine
+* [MODORDSTOR-65](https://issues.folio.org/browse/MODORDSTOR-65) - Update sample data to accommodate increased flexibility in inventory integration
+* [MODORDSTOR-50](https://issues.folio.org/browse/MODORDSTOR-50) - Use sample data in unit tests
+* [MODORDSTOR-22](https://issues.folio.org/browse/MODORDSTOR-22) - Implement `GET /orders-storage/orders` w/ search and filtering
 
 ## 4.0.0 - Released
 The primary focus of this release was to refactor Purchase Order Line model and related endpoints.
