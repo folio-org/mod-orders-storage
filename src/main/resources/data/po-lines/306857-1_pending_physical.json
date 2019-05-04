@@ -56,7 +56,6 @@
     }
   ],
   "orderFormat": "Physical Resource",
-  "owner": "Cushing",
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "None",

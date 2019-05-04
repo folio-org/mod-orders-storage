@@ -3,6 +3,7 @@
   "approved": true,
   "manualPo": false,
   "orderType": "One-Time",
+  "owner": "Acquisitions - Monos",
   "poNumber": "101125",
   "reEncumber": false,
   "vendor": "13fb64dc-cdf1-11e8-a8d5-f2801f1b9fd1",

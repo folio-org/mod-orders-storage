@@ -4,6 +4,7 @@
   "dateOrdered": "2018-06-30T00:00:00Z",
   "manualPo": false,
   "orderType": "One-Time",
+  "owner": "LTS Acquisitions",
   "poNumber": "268758",
   "reEncumber": false,
   "vendor": "50fb88ea-cdf1-11e8-a8d5-f2801f1b9fd1",

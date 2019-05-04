@@ -56,7 +56,6 @@
     }
   ],
   "orderFormat": "Physical Resource",
-  "owner": "Acquisitions - Monos",
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "Instance, Holding, Item",
