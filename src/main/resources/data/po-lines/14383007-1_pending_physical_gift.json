@@ -56,7 +56,6 @@
     }
   ],
   "orderFormat": "Physical Resource",
-  "owner": "Serials",
   "paymentStatus": "Payment Not Required",
   "physical": {
     "createInventory": "Instance, Holding",
