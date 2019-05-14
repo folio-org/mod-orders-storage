@@ -297,25 +297,11 @@ public class TenantReferenceAPI extends TenantAPI {
   @Override
   public void deleteTenant(Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
     log.info("deleteTenant");
-    Vertx vertx = cntxt.owner();
-
-    String tenantId = TenantTool.tenantId(headers);
-    PostgresClient client = PostgresClient.getInstance(vertx, tenantId);
     super.deleteTenant(headers, res -> {
-      if (res.failed()) {
-        hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-          .respond500WithTextPlain(res.cause().getLocalizedMessage())));
-        return;
-      }
-      client.closeClient(event -> {
-        if(event.failed()) {
-          hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-            .respond500WithTextPlain(res.cause().getLocalizedMessage())));
-          return;
-        }
-        hndlr.handle(io.vertx.core.Future.succeededFuture(DeleteTenantResponse.respond204()));
-      });
-
+      Vertx vertx = cntxt.owner();
+      String tenantId = TenantTool.tenantId(headers);
+      PostgresClient.getInstance(vertx, tenantId)
+        .closeClient(event -> hndlr.handle(res));
     }, cntxt);
   }
 }
