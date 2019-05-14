@@ -29,7 +29,6 @@ public class TenantSampleDataTest extends TestBase{
 
   private static final Header NONEXISTENT_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "no_tenant");
   private static final Header ANOTHER_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "new_tenant");
-  private static final Header ANOTHER_TENANT_HEADER_WITHOUT_UPGRADE = new Header(OKAPI_HEADER_TENANT, "no_upgrade_tenant");
   private static final Header PARTIAL_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "partial_tenant");
 
 
@@ -75,15 +74,15 @@ public class TenantSampleDataTest extends TestBase{
     logger.info("load sample data");
     try{
       JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(true, false);
-      postToTenant(ANOTHER_TENANT_HEADER_WITHOUT_UPGRADE, jsonBody)
+      postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
         .assertThat()
           .statusCode(201);
       for (TestEntities entity : TestEntities.values()) {
         logger.info("Test expected quantity for " + entity.name());
-        verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity(), ANOTHER_TENANT_HEADER_WITHOUT_UPGRADE);
+        verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
       }
     } finally {
-      deleteTenant(ANOTHER_TENANT_HEADER_WITHOUT_UPGRADE);
+      deleteTenant(ANOTHER_TENANT_HEADER);
     }
   }
 
