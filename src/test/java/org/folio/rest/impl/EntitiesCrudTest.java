@@ -115,7 +115,9 @@ public class EntitiesCrudTest extends TestBase {
   @MethodSource("deleteOrder")
   public void testDeleteEndpoint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(), testEntity.getId()));
-    deleteDataSuccess(testEntity.getEndpointWithId(), testEntity.getId());
+    deleteData(testEntity.getEndpointWithId(), testEntity.getId())
+      .then().log().ifValidationFails()
+       .statusCode(204);
   }
 
   @ParameterizedTest
