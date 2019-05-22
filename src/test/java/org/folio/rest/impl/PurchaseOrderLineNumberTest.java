@@ -9,7 +9,7 @@ import io.vertx.ext.sql.ResultSet;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.persist.PostgresClient;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.net.MalformedURLException;

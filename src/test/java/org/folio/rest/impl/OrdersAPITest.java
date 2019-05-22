@@ -7,7 +7,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;

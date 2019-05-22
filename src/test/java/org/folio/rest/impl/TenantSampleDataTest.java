@@ -10,7 +10,7 @@ import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.utils.TenantApiTestUtil;
 import org.folio.rest.utils.TestEntities;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 

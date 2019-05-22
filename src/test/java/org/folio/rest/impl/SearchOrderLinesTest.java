@@ -18,7 +18,7 @@ import org.folio.rest.jaxrs.model.PoLine.OrderFormat;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class SearchOrderLinesTest extends TestBase {
   private static final Logger logger = LoggerFactory.getLogger(SearchOrderLinesTest.class);

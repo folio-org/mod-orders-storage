@@ -5,11 +5,6 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.io.IOUtils;
-import org.folio.rest.utils.TestEntities;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -17,6 +12,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import org.apache.commons.io.IOUtils;
+import org.folio.rest.utils.TestEntities;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
@@ -37,7 +36,7 @@ public abstract class TestBase {
 
   private static boolean invokeStorageTestSuiteAfter = false;
 
-  @BeforeClass
+  @BeforeAll
   public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     Vertx vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
@@ -47,7 +46,7 @@ public abstract class TestBase {
 
   }
 
-  @AfterClass
+  @AfterAll
   public static void testBaseAfterClass()
     throws InterruptedException,
     ExecutionException,
