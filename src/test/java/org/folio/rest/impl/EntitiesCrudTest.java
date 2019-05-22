@@ -13,8 +13,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.platform.runner.JUnitPlatform;
+import org.junit.runner.RunWith;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@RunWith(JUnitPlatform.class)
 public class EntitiesCrudTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);

@@ -1,26 +1,22 @@
 package org.folio.rest.impl;
 
-import io.restassured.RestAssured;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.folio.rest.jaxrs.model.Piece;
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.ReceivingHistory;
-import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
-import org.junit.jupiter.api.Test;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
+import io.restassured.RestAssured;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import org.folio.rest.jaxrs.model.*;
+import org.junit.Test;
+
 
 public class ReceivingHistoryTest extends TestBase {
 
@@ -36,11 +32,11 @@ public class ReceivingHistoryTest extends TestBase {
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
   private final String poLineSample = getFile("data/po-lines/268758-03_fully_received_electronic_resource.json");
-  private final String poLineSample2 = getFile("data/po-lines/14383007-1_pending_physical_gift.json");
+  private final String poLineSample2 = getFile("data/po-lines/313000-1_awaiting_receipt_mix-format.json");
   private final String pieceSample = getFile("data/pieces/1a902141-d8c6-4cf3-8a19-193eca007478.json");
   private final String pieceSample2 = getFile("data/pieces/5e317dc2-deeb-4429-b2a1-91e5cd0fd5f7.json");
   private final String purchaseOrderSample = getFile("data/purchase-orders/268758_one-time_open.json");
-  private final String purchaseOrderSample2 = getFile("data/purchase-orders/14383007_ongoing_open.json");
+  private final String purchaseOrderSample2 = getFile("data/purchase-orders/313000_one-time_open.json");
   private static final String APPLICATION_JSON = "application/json";
 
   private static final Integer CREATED_ENTITIES_QUANTITY = 2;
@@ -52,17 +48,6 @@ public class ReceivingHistoryTest extends TestBase {
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, 0);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating receiving_history View ...");
-      logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
-      piecesSampleId = createEntity(PIECE.getEndpoint(), pieceSample);
-      logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
-      piecesSampleId2 = createEntity(PIECE.getEndpoint(), pieceSample2);
-      verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, CREATED_ENTITIES_QUANTITY);
-
-      logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 1...");
-      poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
-      logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 2 ...");
-      poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
-      verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Purchase order 1...");
       purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
@@ -70,6 +55,17 @@ public class ReceivingHistoryTest extends TestBase {
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
       verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
+      logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 1...");
+      poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
+      logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 2 ...");
+      poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
+      verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
+
+      logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
+      piecesSampleId = createEntity(PIECE.getEndpoint(), pieceSample);
+      logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
+      piecesSampleId2 = createEntity(PIECE.getEndpoint(), pieceSample2);
+      verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
       verifyViewCollectionAfter(storageUrl(RECEIVING_HISTORY_ENDPOINT));
@@ -79,10 +75,10 @@ public class ReceivingHistoryTest extends TestBase {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
-      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
       deleteDataSuccess(PIECE.getEndpointWithId(), piecesSampleId);
-      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PIECE.getEndpointWithId(), piecesSampleId2);
+      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
+      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
     }

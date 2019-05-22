@@ -2,7 +2,7 @@ package org.folio.rest.impl;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.net.MalformedURLException;
 

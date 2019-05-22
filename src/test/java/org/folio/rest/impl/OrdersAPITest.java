@@ -7,7 +7,7 @@ import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
@@ -48,11 +48,6 @@ public class OrdersAPITest extends TestBase {
   public void testGetPurchaseOrders() throws MalformedURLException {
 
     try {
-      logger.info("--- mod-orders-storage orders test: Creating PoLine 1...");
-      poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
-      logger.info("--- mod-orders-storage orders test: Creating PoLine 2 ...");
-      poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
-      verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage orders test: Creating Purchase order 1...");
       purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
@@ -61,6 +56,13 @@ public class OrdersAPITest extends TestBase {
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
       expectedOrders.put(purchaseOrderSampleId2, new JsonObject(purchaseOrderSample2).mapTo(PurchaseOrder.class));
       verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
+
+      logger.info("--- mod-orders-storage orders test: Creating PoLine 1...");
+      poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
+      logger.info("--- mod-orders-storage orders test: Creating PoLine 2 ...");
+      poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
+      verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
+
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities conformity... ");
       List<PurchaseOrder> allActualOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT));

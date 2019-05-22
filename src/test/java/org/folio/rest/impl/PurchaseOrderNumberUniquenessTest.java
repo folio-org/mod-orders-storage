@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.net.MalformedURLException;
 
