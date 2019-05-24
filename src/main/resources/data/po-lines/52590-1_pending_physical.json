@@ -1,5 +1,5 @@
 {
-  "id": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "BaEC48DD-1594-2712-Be8f-dE336BC83Fcc",
   "acquisitionMethod": "Purchase",
   "agreementId": "800b2f19-7134-4408-8145-3b04697b7de7",
   "alerts": [],
@@ -46,7 +46,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "422eceb4-a685-4e7d-9fd5-dbce563f32b2",
+  "instanceId": "6b4ae089-e1ee-431f-af83-e1133f8e3da0",
   "locations": [
     {
       "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
@@ -59,8 +59,8 @@
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "None",
-    "materialSupplier": "a1f045a9-22c9-4705-8953-d15438017346",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
     "receiptDue": null,
     "volumes": [
       "vol. 1"

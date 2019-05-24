@@ -46,7 +46,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "25733ba9-49b7-406f-ba56-3dc4e84e24a8",
+  "instanceId": "f7e82a1e-fc06-4b82-bb1d-da326cb378ce",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -59,8 +59,8 @@
   "paymentStatus": "Awaiting Payment",
   "physical": {
     "createInventory": "Instance",
-    "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "5ee11d91-f7e8-481d-b079-65d708582ccc",
     "receiptDue": "2018-09-29T00:00:00.000Z",
     "volumes": [
       "vol. 1"
@@ -70,7 +70,7 @@
   "poLineNumber": "268758-01",
   "publicationDate": "2011",
   "publisher": "Tapir Academic Press",
-  "purchaseOrderId": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "purchaseOrderId": "efff3ffe-5469-1f8f-aa3a-7afc933f9eff",
   "receiptDate": null,
   "receiptStatus": "Awaiting Receipt",
   "reportingCodes": [],

@@ -46,7 +46,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "f8f9bd1d-fd9e-4faa-b3f4-63df23d72866",
+  "instanceId": "ce00bca2-9270-4c6b-b096-b83a2e56e8e9",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -59,8 +59,8 @@
   "paymentStatus": "Payment Not Required",
   "physical": {
     "createInventory": "Instance, Holding",
-    "materialSupplier": "62ce93b0-c675-43d8-9d43-a4ee7177c8de",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "80fb5168-cdf1-11e8-a8d5-c2801f1b9f22",
+    "materialType": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
     "receiptDue": null,
     "volumes": [
       "vol. 1"

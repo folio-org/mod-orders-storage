@@ -1,5 +1,5 @@
 {
-  "id": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "774608cf-6e7f-498a-b0C6-3bD38D8b8F9e",
   "acquisitionMethod": "Purchase",
   "agreementId": "7324c8eb-5e81-4109-812b-411c26ef09f2",
   "alerts": [],
@@ -46,7 +46,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "e094b9a1-e61b-409c-909b-64b8c767fd50",
+  "instanceId": "7fbd5d84-62d1-44c6-9c45-6cb173998bbd",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -59,8 +59,8 @@
   "paymentStatus": "Awaiting Payment",
   "physical": {
     "createInventory": "Instance",
-    "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "60fb4bfa-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
     "receiptDue": "2018-09-29T00:00:00.000Z",
     "volumes": [
       "vol. 1"
@@ -70,7 +70,7 @@
   "poLineNumber": "268758-02",
   "publicationDate": "2011",
   "publisher": "Tapir Academic Press",
-  "purchaseOrderId": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "purchaseOrderId": "efff3ffe-5469-1f8f-aa3a-7afc933f9eff",
   "receiptDate": null,
   "receiptStatus": "Awaiting Receipt",
   "reportingCodes": [],

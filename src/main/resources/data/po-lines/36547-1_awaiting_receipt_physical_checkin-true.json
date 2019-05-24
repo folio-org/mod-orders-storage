@@ -1,5 +1,5 @@
 {
-  "id": "80fb5168-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "852d0F06-290a-279c-92cf-AEE87BeFC6BE",
   "acquisitionMethod": "Purchase",
   "agreementId": "44683de8-e2cf-42bc-af9e-7eca992934b6",
   "alerts": [],
@@ -46,7 +46,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "b3b731f8-9e01-4309-96b2-5ce6ca423eb5",
+  "instanceId": "6b4ae089-e1ee-431f-af83-e1133f8e3da0",
   "locations": [
     {
       "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
@@ -59,8 +59,8 @@
   "paymentStatus": "Awaiting Payment",
   "physical": {
     "createInventory": "Instance, Holding",
-    "materialSupplier": "c8fdc4da-cb3e-4294-a90b-372e2495e84a",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
     "receiptDue": "2018-09-29T00:00:00.000Z",
     "volumes": [
       "vol. 1"
