@@ -25,13 +25,6 @@
       "populateJsonWithId": true
     },
     {
-      "tableName": "pieces",
-      "generateId": true,
-      "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
-    },
-    {
       "tableName": "reporting_code",
       "generateId": true,
       "fromModuleVersion": 1.0,
@@ -51,7 +44,26 @@
       "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true
+      "populateJsonWithId": true,
+      "foreignKeys": [
+        {
+          "fieldName": "purchaseOrderId",
+          "targetTable": "purchase_order"
+        }
+      ]
+    },
+    {
+      "tableName": "pieces",
+      "generateId": true,
+      "fromModuleVersion": 1.0,
+      "withMetadata": true,
+      "populateJsonWithId": true,
+      "foreignKeys": [
+        {
+          "fieldName": "poLineId",
+          "targetTable": "po_line"
+        }
+      ]
     }
   ]
 }
