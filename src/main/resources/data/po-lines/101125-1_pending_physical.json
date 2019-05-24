@@ -41,8 +41,9 @@
   "edition": "First edition",
   "fundDistribution": [
     {
-      "code": "USHIST-FY19",
+      "code": "USHIST",
       "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08013",
+      "fundId": "65032151-39a5-4cef-8810-5350eb316300",
       "percentage": 100.0
     }
   ],
