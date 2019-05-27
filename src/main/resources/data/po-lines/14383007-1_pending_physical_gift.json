@@ -41,8 +41,9 @@
   "edition": "First edition",
   "fundDistribution": [
     {
-      "code": "GIFT-SUBN-FY19",
+      "code": "GIFT-SUBN",
       "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08009",
+      "fundId": "e9f9bc2f-bad5-4613-9d6c-f55efa5805e7",
       "percentage": 100.0
     }
   ],
