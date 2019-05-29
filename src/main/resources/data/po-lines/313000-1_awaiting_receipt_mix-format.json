@@ -28,8 +28,12 @@
   "details": {
     "productIds": [
       {
-        "productId": "12357",
-        "productIdType": "Vendor Title Number"
+        "productIdType": "ISBN",
+        "productId": "0552142352"
+      },
+      {
+        "productIdType": "ISBN",
+        "productId": "9780552142352"
       }
     ],
     "receivingNote": "",
@@ -106,10 +110,16 @@
     "dvd",
     "streaming"
   ],
-  "title": "Acquisitions Rules the Library",
+  "title": "Interesting Times",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Pratchett, Terry"
+    }
+  ]
 }

@@ -26,12 +26,6 @@
   },
   "description": "",
   "details": {
-    "productIds": [
-      {
-        "productId": "1234-8675",
-        "productIdType": "ISSN"
-      }
-    ],
     "receivingNote": "",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
@@ -68,8 +62,6 @@
   },
   "poLineDescription": "",
   "poLineNumber": "14383007-1",
-  "publicationDate": "1956",
-  "publisher": "Tsuda College",
   "purchaseOrderId": "8c328a18-5761-4329-95f6-599412c32310",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -84,10 +76,28 @@
   "tags": [
     "giftsubscription"
   ],
-  "title": "The Tsuda Review",
+  "title": "Cantatas for bass 4 Ich habe genug : BWV 82 / Johann Sebastian Bach ; Matthias Goerne, baritone ; Freiburger Barockorchester, Gottfried von der Goltz, violin and conductor",
   "vendorDetail": {
     "instructions": "no. 42 and continuations",
     "noteFromVendor": "",
     "vendorAccount": ""
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Bach, Johann Sebastian"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Arfken, Katharina"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Goltz, Gottfried von der"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Freiburger Barockorchester"
+    }
+  ]
 }

@@ -28,8 +28,20 @@
   "details": {
     "productIds": [
       {
-        "productId": "43",
-        "productIdType": "Vendor Item Number"
+        "productId": "9780866989732",
+        "productIdType": "ISBN"
+      },
+      {
+        "productId": "0866989730",
+        "productIdType": "ISBN"
+      },
+      {
+        "productId": "9780866985529",
+        "productIdType": "ISBN"
+      },
+      {
+        "productId": "0866985522",
+        "productIdType": "ISBN"
       }
     ],
     "receivingNote": "Cushing materials, do not mark",
@@ -68,8 +80,8 @@
   },
   "poLineDescription": "",
   "poLineNumber": "306857-1",
-  "publicationDate": "2017",
-  "publisher": "",
+  "publicationDate": "2016",
+  "publisher": "ACMRS, Arizona Center for Medieval and Renaissance Studies",
   "purchaseOrderId": "e41e0161-2bc6-41f3-a6e7-34fc13250bf1",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -82,10 +94,20 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Joss Whedon Papers",
+  "title": "Anglo-Saxon manuscripts in microfiche facsimile Volume 25 Corpus Christi College, Cambridge II, MSS 12, 144, 162, 178, 188, 198, 265, 285, 322, 326, 449 microform A. N. Doane (editor and director), Matthew T. Hussey (associate editor), Phillip Pulsiano (founding editor)",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Lucas, Peter J"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Arizona Center for Medieval and Renaissance Studies"
+    }
+  ]
 }

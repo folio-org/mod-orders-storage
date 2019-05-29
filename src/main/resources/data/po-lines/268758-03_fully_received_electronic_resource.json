@@ -28,8 +28,12 @@
   "details": {
     "productIds": [
       {
-        "productId": "4005000",
-        "productIdType": "Vendor Title Number"
+        "productIdType": "ISBN",
+        "productId": "0956687695"
+      },
+      {
+        "productIdType": "ISBN",
+        "productId": "9780956687695"
       }
     ],
     "receivingNote": "Renewal, access continuous",
@@ -69,8 +73,6 @@
   "paymentStatus": "Fully Paid",
   "poLineDescription": "",
   "poLineNumber": "268758-03",
-  "publicationDate": "2019",
-  "publisher": "Taylor & Francis",
   "purchaseOrderId": "efff3ffe-5469-1f8f-aa3a-7afc933f9eff",
   "receiptDate": "2018-01-08T00:00:00.000Z",
   "receiptStatus": "Fully Received",
@@ -82,10 +84,16 @@
     "code": "",
     "description": "Manually entered"
   },
-  "title": "The American Statistician",
+  "title": "Nod",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": "EBAUB12345"
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Barnes, Adrian"
+    }
+  ]
 }

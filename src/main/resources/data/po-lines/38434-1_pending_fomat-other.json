@@ -28,8 +28,8 @@
   "details": {
     "productIds": [
       {
-        "productId": "",
-        "productIdType": "Other Standard Identifier"
+        "productId": "0747-0088",
+        "productIdType": "ISSN"
       }
     ],
     "receivingNote": "",
@@ -67,8 +67,8 @@
   },
   "poLineDescription": "",
   "poLineNumber": "38434-1",
-  "publicationDate": "1989",
-  "publisher": "",
+  "publicationDate": "1915",
+  "publisher": "American Bar Association",
   "purchaseOrderId": "c27e60f9-6361-44c1-976e-0c4821a33a7d",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -83,7 +83,7 @@
   "tags": [
     "CatalogingRecords"
   ],
-  "title": "GOBI record service",
+  "title": "ABA Journal",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

@@ -28,8 +28,8 @@
   "details": {
     "productIds": [
       {
-        "productId": "0065-3438",
-        "productIdType": "ISSN"
+        "productId": "9781450351430",
+        "productIdType": "ISBN"
       }
     ],
     "receivingNote": "start with v. 162",
@@ -69,7 +69,7 @@
   "poLineDescription": "",
   "poLineNumber": "101101-1",
   "publicationDate": "2018",
-  "publisher": "Plenum Press",
+  "publisher": "SAGE",
   "purchaseOrderId": "589a6016-3463-49f6-8aa2-dc315d0665fd",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -82,7 +82,7 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Advances in astronautical science",
+  "title": "The city post-modernity edited by Alan Latham",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

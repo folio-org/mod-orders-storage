@@ -26,12 +26,6 @@
   },
   "description": "",
   "details": {
-    "productIds": [
-      {
-        "productId": "9781118416068",
-        "productIdType": "ISBN"
-      }
-    ],
     "receivingNote": "",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
@@ -69,8 +63,6 @@
   "paymentStatus": "Awaiting Payment",
   "poLineDescription": "",
   "poLineNumber": "268879-1",
-  "publicationDate": "1991",
-  "publisher": "John Wiley & Sons, Inc.",
   "purchaseOrderId": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
   "receiptDate": null,
   "receiptStatus": "Fully Received",
@@ -83,12 +75,30 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Roitt`s essential immunology / Peter J. Delves, Seamus J. Martin, Dennis R. Burton, Ivan M. Roitt.",
+  "title": "Cantatas for bass 4 Ich habe genug : BWV 82 / Johann Sebastian Bach ; Matthias Goerne, baritone ; Freiburger Barockorchester, Gottfried von der Goltz, violin and conductor",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "refNumber": "999632785",
     "refNumberType": "Supplier's unique order line reference number",
     "vendorAccount": "12345-50"
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Bach, Johann Sebastian"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Arfken, Katharina"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Goltz, Gottfried von der"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Freiburger Barockorchester"
+    }
+  ]
 }

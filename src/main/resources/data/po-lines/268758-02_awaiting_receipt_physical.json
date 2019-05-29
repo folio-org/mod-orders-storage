@@ -68,8 +68,8 @@
   },
   "poLineDescription": "",
   "poLineNumber": "268758-02",
-  "publicationDate": "2011",
-  "publisher": "Tapir Academic Press",
+  "publicationDate": "2016",
+  "publisher": "Alfred A. Knopf",
   "purchaseOrderId": "efff3ffe-5469-1f8f-aa3a-7afc933f9eff",
   "receiptDate": null,
   "receiptStatus": "Awaiting Receipt",
@@ -82,10 +82,16 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Taxes, tributes and tributary lands in the making of Scandinavian kingdoms in the Middle Ages",
+  "title": "Bridget Jones's Baby: the diaries",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Fielding, Helen"
+    }
+  ]
 }

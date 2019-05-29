@@ -28,8 +28,8 @@
   "details": {
     "productIds": [
       {
-        "productId": "7659CH",
-        "productIdType": "Vendor Title Number"
+        "productId": "9781450351430",
+        "productIdType": "ISBN"
       }
     ],
     "receivingNote": "",
@@ -68,8 +68,6 @@
   },
   "poLineDescription": "",
   "poLineNumber": "52590-1",
-  "publicationDate": "1901",
-  "publisher": "London Topographical Society",
   "purchaseOrderId": "0610be6d-0ddd-494b-b867-19f63d8b5d6d",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -84,12 +82,46 @@
   "tags": [
     "membership"
   ],
-  "title": "Membership",
+  "title": "MobiCom'17 5 mmNets'17, October 16, 2017, Snowbird, UT, USA / general chairs: Haitham Hassanieh (University of Illinois at Urbana Champaign, USA), Xinyu Zhang (University of California San Diego, USA)",
   "vendorDetail": {
     "instructions": "1901 and continuation",
     "noteFromVendor": "",
     "refNumber": "96459125",
     "refNumberType": "Supplier's unique order line reference number",
     "vendorAccount": "B-Ser"
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1. 2017 Snowbird, Utah"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Hassanieh, Haitham"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Zhang, Xinyu"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "MobiCom 23. 2017 Snowbird, Utah"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Association for Computing Machinery Special Interest Group on Mobility of Systems Users, Data, and Computing"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1 2017.10.16 Snowbird, Utah"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "mmNets 1 2017.10.16 Snowbird, Utah"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "Annual International Conference on Mobile Computing and Networking (ACM MobiCom) 23 2017.10.16-20 Snowbird, Utah"
+    }
+  ]
 }

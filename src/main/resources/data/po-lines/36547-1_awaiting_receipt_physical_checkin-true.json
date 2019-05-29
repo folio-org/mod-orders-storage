@@ -28,7 +28,7 @@
   "details": {
     "productIds": [
       {
-        "productId": "9780764354113",
+        "productId": "9781450351430",
         "productIdType": "ISBN"
       }
     ],
@@ -38,7 +38,7 @@
     "subscriptionTo": null
   },
   "donor": "",
-  "edition": "Second edition",
+  "edition": "",
   "fundDistribution": [
     {
       "code": "USHIST-FY19",
@@ -68,8 +68,6 @@
   },
   "poLineDescription": "",
   "poLineNumber": "36547-1",
-  "publicationDate": "2011",
-  "publisher": "Tapir Academic Press",
   "purchaseOrderId": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
   "receiptDate": null,
   "receiptStatus": "Awaiting Receipt",
@@ -82,10 +80,44 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Kayak Fishing in the Northern Gulf Coast",
+  "title": "MobiCom'17 5 mmNets'17, October 16, 2017, Snowbird, UT, USA / general chairs: Haitham Hassanieh (University of Illinois at Urbana Champaign, USA), Xinyu Zhang (University of California San Diego, USA)",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1. 2017 Snowbird, Utah"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Hassanieh, Haitham"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Zhang, Xinyu"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "MobiCom 23. 2017 Snowbird, Utah"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Association for Computing Machinery Special Interest Group on Mobility of Systems Users, Data, and Computing"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1 2017.10.16 Snowbird, Utah"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "mmNets 1 2017.10.16 Snowbird, Utah"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "Annual International Conference on Mobile Computing and Networking (ACM MobiCom) 23 2017.10.16-20 Snowbird, Utah"
+    }
+  ]
 }
