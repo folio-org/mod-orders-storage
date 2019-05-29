@@ -51,8 +51,9 @@
   },
   "fundDistribution": [
     {
-      "code": "ENDOW-SUBN-FY19",
+      "code": "ENDOW-SUBN",
       "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08008",
+      "fundId": "1714f71f-b845-444b-a79e-a577487a6f7d",
       "percentage": 100.0
     }
   ],
