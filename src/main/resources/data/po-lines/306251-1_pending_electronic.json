@@ -1,5 +1,5 @@
 {
-  "id": "13fb64dc-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "67Df7Bd0-fF70-2ad2-9162-54ACB3e9180E",
   "acquisitionMethod": "Purchase",
   "agreementId": "38451d3a-9e30-4eb1-be32-3fae8e349580",
   "alerts": [],
@@ -45,7 +45,7 @@
     "activationDue": 0,
     "createInventory": "None",
     "expectedActivation": "2018-06-30T00:00:00.000Z",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "materialType": "615b8413-82d5-4203-aa6e-e37984cb5ac3",
     "trial": false,
     "userLimit": 0
   },

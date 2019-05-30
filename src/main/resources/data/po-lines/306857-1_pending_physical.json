@@ -1,5 +1,5 @@
 {
-  "id": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "abBD1cEF-A8eE-3d07-93B2-71C1387E61b1",
   "acquisitionMethod": "Purchase",
   "agreementId": "bfdbf5e3-8d5f-4ec0-9aed-38c68fb89254",
   "alerts": [],
@@ -28,8 +28,20 @@
   "details": {
     "productIds": [
       {
-        "productId": "43",
-        "productIdType": "Vendor Item Number"
+        "productId": "9780866989732",
+        "productIdType": "ISBN"
+      },
+      {
+        "productId": "0866989730",
+        "productIdType": "ISBN"
+      },
+      {
+        "productId": "9780866985529",
+        "productIdType": "ISBN"
+      },
+      {
+        "productId": "0866985522",
+        "productIdType": "ISBN"
       }
     ],
     "receivingNote": "Cushing materials, do not mark",
@@ -47,7 +59,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "27f14a3a-dbfe-4056-a502-0f5ab037cd4a",
+  "instanceId": "8be05cf5-fb4f-4752-8094-8e179d08fb99",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -60,8 +72,8 @@
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "None",
-    "materialSupplier": "fa3cf2bb-5187-444c-b216-d43409874297",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "50fb6ae0-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
     "receiptDue": null,
     "volumes": [
       "vol. 0"
@@ -69,8 +81,8 @@
   },
   "poLineDescription": "",
   "poLineNumber": "306857-1",
-  "publicationDate": "2017",
-  "publisher": "",
+  "publicationDate": "2016",
+  "publisher": "ACMRS, Arizona Center for Medieval and Renaissance Studies",
   "purchaseOrderId": "e41e0161-2bc6-41f3-a6e7-34fc13250bf1",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -83,10 +95,20 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Joss Whedon Papers",
+  "title": "Anglo-Saxon manuscripts in microfiche facsimile Volume 25 Corpus Christi College, Cambridge II, MSS 12, 144, 162, 178, 188, 198, 265, 285, 322, 326, 449 microform A. N. Doane (editor and director), Matthew T. Hussey (associate editor), Phillip Pulsiano (founding editor)",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Lucas, Peter J"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Arizona Center for Medieval and Renaissance Studies"
+    }
+  ]
 }

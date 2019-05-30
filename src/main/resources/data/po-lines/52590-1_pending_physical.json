@@ -1,5 +1,5 @@
 {
-  "id": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "BaEC48DD-1594-2712-Be8f-dE336BC83Fcc",
   "acquisitionMethod": "Purchase",
   "agreementId": "800b2f19-7134-4408-8145-3b04697b7de7",
   "alerts": [],
@@ -28,8 +28,8 @@
   "details": {
     "productIds": [
       {
-        "productId": "7659CH",
-        "productIdType": "Vendor Title Number"
+        "productId": "9781450351430",
+        "productIdType": "ISBN"
       }
     ],
     "receivingNote": "",
@@ -47,7 +47,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "422eceb4-a685-4e7d-9fd5-dbce563f32b2",
+  "instanceId": "6b4ae089-e1ee-431f-af83-e1133f8e3da0",
   "locations": [
     {
       "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
@@ -60,8 +60,8 @@
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "None",
-    "materialSupplier": "a1f045a9-22c9-4705-8953-d15438017346",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
     "receiptDue": null,
     "volumes": [
       "vol. 1"
@@ -69,8 +69,6 @@
   },
   "poLineDescription": "",
   "poLineNumber": "52590-1",
-  "publicationDate": "1901",
-  "publisher": "London Topographical Society",
   "purchaseOrderId": "0610be6d-0ddd-494b-b867-19f63d8b5d6d",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -85,12 +83,46 @@
   "tags": [
     "membership"
   ],
-  "title": "Membership",
+  "title": "MobiCom'17 5 mmNets'17, October 16, 2017, Snowbird, UT, USA / general chairs: Haitham Hassanieh (University of Illinois at Urbana Champaign, USA), Xinyu Zhang (University of California San Diego, USA)",
   "vendorDetail": {
     "instructions": "1901 and continuation",
     "noteFromVendor": "",
     "refNumber": "96459125",
     "refNumberType": "Supplier's unique order line reference number",
     "vendorAccount": "B-Ser"
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1. 2017 Snowbird, Utah"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Hassanieh, Haitham"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Zhang, Xinyu"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "MobiCom 23. 2017 Snowbird, Utah"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Association for Computing Machinery Special Interest Group on Mobility of Systems Users, Data, and Computing"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1 2017.10.16 Snowbird, Utah"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "mmNets 1 2017.10.16 Snowbird, Utah"
+    },
+    {
+      "contributorType": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
+      "contributor": "Annual International Conference on Mobile Computing and Networking (ACM MobiCom) 23 2017.10.16-20 Snowbird, Utah"
+    }
+  ]
 }

@@ -1,5 +1,5 @@
 {
-  "id": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "b9cC5473-bB40-1D61-Afc0-d3A5BA0eD0a8",
   "acquisitionMethod": "Purchase",
   "agreementId": "6bbc890c-0fa9-4ab3-802a-471ee18f72d5",
   "alerts": [],
@@ -47,7 +47,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "f70b3e2c-299c-4a32-ae37-be7330dc80b1",
+  "instanceId": "c1d3be12-ecec-4fab-9237-baf728575185",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -60,8 +60,8 @@
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "Instance, Holding",
-    "materialSupplier": "fb9f16d1-9564-4c0f-abd3-9890e00ba318",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "50fb6ae0-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
     "receiptDue": "2018-08-31T00:00:00.000Z",
     "volumes": [
       "vol. 6"
@@ -69,8 +69,8 @@
   },
   "poLineDescription": "",
   "poLineNumber": "101113-1",
-  "publicationDate": "2010",
-  "publisher": "Unisa Press",
+  "publicationDate": "2018",
+  "publisher": "SAGE",
   "purchaseOrderId": "55b97a4a-6601-4488-84e1-8b0d47a3f523",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -83,7 +83,7 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "The road to democracy in South Africa",
+  "title": "The city post-modernity edited by Alan Latham",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
