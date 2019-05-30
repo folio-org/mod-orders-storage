@@ -87,9 +87,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
             endTxWithId(tx)
               .thenAccept(res -> {
                 HttpStatusException cause = (HttpStatusException) t.getCause();
-                if (cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
-                  asyncResultHandler.handle(Future.succeededFuture(DeleteOrdersStoragePoLinesByIdResponse.respond400WithTextPlain(Response.Status.BAD_REQUEST.getReasonPhrase())));
-                } else if (cause.getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+                if (cause.getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
                   asyncResultHandler.handle(Future.succeededFuture(DeleteOrdersStoragePoLinesByIdResponse.respond404WithTextPlain(Response.Status.NOT_FOUND.getReasonPhrase())));
                 } else {
                   log.info("POLine {} and associated pieces were successfully deleted", tx.getId());
@@ -182,12 +180,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
   private void rollbackDeletePolineTransaction(TxWithId tx, CompletableFuture<TxWithId> future, AsyncResult<UpdateResult> reply) {
     pgClient.rollbackTx(tx.getConnection(), rb -> {
       log.error("Delete POLine by id={} failed", reply.cause(), tx.getId());
-      String badRequestMessage = PgExceptionUtil.badRequestMessage(reply.cause());
-      if (badRequestMessage != null) {
-        future.completeExceptionally(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
-      } else {
-        future.completeExceptionally(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
-      }
+      future.completeExceptionally(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
     });
   }
 
