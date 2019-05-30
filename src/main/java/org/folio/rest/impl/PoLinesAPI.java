@@ -15,7 +15,6 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLines;
 import org.folio.rest.persist.EntitiesMetadataHolder;
-import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.QueryHolder;
