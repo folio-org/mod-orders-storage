@@ -4,8 +4,6 @@ import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import java.net.MalformedURLException;
-import java.util.stream.Stream;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -16,6 +14,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.runner.JUnitPlatform;
 import org.junit.runner.RunWith;
 
+import java.net.MalformedURLException;
+import java.util.stream.Stream;
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @RunWith(JUnitPlatform.class)
 public class EntitiesCrudTest extends TestBase {
@@ -25,15 +26,15 @@ public class EntitiesCrudTest extends TestBase {
 
 
   public static Stream<TestEntities> deleteOrder() {
-    return Stream.of(TestEntities.PIECE,TestEntities.PO_LINE,TestEntities.PURCHASE_ORDER,TestEntities.ALERT,TestEntities.REPORTING_CODE);
+    return Stream.of(TestEntities.PO_LINE, TestEntities.PURCHASE_ORDER, TestEntities.ALERT, TestEntities.REPORTING_CODE);
   }
 
   public static Stream<TestEntities> deleteFailOrder() {
-    return Stream.of(TestEntities.PURCHASE_ORDER,TestEntities.PO_LINE);
+    return Stream.of(TestEntities.PURCHASE_ORDER);
   }
 
   public static Stream<TestEntities> createFailOrder() {
-    return Stream.of(TestEntities.PO_LINE,TestEntities.PIECE);
+    return Stream.of(TestEntities.PO_LINE, TestEntities.PIECE);
   }
 
 
@@ -66,7 +67,7 @@ public class EntitiesCrudTest extends TestBase {
   @EnumSource(TestEntities.class)
   public void testVerifyCollectionQuantity(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Verifying only 1 adjustment was created ... ", testEntity.name()));
-    verifyCollectionQuantity(testEntity.getEndpoint(),1);
+    verifyCollectionQuantity(testEntity.getEndpoint(), 1);
 
   }
 
@@ -107,7 +108,7 @@ public class EntitiesCrudTest extends TestBase {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(), testEntity.getId()));
     deleteData(testEntity.getEndpointWithId(), testEntity.getId())
       .then().log().ifValidationFails()
-       .statusCode(500);
+      .statusCode(500);
   }
 
   @ParameterizedTest
@@ -117,7 +118,7 @@ public class EntitiesCrudTest extends TestBase {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(), testEntity.getId()));
     deleteData(testEntity.getEndpointWithId(), testEntity.getId())
       .then().log().ifValidationFails()
-       .statusCode(204);
+      .statusCode(204);
   }
 
   @ParameterizedTest
@@ -153,7 +154,7 @@ public class EntitiesCrudTest extends TestBase {
     String sampleData = getFile(testEntity.getSampleFileName());
     putData(testEntity.getEndpointWithId(), NON_EXISTED_ID, sampleData)
       .then().log().ifValidationFails()
-        .statusCode(404);
+      .statusCode(404);
   }
 
   @ParameterizedTest
@@ -162,7 +163,7 @@ public class EntitiesCrudTest extends TestBase {
     logger.info(String.format("--- mod-orders-storage %s delete by id test: Invalid %s: %s", testEntity.name(), testEntity.name(), NON_EXISTED_ID));
     deleteData(testEntity.getEndpointWithId(), NON_EXISTED_ID)
       .then().log().ifValidationFails()
-        .statusCode(404);
+      .statusCode(404);
   }
 
   @ParameterizedTest
