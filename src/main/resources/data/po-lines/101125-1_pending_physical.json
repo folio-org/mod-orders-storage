@@ -1,5 +1,5 @@
 {
-  "id": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "647C1dcA-b9BF-47AF-8456-bFB6dfEf9eee",
   "acquisitionMethod": "Purchase",
   "agreementId": "0a79add6-f1a3-44f8-b75d-092c0b729286",
   "alerts": [],
@@ -28,7 +28,11 @@
   "details": {
     "productIds": [
       {
-        "productId": "9780133973488",
+        "productId": "0262012103",
+        "productIdType": "ISBN"
+      },
+      {
+        "productId": "9780262012102",
         "productIdType": "ISBN"
       }
     ],
@@ -47,7 +51,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "481bf4f1-62d6-4b45-8a30-2ffc7acfcc6b",
+  "instanceId": "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39",
   "locations": [
     {
       "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
@@ -60,8 +64,8 @@
   "paymentStatus": "Pending",
   "physical": {
     "createInventory": "Instance, Holding, Item",
-    "materialSupplier": "c6836b28-b2b7-49f5-a9af-05bc88a003f7",
-    "materialType": "fde2e5ca-cde3-11e8-a8d5-f2801f1b9fd1",
+    "materialSupplier": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
     "receiptDue": "2018-07-31T00:00:00.000Z",
     "volumes": [
       "vol. 0"
@@ -69,8 +73,8 @@
   },
   "poLineDescription": "",
   "poLineNumber": "101125-1",
-  "publicationDate": "2015",
-  "publisher": "Pearson",
+  "publicationDate": "2004",
+  "publisher": "MIT Press",
   "purchaseOrderId": "9447d062-89ec-486e-a14b-572f3efb9f8c",
   "receiptDate": null,
   "receiptStatus": "Pending",
@@ -83,10 +87,17 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Business and professional communication",
+  "title": "A semantic web primer",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
-  }
+  },
+  "contributors" : [ {
+    "contributorType" : "2b94c631-fca9-4892-a730-03ee529ffe2a",
+    "contributor" : "Antoniou, Grigoris"
+  }, {
+    "contributorType" : "2b94c631-fca9-4892-a730-03ee529ffe2a",
+    "contributor" : "Van Harmelen, Frank"
+  } ]
 }

@@ -1,5 +1,5 @@
 {
-  "id": "12fb63b0-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "C5CEd39D-672f-3CbA-A13A-ceB06A5d4C6b",
   "acquisitionMethod": "Purchase",
   "agreementId": "291e4a33-fc84-49c5-beac-661fc8bdd55e",
   "alerts": [],
@@ -26,12 +26,6 @@
   },
   "description": "",
   "details": {
-    "productIds": [
-      {
-        "productId": "9781118416068",
-        "productIdType": "ISBN"
-      }
-    ],
     "receivingNote": "",
     "subscriptionFrom": null,
     "subscriptionInterval": 0,
@@ -45,7 +39,7 @@
     "activationDue": 0,
     "createInventory": "None",
     "expectedActivation": "2014-07-06T00:00:00.000Z",
-    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "materialType": "615b8413-82d5-4203-aa6e-e37984cb5ac3",
     "trial": false,
     "userLimit": 1
   },
@@ -57,7 +51,7 @@
       "percentage": 100.0
     }
   ],
-  "instanceId": "507a176a-e139-4745-9d6b-8ef22d92c62f",
+  "instanceId": "ce00bca2-9270-4c6b-b096-b83a2e56e8e9",
   "locations": [
     {
       "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
@@ -70,8 +64,6 @@
   "paymentStatus": "Awaiting Payment",
   "poLineDescription": "",
   "poLineNumber": "268879-1",
-  "publicationDate": "1991",
-  "publisher": "John Wiley & Sons, Inc.",
   "purchaseOrderId": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
   "receiptDate": null,
   "receiptStatus": "Fully Received",
@@ -84,12 +76,30 @@
     "description": "Manually entered"
   },
   "tags": [],
-  "title": "Roitt`s essential immunology / Peter J. Delves, Seamus J. Martin, Dennis R. Burton, Ivan M. Roitt.",
+  "title": "Cantatas for bass 4 Ich habe genug : BWV 82 / Johann Sebastian Bach ; Matthias Goerne, baritone ; Freiburger Barockorchester, Gottfried von der Goltz, violin and conductor",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "refNumber": "999632785",
     "refNumberType": "Supplier's unique order line reference number",
     "vendorAccount": "12345-50"
-  }
+  },
+  "contributors": [
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Bach, Johann Sebastian"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Arfken, Katharina"
+    },
+    {
+      "contributorType": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Goltz, Gottfried von der"
+    },
+    {
+      "contributorType": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
+      "contributor": "Freiburger Barockorchester"
+    }
+  ]
 }
