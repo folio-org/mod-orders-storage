@@ -31,7 +31,6 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
 public class PoLinesAPI implements OrdersStoragePoLines {
   private static final Logger log = LoggerFactory.getLogger(OrdersStoragePoLines.class);
 
-  private static final String PIECES_TABLE = "pieces";
   private static final String POLINE_TABLE = "po_line";
   private static final String ID_FIELD_NAME = "id";
   private static final String POLINE_ID_FIELD = "poLineId";
@@ -172,7 +171,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     CompletableFuture<TxWithId> future = new CompletableFuture<>();
     Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getId());
 
-    pgClient.delete(tx.getConnection(), PIECES_TABLE, criterion, reply -> {
+    pgClient.delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
       if (reply.failed()) {
         future.completeExceptionally(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
       } else {
