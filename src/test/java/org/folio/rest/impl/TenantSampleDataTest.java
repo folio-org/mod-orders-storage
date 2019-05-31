@@ -1,19 +1,5 @@
 package org.folio.rest.impl;
 
-import io.restassured.http.ContentType;
-import io.restassured.http.Header;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.utils.TenantApiTestUtil;
-import org.folio.rest.utils.TestEntities;
-import org.junit.Test;
-
-import java.net.MalformedURLException;
-
 import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
@@ -21,9 +7,27 @@ import static org.folio.rest.utils.TenantApiTestUtil.TENANT_ENDPOINT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postToTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
+import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
+
+import java.net.MalformedURLException;
+
+import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PoLineCollection;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.utils.TenantApiTestUtil;
+import org.folio.rest.utils.TestEntities;
+import org.junit.Test;
+
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 
 public class TenantSampleDataTest extends TestBase{
@@ -79,14 +83,17 @@ public class TenantSampleDataTest extends TestBase{
       postToTenant(PARTIAL_TENANT_HEADER, jsonBody)
         .assertThat()
           .statusCode(201);
-      PurchaseOrderCollection purchaseOrderCollection = getData(PURCHASE_ORDER.getEndpoint(), PARTIAL_TENANT_HEADER)
+      PoLineCollection poLineCollection = getData(PO_LINE.getEndpoint(), PARTIAL_TENANT_HEADER)
         .then()
           .extract()
             .response()
-              .as(PurchaseOrderCollection.class);
+              .as(PoLineCollection.class);
 
-      for (PurchaseOrder purchaseOrder : purchaseOrderCollection.getPurchaseOrders()) {
-        deleteData(PURCHASE_ORDER.getEndpointWithId(), purchaseOrder.getId(), PARTIAL_TENANT_HEADER);
+      for (PoLine poLine : poLineCollection.getPoLines()) {
+        deleteData(PO_LINE.getEndpointWithId(), poLine.getId(), PARTIAL_TENANT_HEADER).then()
+          .log()
+          .ifValidationFails()
+          .statusCode(204);
       }
 
       jsonBody = TenantApiTestUtil.prepareTenantBody(true, true);
@@ -105,7 +112,6 @@ public class TenantSampleDataTest extends TestBase{
       assertThat(oldClient, not(newClient));
     }
   }
-
 
   private void upgradeTenantWithSampleDataLoad() throws MalformedURLException {
 
