@@ -207,27 +207,27 @@
         {
           "methods": ["GET"],
           "pathPattern": "/order-storage/order-invoice-relns",
-          "permissionsRequired": ["orders-storage.order-invoice-relationship.collection.get"]
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.collection.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/order-storage/order-invoice-relns",
-          "permissionsRequired": ["orders-storage.order-invoice-relationship.item.post"]
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.post"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/order-storage/order-invoice-relns/{id}",
-          "permissionsRequired": ["orders-storage.order-invoice-relationship.item.get"]
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.get"]
         },
         {
           "methods": ["PUT"],
           "pathPattern": "/order-storage/order-invoice-relns/{id}",
-          "permissionsRequired": ["orders-storage.order-invoice-relationship.item.put"]
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.put"]
         },
         {
           "methods": ["DELETE"],
           "pathPattern": "/order-storage/order-invoice-relns/{id}",
-          "permissionsRequired": ["orders-storage.order-invoice-relationship.item.delete"]
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.delete"]
         }
       ]
     },
