@@ -201,7 +201,7 @@
       ]
     },
     {
-      "id": "orders-storage.order-invoice-relationship",
+      "id": "orders-storage.order-invoice-relationships",
       "version": "1.0",
       "handlers": [
         {
@@ -469,40 +469,40 @@
       ]
     },
     {
-      "permissionName" : "orders-storage.order-invoice-relationship.collection.get",
-      "displayName" : "order-invoice-relationship-collection get",
+      "permissionName" : "orders-storage.order-invoice-relationships.collection.get",
+      "displayName" : "order-invoice-relationships-collection get",
       "description" : "Get a collection of order-invoice-relationship"
     },
     {
-      "permissionName" : "orders-storage.order-invoice-relationship.item.post",
-      "displayName" : "order-invoice-relationship post",
+      "permissionName" : "orders-storage.order-invoice-relationships.item.post",
+      "displayName" : "order-invoice-relationships post",
       "description" : "Create a new relationship between order and invoice"
     },
     {
-      "permissionName" : "orders-storage.order-invoice-relationship.item.get",
-      "displayName" : "order-invoice-relationship-item get",
+      "permissionName" : "orders-storage.order-invoice-relationships.item.get",
+      "displayName" : "order-invoice-relationships-item get",
       "description" : "Fetch an order-invoice-relationship"
     },
     {
-      "permissionName" : "orders-storage.order-invoice-relationship.item.put",
-      "displayName" : "order-invoice-relationship-item put",
+      "permissionName" : "orders-storage.order-invoice-relationships.item.put",
+      "displayName" : "order-invoice-relationships-item put",
       "description" : "Update an order-invoice-relationship"
     },
     {
-      "permissionName" : "orders-storage.order-invoice-relationship.item.delete",
-      "displayName" : "order-invoice-relationship-item delete",
+      "permissionName" : "orders-storage.order-invoice-relationships.item.delete",
+      "displayName" : "order-invoice-relationships-item delete",
       "description" : "Delete an order-invoice-relationship"
     },
     {
-      "permissionName" : "orders-storage.order-invoice-relationship.all",
-      "displayName" : "All order-invoice-relationship perms",
+      "permissionName" : "orders-storage.order-invoice-relationships.all",
+      "displayName" : "All order-invoice-relationships perms",
       "description" : "All permissions for the order-invoice-relationship",
       "subPermissions" : [
-        "orders-storage.order-invoice-relationship.collection.get",
-        "orders-storage.order-invoice-relationship.item.post",
-        "orders-storage.order-invoice-relationship.item.get",
-        "orders-storage.order-invoice-relationship.item.put",
-        "orders-storage.order-invoice-relationship.item.delete"
+        "orders-storage.order-invoice-relationships.collection.get",
+        "orders-storage.order-invoice-relationships.item.post",
+        "orders-storage.order-invoice-relationships.item.get",
+        "orders-storage.order-invoice-relationships.item.put",
+        "orders-storage.order-invoice-relationships.item.delete"
       ]
     },
     {
@@ -518,7 +518,7 @@
         "orders-storage.purchase-orders.all",
         "orders-storage.receiving-history.all",
         "orders-storage.reporting-codes.all",
-        "orders-storage.order-invoice-relationship.all"
+        "orders-storage.order-invoice-relationships.all"
       ]
     }
   ],
