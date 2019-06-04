@@ -19,7 +19,7 @@ import java.util.Map;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class PiecesAPI implements OrdersStoragePieces {
-  private static final String PIECES_TABLE = "pieces";
+  static final String PIECES_TABLE = "pieces";
   private String idFieldName = "id";
 
 
