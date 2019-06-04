@@ -201,6 +201,37 @@
       ]
     },
     {
+      "id": "orders-storage.order-invoice-relationships",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/order-storage/order-invoice-relns",
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/order-storage/order-invoice-relns",
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/order-storage/order-invoice-relns/{id}",
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/order-storage/order-invoice-relns/{id}",
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/order-storage/order-invoice-relns/{id}",
+          "permissionsRequired": ["orders-storage.order-invoice-relationships.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",
@@ -438,6 +469,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.order-invoice-relationships.collection.get",
+      "displayName" : "order-invoice-relationships-collection get",
+      "description" : "Get a collection of order-invoice-relationship"
+    },
+    {
+      "permissionName" : "orders-storage.order-invoice-relationships.item.post",
+      "displayName" : "order-invoice-relationships post",
+      "description" : "Create a new relationship between order and invoice"
+    },
+    {
+      "permissionName" : "orders-storage.order-invoice-relationships.item.get",
+      "displayName" : "order-invoice-relationships-item get",
+      "description" : "Fetch an order-invoice-relationship"
+    },
+    {
+      "permissionName" : "orders-storage.order-invoice-relationships.item.put",
+      "displayName" : "order-invoice-relationships-item put",
+      "description" : "Update an order-invoice-relationship"
+    },
+    {
+      "permissionName" : "orders-storage.order-invoice-relationships.item.delete",
+      "displayName" : "order-invoice-relationships-item delete",
+      "description" : "Delete an order-invoice-relationship"
+    },
+    {
+      "permissionName" : "orders-storage.order-invoice-relationships.all",
+      "displayName" : "All order-invoice-relationships perms",
+      "description" : "All permissions for the order-invoice-relationship",
+      "subPermissions" : [
+        "orders-storage.order-invoice-relationships.collection.get",
+        "orders-storage.order-invoice-relationships.item.post",
+        "orders-storage.order-invoice-relationships.item.get",
+        "orders-storage.order-invoice-relationships.item.put",
+        "orders-storage.order-invoice-relationships.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -449,7 +517,8 @@
         "orders-storage.po-line-number.all",
         "orders-storage.purchase-orders.all",
         "orders-storage.receiving-history.all",
-        "orders-storage.reporting-codes.all"
+        "orders-storage.reporting-codes.all",
+        "orders-storage.order-invoice-relationships.all"
       ]
     }
   ],
