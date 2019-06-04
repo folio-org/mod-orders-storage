@@ -69,7 +69,7 @@
       "tableName": "order_invoice_relationship",
       "generateId": true,
       "fromModuleVersion": 6.0,
-      "withMetadata": true,
+      "withMetadata": false,
       "populateJsonWithId": true,
       "foreignKeys": [
         {
