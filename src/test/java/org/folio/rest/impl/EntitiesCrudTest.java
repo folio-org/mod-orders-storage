@@ -26,12 +26,12 @@ public class EntitiesCrudTest extends TestBase {
   String sample = null;
 
   public static Stream<TestEntities> deleteOrder() {
-    return Stream.of(TestEntities.ORDER_INVOICE_RELNS, TestEntities.PIECE, TestEntities.PO_LINE,
+    return Stream.of(TestEntities.ORDER_INVOICE_RELNS, TestEntities.PO_LINE,
       TestEntities.PURCHASE_ORDER, TestEntities.ALERT, TestEntities.REPORTING_CODE);
   }
 
   public static Stream<TestEntities> deleteFailOrder() {
-    return Stream.of(TestEntities.PURCHASE_ORDER, TestEntities.PO_LINE);
+    return Stream.of(TestEntities.PURCHASE_ORDER);
   }
 
   public static Stream<TestEntities> createFailOrder() {
