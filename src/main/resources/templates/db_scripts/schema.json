@@ -64,6 +64,19 @@
           "targetTable": "po_line"
         }
       ]
+    },
+    {
+      "tableName": "order_invoice_relationship",
+      "generateId": true,
+      "fromModuleVersion": 6.0,
+      "withMetadata": false,
+      "populateJsonWithId": true,
+      "foreignKeys": [
+        {
+          "fieldName": "purchaseOrderId",
+          "targetTable": "purchase_order"
+        }
+      ]
     }
   ]
 }
