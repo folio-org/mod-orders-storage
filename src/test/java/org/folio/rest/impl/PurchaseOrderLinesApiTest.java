@@ -17,12 +17,12 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   public void testPostOrdersLinesByIdPoLineWithoutId() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: post PoLine without purchaseOrderId");
 
-    TestEntities testEntities = TestEntities.PO_LINE;
-    JsonObject data = new JsonObject(getFile(testEntities.getSampleFileName()));
+    TestEntities poLineTstEntities = TestEntities.PO_LINE;
+    JsonObject data = new JsonObject(getFile(poLineTstEntities.getSampleFileName()));
 
     data.remove("purchaseOrderId");
 
-    Response response = postData(testEntities.getEndpoint(), data.toString());
+    Response response = postData(poLineTstEntities.getEndpoint(), data.toString());
     response.then()
       .statusCode(422);
   }
