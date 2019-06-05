@@ -1,5 +1,5 @@
 {
-  "id": "852d0F06-290a-279c-92cf-AEE87BeFC6BE",
+  "id": "852d0f06-290a-279c-92cf-aee87befc6be",
   "acquisitionMethod": "Purchase",
   "agreementId": "44683de8-e2cf-42bc-af9e-7eca992934b6",
   "alerts": [],
@@ -57,7 +57,7 @@
     }
   ],
   "orderFormat": "Physical Resource",
-  "paymentStatus": "Awaiting Payment",
+  "paymentStatus": "Fully Paid",
   "physical": {
     "createInventory": "Instance, Holding",
     "materialSupplier": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
@@ -71,7 +71,7 @@
   "poLineNumber": "36547-1",
   "purchaseOrderId": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
   "receiptDate": null,
-  "receiptStatus": "Awaiting Receipt",
+  "receiptStatus": "Partially Received",
   "reportingCodes": [],
   "requester": "",
   "rush": false,

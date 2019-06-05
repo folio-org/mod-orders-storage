@@ -88,7 +88,7 @@ public class OrdersAPITest extends TestBase {
       }
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by PO and POLine fields... ");
-      List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=paymentStatus==Fully Paid AND workflowStatus==Open AND orderType==One-Time"));
+      List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=paymentStatus==Partially Paid AND workflowStatus==Open AND orderType==One-Time"));
       assertThat(filteredByPoAndP0LineFields, hasSize(1));
       assertThat(filteredByPoAndP0LineFields.get(0).getWorkflowStatus(), is(PurchaseOrder.WorkflowStatus.OPEN));
       assertThat(filteredByPoAndP0LineFields.get(0).getOrderType(), is(PurchaseOrder.OrderType.ONE_TIME));

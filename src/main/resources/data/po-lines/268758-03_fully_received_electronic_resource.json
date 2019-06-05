@@ -20,8 +20,8 @@
     "discountType": "amount",
     "listUnitPrice": 0.00,
     "listUnitPriceElectronic": 342.00,
-    "poLineEstimatedPrice": 322.00,
-    "quantityElectronic": 1,
+    "poLineEstimatedPrice": 664.00,
+    "quantityElectronic": 2,
     "quantityPhysical": 0
   },
   "description": "",
@@ -65,17 +65,17 @@
   "locations": [
     {
       "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
-      "quantity": 1,
-      "quantityElectronic": 1,
+      "quantity": 2,
+      "quantityElectronic": 2,
       "quantityPhysical": 0
     }
   ],
   "orderFormat": "Electronic Resource",
-  "paymentStatus": "Fully Paid",
+  "paymentStatus": "Partially Paid",
   "poLineDescription": "",
   "poLineNumber": "268758-03",
   "purchaseOrderId": "efff3ffe-5469-1f8f-aa3a-7afc933f9eff",
-  "receiptDate": "2018-01-08T00:00:00.000Z",
+  "receiptDate": "2018-07-08T00:00:00.000Z",
   "receiptStatus": "Fully Received",
   "reportingCodes": [],
   "requester": "",

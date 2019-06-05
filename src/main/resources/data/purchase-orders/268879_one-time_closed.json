@@ -1,6 +1,9 @@
 {
   "id": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
   "approved": true,
+  "closeReason": {
+    "reason": "Complete"
+  },
   "dateOrdered": "2014-07-10T00:00:00Z",
   "manualPo": false,
   "orderType": "One-Time",
