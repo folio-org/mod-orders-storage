@@ -83,12 +83,12 @@ public class OrdersAPITest extends TestBase {
       assertThat(allActualOrdersWithLimit, hasSize(1));
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering and ordering... ");
-      List<PurchaseOrder> orderedByAscOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open OR workflowStatus==Pending sortBy dateOrdered/sort.ascending"));
+      List<PurchaseOrder> orderedByAscOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.ascending"));
       for(int i = 0; i < orderedByAscOrders.size() - 1; i++) {
         assertThat(orderedByAscOrders.get(i + 1).getDateOrdered().after(orderedByAscOrders.get(i).getDateOrdered()), is(true));
       }
 
-      List<PurchaseOrder> orderedByDescOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open OR workflowStatus==Pending sortBy dateOrdered/sort.descending"));
+      List<PurchaseOrder> orderedByDescOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.descending"));
       for(int i = 0; i < orderedByDescOrders.size() - 1; i++) {
         assertThat(orderedByDescOrders.get(i + 1).getDateOrdered().before(orderedByDescOrders.get(i).getDateOrdered()), is(true));
       }
