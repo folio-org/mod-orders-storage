@@ -1,15 +1,12 @@
 {
   "id": "cf4bfd64-e609-4ecb-b3e6-7a5a1ced1645",
-  "approved": true,
-  "dateOrdered": "2019-07-24T00:00:00Z",
   "manualPo": false,
   "notes": [
     "DVD plus 3 years streaming"
   ],
   "orderType": "One-Time",
-  "owner": "Cushing",
   "poNumber": "313110",
   "reEncumber": false,
   "vendor": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflowStatus": "Open"
+  "workflowStatus": "Pending"
 }
