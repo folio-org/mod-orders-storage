@@ -11,7 +11,7 @@ import java.net.MalformedURLException;
 
 public class PurchaseOrderLinesApiTest extends TestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(OrdersAPITest.class);
+  private final Logger logger = LoggerFactory.getLogger(PurchaseOrderLinesApiTest.class);
 
   @Test
   public void testPostOrdersLinesByIdPoLineWithoutId() throws MalformedURLException {
