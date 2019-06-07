@@ -33,6 +33,7 @@ public class OrdersAPITest extends TestBase {
   private String poLineSampleId2; // "2303926f-0ef7-4063-9039-07c0e7fae77d"
   private String purchaseOrderSampleId;
   private String purchaseOrderSampleId2;
+  private String purchaseOrderWithoutPOLinesId;
 
   private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
 
@@ -40,8 +41,10 @@ public class OrdersAPITest extends TestBase {
   private final String poLineSample2 = getFile("data/po-lines/14383007-1_pending_physical_gift.json");
   private final String purchaseOrderSample = getFile("data/purchase-orders/268758_one-time_open.json");
   private final String purchaseOrderSample2 = getFile("data/purchase-orders/14383007_ongoing_open.json");
+  private final String purchaseOrderWithoutPOLines= getFile("data/purchase-orders/313110_order_without_poLines.json");
   private static final String APPLICATION_JSON = "application/json";
-  private static final Integer CREATED_ENTITIES_QUANTITY = 2;
+  private static final Integer CREATED_ORDERS_QUANTITY = 3;
+  private static final Integer CREATED_PO_LINES_QUANTITY = 2;
   private static final Map<String, PurchaseOrder> expectedOrders = new HashMap<>();
 
   @Test
@@ -55,13 +58,16 @@ public class OrdersAPITest extends TestBase {
       logger.info("--- mod-orders-storage orders test: Creating Purchase order 2...");
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
       expectedOrders.put(purchaseOrderSampleId2, new JsonObject(purchaseOrderSample2).mapTo(PurchaseOrder.class));
-      verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
+      logger.info("--- mod-orders-storage orders test: Creating Purchase order without PoLines...");
+      purchaseOrderWithoutPOLinesId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines);
+      expectedOrders.put(purchaseOrderWithoutPOLinesId, new JsonObject(purchaseOrderWithoutPOLines).mapTo(PurchaseOrder.class));
+      verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ORDERS_QUANTITY);
 
       logger.info("--- mod-orders-storage orders test: Creating PoLine 1...");
       poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
       logger.info("--- mod-orders-storage orders test: Creating PoLine 2 ...");
       poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
-      verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
+      verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_PO_LINES_QUANTITY);
 
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities conformity... ");
@@ -77,12 +83,12 @@ public class OrdersAPITest extends TestBase {
       assertThat(allActualOrdersWithLimit, hasSize(1));
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering and ordering... ");
-      List<PurchaseOrder> orderedByAscOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open OR workflowStatus==Pending sortBy dateOrdered/sort.ascending"));
+      List<PurchaseOrder> orderedByAscOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.ascending"));
       for(int i = 0; i < orderedByAscOrders.size() - 1; i++) {
         assertThat(orderedByAscOrders.get(i + 1).getDateOrdered().after(orderedByAscOrders.get(i).getDateOrdered()), is(true));
       }
 
-      List<PurchaseOrder> orderedByDescOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open OR workflowStatus==Pending sortBy dateOrdered/sort.descending"));
+      List<PurchaseOrder> orderedByDescOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.descending"));
       for(int i = 0; i < orderedByDescOrders.size() - 1; i++) {
         assertThat(orderedByDescOrders.get(i + 1).getDateOrdered().before(orderedByDescOrders.get(i).getDateOrdered()), is(true));
       }
@@ -102,6 +108,7 @@ public class OrdersAPITest extends TestBase {
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderWithoutPOLinesId);
     }
   }
 
