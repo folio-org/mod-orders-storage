@@ -29,11 +29,11 @@
     "productIds": [
       {
         "productId": "0262012103",
-        "productIdType": "ISBN"
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
       },
       {
         "productId": "9780262012102",
-        "productIdType": "ISBN"
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
       }
     ],
     "receivingNote": "2 copies",
