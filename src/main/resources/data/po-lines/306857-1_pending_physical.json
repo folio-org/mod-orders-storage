@@ -29,19 +29,19 @@
     "productIds": [
       {
         "productId": "9780866989732",
-        "productIdType": "ISBN"
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
       },
       {
         "productId": "0866989730",
-        "productIdType": "ISBN"
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
       },
       {
         "productId": "9780866985529",
-        "productIdType": "ISBN"
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
       },
       {
         "productId": "0866985522",
-        "productIdType": "ISBN"
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
       }
     ],
     "receivingNote": "Cushing materials, do not mark",
