@@ -1,4 +1,20 @@
-## 6.0.0 - Unreleased
+## 7.0.0 - Unreleased
+
+## 6.0.0 - Released
+The primary focus of this release was to implement backend logic for relationship between purchase orders and invoices and to update purchase-order/po-line schemas.
+  
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v5.0.0...v6.0.0)
+
+### Stories
+* [MODORDSTOR-90](https://issues.folio.org/browse/MODORDSTOR-90) - Make `purchaseOrderId` required
+* [MODORDSTOR-80](https://issues.folio.org/browse/MODORDSTOR-80) - Implement basic CRUD for order-invoice-relns
+* [MODORDSTOR-79](https://issues.folio.org/browse/MODORDSTOR-79) - Remove associated piece records when removing POLine
+* [MODORDSTOR-78](https://issues.folio.org/browse/MODORDSTOR-78) - DB schema enhancements
+* [MODORDSTOR-76](https://issues.folio.org/browse/MODORDSTOR-76) - Move "Owner" field to PO level
+
+### Bug Fixes
+* [MODORDSTOR-86](https://issues.folio.org/browse/MODORDSTOR-86) - Orders without PO Lines are not returned by /orders-storage/orders
+* [MODORDSTOR-77](https://issues.folio.org/browse/MODORDSTOR-77) - UUIDs are reused across various record types in sample data
 
 ## 5.0.0 - Released
 The primary focus of this release was to accommodate increased flexibility in inventory integration and also provide endpoints for Purchase Order and Purchase Order Lines search and filtering based on complex criteria.
