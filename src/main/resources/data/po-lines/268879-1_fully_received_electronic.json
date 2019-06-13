@@ -1,5 +1,5 @@
 {
-  "id": "C5CEd39D-672f-3CbA-A13A-ceB06A5d4C6b",
+  "id": "c5ced39d-672f-3cba-a13a-ceb06a5d4c6b",
   "acquisitionMethod": "Purchase",
   "agreementId": "291e4a33-fc84-49c5-beac-661fc8bdd55e",
   "alerts": [],
@@ -61,7 +61,7 @@
     }
   ],
   "orderFormat": "Electronic Resource",
-  "paymentStatus": "Awaiting Payment",
+  "paymentStatus": "Fully Paid",
   "poLineDescription": "",
   "poLineNumber": "268879-1",
   "purchaseOrderId": "e5ae4afd-3fa9-494e-a972-f541df9b877e",
