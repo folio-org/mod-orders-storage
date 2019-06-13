@@ -59,6 +59,6 @@ public class AcquisitionsUnitAPI implements AcquisitionsUnitStorageUnits {
   @Override
   @Validate
   public void putAcquisitionsUnitStorageUnitsById(String id, String lang, AcquisitionsUnit entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(ACQUISITIONS_UNITS_TABLE, entity, id, okapiHeaders,vertxContext, OrderStorageOrderInvoiceRelns.PutOrderStorageOrderInvoiceRelnsByIdResponse.class, asyncResultHandler);
+    PgUtil.put(ACQUISITIONS_UNITS_TABLE, entity, id, okapiHeaders,vertxContext, AcquisitionsUnitStorageUnits.PutAcquisitionsUnitStorageUnitsByIdResponse.class, asyncResultHandler);
   }
 }
