@@ -232,6 +232,37 @@
       ]
     },
     {
+      "id": "acquisitions-unit-storage.units",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/acquisitions-unit-storage/units",
+          "permissionsRequired": ["acquisitions-unit-storage.units.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/acquisitions-unit-storage/units",
+          "permissionsRequired": ["acquisitions-unit-storage.units.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/acquisitions-unit-storage/units/{id}",
+          "permissionsRequired": ["acquisitions-unit-storage.units.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/acquisitions-unit-storage/units/{id}",
+          "permissionsRequired": ["acquisitions-unit-storage.units.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/acquisitions-unit-storage/units/{id}",
+          "permissionsRequired": ["acquisitions-unit-storage.units.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",
@@ -494,6 +525,43 @@
       "description" : "Delete an order-invoice-relationship"
     },
     {
+      "permissionName" : "acquisitions-unit-storage.units.collection.get",
+      "displayName" : "acquisitions-units-collection get",
+      "description" : "Get a collection of acquisitions units"
+    },
+    {
+      "permissionName" : "acquisitions-unit-storage.units.item.post",
+      "displayName" : "acquisitions-units-item post",
+      "description" : "Create a new acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-unit-storage.units.item.get",
+      "displayName" : "acquisitions-units-item get",
+      "description" : "Fetch an acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-unit-storage.units.item.put",
+      "displayName" : "acquisitions-units-item put",
+      "description" : "Update an acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-unit-storage.units.item.delete",
+      "displayName" : "acquisitions-units-item delete",
+      "description" : "Delete an acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-unit-storage.units.all",
+      "displayName" : "All acquisitions-units perms",
+      "description" : "All permissions for the acquisitions-units",
+      "subPermissions" : [
+        "acquisitions-unit-storage.units.collection.get",
+        "acquisitions-unit-storage.units.item.post",
+        "acquisitions-unit-storage.units.item.get",
+        "acquisitions-unit-storage.units.item.put",
+        "acquisitions-unit-storage.units.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.order-invoice-relationships.all",
       "displayName" : "All order-invoice-relationships perms",
       "description" : "All permissions for the order-invoice-relationship",
@@ -518,7 +586,8 @@
         "orders-storage.purchase-orders.all",
         "orders-storage.receiving-history.all",
         "orders-storage.reporting-codes.all",
-        "orders-storage.order-invoice-relationships.all"
+        "orders-storage.order-invoice-relationships.all",
+        "acquisitions-unit-storage.units.all"
       ]
     }
   ],
