@@ -33,8 +33,8 @@ public class ReceivingHistoryTest extends TestBase {
 
   private final String poLineSample = getFile("data/po-lines/268758-03_fully_received_electronic_resource.json");
   private final String poLineSample2 = getFile("data/po-lines/313000-1_awaiting_receipt_mix-format.json");
-  private final String pieceSample = getFile("data/pieces/1a902141-d8c6-4cf3-8a19-193eca007478.json");
-  private final String pieceSample2 = getFile("data/pieces/5e317dc2-deeb-4429-b2a1-91e5cd0fd5f7.json");
+  private final String pieceSample = getFile("data/pieces/268758-03_02_create_by_none.json");
+  private final String pieceSample2 = getFile("data/pieces/313000-03_created_by_holding.json");
   private final String purchaseOrderSample = getFile("data/purchase-orders/268758_one-time_open.json");
   private final String purchaseOrderSample2 = getFile("data/purchase-orders/313000_one-time_open.json");
   private static final String APPLICATION_JSON = "application/json";
