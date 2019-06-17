@@ -18,12 +18,12 @@ import java.util.Map;
 
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
-public class AcquisitionsUnitAPI implements AcquisitionsUnitsStorageUnits {
+public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorageUnits {
 
   private static final String ACQUISITIONS_UNITS_TABLE = "acquisitions_units";
   private String idFieldName = "id";
 
-  public AcquisitionsUnitAPI(Vertx vertx, String tenantId) {
+  public AcquisitionsUnitsAPI(Vertx vertx, String tenantId) {
     PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
   }
 
