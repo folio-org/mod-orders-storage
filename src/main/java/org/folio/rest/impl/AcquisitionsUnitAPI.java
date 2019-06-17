@@ -7,7 +7,7 @@ import io.vertx.core.Vertx;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.AcquisitionsUnit;
 import org.folio.rest.jaxrs.model.AcquisitionsUnitCollection;
-import org.folio.rest.jaxrs.resource.AcquisitionsUnitStorageUnits;
+import org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorageUnits;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
@@ -18,7 +18,7 @@ import java.util.Map;
 
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
-public class AcquisitionsUnitAPI implements AcquisitionsUnitStorageUnits {
+public class AcquisitionsUnitAPI implements AcquisitionsUnitsStorageUnits {
 
   private static final String ACQUISITIONS_UNITS_TABLE = "acquisitions_units";
   private String idFieldName = "id";
@@ -29,9 +29,9 @@ public class AcquisitionsUnitAPI implements AcquisitionsUnitStorageUnits {
 
   @Override
   @Validate
-  public void getAcquisitionsUnitStorageUnits(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getAcquisitionsUnitsStorageUnits(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<AcquisitionsUnit, AcquisitionsUnitCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(AcquisitionsUnit.class, AcquisitionsUnitCollection.class, GetAcquisitionsUnitStorageUnitsResponse.class);
+      EntitiesMetadataHolder<AcquisitionsUnit, AcquisitionsUnitCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(AcquisitionsUnit.class, AcquisitionsUnitCollection.class, GetAcquisitionsUnitsStorageUnitsResponse.class);
       QueryHolder cql = new QueryHolder(ACQUISITIONS_UNITS_TABLE, query, offset, limit, lang);
       getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
@@ -39,25 +39,25 @@ public class AcquisitionsUnitAPI implements AcquisitionsUnitStorageUnits {
 
   @Override
   @Validate
-  public void postAcquisitionsUnitStorageUnits(String lang, AcquisitionsUnit entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.post(ACQUISITIONS_UNITS_TABLE, entity, okapiHeaders, vertxContext, PostAcquisitionsUnitStorageUnitsResponse.class, asyncResultHandler);
+  public void postAcquisitionsUnitsStorageUnits(String lang, AcquisitionsUnit entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.post(ACQUISITIONS_UNITS_TABLE, entity, okapiHeaders, vertxContext, PostAcquisitionsUnitsStorageUnitsResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void getAcquisitionsUnitStorageUnitsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.getById(ACQUISITIONS_UNITS_TABLE, AcquisitionsUnit.class, id, okapiHeaders,vertxContext, GetAcquisitionsUnitStorageUnitsByIdResponse.class, asyncResultHandler);
+  public void getAcquisitionsUnitsStorageUnitsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.getById(ACQUISITIONS_UNITS_TABLE, AcquisitionsUnit.class, id, okapiHeaders,vertxContext, GetAcquisitionsUnitsStorageUnitsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void deleteAcquisitionsUnitStorageUnitsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.deleteById(ACQUISITIONS_UNITS_TABLE, id, okapiHeaders, vertxContext, DeleteAcquisitionsUnitStorageUnitsByIdResponse.class, asyncResultHandler);
+  public void deleteAcquisitionsUnitsStorageUnitsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.deleteById(ACQUISITIONS_UNITS_TABLE, id, okapiHeaders, vertxContext, DeleteAcquisitionsUnitsStorageUnitsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void putAcquisitionsUnitStorageUnitsById(String id, String lang, AcquisitionsUnit entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(ACQUISITIONS_UNITS_TABLE, entity, id, okapiHeaders,vertxContext, PutAcquisitionsUnitStorageUnitsByIdResponse.class, asyncResultHandler);
+  public void putAcquisitionsUnitsStorageUnitsById(String id, String lang, AcquisitionsUnit entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.put(ACQUISITIONS_UNITS_TABLE, entity, id, okapiHeaders,vertxContext, PutAcquisitionsUnitsStorageUnitsByIdResponse.class, asyncResultHandler);
   }
 }

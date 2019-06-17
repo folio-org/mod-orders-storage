@@ -66,8 +66,8 @@ public class TenantReferenceAPI extends TenantAPI {
         .add("purchase-orders", "orders-storage/purchase-orders")
         .add("po-lines", "orders-storage/po-lines")
         .add("pieces", "orders-storage/pieces")
-        .add("order-invoice-relationships", "order-storage/order-invoice-relns")
-        .add("acquisitions-unit", "acquisitions-unit-storage/units");
+        .add("order-invoice-relationships", "orders-storage/order-invoice-relns")
+        .add("acquisitions-unit", "acquisitions-units-storage/units");
       loadData = true;
     }
     return loadData;
