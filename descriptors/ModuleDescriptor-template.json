@@ -603,7 +603,7 @@
         "acquisitions-units-storage.units.item.put",
         "acquisitions-units-storage.units.item.delete"
       ]
-    },,
+    },
     {
       "permissionName" : "acquisitions-units-storage.memberships.collection.get",
       "displayName" : "acquisitions-units-memberships-collection get",
@@ -640,7 +640,7 @@
         "acquisitions-units-storage.memberships.item.put",
         "acquisitions-units-storage.memberships.item.delete"
       ]
-    }
+    },
     {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
