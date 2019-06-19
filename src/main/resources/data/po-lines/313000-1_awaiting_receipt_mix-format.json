@@ -45,12 +45,12 @@
   "edition": "First edition",
   "eresource": {
     "accessProvider": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "activated": true,
+    "activated": false,
     "activationDue": 1,
-    "createInventory": "Instance, Holding, Item",
+    "createInventory": "Instance, Holding",
     "expectedActivation": "2019-07-20T00:00:00.000Z",
     "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
-    "trial": false,
+    "trial": true,
     "userLimit": 0
   },
   "fundDistribution": [

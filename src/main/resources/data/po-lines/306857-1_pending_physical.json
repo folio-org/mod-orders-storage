@@ -1,5 +1,5 @@
 {
-  "id": "abBD1cEF-A8eE-3d07-93B2-71C1387E61b1",
+  "id": "abbd1cef-a8ee-3d07-93b2-71c1387e61b1",
   "acquisitionMethod": "Purchase",
   "agreementId": "bfdbf5e3-8d5f-4ec0-9aed-38c68fb89254",
   "alerts": [],
@@ -53,9 +53,9 @@
   "edition": "First edition",
   "fundDistribution": [
     {
-      "code": "GIFTS-ONE-TIME",
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08017",
-      "fundId": "6506b79b-7702-48b2-9774-a1c538fdd34e",
+      "code": "STATE-SUBN",
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08011",
+      "fundId": "e54b1f4d-7d05-4b1a-9368-3c36b75d8ac6",
       "percentage": 100.0
     }
   ],

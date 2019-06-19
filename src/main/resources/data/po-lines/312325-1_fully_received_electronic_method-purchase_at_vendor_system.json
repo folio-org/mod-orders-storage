@@ -76,7 +76,7 @@
   "receiptStatus": "Fully Received",
   "reportingCodes": [],
   "requester": "msmith",
-  "rush": false,
+  "rush": true,
   "selector": "dhalling",
   "source": {
     "code": "",

@@ -66,11 +66,12 @@
     }
   ],
   "orderFormat": "Electronic Resource",
-  "paymentStatus": "Awaiting Payment",
+  "paymentStatus": "Partially Paid",
   "poLineDescription": "",
   "poLineNumber": "S60402-80",
   "publicationDate": "2019",
   "publisher": "American Chemical Society",
+  "receiptStatus": "Partially Received",
   "purchaseOrderId": "07f65192-44a4-483d-97aa-b137bbd96390",
   "receiptDate": null,
   "reportingCodes": [],
