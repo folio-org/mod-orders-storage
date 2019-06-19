@@ -76,7 +76,7 @@
   "receiptStatus": "Awaiting Receipt",
   "reportingCodes": [],
   "requester": "",
-  "rush": false,
+  "rush": true,
   "selector": "Brown",
   "source": {
     "code": "",

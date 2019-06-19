@@ -9,7 +9,7 @@
   "renewal": {
     "cycle": "6 Months",
     "interval": 182,
-    "manualRenewal": true,
+    "manualRenewal": false,
     "renewalDate": "2019-04-09T00:00:00.000Z",
     "reviewPeriod": 30
   },
