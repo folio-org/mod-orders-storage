@@ -91,7 +91,7 @@
       "foreignKeys": [
         {
           "fieldName": "acquisitionsUnitId",
-          "targetTable": "acquistions_units"
+          "targetTable": "acquisitions_units"
         }
       ]
     }
