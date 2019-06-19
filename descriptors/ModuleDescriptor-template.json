@@ -206,27 +206,27 @@
       "handlers": [
         {
           "methods": ["GET"],
-          "pathPattern": "/order-storage/order-invoice-relns",
+          "pathPattern": "/orders-storage/order-invoice-relns",
           "permissionsRequired": ["orders-storage.order-invoice-relationships.collection.get"]
         },
         {
           "methods": ["POST"],
-          "pathPattern": "/order-storage/order-invoice-relns",
+          "pathPattern": "/orders-storage/order-invoice-relns",
           "permissionsRequired": ["orders-storage.order-invoice-relationships.item.post"]
         },
         {
           "methods": ["GET"],
-          "pathPattern": "/order-storage/order-invoice-relns/{id}",
+          "pathPattern": "/orders-storage/order-invoice-relns/{id}",
           "permissionsRequired": ["orders-storage.order-invoice-relationships.item.get"]
         },
         {
           "methods": ["PUT"],
-          "pathPattern": "/order-storage/order-invoice-relns/{id}",
+          "pathPattern": "/orders-storage/order-invoice-relns/{id}",
           "permissionsRequired": ["orders-storage.order-invoice-relationships.item.put"]
         },
         {
           "methods": ["DELETE"],
-          "pathPattern": "/order-storage/order-invoice-relns/{id}",
+          "pathPattern": "/orders-storage/order-invoice-relns/{id}",
           "permissionsRequired": ["orders-storage.order-invoice-relationships.item.delete"]
         }
       ]
@@ -259,6 +259,37 @@
           "methods": ["DELETE"],
           "pathPattern": "/acquisitions-units-storage/memberships/{id}",
           "permissionsRequired": ["acquisitions-units-storage.memberships.item.delete"]
+        }
+        ]
+     },
+    {
+      "id": "acquisitions-units-storage.units",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/acquisitions-units-storage/units",
+          "permissionsRequired": ["acquisitions-units-storage.units.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/acquisitions-units-storage/units",
+          "permissionsRequired": ["acquisitions-units-storage.units.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/acquisitions-units-storage/units/{id}",
+          "permissionsRequired": ["acquisitions-units-storage.units.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/acquisitions-units-storage/units/{id}",
+          "permissionsRequired": ["acquisitions-units-storage.units.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/acquisitions-units-storage/units/{id}",
+          "permissionsRequired": ["acquisitions-units-storage.units.item.delete"]
         }
       ]
     },
@@ -574,6 +605,43 @@
       ]
     },
     {
+      "permissionName" : "acquisitions-units-storage.units.collection.get",
+      "displayName" : "acquisitions-units-collection get",
+      "description" : "Get a collection of acquisitions units"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.units.item.post",
+      "displayName" : "acquisitions-units-item post",
+      "description" : "Create a new acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.units.item.get",
+      "displayName" : "acquisitions-units-item get",
+      "description" : "Fetch an acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.units.item.put",
+      "displayName" : "acquisitions-units-item put",
+      "description" : "Update an acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.units.item.delete",
+      "displayName" : "acquisitions-units-item delete",
+      "description" : "Delete an acquisitions unit"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.units.all",
+      "displayName" : "All acquisitions-units perms",
+      "description" : "All permissions for the acquisitions-units",
+      "subPermissions" : [
+        "acquisitions-units-storage.units.collection.get",
+        "acquisitions-units-storage.units.item.post",
+        "acquisitions-units-storage.units.item.get",
+        "acquisitions-units-storage.units.item.put",
+        "acquisitions-units-storage.units.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -587,7 +655,8 @@
         "orders-storage.receiving-history.all",
         "orders-storage.reporting-codes.all",
         "orders-storage.order-invoice-relationships.all",
-        "acquisitions-units-storage.memberships.all"
+        "acquisitions-units-storage.memberships.all",
+        "acquisitions-units-storage.units.all"
       ]
     }
   ],

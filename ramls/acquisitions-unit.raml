@@ -12,12 +12,14 @@ types:
     acquisitions-unit-collection: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_collection.json
     acquisitions-unit-membership: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_membership.json
     acquisitions-unit-membership-collection: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_membership_collection.json
+    errors: !include raml-util/schemas/errors.schema
+
     UUID:
      type: string
      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
 
 traits:
-    orderable: !include raml-util/traits/orderable.raml
+    validate: !include raml-util/traits/validation.raml
     pageable:  !include raml-util/traits/pageable.raml
     searchable: !include raml-util/traits/searchable.raml
     language: !include raml-util/traits/language.raml
@@ -27,29 +29,35 @@ resourceTypes:
     collection-item: !include raml-util/rtypes/item-collection.raml
 
 /acquisitions-units-storage:
-  /units:
-    type:
-     collection:
+ /units:
+   type:
+    collection:
       exampleCollection: !include acq-models/mod-orders-storage/examples/acquisitions_unit_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_post.sample
       schemaCollection: acquisitions-unit-collection
       schemaItem: acquisitions-unit
-    get:
+   post:
+    description: Create new acquisitions unit
+    is: [validate]
+   get:
      description: Get list of acquisitions units
      is: [
       searchable: {description: "with valid searchable fields: for example protectRead", example: "[\"protectRead\", \"false\"]"},
       pageable
      ]
-    /{id}:
-      uriParameters:
-       id:
-         description: The UUID of a acquisitions unit
-         type: UUID
-      type:
-       collection-item:
+   /{id}:
+    uriParameters:
+      id:
+        description: The UUID of a acquisitions unit
+        type: UUID
+    type:
+      collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_post.sample
         schema: acquisitions-unit
-  /memberships:
+    put:
+      description: Update acquisitions unit
+      is: [validate]
+ /memberships:
     type:
      collection:
          exampleCollection: !include acq-models/mod-orders-storage/examples/acquisitions_unit_membership_collection.sample

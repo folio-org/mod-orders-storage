@@ -79,6 +79,12 @@
       ]
     },
     {
+      "tableName": "acquisitions_units",
+      "fromModuleVersion": 6.1,
+      "withMetadata": true,
+      "populateJsonWithId": true
+    },
+    {
     "tableName": "acquisitions_units_memberships",
       "fromModuleVersion": 6.0,
       "withMetadata": true,

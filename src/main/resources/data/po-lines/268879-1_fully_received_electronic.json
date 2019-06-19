@@ -35,12 +35,12 @@
   "edition": "First edition",
   "eresource": {
     "accessProvider": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "activated": true,
+    "activated": false,
     "activationDue": 0,
     "createInventory": "None",
     "expectedActivation": "2014-07-06T00:00:00.000Z",
     "materialType": "615b8413-82d5-4203-aa6e-e37984cb5ac3",
-    "trial": false,
+    "trial": true,
     "userLimit": 1
   },
   "fundDistribution": [
