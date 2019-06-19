@@ -77,6 +77,17 @@
           "targetTable": "purchase_order"
         }
       ]
+    },
+    {
+    "tableName": "acquisitions_units_memberships",
+      "fromModuleVersion": 6.0,
+      "withMetadata": true,
+      "foreignKeys": [
+        {
+          "fieldName": "acquisitionsUnitId",
+          "targetTable": "acquistions_units"
+        }
+      ]
     }
   ]
 }

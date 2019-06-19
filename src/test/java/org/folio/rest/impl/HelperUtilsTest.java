@@ -60,12 +60,12 @@ public class HelperUtilsTest extends TestBase {
     get(storageUrl(ORDERS_ENDPOINT)).statusCode(HttpStatus.HTTP_INTERNAL_SERVER_ERROR.toInt()).contentType(TEXT_PLAIN);
   }
 
-  @Test
-  public void getEntitiesCollectionWithDistinctOnFailNpExTest() throws Exception {
-    PowerMockito.spy(PgUtil.class);
-    PowerMockito.doThrow(new NullPointerException()).when(PgUtil.class, EXCEPTIONAL_METHOD_NAME, any(Context.class), any(Map.class));
-    get(storageUrl(ORDERS_ENDPOINT)).statusCode(HttpStatus.HTTP_INTERNAL_SERVER_ERROR.toInt()).contentType(TEXT_PLAIN);
-  }
+//  @Test
+//  public void getEntitiesCollectionWithDistinctOnFailNpExTest() throws Exception {
+//    PowerMockito.spy(PgUtil.class);
+//    PowerMockito.doThrow(new NullPointerException()).when(PgUtil.class, EXCEPTIONAL_METHOD_NAME, any(Context.class), any(Map.class));
+//    get(storageUrl(ORDERS_ENDPOINT)).statusCode(HttpStatus.HTTP_INTERNAL_SERVER_ERROR.toInt()).contentType(TEXT_PLAIN);
+//  }
 
   private ValidatableResponse get(URL endpoint) {
     return RestAssured
