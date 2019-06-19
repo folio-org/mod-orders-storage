@@ -292,8 +292,8 @@
           "permissionsRequired": ["acquisitions-units-storage.memberships.item.delete"]
         }
         ]
-     }
-    {
+     },
+     {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",
