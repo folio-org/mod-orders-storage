@@ -86,7 +86,7 @@
     },
     {
     "tableName": "acquisitions_unit_membership",
-      "fromModuleVersion": 6.0,
+      "fromModuleVersion": 6.1,
       "withMetadata": true,
       "populateJsonWithId": true,
       "foreignKeys": [

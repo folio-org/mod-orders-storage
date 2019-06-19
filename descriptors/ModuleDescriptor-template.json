@@ -264,7 +264,7 @@
     },
     {
       "id": "acquisitions-units-storage.memberships",
-      "version": "3.0",
+      "version": "1.0",
       "handlers": [
         {
           "methods": ["GET"],
