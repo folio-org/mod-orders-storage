@@ -17,7 +17,7 @@ public enum TestEntities {
   PO_LINE("/orders-storage/po-lines", PoLine.class, "data/po-lines/313000-1_awaiting_receipt_mix-format.json", "description", "Gift", 16),
   PIECE("/orders-storage/pieces", Piece.class, "data/pieces/313000-03_created_by_holding.json", "comment", "Update Comment", 18),
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, "data/order-invoice-relationships/313000_123invoicenumber45.json", "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 9),
-  ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, "data/acquisitions-unit/acquisitions-unit.json", "name", "met", 1),
+  ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, "data/acquisitions-units/acquisitions-unit.json", "name", "met", 1),
   ACQUISITIONS_UNIT_MEMBERSHIPS("/acquisitions-units-storage/memberships", AcquisitionsUnitMembership.class, "data/acquisitions-units-memberships/acquisition_unit_membership.json", "userId", "f8e41958-a378-4051-ae6e-429d231acb66", 1);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {

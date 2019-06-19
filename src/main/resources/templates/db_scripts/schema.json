@@ -79,20 +79,20 @@
       ]
     },
     {
-      "tableName": "acquisitions_units",
+      "tableName": "acquisitions_unit",
       "fromModuleVersion": 6.1,
       "withMetadata": true,
       "populateJsonWithId": true
     },
     {
-    "tableName": "acquisitions_units_memberships",
+    "tableName": "acquisitions_unit_membership",
       "fromModuleVersion": 6.0,
       "withMetadata": true,
       "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "acquisitionsUnitId",
-          "targetTable": "acquisitions_units"
+          "targetTable": "acquisitions_unit"
         }
       ]
     }
