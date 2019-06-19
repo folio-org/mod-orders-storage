@@ -21,11 +21,6 @@ import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorageUnits {
 
   private static final String ACQUISITIONS_UNITS_TABLE = "acquisitions_units";
-  private String idFieldName = "id";
-
-  public AcquisitionsUnitsAPI(Vertx vertx, String tenantId) {
-    PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
-  }
 
   @Override
   @Validate
