@@ -77,6 +77,12 @@
           "targetTable": "purchase_order"
         }
       ]
+    },
+    {
+      "tableName": "acquisitions_units",
+      "fromModuleVersion": 6.1,
+      "withMetadata": true,
+      "populateJsonWithId": true
     }
   ]
 }
