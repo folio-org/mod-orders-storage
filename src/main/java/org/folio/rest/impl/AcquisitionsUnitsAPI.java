@@ -67,7 +67,7 @@ public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
   @Validate
   public void getAcquisitionsUnitsStorageMembershipsById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.getById(ACQUISITIONS_UNITS_MEMBERSHIPS_TABLE, OrderInvoiceRelationship.class, id, okapiHeaders,vertxContext, GetAcquisitionsUnitsStorageMembershipsByIdResponse.class, asyncResultHandler);
+    PgUtil.getById(ACQUISITIONS_UNITS_MEMBERSHIPS_TABLE, AcquisitionsUnitMembership.class, id, okapiHeaders,vertxContext, GetAcquisitionsUnitsStorageMembershipsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
@@ -79,6 +79,7 @@ public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
   }
 
   @Override
+  @Validate
   public void postAcquisitionsUnitsStorageMemberships(String lang, AcquisitionsUnitMembership entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.post(ACQUISITIONS_UNITS_MEMBERSHIPS_TABLE, entity, okapiHeaders, vertxContext, PostAcquisitionsUnitsStorageMembershipsResponse.class, asyncResultHandler);
@@ -86,6 +87,7 @@ public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
   }
 
   @Override
+  @Validate
   public void putAcquisitionsUnitsStorageMembershipsById(String id, String lang, AcquisitionsUnitMembership entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(ACQUISITIONS_UNITS_MEMBERSHIPS_TABLE, entity, id, okapiHeaders,vertxContext, PutAcquisitionsUnitsStorageMembershipsByIdResponse.class, asyncResultHandler);

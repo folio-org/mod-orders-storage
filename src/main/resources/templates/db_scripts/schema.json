@@ -88,6 +88,7 @@
     "tableName": "acquisitions_units_memberships",
       "fromModuleVersion": 6.0,
       "withMetadata": true,
+      "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "acquisitionsUnitId",
