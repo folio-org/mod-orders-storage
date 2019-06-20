@@ -19,21 +19,18 @@
   "tables": [
     {
       "tableName": "alert",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
       "populateJsonWithId": true
     },
     {
       "tableName": "reporting_code",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
       "populateJsonWithId": true
     },
     {
       "tableName": "purchase_order",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
       "populateJsonWithId": true,
@@ -47,9 +44,6 @@
         },
         {
           "fieldName": "metadata.createdByUserId"
-        },
-        {
-          "fieldName": "poNumber"
         },
         {
           "fieldName": "workflowStatus"
@@ -83,11 +77,15 @@
         {
           "fieldName": "closeReason.note"
         }
+      ],
+      "uniqueIndex": [
+        {
+          "fieldName": "poNumber"
+        }
       ]
     },
     {
       "tableName": "po_line",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
       "populateJsonWithId": true,
@@ -147,9 +145,6 @@
           "fieldName": "collection"
         },
         {
-          "fieldName": "poLineNumber"
-        },
-        {
           "fieldName": "receiptStatus"
         },
         {
@@ -204,11 +199,15 @@
         {
           "fieldName": "vendor.refNumber"
         }
+      ],
+      "uniqueIndex": [
+        {
+          "fieldName": "poLineNumber"
+        }
       ]
     },
     {
       "tableName": "pieces",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
       "populateJsonWithId": true,
@@ -254,7 +253,6 @@
     },
     {
       "tableName": "order_invoice_relationship",
-      "generateId": true,
       "fromModuleVersion": 6.0,
       "withMetadata": false,
       "populateJsonWithId": true,
