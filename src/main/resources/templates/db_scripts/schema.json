@@ -94,7 +94,17 @@
           "fieldName": "acquisitionsUnitId",
           "targetTable": "acquisitions_unit"
         }
-      ]
+      ],
+      "index": [
+         {
+            "fieldName" : "userId",
+            "tOps": "ADD"
+         },
+         {
+            "fieldName" : "acquisitionsUnitId",
+            "tOps": "ADD"
+         }
+       ]
     }
   ]
 }
