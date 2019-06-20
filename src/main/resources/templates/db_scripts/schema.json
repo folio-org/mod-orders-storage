@@ -37,7 +37,53 @@
       "fromModuleVersion": 1.0,
       "withMetadata": true,
       "populateJsonWithId": true,
-      "customSnippetPath": "purchase_order_table.sql"
+      "customSnippetPath": "purchase_order_table.sql",
+      "index": [
+        {
+          "fieldName": "assignedTo"
+        },
+        {
+          "fieldName": "metadata.createdDate"
+        },
+        {
+          "fieldName": "metadata.createdByUserId"
+        },
+        {
+          "fieldName": "poNumber"
+        },
+        {
+          "fieldName": "workflowStatus"
+        },
+        {
+          "fieldName": "approved"
+        },
+        {
+          "fieldName": "dateOrdered"
+        },
+        {
+          "fieldName": "orderType"
+        },
+        {
+          "fieldName": "reEncumber"
+        },
+        {
+          "fieldName": "renewal.manualRenewal"
+        },
+        {
+          "fieldName": "renewal.renewalDate"
+        },
+        {
+          "fieldName": "renewal.reviewPeriod"
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "closeReason.reason"
+        },
+        {
+          "fieldName": "closeReason.note"
+        }
+      ]
     },
     {
       "tableName": "po_line",
@@ -49,6 +95,114 @@
         {
           "fieldName": "purchaseOrderId",
           "targetTable": "purchase_order"
+        }
+      ],
+      "index": [
+        {
+          "fieldName": "eresource.accessProvider"
+        },
+        {
+          "fieldName": "eresource.activated"
+        },
+        {
+          "fieldName": "eresource.expectedActivation"
+        },
+        {
+          "fieldName": "eresource.trial"
+        },
+        {
+          "fieldName": "eresource.materialType"
+        },
+        {
+          "fieldName": "details.subscriptionFrom"
+        },
+        {
+          "fieldName": "details.subscriptionTo"
+        },
+        {
+          "fieldName": "location.locationId"
+        },
+        {
+          "fieldName": "physical.receiptDue"
+        },
+        {
+          "fieldName": "physical.expectedReceiptDate"
+        },
+        {
+          "fieldName": "physical.volumes"
+        },
+        {
+          "fieldName": "physical.materialType"
+        },
+        {
+          "fieldName": "contributors"
+        },
+        {
+          "fieldName": "claim.grace"
+        },
+        {
+          "fieldName": "claim.sent"
+        },
+        {
+          "fieldName": "collection"
+        },
+        {
+          "fieldName": "poLineNumber"
+        },
+        {
+          "fieldName": "receiptStatus"
+        },
+        {
+          "fieldName": "paymentStatus"
+        },
+        {
+          "fieldName": "orderFormat"
+        },
+        {
+          "fieldName": "receiptDate"
+        },
+        {
+          "fieldName": "metadata.createdDate"
+        },
+        {
+          "fieldName": "rush"
+        },
+        {
+          "fieldName": "source"
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "publisher"
+        },
+        {
+          "fieldName": "donor"
+        },
+        {
+          "fieldName": "requester"
+        },
+        {
+          "fieldName": "selector"
+        },
+        {
+          "fieldName": "tags"
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "fundDistribution.code"
+        },
+        {
+          "fieldName": "details.productIds"
+        },
+        {
+          "fieldName": "title"
+        },
+        {
+          "fieldName": "vendor.vendorAccount"
+        },
+        {
+          "fieldName": "vendor.refNumber"
         }
       ]
     },
@@ -62,6 +216,39 @@
         {
           "fieldName": "poLineId",
           "targetTable": "po_line"
+        }
+      ],
+      "index": [
+        {
+          "fieldName": "format"
+        },
+        {
+          "fieldName": "itemId"
+        },
+        {
+          "fieldName": "locationId"
+        },
+        {
+          "fieldName": "poLineId"
+        },
+        {
+          "fieldName": "receivingStatus"
+        },
+        {
+          "fieldName": "receivedDate"
+        },
+        {
+          "fieldName": "supplement"
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "comment"
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "caption"
         }
       ]
     },
