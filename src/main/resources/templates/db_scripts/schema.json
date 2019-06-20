@@ -37,37 +37,48 @@
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
         {
-          "fieldName": "assignedTo"
+          "fieldName": "assignedTo",
+          "caseSensitive": false
         },
         {
-          "fieldName": "metadata.createdDate"
+          "fieldName": "metadata.createdDate",
+          "caseSensitive": false
         },
         {
-          "fieldName": "metadata.createdByUserId"
+          "fieldName": "metadata.createdByUserId",
+          "caseSensitive": false
         },
         {
-          "fieldName": "workflowStatus"
+          "fieldName": "workflowStatus",
+          "caseSensitive": false
         },
         {
-          "fieldName": "approved"
+          "fieldName": "approved",
+          "caseSensitive": false
         },
         {
-          "fieldName": "dateOrdered"
+          "fieldName": "dateOrdered",
+          "caseSensitive": false
         },
         {
-          "fieldName": "orderType"
+          "fieldName": "orderType",
+          "caseSensitive": false
         },
         {
-          "fieldName": "reEncumber"
+          "fieldName": "reEncumber",
+          "caseSensitive": false
         },
         {
-          "fieldName": "renewal.manualRenewal"
+          "fieldName": "renewal.manualRenewal",
+          "caseSensitive": false
         },
         {
-          "fieldName": "renewal.renewalDate"
+          "fieldName": "renewal.renewalDate",
+          "caseSensitive": false
         },
         {
-          "fieldName": "renewal.reviewPeriod"
+          "fieldName": "renewal.reviewPeriod",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
@@ -97,73 +108,96 @@
       ],
       "index": [
         {
-          "fieldName": "eresource.accessProvider"
+          "fieldName": "eresource.accessProvider",
+          "caseSensitive": false
         },
         {
-          "fieldName": "eresource.activated"
+          "fieldName": "eresource.activated",
+          "caseSensitive": false
         },
         {
-          "fieldName": "eresource.expectedActivation"
+          "fieldName": "eresource.expectedActivation",
+          "caseSensitive": false
         },
         {
-          "fieldName": "eresource.trial"
+          "fieldName": "eresource.trial",
+          "caseSensitive": false
         },
         {
-          "fieldName": "eresource.materialType"
+          "fieldName": "eresource.materialType",
+          "caseSensitive": false
         },
         {
-          "fieldName": "details.subscriptionFrom"
+          "fieldName": "details.subscriptionFrom",
+          "caseSensitive": false
         },
         {
-          "fieldName": "details.subscriptionTo"
+          "fieldName": "details.subscriptionTo",
+          "caseSensitive": false
         },
         {
-          "fieldName": "location.locationId"
+          "fieldName": "location.locationId",
+          "caseSensitive": false
         },
         {
-          "fieldName": "physical.receiptDue"
+          "fieldName": "physical.receiptDue",
+          "caseSensitive": false
         },
         {
-          "fieldName": "physical.expectedReceiptDate"
+          "fieldName": "physical.expectedReceiptDate",
+          "caseSensitive": false
         },
         {
-          "fieldName": "physical.volumes"
+          "fieldName": "physical.volumes",
+          "caseSensitive": false
         },
         {
-          "fieldName": "physical.materialType"
+          "fieldName": "physical.materialType",
+          "caseSensitive": false
         },
         {
-          "fieldName": "contributors"
+          "fieldName": "contributors",
+          "caseSensitive": false
         },
         {
-          "fieldName": "claim.grace"
+          "fieldName": "claim.grace",
+          "caseSensitive": false
         },
         {
-          "fieldName": "claim.sent"
+          "fieldName": "claim.sent",
+          "caseSensitive": false
         },
         {
-          "fieldName": "collection"
+          "fieldName": "collection",
+          "caseSensitive": false
         },
         {
-          "fieldName": "receiptStatus"
+          "fieldName": "receiptStatus",
+          "caseSensitive": false
         },
         {
-          "fieldName": "paymentStatus"
+          "fieldName": "paymentStatus",
+          "caseSensitive": false
         },
         {
-          "fieldName": "orderFormat"
+          "fieldName": "orderFormat",
+          "caseSensitive": false
         },
         {
-          "fieldName": "receiptDate"
+          "fieldName": "receiptDate",
+          "caseSensitive": false
         },
         {
-          "fieldName": "metadata.createdDate"
+          "fieldName": "metadata.createdDate",
+          "caseSensitive": false
         },
         {
-          "fieldName": "rush"
+          "fieldName": "rush",
+          "caseSensitive": false
         },
         {
-          "fieldName": "source"
+          "fieldName": "source",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
@@ -178,26 +212,38 @@
         },
         {
           "fieldName": "selector"
-        },
-        {
-          "fieldName": "tags"
         }
       ],
       "ginIndex": [
         {
-          "fieldName": "fundDistribution.code"
+          "fieldName": "fundDistribution.code",
+          "caseSensitive": false,
+          "removeAccents": true
         },
         {
-          "fieldName": "details.productIds"
+          "fieldName": "details.productIds",
+          "caseSensitive": false,
+          "removeAccents": true
         },
         {
-          "fieldName": "title"
+          "fieldName": "title",
+          "caseSensitive": false,
+          "removeAccents": true
         },
         {
-          "fieldName": "vendor.vendorAccount"
+          "fieldName": "vendor.vendorAccount",
+          "caseSensitive": false,
+          "removeAccents": true
         },
         {
-          "fieldName": "vendor.refNumber"
+          "fieldName": "vendor.refNumber",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "tags",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ],
       "uniqueIndex": [
@@ -219,25 +265,32 @@
       ],
       "index": [
         {
-          "fieldName": "format"
+          "fieldName": "format",
+          "caseSensitive": false
         },
         {
-          "fieldName": "itemId"
+          "fieldName": "itemId",
+          "caseSensitive": false
         },
         {
-          "fieldName": "locationId"
+          "fieldName": "locationId",
+          "caseSensitive": false
         },
         {
-          "fieldName": "poLineId"
+          "fieldName": "poLineId",
+          "caseSensitive": false
         },
         {
-          "fieldName": "receivingStatus"
+          "fieldName": "receivingStatus",
+          "caseSensitive": false
         },
         {
-          "fieldName": "receivedDate"
+          "fieldName": "receivedDate",
+          "caseSensitive": false
         },
         {
-          "fieldName": "supplement"
+          "fieldName": "supplement",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
@@ -247,7 +300,9 @@
       ],
       "ginIndex": [
         {
-          "fieldName": "caption"
+          "fieldName": "caption",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
