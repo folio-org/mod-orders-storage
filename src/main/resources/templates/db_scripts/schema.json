@@ -151,10 +151,6 @@
           "caseSensitive": false
         },
         {
-          "fieldName": "contributors",
-          "caseSensitive": false
-        },
-        {
           "fieldName": "claim.grace",
           "caseSensitive": false
         },
@@ -237,6 +233,11 @@
         },
         {
           "fieldName": "tags",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "contributors",
           "caseSensitive": false,
           "removeAccents": true
         }
