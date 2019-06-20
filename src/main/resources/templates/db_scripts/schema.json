@@ -88,11 +88,6 @@
         {
           "fieldName": "closeReason.note"
         }
-      ],
-      "uniqueIndex": [
-        {
-          "fieldName": "poNumber"
-        }
       ]
     },
     {
