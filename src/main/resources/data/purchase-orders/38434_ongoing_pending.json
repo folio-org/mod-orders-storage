@@ -1,14 +1,13 @@
 {
   "id": "c27e60f9-6361-44c1-976e-0c4821a33a7d",
-  "approved": true,
+  "approved": false,
   "manualPo": true,
   "notes": [
     "Cataloging record service"
   ],
   "orderType": "Ongoing",
-  "owner": "Monographs",
   "poNumber": "38434",
-  "reEncumber": false,
+  "reEncumber": true,
   "renewal": {
     "cycle": "6 Months",
     "interval": 182,

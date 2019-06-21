@@ -7,13 +7,12 @@
     "Published twice a year"
   ],
   "orderType": "Ongoing",
-  "owner": "Cushing",
   "poNumber": "306857",
-  "reEncumber": false,
+  "reEncumber": true,
   "renewal": {
     "cycle": "6 Months",
     "interval": 182,
-    "manualRenewal": true,
+    "manualRenewal": false,
     "renewalDate": "2019-04-09T00:00:00.000Z",
     "reviewPeriod": 30
   },
