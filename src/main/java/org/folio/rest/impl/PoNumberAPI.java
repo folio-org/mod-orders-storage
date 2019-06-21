@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.RestVerticle;
@@ -22,12 +21,7 @@ public class PoNumberAPI implements OrdersStoragePoNumber {
   private static final Logger log = LoggerFactory.getLogger(PoNumberAPI.class);
   private static final String PO_NUMBER_QUERY = "SELECT nextval('po_number')";
   private final Messages messages = Messages.getInstance();
-  private String idFieldName = "id";
 
-
-  public PoNumberAPI(Vertx vertx, String tenantId) {
-    PostgresClient.getInstance(vertx, tenantId).setIdField(idFieldName);
-  }
 
   @Override
   public void getOrdersStoragePoNumber(String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {

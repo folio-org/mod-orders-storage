@@ -20,20 +20,17 @@
     {
       "tableName": "alert",
       "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
+      "withMetadata": true
     },
     {
       "tableName": "reporting_code",
       "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
+      "withMetadata": true
     },
     {
       "tableName": "purchase_order",
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
         {
@@ -94,7 +91,6 @@
       "tableName": "po_line",
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "purchaseOrderId",
@@ -252,7 +248,6 @@
       "tableName": "pieces",
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "poLineId",
@@ -306,7 +301,6 @@
       "tableName": "order_invoice_relationship",
       "fromModuleVersion": 6.0,
       "withMetadata": false,
-      "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "purchaseOrderId",

@@ -3,13 +3,11 @@ package org.folio.rest.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageOrders;
 import org.folio.rest.persist.EntitiesMetadataHolder;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.QueryHolder;
 
 import javax.ws.rs.core.Response;
@@ -23,9 +21,6 @@ public class OrdersAPI implements OrdersStorageOrders {
   private static final String SEARCH_ORDERS_VIEW_TABLE = "orders_view";
   private static final String SORT_FIELD = "poNumber";
 
-  public OrdersAPI(Vertx vertx, String tenantId) {
-    PostgresClient.getInstance(vertx, tenantId).setIdField("id");
-  }
 
   @Override
   @Validate
