@@ -238,11 +238,11 @@
           "fieldName": "requester",
           "caseSensitive": false,
           "removeAccents": true
-        }
-      ],
-      "uniqueIndex": [
+        },
         {
-          "fieldName": "poLineNumber"
+          "fieldName": "poLineNumber",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
