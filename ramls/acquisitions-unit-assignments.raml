@@ -1,0 +1,56 @@
+#%RAML 1.0
+title: "Orders Storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1
+
+documentation:
+  - title: Acquisitions units
+    content: <b>CRUD APIs used to manage acquisitions unit assignments.</b>
+
+types:
+    acquisitions-unit-assignment: !include acq-models/common/schemas/acquisitions_unit_assignment.json
+    acquisitions-unit-assignment-collection: !include acq-models/common/schemas/acquisitions_unit_assignment_collection.json
+    errors: !include raml-util/schemas/errors.schema
+
+    UUID:
+     type: string
+     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+traits:
+    validate: !include raml-util/traits/validation.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+    language: !include raml-util/traits/language.raml
+
+resourceTypes:
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
+
+/orders-storage/acquisitions-unit-assignments:
+  type:
+    collection:
+      exampleCollection: !include acq-models/common/examples/acquisitions_unit_assignment_collection.sample
+      exampleItem: !include acq-models/common/examples/acquisitions_unit_assignment_post.sample
+      schemaCollection: acquisitions-unit-assignment-collection
+      schemaItem: acquisitions-unit-assignment
+  post:
+    description: Create new acquisitions unit assignment
+    is: [validate]
+  get:
+    description: Get list of acquisitions unit assignments
+    is: [
+      searchable: {description: "with valid searchable fields: for example protectRead", example: "[\"recordId\", \"68a8d546-33e0-4613-8a47-a72fca7f576b\"]"},
+      pageable
+    ]
+  /{id}:
+    uriParameters:
+      id:
+        description: The UUID of a acquisitions unit assignment
+        type: UUID
+    type:
+      collection-item:
+        exampleItem: !include acq-models/common/examples/acquisitions_unit_assignment_post.sample
+        schema: acquisitions-unit-assignment
+    put:
+      description: Update acquisitions unit assignment
+      is: [validate]
