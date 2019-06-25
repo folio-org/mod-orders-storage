@@ -39,7 +39,6 @@ public class PoLinesAPI implements OrdersStoragePoLines {
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
     pgClient = PostgresClient.getInstance(vertx, tenantId);
-    pgClient.setIdField(ID_FIELD_NAME);
   }
 
   @Override
@@ -204,7 +203,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     Criteria a = new Criteria();
     a.addField("'" + filedName + "'");
     a.setOperation("=");
-    a.setValue(fieldValue);
+    a.setVal(fieldValue);
     return new Criterion(a);
   }
 

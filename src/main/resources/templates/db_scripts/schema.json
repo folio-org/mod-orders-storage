@@ -19,58 +19,290 @@
   "tables": [
     {
       "tableName": "alert",
-      "generateId": true,
       "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
+      "withMetadata": true
     },
     {
       "tableName": "reporting_code",
-      "generateId": true,
       "fromModuleVersion": 1.0,
-      "withMetadata": true,
-      "populateJsonWithId": true
+      "withMetadata": true
     },
     {
       "tableName": "purchase_order",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
-      "customSnippetPath": "purchase_order_table.sql"
+      "customSnippetPath": "purchase_order_table.sql",
+      "index": [
+        {
+          "fieldName": "assignedTo",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "metadata.createdDate",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "metadata.createdByUserId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "workflowStatus",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "approved",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "dateOrdered",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "orderType",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "reEncumber",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "renewal.manualRenewal",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "renewal.renewalDate",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "renewal.reviewPeriod",
+          "caseSensitive": false
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "closeReason.reason"
+        },
+        {
+          "fieldName": "closeReason.note"
+        }
+      ]
     },
     {
       "tableName": "po_line",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "purchaseOrderId",
           "targetTable": "purchase_order"
         }
+      ],
+      "index": [
+        {
+          "fieldName": "eresource.accessProvider",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "eresource.activated",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "eresource.expectedActivation",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "eresource.trial",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "eresource.materialType",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "details.subscriptionFrom",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "details.subscriptionTo",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "location.locationId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "physical.receiptDue",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "physical.expectedReceiptDate",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "physical.volumes",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "physical.materialType",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "claim.grace",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "claim.sent",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "collection",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "receiptStatus",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "paymentStatus",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "orderFormat",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "receiptDate",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "metadata.createdDate",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "rush",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "source",
+          "caseSensitive": false
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "publisher"
+        },
+        {
+          "fieldName": "donor"
+        },
+        {
+          "fieldName": "selector"
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "fundDistribution.code",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "details.productIds",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "title",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "vendor.vendorAccount",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "vendor.refNumber",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "tags",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "contributors",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "requester",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "poLineNumber",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
       ]
     },
     {
       "tableName": "pieces",
-      "generateId": true,
       "fromModuleVersion": 1.0,
       "withMetadata": true,
-      "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "poLineId",
           "targetTable": "po_line"
         }
+      ],
+      "index": [
+        {
+          "fieldName": "format",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "itemId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "locationId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "poLineId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "receivingStatus",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "receivedDate",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "supplement",
+          "caseSensitive": false
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "comment"
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "caption",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
       ]
     },
     {
       "tableName": "order_invoice_relationship",
-      "generateId": true,
       "fromModuleVersion": 6.0,
       "withMetadata": false,
-      "populateJsonWithId": true,
       "foreignKeys": [
         {
           "fieldName": "purchaseOrderId",
@@ -81,8 +313,7 @@
     {
       "tableName": "acquisitions_units",
       "fromModuleVersion": 6.1,
-      "withMetadata": true,
-      "populateJsonWithId": true
+      "withMetadata": true
     }
   ]
 }
