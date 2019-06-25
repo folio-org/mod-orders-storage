@@ -655,7 +655,8 @@
         "orders-storage.receiving-history.all",
         "orders-storage.reporting-codes.all",
         "orders-storage.order-invoice-relationships.all",
-        "acquisitions-units-storage.units.all"
+        "acquisitions-units-storage.units.all",
+        "orders-acquisitions-unit-assignments-storage.all"
       ]
     }
   ],
