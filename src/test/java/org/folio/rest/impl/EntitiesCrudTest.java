@@ -116,7 +116,7 @@ public class EntitiesCrudTest extends TestBase {
     deleteData(testEntity.getEndpointWithId(), testEntity.getId()).then()
       .log()
       .ifValidationFails()
-      .statusCode(500);
+      .statusCode(400);
   }
 
   @ParameterizedTest
