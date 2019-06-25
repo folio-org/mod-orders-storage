@@ -39,7 +39,7 @@ resourceTypes:
   get:
     description: Get list of acquisitions unit assignments
     is: [
-      searchable: {description: "with valid searchable fields: for example protectRead", example: "[\"recordId\", \"68a8d546-33e0-4613-8a47-a72fca7f576b\"]"},
+      searchable: {description: "with valid searchable fields: for example recordId", example: "[\"recordId\", \"68a8d546-33e0-4613-8a47-a72fca7f576b\"]"},
       pageable
     ]
   /{id}:
@@ -49,7 +49,7 @@ resourceTypes:
         type: UUID
     type:
       collection-item:
-        exampleItem: !include acq-models/common/examples/acquisitions_unit_assignment_post.sample
+        exampleItem: !include acq-models/common/examples/acquisitions_unit_assignment_get.sample
         schema: acquisitions-unit-assignment
     put:
       description: Update acquisitions unit assignment

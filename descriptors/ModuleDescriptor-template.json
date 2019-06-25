@@ -269,27 +269,27 @@
         {
           "methods": ["GET"],
           "pathPattern": "/orders-storage/acquisitions-unit-assignments",
-          "permissionsRequired": ["orders-acquisitions-unit-assignments-storage.collection.get"]
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.collection.get"]
         },
         {
           "methods": ["POST"],
           "pathPattern": "/orders-storage/acquisitions-unit-assignments",
-          "permissionsRequired": ["orders-acquisitions-unit-assignments-storage.item.post"]
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.post"]
         },
         {
           "methods": ["GET"],
           "pathPattern": "/orders-storage/acquisitions-unit-assignments/{id}",
-          "permissionsRequired": ["orders-acquisitions-unit-assignments-storage.item.get"]
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.get"]
         },
         {
           "methods": ["PUT"],
           "pathPattern": "/orders-storage/acquisitions-unit-assignments/{id}",
-          "permissionsRequired": ["orders-acquisitions-unit-assignments-storage.item.put"]
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.put"]
         },
         {
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/acquisitions-unit-assignments/{id}",
-          "permissionsRequired": ["orders-acquisitions-unit-assignments-storage.item.delete"]
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.delete"]
         }
       ]
     },
@@ -605,40 +605,40 @@
       ]
     },
     {
-      "permissionName" : "orders-acquisitions-unit-assignments-storage.collection.get",
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.collection.get",
       "displayName" : "acquisitions-unit-assignments-collection get",
       "description" : "Get a collection of acquisitions unit assignments"
     },
     {
-      "permissionName" : "orders-acquisitions-unit-assignments-storage.item.post",
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.post",
       "displayName" : "acquisitions-unit-assignment-item post",
       "description" : "Create a new acquisitions unit assignment"
     },
     {
-      "permissionName" : "orders-acquisitions-unit-assignments-storage.item.get",
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.get",
       "displayName" : "acquisitions-unit-assignment-item get",
       "description" : "Fetch an acquisitions unit assignment"
     },
     {
-      "permissionName" : "orders-acquisitions-unit-assignments-storage.item.put",
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.put",
       "displayName" : "acquisitions-unit-assignment put",
       "description" : "Update an acquisitions unit assignment"
     },
     {
-      "permissionName" : "orders-acquisitions-unit-assignments-storage.item.delete",
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.delete",
       "displayName" : "acquisitions-unit-assignment-item delete",
       "description" : "Delete an acquisitions unit assignment"
     },
     {
-      "permissionName" : "orders-acquisitions-unit-assignments-storage.all",
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.all",
       "displayName" : "All acquisitions-unit-assignment perms",
       "description" : "All permissions for the acquisitions-unit-assignments",
       "subPermissions" : [
-        "orders-acquisitions-unit-assignments-storage.collection.get",
-        "orders-acquisitions-unit-assignments-storage.item.post",
-        "orders-acquisitions-unit-assignments-storage.item.get",
-        "orders-acquisitions-unit-assignments-storage.item.put",
-        "orders-acquisitions-unit-assignments-storage.item.delete"
+        "orders-storage.acquisitions-unit-assignments.collection.get",
+        "orders-storage.acquisitions-unit-assignments.item.post",
+        "orders-storage.acquisitions-unit-assignments.item.get",
+        "orders-storage.acquisitions-unit-assignments.item.put",
+        "orders-storage.acquisitions-unit-assignments.item.delete"
       ]
     },
     {
@@ -656,7 +656,7 @@
         "orders-storage.reporting-codes.all",
         "orders-storage.order-invoice-relationships.all",
         "acquisitions-units-storage.units.all",
-        "orders-acquisitions-unit-assignments-storage.all"
+        "orders-storage.acquisitions-unit-assignments.all"
       ]
     }
   ],
