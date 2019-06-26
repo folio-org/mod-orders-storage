@@ -7,14 +7,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.persist.EntitiesMetadataHolder;
+import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
-import org.junit.platform.runner.JUnitPlatform;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.modules.junit4.PowerMockRunnerDelegate;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -30,7 +35,22 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 
 
-@RunWith(JUnitPlatform.class)
+@RunWith(PowerMockRunner.class)
+@PowerMockRunnerDelegate(Suite.class)
+@PowerMockIgnore({"javax.net.ssl.*", "org.apache.logging.log4j.*"})
+@PrepareForTest({PgUtil.class, EntitiesMetadataHolder.class, OrdersAPI.class})
+
+@Suite.SuiteClasses({
+  EntitiesCrudTest.class,
+  OrdersAPITest.class,
+  PoNumberTest.class,
+  PurchaseOrderLineNumberTest.class,
+  PurchaseOrderNumberUniquenessTest.class,
+  ReceivingHistoryTest.class,
+  SearchOrderLinesTest.class,
+  TenantSampleDataTest.class,
+  HelperUtilsTest.class
+})
 
 public class StorageTestSuite {
   private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
@@ -49,7 +69,7 @@ public class StorageTestSuite {
     return vertx;
   }
 
-  @BeforeAll
+  @BeforeClass
   public static void before() throws IOException, InterruptedException, ExecutionException, TimeoutException {
 
     // tests expect English error messages only, no Danish/German/...
@@ -72,7 +92,7 @@ public class StorageTestSuite {
     prepareTenant(TENANT_HEADER, false);
   }
 
-  @AfterAll
+  @AfterClass
   public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
     logger.info("Delete tenant");
     deleteTenant(TENANT_HEADER);
@@ -111,24 +131,5 @@ public class StorageTestSuite {
 
     deploymentComplete.get(60, TimeUnit.SECONDS);
   }
-
-  @Nested
-  class EntitiesCrudTestNested extends EntitiesCrudTest{}
-  @Nested
-  class OrdersAPITestNested extends OrdersAPITest{}
-  @Nested
-  class PoNumberTestNested extends PoNumberTest{}
-  @Nested
-  class PurchaseOrderLineNumberTestNested extends PurchaseOrderLineNumberTest{}
-  @Nested
-  class PurchaseOrderNumberUniquenessTestNested extends PurchaseOrderNumberUniquenessTest{}
-  @Nested
-  class ReceivingHistoryTestNested extends ReceivingHistoryTest{}
-  @Nested
-  class SearchOrderLinesTestNested extends SearchOrderLinesTest{}
-  @Nested
-  class TenantSampleDataTestNested extends TenantSampleDataTest{}
-  @Nested
-  class HelperUtilsTestNested extends HelperUtilsTest{}
 
 }
