@@ -2,7 +2,7 @@ package org.folio.rest.impl;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 
@@ -13,7 +13,6 @@ public class PoNumberTest extends TestBase {
   private final Logger logger = LoggerFactory.getLogger(PoNumberTest.class);
 
   private static final String PO_NUMBER_ENDPOINT = "/orders-storage/po-number";
-
 
   @Test
   public void testGetPoNumberOk() throws MalformedURLException {

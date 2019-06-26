@@ -16,9 +16,9 @@ import org.folio.rest.jaxrs.model.Physical;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLine.OrderFormat;
 import org.folio.rest.jaxrs.model.PoLineCollection;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class SearchOrderLinesTest extends TestBase {
   private static final Logger logger = LoggerFactory.getLogger(SearchOrderLinesTest.class);
@@ -27,13 +27,13 @@ public class SearchOrderLinesTest extends TestBase {
   private static final String TENANT_NAME = "polinesearch";
   static final Header NEW_TENANT = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
 
-  @BeforeClass
+  @BeforeAll
   public static void before() throws MalformedURLException {
     logger.info("Create a new tenant loading the sample data");
     prepareTenant(NEW_TENANT, true);
   }
 
-  @AfterClass
+  @AfterAll
   public static void after() throws MalformedURLException {
     logger.info("Delete the created \"polinesearch\" tenant");
     deleteTenant(NEW_TENANT);

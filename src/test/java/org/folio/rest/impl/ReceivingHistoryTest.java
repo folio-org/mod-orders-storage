@@ -15,7 +15,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import org.folio.rest.jaxrs.model.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class ReceivingHistoryTest extends TestBase {
