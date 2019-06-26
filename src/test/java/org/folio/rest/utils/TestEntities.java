@@ -1,6 +1,7 @@
 package org.folio.rest.utils;
 
 import org.folio.rest.jaxrs.model.AcquisitionsUnit;
+import org.folio.rest.jaxrs.model.AcquisitionsUnitAssignment;
 import org.folio.rest.jaxrs.model.Alert;
 import org.folio.rest.jaxrs.model.OrderInvoiceRelationship;
 import org.folio.rest.jaxrs.model.Piece;
@@ -16,7 +17,8 @@ public enum TestEntities {
   PO_LINE("/orders-storage/po-lines", PoLine.class, "data/po-lines/313000-1_awaiting_receipt_mix-format.json", "description", "Gift", 16),
   PIECE("/orders-storage/pieces", Piece.class, "data/pieces/313000-03_created_by_item.json", "comment", "Update Comment", 18),
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, "data/order-invoice-relationships/313000_123invoicenumber45.json", "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 9),
-  ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, "data/acquisitions-unit/acquisitions-unit.json", "name", "met", 1);
+  ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, "data/acquisitions-unit/acquisitions-unit.json", "name", "met", 1),
+  ACQUISITIONS_UNIT_ASSIGNMENTS("/orders-storage/acquisitions-unit-assignments", AcquisitionsUnitAssignment.class, "data/acquisitions-unit-assignments/AUA-04ae9da2.json", "recordId", "05bdf3c8-01f0-4ddb-bd6c-6efd465f9e33", 1);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;

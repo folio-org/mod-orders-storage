@@ -314,6 +314,31 @@
       "tableName": "acquisitions_units",
       "fromModuleVersion": 6.1,
       "withMetadata": true
+    },
+    {
+      "tableName": "acquisitions_unit_assignments",
+      "fromModuleVersion": 6.1,
+      "withMetadata": true,
+      "foreignKeys": [
+        {
+          "fieldName": "recordId",
+          "targetTable": "purchase_order"
+        },
+        {
+          "fieldName": "acquisitionsUnitId",
+          "targetTable": "acquisitions_units"
+        }
+      ],
+      "index": [
+        {
+          "fieldName": "recordId",
+          "tOps": "ADD"
+        },
+        {
+          "fieldName": "acquisitionsUnitId",
+          "tOps": "ADD"
+        }
+      ]
     }
   ]
 }
