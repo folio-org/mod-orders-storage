@@ -294,6 +294,37 @@
         ]
      },
      {
+      "id": "orders-acquisitions-unit-assignments-storage",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/acquisitions-unit-assignments",
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/acquisitions-unit-assignments",
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/acquisitions-unit-assignments/{id}",
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/acquisitions-unit-assignments/{id}",
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/acquisitions-unit-assignments/{id}",
+          "permissionsRequired": ["orders-storage.acquisitions-unit-assignments.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",
@@ -605,6 +636,7 @@
       ]
     },
     {
+<<<<<<< HEAD
       "permissionName" : "acquisitions-units-storage.memberships.collection.get",
       "displayName" : "acquisitions-units-memberships-collection get",
       "description" : "Get a collection of acquisitions units memberships"
@@ -639,6 +671,42 @@
         "acquisitions-units-storage.memberships.item.get",
         "acquisitions-units-storage.memberships.item.put",
         "acquisitions-units-storage.memberships.item.delete"
+=======
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.collection.get",
+      "displayName" : "acquisitions-unit-assignments-collection get",
+      "description" : "Get a collection of acquisitions unit assignments"
+    },
+    {
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.post",
+      "displayName" : "acquisitions-unit-assignment-item post",
+      "description" : "Create a new acquisitions unit assignment"
+    },
+    {
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.get",
+      "displayName" : "acquisitions-unit-assignment-item get",
+      "description" : "Fetch an acquisitions unit assignment"
+    },
+    {
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.put",
+      "displayName" : "acquisitions-unit-assignment put",
+      "description" : "Update an acquisitions unit assignment"
+    },
+    {
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.item.delete",
+      "displayName" : "acquisitions-unit-assignment-item delete",
+      "description" : "Delete an acquisitions unit assignment"
+    },
+    {
+      "permissionName" : "orders-storage.acquisitions-unit-assignments.all",
+      "displayName" : "All acquisitions-unit-assignment perms",
+      "description" : "All permissions for the acquisitions-unit-assignments",
+      "subPermissions" : [
+        "orders-storage.acquisitions-unit-assignments.collection.get",
+        "orders-storage.acquisitions-unit-assignments.item.post",
+        "orders-storage.acquisitions-unit-assignments.item.get",
+        "orders-storage.acquisitions-unit-assignments.item.put",
+        "orders-storage.acquisitions-unit-assignments.item.delete"
+>>>>>>> branch 'master' of https://github.com/folio-org/mod-orders-storage.git
       ]
     },
     {
@@ -656,7 +724,11 @@
         "orders-storage.reporting-codes.all",
         "orders-storage.order-invoice-relationships.all",
         "acquisitions-units-storage.units.all",
+<<<<<<< HEAD
         "acquisitions-units-storage.memberships.all"
+=======
+        "orders-storage.acquisitions-unit-assignments.all"
+>>>>>>> branch 'master' of https://github.com/folio-org/mod-orders-storage.git
       ]
     }
   ],

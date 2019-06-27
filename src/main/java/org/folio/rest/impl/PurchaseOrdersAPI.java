@@ -34,13 +34,10 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase-orders/";
   private PostgresClient pgClient;
 
-  private String idFieldName = "id";
-
 
   public PurchaseOrdersAPI(Vertx vertx, String tenantId) {
     log.debug("Init PurchaseOrdersAPI creating PostgresClient");
     pgClient = PostgresClient.getInstance(vertx, tenantId);
-    pgClient.setIdField(idFieldName);
   }
 
   @Override

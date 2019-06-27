@@ -10,8 +10,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
@@ -19,15 +17,15 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@RunWith(JUnitPlatform.class)
 public class EntitiesCrudTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);
   String sample = null;
 
   public static Stream<TestEntities> deleteOrder() {
-    return Stream.of(TestEntities.ORDER_INVOICE_RELNS, TestEntities.PO_LINE,
-      TestEntities.PURCHASE_ORDER, TestEntities.ALERT, TestEntities.REPORTING_CODE, TestEntities.ACQUISITIONS_UNIT_MEMBERSHIPS, TestEntities.ACQUISITIONS_UNIT);
+    return Stream.of(TestEntities.ORDER_INVOICE_RELNS, TestEntities.ACQUISITIONS_UNIT_ASSIGNMENTS, TestEntities.PO_LINE,
+        TestEntities.PURCHASE_ORDER, TestEntities.ALERT, TestEntities.REPORTING_CODE, TestEntities.ACQUISITIONS_UNIT_MEMBERSHIPS,
+        TestEntities.ACQUISITIONS_UNIT);
   }
 
   public static Stream<TestEntities> deleteFailOrder() {
@@ -116,7 +114,7 @@ public class EntitiesCrudTest extends TestBase {
     deleteData(testEntity.getEndpointWithId(), testEntity.getId()).then()
       .log()
       .ifValidationFails()
-      .statusCode(500);
+      .statusCode(400);
   }
 
   @ParameterizedTest
