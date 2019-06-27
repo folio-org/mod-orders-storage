@@ -23,6 +23,7 @@
     <postgres.driver.version>9.4.1212</postgres.driver.version>
     <junit-jupiter-version>5.4.2</junit-jupiter-version>
     <jmockit.version>1.46</jmockit.version>
+    <argLine/>
   </properties>
 
   <repositories>
@@ -442,7 +443,7 @@
         <version>2.22.1</version>
         <configuration>
           <argLine>
-            -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
+            @{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
           </argLine>
           <excludes>
             <exclude>org/folio/rest/impl/*Test.java</exclude>
