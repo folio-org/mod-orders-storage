@@ -6,11 +6,9 @@ import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.sql.ResultSet;
-import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.folio.rest.persist.PostgresClient;
 import org.json.JSONObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -21,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(VertxUnitRunner.class)
 public class PurchaseOrderLineNumberTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(PurchaseOrderLineNumberTest.class);

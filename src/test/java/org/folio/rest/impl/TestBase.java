@@ -14,8 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.utils.TestEntities;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -39,18 +37,15 @@ public abstract class TestBase {
   private static boolean invokeStorageTestSuiteAfter = false;
 
   @BeforeAll
-  @BeforeClass
   public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
     Vertx vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
       invokeStorageTestSuiteAfter = true;
       StorageTestSuite.before();
     }
-
   }
 
   @AfterAll
-  @AfterClass
   public static void testBaseAfterClass()
     throws InterruptedException,
     ExecutionException,

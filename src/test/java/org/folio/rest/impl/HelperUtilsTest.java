@@ -14,16 +14,14 @@ import java.util.Map;
 import mockit.Mock;
 import mockit.MockUp;
 
-import mockit.integration.junit4.JMockit;
 import org.folio.HttpStatus;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(JMockit.class)
+import org.junit.jupiter.api.Test;
+
 public class HelperUtilsTest extends TestBase {
 
   private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
