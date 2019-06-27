@@ -670,6 +670,7 @@
         "acquisitions-units-storage.memberships.item.get",
         "acquisitions-units-storage.memberships.item.put",
         "acquisitions-units-storage.memberships.item.delete"
+      ]
     },
     {
       "permissionName" : "orders-storage.acquisitions-unit-assignments.collection.get",
