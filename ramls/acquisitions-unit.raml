@@ -10,6 +10,8 @@ documentation:
 types:
     acquisitions-unit: !include acq-models/mod-orders-storage/schemas/acquisitions_unit.json
     acquisitions-unit-collection: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_collection.json
+    acquisitions-unit-membership: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_membership.json
+    acquisitions-unit-membership-collection: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_membership_collection.json
     errors: !include raml-util/schemas/errors.schema
 
     UUID:
@@ -26,23 +28,24 @@ resourceTypes:
     collection: !include raml-util/rtypes/collection.raml
     collection-item: !include raml-util/rtypes/item-collection.raml
 
-/acquisitions-units-storage/units:
-  type:
+/acquisitions-units-storage:
+ /units:
+   type:
     collection:
       exampleCollection: !include acq-models/mod-orders-storage/examples/acquisitions_unit_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_post.sample
       schemaCollection: acquisitions-unit-collection
       schemaItem: acquisitions-unit
-  post:
+   post:
     description: Create new acquisitions unit
     is: [validate]
-  get:
-    description: Get list of acquisitions units
-    is: [
+   get:
+     description: Get list of acquisitions units
+     is: [
       searchable: {description: "with valid searchable fields: for example protectRead", example: "[\"protectRead\", \"false\"]"},
       pageable
-    ]
-  /{id}:
+     ]
+   /{id}:
     uriParameters:
       id:
         description: The UUID of a acquisitions unit
@@ -54,3 +57,25 @@ resourceTypes:
     put:
       description: Update acquisitions unit
       is: [validate]
+ /memberships:
+    type:
+     collection:
+         exampleCollection: !include acq-models/mod-orders-storage/examples/acquisitions_unit_membership_collection.sample
+         exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_membership_post.sample
+         schemaCollection: acquisitions-unit-membership-collection
+         schemaItem: acquisitions-unit-membership
+    get:
+     description: Get list of acquisitions units memberships
+     is: [
+      searchable: {description: "with valid searchable fields: for example acquisitionUnitId", example: "[\"acquisitionUnitId\", \"0ebb1f7d-983f-3026-8a4c-5318e0ebc041\"]"},
+      pageable
+     ]
+    /{id}:
+     uriParameters:
+      id:
+        description: The UUID of a acquisitions unit membership
+        type: UUID
+     type:
+      collection-item:
+        exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_membership_get.sample
+        schema: acquisitions-unit-membership

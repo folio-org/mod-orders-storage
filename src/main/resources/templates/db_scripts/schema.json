@@ -311,7 +311,7 @@
       ]
     },
     {
-      "tableName": "acquisitions_units",
+      "tableName": "acquisitions_unit",
       "fromModuleVersion": 6.1,
       "withMetadata": true
     },
@@ -326,7 +326,7 @@
         },
         {
           "fieldName": "acquisitionsUnitId",
-          "targetTable": "acquisitions_units"
+          "targetTable": "acquisitions_unit"
         }
       ],
       "index": [
@@ -339,6 +339,25 @@
           "tOps": "ADD"
         }
       ]
-    }
+    },
+    {
+    "tableName": "acquisitions_unit_membership",
+      "fromModuleVersion": 6.1,
+      "withMetadata": true,
+      "foreignKeys": [
+        {
+          "fieldName": "acquisitionsUnitId",
+          "targetTable": "acquisitions_unit"
+        }
+      ],
+      "index": [
+         {
+            "fieldName" : "userId"
+         },
+         {
+            "fieldName" : "acquisitionsUnitId"
+         }
+       ]
+     }
   ]
 }

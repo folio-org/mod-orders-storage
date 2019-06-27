@@ -263,6 +263,37 @@
       ]
     },
     {
+      "id": "acquisitions-units-storage.memberships",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/acquisitions-units-storage/memberships",
+          "permissionsRequired": ["acquisitions-units-storage.memberships.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/acquisitions-units-storage/memberships",
+          "permissionsRequired": ["acquisitions-units-storage.memberships.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/acquisitions-units-storage/memberships/{id}",
+          "permissionsRequired": ["acquisitions-units-storage.memberships.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/acquisitions-units-storage/memberships/{id}",
+          "permissionsRequired": ["acquisitions-units-storage.memberships.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/acquisitions-units-storage/memberships/{id}",
+          "permissionsRequired": ["acquisitions-units-storage.memberships.item.delete"]
+        }
+        ]
+     },
+     {
       "id": "orders-acquisitions-unit-assignments-storage",
       "version": "1.0",
       "handlers": [
@@ -605,6 +636,43 @@
       ]
     },
     {
+      "permissionName" : "acquisitions-units-storage.memberships.collection.get",
+      "displayName" : "acquisitions-units-memberships-collection get",
+      "description" : "Get a collection of acquisitions units memberships"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.memberships.item.post",
+      "displayName" : "acquisitions-units-memberships-item post",
+      "description" : "Create a new acquisitions unit membership"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.memberships.item.get",
+      "displayName" : "acquisitions-units-memberships-item get",
+      "description" : "Fetch an acquisitions unit membership"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.memberships.item.put",
+      "displayName" : "acquisitions-units-memberships-item put",
+      "description" : "Update an acquisitions unit membership"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.memberships.item.delete",
+      "displayName" : "acquisitions-units-memberships-item delete",
+      "description" : "Delete an acquisitions unit membership"
+    },
+    {
+      "permissionName" : "acquisitions-units-storage.memberships.all",
+      "displayName" : "All acquisitions-units-memberships perms",
+      "description" : "All permissions for the acquisitions-units memberships",
+      "subPermissions" : [
+        "acquisitions-units-storage.memberships.collection.get",
+        "acquisitions-units-storage.memberships.item.post",
+        "acquisitions-units-storage.memberships.item.get",
+        "acquisitions-units-storage.memberships.item.put",
+        "acquisitions-units-storage.memberships.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.acquisitions-unit-assignments.collection.get",
       "displayName" : "acquisitions-unit-assignments-collection get",
       "description" : "Get a collection of acquisitions unit assignments"
@@ -656,6 +724,7 @@
         "orders-storage.reporting-codes.all",
         "orders-storage.order-invoice-relationships.all",
         "acquisitions-units-storage.units.all",
+        "acquisitions-units-storage.memberships.all",
         "orders-storage.acquisitions-unit-assignments.all"
       ]
     }
