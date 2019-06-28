@@ -26,6 +26,7 @@ public class HelperUtils {
 
   public static final String JSONB = "jsonb";
   public static final String METADATA = "metadata";
+  public static final String ID_FIELD_NAME = "id";
 
   private HelperUtils() {
     throw new UnsupportedOperationException("Cannot instantiate utility class.");

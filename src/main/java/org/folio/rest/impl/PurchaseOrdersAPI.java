@@ -23,14 +23,17 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
+import static org.folio.rest.persist.HelperUtils.METADATA;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
+import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
 
 public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
   static final String PURCHASE_ORDER_TABLE = "purchase_order";
+  private static final String PURCHASE_ORDERS_VIEW = "purchase_orders_view";
   private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase-orders/";
   private PostgresClient pgClient;
 
@@ -46,8 +49,8 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PurchaseOrder.class, PurchaseOrderCollection.class, GetOrdersStoragePurchaseOrdersResponse.class);
-      QueryHolder cql = new QueryHolder(PURCHASE_ORDER_TABLE, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
+      QueryHolder cql = new QueryHolder(PURCHASE_ORDERS_VIEW, METADATA, query, offset, limit, lang);
+      getEntitiesCollectionWithDistinctOn(entitiesMetadataHolder, cql, ID_FIELD_NAME, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }
 

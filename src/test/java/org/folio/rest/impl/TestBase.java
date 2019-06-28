@@ -105,8 +105,12 @@ public abstract class TestBase {
   }
 
   Response postData(String endpoint, String input) throws MalformedURLException {
+    return postData(endpoint, input, TENANT_HEADER);
+  }
+
+  Response postData(String endpoint, String input, Header tenant) throws MalformedURLException {
     return given()
-      .header(TENANT_HEADER)
+      .header(tenant)
       .accept(ContentType.JSON)
       .contentType(ContentType.JSON)
       .body(input)
@@ -116,7 +120,11 @@ public abstract class TestBase {
   }
 
   String createEntity(String endpoint, String entity) throws MalformedURLException {
-    return postData(endpoint, entity)
+    return createEntity(endpoint, entity, TENANT_HEADER);
+  }
+
+  String createEntity(String endpoint, String entity, Header tenant) throws MalformedURLException {
+    return postData(endpoint, entity, tenant)
       .then().log().all()
         .statusCode(201)
         .extract()
