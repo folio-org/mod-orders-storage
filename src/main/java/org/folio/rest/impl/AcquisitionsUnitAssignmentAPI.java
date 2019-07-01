@@ -20,7 +20,7 @@ import io.vertx.core.Handler;
 
 public class AcquisitionsUnitAssignmentAPI implements OrdersStorageAcquisitionsUnitAssignments {
 
-  private static final String ACQUISITIONS_UNIT_ASSIGNMENTS_TABLE = "acquisitions_unit_assignments";
+  static final String ACQUISITIONS_UNIT_ASSIGNMENTS_TABLE = "acquisitions_unit_assignments";
 
   @Override
   @Validate

@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.METADATA;
+import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
 
 import java.util.Map;
@@ -17,7 +18,6 @@ import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.QueryHolder;
-import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 
 import io.vertx.core.AsyncResult;
@@ -176,7 +176,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
       if (reply.failed()) {
         future.completeExceptionally(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
       } else {
-        log.info("{} pieces of POLine with id={} successfully deleted", tx.getId(), reply.result().getUpdated());
+        log.info("{} pieces of POLine with id={} successfully deleted", reply.result().getUpdated(), tx.getId());
         future.complete(tx);
       }
     });
@@ -199,14 +199,6 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     CompletableFuture<TxWithId> future = new CompletableFuture<>();
     pgClient.endTx(tx.getConnection(), v -> future.complete(tx));
     return future;
-  }
-
-  private Criterion getCriterionByFieldNameAndValue(String filedName, String fieldValue) {
-    Criteria a = new Criteria();
-    a.addField("'" + filedName + "'");
-    a.setOperation("=");
-    a.setVal(fieldValue);
-    return new Criterion(a);
   }
 
 }

@@ -13,6 +13,7 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PgUtil;
@@ -23,10 +24,13 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.UUID;
 
+import static io.vertx.core.Future.succeededFuture;
+import static org.folio.rest.impl.AcquisitionsUnitAssignmentAPI.ACQUISITIONS_UNIT_ASSIGNMENTS_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.METADATA;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
+import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
 
 public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
@@ -34,6 +38,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
   static final String PURCHASE_ORDER_TABLE = "purchase_order";
   private static final String PURCHASE_ORDERS_VIEW = "purchase_orders_view";
+  private static final String ACQ_UNIT_RECORD_ID = "recordId";
   private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase-orders/";
   private PostgresClient pgClient;
 
@@ -101,7 +106,40 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   @Validate
   public void deleteOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.deleteById(PURCHASE_ORDER_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStoragePurchaseOrdersByIdResponse.class, asyncResultHandler);
+    try {
+      Tx<String> tx = new Tx<>(id);
+      startTx(tx)
+        .compose(this::deleteAcqUnitsAssignments)
+        .compose(this::deletePolNumberSequence)
+        .compose(this::deleteOrderById)
+        .compose(this::endTx)
+        .setHandler(result -> {
+          if (result.failed()) {
+            HttpStatusException cause = (HttpStatusException) result.cause();
+            log.error("Order {} or associated data failed to be deleted", cause, tx.getEntity());
+
+            // The result of rollback operation is not so important, main failure cause is used to build the response
+            rollbackTransaction(tx).setHandler(res -> {
+              if (cause.getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
+                asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse
+                  .respond404WithTextPlain(Response.Status.NOT_FOUND.getReasonPhrase())));
+              } else if (cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
+                asyncResultHandler.handle(
+                    succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse.respond400WithTextPlain(cause.getPayload())));
+              } else {
+                asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse
+                  .respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
+              }
+            });
+          } else {
+            log.info("Order {} and associated data were successfully deleted", tx.getEntity());
+            asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse.respond204()));
+          }
+        });
+    } catch (Exception e) {
+      asyncResultHandler.handle(Future.succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse
+        .respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
+    }
   }
 
   @Validate
@@ -180,8 +218,8 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     return future;
   }
 
-  private Future<Tx<PurchaseOrder>> startTx(Tx<PurchaseOrder> tx) {
-    Future<Tx<PurchaseOrder>> future = Future.future();
+  private <T> Future<Tx<T>> startTx(Tx<T> tx) {
+    Future<Tx<T>> future = Future.future();
 
     log.debug("Start transaction");
 
@@ -192,10 +230,82 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     return future;
   }
 
-  private Future<Tx<PurchaseOrder>> endTx(Tx<PurchaseOrder> tx) {
+  private <T> Future<Tx<T>> endTx(Tx<T> tx) {
     log.debug("End transaction");
-    Future<Tx<PurchaseOrder>> future = Future.future();
+    Future<Tx<T>> future = Future.future();
     pgClient.endTx(tx.getConnection(), v -> future.complete(tx));
+    return future;
+  }
+
+  private Future<Tx<String>> deleteAcqUnitsAssignments(Tx<String> tx) {
+    log.info("Delete acquisition units assignments by PO id={}", tx.getEntity());
+
+    Future<Tx<String>> future = Future.future();
+    Criterion criterion = getCriterionByFieldNameAndValue(ACQ_UNIT_RECORD_ID, tx.getEntity());
+
+    pgClient.delete(tx.getConnection(), ACQUISITIONS_UNIT_ASSIGNMENTS_TABLE, criterion, reply -> {
+      if (reply.failed()) {
+        handleFailure(future, reply);
+      } else {
+        log.info("{} unit assignments of PO with id={} successfully deleted", reply.result().getUpdated(), tx.getEntity());
+        future.complete(tx);
+      }
+    });
+    return future;
+  }
+
+  private Future<Tx<String>> deletePolNumberSequence(Tx<String> tx) {
+    log.info("POL number sequence by PO id={}", tx.getEntity());
+
+    Future<Tx<String>> future = Future.future();
+    pgClient.execute(DROP_SEQUENCE.getQuery(tx.getEntity()), reply -> {
+      if (reply.failed()) {
+        handleFailure(future, reply);
+      } else {
+        log.info("POL number sequence for PO with id={} successfully deleted", reply.result().getUpdated(), tx.getEntity());
+        future.complete(tx);
+      }
+    });
+
+    return future;
+  }
+
+  private Future<Tx<String>> deleteOrderById(Tx<String> tx) {
+    log.info("Delete PO with id={}", tx.getEntity());
+
+    Future<Tx<String>> future = Future.future();
+
+    pgClient.delete(tx.getConnection(), PURCHASE_ORDER_TABLE, tx.getEntity(), reply -> {
+      if (reply.failed()) {
+        handleFailure(future, reply);
+      } else {
+        if (reply.result().getUpdated() == 0) {
+          future.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), "Purchase order not found"));
+        } else {
+          future.complete(tx);
+        }
+      }
+    });
+    return future;
+  }
+
+  private void handleFailure(Future future, AsyncResult reply) {
+    String badRequestMessage = PgExceptionUtil.badRequestMessage(reply.cause());
+    if (badRequestMessage != null) {
+      future.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+    } else {
+      future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause()
+        .getMessage()));
+    }
+  }
+
+  private Future<Void> rollbackTransaction(Tx<?> tx) {
+    Future<Void> future = Future.future();
+    if (tx.getConnection().failed()) {
+      future.fail(tx.getConnection().cause());
+    } else {
+      pgClient.rollbackTx(tx.getConnection(), future);
+    }
     return future;
   }
 

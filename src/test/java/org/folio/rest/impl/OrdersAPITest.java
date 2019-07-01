@@ -58,9 +58,6 @@ public class OrdersAPITest extends TestBase {
 
     String acqUnitId1 = null;
     String acqUnitId2 = null;
-    String acqUnitPo1AssignmentId1 = null;
-    String acqUnitPo1AssignmentId2 = null;
-    String acqUnitPo2AssignmentId = null;
     try {
       acqUnitId1 = createEntity(ACQUISITIONS_UNIT.getEndpoint(), buildAcqUnit("Test unit"));
       acqUnitId2 = createEntity(ACQUISITIONS_UNIT.getEndpoint(), buildAcqUnit("Test unit 2"));
@@ -70,15 +67,14 @@ public class OrdersAPITest extends TestBase {
 
       logger.info("--- mod-orders-storage orders test: Creating Purchase order 1...");
       purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
-
       // assign 2 units
-      acqUnitPo1AssignmentId1 = createAcqUnitAssignment(acqUnitAssignment1.withRecordId(purchaseOrderSampleId));
-      acqUnitPo1AssignmentId2 = createAcqUnitAssignment(acqUnitAssignment2.withRecordId(purchaseOrderSampleId));
+      createAcqUnitAssignment(acqUnitAssignment1.withRecordId(purchaseOrderSampleId));
+      createAcqUnitAssignment(acqUnitAssignment2.withRecordId(purchaseOrderSampleId));
 
       expectedOrders.put(purchaseOrderSampleId, new JsonObject(purchaseOrderSample).mapTo(PurchaseOrder.class));
       logger.info("--- mod-orders-storage orders test: Creating Purchase order 2...");
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
-      acqUnitPo2AssignmentId = createAcqUnitAssignment(acqUnitAssignment1.withRecordId(purchaseOrderSampleId2));
+      createAcqUnitAssignment(acqUnitAssignment1.withRecordId(purchaseOrderSampleId2));
 
       expectedOrders.put(purchaseOrderSampleId2, new JsonObject(purchaseOrderSample2).mapTo(PurchaseOrder.class));
       logger.info("--- mod-orders-storage orders test: Creating Purchase order without PoLines...");
@@ -135,13 +131,7 @@ public class OrdersAPITest extends TestBase {
       logger.error("--- mod-orders-storage-test: orders API ERROR: " + e.getMessage(), e);
       fail(e.getMessage());
     } finally {
-      logger.info("--- mod-orders-storage orders test: Clean-up acq units, PoLine and orders...");
-
-      // acq units assignments
-      deleteDataSuccess(ACQUISITIONS_UNIT_ASSIGNMENTS.getEndpointWithId(), acqUnitPo1AssignmentId1);
-      deleteDataSuccess(ACQUISITIONS_UNIT_ASSIGNMENTS.getEndpointWithId(), acqUnitPo1AssignmentId2);
-      deleteDataSuccess(ACQUISITIONS_UNIT_ASSIGNMENTS.getEndpointWithId(), acqUnitPo2AssignmentId);
-
+      logger.info("--- mod-orders-storage orders test: Clean-up PO lines, orders and acq units...");
       // PO lines and PO
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
@@ -169,8 +159,8 @@ public class OrdersAPITest extends TestBase {
     assertThat(orderIds, containsInAnyOrder(poIds));
   }
 
-  private String createAcqUnitAssignment(AcquisitionsUnitAssignment acqUnitAssignment) throws MalformedURLException {
-    return createEntity(ACQUISITIONS_UNIT_ASSIGNMENTS.getEndpoint(), JsonObject.mapFrom(acqUnitAssignment).encode());
+  private void createAcqUnitAssignment(AcquisitionsUnitAssignment acqUnitAssignment) throws MalformedURLException {
+    createEntity(ACQUISITIONS_UNIT_ASSIGNMENTS.getEndpoint(), JsonObject.mapFrom(acqUnitAssignment).encode());
   }
 
   @Test
