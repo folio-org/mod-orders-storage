@@ -1,6 +1,9 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
+import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
+import static org.folio.rest.persist.HelperUtils.METADATA;
+import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
+import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -15,7 +18,6 @@ import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.QueryHolder;
-import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 
 import io.vertx.core.AsyncResult;
@@ -29,10 +31,10 @@ import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class PoLinesAPI implements OrdersStoragePoLines {
-  private static final Logger log = LoggerFactory.getLogger(OrdersStoragePoLines.class);
+  private static final Logger log = LoggerFactory.getLogger(PoLinesAPI.class);
 
   private static final String POLINE_TABLE = "po_line";
-  private static final String ID_FIELD_NAME = "id";
+  private static final String PO_LINES_VIEW = "po_lines_view";
   private static final String POLINE_ID_FIELD = "poLineId";
 
   private PostgresClient pgClient;
@@ -48,8 +50,8 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<PoLine, PoLineCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PoLine.class,
           PoLineCollection.class, GetOrdersStoragePoLinesResponse.class);
-      QueryHolder cql = new QueryHolder(POLINE_TABLE, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
+      QueryHolder cql = new QueryHolder(PO_LINES_VIEW, METADATA, query, offset, limit, lang);
+      getEntitiesCollectionWithDistinctOn(entitiesMetadataHolder, cql, ID_FIELD_NAME, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }
 
@@ -174,7 +176,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
       if (reply.failed()) {
         future.completeExceptionally(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
       } else {
-        log.info("{} pieces of POLine with id={} successfully deleted", tx.getId(), reply.result().getUpdated());
+        log.info("{} pieces of POLine with id={} successfully deleted", reply.result().getUpdated(), tx.getId());
         future.complete(tx);
       }
     });
@@ -197,14 +199,6 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     CompletableFuture<TxWithId> future = new CompletableFuture<>();
     pgClient.endTx(tx.getConnection(), v -> future.complete(tx));
     return future;
-  }
-
-  private Criterion getCriterionByFieldNameAndValue(String filedName, String fieldValue) {
-    Criteria a = new Criteria();
-    a.addField("'" + filedName + "'");
-    a.setOperation("=");
-    a.setVal(fieldValue);
-    return new Criterion(a);
   }
 
 }

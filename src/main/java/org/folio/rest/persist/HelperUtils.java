@@ -5,6 +5,9 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+
+import org.folio.rest.persist.Criteria.Criteria;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.persist.interfaces.Results;
 
@@ -26,6 +29,7 @@ public class HelperUtils {
 
   public static final String JSONB = "jsonb";
   public static final String METADATA = "metadata";
+  public static final String ID_FIELD_NAME = "id";
 
   private HelperUtils() {
     throw new UnsupportedOperationException("Cannot instantiate utility class.");
@@ -62,6 +66,14 @@ public class HelperUtils {
       log.error(e.getMessage(), e);
       asyncResultHandler.handle(response(e.getMessage(), respond500, respond500));
     }
+  }
+
+  public static Criterion getCriterionByFieldNameAndValue(String filedName, String fieldValue) {
+    Criteria a = new Criteria();
+    a.addField("'" + filedName + "'");
+    a.setOperation("=");
+    a.setVal(fieldValue);
+    return new Criterion(a);
   }
 
   private static <T, E> void processDbReply(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, Handler<AsyncResult<Response>> asyncResultHandler, Method respond500, Method respond400, AsyncResult<Results<T>> reply) {

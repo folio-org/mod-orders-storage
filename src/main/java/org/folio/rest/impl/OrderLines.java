@@ -1,7 +1,8 @@
 package org.folio.rest.impl;
 
+import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.METADATA;
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
+import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -29,7 +30,7 @@ public class OrderLines implements OrdersStorageOrderLines {
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<PoLine, PoLineCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PoLine.class, PoLineCollection.class, GetOrdersStoragePoLinesResponse.class);
       QueryHolder cql = new QueryHolder(POLINE_VIEW, METADATA, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
+      getEntitiesCollectionWithDistinctOn(entitiesMetadataHolder, cql, ID_FIELD_NAME, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }
 }
