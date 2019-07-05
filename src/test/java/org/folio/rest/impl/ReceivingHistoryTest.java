@@ -84,12 +84,6 @@ public class ReceivingHistoryTest extends TestBase {
     }
   }
 
-  @Test
-  public void testGetEntitiesWithInvalidCQLQuery() throws MalformedURLException {
-    logger.info("--- mod-orders-storage receiving history test: Invalid CQL query");
-    testInvalidCQLQuery(RECEIVING_HISTORY_ENDPOINT + "?query=invalid-query");
-  }
-
   private void verifyViewCollectionAfter(URL endpoint) {
     Piece[] pieces = new Piece[] {new JsonObject(pieceSample).mapTo(Piece.class), new JsonObject(pieceSample2).mapTo(Piece.class)};
     PoLine[] poLines = new PoLine[] {new JsonObject(poLineSample).mapTo(PoLine.class), new JsonObject(poLineSample2).mapTo(PoLine.class)};

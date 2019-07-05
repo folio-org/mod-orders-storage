@@ -6,9 +6,9 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.folio.rest.utils.TestEntities.ACQUISITIONS_UNIT;
 import static org.folio.rest.utils.TestEntities.ACQUISITIONS_UNIT_ASSIGNMENTS;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.everyItem;
 import static org.junit.Assert.assertThat;
 
 import io.restassured.http.Header;
@@ -110,7 +110,7 @@ public class SearchOrderLinesTest extends TestBase {
     testInvalidCQLQuery(ORDER_LINES_ENDPOINT + "?query=invalid-query");
   }
 
-  private void verifySearchByAcqUnit(String acqUnitQuery, String... poIds) throws MalformedURLException {
+  private void verifySearchByAcqUnit(String acqUnitQuery, String poIds) throws MalformedURLException {
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + acqUnitQuery);
     assertThat(poLines, hasSize(1));
     verifyFilteredLinesByAcqUnits(poLines, poIds);
@@ -121,9 +121,9 @@ public class SearchOrderLinesTest extends TestBase {
     verifyFilteredLinesByAcqUnits(poLines, poIds);
   }
 
-  private void verifyFilteredLinesByAcqUnits(List<PoLine> poLines, String... poIds) {
+  private void verifyFilteredLinesByAcqUnits(List<PoLine> poLines, String poIds) {
     List<String> orderIds = poLines.stream().map(PoLine::getPurchaseOrderId).collect(Collectors.toList());
-    assertThat(orderIds, containsInAnyOrder(poIds));
+    assertThat(orderIds, everyItem(is(poIds)));
   }
 
   private List<PoLine> queryAndGetPOLines(String endpoint) throws MalformedURLException {

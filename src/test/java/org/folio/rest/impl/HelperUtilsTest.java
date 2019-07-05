@@ -40,7 +40,7 @@ public class HelperUtilsTest extends TestBase {
   }
 
   @Test
-  public void getEntitiesCollectionFailTest() throws Exception {
+  public void getReceivingHistoryCollectionWithDistinctOnFailCqlExTest() throws Exception {
     new MockUp<PgUtil>()
     {
       @Mock
@@ -48,8 +48,9 @@ public class HelperUtilsTest extends TestBase {
         throw new CQLQueryValidationException(null);
       }
     };
-    get(storageUrl(RECEIVING_HISTORY_ENDPOINT)).statusCode(HttpStatus.HTTP_INTERNAL_SERVER_ERROR.toInt()).contentType(TEXT_PLAIN);
+    get(storageUrl(RECEIVING_HISTORY_ENDPOINT)).statusCode(HttpStatus.HTTP_BAD_REQUEST.toInt()).contentType(TEXT_PLAIN);
   }
+
 
   @Test
   public void entitiesMetadataHolderRespond400FailTest() throws Exception {
