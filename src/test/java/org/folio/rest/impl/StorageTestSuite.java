@@ -127,8 +127,6 @@ public class StorageTestSuite {
   @Nested
   class SearchOrderLinesTestNested extends SearchOrderLinesTest{}
   @Nested
-  class SearchReceivingHistoryTestNested extends SearchReceivingHistoryTest{}
-  @Nested
   class TenantSampleDataTestNested extends TenantSampleDataTest{}
   @Nested
   class HelperUtilsTestNested extends HelperUtilsTest{}
