@@ -93,11 +93,14 @@
     "noteFromVendor": "",
     "vendorAccount": ""
   },
-  "contributors" : [ {
-    "contributorNameTypeId" : "2b94c631-fca9-4892-a730-03ee529ffe2a",
-    "contributor" : "Antoniou, Grigoris"
-  }, {
-    "contributorNameTypeId" : "2b94c631-fca9-4892-a730-03ee529ffe2a",
-    "contributor" : "Van Harmelen, Frank"
-  } ]
+  "contributors": [
+    {
+      "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Antoniou, Grigoris"
+    },
+    {
+      "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
+      "contributor": "Van Harmelen, Frank"
+    }
+  ]
 }
