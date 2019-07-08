@@ -1,5 +1,7 @@
 package org.folio.rest.impl;
 
+import static org.hamcrest.Matchers.containsString;
+
 import java.net.MalformedURLException;
 import java.util.stream.Stream;
 
@@ -19,6 +21,7 @@ import io.vertx.core.logging.LoggerFactory;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EntitiesCrudTest extends TestBase {
 
+  private static final String ERROR_MESSAGE_UNIQUE_CONSTRAINT = "duplicate key value violates unique constraint";
   private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);
   String sample = null;
 
@@ -34,6 +37,10 @@ public class EntitiesCrudTest extends TestBase {
 
   public static Stream<TestEntities> createFailOrder() {
     return Stream.of(TestEntities.PO_LINE, TestEntities.PIECE, TestEntities.ORDER_INVOICE_RELNS);
+  }
+
+  public static Stream<TestEntities> uniqueKeyConstraint() {
+    return Stream.of(TestEntities.ACQUISITIONS_UNIT);
   }
 
   @ParameterizedTest
@@ -85,6 +92,20 @@ public class EntitiesCrudTest extends TestBase {
 
   @ParameterizedTest
   @Order(5)
+  @MethodSource("uniqueKeyConstraint")
+  public void testUniqueKeyConstraint(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
+    JsonObject duplicateEntity = new JsonObject(getSample(testEntity.getSampleFileName()));
+    duplicateEntity.remove("id");
+    Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
+    response.then().log().ifValidationFails()
+    .statusCode(400);
+    response.then().body(containsString(ERROR_MESSAGE_UNIQUE_CONSTRAINT));
+
+  }
+
+  @ParameterizedTest
+  @Order(6)
   @EnumSource(TestEntities.class)
   public void testPutById(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Editing %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -97,7 +118,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(6)
+  @Order(7)
   @EnumSource(TestEntities.class)
   public void testVerifyPut(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Fetching updated %s with ID: %s", testEntity.name(),
@@ -106,7 +127,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(7)
+  @Order(8)
   @MethodSource("deleteFailOrder")
   public void testDeleteEndpointForeignKeyFailure(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -118,7 +139,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(8)
+  @Order(9)
   @MethodSource("deleteOrder")
   public void testDeleteEndpoint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -130,7 +151,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(9)
+  @Order(10)
   @EnumSource(TestEntities.class)
   public void testVerifyDelete(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Verify %s is deleted with ID: %s", testEntity.name(),

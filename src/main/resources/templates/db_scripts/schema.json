@@ -323,7 +323,12 @@
     {
       "tableName": "acquisitions_unit",
       "fromModuleVersion": 6.1,
-      "withMetadata": true
+      "withMetadata": true,
+      "uniqueIndex": [
+        {
+            "fieldName" : "name"
+        }
+      ] 
     },
     {
       "tableName": "acquisitions_unit_assignments",
@@ -341,14 +346,12 @@
       ],
       "index": [
         {
-          "fieldName": "recordId",
-          "tOps": "ADD"
+          "fieldName": "recordId"
         },
         {
-          "fieldName": "acquisitionsUnitId",
-          "tOps": "ADD"
+          "fieldName": "acquisitionsUnitId"
         }
-      ]
+      ]     
     },
     {
     "tableName": "acquisitions_unit_membership",
