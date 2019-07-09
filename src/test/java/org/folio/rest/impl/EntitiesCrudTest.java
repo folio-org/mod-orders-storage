@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.folio.rest.tools.utils.ValidationHelper.isDuplicate;
 
 import java.net.MalformedURLException;
 import java.util.stream.Stream;
@@ -21,7 +22,6 @@ import io.vertx.core.logging.LoggerFactory;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EntitiesCrudTest extends TestBase {
 
-  private static final String ERROR_MESSAGE_UNIQUE_CONSTRAINT = "duplicate key value violates unique constraint";
   private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);
   String sample = null;
 
@@ -100,7 +100,7 @@ public class EntitiesCrudTest extends TestBase {
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
     response.then().log().ifValidationFails()
     .statusCode(400);
-    response.then().body(containsString(ERROR_MESSAGE_UNIQUE_CONSTRAINT));
+    assertEquals(isDuplicate(response.asString()), true);
 
   }
 
