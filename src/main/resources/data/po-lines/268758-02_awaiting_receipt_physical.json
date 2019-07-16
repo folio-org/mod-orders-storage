@@ -79,7 +79,9 @@
   "rush": true,
   "selector": "Stevens",
   "source": "User",
-  "tags": [],
+  "tags": {
+        "tagList": []
+  },
   "title": "Bridget Jones's Baby: the diaries",
   "vendorDetail": {
     "instructions": "",

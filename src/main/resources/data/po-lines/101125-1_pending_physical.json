@@ -83,7 +83,9 @@
   "rush": false,
   "selector": "",
   "source": "User",
-  "tags": [],
+  "tags": {
+        "tagList": []
+  },
   "title": "A semantic web primer",
   "vendorDetail": {
     "instructions": "",

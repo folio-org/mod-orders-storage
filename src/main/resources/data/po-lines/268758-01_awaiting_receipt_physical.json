@@ -79,7 +79,9 @@
   "rush": true,
   "selector": "Brown",
   "source": "User",
-  "tags": [],
+  "tags": {
+        "tagList": []
+  },
   "title": "Global Africa",
   "vendorDetail": {
     "instructions": "",

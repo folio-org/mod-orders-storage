@@ -78,9 +78,11 @@
   "rush": false,
   "selector": "",
   "source": "User",
-  "tags": [
-    "CatalogingRecords"
-  ],
+  "tags": {
+    "tagList": [
+       "CatalogingRecords"
+     ]
+  },
   "title": "ABA Journal",
   "vendorDetail": {
     "instructions": "",

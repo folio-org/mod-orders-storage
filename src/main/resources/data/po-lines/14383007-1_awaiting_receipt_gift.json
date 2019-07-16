@@ -85,9 +85,11 @@
   "rush": false,
   "selector": "ay",
   "source": "User",
-  "tags": [
-    "giftsubscription"
-  ],
+  "tags": {
+    "tagList": [
+        "giftsubscription"
+     ]
+  },
   "title": "The American Journal of Medicine",
   "vendorDetail": {
     "instructions": "no. 42 and continuations",

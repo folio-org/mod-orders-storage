@@ -111,10 +111,12 @@
   "rush": false,
   "selector": "mreynolds",
   "source": "User",
-  "tags": [
-    "dvd",
-    "streaming"
-  ],
+  "tags": {
+    "tagList": [
+       "dvd",
+       "streaming"
+     ]
+  },
   "title": "Interesting Times",
   "vendorDetail": {
     "instructions": "",

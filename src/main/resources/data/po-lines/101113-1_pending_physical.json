@@ -79,7 +79,9 @@
   "rush": false,
   "selector": "",
   "source": "User",
-  "tags": [],
+  "tags": {
+        "tagList": []
+  },
   "title": "The city post-modernity edited by Alan Latham",
   "vendorDetail": {
     "instructions": "",

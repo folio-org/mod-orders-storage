@@ -79,7 +79,11 @@
   "rush": false,
   "selector": "Buchanan",
   "source": "User",
-  "tags": [],
+  "tags": {
+    "tagList": [
+       "CatalogingRecords"
+     ]
+  },
   "title": "American Chemical Society Web Editions",
   "vendorDetail": {
     "instructions": "",

@@ -77,9 +77,11 @@
   "rush": false,
   "selector": "sgw",
   "source": "User",
-  "tags": [
-    "membership"
-  ],
+  "tags": {
+     "tagList": [
+        "membership"
+     ]
+  },
   "title": "MobiCom'17 5 mmNets'17, October 16, 2017, Snowbird, UT, USA / general chairs: Haitham Hassanieh (University of Illinois at Urbana Champaign, USA), Xinyu Zhang (University of California San Diego, USA)",
   "vendorDetail": {
     "instructions": "1901 and continuation",
