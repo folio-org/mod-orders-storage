@@ -82,7 +82,11 @@
     "code": "",
     "description": "Manually entered"
   },
-  "tags": [],
+  "tags": {
+    "tagList": [
+       "CatalogingRecords"
+     ]
+  },
   "title": "American Chemical Society Web Editions",
   "vendorDetail": {
     "instructions": "",

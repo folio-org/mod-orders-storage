@@ -82,9 +82,11 @@
     "code": "",
     "description": "Manually entered"
   },
-  "tags": [
-    "streaming_video"
-  ],
+  "tags": {
+     "tagList": [
+         "streaming_video"
+     ]
+  },
   "title": "At Berkeley",
   "vendorDetail": {
     "instructions": "",

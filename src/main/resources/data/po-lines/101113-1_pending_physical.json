@@ -82,7 +82,9 @@
     "code": "",
     "description": "Manually entered"
   },
-  "tags": [],
+  "tags": {
+        "tagList": []
+  },
   "title": "The city post-modernity edited by Alan Latham",
   "vendorDetail": {
     "instructions": "",

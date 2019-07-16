@@ -114,10 +114,12 @@
     "code": "",
     "description": "Manually entered"
   },
-  "tags": [
-    "dvd",
-    "streaming"
-  ],
+  "tags": {
+    "tagList": [
+       "dvd",
+       "streaming"
+     ]
+  },
   "title": "Interesting Times",
   "vendorDetail": {
     "instructions": "",

@@ -86,7 +86,9 @@
     "code": "",
     "description": "Manually entered"
   },
-  "tags": [],
+  "tags": {
+        "tagList": []
+  },
   "title": "A semantic web primer",
   "vendorDetail": {
     "instructions": "",
