@@ -81,9 +81,11 @@
     "code": "",
     "description": "Manually entered"
   },
-  "tags": [
-    "CatalogingRecords"
-  ],
+  "tags": {
+    "tagList": [
+       "CatalogingRecords"
+     ]
+  },
   "title": "ABA Journal",
   "vendorDetail": {
     "instructions": "",

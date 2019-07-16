@@ -88,9 +88,11 @@
     "code": "",
     "description": "Manually entered"
   },
-  "tags": [
-    "giftsubscription"
-  ],
+  "tags": {
+    "tagList": [
+        "giftsubscription"
+     ]
+  },
   "title": "The American Journal of Medicine",
   "vendorDetail": {
     "instructions": "no. 42 and continuations",
