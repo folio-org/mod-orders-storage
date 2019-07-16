@@ -77,10 +77,7 @@
   "requester": "",
   "rush": false,
   "selector": "",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": [
     "CatalogingRecords"
   ],

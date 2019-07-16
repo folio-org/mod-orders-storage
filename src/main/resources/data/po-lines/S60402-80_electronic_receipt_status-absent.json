@@ -78,10 +78,7 @@
   "requester": "",
   "rush": false,
   "selector": "Buchanan",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": [],
   "title": "American Chemical Society Web Editions",
   "vendorDetail": {

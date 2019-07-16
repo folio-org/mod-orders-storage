@@ -84,10 +84,7 @@
   "requester": "stp0",
   "rush": false,
   "selector": "ay",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": [
     "giftsubscription"
   ],

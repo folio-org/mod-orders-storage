@@ -78,10 +78,7 @@
   "requester": "",
   "rush": false,
   "selector": "Lincoln",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "title": "PDCnet Backfiles",
   "vendorDetail": {
     "instructions": "",

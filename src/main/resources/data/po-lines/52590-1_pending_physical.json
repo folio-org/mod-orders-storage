@@ -76,10 +76,7 @@
   "requester": "",
   "rush": false,
   "selector": "sgw",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": [
     "membership"
   ],

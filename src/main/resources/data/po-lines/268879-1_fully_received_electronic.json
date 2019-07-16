@@ -71,10 +71,7 @@
   "requester": "",
   "rush": false,
   "selector": "Woods",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": [],
   "title": "Cantatas for bass 4 Ich habe genug : BWV 82 / Johann Sebastian Bach ; Matthias Goerne, baritone ; Freiburger Barockorchester, Gottfried von der Goltz, violin and conductor",
   "vendorDetail": {

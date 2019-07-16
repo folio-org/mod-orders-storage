@@ -110,10 +110,7 @@
   "requester": "jcobb",
   "rush": false,
   "selector": "mreynolds",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": [
     "dvd",
     "streaming"
