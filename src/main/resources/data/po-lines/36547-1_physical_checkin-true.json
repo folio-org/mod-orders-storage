@@ -76,10 +76,7 @@
   "requester": "",
   "rush": false,
   "selector": "Brown",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": {
      "tagList": []
   },

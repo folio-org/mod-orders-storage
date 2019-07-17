@@ -78,10 +78,7 @@
   "requester": "msmith",
   "rush": true,
   "selector": "dhalling",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": {
      "tagList": [
          "streaming_video"

@@ -71,10 +71,7 @@
   "requester": "",
   "rush": false,
   "selector": "Woods",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": {
         "tagList": []
   },

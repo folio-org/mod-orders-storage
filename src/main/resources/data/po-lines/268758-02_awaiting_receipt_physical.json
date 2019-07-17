@@ -78,10 +78,7 @@
   "requester": "",
   "rush": true,
   "selector": "Stevens",
-  "source": {
-    "code": "",
-    "description": "Manually entered"
-  },
+  "source": "User",
   "tags": {
         "tagList": []
   },
