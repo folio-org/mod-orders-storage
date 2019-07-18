@@ -10,7 +10,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.isIn;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import io.restassured.http.Header;
@@ -84,8 +83,8 @@ public class SearchOrderLinesTest extends TestBase {
   public void testGetPoLinesWithTags() throws MalformedURLException {
     logger.info("--- mod-orders-storage po-lines: Verify query PO Lines by tags");
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=tags.tagList=important");
-    poLines.forEach(poLine ->
-      assertThat("important", isIn(poLine.getTags().getTagList())));
+    assertThat(poLines, hasSize(1));
+    assertThat("important", isIn(poLines.get(0).getTags().getTagList()));
   }
 
   @Test

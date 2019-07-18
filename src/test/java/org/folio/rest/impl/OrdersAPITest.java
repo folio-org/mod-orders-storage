@@ -110,9 +110,9 @@ public class OrdersAPITest extends TestBase {
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags... ");
       List<PurchaseOrder> ordersWithTag = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=tags.tagList=important sortBy dateOrdered/sort.ascending"));
-      for(int i = 0; i < ordersWithTag.size() - 1; i++) {
-        assertThat("important", isIn(ordersWithTag.get(i).getTags().getTagList()));
-      }
+
+      assertThat(ordersWithTag, hasSize(1));
+      assertThat("important", isIn(ordersWithTag.get(0).getTags().getTagList()));
 
       List<PurchaseOrder> orderedByDescOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.descending"));
       for(int i = 0; i < orderedByDescOrders.size() - 1; i++) {
