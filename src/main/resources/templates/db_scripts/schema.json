@@ -29,17 +29,17 @@
   "tables": [
     {
       "tableName": "alert",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true
     },
     {
       "tableName": "reporting_code",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true
     },
     {
       "tableName": "purchase_order",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
@@ -99,7 +99,7 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -258,7 +258,7 @@
     },
     {
       "tableName": "pieces",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -311,7 +311,7 @@
     },
     {
       "tableName": "order_invoice_relationship",
-      "fromModuleVersion": 6.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": false,
       "foreignKeys": [
         {
