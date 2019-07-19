@@ -6,7 +6,6 @@ The main focus of this release was to implement API for managing Teams (Units, A
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v6.0.0...v7.0.0)
 
 ### Stories
-* [MODORDSTOR-100](https://issues.folio.org/browse/MODORDSTOR-100) - Acquisitions unit names should be unique
 * [MODORDSTOR-98](https://issues.folio.org/browse/MODORDSTOR-98) - Schema updates: filterable boolean properties to have default value
 * [MODORDSTOR-96](https://issues.folio.org/browse/MODORDSTOR-96) - Add acquisitions-unit-assignments.recordId to receiving-history view
 * [MODORDSTOR-94](https://issues.folio.org/browse/MODORDSTOR-94) - Add acquisitions-unit-assignments.recordId to orders views
@@ -18,6 +17,7 @@ The main focus of this release was to implement API for managing Teams (Units, A
 * [MODORDSTOR-63](https://issues.folio.org/browse/MODORDSTOR-63) - Add sample data for pieces
 
 ### Bug Fixes
+* [MODORDSTOR-100](https://issues.folio.org/browse/MODORDSTOR-100) - Acquisitions unit names should be unique
 * [MODORDSTOR-97](https://issues.folio.org/browse/MODORDSTOR-97) - Randomly failing HelperUtilsTest unit tests
 
 ## 6.0.0 - Released
