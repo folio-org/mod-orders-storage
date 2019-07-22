@@ -3,43 +3,43 @@
     {
       "run": "after",
       "snippet": "CREATE OR REPLACE VIEW receiving_history_view AS SELECT pieces.id AS id, json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'dateOrdered', purchase_order.jsonb->>'dateOrdered', 'checkin', po_line.jsonb->>'checkinItems', 'instanceId', po_line.jsonb->>'instanceId','itemId', pieces.jsonb->>'itemId', 'locationId', pieces.jsonb->>'locationId', 'pieceFormat', pieces.jsonb->>'format', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'poLineNumber', 'purchaseOrderId', po_line.jsonb->>'purchaseOrderId', 'poLineReceiptStatus', po_line.jsonb->>'receiptStatus','receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title','receivingNote', po_line.jsonb->'details'->>'receivingNote', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement') AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'dateOrdered', purchase_order.jsonb->>'dateOrdered', 'checkin', po_line.jsonb->>'checkinItems', 'instanceId', po_line.jsonb->>'instanceId','itemId', pieces.jsonb->>'itemId', 'locationId', pieces.jsonb->>'locationId', 'pieceFormat', pieces.jsonb->>'format', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'poLineNumber', 'purchaseOrderId', po_line.jsonb->>'purchaseOrderId', 'poLineReceiptStatus', po_line.jsonb->>'receiptStatus','receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title','receivingNote', po_line.jsonb->'details'->>'receivingNote', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement')::jsonb AS metadata FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb->>'poLineId' = po_line.jsonb->>'id' LEFT OUTER JOIN purchase_order ON po_line.jsonb->>'purchaseOrderId' = purchase_order.jsonb->>'id' LEFT OUTER JOIN acquisitions_unit_assignments ON acquisitions_unit_assignments.jsonb->>'recordId' = purchase_order.jsonb->>'id';",
-      "fromModuleVersion": "1.0"
+      "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
       "snippet": "CREATE OR REPLACE VIEW orders_view AS SELECT purchase_order.id AS id, purchase_order.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || COALESCE(po_line.jsonb, '{}'::jsonb) || purchase_order.jsonb AS metadata FROM purchase_order LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (purchase_order.jsonb -> 'id'::text) LEFT JOIN po_line ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
-      "fromModuleVersion": "5.0"
+      "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
       "snippet": "CREATE OR REPLACE VIEW order_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || COALESCE(purchase_order.jsonb, '{}'::jsonb) || po_line.jsonb AS metadata FROM po_line LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (po_line.jsonb -> 'purchaseOrderId'::text) LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
-      "fromModuleVersion": "5.0"
+      "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
       "snippet": "CREATE OR REPLACE VIEW purchase_orders_view AS SELECT purchase_order.id AS id, purchase_order.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || purchase_order.jsonb AS metadata FROM purchase_order LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (purchase_order.jsonb -> 'id'::text);",
-      "fromModuleVersion": "6.1"
+      "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
       "snippet": "CREATE OR REPLACE VIEW po_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || po_line.jsonb AS metadata FROM po_line LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (po_line.jsonb -> 'purchaseOrderId'::text);",
-      "fromModuleVersion": "6.1"
+      "fromModuleVersion": "7.0"
     }
   ],
   "tables": [
     {
       "tableName": "alert",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true
     },
     {
       "tableName": "reporting_code",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true
     },
     {
       "tableName": "purchase_order",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
@@ -99,7 +99,7 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -258,7 +258,7 @@
     },
     {
       "tableName": "pieces",
-      "fromModuleVersion": 1.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -311,7 +311,7 @@
     },
     {
       "tableName": "order_invoice_relationship",
-      "fromModuleVersion": 6.0,
+      "fromModuleVersion": 7.0,
       "withMetadata": false,
       "foreignKeys": [
         {
@@ -322,7 +322,7 @@
     },
     {
       "tableName": "acquisitions_unit",
-      "fromModuleVersion": 6.1,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "uniqueIndex": [
         {
@@ -332,7 +332,7 @@
     },
     {
       "tableName": "acquisitions_unit_assignments",
-      "fromModuleVersion": 6.1,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -351,7 +351,7 @@
     },
     {
     "tableName": "acquisitions_unit_membership",
-      "fromModuleVersion": 6.1,
+      "fromModuleVersion": 7.0,
       "withMetadata": true,
       "foreignKeys": [
         {
