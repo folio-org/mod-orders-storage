@@ -338,10 +338,6 @@
         {
           "fieldName": "recordId",
           "targetTable": "purchase_order"
-        },
-        {
-          "fieldName": "acquisitionsUnitId",
-          "targetTable": "acquisitions_unit"
         }
       ],
       "index": [
