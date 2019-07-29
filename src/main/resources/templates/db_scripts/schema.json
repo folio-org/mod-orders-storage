@@ -7,12 +7,12 @@
     },
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW orders_view AS SELECT purchase_order.id AS id, purchase_order.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || COALESCE(po_line.jsonb, '{}'::jsonb) || purchase_order.jsonb AS metadata FROM purchase_order LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (purchase_order.jsonb -> 'id'::text) LEFT JOIN po_line ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
+      "snippet": "CREATE OR REPLACE VIEW orders_view AS SELECT purchase_order.id AS id, purchase_order.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || (COALESCE(po_line.jsonb, '{}'::jsonb) - 'tags') || purchase_order.jsonb AS metadata FROM purchase_order LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (purchase_order.jsonb -> 'id'::text) LEFT JOIN po_line ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
       "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW order_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || COALESCE(purchase_order.jsonb, '{}'::jsonb) || po_line.jsonb AS metadata FROM po_line LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (po_line.jsonb -> 'purchaseOrderId'::text) LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
+      "snippet": "CREATE OR REPLACE VIEW order_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || (COALESCE(purchase_order.jsonb, '{}'::jsonb) - 'tags') || po_line.jsonb AS metadata FROM po_line LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (po_line.jsonb -> 'purchaseOrderId'::text) LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
       "fromModuleVersion": "7.0"
     },
     {
@@ -328,7 +328,7 @@
         {
             "fieldName" : "name"
         }
-      ] 
+      ]
     },
     {
       "tableName": "acquisitions_unit_assignments",
@@ -347,7 +347,7 @@
         {
           "fieldName": "acquisitionsUnitId"
         }
-      ]     
+      ]
     },
     {
     "tableName": "acquisitions_unit_membership",

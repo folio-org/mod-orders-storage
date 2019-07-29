@@ -28,6 +28,7 @@ import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
@@ -106,6 +107,12 @@ public class OrdersAPITest extends TestBase {
       for(int i = 0; i < orderedByAscOrders.size() - 1; i++) {
         assertThat(orderedByAscOrders.get(i + 1).getDateOrdered().after(orderedByAscOrders.get(i).getDateOrdered()), is(true));
       }
+
+      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags... ");
+      List<PurchaseOrder> ordersWithTag = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=tags.tagList=important sortBy dateOrdered/sort.ascending"));
+
+      assertThat(ordersWithTag, hasSize(1));
+      assertThat("important", isIn(ordersWithTag.get(0).getTags().getTagList()));
 
       List<PurchaseOrder> orderedByDescOrders = getViewCollection(storageUrl(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.descending"));
       for(int i = 0; i < orderedByDescOrders.size() - 1; i++) {
