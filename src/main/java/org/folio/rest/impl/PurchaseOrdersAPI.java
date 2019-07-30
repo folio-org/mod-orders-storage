@@ -13,7 +13,6 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
-import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PgUtil;
@@ -25,20 +24,14 @@ import java.util.Map;
 import java.util.UUID;
 
 import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.impl.AcquisitionsUnitAssignmentAPI.ACQUISITIONS_UNIT_ASSIGNMENTS_TABLE;
-import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
-import static org.folio.rest.persist.HelperUtils.METADATA;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
-import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
+import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
   static final String PURCHASE_ORDER_TABLE = "purchase_order";
-  private static final String PURCHASE_ORDERS_VIEW = "purchase_orders_view";
-  private static final String ACQ_UNIT_RECORD_ID = "recordId";
   private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase-orders/";
   private PostgresClient pgClient;
 
@@ -53,9 +46,10 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   public void getOrdersStoragePurchaseOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PurchaseOrder.class, PurchaseOrderCollection.class, GetOrdersStoragePurchaseOrdersResponse.class);
-      QueryHolder cql = new QueryHolder(PURCHASE_ORDERS_VIEW, METADATA, query, offset, limit, lang);
-      getEntitiesCollectionWithDistinctOn(entitiesMetadataHolder, cql, ID_FIELD_NAME, asyncResultHandler, vertxContext, okapiHeaders);
+      EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(
+          PurchaseOrder.class, PurchaseOrderCollection.class, GetOrdersStoragePurchaseOrdersResponse.class);
+      QueryHolder cql = new QueryHolder(PURCHASE_ORDER_TABLE, query, offset, limit, lang);
+      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
     });
   }
 
@@ -109,7 +103,6 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     try {
       Tx<String> tx = new Tx<>(id);
       startTx(tx)
-        .compose(this::deleteAcqUnitsAssignments)
         .compose(this::deletePolNumberSequence)
         .compose(this::deleteOrderById)
         .compose(this::endTx)
@@ -234,23 +227,6 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     log.debug("End transaction");
     Future<Tx<T>> future = Future.future();
     pgClient.endTx(tx.getConnection(), v -> future.complete(tx));
-    return future;
-  }
-
-  private Future<Tx<String>> deleteAcqUnitsAssignments(Tx<String> tx) {
-    log.info("Delete acquisition units assignments by PO id={}", tx.getEntity());
-
-    Future<Tx<String>> future = Future.future();
-    Criterion criterion = getCriterionByFieldNameAndValue(ACQ_UNIT_RECORD_ID, tx.getEntity());
-
-    pgClient.delete(tx.getConnection(), ACQUISITIONS_UNIT_ASSIGNMENTS_TABLE, criterion, reply -> {
-      if (reply.failed()) {
-        handleFailure(future, reply);
-      } else {
-        log.info("{} unit assignments of PO with id={} successfully deleted", reply.result().getUpdated(), tx.getEntity());
-        future.complete(tx);
-      }
-    });
     return future;
   }
 

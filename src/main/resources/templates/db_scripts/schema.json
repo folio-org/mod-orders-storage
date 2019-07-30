@@ -2,27 +2,27 @@
   "scripts": [
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW receiving_history_view AS SELECT pieces.id AS id, json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'dateOrdered', purchase_order.jsonb->>'dateOrdered', 'checkin', po_line.jsonb->>'checkinItems', 'instanceId', po_line.jsonb->>'instanceId','itemId', pieces.jsonb->>'itemId', 'locationId', pieces.jsonb->>'locationId', 'pieceFormat', pieces.jsonb->>'format', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'poLineNumber', 'purchaseOrderId', po_line.jsonb->>'purchaseOrderId', 'poLineReceiptStatus', po_line.jsonb->>'receiptStatus','receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title','receivingNote', po_line.jsonb->'details'->>'receivingNote', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement') AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'dateOrdered', purchase_order.jsonb->>'dateOrdered', 'checkin', po_line.jsonb->>'checkinItems', 'instanceId', po_line.jsonb->>'instanceId','itemId', pieces.jsonb->>'itemId', 'locationId', pieces.jsonb->>'locationId', 'pieceFormat', pieces.jsonb->>'format', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'poLineNumber', 'purchaseOrderId', po_line.jsonb->>'purchaseOrderId', 'poLineReceiptStatus', po_line.jsonb->>'receiptStatus','receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title','receivingNote', po_line.jsonb->'details'->>'receivingNote', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement')::jsonb AS metadata FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb->>'poLineId' = po_line.jsonb->>'id' LEFT OUTER JOIN purchase_order ON po_line.jsonb->>'purchaseOrderId' = purchase_order.jsonb->>'id' LEFT OUTER JOIN acquisitions_unit_assignments ON acquisitions_unit_assignments.jsonb->>'recordId' = purchase_order.jsonb->>'id';",
+      "snippet": "CREATE OR REPLACE VIEW receiving_history_view AS SELECT pieces.id AS id, json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'dateOrdered', purchase_order.jsonb->>'dateOrdered', 'checkin', po_line.jsonb->>'checkinItems', 'instanceId', po_line.jsonb->>'instanceId','itemId', pieces.jsonb->>'itemId', 'locationId', pieces.jsonb->>'locationId', 'pieceFormat', pieces.jsonb->>'format', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'poLineNumber', 'purchaseOrderId', po_line.jsonb->>'purchaseOrderId', 'poLineReceiptStatus', po_line.jsonb->>'receiptStatus','receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title','receivingNote', po_line.jsonb->'details'->>'receivingNote', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement') AS jsonb, json_build_object('id', pieces.jsonb->>'id', 'caption', pieces.jsonb->>'caption', 'comment', pieces.jsonb->>'comment', 'acqUnitIds', purchase_order.jsonb->>'acqUnitIds', 'dateOrdered', purchase_order.jsonb->>'dateOrdered', 'checkin', po_line.jsonb->>'checkinItems', 'instanceId', po_line.jsonb->>'instanceId','itemId', pieces.jsonb->>'itemId', 'locationId', pieces.jsonb->>'locationId', 'pieceFormat', pieces.jsonb->>'format', 'poLineId', pieces.jsonb->>'poLineId', 'poLineNumber', po_line.jsonb->>'poLineNumber', 'purchaseOrderId', po_line.jsonb->>'purchaseOrderId', 'poLineReceiptStatus', po_line.jsonb->>'receiptStatus','receivedDate', pieces.jsonb->>'receivedDate', 'title', po_line.jsonb->>'title','receivingNote', po_line.jsonb->'details'->>'receivingNote', 'receivingStatus', pieces.jsonb->>'receivingStatus', 'supplement', pieces.jsonb->>'supplement')::jsonb AS metadata FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb->>'poLineId' = po_line.jsonb->>'id' LEFT OUTER JOIN purchase_order ON po_line.jsonb->>'purchaseOrderId' = purchase_order.jsonb->>'id';",
       "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW orders_view AS SELECT purchase_order.id AS id, purchase_order.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || (COALESCE(po_line.jsonb, '{}'::jsonb) - 'tags') || purchase_order.jsonb AS metadata FROM purchase_order LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (purchase_order.jsonb -> 'id'::text) LEFT JOIN po_line ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
+      "snippet": "CREATE OR REPLACE VIEW orders_view AS SELECT purchase_order.id AS id, purchase_order.jsonb AS jsonb, (COALESCE(po_line.jsonb, '{}'::jsonb) - 'tags') || purchase_order.jsonb AS metadata FROM purchase_order LEFT JOIN po_line ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
       "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW order_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || (COALESCE(purchase_order.jsonb, '{}'::jsonb) - 'tags') || po_line.jsonb AS metadata FROM po_line LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (po_line.jsonb -> 'purchaseOrderId'::text) LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
+      "snippet": "CREATE OR REPLACE VIEW order_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, (COALESCE(purchase_order.jsonb, '{}'::jsonb) - 'tags') || po_line.jsonb AS metadata FROM po_line LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
       "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW purchase_orders_view AS SELECT purchase_order.id AS id, purchase_order.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || purchase_order.jsonb AS metadata FROM purchase_order LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (purchase_order.jsonb -> 'id'::text);",
+      "snippet": "DROP VIEW IF EXISTS purchase_orders_view;",
       "fromModuleVersion": "7.0"
     },
     {
       "run": "after",
-      "snippet": "CREATE OR REPLACE VIEW po_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, COALESCE(acquisitions_unit_assignments.jsonb, '{}'::jsonb) || po_line.jsonb AS metadata FROM po_line LEFT JOIN acquisitions_unit_assignments ON (acquisitions_unit_assignments.jsonb -> 'recordId'::text) = (po_line.jsonb -> 'purchaseOrderId'::text);",
+      "snippet": "CREATE OR REPLACE VIEW po_lines_view AS SELECT po_line.id AS id, po_line.jsonb AS jsonb, jsonb_build_object('acqUnitIds', purchase_order.jsonb->'acqUnitIds') || po_line.jsonb AS metadata FROM po_line LEFT JOIN purchase_order ON (po_line.jsonb -> 'purchaseOrderId'::text) = (purchase_order.jsonb -> 'id'::text);",
       "fromModuleVersion": "7.0"
     }
   ],
@@ -43,6 +43,10 @@
       "withMetadata": true,
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
+        {
+          "fieldName": "acqUnitIds",
+          "caseSensitive": false
+        },
         {
           "fieldName": "assignedTo",
           "caseSensitive": false
@@ -333,21 +337,7 @@
     {
       "tableName": "acquisitions_unit_assignments",
       "fromModuleVersion": 7.0,
-      "withMetadata": true,
-      "foreignKeys": [
-        {
-          "fieldName": "recordId",
-          "targetTable": "purchase_order"
-        }
-      ],
-      "index": [
-        {
-          "fieldName": "recordId"
-        },
-        {
-          "fieldName": "acquisitionsUnitId"
-        }
-      ]
+      "mode": "delete"
     },
     {
     "tableName": "acquisitions_unit_membership",
