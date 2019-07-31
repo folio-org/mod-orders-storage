@@ -35,20 +35,6 @@ public class HelperUtils {
     throw new UnsupportedOperationException("Cannot instantiate utility class.");
   }
 
-  public static <T, E> void getEntitiesCollection(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, QueryHolder queryHolder, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
-    String[] fieldList = { "*" };
-    Method respond500 = getRespond500(entitiesMetadataHolder, asyncResultHandler);
-    Method respond400 = getRespond400(entitiesMetadataHolder, asyncResultHandler);
-    try {
-      PostgresClient postgresClient = PgUtil.postgresClient(vertxContext, okapiHeaders);
-      postgresClient.get(queryHolder.getTable(), entitiesMetadataHolder.getClazz(), fieldList, queryHolder.buildCQLQuery(), true, false,
-        reply -> processDbReply(entitiesMetadataHolder, asyncResultHandler, respond500, respond400, reply));
-    } catch (Exception e) {
-      log.error(e.getMessage(), e);
-      asyncResultHandler.handle(response(e.getMessage(), respond500, respond500));
-    }
-  }
-
   public static <T, E> void getEntitiesCollectionWithDistinctOn(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, QueryHolder queryHolder, String sortField, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
     Method respond500 = getRespond500(entitiesMetadataHolder, asyncResultHandler);
     Method respond400 = getRespond400(entitiesMetadataHolder, asyncResultHandler);
@@ -80,7 +66,7 @@ public class HelperUtils {
     try {
       Method respond200 = entitiesMetadataHolder.getRespond200WithApplicationJson();
       if (reply.succeeded()) {
-        E collection = entitiesMetadataHolder.getCollectionClazz().newInstance();
+        E collection = entitiesMetadataHolder.getCollectionClazz().getDeclaredConstructor().newInstance();
         List<T> results = reply.result().getResults();
         Method setResults =  entitiesMetadataHolder.getSetResultsMethod();
         Method setTotalRecordsMethod =  entitiesMetadataHolder.getSetTotalRecordsMethod();

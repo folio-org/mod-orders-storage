@@ -1,7 +1,5 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
@@ -10,9 +8,7 @@ import javax.ws.rs.core.Response;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.*;
 import org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage;
-import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.QueryHolder;
 
 public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
 
@@ -21,12 +17,10 @@ public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
 
   @Override
   @Validate
-  public void getAcquisitionsUnitsStorageUnits(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<AcquisitionsUnit, AcquisitionsUnitCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(AcquisitionsUnit.class, AcquisitionsUnitCollection.class, GetAcquisitionsUnitsStorageUnitsResponse.class);
-      QueryHolder cql = new QueryHolder(ACQUISITIONS_UNIT_TABLE, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
-    });
+  public void getAcquisitionsUnitsStorageUnits(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.get(ACQUISITIONS_UNIT_TABLE, AcquisitionsUnit.class, AcquisitionsUnitCollection.class, query, offset, limit,
+        okapiHeaders, vertxContext, GetAcquisitionsUnitsStorageUnitsResponse.class, asyncResultHandler);
   }
 
   @Override
@@ -57,10 +51,8 @@ public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
   @Validate
   public void getAcquisitionsUnitsStorageMemberships(String query, int offset, int limit, String lang,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    EntitiesMetadataHolder<AcquisitionsUnitMembership, AcquisitionsUnitMembershipCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(AcquisitionsUnitMembership.class, AcquisitionsUnitMembershipCollection.class, GetAcquisitionsUnitsStorageMembershipsResponse.class);
-    QueryHolder cql = new QueryHolder(ACQUISITIONS_UNIT_MEMBERSHIP_TABLE, query, offset, limit, lang);
-    getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
-
+    PgUtil.get(ACQUISITIONS_UNIT_MEMBERSHIP_TABLE, AcquisitionsUnitMembership.class, AcquisitionsUnitMembershipCollection.class,
+        query, offset, limit, okapiHeaders, vertxContext, GetAcquisitionsUnitsStorageMembershipsResponse.class, asyncResultHandler);
   }
 
   @Override

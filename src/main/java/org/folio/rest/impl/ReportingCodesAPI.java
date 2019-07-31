@@ -7,30 +7,21 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ReportingCode;
 import org.folio.rest.jaxrs.model.ReportingCodeCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageReportingCodes;
-import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.QueryHolder;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
-
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
-
 
 public class ReportingCodesAPI implements OrdersStorageReportingCodes {
 
   private static final String REPORTING_CODE_TABLE = "reporting_code";
 
-
   @Override
   @Validate
   public void getOrdersStorageReportingCodes(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<ReportingCode, ReportingCodeCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(ReportingCode.class, ReportingCodeCollection.class, GetOrdersStorageReportingCodesResponse.class);
-      QueryHolder cql = new QueryHolder(REPORTING_CODE_TABLE, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
-    });
+    PgUtil.get(REPORTING_CODE_TABLE, ReportingCode.class, ReportingCodeCollection.class, query, offset, limit, okapiHeaders,
+        vertxContext, GetOrdersStorageReportingCodesResponse.class, asyncResultHandler);
   }
 
   @Override

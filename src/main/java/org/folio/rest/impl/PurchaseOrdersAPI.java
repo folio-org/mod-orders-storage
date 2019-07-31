@@ -13,11 +13,9 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
-import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.QueryHolder;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -26,12 +24,11 @@ import java.util.UUID;
 import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
 import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
-  static final String PURCHASE_ORDER_TABLE = "purchase_order";
+  private static final String PURCHASE_ORDER_TABLE = "purchase_order";
   private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase-orders/";
   private PostgresClient pgClient;
 
@@ -44,13 +41,9 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   @Override
   @Validate
   public void getOrdersStoragePurchaseOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
-    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(
-          PurchaseOrder.class, PurchaseOrderCollection.class, GetOrdersStoragePurchaseOrdersResponse.class);
-      QueryHolder cql = new QueryHolder(PURCHASE_ORDER_TABLE, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
-    });
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.get(PURCHASE_ORDER_TABLE, PurchaseOrder.class, PurchaseOrderCollection.class, query, offset, limit, okapiHeaders,
+        vertxContext, GetOrdersStoragePurchaseOrdersResponse.class, asyncResultHandler);
   }
 
   @Override
