@@ -7,29 +7,21 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePieces;
-import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.QueryHolder;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
-
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class PiecesAPI implements OrdersStoragePieces {
 
   static final String PIECES_TABLE = "pieces";
 
-
   @Override
   @Validate
   public void getOrdersStoragePieces(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<Piece, PieceCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(Piece.class, PieceCollection.class, GetOrdersStoragePiecesResponse.class);
-      QueryHolder cql = new QueryHolder(PIECES_TABLE, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
-    });
+    PgUtil.get(PIECES_TABLE, Piece.class, PieceCollection.class, query, offset, limit, okapiHeaders, vertxContext,
+        GetOrdersStoragePiecesResponse.class, asyncResultHandler);
   }
 
   @Override

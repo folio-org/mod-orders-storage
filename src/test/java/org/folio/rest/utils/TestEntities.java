@@ -2,7 +2,6 @@ package org.folio.rest.utils;
 
 import org.folio.rest.jaxrs.model.AcquisitionsUnit;
 import org.folio.rest.jaxrs.model.AcquisitionsUnitMembership;
-import org.folio.rest.jaxrs.model.AcquisitionsUnitAssignment;
 import org.folio.rest.jaxrs.model.Alert;
 import org.folio.rest.jaxrs.model.OrderInvoiceRelationship;
 import org.folio.rest.jaxrs.model.Piece;
@@ -19,8 +18,7 @@ public enum TestEntities {
   PIECE("/orders-storage/pieces", Piece.class, "data/pieces/313000-03_created_by_item.json", "comment", "Update Comment", 18),
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, "data/order-invoice-relationships/313000_123invoicenumber45.json", "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 9),
   ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, "data/acquisitions-units/acquisitions-unit.json", "name", "met", 1),
-  ACQUISITIONS_UNIT_MEMBERSHIPS("/acquisitions-units-storage/memberships", AcquisitionsUnitMembership.class, "data/acquisitions-units-memberships/acquisition_unit_membership.json", "userId", "f8e41958-a378-4051-ae6e-429d231acb66", 1),
-  ACQUISITIONS_UNIT_ASSIGNMENTS("/orders-storage/acquisitions-unit-assignments", AcquisitionsUnitAssignment.class, "data/acquisitions-unit-assignments/AUA-04ae9da2.json", "recordId", "05bdf3c8-01f0-4ddb-bd6c-6efd465f9e33", 1);
+  ACQUISITIONS_UNIT_MEMBERSHIPS("/acquisitions-units-storage/memberships", AcquisitionsUnitMembership.class, "data/acquisitions-units-memberships/acquisition_unit_membership.json", "userId", "f8e41958-a378-4051-ae6e-429d231acb66", 1);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;

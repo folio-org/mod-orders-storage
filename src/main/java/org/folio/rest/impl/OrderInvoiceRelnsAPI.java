@@ -7,28 +7,21 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.OrderInvoiceRelationship;
 import org.folio.rest.jaxrs.model.OrderInvoiceRelationshipCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageOrderInvoiceRelns;
-import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.QueryHolder;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
-
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollection;
 
 public class OrderInvoiceRelnsAPI implements OrdersStorageOrderInvoiceRelns {
 
   private static final String ORDER_INVOICE_RELNS_TABLE = "order_invoice_relationship";
 
-
   @Override
   @Validate
-  public void getOrdersStorageOrderInvoiceRelns(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<OrderInvoiceRelationship, OrderInvoiceRelationshipCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(OrderInvoiceRelationship.class, OrderInvoiceRelationshipCollection.class, GetOrdersStorageOrderInvoiceRelnsResponse.class);
-      QueryHolder cql = new QueryHolder(ORDER_INVOICE_RELNS_TABLE, query, offset, limit, lang);
-      getEntitiesCollection(entitiesMetadataHolder, cql, asyncResultHandler, vertxContext, okapiHeaders);
-    });
+  public void getOrdersStorageOrderInvoiceRelns(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.get(ORDER_INVOICE_RELNS_TABLE, OrderInvoiceRelationship.class, OrderInvoiceRelationshipCollection.class, query, offset,
+        limit, okapiHeaders, vertxContext, GetOrdersStorageOrderInvoiceRelnsResponse.class, asyncResultHandler);
   }
 
   @Override

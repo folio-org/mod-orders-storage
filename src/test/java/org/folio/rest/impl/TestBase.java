@@ -89,9 +89,13 @@ public abstract class TestBase {
   }
 
   Response getDataById(String endpoint, String id) throws MalformedURLException {
+    return getDataById(endpoint, id, TENANT_HEADER);
+  }
+
+  Response getDataById(String endpoint, String id, Header tenant) throws MalformedURLException {
     return given()
       .pathParam("id", id)
-      .header(TENANT_HEADER)
+      .header(tenant)
       .contentType(ContentType.JSON)
       .get(storageUrl(endpoint));
   }
@@ -119,6 +123,10 @@ public abstract class TestBase {
       .post(storageUrl(endpoint));
   }
 
+  String createEntity(String endpoint, Object entity) throws MalformedURLException {
+    return createEntity(endpoint, JsonObject.mapFrom(entity).encode());
+  }
+
   String createEntity(String endpoint, String entity) throws MalformedURLException {
     return createEntity(endpoint, entity, TENANT_HEADER);
   }
@@ -131,13 +139,17 @@ public abstract class TestBase {
           .path("id");
   }
 
-  Response putData(String endpoint, String id, String input) throws MalformedURLException {
+  Response putData(String endpoint, String id, String input, Header tenant) throws MalformedURLException {
     return given()
       .pathParam("id", id)
-      .header(TENANT_HEADER)
+      .header(tenant)
       .contentType(ContentType.JSON)
       .body(input)
       .put(storageUrl(endpoint));
+  }
+
+  Response putData(String endpoint, String id, String input) throws MalformedURLException {
+    return putData(endpoint, id, input, TENANT_HEADER);
   }
 
   void deleteDataSuccess(String endpoint, String id) throws MalformedURLException {
@@ -213,5 +225,8 @@ public abstract class TestBase {
     return value;
   }
 
+  <T> T getFileAsObject(String path, Class<T> clazz) {
+    return new JsonObject(getFile(path)).mapTo(clazz);
+  }
 
 }
