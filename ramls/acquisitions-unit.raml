@@ -8,10 +8,10 @@ documentation:
     content: <b>CRUD APIs used to manage acquisitions units.</b>
 
 types:
-    acquisitions-unit: !include acq-models/mod-orders-storage/schemas/acquisitions_unit.json
-    acquisitions-unit-collection: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_collection.json
-    acquisitions-unit-membership: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_membership.json
-    acquisitions-unit-membership-collection: !include acq-models/mod-orders-storage/schemas/acquisitions_unit_membership_collection.json
+    acquisitions-unit: !include acq-models/common/schemas/acquisitions_unit.json
+    acquisitions-unit-collection: !include acq-models/common/schemas/acquisitions_unit_collection.json
+    acquisitions-unit-membership: !include acq-models/common/schemas/acquisitions_unit_membership.json
+    acquisitions-unit-membership-collection: !include acq-models/common/schemas/acquisitions_unit_membership_collection.json
     errors: !include raml-util/schemas/errors.schema
 
     UUID:
@@ -32,8 +32,8 @@ resourceTypes:
  /units:
    type:
     collection:
-      exampleCollection: !include acq-models/mod-orders-storage/examples/acquisitions_unit_collection.sample
-      exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_post.sample
+      exampleCollection: !include acq-models/common/examples/acquisitions_unit_collection.sample
+      exampleItem: !include acq-models/common/examples/acquisitions_unit_post.sample
       schemaCollection: acquisitions-unit-collection
       schemaItem: acquisitions-unit
    post:
@@ -52,7 +52,7 @@ resourceTypes:
         type: UUID
     type:
       collection-item:
-        exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_post.sample
+        exampleItem: !include acq-models/common/examples/acquisitions_unit_post.sample
         schema: acquisitions-unit
     put:
       description: Update acquisitions unit
@@ -60,8 +60,8 @@ resourceTypes:
  /memberships:
     type:
      collection:
-         exampleCollection: !include acq-models/mod-orders-storage/examples/acquisitions_unit_membership_collection.sample
-         exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_membership_post.sample
+         exampleCollection: !include acq-models/common/examples/acquisitions_unit_membership_collection.sample
+         exampleItem: !include acq-models/common/examples/acquisitions_unit_membership_post.sample
          schemaCollection: acquisitions-unit-membership-collection
          schemaItem: acquisitions-unit-membership
     get:
@@ -77,5 +77,5 @@ resourceTypes:
         type: UUID
      type:
       collection-item:
-        exampleItem: !include acq-models/mod-orders-storage/examples/acquisitions_unit_membership_get.sample
+        exampleItem: !include acq-models/common/examples/acquisitions_unit_membership_get.sample
         schema: acquisitions-unit-membership
