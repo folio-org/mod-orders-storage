@@ -1,6 +1,8 @@
 {
   "id": "e20af8c8-b07d-47a1-9ebd-f1187e9335bd",
   "approved": true,
+  "approvalDate": "2018-06-18T00:00:00Z",
+  "approvedById": "e63273e7-48f5-4c43-ab4e-1751ecacaa21",
   "closeReason": {
     "reason": "Low quality"
   },
