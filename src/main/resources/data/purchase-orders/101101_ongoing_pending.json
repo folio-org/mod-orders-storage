@@ -1,6 +1,8 @@
 {
   "id": "589a6016-3463-49f6-8aa2-dc315d0665fd",
   "approved": true,
+  "approvalDate": "2018-07-30T00:00:00.000Z",
+  "approvedById": "e63273e7-48f5-4c43-ab4e-1751ecacaa21",
   "manualPo": true,
   "orderType": "Ongoing",
   "poNumber": "101101",

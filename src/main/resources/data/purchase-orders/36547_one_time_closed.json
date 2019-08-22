@@ -1,6 +1,8 @@
 {
   "id": "1d6a455f-29c5-4e51-84d9-e28450ef86ad",
   "approved": true,
+  "approvalDate": "2019-05-17T00:00:00Z",
+  "approvedById": "e63273e7-48f5-4c43-ab4e-1751ecacaa21",
   "closeReason": {
     "reason": "Complete"
   },

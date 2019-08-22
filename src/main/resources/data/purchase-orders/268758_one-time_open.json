@@ -1,6 +1,8 @@
 {
   "id": "efff3ffe-5469-1f8f-aa3a-7afc933f9eff",
   "approved": true,
+  "approvalDate": "2018-06-29T00:00:00Z",
+  "approvedById": "e63273e7-48f5-4c43-ab4e-1751ecacaa21",
   "dateOrdered": "2018-06-30T00:00:00Z",
   "manualPo": false,
   "orderType": "One-Time",
