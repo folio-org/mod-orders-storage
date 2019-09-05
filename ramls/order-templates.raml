@@ -29,7 +29,7 @@ resourceTypes:
   type:
     collection:
       exampleCollection: !include acq-models/mod-orders-storage/examples/order_template_collection.sample
-      exampleItem: !include acq-models/mod-orders-storage/examples/order_template_get.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/order_template_post.sample
       schemaCollection: order-template-collection
       schemaItem: order-template
   post:
@@ -48,7 +48,7 @@ resourceTypes:
         type: UUID
     type:
       collection-item:
-        exampleItem: !include acq-models/mod-orders-storage/examples/order_template_post.sample
+        exampleItem: !include acq-models/mod-orders-storage/examples/order_template_get.sample
         schema: order-template
     put:
       description: Update order template
