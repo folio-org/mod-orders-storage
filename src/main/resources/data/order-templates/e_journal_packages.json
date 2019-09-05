@@ -1,0 +1,35 @@
+{
+  "id": "43bb8a31-4e4b-463c-95c5-e163760f0092",
+  "receiptStatus": "Receipt Not Required",
+  "templateCode": "Packages: eJournals",
+  "templateName": "eJournal packages",
+  "acqUnitIds": [
+    "0ebb1f7d-983f-3026-8a4c-5318e0ebc041"
+  ],
+  "acquisitionMethod": "Purchase At Vendor System",
+  "approved": true,
+  "billTo" : "103c7625-0142-42f9-896e-cb51dd94a322",
+  "cancellationRestriction": true,
+  "collection": true,
+  "cost": {
+    "currency": "USD",
+    "quantityElectronic": 1
+  },
+  "eresource": {
+    "createInventory": "None",
+    "materialType": "615b8413-82d5-4203-aa6e-e37984cb5ac3"
+  },
+  "locations": [
+    {
+      "locationId": "184aae84-a5bf-4c6a-85ba-4a7c73026cd5",
+      "quantityElectronic": 1
+    }
+  ],
+  "manualPo": true,
+  "orderFormat": "Electronic Resource",
+  "orderType": "Ongoing",
+  "physical": {
+    "createInventory": "Instance, Holding, Item"
+  },
+  "reEncumber": true
+}

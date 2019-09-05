@@ -1,0 +1,35 @@
+{
+  "id": "5c56e4f6-1296-4b5f-a6dc-8309d9983a16",
+  "templateCode": "Dissert",
+  "templateDescription": "Use to create orders for our dissertations going to the archives; change the pub year each year",
+  "templateName": "Our dissertations",
+  "acquisitionMethod": "Gift",
+  "approved": true,
+  "cost": {
+    "listUnitPrice": 0,
+    "quantityPhysical": 1
+  },
+  "instanceId": null,
+  "locations": [
+    {
+      "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "quantityPhysical": 1
+    }
+  ],
+  "manualPo": true,
+  "orderFormat": "Physical Resource",
+  "orderType": "One-Time",
+  "paymentStatus": "Payment Not Required",
+  "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
+  },
+  "publicationDate": "2020",
+  "publisher": "Important University",
+  "shipTo": "a3a02de3-c31a-4c2b-a2ce-8db9590ea90c",
+  "tags": {
+    "tagList": [
+      "dissertation"
+    ]
+  }
+}
