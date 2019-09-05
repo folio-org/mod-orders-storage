@@ -361,7 +361,12 @@
      {
       "tableName": "order_templates",
       "fromModuleVersion": 7.0,
-      "withMetadata": false
+      "withMetadata": false,
+      "uniqueIndex": [
+         {
+           "fieldName" : "templateName"
+         }
+       ]
      }
   ]
 }
