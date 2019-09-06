@@ -26,10 +26,16 @@
   },
   "publicationDate": "2020",
   "publisher": "Important University",
-  "shipTo": "a3a02de3-c31a-4c2b-a2ce-8db9590ea90c",
-  "tags": {
+  "poTags": {
     "tagList": [
       "dissertation"
     ]
-  }
+  },
+  "polTags": {
+    "tagList": [
+      "dissert-2020"
+    ]
+  },
+  "shipTo": "a3a02de3-c31a-4c2b-a2ce-8db9590ea90c"
+
 }

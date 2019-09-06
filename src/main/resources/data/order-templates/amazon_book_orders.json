@@ -28,7 +28,7 @@
     "materialType": "1a54b431-2e4f-452d-9cae-9cee66c9a892"
   },
   "shipTo" : "f7c36792-05f7-4c8c-969d-103ac6763187",
-  "tags": {
+  "poTags": {
     "tagList": [
       "amazon"
     ]

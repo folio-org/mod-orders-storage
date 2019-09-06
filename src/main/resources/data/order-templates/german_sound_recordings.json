@@ -32,9 +32,14 @@
   },
   "selector": "Music Librarian",
   "shipTo" : "a3a02de3-c31a-4c2b-a2ce-8db9590ea90c",
-  "tags": {
+  "poTags": {
     "tagList": [
       "music"
+    ]
+  },
+  "polTags": {
+    "tagList": [
+      "german, music"
     ]
   },
   "vendor": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1"

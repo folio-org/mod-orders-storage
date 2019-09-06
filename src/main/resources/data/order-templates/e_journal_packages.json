@@ -31,5 +31,10 @@
   "physical": {
     "createInventory": "Instance, Holding, Item"
   },
+  "polTags": {
+    "tagList": [
+      "e-journal"
+    ]
+  },
   "reEncumber": true
 }

@@ -32,5 +32,10 @@
   "physical": {
     "createInventory": "Instance, Holding, Item"
   },
+  "polTags": {
+    "tagList": [
+      "dissert-2020"
+    ]
+  },
   "receiptStatus": "Receipt Not Required"
 }
