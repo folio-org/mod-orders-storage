@@ -29,12 +29,9 @@
   ],
   "orderFormat": "Electronic Resource",
   "orderType": "One-Time",
-  "physical": {
-    "createInventory": "Instance, Holding, Item"
-  },
   "polTags": {
     "tagList": [
-      "dissert-2020"
+      "e-book"
     ]
   },
   "receiptStatus": "Receipt Not Required"

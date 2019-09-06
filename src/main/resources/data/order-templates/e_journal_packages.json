@@ -28,9 +28,6 @@
   "manualPo": true,
   "orderFormat": "Electronic Resource",
   "orderType": "Ongoing",
-  "physical": {
-    "createInventory": "Instance, Holding, Item"
-  },
   "polTags": {
     "tagList": [
       "e-journal"
