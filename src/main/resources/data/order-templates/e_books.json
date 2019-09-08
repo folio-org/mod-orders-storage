@@ -1,0 +1,38 @@
+{
+  "id": "2cec3275-a5c7-4ba1-afab-905ada8c5b65",
+  "templateCode": "Individual eBooks",
+  "templateDescription": "Be sure to fill in the proper vendor",
+  "templateName": "eBooks",
+  "acqUnitIds": [
+    "0ebb1f7d-983f-3026-8a4c-5318e0ebc041"
+  ],
+  "acquisitionMethod": "Purchase At Vendor System",
+  "approved": true,
+  "billTo" : "103c7625-0142-42f9-896e-cb51dd94a322",
+  "cancellationRestriction": true,
+  "cost": {
+    "currency": "USD",
+    "listUnitPriceElectronic": 1
+  },
+  "eresource": {
+    "createInventory": "Instance, Holding",
+    "materialType": "615b8413-82d5-4203-aa6e-e37984cb5ac3"
+  },
+  "locations": [
+    {
+      "locationId": "184aae84-a5bf-4c6a-85ba-4a7c73026cd5",
+      "quantityElectronic": 1
+    }
+  ],
+  "notes": [
+    "Check for activation & discovery"
+  ],
+  "orderFormat": "Electronic Resource",
+  "orderType": "One-Time",
+  "polTags": {
+    "tagList": [
+      "e-book"
+    ]
+  },
+  "receiptStatus": "Receipt Not Required"
+}
