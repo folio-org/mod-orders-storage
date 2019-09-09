@@ -1,4 +1,18 @@
-## 8.0.0 - Unreleased
+## 9.0.0 - Unreleased
+
+## 8.0.0 - Released
+The main focus of this release was to implement API for order templates and to clean-up API for acquisition-unit-assignments.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v7.0.0...v8.0.0)
+
+### Stories
+* [MODORDSTOR-106](https://issues.folio.org/browse/MODORDSTOR-106) - Create order-templates API
+* [MODORDSTOR-105](https://issues.folio.org/browse/MODORDSTOR-105) - Populate sample data for Order templates
+* [MODORDSTOR-103](https://issues.folio.org/browse/MODORDSTOR-103) - Clean-up - Implement basic CRUD for acquisitions-unit-assignments
+* [MODORDSTOR-102](https://issues.folio.org/browse/MODORDSTOR-102) - Remove foreign key constraint on acquisitions-unit-assignments
+
+### Bug Fixes
+* [MODORDSTOR-107](https://issues.folio.org/browse/MODORDSTOR-107) - Unhandled DB connection upon deletion orders
 
 ## 7.0.0 - Released
 The main focus of this release was to implement API for managing Teams (Units, Assignments, Memberships), schemas updating and performance optimization.
