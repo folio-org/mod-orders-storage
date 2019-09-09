@@ -360,7 +360,7 @@
      },
      {
       "tableName": "order_templates",
-      "fromModuleVersion": 7.0,
+      "fromModuleVersion": 8.0,
       "withMetadata": false,
       "uniqueIndex": [
          {
