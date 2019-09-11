@@ -357,6 +357,16 @@
             "fieldName" : "acquisitionsUnitId"
          }
        ]
+     },
+     {
+      "tableName": "order_templates",
+      "fromModuleVersion": 8.0,
+      "withMetadata": false,
+      "uniqueIndex": [
+         {
+           "fieldName" : "templateName"
+         }
+       ]
      }
   ]
 }

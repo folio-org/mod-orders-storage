@@ -134,7 +134,9 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     try {
       PgUtil.put(PURCHASE_ORDER_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStoragePurchaseOrdersByIdResponse.class, reply -> {
         asyncResultHandler.handle(reply);
-        deleteSequence(entity);
+        if (reply.succeeded()) {
+          deleteSequence(entity);
+        }
       });
     } catch (Exception e) {
       asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
@@ -227,7 +229,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     log.info("POL number sequence by PO id={}", tx.getEntity());
 
     Future<Tx<String>> future = Future.future();
-    pgClient.execute(DROP_SEQUENCE.getQuery(tx.getEntity()), reply -> {
+    pgClient.execute(tx.getConnection(), DROP_SEQUENCE.getQuery(tx.getEntity()), reply -> {
       if (reply.failed()) {
         handleFailure(future, reply);
       } else {

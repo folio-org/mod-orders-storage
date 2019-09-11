@@ -1,0 +1,47 @@
+{
+  "id": "cc637c23-d1fb-47b9-bcda-1d6f0812dc01",
+  "templateCode": "German music",
+  "templateName": "German sound recordings",
+  "acqUnitIds": [
+    "0ebb1f7d-983f-3026-8a4c-5318e0ebc041"
+  ],
+  "acquisitionMethod": "Purchase",
+  "approved": true,
+  "billTo" : "103c7625-0142-42f9-896e-cb51dd94a322",
+  "cost": {
+    "currency": "USD",
+    "quantityPhysical": 1
+  },
+  "fundDistribution": [
+    {
+      "fundId": "e9285a1c-1dfc-4380-868c-e74073003f43",
+      "percentage": 100
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "orderType": "One-Time",
+  "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialSupplier": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1"
+  },
+  "selector": "Music Librarian",
+  "shipTo" : "a3a02de3-c31a-4c2b-a2ce-8db9590ea90c",
+  "poTags": {
+    "tagList": [
+      "music"
+    ]
+  },
+  "polTags": {
+    "tagList": [
+      "german",
+      "music"
+    ]
+  },
+  "vendor": "c0fb5956-cdf1-11e8-a8d5-f2801f1b9fd1"
+}
