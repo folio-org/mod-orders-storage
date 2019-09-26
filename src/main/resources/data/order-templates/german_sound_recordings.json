@@ -15,7 +15,8 @@
   "fundDistribution": [
     {
       "fundId": "e9285a1c-1dfc-4380-868c-e74073003f43",
-      "percentage": 100
+      "distributionType": "percentage",
+      "value": 100
     }
   ],
   "locations": [

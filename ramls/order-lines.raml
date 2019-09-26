@@ -1,7 +1,7 @@
 #%RAML 1.0
 title: "mod-orders-storage"
 baseUri: http://github.com/folio-org/mod-orders-storage
-version: v2
+version: v3
 
 documentation:
   - title: Order-lines
@@ -9,7 +9,7 @@ documentation:
 
 types:
     po_line_collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
-    
+
 traits:
     pageable:  !include raml-util/traits/pageable.raml
     searchable: !include raml-util/traits/searchable.raml

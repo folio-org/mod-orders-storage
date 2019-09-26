@@ -103,7 +103,8 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": 7.0,
+      "customSnippetPath": "data-migration/po_line_table.sql",
+      "fromModuleVersion": "mod-orders-storage-9.0.0",
       "withMetadata": true,
       "foreignKeys": [
         {

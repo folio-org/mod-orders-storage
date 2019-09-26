@@ -44,7 +44,8 @@
       "code": "STATE-MONOSER",
       "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08010",
       "fundId": "bbd4a5e1-c9f3-44b9-bfdf-d184e04f0ba0",
-      "percentage": 100.0
+      "distributionType": "percentage",
+      "value": 100.0
     }
   ],
   "instanceId": "c1d3be12-ecec-4fab-9237-baf728575185",

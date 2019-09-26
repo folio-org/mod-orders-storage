@@ -56,7 +56,8 @@
       "code": "STATE-SUBN",
       "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08011",
       "fundId": "e54b1f4d-7d05-4b1a-9368-3c36b75d8ac6",
-      "percentage": 100.0
+      "distributionType": "percentage",
+      "value": 100.0
     }
   ],
   "instanceId": "8be05cf5-fb4f-4752-8094-8e179d08fb99",
