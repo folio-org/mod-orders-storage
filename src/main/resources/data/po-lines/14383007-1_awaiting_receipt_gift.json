@@ -52,7 +52,8 @@
       "code": "GIFT-SUBN",
       "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08009",
       "fundId": "e9f9bc2f-bad5-4613-9d6c-f55efa5805e7",
-      "percentage": 100.0
+      "distributionType": "percentage",
+      "value": 100.0
     }
   ],
   "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
