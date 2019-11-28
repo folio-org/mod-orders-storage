@@ -13,14 +13,13 @@
   </licenses>
 
   <properties>
-    <aspectj.version>1.8.9</aspectj.version>
+    <aspectj.version>1.9.4</aspectj.version>
     <module_name>mod-orders-storage</module_name>
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>25.0.2</raml-module-builder.version>
+    <raml-module-builder.version>29.0.1</raml-module-builder.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <postgres.driver.version>9.4.1212</postgres.driver.version>
     <junit-jupiter-version>5.4.2</junit-jupiter-version>
     <jmockit.version>1.46</jmockit.version>
     <argLine />
@@ -39,7 +38,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-stack-depchain</artifactId>
-        <version>3.5.4</version>
+        <version>3.8.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
