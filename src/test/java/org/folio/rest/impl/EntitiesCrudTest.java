@@ -1,7 +1,6 @@
 package org.folio.rest.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.folio.rest.tools.utils.ValidationHelper.isDuplicate;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.MalformedURLException;
 import java.util.stream.Stream;
@@ -99,8 +98,8 @@ public class EntitiesCrudTest extends TestBase {
     duplicateEntity.remove("id");
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
     response.then().log().ifValidationFails()
-    .statusCode(400);
-    assertEquals(isDuplicate(response.asString()), true);
+    .statusCode(422);
+    assertTrue(response.asString().contains("value already exists in table"));
 
   }
 

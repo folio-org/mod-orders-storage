@@ -4,6 +4,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -145,7 +146,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
 
   private Future<Tx<PurchaseOrder>> createSequence(Tx<PurchaseOrder> tx) {
-    Future<Tx<PurchaseOrder>> future = Future.future();
+    Promise<Tx<PurchaseOrder>> promise = Promise.promise();
 
     String orderId = tx.getEntity().getId();
     log.debug("Creating POL number sequence for order with id={}", orderId);
@@ -153,16 +154,16 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
       pgClient.execute(tx.getConnection(), CREATE_SEQUENCE.getQuery(orderId), reply -> {
         if (reply.failed()) {
           log.error("POL number sequence creation for order with id={} failed", reply.cause(), orderId);
-          pgClient.rollbackTx(tx.getConnection(), rb -> future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage())));
+          pgClient.rollbackTx(tx.getConnection(), rb -> promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage())));
         } else {
           log.debug("POL number sequence for order with id={} successfully created", orderId);
-          future.complete(tx);
+          promise.complete(tx);
         }
       });
     } catch (Exception e) {
-      future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()));
+      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()));
     }
-    return future;
+    return promise.future();
   }
 
   private void deleteSequence(PurchaseOrder order) {
@@ -178,7 +179,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   }
 
   private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx) {
-    Future<Tx<PurchaseOrder>> future = Future.future();
+    Promise<Tx<PurchaseOrder>> promise = Promise.promise();
 
     PurchaseOrder order = tx.getEntity();
     if (order.getId() == null) {
@@ -193,91 +194,91 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
         pgClient.rollbackTx(tx.getConnection(), rb -> {
           String badRequestMessage = PgExceptionUtil.badRequestMessage(reply.cause());
           if (badRequestMessage != null) {
-            future.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+            promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
           } else {
-            future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
+            promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
           }
         });
       } else {
         log.debug("New order with id={} successfully created", order.getId());
-        future.complete(tx);
+        promise.complete(tx);
       }
     });
-    return future;
+    return promise.future();
   }
 
   private <T> Future<Tx<T>> startTx(Tx<T> tx) {
-    Future<Tx<T>> future = Future.future();
+    Promise<Tx<T>> promise = Promise.promise();
 
     log.debug("Start transaction");
 
     pgClient.startTx(sqlConnection -> {
       tx.setConnection(sqlConnection);
-      future.complete(tx);
+      promise.complete(tx);
     });
-    return future;
+    return promise.future();
   }
 
   private <T> Future<Tx<T>> endTx(Tx<T> tx) {
     log.debug("End transaction");
-    Future<Tx<T>> future = Future.future();
-    pgClient.endTx(tx.getConnection(), v -> future.complete(tx));
-    return future;
+    Promise<Tx<T>> promise = Promise.promise();
+    pgClient.endTx(tx.getConnection(), v -> promise.complete(tx));
+    return promise.future();
   }
 
   private Future<Tx<String>> deletePolNumberSequence(Tx<String> tx) {
     log.info("POL number sequence by PO id={}", tx.getEntity());
 
-    Future<Tx<String>> future = Future.future();
+    Promise<Tx<String>> promise = Promise.promise();
     pgClient.execute(tx.getConnection(), DROP_SEQUENCE.getQuery(tx.getEntity()), reply -> {
       if (reply.failed()) {
-        handleFailure(future, reply);
+        handleFailure(promise, reply);
       } else {
         log.info("POL number sequence for PO with id={} successfully deleted", reply.result().getUpdated(), tx.getEntity());
-        future.complete(tx);
+        promise.complete(tx);
       }
     });
 
-    return future;
+    return promise.future();
   }
 
   private Future<Tx<String>> deleteOrderById(Tx<String> tx) {
     log.info("Delete PO with id={}", tx.getEntity());
 
-    Future<Tx<String>> future = Future.future();
+    Promise<Tx<String>> promise = Promise.promise();
 
     pgClient.delete(tx.getConnection(), PURCHASE_ORDER_TABLE, tx.getEntity(), reply -> {
       if (reply.failed()) {
-        handleFailure(future, reply);
+        handleFailure(promise, reply);
       } else {
         if (reply.result().getUpdated() == 0) {
-          future.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), "Purchase order not found"));
+          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), "Purchase order not found"));
         } else {
-          future.complete(tx);
+          promise.complete(tx);
         }
       }
     });
-    return future;
+    return promise.future();
   }
 
-  private void handleFailure(Future future, AsyncResult reply) {
+  private void handleFailure(Promise promise, AsyncResult reply) {
     String badRequestMessage = PgExceptionUtil.badRequestMessage(reply.cause());
     if (badRequestMessage != null) {
-      future.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+      promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
     } else {
-      future.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause()
+      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause()
         .getMessage()));
     }
   }
 
   private Future<Void> rollbackTransaction(Tx<?> tx) {
-    Future<Void> future = Future.future();
+    Promise<Void> promise = Promise.promise();
     if (tx.getConnection().failed()) {
-      future.fail(tx.getConnection().cause());
+      promise.fail(tx.getConnection().cause());
     } else {
-      pgClient.rollbackTx(tx.getConnection(), future);
+      pgClient.rollbackTx(tx.getConnection(), promise.future());
     }
-    return future;
+    return promise.future();
   }
 
   public class Tx<T> {

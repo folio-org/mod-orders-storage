@@ -338,7 +338,8 @@
     {
       "tableName": "acquisitions_unit_assignments",
       "fromModuleVersion": 7.0,
-      "mode": "delete"
+      "mode": "delete",
+      "auditingTableName": "NOT_EXISTING_AUDITING_TABLE"
     },
     {
     "tableName": "acquisitions_unit_membership",

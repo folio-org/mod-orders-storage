@@ -1,6 +1,15 @@
 package org.folio.rest.impl;
 
-import io.restassured.RestAssured;
+import static org.folio.rest.utils.TestEntities.PO_LINE;
+import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isIn;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -11,24 +20,15 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.folio.rest.impl.StorageTestSuite.storageUrl;
-import static org.folio.rest.utils.TestEntities.PO_LINE;
-import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isIn;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 public class OrdersAPITest extends TestBase {
   private final Logger logger = LoggerFactory.getLogger(OrdersAPITest.class);
@@ -44,6 +44,7 @@ public class OrdersAPITest extends TestBase {
   private static final Integer CREATED_ORDERS_QUANTITY = 3;
   private static final Integer CREATED_PO_LINES_QUANTITY = 2;
   private static final Map<String, PurchaseOrder> expectedOrders = new HashMap<>();
+  private static final Set<String> EXCLUDED_FIELD_NAMES = new HashSet<>(Arrays.asList("metadata"));
 
   @Test
   public void testGetPurchaseOrders() throws MalformedURLException {
@@ -174,7 +175,9 @@ public class OrdersAPITest extends TestBase {
     Map<Field, Object> actualFieldValueMap = getFieldValueMap(actual);
     Map<Field, Object> expectedFieldValueMap = getFieldValueMap(expected);
     for(Map.Entry<Field, Object> e : expectedFieldValueMap.entrySet()) {
-      assertThat(EqualsBuilder.reflectionEquals(e.getValue(), actualFieldValueMap.get(e.getKey())), is(true));
+      if(!EXCLUDED_FIELD_NAMES.contains(e.getKey().getName())) {
+        assertThat(EqualsBuilder.reflectionEquals(e.getValue(), actualFieldValueMap.get(e.getKey())), is(true));
+      }
     }
   }
 
