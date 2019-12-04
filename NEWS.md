@@ -1,4 +1,16 @@
-## 9.0.0 - Unreleased
+## 10.0.0 - Unreleased
+
+## 9.0.0 - Released
+The main focus of this release was to improve schema for fund distributions, poLine/details and update environment settings
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v8.0.0...v9.0.0)
+
+### Stories
+* [MODORDSTOR-124](https://issues.folio.org/browse/MODORDSTOR-124) - Update RMB to 29.0.1
+* [MODORDSTOR-123](https://issues.folio.org/browse/MODORDSTOR-123) - Use JVM features to manage container memory
+* [MODORDSTOR-109](https://issues.folio.org/browse/MODORDSTOR-109) - Allow fund distributions to be specified as amount or percentage
+* [MODORDSTOR-108](https://issues.folio.org/browse/MODORDSTOR-108) - Add qualifier field to poLine->details->productIds[]
+* [FOLIO-2235](https://issues.folio.org/browse/FOLIO-2235) Add LaunchDescriptor settings to each backend non-core module repository
 
 ## 8.0.0 - Released
 The main focus of this release was to implement API for order templates and to clean-up API for acquisition-unit-assignments.
