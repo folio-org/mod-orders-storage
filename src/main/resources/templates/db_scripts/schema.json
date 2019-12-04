@@ -285,10 +285,6 @@
           "caseSensitive": false
         },
         {
-          "fieldName": "poLineId",
-          "caseSensitive": false
-        },
-        {
           "fieldName": "receivingStatus",
           "caseSensitive": false
         },
@@ -354,9 +350,6 @@
       "index": [
          {
             "fieldName" : "userId"
-         },
-         {
-            "fieldName" : "acquisitionsUnitId"
          }
        ]
      },
