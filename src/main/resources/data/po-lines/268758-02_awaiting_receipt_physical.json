@@ -42,7 +42,7 @@
   "fundDistribution": [
     {
       "code": "EUROHIST",
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08003",
+      "encumbrance": "28de9c56-abb0-4522-acb8-1e8442bd32e4",
       "fundId": "e9285a1c-1dfc-4380-868c-e74073003f43",
       "distributionType": "percentage",
       "value": 100.0
