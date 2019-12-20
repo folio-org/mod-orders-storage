@@ -1,0 +1,20 @@
+{
+  "id": "fa513f2c-8594-4342-8a83-300a66852bff",
+  "title": "The American Journal of Medicine",
+  "poLineId": "b0fb580c-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
+  "productIds": [
+    {
+      "productId": "AJMEAZ",
+      "productIdType": "593b78cb-32f3-44d1-ba8c-63fd5e6989e6"
+    },
+    {
+      "productId": "0002-9343",
+      "productIdType": "913300b2-03ed-469a-8179-c1092c991227"
+    },
+    {
+      "productId": "med49002270",
+      "productIdType": "c858e4f2-2b6b-4385-842b-60732ee14abb"
+    }
+  ]
+}

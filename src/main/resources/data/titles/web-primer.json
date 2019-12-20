@@ -1,0 +1,17 @@
+{
+  "id": "1b3435ff-ab79-4840-96b1-a6262a4d35ed",
+  "title": "A semantic web primer",
+  "poLineId": "647c1dca-b9bf-47af-8456-bfb6dfef9eee",
+  "instanceId": "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39",
+  "productIds": [
+    {
+      "productId": "0262012103",
+      "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
+    },
+    {
+      "productId": "9780262012102",
+      "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422",
+      "qualifier": "(hardcover)"
+    }
+  ]
+}
