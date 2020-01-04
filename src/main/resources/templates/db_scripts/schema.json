@@ -39,7 +39,7 @@
   "tables": [
     {
       "tableName": "alert",
-      "fromModuleVersion": 7.0,
+      "fromModuleVersion": "mod-orders-storage-7.0.0",
       "withMetadata": true
     },
     {
