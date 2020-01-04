@@ -1,0 +1,16 @@
+{
+  "id": "27c5626a-d463-4391-b622-c3d25f26f0ab",
+  "title": "Nod",
+  "poLineId": "57ae37a8-dbfa-2e6f-aecd-dcc24d784b0b",
+  "instanceId": "6506b79b-7702-48b2-9774-a1c538fdd34e",
+  "productIds": [
+    {
+      "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422",
+      "productId": "0956687695"
+    },
+    {
+      "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422",
+      "productId": "9780956687695"
+    }
+  ]
+}

@@ -7,14 +7,14 @@ import static org.folio.rest.utils.TenantApiTestUtil.TENANT_ENDPOINT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postToTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
-import static org.folio.rest.utils.TestEntities.PO_LINE;
+import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
 import java.net.MalformedURLException;
 
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.PoLineCollection;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.utils.TenantApiTestUtil;
 import org.folio.rest.utils.TestEntities;
@@ -80,14 +80,15 @@ public class TenantSampleDataTest extends TestBase{
       postToTenant(PARTIAL_TENANT_HEADER, jsonBody)
         .assertThat()
           .statusCode(201);
-      PoLineCollection poLineCollection = getData(PO_LINE.getEndpoint(), PARTIAL_TENANT_HEADER)
+
+      TitleCollection titleCollection = getData(TITLES.getEndpoint(), PARTIAL_TENANT_HEADER)
         .then()
           .extract()
             .response()
-              .as(PoLineCollection.class);
+              .as(TitleCollection.class);
 
-      for (PoLine poLine : poLineCollection.getPoLines()) {
-        deleteData(PO_LINE.getEndpointWithId(), poLine.getId(), PARTIAL_TENANT_HEADER).then()
+      for (Title title : titleCollection.getTitles()) {
+        deleteData(TITLES.getEndpointWithId(), title.getId(), PARTIAL_TENANT_HEADER).then()
           .log()
           .ifValidationFails()
           .statusCode(204);

@@ -25,7 +25,7 @@ public class EntitiesCrudTest extends TestBase {
   String sample = null;
 
   public static Stream<TestEntities> deleteOrder() {
-    return Stream.of(TestEntities.ORDER_INVOICE_RELNS, TestEntities.PO_LINE,
+    return Stream.of(TestEntities.TITLES, TestEntities.ORDER_INVOICE_RELNS, TestEntities.PO_LINE,
         TestEntities.PURCHASE_ORDER, TestEntities.ALERT, TestEntities.REPORTING_CODE, TestEntities.ORDER_TEMPLATE, TestEntities.ACQUISITIONS_UNIT_MEMBERSHIPS,
         TestEntities.ACQUISITIONS_UNIT);
   }
