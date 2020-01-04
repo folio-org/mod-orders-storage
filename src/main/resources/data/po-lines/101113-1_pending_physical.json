@@ -48,7 +48,6 @@
       "value": 100.0
     }
   ],
-  "instanceId": "c1d3be12-ecec-4fab-9237-baf728575185",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -83,7 +82,7 @@
   "tags": {
         "tagList": []
   },
-  "title": "The city post-modernity edited by Alan Latham",
+  "titleOrPackage": "The city post-modernity edited by Alan Latham",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

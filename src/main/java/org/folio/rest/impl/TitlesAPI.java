@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class TitlesAPI implements OrdersStorageTitles {
 
-  private static final String TITLES_TABLE = "titles";
+  static final String TITLES_TABLE = "titles";
 
   @Override
   @Validate

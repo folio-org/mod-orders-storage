@@ -56,7 +56,6 @@
       "value": 100.0
     }
   ],
-  "instanceId": "30fcc8e7-a019-43f4-b642-2edc389f4501",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -92,7 +91,7 @@
         "important"
      ]
   },
-  "title": "The American Journal of Medicine",
+  "titleOrPackage": "The American Journal of Medicine",
   "vendorDetail": {
     "instructions": "no. 42 and continuations",
     "noteFromVendor": "",

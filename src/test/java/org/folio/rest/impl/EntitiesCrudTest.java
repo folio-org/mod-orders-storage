@@ -56,7 +56,7 @@ public class EntitiesCrudTest extends TestBase {
   @EnumSource(TestEntities.class)
   public void testPostData(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Creating %s ... ", testEntity.name(), testEntity.name()));
-    sample = getSample(testEntity.getSampleFileName());
+    sample = getFile(testEntity.getSampleFileName());
     Response response = postData(testEntity.getEndpoint(), sample);
     testEntity.setId(response.then()
       .extract()
@@ -94,7 +94,7 @@ public class EntitiesCrudTest extends TestBase {
   @MethodSource("uniqueKeyConstraint")
   public void testUniqueKeyConstraint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
-    JsonObject duplicateEntity = new JsonObject(getSample(testEntity.getSampleFileName()));
+    JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
     duplicateEntity.remove("id");
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
     response.then().log().ifValidationFails()
@@ -109,7 +109,7 @@ public class EntitiesCrudTest extends TestBase {
   public void testPutById(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Editing %s with ID: %s", testEntity.name(), testEntity.name(),
         testEntity.getId()));
-    JsonObject catJSON = new JsonObject(getSample(testEntity.getSampleFileName()));
+    JsonObject catJSON = new JsonObject(getFile(testEntity.getSampleFileName()));
     catJSON.put("id", testEntity.getId());
     catJSON.put(testEntity.getUpdatedFieldName(), testEntity.getUpdatedFieldValue());
     testEntityEdit(testEntity.getEndpointWithId(), catJSON.toString(), testEntity.getId());
@@ -162,7 +162,7 @@ public class EntitiesCrudTest extends TestBase {
   @MethodSource("createFailOrder")
   public void testPostFailsOnForeignKeyDependencies(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Creating %s ... fails", testEntity.name(), testEntity.name()));
-    sample = getSample(testEntity.getSampleFileName());
+    sample = getFile(testEntity.getSampleFileName());
     Response response = postData(testEntity.getEndpoint(), sample);
     response.then()
       .statusCode(400);
@@ -208,10 +208,6 @@ public class EntitiesCrudTest extends TestBase {
   public void testGetEntitiesWithInvalidCQLQuery(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Invalid CQL query", testEntity.name()));
     testInvalidCQLQuery(testEntity.getEndpoint() + "?query=invalid-query");
-  }
-
-  private String getSample(String fileName) {
-    return getFile(fileName);
   }
 
   private JsonObject convertToMatchingModelJson(String sample, TestEntities testEntity) {

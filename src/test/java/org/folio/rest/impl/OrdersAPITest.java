@@ -143,7 +143,9 @@ public class OrdersAPITest extends TestBase {
     } finally {
       logger.info("--- mod-orders-storage orders test: Clean-up PO lines, orders and acq units...");
       // PO lines and PO
+      deleteTitles(poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
+      deleteTitles(poLineSampleId2);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);

@@ -3,27 +3,35 @@ package org.folio.rest.impl;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
-
-import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
-import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PIECE;
+import static org.folio.rest.utils.TestEntities.PO_LINE;
+import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
+import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import io.restassured.http.Header;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-import org.folio.rest.jaxrs.model.*;
+import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.ReceivingHistory;
+import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
+import org.folio.rest.jaxrs.model.TitleCollection;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import io.restassured.http.Header;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 
 public class ReceivingHistoryTest extends TestBase {
@@ -110,6 +118,7 @@ public class ReceivingHistoryTest extends TestBase {
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
+      deleteTitles(poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
@@ -178,7 +187,7 @@ public class ReceivingHistoryTest extends TestBase {
     assertEquals(piece.getItemId(), receivingHistory.getItemId());
     assertEquals(piece.getLocationId(), receivingHistory.getLocationId());
     assertEquals(piece.getSupplement(), receivingHistory.getSupplement());
-    assertEquals(poLine.getTitle(), receivingHistory.getTitle());
+    assertEquals(poLine.getTitleOrPackage(), receivingHistory.getTitle());
     assertEquals(piece.getPoLineId(), receivingHistory.getPoLineId());
     assertEquals(poLine.getPoLineNumber(), receivingHistory.getPoLineNumber());
     assertEquals(poLine.getDetails().getReceivingNote(), receivingHistory.getReceivingNote());

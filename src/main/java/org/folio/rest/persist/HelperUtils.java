@@ -1,24 +1,29 @@
 package org.folio.rest.persist;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import static org.folio.rest.persist.PgUtil.response;
 
-import org.folio.rest.persist.Criteria.Criteria;
-import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.cql.CQLQueryValidationException;
-import org.folio.rest.persist.interfaces.Results;
-
-import javax.ws.rs.core.Response;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.folio.rest.persist.PgUtil.response;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+
+import org.folio.rest.persist.Criteria.Criteria;
+import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.rest.persist.cql.CQLQueryValidationException;
+import org.folio.rest.persist.interfaces.Results;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class HelperUtils {
   private static final Logger log = LoggerFactory.getLogger(HelperUtils.class);
@@ -62,6 +67,15 @@ public class HelperUtils {
     return new Criterion(a);
   }
 
+  public static Criterion getCriteriaByFieldNameAndValueNotJsonb(String fieldName, String fieldValue) {
+    Criteria a = new Criteria();
+    a.addField(fieldName);
+    a.setOperation("=");
+    a.setVal(fieldValue);
+    a.setJSONB(false);
+    return new Criterion(a);
+  }
+
   private static <T, E> void processDbReply(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, Handler<AsyncResult<Response>> asyncResultHandler, Method respond500, Method respond400, AsyncResult<Results<T>> reply) {
     try {
       Method respond200 = entitiesMetadataHolder.getRespond200WithApplicationJson();
@@ -101,6 +115,46 @@ public class HelperUtils {
       asyncResultHandler.handle(response(e.getMessage(), null, null));
       return null;
     }
+  }
+
+  public static <T> Future<Tx<T>> startTx(Tx<T> tx) {
+    Promise<Tx<T>> promise = Promise.promise();
+
+    tx.getPgClient().startTx(sqlConnection -> {
+      tx.setConnection(sqlConnection);
+      promise.complete(tx);
+    });
+    return promise.future();
+  }
+
+  public static <T> Future<Tx<T>> endTx(Tx<T> tx) {
+    Promise<Tx<T>> promise = Promise.promise();
+    tx.getPgClient().endTx(tx.getConnection(), v -> promise.complete(tx));
+    return promise.future();
+  }
+
+  public static Future<Void> rollbackTransaction(Tx<?> tx) {
+    Promise<Void> promise = Promise.promise();
+    if (tx.getConnection().failed()) {
+      promise.fail(tx.getConnection().cause());
+    } else {
+      tx.getPgClient().rollbackTx(tx.getConnection(), promise);
+    }
+    return promise.future();
+  }
+
+  public static void handleFailure(Promise promise, AsyncResult reply) {
+    Throwable cause = reply.cause();
+    String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
+    if (badRequestMessage != null) {
+      promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+    } else {
+      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
+    }
+  }
+
+  public static String getEndpoint(Class<?> clazz) {
+    return clazz.getAnnotation(Path.class).value();
   }
 
   public enum SequenceQuery {

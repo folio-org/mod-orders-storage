@@ -53,7 +53,6 @@
       "value": 100.0
     }
   ],
-  "instanceId": "5bf370e0-8cca-4d9c-82e4-5170ab2a0a39",
   "locations": [
     {
       "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
@@ -88,7 +87,7 @@
   "tags": {
         "tagList": []
   },
-  "title": "A semantic web primer",
+  "titleOrPackage": "A semantic web primer",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

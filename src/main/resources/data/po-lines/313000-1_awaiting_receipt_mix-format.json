@@ -69,7 +69,7 @@
       "value": 50.0
     }
   ],
-  "instanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+  "isPackage": true,
   "locations": [
     {
       "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
@@ -119,7 +119,7 @@
        "streaming"
      ]
   },
-  "title": "Interesting Times",
+  "titleOrPackage": "Interesting Times",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

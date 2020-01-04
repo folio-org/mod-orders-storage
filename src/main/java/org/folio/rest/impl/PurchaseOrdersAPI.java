@@ -1,5 +1,27 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.Future.succeededFuture;
+import static org.folio.rest.persist.HelperUtils.handleFailure;
+import static org.folio.rest.persist.HelperUtils.rollbackTransaction;
+import static org.folio.rest.persist.HelperUtils.startTx;
+import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
+import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
+
+import java.util.Map;
+import java.util.UUID;
+
+import javax.ws.rs.core.Response;
+
+import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
+import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
+import org.folio.rest.persist.HelperUtils;
+import org.folio.rest.persist.PgExceptionUtil;
+import org.folio.rest.persist.PgUtil;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.Tx;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -8,23 +30,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.sql.SQLConnection;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
-import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
-import org.folio.rest.persist.PgExceptionUtil;
-import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.PostgresClient;
-
-import javax.ws.rs.core.Response;
-import java.util.Map;
-import java.util.UUID;
-
-import static io.vertx.core.Future.succeededFuture;
-import static org.folio.rest.persist.HelperUtils.SequenceQuery.CREATE_SEQUENCE;
-import static org.folio.rest.persist.HelperUtils.SequenceQuery.DROP_SEQUENCE;
 
 public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
@@ -55,11 +61,11 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
       vertxContext.runOnContext(v -> {
         log.debug("Creating a new purchase order");
 
-        Future.succeededFuture(new Tx<>(entity))
-          .compose(this::startTx)
+        Future.succeededFuture(new Tx<>(entity, pgClient))
+          .compose(HelperUtils::startTx)
           .compose(this::createPurchaseOrder)
           .compose(this::createSequence)
-          .compose(this::endTx)
+          .compose(HelperUtils::endTx)
           .setHandler(reply -> {
             if (reply.failed()) {
               HttpStatusException cause = (HttpStatusException) reply.cause();
@@ -95,11 +101,11 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
   public void deleteOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
-      Tx<String> tx = new Tx<>(id);
+      Tx<String> tx = new Tx<>(id, pgClient);
       startTx(tx)
         .compose(this::deletePolNumberSequence)
         .compose(this::deleteOrderById)
-        .compose(this::endTx)
+        .compose(HelperUtils::endTx)
         .setHandler(result -> {
           if (result.failed()) {
             HttpStatusException cause = (HttpStatusException) result.cause();
@@ -207,25 +213,6 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     return promise.future();
   }
 
-  private <T> Future<Tx<T>> startTx(Tx<T> tx) {
-    Promise<Tx<T>> promise = Promise.promise();
-
-    log.debug("Start transaction");
-
-    pgClient.startTx(sqlConnection -> {
-      tx.setConnection(sqlConnection);
-      promise.complete(tx);
-    });
-    return promise.future();
-  }
-
-  private <T> Future<Tx<T>> endTx(Tx<T> tx) {
-    log.debug("End transaction");
-    Promise<Tx<T>> promise = Promise.promise();
-    pgClient.endTx(tx.getConnection(), v -> promise.complete(tx));
-    return promise.future();
-  }
-
   private Future<Tx<String>> deletePolNumberSequence(Tx<String> tx) {
     log.info("POL number sequence by PO id={}", tx.getEntity());
 
@@ -261,45 +248,4 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     return promise.future();
   }
 
-  private void handleFailure(Promise promise, AsyncResult reply) {
-    String badRequestMessage = PgExceptionUtil.badRequestMessage(reply.cause());
-    if (badRequestMessage != null) {
-      promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
-    } else {
-      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause()
-        .getMessage()));
-    }
-  }
-
-  private Future<Void> rollbackTransaction(Tx<?> tx) {
-    Promise<Void> promise = Promise.promise();
-    if (tx.getConnection().failed()) {
-      promise.fail(tx.getConnection().cause());
-    } else {
-      pgClient.rollbackTx(tx.getConnection(), promise.future());
-    }
-    return promise.future();
-  }
-
-  public class Tx<T> {
-
-    private T entity;
-    private AsyncResult<SQLConnection> sqlConnection;
-
-    Tx(T entity) {
-      this.entity = entity;
-    }
-
-    public T getEntity() {
-      return entity;
-    }
-
-    AsyncResult<SQLConnection> getConnection() {
-      return sqlConnection;
-    }
-
-    void setConnection(AsyncResult<SQLConnection> sqlConnection) {
-      this.sqlConnection = sqlConnection;
-    }
-  }
 }
