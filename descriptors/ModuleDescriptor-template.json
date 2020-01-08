@@ -65,6 +65,37 @@
       ]
     },
     {
+      "id": "orders-storage.titles",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/titles",
+          "permissionsRequired": ["orders-storage.titles.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/titles",
+          "permissionsRequired": ["orders-storage.titles.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/titles/{id}",
+          "permissionsRequired": ["orders-storage.titles.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/titles/{id}",
+          "permissionsRequired": ["orders-storage.titles.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/titles/{id}",
+          "permissionsRequired": ["orders-storage.titles.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "orders-storage.po-lines",
       "version": "8.0",
       "handlers": [
@@ -412,6 +443,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.titles.collection.get",
+      "displayName" : "orders-storage.titles-collection get",
+      "description" : "Get a collection of titles"
+    },
+    {
+      "permissionName" : "orders-storage.titles.item.post",
+      "displayName" : "orders-storage.titles-item post",
+      "description" : "Create a new title"
+    },
+    {
+      "permissionName" : "orders-storage.titles.item.get",
+      "displayName" : "orders-storage.titles-item get",
+      "description" : "Fetch a title"
+    },
+    {
+      "permissionName" : "orders-storage.titles.item.put",
+      "displayName" : "orders-storage.titles-item put",
+      "description" : "Update a title"
+    },
+    {
+      "permissionName" : "orders-storage.titles.item.delete",
+      "displayName" : "orders-storage.titles-item delete",
+      "description" : "Delete a title"
+    },
+    {
+      "permissionName" : "orders-storage.titles.all",
+      "displayName" : "All orders-storage titles perms",
+      "description" : "All permissions for the orders-storage-titles",
+      "subPermissions" : [
+        "orders-storage.titles.collection.get",
+        "orders-storage.titles.item.post",
+        "orders-storage.titles.item.get",
+        "orders-storage.titles.item.put",
+        "orders-storage.titles.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.po-lines.collection.get",
       "displayName" : "po-line-collection get",
       "description" : "Get a collection of po-lines"
@@ -716,6 +784,7 @@
       "subPermissions" : [
         "orders-storage.alerts.all",
         "orders-storage.pieces.all",
+        "orders-storage.titles.all",
         "orders-storage.po-lines.all",
         "orders-storage.po-number.all",
         "orders-storage.po-line-number.all",

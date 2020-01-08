@@ -371,6 +371,26 @@
            "fieldName" : "templateName"
          }
        ]
-     }
+     },
+    {
+      "tableName": "titles",
+      "fromModuleVersion": 8.0,
+      "withMetadata": false,
+      "foreignKeys": [
+        {
+          "fieldName": "poLineId",
+          "targetTable":      "po_line",
+          "targetTableAlias": "poLine",
+          "tableAlias": "titles",
+          "tOps": "ADD"
+        },
+        {
+          "targetPath": ["poLineId", "purchaseOrderId"],
+          "targetTable":      "purchase_order",
+          "targetTableAlias": "purchaseOrder",
+          "tableAlias": "titles"
+        }
+      ]
+    }
   ]
 }

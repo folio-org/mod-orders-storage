@@ -187,7 +187,6 @@ public class ReceivingHistoryTest extends TestBase {
     assertEquals(piece.getFormat().value(), receivingHistory.getPieceFormat().value());
     assertEquals(poLine.getReceiptStatus().value(), receivingHistory.getPoLineReceiptStatus().value());
     assertEquals(poLine.getCheckinItems(), receivingHistory.getCheckin());
-    assertEquals(poLine.getInstanceId(), receivingHistory.getInstanceId());
   }
 
 }
