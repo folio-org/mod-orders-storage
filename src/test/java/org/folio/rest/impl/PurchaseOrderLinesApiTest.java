@@ -1,13 +1,24 @@
 package org.folio.rest.impl;
 
 import io.restassured.response.Response;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.sql.SQLConnection;
+import mockit.Expectations;
+import mockit.Mock;
+import mockit.MockUp;
+import mockit.Mocked;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
+import org.folio.rest.persist.PgUtil;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.Tx;
+import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.Test;
 
@@ -116,6 +127,25 @@ public class PurchaseOrderLinesApiTest extends TestBase {
       .then()
       .statusCode(404)
       .content(containsString(javax.ws.rs.core.Response.Status.NOT_FOUND.getReasonPhrase()));
+
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
+  }
+
+  @Test
+  public void testNonPackagePoLineUpdateWithNonExistentPurchaseOrderId() throws MalformedURLException {
+    logger.info("--- mod-orders-storage orders test: non-package PoLine update fails if set non-existent purchaseOrderId");
+
+    JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
+    JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
+
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString()).then().statusCode(201);
+    postData(PO_LINE.getEndpoint(), jsonLine.toString()).then().statusCode(201);
+
+    jsonLine.put("purchaseOrderId", NON_EXISTED_ID);
+    putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString())
+      .then()
+      .statusCode(400)
+      .content(containsString(NON_EXISTED_ID));
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
   }

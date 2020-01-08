@@ -30,8 +30,4 @@ public class Tx<T> {
     this.sqlConnection = sqlConnection;
   }
 
-  public Tx<T> withConnection(AsyncResult<SQLConnection> sqlConnection) {
-    this.sqlConnection = sqlConnection;
-    return this;
-  }
 }

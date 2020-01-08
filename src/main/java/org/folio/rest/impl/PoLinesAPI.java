@@ -1,9 +1,11 @@
 package org.folio.rest.impl;
 
-import static io.vertx.core.Future.succeededFuture;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.METADATA;
+import static org.folio.rest.persist.HelperUtils.buildErrorResponse;
+import static org.folio.rest.persist.HelperUtils.buildNoContentResponse;
+import static org.folio.rest.persist.HelperUtils.buildResponseWithLocation;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
 import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
@@ -43,7 +45,7 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
 public class PoLinesAPI implements OrdersStoragePoLines {
   private static final Logger log = LoggerFactory.getLogger(PoLinesAPI.class);
 
-  private static final String POLINE_TABLE = "po_line";
+  static final String POLINE_TABLE = "po_line";
   private static final String PO_LINES_VIEW = "po_lines_view";
   private static final String POLINE_ID_FIELD = "poLineId";
 
@@ -70,7 +72,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
   @Validate
   public void postOrdersStoragePoLines(String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    if (poLine.getIsPackage()) {
+    if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       PgUtil.post(POLINE_TABLE, poLine, okapiHeaders, vertxContext, PostOrdersStoragePoLinesResponse.class, asyncResultHandler);
     } else {
       createPoLineWithTitle(poLine, asyncResultHandler);
@@ -89,46 +91,28 @@ public class PoLinesAPI implements OrdersStoragePoLines {
             log.error("POLine {} or associated data failed to be created", cause, tx.getEntity());
 
             // The result of rollback operation is not so important, main failure cause is used to build the response
-            rollbackTransaction(tx).setHandler(res -> {
-              if (cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
-                asyncResultHandler
-                  .handle(succeededFuture(PostOrdersStoragePoLinesResponse.respond400WithTextPlain(cause.getPayload())));
-              } else {
-                asyncResultHandler.handle(succeededFuture(PostOrdersStoragePoLinesResponse
-                  .respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
-              }
-            });
+            rollbackTransaction(tx).setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
           } else {
             log.info("POLine {} and associated data were successfully created", tx.getEntity());
-            asyncResultHandler.handle(succeededFuture(PostOrdersStoragePoLinesResponse.respond201WithApplicationJson(result.result()
-              .getEntity(),
-                PostOrdersStoragePoLinesResponse.headersFor201()
-                  .withLocation(HelperUtils.getEndpoint(OrdersStoragePoLines.class) + result.result()
-                    .getEntity()
-                    .getId()))));
+            String endpoint = HelperUtils.getEndpoint(OrdersStoragePoLines.class) + result.result()
+              .getEntity()
+              .getId();
+            asyncResultHandler.handle(buildResponseWithLocation(result.result()
+              .getEntity(), endpoint));
           }
         });
     } catch (Exception e) {
-      asyncResultHandler.handle(Future.succeededFuture(
-          PostOrdersStoragePoLinesResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
+      asyncResultHandler.handle(buildErrorResponse(e));
     }
   }
 
   private Future<Tx<PoLine>> createTitle(Tx<PoLine> poLineTx) {
-    Promise<Tx<PoLine>> promise = Promise.promise();
-
     Title title = createTitleObject(poLineTx.getEntity());
 
     log.debug("Creating new title record with id={}", title.getId());
 
-    pgClient.save(poLineTx.getConnection(), TITLES_TABLE, title.getId(), title, reply -> {
-      if (reply.failed()) {
-        HelperUtils.handleFailure(promise, reply);
-      } else {
-        promise.complete(poLineTx);
-      }
-    });
-    return promise.future();
+    return save(poLineTx, title.getId(), title, TITLES_TABLE);
+
   }
 
   private Title createTitleObject(PoLine poLine) {
@@ -144,22 +128,25 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     return title;
   }
 
-  private Future<Tx<PoLine>> createPoLine(Tx<PoLine> poLineTx) {
-    Promise<Tx<PoLine>> promise = Promise.promise();
-
+  Future<Tx<PoLine>> createPoLine(Tx<PoLine> poLineTx) {
     PoLine poLine = poLineTx.getEntity();
     if (poLine.getId() == null) {
       poLine.setId(UUID.randomUUID()
         .toString());
     }
-
     log.debug("Creating new poLine record with id={}", poLine.getId());
 
-    pgClient.save(poLineTx.getConnection(), POLINE_TABLE, poLine.getId(), poLine, reply -> {
+    return save(poLineTx, poLine.getId(), poLine, POLINE_TABLE);
+
+  }
+
+  public <T> Future<Tx<T>> save(Tx<T> tx, String id, Object entity, String table) {
+    Promise<Tx<T>> promise = Promise.promise();
+    tx.getPgClient().save(tx.getConnection(), table, id, entity, reply -> {
       if (reply.failed()) {
         HelperUtils.handleFailure(promise, reply);
       } else {
-        promise.complete(poLineTx);
+        promise.complete(tx);
       }
     });
     return promise.future();
@@ -191,27 +178,15 @@ public class PoLinesAPI implements OrdersStoragePoLines {
               log.error("POLine {} or associated data failed to be deleted", cause, tx.getEntity());
 
               // The result of rollback operation is not so important, main failure cause is used to build the response
-              rollbackTransaction(tx).setHandler(res -> {
-                if (cause.getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
-                  asyncResultHandler.handle(succeededFuture(
-                      DeleteOrdersStoragePoLinesByIdResponse.respond404WithTextPlain(Response.Status.NOT_FOUND.getReasonPhrase())));
-                } else if (cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
-                  asyncResultHandler
-                    .handle(succeededFuture(DeleteOrdersStoragePoLinesByIdResponse.respond400WithTextPlain(cause.getPayload())));
-                } else {
-                  asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePoLinesByIdResponse
-                    .respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
-                }
-              });
+              rollbackTransaction(tx).setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
             } else {
               log.info("POLine {} and associated data were successfully deleted", tx.getEntity());
-              asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePoLinesByIdResponse.respond204()));
+              asyncResultHandler.handle(buildNoContentResponse());
             }
           });
       });
     } catch (Exception e) {
-      asyncResultHandler.handle(Future.succeededFuture(
-          DeleteOrdersStoragePoLinesByIdResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
+      asyncResultHandler.handle(buildErrorResponse(e));
     }
   }
 
@@ -219,51 +194,43 @@ public class PoLinesAPI implements OrdersStoragePoLines {
   @Validate
   public void putOrdersStoragePoLinesById(String id, String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    if (poLine.getIsPackage()) {
+    if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       PgUtil.put(POLINE_TABLE, poLine, id, okapiHeaders, vertxContext, PutOrdersStoragePoLinesByIdResponse.class,
           asyncResultHandler);
     } else {
-      try {
-        Tx<PoLine> tx = new Tx<>(poLine, pgClient);
-        poLine.setId(id);
-        startTx(tx).compose(this::updatePoLine)
-          .compose(this::updateOrCreateTitle)
-          .compose(HelperUtils::endTx)
-          .setHandler(result -> {
-            if (result.failed()) {
-              HttpStatusException cause = (HttpStatusException) result.cause();
-              log.error("POLine {} or associated data failed to be updated", cause, tx.getEntity());
-
-              // The result of rollback operation is not so important, main failure cause is used to build the response
-              rollbackTransaction(tx).setHandler(res -> {
-                if (cause.getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
-                  asyncResultHandler.handle(succeededFuture(
-                      PutOrdersStoragePoLinesByIdResponse.respond404WithTextPlain(Response.Status.NOT_FOUND.getReasonPhrase())));
-                } else if (cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
-                  asyncResultHandler
-                    .handle(succeededFuture(PutOrdersStoragePoLinesByIdResponse.respond400WithTextPlain(cause.getPayload())));
-                } else {
-                  asyncResultHandler.handle(succeededFuture(PutOrdersStoragePoLinesByIdResponse
-                    .respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
-                }
-              });
-            } else {
-              log.info("POLine {} and associated data were successfully created", tx.getEntity());
-              asyncResultHandler.handle(succeededFuture(PutOrdersStoragePoLinesByIdResponse.respond204()));
-            }
-          });
-      } catch (Exception e) {
-        asyncResultHandler.handle(Future.succeededFuture(
-          PutOrdersStoragePoLinesByIdResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
-      }
+      updatePoLineWithTitle(id, poLine, asyncResultHandler);
     }
   }
 
-  private Future<Tx<PoLine>> updateOrCreateTitle(Tx<PoLine> poLineTx) {
+  private void updatePoLineWithTitle(String id, PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler) {
+    try {
+      Tx<PoLine> tx = new Tx<>(poLine, pgClient);
+      poLine.setId(id);
+      startTx(tx).compose(this::updatePoLine)
+        .compose(this::updateTitle)
+        .compose(HelperUtils::endTx)
+        .setHandler(result -> {
+          if (result.failed()) {
+            HttpStatusException cause = (HttpStatusException) result.cause();
+            log.error("POLine {} or associated data failed to be updated", cause, tx.getEntity());
+
+            // The result of rollback operation is not so important, main failure cause is used to build the response
+            rollbackTransaction(tx).setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
+          } else {
+            log.info("POLine {} and associated data were successfully updated", tx.getEntity());
+            asyncResultHandler.handle(buildNoContentResponse());
+          }
+        });
+    } catch (Exception e) {
+      asyncResultHandler.handle(buildErrorResponse(e));
+    }
+  }
+
+  private Future<Tx<PoLine>> updateTitle(Tx<PoLine> poLineTx) {
     Promise<Tx<PoLine>> promise = Promise.promise();
     PoLine poLine = poLineTx.getEntity();
 
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb("poLineId", poLine.getId());
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
     Title title = createTitleObject(poLine);
     title.setId(null);
     poLineTx.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, title, "jsonb", criterion.toString(), false, event -> {

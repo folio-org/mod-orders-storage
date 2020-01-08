@@ -1,6 +1,8 @@
 package org.folio.rest.impl;
 
-import static io.vertx.core.Future.succeededFuture;
+import static org.folio.rest.persist.HelperUtils.buildErrorResponse;
+import static org.folio.rest.persist.HelperUtils.buildNoContentResponse;
+import static org.folio.rest.persist.HelperUtils.buildResponseWithLocation;
 import static org.folio.rest.persist.HelperUtils.handleFailure;
 import static org.folio.rest.persist.HelperUtils.rollbackTransaction;
 import static org.folio.rest.persist.HelperUtils.startTx;
@@ -17,7 +19,6 @@ import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.HelperUtils;
-import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
@@ -36,7 +37,6 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
   private static final String PURCHASE_ORDER_TABLE = "purchase_order";
-  private static final String PURCHASE_ORDER_LOCATION_PREFIX = "/orders-storage/purchase-orders/";
   private PostgresClient pgClient;
 
 
@@ -68,24 +68,19 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
           .compose(HelperUtils::endTx)
           .setHandler(reply -> {
             if (reply.failed()) {
-              HttpStatusException cause = (HttpStatusException) reply.cause();
-              if(cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
-                asyncResultHandler.handle(Future.succeededFuture(PostOrdersStoragePurchaseOrdersResponse.respond400WithTextPlain(cause.getPayload())));
-              } else if(cause.getStatusCode() == Response.Status.UNAUTHORIZED.getStatusCode()) {
-                asyncResultHandler.handle(Future.succeededFuture(PostOrdersStoragePurchaseOrdersResponse.respond401WithTextPlain(cause.getPayload())));
-              } else {
-                asyncResultHandler.handle(Future.succeededFuture(PostOrdersStoragePurchaseOrdersResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
-              }
+              asyncResultHandler.handle(buildErrorResponse(reply.cause()));
             } else {
               log.debug("Preparing response to client");
-              asyncResultHandler.handle(Future.succeededFuture(PostOrdersStoragePurchaseOrdersResponse
-                .respond201WithApplicationJson(reply.result().getEntity(), PostOrdersStoragePurchaseOrdersResponse.headersFor201()
-                  .withLocation(PURCHASE_ORDER_LOCATION_PREFIX + reply.result().getEntity().getId()))));
+              String endpoint = HelperUtils.getEndpoint(OrdersStoragePurchaseOrders.class) + reply.result()
+                .getEntity()
+                .getId();
+              asyncResultHandler.handle(buildResponseWithLocation(reply.result()
+                .getEntity(), endpoint));
             }
           });
       });
     } catch (Exception e) {
-      asyncResultHandler.handle(Future.succeededFuture(PostOrdersStoragePurchaseOrdersResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
+      asyncResultHandler.handle(buildErrorResponse(e));
     }
   }
 
@@ -112,26 +107,14 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
             log.error("Order {} or associated data failed to be deleted", cause, tx.getEntity());
 
             // The result of rollback operation is not so important, main failure cause is used to build the response
-            rollbackTransaction(tx).setHandler(res -> {
-              if (cause.getStatusCode() == Response.Status.NOT_FOUND.getStatusCode()) {
-                asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse
-                  .respond404WithTextPlain(Response.Status.NOT_FOUND.getReasonPhrase())));
-              } else if (cause.getStatusCode() == Response.Status.BAD_REQUEST.getStatusCode()) {
-                asyncResultHandler.handle(
-                    succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse.respond400WithTextPlain(cause.getPayload())));
-              } else {
-                asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse
-                  .respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
-              }
-            });
+            rollbackTransaction(tx).setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
           } else {
             log.info("Order {} and associated data were successfully deleted", tx.getEntity());
-            asyncResultHandler.handle(succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse.respond204()));
+            asyncResultHandler.handle(buildNoContentResponse());
           }
         });
     } catch (Exception e) {
-      asyncResultHandler.handle(Future.succeededFuture(DeleteOrdersStoragePurchaseOrdersByIdResponse
-        .respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
+      asyncResultHandler.handle(buildErrorResponse(e));
     }
   }
 
@@ -146,7 +129,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
         }
       });
     } catch (Exception e) {
-      asyncResultHandler.handle(Future.succeededFuture(PutOrdersStoragePurchaseOrdersByIdResponse.respond500WithTextPlain(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase())));
+      asyncResultHandler.handle(buildErrorResponse(e));
     }
   }
 
@@ -197,14 +180,7 @@ public class PurchaseOrdersAPI implements OrdersStoragePurchaseOrders {
     pgClient.save(tx.getConnection(), PURCHASE_ORDER_TABLE, order.getId(), order, reply -> {
       if(reply.failed()) {
         log.error("Purchase order creation with id={} failed", reply.cause(), order.getId());
-        pgClient.rollbackTx(tx.getConnection(), rb -> {
-          String badRequestMessage = PgExceptionUtil.badRequestMessage(reply.cause());
-          if (badRequestMessage != null) {
-            promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
-          } else {
-            promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), reply.cause().getMessage()));
-          }
-        });
+        pgClient.rollbackTx(tx.getConnection(), rb -> handleFailure(promise, reply));
       } else {
         log.debug("New order with id={} successfully created", order.getId());
         promise.complete(tx);
