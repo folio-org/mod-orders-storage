@@ -27,8 +27,8 @@ public class Tx<T> {
   public Future<Tx<T>> startTx() {
     Promise<Tx<T>> promise = Promise.promise();
 
-    pgClient.startTx(sqlConnection -> {
-      this.sqlConnection = sqlConnection;
+    pgClient.startTx(connectionAsyncResult -> {
+      this.sqlConnection = connectionAsyncResult;
       promise.complete(this);
     });
 
