@@ -3,15 +3,9 @@ package org.folio.rest.impl;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.METADATA;
-import static org.folio.rest.persist.HelperUtils.buildErrorResponse;
-import static org.folio.rest.persist.HelperUtils.buildNoContentResponse;
-import static org.folio.rest.persist.HelperUtils.buildResponseWithLocation;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
 import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
-import static org.folio.rest.persist.HelperUtils.handleFailure;
-import static org.folio.rest.persist.HelperUtils.rollbackTransaction;
-import static org.folio.rest.persist.HelperUtils.startTx;
 
 import java.util.Map;
 import java.util.Objects;
@@ -38,21 +32,17 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
-public class PoLinesAPI implements OrdersStoragePoLines {
-  private static final Logger log = LoggerFactory.getLogger(PoLinesAPI.class);
+public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLines {
 
   static final String POLINE_TABLE = "po_line";
   private static final String PO_LINES_VIEW = "po_lines_view";
   private static final String POLINE_ID_FIELD = "poLineId";
 
-  private PostgresClient pgClient;
-
   public PoLinesAPI(Vertx vertx, String tenantId) {
-    pgClient = PostgresClient.getInstance(vertx, tenantId);
+    super(PostgresClient.getInstance(vertx, tenantId));
   }
 
   @Override
@@ -81,26 +71,11 @@ public class PoLinesAPI implements OrdersStoragePoLines {
 
   private void createPoLineWithTitle(PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler) {
     try {
-      Tx<PoLine> tx = new Tx<>(poLine, pgClient);
-      startTx(tx).compose(this::createPoLine)
+      Tx<PoLine> tx = new Tx<>(poLine, getPgClient());
+      tx.startTx().compose(this::createPoLine)
         .compose(this::createTitle)
-        .compose(HelperUtils::endTx)
-        .setHandler(result -> {
-          if (result.failed()) {
-            HttpStatusException cause = (HttpStatusException) result.cause();
-            log.error("POLine {} or associated data failed to be created", cause, tx.getEntity());
-
-            // The result of rollback operation is not so important, main failure cause is used to build the response
-            rollbackTransaction(tx).setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
-          } else {
-            log.info("POLine {} and associated data were successfully created", tx.getEntity());
-            String endpoint = HelperUtils.getEndpoint(OrdersStoragePoLines.class) + result.result()
-              .getEntity()
-              .getId();
-            asyncResultHandler.handle(buildResponseWithLocation(result.result()
-              .getEntity(), endpoint));
-          }
-        });
+        .compose(Tx::endTx)
+        .setHandler(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -109,7 +84,7 @@ public class PoLinesAPI implements OrdersStoragePoLines {
   private Future<Tx<PoLine>> createTitle(Tx<PoLine> poLineTx) {
     Title title = createTitleObject(poLineTx.getEntity());
 
-    log.debug("Creating new title record with id={}", title.getId());
+    logger.debug("Creating new title record with id={}", title.getId());
 
     return save(poLineTx, title.getId(), title, TITLES_TABLE);
 
@@ -134,22 +109,10 @@ public class PoLinesAPI implements OrdersStoragePoLines {
       poLine.setId(UUID.randomUUID()
         .toString());
     }
-    log.debug("Creating new poLine record with id={}", poLine.getId());
+    logger.debug("Creating new poLine record with id={}", poLine.getId());
 
     return save(poLineTx, poLine.getId(), poLine, POLINE_TABLE);
 
-  }
-
-  public <T> Future<Tx<T>> save(Tx<T> tx, String id, Object entity, String table) {
-    Promise<Tx<T>> promise = Promise.promise();
-    tx.getPgClient().save(tx.getConnection(), table, id, entity, reply -> {
-      if (reply.failed()) {
-        HelperUtils.handleFailure(promise, reply);
-      } else {
-        promise.complete(tx);
-      }
-    });
-    return promise.future();
   }
 
   @Override
@@ -166,24 +129,13 @@ public class PoLinesAPI implements OrdersStoragePoLines {
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       vertxContext.runOnContext(v -> {
-        Tx<String> tx = new Tx<>(id, pgClient);
-        log.info("Delete POLine");
-        startTx(tx)
+        Tx<String> tx = new Tx<>(id, getPgClient());
+        logger.info("Delete POLine");
+        tx.startTx()
           .compose(this::deletePiecesByPOLineId)
           .compose(this::deletePOLineById)
-          .compose(HelperUtils::endTx)
-          .setHandler(result -> {
-            if (result.failed()) {
-              HttpStatusException cause = (HttpStatusException) result.cause();
-              log.error("POLine {} or associated data failed to be deleted", cause, tx.getEntity());
-
-              // The result of rollback operation is not so important, main failure cause is used to build the response
-              rollbackTransaction(tx).setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
-            } else {
-              log.info("POLine {} and associated data were successfully deleted", tx.getEntity());
-              asyncResultHandler.handle(buildNoContentResponse());
-            }
-          });
+          .compose(Tx::endTx)
+          .setHandler(handleNoContentResponse(asyncResultHandler, tx, "POLine {} {} deleted"));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -204,23 +156,12 @@ public class PoLinesAPI implements OrdersStoragePoLines {
 
   private void updatePoLineWithTitle(String id, PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler) {
     try {
-      Tx<PoLine> tx = new Tx<>(poLine, pgClient);
+      Tx<PoLine> tx = new Tx<>(poLine, getPgClient());
       poLine.setId(id);
-      startTx(tx).compose(this::updatePoLine)
+      tx.startTx().compose(this::updatePoLine)
         .compose(this::updateTitle)
-        .compose(HelperUtils::endTx)
-        .setHandler(result -> {
-          if (result.failed()) {
-            HttpStatusException cause = (HttpStatusException) result.cause();
-            log.error("POLine {} or associated data failed to be updated", cause, tx.getEntity());
-
-            // The result of rollback operation is not so important, main failure cause is used to build the response
-            rollbackTransaction(tx).setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
-          } else {
-            log.info("POLine {} and associated data were successfully updated", tx.getEntity());
-            asyncResultHandler.handle(buildNoContentResponse());
-          }
-        });
+        .compose(Tx::endTx)
+        .setHandler(handleNoContentResponse(asyncResultHandler, tx, "POLine {} {} updated"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -233,11 +174,11 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
     Title title = createTitleObject(poLine);
     title.setId(null);
-    poLineTx.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, title, "jsonb", criterion.toString(), false, event -> {
+    getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, title, "jsonb", criterion.toString(), false, event -> {
       if (event.failed()) {
-        HelperUtils.handleFailure(promise, event);
+        handleFailure(promise, event);
       } else {
-        log.info("Title record {} was successfully updated", title);
+        logger.info("Title record {} was successfully updated", title);
         promise.complete(poLineTx);
       }
     });
@@ -250,14 +191,14 @@ public class PoLinesAPI implements OrdersStoragePoLines {
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
 
-    poLineTx.getPgClient().update(poLineTx.getConnection(), POLINE_TABLE, poLine, "jsonb", criterion.toString(), true, event -> {
+    getPgClient().update(poLineTx.getConnection(), POLINE_TABLE, poLine, "jsonb", criterion.toString(), true, event -> {
       if (event.failed()) {
-        HelperUtils.handleFailure(promise, event);
+        handleFailure(promise, event);
       } else {
         if (event.result().getUpdated() == 0) {
           promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         }
-        log.info("POLine record {} was successfully updated", poLineTx.getEntity());
+        logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
         promise.complete(poLineTx);
       }
     });
@@ -265,37 +206,21 @@ public class PoLinesAPI implements OrdersStoragePoLines {
   }
 
   private Future<Tx<String>> deletePOLineById(Tx<String> tx) {
-    log.info("Delete POLine with id={}", tx.getEntity());
-
-    Promise<Tx<String>> promise = Promise.promise();
-    Criterion criterion = getCriterionByFieldNameAndValue(ID_FIELD_NAME, tx.getEntity());
-
-    pgClient.delete(tx.getConnection(), POLINE_TABLE, criterion, reply -> {
-      if (reply.failed()) {
-        handleFailure(promise, reply);
-      } else {
-        if (reply.result()
-          .getUpdated() == 0) {
-          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), "POLine not found"));
-        } else {
-          promise.complete(tx);
-        }
-      }
-    });
-    return promise.future();
+    logger.info("Delete POLine with id={}", tx.getEntity());
+    return deleteById(tx, POLINE_TABLE);
   }
 
   private Future<Tx<String>> deletePiecesByPOLineId(Tx<String> tx) {
-    log.info("Delete pieces by POLine id={}", tx.getEntity());
+    logger.info("Delete pieces by POLine id={}", tx.getEntity());
 
     Promise<Tx<String>> promise = Promise.promise();
     Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
 
-    pgClient.delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
+    getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
       if (reply.failed()) {
         handleFailure(promise, reply);
       } else {
-        log.info("{} pieces of POLine with id={} successfully deleted", reply.result()
+        logger.info("{} pieces of POLine with id={} successfully deleted", reply.result()
           .getUpdated(), tx.getEntity());
         promise.complete(tx);
       }
@@ -303,4 +228,8 @@ public class PoLinesAPI implements OrdersStoragePoLines {
     return promise.future();
   }
 
+  @Override
+  String getEndpoint(Object entity) {
+    return HelperUtils.getEndpoint(OrdersStoragePoLines.class) + JsonObject.mapFrom(entity).getString("id");
+  }
 }

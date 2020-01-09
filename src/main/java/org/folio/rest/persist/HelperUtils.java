@@ -1,16 +1,8 @@
 package org.folio.rest.persist;
 
-import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
-import static javax.ws.rs.core.HttpHeaders.LOCATION;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static javax.ws.rs.core.Response.Status.CREATED;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.folio.rest.persist.PgUtil.response;
 
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,8 +11,6 @@ import java.util.regex.Pattern;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import org.apache.http.HttpException;
-import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
@@ -28,12 +18,9 @@ import org.folio.rest.persist.interfaces.Results;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class HelperUtils {
   private static final Logger log = LoggerFactory.getLogger(HelperUtils.class);
@@ -127,75 +114,8 @@ public class HelperUtils {
     }
   }
 
-  public static <T> Future<Tx<T>> startTx(Tx<T> tx) {
-    Promise<Tx<T>> promise = Promise.promise();
-
-    tx.getPgClient().startTx(sqlConnection -> {
-      tx.setConnection(sqlConnection);
-      promise.complete(tx);
-    });
-    return promise.future();
-  }
-
-  public static <T> Future<Tx<T>> endTx(Tx<T> tx) {
-    Promise<Tx<T>> promise = Promise.promise();
-    tx.getPgClient().endTx(tx.getConnection(), v -> promise.complete(tx));
-    return promise.future();
-  }
-
-  public static Future<Void> rollbackTransaction(Tx<?> tx) {
-    Promise<Void> promise = Promise.promise();
-    if (tx.getConnection().failed()) {
-      promise.fail(tx.getConnection().cause());
-    } else {
-      tx.getPgClient().rollbackTx(tx.getConnection(), promise);
-    }
-    return promise.future();
-  }
-
-  public static void handleFailure(Promise promise, AsyncResult reply) {
-    Throwable cause = reply.cause();
-    String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
-    if (badRequestMessage != null) {
-      promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
-    } else {
-      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
-    }
-  }
-
   public static String getEndpoint(Class<?> clazz) {
     return clazz.getAnnotation(Path.class).value();
-  }
-
-  public static Future<Response> buildResponseWithLocation(Object body, String endpoint) {
-    return Future.succeededFuture(Response.created(URI.create(endpoint))
-      .header(CONTENT_TYPE, APPLICATION_JSON).entity(body).build());
-  }
-
-  public static Future<Response> buildNoContentResponse() {
-    return  Future.succeededFuture(Response.noContent().build());
-  }
-
-  public static Future<Response> buildErrorResponse(Throwable throwable) {
-    final String message;
-    final int code;
-
-    if (throwable instanceof HttpStatusException) {
-      code = ((HttpStatusException) throwable).getStatusCode();
-      message =  ((HttpStatusException) throwable).getPayload();
-    } else {
-      code = INTERNAL_SERVER_ERROR.getStatusCode();
-      message =  throwable.getMessage();
-    }
-
-    return Future.succeededFuture(buildErrorResponse(code, message));
-  }
-
-  private static Response buildErrorResponse(int code, String message) {
-    return Response.status(code)
-      .header(CONTENT_TYPE, TEXT_PLAIN)
-      .entity(message)
-      .build();
   }
 
   public enum SequenceQuery {
