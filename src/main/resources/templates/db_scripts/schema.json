@@ -369,7 +369,7 @@
      },
     {
       "tableName": "titles",
-      "fromModuleVersion": "mod-orders-storage-9.0.0",
+      "fromModuleVersion": "mod-orders-storage-9.1.0",
       "withMetadata": false,
       "foreignKeys": [
         {
