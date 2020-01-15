@@ -85,7 +85,7 @@ public abstract class AbstractApiHandler {
         // The result of rollback operation is not so important, main failure cause is used to build the response
         tx.rollbackTransaction().setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
       } else {
-        logger.info(logMessage, tx.getEntity(), "and associated data were successfully updated");
+        logger.info(logMessage, tx.getEntity(), "and associated data were successfully");
         asyncResultHandler.handle(buildNoContentResponse());
       }
     };
