@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
@@ -82,7 +83,10 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     poLine.setDetails(null);
     poLine.setTitleOrPackage(newTitle);
     poLine.setMetadata(null);
+    String instanceId = UUID.randomUUID().toString();
 
+    titleBefore.setInstanceId(instanceId);
+    putData(TITLES.getEndpointWithId(), titleBefore.getId(), JsonObject.mapFrom(titleBefore).encode()).then().statusCode(204);
     putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode()).then().statusCode(204);
 
     titleCollection = getDataByParam(TITLES.getEndpoint(), params)
@@ -96,6 +100,8 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertThat(titleAfter.getPoLineId(), is(poLine.getId()));
     assertThat(titleAfter.getProductIds(), hasSize(0));
     assertThat(titleAfter.getTitle(), is(newTitle));
+    assertThat(titleAfter.getInstanceId(), is(instanceId));
+
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
     deleteData(PO_LINE.getEndpointWithId(), poLine.getId());
@@ -148,6 +154,58 @@ public class PurchaseOrderLinesApiTest extends TestBase {
       .content(containsString(NON_EXISTED_ID));
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
+  }
+
+  @Test
+  public void testUpdateNonPackagePoLineWithoutTitle() throws MalformedURLException {
+    logger.info("--- mod-orders-storage orders test: update non-package PoLine without title must create title");
+    JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
+    JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
+
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString()).then().statusCode(201);
+    Response response = postData(PO_LINE.getEndpoint(), jsonLine.toString());
+    PoLine poLine = response.then()
+      .statusCode(201)
+      .extract().as(PoLine.class);
+    Map<String, Object> params = new HashMap<>();
+    params.put("query", "poLineId==" + poLine.getId());
+
+    TitleCollection titleCollection = getDataByParam(TITLES.getEndpoint(), params)
+      .then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class);
+
+    assertThat(titleCollection.getTitles(), hasSize(1));
+    Title titleBefore = titleCollection.getTitles().get(0);
+    assertThat(titleBefore.getPoLineId(), is(poLine.getId()));
+    assertThat(titleBefore.getProductIds(), is(poLine.getDetails().getProductIds()));
+    assertThat(titleBefore.getTitle(), is(poLine.getTitleOrPackage()));
+
+    String newTitle = "new Title";
+    poLine.setDetails(null);
+    poLine.setTitleOrPackage(newTitle);
+    poLine.setMetadata(null);
+
+    deleteData(TITLES.getEndpointWithId(), titleBefore.getId());
+
+    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode()).then().statusCode(204);
+
+    titleCollection = getDataByParam(TITLES.getEndpoint(), params)
+      .then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class);
+
+    assertThat(titleCollection.getTitles(), hasSize(1));
+    Title titleAfter = titleCollection.getTitles().get(0);
+    assertThat(titleAfter.getPoLineId(), is(poLine.getId()));
+    assertThat(titleAfter.getProductIds(), hasSize(0));
+    assertThat(titleAfter.getTitle(), is(newTitle));
+
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
+    deleteData(PO_LINE.getEndpointWithId(), poLine.getId());
+    deleteData(TITLES.getEndpointWithId(), titleAfter.getId());
   }
 
 }
