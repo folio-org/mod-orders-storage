@@ -48,7 +48,6 @@
       "value": 100.0
     }
   ],
-  "instanceId": "f7e82a1e-fc06-4b82-bb1d-da326cb378ce",
   "locations": [
     {
       "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
@@ -83,7 +82,7 @@
   "tags": {
         "tagList": []
   },
-  "title": "Global Africa",
+  "titleOrPackage": "Global Africa",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

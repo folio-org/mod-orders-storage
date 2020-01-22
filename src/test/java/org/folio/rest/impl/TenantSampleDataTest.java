@@ -7,12 +7,15 @@ import static org.folio.rest.utils.TenantApiTestUtil.TENANT_ENDPOINT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postToTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
+import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
 import java.net.MalformedURLException;
 
+import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceCollection;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.persist.PostgresClient;
@@ -81,14 +84,14 @@ public class TenantSampleDataTest extends TestBase{
         .assertThat()
           .statusCode(201);
 
-      TitleCollection titleCollection = getData(TITLES.getEndpoint(), PARTIAL_TENANT_HEADER)
+      PieceCollection pieceCollection = getData(PIECE.getEndpoint(), PARTIAL_TENANT_HEADER)
         .then()
           .extract()
             .response()
-              .as(TitleCollection.class);
+              .as(PieceCollection.class);
 
-      for (Title title : titleCollection.getTitles()) {
-        deleteData(TITLES.getEndpointWithId(), title.getId(), PARTIAL_TENANT_HEADER).then()
+      for (Piece piece : pieceCollection.getPieces()) {
+        deleteData(PIECE.getEndpointWithId(), piece.getId(), PARTIAL_TENANT_HEADER).then()
           .log()
           .ifValidationFails()
           .statusCode(204);

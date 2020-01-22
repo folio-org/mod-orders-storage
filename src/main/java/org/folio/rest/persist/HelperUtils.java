@@ -1,24 +1,26 @@
 package org.folio.rest.persist;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import static org.folio.rest.persist.PgUtil.response;
 
-import org.folio.rest.persist.Criteria.Criteria;
-import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.cql.CQLQueryValidationException;
-import org.folio.rest.persist.interfaces.Results;
-
-import javax.ws.rs.core.Response;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.folio.rest.persist.PgUtil.response;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.Response;
+
+import org.folio.rest.persist.Criteria.Criteria;
+import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.rest.persist.cql.CQLQueryValidationException;
+import org.folio.rest.persist.interfaces.Results;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class HelperUtils {
   private static final Logger log = LoggerFactory.getLogger(HelperUtils.class);
@@ -62,6 +64,15 @@ public class HelperUtils {
     return new Criterion(a);
   }
 
+  public static Criterion getCriteriaByFieldNameAndValueNotJsonb(String fieldName, String fieldValue) {
+    Criteria a = new Criteria();
+    a.addField(fieldName);
+    a.setOperation("=");
+    a.setVal(fieldValue);
+    a.setJSONB(false);
+    return new Criterion(a);
+  }
+
   private static <T, E> void processDbReply(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, Handler<AsyncResult<Response>> asyncResultHandler, Method respond500, Method respond400, AsyncResult<Results<T>> reply) {
     try {
       Method respond200 = entitiesMetadataHolder.getRespond200WithApplicationJson();
@@ -101,6 +112,10 @@ public class HelperUtils {
       asyncResultHandler.handle(response(e.getMessage(), null, null));
       return null;
     }
+  }
+
+  public static String getEndpoint(Class<?> clazz) {
+    return clazz.getAnnotation(Path.class).value();
   }
 
   public enum SequenceQuery {

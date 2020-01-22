@@ -48,7 +48,6 @@
       "value": 100.0
     }
   ],
-  "instanceId": "6b4ae089-e1ee-431f-af83-e1133f8e3da0",
   "locations": [
     {
       "locationId": "53cf956f-c1df-410b-8bea-27f712cca7c0",
@@ -81,7 +80,7 @@
   "tags": {
      "tagList": []
   },
-  "title": "MobiCom'17 5 mmNets'17, October 16, 2017, Snowbird, UT, USA / general chairs: Haitham Hassanieh (University of Illinois at Urbana Champaign, USA), Xinyu Zhang (University of California San Diego, USA)",
+  "titleOrPackage": "MobiCom'17 5 mmNets'17, October 16, 2017, Snowbird, UT, USA / general chairs: Haitham Hassanieh (University of Illinois at Urbana Champaign, USA), Xinyu Zhang (University of California San Diego, USA)",
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

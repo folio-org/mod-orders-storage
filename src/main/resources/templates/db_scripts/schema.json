@@ -108,7 +108,7 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": "mod-orders-storage-9.0.0",
+      "fromModuleVersion": "mod-orders-storage-10.0.0",
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -230,8 +230,13 @@
         },
         {
           "fieldName": "title",
+          "tOps": "DELETE"
+        },
+        {
+          "fieldName": "titleOrPackage",
           "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": true,
+          "tOps": "ADD"
         },
         {
           "fieldName": "vendor.vendorAccount",
