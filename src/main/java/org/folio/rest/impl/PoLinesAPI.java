@@ -97,11 +97,17 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     Title title = new Title().withId(UUID.randomUUID()
       .toString())
       .withPoLineId(poLine.getId())
-      .withTitle(poLine.getTitleOrPackage());
-    if (Objects.nonNull(poLine.getDetails()) && Objects.nonNull(poLine.getDetails()
-      .getProductIds())) {
-      title.setProductIds(poLine.getDetails()
-        .getProductIds());
+      .withTitle(poLine.getTitleOrPackage())
+      .withContributors(poLine.getContributors())
+      .withEdition(poLine.getEdition())
+      .withPublisher(poLine.getPublisher())
+      .withPublishedDate(poLine.getPublicationDate());
+    if (Objects.nonNull(poLine.getDetails())) {
+      title.withProductIds(poLine.getDetails()
+        .getProductIds())
+        .withSubscriptionFrom(poLine.getDetails().getSubscriptionFrom())
+        .withSubscriptionTo(poLine.getDetails().getSubscriptionTo())
+        .withSubscriptionInterval(poLine.getDetails().getSubscriptionInterval());
     }
     return title;
   }
