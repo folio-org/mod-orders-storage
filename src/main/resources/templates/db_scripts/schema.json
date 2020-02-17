@@ -413,6 +413,33 @@
           "tableAlias": "titles"
         }
       ]
+    },
+    {
+      "tableName": "reasons_for_closure",
+      "fromModuleVersion": "mod-orders-storage-10.0.0",
+      "uniqueIndex": [
+        {
+          "fieldName" : "reason"
+        }
+      ]
+    },
+    {
+      "tableName": "prefixes",
+      "fromModuleVersion": "mod-orders-storage-10.0.0",
+      "uniqueIndex": [
+        {
+          "fieldName" : "name"
+        }
+      ]
+    },
+    {
+      "tableName": "suffixes",
+      "fromModuleVersion": "mod-orders-storage-10.0.0",
+      "uniqueIndex": [
+        {
+          "fieldName" : "name"
+        }
+      ]
     }
   ]
 }

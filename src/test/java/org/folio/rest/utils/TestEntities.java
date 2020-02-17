@@ -7,8 +7,11 @@ import org.folio.rest.jaxrs.model.OrderInvoiceRelationship;
 import org.folio.rest.jaxrs.model.OrderTemplate;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.Prefix;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.ReasonForClosure;
 import org.folio.rest.jaxrs.model.ReportingCode;
+import org.folio.rest.jaxrs.model.Suffix;
 import org.folio.rest.jaxrs.model.Title;
 
 public enum TestEntities {
@@ -22,7 +25,10 @@ public enum TestEntities {
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, "data/order-invoice-relationships/313000_123invoicenumber45.json", "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 9),
   ORDER_TEMPLATE("/orders-storage/order-templates", OrderTemplate.class, "data/order-templates/amazon_book_orders.json", "templateCode", "Amazon-A", 5),
   ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, "data/acquisitions-units/acquisitions-unit.json", "name", "met", 1),
-  ACQUISITIONS_UNIT_MEMBERSHIPS("/acquisitions-units-storage/memberships", AcquisitionsUnitMembership.class, "data/acquisitions-units-memberships/acquisition_unit_membership.json", "userId", "f8e41958-a378-4051-ae6e-429d231acb66", 1);
+  ACQUISITIONS_UNIT_MEMBERSHIPS("/acquisitions-units-storage/memberships", AcquisitionsUnitMembership.class, "data/acquisitions-units-memberships/acquisition_unit_membership.json", "userId", "f8e41958-a378-4051-ae6e-429d231acb66", 1),
+  REASON_FOR_CLOSURE("/orders-storage/configuration/reasons-for-closure", ReasonForClosure.class, "data/configuration/reasons-for-closure/custom_reason.json", "reason", "New reason for closure", 1),
+  PREFIX("/orders-storage/configuration/prefixes", Prefix.class, "data/configuration/prefixes/prefix.json", "description", "New description", 1),
+  SUFFIX("/orders-storage/configuration/suffixes", Suffix.class, "data/configuration/suffixes/suffix.json", "description", "New description", 1);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;
@@ -75,5 +81,9 @@ public enum TestEntities {
 
   public void setId(String id) {
     this.sampleId = id;
+  }
+
+  public int getEstimatedSystemDataRecordsQuantity() {
+    return REASON_FOR_CLOSURE == this ? 18 : 0;
   }
 }
