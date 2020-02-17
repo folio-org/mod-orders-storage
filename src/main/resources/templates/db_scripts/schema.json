@@ -34,6 +34,11 @@
       "run": "after",
       "snippetPath": "data-migration/10.0.0/po_line_table.sql",
       "fromModuleVersion": "mod-orders-storage-10.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/10.0.0/purchase_order_table.sql",
+      "fromModuleVersion": "mod-orders-storage-10.0.0"
     }
   ],
   "tables": [
@@ -90,15 +95,15 @@
           "caseSensitive": false
         },
         {
-          "fieldName": "renewal.manualRenewal",
+          "fieldName": "ongoing.manualRenewal",
           "caseSensitive": false
         },
         {
-          "fieldName": "renewal.renewalDate",
+          "fieldName": "ongoing.renewalDate",
           "caseSensitive": false
         },
         {
-          "fieldName": "renewal.reviewPeriod",
+          "fieldName": "ongoing.reviewPeriod",
           "caseSensitive": false
         }
       ],

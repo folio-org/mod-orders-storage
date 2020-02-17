@@ -117,7 +117,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     postData(PO_LINE.getEndpoint(), jsonLine.toString())
       .then()
         .statusCode(400)
-        .content(containsString(jsonLine.getString("purchaseOrderId")));
+        .body(containsString(jsonLine.getString("purchaseOrderId")));
   }
 
   @Test
@@ -132,7 +132,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString())
       .then()
       .statusCode(404)
-      .content(containsString(javax.ws.rs.core.Response.Status.NOT_FOUND.getReasonPhrase()));
+      .body(containsString(javax.ws.rs.core.Response.Status.NOT_FOUND.getReasonPhrase()));
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
   }
@@ -151,7 +151,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString())
       .then()
       .statusCode(400)
-      .content(containsString(NON_EXISTED_ID));
+      .body(containsString(NON_EXISTED_ID));
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
   }
