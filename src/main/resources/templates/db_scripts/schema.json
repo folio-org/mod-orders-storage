@@ -54,7 +54,7 @@
     },
     {
       "tableName": "purchase_order",
-      "fromModuleVersion": "mod-orders-storage-7.0.0",
+      "fromModuleVersion": "mod-orders-storage-10.0.0",
       "withMetadata": true,
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
@@ -93,6 +93,18 @@
         {
           "fieldName": "reEncumber",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "renewal.manualRenewal",
+          "tOps": "DELETE"
+        },
+        {
+          "fieldName": "renewal.renewalDate",
+          "tOps": "DELETE"
+        },
+        {
+          "fieldName": "renewal.reviewPeriod",
+          "tOps": "DELETE"
         },
         {
           "fieldName": "ongoing.manualRenewal",
