@@ -24,3 +24,10 @@ UPDATE ${myuniversity}_${mymodule}.purchase_order
 SET
   jsonb = jsonb_set(jsonb, '{ongoing, isSubscription}', 'false')
 WHERE (jsonb ? 'ongoing' AND jsonb #> '{ongoing, isSubscription}' IS NULL);
+
+
+-- Remove ongoing field for one-time orders
+UPDATE ${myuniversity}_${mymodule}.purchase_order
+SET
+  jsonb = jsonb #- '{ongoing}'
+WHERE jsonb::json ->> 'orderType' = 'One-Time';
