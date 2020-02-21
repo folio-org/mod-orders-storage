@@ -7,9 +7,9 @@
   "orderType": "Ongoing",
   "poNumber": "101101",
   "reEncumber": false,
-  "renewal": {
-    "cycle": "6 Months",
-    "interval": 182,
+  "ongoing": {
+    "interval": 365,
+    "isSubscription": true,
     "manualRenewal": true,
     "renewalDate": "2019-04-09T00:00:00.000Z",
     "reviewPeriod": 30
