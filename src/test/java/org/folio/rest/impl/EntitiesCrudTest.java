@@ -27,19 +27,7 @@ public class EntitiesCrudTest extends TestBase {
   public static Stream<TestEntities> deleteOrder() {
     return Stream.of(TestEntities.TITLES, TestEntities.ORDER_INVOICE_RELNS, TestEntities.PO_LINE,
         TestEntities.PURCHASE_ORDER, TestEntities.ALERT, TestEntities.REPORTING_CODE, TestEntities.ORDER_TEMPLATE, TestEntities.ACQUISITIONS_UNIT_MEMBERSHIPS,
-        TestEntities.ACQUISITIONS_UNIT);
-  }
-
-  public static Stream<TestEntities> deleteFailOrder() {
-    return Stream.of(TestEntities.PURCHASE_ORDER);
-  }
-
-  public static Stream<TestEntities> createFailOrder() {
-    return Stream.of(TestEntities.PO_LINE, TestEntities.PIECE, TestEntities.ORDER_INVOICE_RELNS);
-  }
-
-  public static Stream<TestEntities> uniqueKeyConstraint() {
-    return Stream.of(TestEntities.ACQUISITIONS_UNIT);
+        TestEntities.ACQUISITIONS_UNIT, TestEntities.REASON_FOR_CLOSURE, TestEntities.PREFIX, TestEntities.SUFFIX);
   }
 
   @ParameterizedTest
@@ -47,7 +35,7 @@ public class EntitiesCrudTest extends TestBase {
   @EnumSource(TestEntities.class)
   public void testVerifyCollection(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Verifying database's initial state ... ", testEntity.name()));
-    verifyCollectionQuantity(testEntity.getEndpoint(), 0);
+    verifyCollectionQuantity(testEntity.getEndpoint(), testEntity.getEstimatedSystemDataRecordsQuantity());
 
   }
 
@@ -76,7 +64,7 @@ public class EntitiesCrudTest extends TestBase {
   @EnumSource(TestEntities.class)
   public void testVerifyCollectionQuantity(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Verifying only 1 adjustment was created ... ", testEntity.name()));
-    verifyCollectionQuantity(testEntity.getEndpoint(), 1);
+    verifyCollectionQuantity(testEntity.getEndpoint(), testEntity.getEstimatedSystemDataRecordsQuantity() + 1);
 
   }
 
@@ -91,7 +79,7 @@ public class EntitiesCrudTest extends TestBase {
 
   @ParameterizedTest
   @Order(5)
-  @MethodSource("uniqueKeyConstraint")
+  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT", "REASON_FOR_CLOSURE", "PREFIX", "SUFFIX"}, mode = EnumSource.Mode.INCLUDE)
   public void testUniqueKeyConstraint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
     JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
@@ -105,7 +93,7 @@ public class EntitiesCrudTest extends TestBase {
 
   @ParameterizedTest
   @Order(6)
-  @EnumSource(TestEntities.class)
+  @EnumSource(value = TestEntities.class)
   public void testPutById(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Editing %s with ID: %s", testEntity.name(), testEntity.name(),
         testEntity.getId()));
@@ -118,7 +106,7 @@ public class EntitiesCrudTest extends TestBase {
 
   @ParameterizedTest
   @Order(7)
-  @EnumSource(TestEntities.class)
+  @EnumSource(value = TestEntities.class)
   public void testVerifyPut(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Fetching updated %s with ID: %s", testEntity.name(),
         testEntity.name(), testEntity.getId()));
@@ -127,7 +115,7 @@ public class EntitiesCrudTest extends TestBase {
 
   @ParameterizedTest
   @Order(8)
-  @MethodSource("deleteFailOrder")
+  @EnumSource(value = TestEntities.class, names = {"PURCHASE_ORDER"}, mode = EnumSource.Mode.INCLUDE)
   public void testDeleteEndpointForeignKeyFailure(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
         testEntity.getId()));
@@ -159,7 +147,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @MethodSource("createFailOrder")
+  @EnumSource(value = TestEntities.class, names = {"PO_LINE", "PIECE", "ORDER_INVOICE_RELNS"}, mode = EnumSource.Mode.INCLUDE)
   public void testPostFailsOnForeignKeyDependencies(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Creating %s ... fails", testEntity.name(), testEntity.name()));
     sample = getFile(testEntity.getSampleFileName());
@@ -181,7 +169,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @EnumSource(TestEntities.class)
+  @EnumSource(value = TestEntities.class)
   public void testEditEntityWithNonExistedId(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s put by id test: Invalid %s: %s", testEntity.name(), testEntity.name(),
         NON_EXISTED_ID));
