@@ -21,7 +21,7 @@ public class TenantReferenceAPI extends TenantAPI {
   private static final Logger log = LoggerFactory.getLogger(TenantReferenceAPI.class);
 
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
-
+  private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
 
   @Override
   public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
@@ -32,6 +32,10 @@ public class TenantReferenceAPI extends TenantAPI {
         hndlr.handle(res);
         return;
       }
+
+      //Always load this system data
+      Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
+      tenantAttributes.getParameters().add(parameter);
 
       TenantLoading tl = new TenantLoading();
       boolean loadData = buildDataLoadingParameters(tenantAttributes, tl);
@@ -57,7 +61,9 @@ public class TenantReferenceAPI extends TenantAPI {
 
 
   private boolean buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
-    boolean loadData = false;
+    tl.withKey(PARAMETER_LOAD_SYSTEM)
+      .withLead("data/system")
+      .add("reasons-for-closure", "orders-storage/configuration/reasons-for-closure");
     if (isLoadSample(tenantAttributes)) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
@@ -70,10 +76,12 @@ public class TenantReferenceAPI extends TenantAPI {
         .add("order-invoice-relationships", "orders-storage/order-invoice-relns")
         .add("order-templates", "orders-storage/order-templates")
         .add("acquisitions-units", "acquisitions-units-storage/units")
-        .add("acquisitions-units-memberships", "acquisitions-units-storage/memberships");
-      loadData = true;
+        .add("acquisitions-units-memberships", "acquisitions-units-storage/memberships")
+        .add("configuration/reasons-for-closure", "orders-storage/configuration/reasons-for-closure")
+        .add("configuration/prefixes", "orders-storage/configuration/prefixes")
+        .add("configuration/suffixes", "orders-storage/configuration/suffixes");
     }
-    return loadData;
+    return true;
   }
 
   private boolean isLoadSample(TenantAttributes tenantAttributes) {

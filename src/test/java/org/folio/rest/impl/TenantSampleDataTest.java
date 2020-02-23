@@ -7,17 +7,20 @@ import static org.folio.rest.utils.TenantApiTestUtil.TENANT_ENDPOINT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postToTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
-import static org.folio.rest.utils.TestEntities.PIECE;
-import static org.folio.rest.utils.TestEntities.TITLES;
+import static org.folio.rest.utils.TestEntities.PREFIX;
+import static org.folio.rest.utils.TestEntities.REASON_FOR_CLOSURE;
+import static org.folio.rest.utils.TestEntities.SUFFIX;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
 import java.net.MalformedURLException;
 
-import org.folio.rest.jaxrs.model.Piece;
-import org.folio.rest.jaxrs.model.PieceCollection;
-import org.folio.rest.jaxrs.model.Title;
-import org.folio.rest.jaxrs.model.TitleCollection;
+import org.folio.rest.jaxrs.model.Prefix;
+import org.folio.rest.jaxrs.model.PrefixCollection;
+import org.folio.rest.jaxrs.model.ReasonForClosureCollection;
+import org.folio.rest.jaxrs.model.ReasonsForClosure;
+import org.folio.rest.jaxrs.model.Suffix;
+import org.folio.rest.jaxrs.model.SuffixCollection;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.utils.TenantApiTestUtil;
 import org.folio.rest.utils.TestEntities;
@@ -52,6 +55,7 @@ public class TenantSampleDataTest extends TestBase{
     try {
       logger.info("-- create a tenant with no sample data --");
       prepareTenant(ANOTHER_TENANT_HEADER, false);
+      deleteReasonsForClosure(ANOTHER_TENANT_HEADER);
       logger.info("-- upgrade the tenant with sample data, so that it will be inserted now --");
       upgradeTenantWithSampleDataLoad();
       logger.info("-- upgrade the tenant again with no sample data, so the previously inserted data stays in tact --");
@@ -84,18 +88,9 @@ public class TenantSampleDataTest extends TestBase{
         .assertThat()
           .statusCode(201);
 
-      PieceCollection pieceCollection = getData(PIECE.getEndpoint(), PARTIAL_TENANT_HEADER)
-        .then()
-          .extract()
-            .response()
-              .as(PieceCollection.class);
-
-      for (Piece piece : pieceCollection.getPieces()) {
-        deleteData(PIECE.getEndpointWithId(), piece.getId(), PARTIAL_TENANT_HEADER).then()
-          .log()
-          .ifValidationFails()
-          .statusCode(204);
-      }
+      deleteReasonsForClosure(PARTIAL_TENANT_HEADER);
+      deletePrefixes();
+      deleteSuffixes();
 
       jsonBody = TenantApiTestUtil.prepareTenantBody(true, true);
       postToTenant(PARTIAL_TENANT_HEADER, jsonBody)
@@ -104,13 +99,58 @@ public class TenantSampleDataTest extends TestBase{
 
       for (TestEntities entity : TestEntities.values()) {
         logger.info("Test expected quantity for " + entity.name());
-        verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity(), PARTIAL_TENANT_HEADER);
+        verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
       }
     } finally {
       PostgresClient oldClient = PostgresClient.getInstance(StorageTestSuite.getVertx(), PARTIAL_TENANT_HEADER.getValue());
       deleteTenant(PARTIAL_TENANT_HEADER);
       PostgresClient newClient = PostgresClient.getInstance(StorageTestSuite.getVertx(), PARTIAL_TENANT_HEADER.getValue());
       assertThat(oldClient, not(newClient));
+    }
+  }
+
+  private void deleteReasonsForClosure(Header tenant) throws MalformedURLException {
+    ReasonForClosureCollection reasonForClosureCollection = getData(REASON_FOR_CLOSURE.getEndpoint() + "?limit=999", tenant)
+      .then()
+        .extract()
+          .response()
+            .as(ReasonForClosureCollection.class);
+
+    for (ReasonsForClosure reasonsForClosure : reasonForClosureCollection.getReasonsForClosure()) {
+      deleteData(REASON_FOR_CLOSURE.getEndpointWithId(), reasonsForClosure.getId(), tenant).then()
+        .log()
+        .ifValidationFails()
+        .statusCode(204);
+    }
+  }
+
+  private void deletePrefixes() throws MalformedURLException {
+    PrefixCollection prefixCollection = getData(PREFIX.getEndpoint(), PARTIAL_TENANT_HEADER)
+      .then()
+      .extract()
+      .response()
+      .as(PrefixCollection.class);
+
+    for (Prefix prefix : prefixCollection.getPrefixes()) {
+      deleteData(PREFIX.getEndpointWithId(), prefix.getId(), PARTIAL_TENANT_HEADER).then()
+        .log()
+        .ifValidationFails()
+        .statusCode(204);
+    }
+  }
+
+  private void deleteSuffixes() throws MalformedURLException {
+    SuffixCollection suffixCollection = getData(SUFFIX.getEndpoint(), PARTIAL_TENANT_HEADER)
+      .then()
+      .extract()
+      .response()
+      .as(SuffixCollection.class);
+
+    for (Suffix suffix : suffixCollection.getSuffixes()) {
+      deleteData(SUFFIX.getEndpointWithId(), suffix.getId(), PARTIAL_TENANT_HEADER).then()
+        .log()
+        .ifValidationFails()
+        .statusCode(204);
     }
   }
 
@@ -123,7 +163,7 @@ public class TenantSampleDataTest extends TestBase{
         .statusCode(201);
     for (TestEntities entity : TestEntities.values()) {
       logger.info("Test expected quantity for " + entity.name());
-      verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
+      verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() + entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
     }
   }
 
@@ -132,9 +172,11 @@ public class TenantSampleDataTest extends TestBase{
     logger.info("upgrading Module without sample data");
 
     JsonObject jsonBody = TenantApiTestUtil.prepareTenantBody(false, false);
-    postToTenant(ANOTHER_TENANT_HEADER, jsonBody)
-      .assertThat()
-        .statusCode(200);
+    postToTenant(ANOTHER_TENANT_HEADER, jsonBody);
+
+    for(TestEntities te: TestEntities.values()) {
+      verifyCollectionQuantity(te.getEndpoint(), te.getEstimatedSystemDataRecordsQuantity());
+    }
   }
 
 
@@ -152,7 +194,7 @@ public class TenantSampleDataTest extends TestBase{
       // Check that no sample data loaded
       for (TestEntities entity : TestEntities.values()) {
         logger.info("Test expected quantity for " , 0, entity.name());
-        verifyCollectionQuantity(entity.getEndpoint(), 0, NONEXISTENT_TENANT_HEADER);
+        verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() , NONEXISTENT_TENANT_HEADER);
       }
     }
     finally {

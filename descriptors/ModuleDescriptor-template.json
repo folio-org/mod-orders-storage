@@ -356,6 +356,99 @@
       ]
     },
     {
+      "id": "orders-storage.configuration.reasons-for-closure",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/configuration/reasons-for-closure",
+          "permissionsRequired": ["orders-storage.configuration.reasons-for-closure.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/configuration/reasons-for-closure",
+          "permissionsRequired": ["orders-storage.configuration.reasons-for-closure.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/configuration/reasons-for-closure/{id}",
+          "permissionsRequired": ["orders-storage.configuration.reasons-for-closure.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/configuration/reasons-for-closure/{id}",
+          "permissionsRequired": ["orders-storage.configuration.reasons-for-closure.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/configuration/reasons-for-closure/{id}",
+          "permissionsRequired": ["orders-storage.configuration.reasons-for-closure.item.delete"]
+        }
+      ]
+    },
+    {
+      "id": "orders-storage.configuration.prefixes",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/configuration/prefixes",
+          "permissionsRequired": ["orders-storage.configuration.prefixes.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/configuration/prefixes",
+          "permissionsRequired": ["orders-storage.configuration.prefixes.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/configuration/prefixes/{id}",
+          "permissionsRequired": ["orders-storage.configuration.prefixes.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/configuration/prefixes/{id}",
+          "permissionsRequired": ["orders-storage.configuration.prefixes.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/configuration/prefixes/{id}",
+          "permissionsRequired": ["orders-storage.configuration.prefixes.item.delete"]
+        }
+      ]
+    },
+    {
+      "id": "orders-storage.configuration.suffixes",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/configuration/suffixes",
+          "permissionsRequired": ["orders-storage.configuration.suffixes.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/configuration/suffixes",
+          "permissionsRequired": ["orders-storage.configuration.suffixes.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/configuration/suffixes/{id}",
+          "permissionsRequired": ["orders-storage.configuration.suffixes.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/configuration/suffixes/{id}",
+          "permissionsRequired": ["orders-storage.configuration.suffixes.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/configuration/suffixes/{id}",
+          "permissionsRequired": ["orders-storage.configuration.suffixes.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "1.2",
       "interfaceType": "system",
@@ -778,6 +871,117 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.configuration.reasons-for-closure.collection.get",
+      "displayName" : "orders-storage-configuration-reasons-for-closure-collection get",
+      "description" : "Get a collection of reasons for closure"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.reasons-for-closure.item.post",
+      "displayName" : "orders-storage-configuration-reasons-for-closure-item post",
+      "description" : "Create a new reason for closure"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.reasons-for-closure.item.get",
+      "displayName" : "orders-storage-configuration-reasons-for-closure-item get",
+      "description" : "Fetch a reason for closure"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.reasons-for-closure.item.put",
+      "displayName" : "orders-storage-configuration-reasons-for-closure-item put",
+      "description" : "Update a reason for closure"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.reasons-for-closure.item.delete",
+      "displayName" : "orders-storage-configuration-reasons-for-closure-item delete",
+      "description" : "Delete a reason for closure"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.reasons-for-closure.all",
+      "displayName" : "All orders-storage reasons for closure perms",
+      "description" : "All permissions for the orders-storage configuration - reasons for closure",
+      "subPermissions" : [
+        "orders-storage.configuration.reasons-for-closure.collection.get",
+        "orders-storage.configuration.reasons-for-closure.item.post",
+        "orders-storage.configuration.reasons-for-closure.item.get",
+        "orders-storage.configuration.reasons-for-closure.item.put",
+        "orders-storage.configuration.reasons-for-closure.item.delete"
+      ]
+    },
+    {
+      "permissionName" : "orders-storage.configuration.prefixes.collection.get",
+      "displayName" : "orders-storage-configuration-prefix-collection get",
+      "description" : "Get a collection of prefixes"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.prefixes.item.post",
+      "displayName" : "orders-storage-configuration-prefixes-item post",
+      "description" : "Create a new prefix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.prefixes.item.get",
+      "displayName" : "orders-storage-configuration-prefixes-item get",
+      "description" : "Fetch a prefix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.prefixes.item.put",
+      "displayName" : "orders-storage-configuration-prefix-item put",
+      "description" : "Update a prefix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.prefixes.item.delete",
+      "displayName" : "orders-storage-configuration-prefixes-item delete",
+      "description" : "Delete a prefix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.prefixes.all",
+      "displayName" : "All orders-storage prefixes perms",
+      "description" : "All permissions for the orders-storage configuration - prefixes",
+      "subPermissions" : [
+        "orders-storage.configuration.prefixes.collection.get",
+        "orders-storage.configuration.prefixes.item.post",
+        "orders-storage.configuration.prefixes.item.get",
+        "orders-storage.configuration.prefixes.item.put",
+        "orders-storage.configuration.prefixes.item.delete"
+      ]
+    },
+    {
+      "permissionName" : "orders-storage.configuration.suffixes.collection.get",
+      "displayName" : "orders-storage-configuration-suffixes-collection get",
+      "description" : "Get a collection of suffixes"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.suffixes.item.post",
+      "displayName" : "orders-storage-configuration-suffixes-item post",
+      "description" : "Create a new suffix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.suffixes.item.get",
+      "displayName" : "orders-storage-configuration-suffixes-item get",
+      "description" : "Fetch a suffix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.suffixes.item.put",
+      "displayName" : "orders-storage-configuration-suffix-item put",
+      "description" : "Update a suffix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.suffixes.item.delete",
+      "displayName" : "orders-storage-configuration-suffixes-item delete",
+      "description" : "Delete a suffix"
+    },
+    {
+      "permissionName" : "orders-storage.configuration.suffixes.all",
+      "displayName" : "All orders-storage suffixes perms",
+      "description" : "All permissions for the orders-storage configuration - suffixes",
+      "subPermissions" : [
+        "orders-storage.configuration.suffixes.collection.get",
+        "orders-storage.configuration.suffixes.item.post",
+        "orders-storage.configuration.suffixes.item.get",
+        "orders-storage.configuration.suffixes.item.put",
+        "orders-storage.configuration.suffixes.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -794,7 +998,10 @@
         "orders-storage.order-invoice-relationships.all",
         "orders-storage.order-templates.all",
         "acquisitions-units-storage.units.all",
-        "acquisitions-units-storage.memberships.all"
+        "acquisitions-units-storage.memberships.all",
+        "orders-storage.configuration.reasons-for-closure.all",
+        "orders-storage.configuration.prefixes.all",
+        "orders-storage.configuration.suffixes.all"
       ]
     }
   ],
