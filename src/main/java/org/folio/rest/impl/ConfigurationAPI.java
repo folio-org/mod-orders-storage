@@ -22,7 +22,6 @@ public class ConfigurationAPI implements OrdersStorageConfiguration {
   public static final String PREFIX_TABLE = "prefixes";
   public static final String SUFFIX_TABLE = "suffixes";
 
-
   @Override
   @Validate
   public void getOrdersStorageConfigurationReasonsForClosure(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {

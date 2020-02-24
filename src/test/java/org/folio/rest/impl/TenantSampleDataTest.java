@@ -17,8 +17,8 @@ import java.net.MalformedURLException;
 
 import org.folio.rest.jaxrs.model.Prefix;
 import org.folio.rest.jaxrs.model.PrefixCollection;
+import org.folio.rest.jaxrs.model.ReasonForClosure;
 import org.folio.rest.jaxrs.model.ReasonForClosureCollection;
-import org.folio.rest.jaxrs.model.ReasonsForClosure;
 import org.folio.rest.jaxrs.model.Suffix;
 import org.folio.rest.jaxrs.model.SuffixCollection;
 import org.folio.rest.persist.PostgresClient;
@@ -116,8 +116,8 @@ public class TenantSampleDataTest extends TestBase{
           .response()
             .as(ReasonForClosureCollection.class);
 
-    for (ReasonsForClosure reasonsForClosure : reasonForClosureCollection.getReasonsForClosure()) {
-      deleteData(REASON_FOR_CLOSURE.getEndpointWithId(), reasonsForClosure.getId(), tenant).then()
+    for (ReasonForClosure reasonForClosure : reasonForClosureCollection.getReasonsForClosure()) {
+      deleteData(REASON_FOR_CLOSURE.getEndpointWithId(), reasonForClosure.getId(), tenant).then()
         .log()
         .ifValidationFails()
         .statusCode(204);
