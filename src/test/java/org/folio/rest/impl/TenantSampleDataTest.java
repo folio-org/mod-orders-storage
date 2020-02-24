@@ -116,8 +116,8 @@ public class TenantSampleDataTest extends TestBase{
           .response()
             .as(ReasonForClosureCollection.class);
 
-    for (ReasonForClosure reasonsForClosure : reasonForClosureCollection.getReasonForClosure()) {
-      deleteData(REASON_FOR_CLOSURE.getEndpointWithId(), reasonsForClosure.getId(), tenant).then()
+    for (ReasonForClosure reasonForClosure : reasonForClosureCollection.getReasonsForClosure()) {
+      deleteData(REASON_FOR_CLOSURE.getEndpointWithId(), reasonForClosure.getId(), tenant).then()
         .log()
         .ifValidationFails()
         .statusCode(204);
