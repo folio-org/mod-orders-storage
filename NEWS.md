@@ -1,7 +1,8 @@
 ## 10.1.0 - Unreleased
 
 ## 10.0.0 - Released
-The main focus of this release was to introduce required fields in schemas and adding new CRUD API
+The main focus of this release was to introduce new APIs and tables for **titles, poNumber prefix/suffix, and reason for closure**.
+Also **major versions of APIs** were changed for **poLines, purchase orders, pieces and receiving history**.
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v9.0.0...v10.0.0)
 
