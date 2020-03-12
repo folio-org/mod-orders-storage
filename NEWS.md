@@ -15,7 +15,6 @@ Also **major versions of APIs** were changed for **poLines, purchase orders, pie
 * [MODORDSTOR-127](https://issues.folio.org/browse/MODORDSTOR-127)	Duplicate the title information for non-packages
 * [MODORDSTOR-126](https://issues.folio.org/browse/MODORDSTOR-126)	titles schema and CRUD operations
 * [MODORDSTOR-119](https://issues.folio.org/browse/MODORDSTOR-119)	Migrate orders settings from mod-configuration
-* [MODORDSTOR-114](https://issues.folio.org/browse/MODORDSTOR-114)	Upgrade RMB in order to improve ISBN search
 
 ## 9.0.0 - Released
 The main focus of this release was to improve schema for fund distributions, poLine/details and update environment settings
