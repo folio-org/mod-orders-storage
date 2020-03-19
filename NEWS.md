@@ -1,4 +1,20 @@
-## 10.0.0 - Unreleased
+## 10.1.0 - Unreleased
+
+## 10.0.0 - Released
+The main focus of this release was to introduce new APIs and tables for **titles, poNumber prefix/suffix, and reason for closure**.
+Also **major versions of APIs** were changed for **poLines, purchase orders, pieces and receiving history**.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v9.0.0...v10.0.0)
+
+### Stories
+* [MODORDSTOR-137](https://issues.folio.org/browse/MODORDSTOR-137)	Add fields to ongoing schema
+* [MODORDSTOR-132](https://issues.folio.org/browse/MODORDSTOR-132)	Title schema updates
+* [MODORDSTOR-131](https://issues.folio.org/browse/MODORDSTOR-131)	Renewal/subscription PO schema changes
+* [MODORDSTOR-129](https://issues.folio.org/browse/MODORDSTOR-129)	add receipt date to piece schema
+* [MODORDSTOR-128](https://issues.folio.org/browse/MODORDSTOR-128)	Data migration scripts for schema changes
+* [MODORDSTOR-127](https://issues.folio.org/browse/MODORDSTOR-127)	Duplicate the title information for non-packages
+* [MODORDSTOR-126](https://issues.folio.org/browse/MODORDSTOR-126)	titles schema and CRUD operations
+* [MODORDSTOR-119](https://issues.folio.org/browse/MODORDSTOR-119)	Migrate orders settings from mod-configuration
 
 ## 9.0.0 - Released
 The main focus of this release was to improve schema for fund distributions, poLine/details and update environment settings
