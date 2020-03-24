@@ -177,7 +177,6 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-//  @IsolatedTenant
   public void testUpdateNonPackagePoLineWithoutTitle() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: update non-package PoLine without title must create title");
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
