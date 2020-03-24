@@ -119,6 +119,8 @@ public class StorageTestSuite {
   @Nested
   class PoNumberTestNested extends PoNumberTest{}
   @Nested
+  class PurchaseOrderLineApiTest extends PurchaseOrderLinesApiTest {}
+  @Nested
   class PurchaseOrderLineNumberTestNested extends PurchaseOrderLineNumberTest{}
   @Nested
   class PurchaseOrderNumberUniquenessTestNested extends PurchaseOrderNumberUniquenessTest{}

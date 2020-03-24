@@ -142,6 +142,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
         logger.info("Delete POLine");
         tx.startTx()
           .compose(this::deletePiecesByPOLineId)
+          .compose(this::deleteTitleById)
           .compose(this::deletePOLineById)
           .compose(Tx::endTx)
           .setHandler(handleNoContentResponse(asyncResultHandler, tx, "POLine {} {} deleted"));
@@ -149,6 +150,24 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
+  }
+
+  private Future<Tx<String>> deleteTitleById(Tx<String> tx) {
+    logger.info("Delete title by POLine id={}", tx.getEntity());
+
+    Promise<Tx<String>> promise = Promise.promise();
+    Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
+
+    getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, reply -> {
+      if (reply.failed()) {
+        handleFailure(promise, reply);
+      } else {
+        logger.info("{} title of POLine with id={} successfully deleted", reply.result()
+          .getUpdated(), tx.getEntity());
+        promise.complete(tx);
+      }
+    });
+    return promise.future();
   }
 
   @Override
