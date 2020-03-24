@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.AfterAll;
@@ -35,7 +36,9 @@ public abstract class TestBase {
 
   static final String NON_EXISTED_ID = "bad500aa-aaaa-500a-aaaa-aaaaaaaaaaaa";
   private static final String TENANT_NAME = "diku";
+  static final String ISOLATED_TENANT = "isolated";
   static final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
+  static final Header ISOLATED_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, ISOLATED_TENANT);
 
   private static boolean invokeStorageTestSuiteAfter = false;
 
@@ -57,6 +60,20 @@ public abstract class TestBase {
 
     if (invokeStorageTestSuiteAfter) {
       StorageTestSuite.after();
+    }
+  }
+
+  @SafeVarargs
+  final void givenTestData(Pair<TestEntities, String>... testPairs) throws MalformedURLException {
+    for(Pair<TestEntities, String> pair: testPairs) {
+
+      String sample = getFile(pair.getRight());
+      String id = new JsonObject(sample).getString("id");
+      pair.getLeft().setId(id);
+
+      postData(pair.getLeft().getEndpoint(), sample, ISOLATED_TENANT_HEADER)
+        .then()
+        .statusCode(201);
     }
   }
 
@@ -103,12 +120,16 @@ public abstract class TestBase {
       .get(storageUrl(endpoint));
   }
 
-  Response getDataByParam(String endpoint, Map<String, Object> params) throws MalformedURLException {
+  Response getDataByParam(String endpoint, Map<String, Object> params, Header tenant) throws MalformedURLException {
     return given()
       .params(params)
-      .header(TENANT_HEADER)
+      .header(tenant)
       .contentType(ContentType.JSON)
       .get(storageUrl(endpoint));
+  }
+
+  Response getDataByParam(String endpoint, Map<String, Object> params) throws MalformedURLException {
+    return getDataByParam(endpoint, params, TENANT_HEADER);
   }
 
   Response postData(String endpoint, String input) throws MalformedURLException {

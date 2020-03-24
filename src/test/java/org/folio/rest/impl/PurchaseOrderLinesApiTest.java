@@ -1,24 +1,15 @@
 package org.folio.rest.impl;
 
 import io.restassured.response.Response;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.sql.SQLConnection;
-import mockit.Expectations;
-import mockit.Mock;
-import mockit.MockUp;
-import mockit.Mocked;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
-import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.Tx;
-import org.folio.rest.persist.cql.CQLQueryValidationException;
+import org.folio.rest.utils.IsolatedTenant;
+import org.folio.rest.utils.TestData;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.Test;
 
@@ -35,9 +26,38 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
 
+@IsolatedTenant
 public class PurchaseOrderLinesApiTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(PurchaseOrderLinesApiTest.class);
+
+  @Test
+  public void testDeletePOLineByIdWithRelatedData() throws MalformedURLException {
+
+    givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT),
+                  Pair.of(PO_LINE, TestData.PoLine.DEFAULT),
+                  Pair.of(TITLES, TestData.Title.DEFAULT));
+
+    // check that titles present
+    getDataById(TITLES.getEndpointWithId(), TITLES.getId(), ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(200);
+
+    // when delete po line by Id
+    deleteData(PO_LINE.getEndpointWithId(), PO_LINE.getId(), ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(204);
+
+    // po line has been deleted
+    getDataById(PO_LINE.getEndpointWithId(), PO_LINE.getId(), ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(404);
+
+    // and titles has been deleted as well
+    getDataById(TITLES.getEndpointWithId(), TITLES.getId(), ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(404);
+  }
 
   @Test
   public void testPostOrdersLinesByIdPoLineWithoutId() throws MalformedURLException {
@@ -114,7 +134,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
 
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PO_LINE.getEndpoint(), jsonLine.toString())
+    postData(PO_LINE.getEndpoint(), jsonLine.toString(), ISOLATED_TENANT_HEADER)
       .then()
         .statusCode(400)
         .body(containsString(jsonLine.getString("purchaseOrderId")));
@@ -144,11 +164,11 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString()).then().statusCode(201);
-    postData(PO_LINE.getEndpoint(), jsonLine.toString()).then().statusCode(201);
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), ISOLATED_TENANT_HEADER).then().statusCode(201);
+    postData(PO_LINE.getEndpoint(), jsonLine.toString(), ISOLATED_TENANT_HEADER).then().statusCode(201);
 
     jsonLine.put("purchaseOrderId", NON_EXISTED_ID);
-    putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString())
+    putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString(), ISOLATED_TENANT_HEADER)
       .then()
       .statusCode(400)
       .body(containsString(NON_EXISTED_ID));
@@ -157,20 +177,21 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
+//  @IsolatedTenant
   public void testUpdateNonPackagePoLineWithoutTitle() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: update non-package PoLine without title must create title");
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString()).then().statusCode(201);
-    Response response = postData(PO_LINE.getEndpoint(), jsonLine.toString());
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), ISOLATED_TENANT_HEADER).then().statusCode(201);
+    Response response = postData(PO_LINE.getEndpoint(), jsonLine.toString(), ISOLATED_TENANT_HEADER);
     PoLine poLine = response.then()
       .statusCode(201)
       .extract().as(PoLine.class);
     Map<String, Object> params = new HashMap<>();
     params.put("query", "poLineId==" + poLine.getId());
 
-    TitleCollection titleCollection = getDataByParam(TITLES.getEndpoint(), params)
+    TitleCollection titleCollection = getDataByParam(TITLES.getEndpoint(), params, ISOLATED_TENANT_HEADER)
       .then()
       .statusCode(200)
       .extract()
@@ -187,11 +208,13 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     poLine.setTitleOrPackage(newTitle);
     poLine.setMetadata(null);
 
-    deleteData(TITLES.getEndpointWithId(), titleBefore.getId());
+    deleteData(TITLES.getEndpointWithId(), titleBefore.getId(), ISOLATED_TENANT_HEADER);
 
-    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode()).then().statusCode(204);
+    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode(), ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(204);
 
-    titleCollection = getDataByParam(TITLES.getEndpoint(), params)
+    titleCollection = getDataByParam(TITLES.getEndpoint(), params, ISOLATED_TENANT_HEADER)
       .then()
       .statusCode(200)
       .extract()
@@ -203,9 +226,9 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertThat(titleAfter.getProductIds(), hasSize(0));
     assertThat(titleAfter.getTitle(), is(newTitle));
 
-    deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
-    deleteData(PO_LINE.getEndpointWithId(), poLine.getId());
-    deleteData(TITLES.getEndpointWithId(), titleAfter.getId());
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"), ISOLATED_TENANT_HEADER);
+    deleteData(PO_LINE.getEndpointWithId(), poLine.getId(), ISOLATED_TENANT_HEADER);
+    deleteData(TITLES.getEndpointWithId(), titleAfter.getId(), ISOLATED_TENANT_HEADER);
   }
 
 }
