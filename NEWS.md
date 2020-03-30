@@ -1,4 +1,11 @@
 ## 10.1.0 - Unreleased
+## 10.0.1 - Released
+Bugfix release to fix cascade deletion for titles
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v10.0.0...v10.0.1)
+
+### Bug Fixes
+* [MODORDSTOR-139](https://issues.folio.org/browse/MODORDSTOR-139) - Implementing cascade deletion for Titles
 
 ## 10.0.0 - Released
 The main focus of this release was to introduce new APIs and tables for **titles, poNumber prefix/suffix, and reason for closure**.
