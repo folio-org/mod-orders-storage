@@ -133,7 +133,7 @@
     },
     {
       "id": "orders-storage.purchase-orders",
-      "version": "7.0",
+      "version": "7.1",
       "handlers": [
         {
           "methods": ["GET"],
