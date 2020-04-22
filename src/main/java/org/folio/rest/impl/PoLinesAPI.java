@@ -98,6 +98,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       .toString())
       .withPoLineId(poLine.getId())
       .withTitle(poLine.getTitleOrPackage())
+      .withInstanceId(poLine.getInstanceId())
       .withContributors(poLine.getContributors())
       .withEdition(poLine.getEdition())
       .withPublisher(poLine.getPublisher())
