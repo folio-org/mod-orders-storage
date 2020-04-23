@@ -222,7 +222,6 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
     Title newTitle = createTitleObject(poLine)
-      .withInstanceId(title.getInstanceId())
       .withId(title.getId());
 
     getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, newTitle, JSONB, criterion.toString(), false, event -> {
