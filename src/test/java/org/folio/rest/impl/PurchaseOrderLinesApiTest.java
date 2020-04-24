@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @IsolatedTenant
 public class PurchaseOrderLinesApiTest extends TestBase {
@@ -120,7 +121,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertThat(titleAfter.getPoLineId(), is(poLine.getId()));
     assertThat(titleAfter.getProductIds(), hasSize(0));
     assertThat(titleAfter.getTitle(), is(newTitle));
-    assertThat(titleAfter.getInstanceId(), is(instanceId));
+    assertEquals(titleAfter.getInstanceId(), poLine.getInstanceId());
 
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
