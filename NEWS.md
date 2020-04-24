@@ -1,4 +1,14 @@
 ## 10.1.0 - Unreleased
+
+## 10.0.2 - Released
+Bugfix release to fix populating instanceId for titles
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v10.0.1...v10.0.2)
+
+### Bug Fixes
+* [MODORDSTOR-145](https://issues.folio.org/browse/MODORDSTOR-145) - Create title with populated instanceId upon creation of poLine
+
+
 ## 10.0.1 - Released
 Bugfix release to fix cascade deletion for titles
 
