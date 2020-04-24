@@ -9,7 +9,7 @@ FROM ${myuniversity}_${mymodule}.po_line AS po_line
 WHERE po_line.jsonb ? 'title';
 
 UPDATE ${myuniversity}_${mymodule}.po_line
-SET jsonb = jsonb - '{title, instanceId}'::text[] || jsonb_build_object('titleOrPackage', jsonb->'title', 'isPackage', false)
+SET jsonb = jsonb - '{title}'::text[] || jsonb_build_object('titleOrPackage', jsonb->'title', 'isPackage', false)
 WHERE jsonb ? 'title';
 
 DROP EXTENSION "uuid-ossp";
