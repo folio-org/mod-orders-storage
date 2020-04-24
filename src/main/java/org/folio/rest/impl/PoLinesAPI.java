@@ -256,7 +256,6 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
   private boolean titleUpdateRequired(Title title, PoLine poLine) {
     return !title.equals(createTitleObject(poLine)
-      .withInstanceId(title.getInstanceId())
       .withId(title.getId()));
   }
 
