@@ -63,6 +63,7 @@
     "materialSupplier": "15fb695a-cdf1-11e8-a8d5-f2801f1b9fd1",
     "materialType": "5ee11d91-f7e8-481d-b079-65d708582ccc",
     "receiptDue": "2018-09-29T00:00:00.000Z",
+    "expectedReceiptDate": "2018-10-05T00:00:00.000Z",
     "volumes": [
       "vol. 1"
     ]
