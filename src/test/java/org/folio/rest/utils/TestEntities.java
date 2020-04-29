@@ -18,7 +18,7 @@ public enum TestEntities {
   // the below order is important to satisfy the foreign key constraints
   ALERT("/orders-storage/alerts", Alert.class, TestData.Alert.DEFAULT,  "alert", "Receipt overdue updated", 1),
   REPORTING_CODE("/orders-storage/reporting-codes", ReportingCode.class, TestData.ReportingCode.DEFAULT, "code", "CODEV", 1),
-  PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, TestData.PurchaseOrder.DEFAULT, "poNumber", "666666", 15),
+  PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, TestData.PurchaseOrder.DEFAULT, "poNumber", "666666", 16),
   PO_LINE("/orders-storage/po-lines", PoLine.class, TestData.PoLine.DEFAULT, "description", "Gift", 16),
   PIECE("/orders-storage/pieces", Piece.class, TestData.Piece.DEFAULT, "comment", "Update Comment", 18),
   TITLES("/orders-storage/titles", Title.class, TestData.Title.DEFAULT, "title", "New title", 16),
