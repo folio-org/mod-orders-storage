@@ -14,9 +14,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.folio.rest.jaxrs.model.Piece;
@@ -24,7 +22,8 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
-import org.folio.rest.jaxrs.model.TitleCollection;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.utils.TestData;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -99,6 +98,9 @@ public class ReceivingHistoryTest extends TestBase {
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
+
+      createEntity(TITLES.getEndpoint(), getFileAsObject(TITLES.getSampleFileName(), Title.class));
+      createEntity(TITLES.getEndpoint(), getFileAsObject(TestData.Title.INTERESTING_TIMES_TWO, Title.class));
       createEntity(PIECE.getEndpoint(), pieceSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
       createEntity(PIECE.getEndpoint(), pieceSample2);
@@ -117,9 +119,8 @@ public class ReceivingHistoryTest extends TestBase {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
-      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
-      deleteTitles(poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
+      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
     }

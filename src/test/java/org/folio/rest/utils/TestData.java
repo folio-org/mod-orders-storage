@@ -24,6 +24,7 @@ public class TestData {
 
   public interface Title {
     String DEFAULT = "data/titles/interesting-times.json";
+    String INTERESTING_TIMES_TWO = "data/titles/interesting-times-two.json";
   }
 
   public interface OrderInvoiceRelationship {
