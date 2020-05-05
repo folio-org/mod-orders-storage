@@ -44,6 +44,11 @@
       "run": "after",
       "snippetPath": "data-migration/10.1.0/purchase_order_table.sql",
       "fromModuleVersion": "mod-orders-storage-10.1.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/11.0.0/update_title.sql",
+      "fromModuleVersion": "mod-orders-storage-11.0.0"
     }
   ],
   "tables": [
@@ -401,8 +406,8 @@
      },
     {
       "tableName": "titles",
-      "fromModuleVersion": "mod-orders-storage-10.0.0",
-      "withMetadata": false,
+      "fromModuleVersion": "mod-orders-storage-11.0.0",
+      "withMetadata": true,
       "foreignKeys": [
         {
           "fieldName": "poLineId",
