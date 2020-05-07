@@ -12,57 +12,91 @@
       "grace": 0
     }
   ],
-  "collection": true,
+  "collection": false,
   "cost": {
     "additionalCost": 0,
     "currency": "USD",
-    "discount": 0.00,
-    "discountType": "percentage",
-    "listUnitPrice": 0.00,
+    "discount": 20,
+    "discountType": "amount",
+    "listUnitPrice": 500.00,
     "listUnitPriceElectronic": 0.00,
-    "poLineEstimatedPrice": 0.00,
-    "quantityElectronic": 0,
-    "quantityPhysical": 1
+    "poLineEstimatedPrice": 2980.00,
+    "quantityElectronic": 1,
+    "quantityPhysical": 6
   },
   "description": "",
   "details": {
     "productIds": [
       {
-        "productId": "9781450351430",
-        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422"
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422",
+        "productId": "0552142352"
+      },
+      {
+        "productIdType": "8261054f-be78-422d-bd51-4ed9f33c3422",
+        "productId": "9780552142352"
       }
     ],
     "receivingNote": "",
-    "subscriptionFrom": null,
-    "subscriptionInterval": 0,
-    "subscriptionTo": null
+    "subscriptionFrom": "2018-07-20T00:00:00.000Z",
+    "subscriptionInterval": 1095,
+    "subscriptionTo": "2021-07-19T00:00:00.000Z"
   },
   "donor": "",
   "edition": "First edition",
-  "fundDistribution": [
+  "eresource": {
+    "accessProvider": "14fb6608-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "activated": false,
+    "activationDue": 1,
+    "createInventory": "Instance, Holding",
+    "expectedActivation": "2019-07-20T00:00:00.000Z",
+    "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
+    "trial": true,
+    "userLimit": 0
+  },
+   "fundDistribution": [
     {
-      "code": "STATE-SUBN",
-      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08012",
-      "fundId": "e54b1f4d-7d05-4b1a-9368-3c36b75d8ac6",
+      "code": "USHIST",
+      "encumbrance": "e1a607b4-2ed3-4bd9-9c1e-3726737d5425",
+      "fundId": "65032151-39a5-4cef-8810-5350eb316300",
       "distributionType": "percentage",
-      "value": 100.0
+      "value": 50.0
+    },
+    {
+      "code": "EUROHIST",
+      "encumbrance": "6268d1e5-00c4-4ba7-86ff-c3eeb44886ea",
+      "fundId": "e9285a1c-1dfc-4380-868c-e74073003f43",
+      "distributionType": "percentage",
+      "value": 50.0
     }
   ],
-  "locations": [
+  "isPackage": true,
+    "locations": [
     {
-      "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
+      "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
+      "quantity": 2,
+      "quantityElectronic": 1,
+      "quantityPhysical": 1
+    },
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
       "quantity": 1,
       "quantityElectronic": 0,
       "quantityPhysical": 1
+    },
+    {
+      "locationId": "b241764c-1466-4e1d-a028-1a3684a5da87",
+      "quantity": 4,
+      "quantityElectronic": 0,
+      "quantityPhysical": 4
     }
   ],
   "orderFormat": "Physical Resource",
   "paymentStatus": "Pending",
-  "physical": {
-    "createInventory": "None",
-    "materialSupplier": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
-    "receiptDue": null,
+   "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialSupplier": "70fb4e66-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "5ee11d91-f7e8-481d-b079-65d708582ccc",
+    "receiptDue": "2018-08-19T00:00:00.000Z",
     "volumes": [
       "vol. 1"
     ]
@@ -82,46 +116,10 @@
         "membership"
      ]
   },
-  "titleOrPackage": "MobiCom'17 5 mmNets'17, October 16, 2017, Snowbird, UT, USA / general chairs: Haitham Hassanieh (University of Illinois at Urbana Champaign, USA), Xinyu Zhang (University of California San Diego, USA)",
-  "vendorDetail": {
-    "instructions": "1901 and continuation",
+  "titleOrPackage": "Interesting Times",
+   "vendorDetail": {
+    "instructions": "",
     "noteFromVendor": "",
-    "refNumber": "96459125",
-    "refNumberType": "Supplier's unique order line reference number",
-    "vendorAccount": "B-Ser"
-  },
-  "contributors": [
-    {
-      "contributorNameTypeId": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
-      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1. 2017 Snowbird, Utah"
-    },
-    {
-      "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
-      "contributor": "Hassanieh, Haitham"
-    },
-    {
-      "contributorNameTypeId": "2b94c631-fca9-4892-a730-03ee529ffe2a",
-      "contributor": "Zhang, Xinyu"
-    },
-    {
-      "contributorNameTypeId": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
-      "contributor": "MobiCom 23. 2017 Snowbird, Utah"
-    },
-    {
-      "contributorNameTypeId": "2e48e713-17f3-4c13-a9f8-23845bb210aa",
-      "contributor": "Association for Computing Machinery Special Interest Group on Mobility of Systems Users, Data, and Computing"
-    },
-    {
-      "contributorNameTypeId": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
-      "contributor": "ACM Workshop on Millimeter Wave Networks and Sensing Systems 1 2017.10.16 Snowbird, Utah"
-    },
-    {
-      "contributorNameTypeId": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
-      "contributor": "mmNets 1 2017.10.16 Snowbird, Utah"
-    },
-    {
-      "contributorNameTypeId": "e8b311a6-3b21-43f2-a269-dd9310cb2d0a",
-      "contributor": "Annual International Conference on Mobile Computing and Networking (ACM MobiCom) 23 2017.10.16-20 Snowbird, Utah"
-    }
-  ]
+    "vendorAccount": ""
+  }
 }

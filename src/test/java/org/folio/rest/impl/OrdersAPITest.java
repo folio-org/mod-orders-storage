@@ -15,6 +15,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.junit.jupiter.api.Test;
 
@@ -35,10 +36,10 @@ public class OrdersAPITest extends TestBase {
 
   private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
 
-  private final String poLineSample = getFile("data/po-lines/268758-03_fully_received_electronic_resource.json");
-  private final String poLineSample2 = getFile("data/po-lines/14383007-1_awaiting_receipt_gift.json");
-  private final PurchaseOrder purchaseOrderSample = getOrder("data/purchase-orders/268758_one-time_open.json");
-  private final PurchaseOrder purchaseOrderSample2 = getOrder("data/purchase-orders/14383007_ongoing_open.json");
+  private final String poLineSample = getFile("data/po-lines/81-1_pending_fomat-other.json");
+  private final String poLineSample2 = getFile("data/po-lines/52590-1_pending_physical.json");
+  private final PurchaseOrder purchaseOrderSample = getOrder("data/purchase-orders/81_ongoing_pending.json");
+  private final PurchaseOrder purchaseOrderSample2 = getOrder("data/purchase-orders/52590_one-time_pending.json");
   private final String purchaseOrderWithoutPOLines= getFile("data/purchase-orders/313110_order_without_poLines.json");
   private static final String APPLICATION_JSON = "application/json";
   private static final Integer CREATED_ORDERS_QUANTITY = 3;
@@ -95,27 +96,16 @@ public class OrdersAPITest extends TestBase {
       List<PurchaseOrder> allActualOrdersWithLimit = getViewCollection(ORDERS_ENDPOINT + "?limit=1");
       assertThat(allActualOrdersWithLimit, hasSize(1));
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering and ordering... ");
-      List<PurchaseOrder> orderedByAscOrders = getViewCollection(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.ascending");
-      for(int i = 0; i < orderedByAscOrders.size() - 1; i++) {
-        assertThat(orderedByAscOrders.get(i + 1).getDateOrdered().after(orderedByAscOrders.get(i).getDateOrdered()), is(true));
-      }
-
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags... ");
       List<PurchaseOrder> ordersWithTag = getViewCollection(ORDERS_ENDPOINT + "?query=tags.tagList=important sortBy dateOrdered/sort.ascending");
 
       assertThat(ordersWithTag, hasSize(1));
       assertThat("important", isIn(ordersWithTag.get(0).getTags().getTagList()));
 
-      List<PurchaseOrder> orderedByDescOrders = getViewCollection(ORDERS_ENDPOINT + "?query=workflowStatus==Open sortBy dateOrdered/sort.descending");
-      for(int i = 0; i < orderedByDescOrders.size() - 1; i++) {
-        assertThat(orderedByDescOrders.get(i + 1).getDateOrdered().before(orderedByDescOrders.get(i).getDateOrdered()), is(true));
-      }
-
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by PO and POLine fields... ");
-      List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(ORDERS_ENDPOINT + "?query=paymentStatus==Partially Paid AND workflowStatus==Open AND orderType==One-Time");
-      assertThat(filteredByPoAndP0LineFields, hasSize(1));
-      assertThat(filteredByPoAndP0LineFields.get(0).getWorkflowStatus(), is(PurchaseOrder.WorkflowStatus.OPEN));
+      List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(ORDERS_ENDPOINT + "?query=workflowStatus==Pending AND orderType==One-Time");
+      assertThat(filteredByPoAndP0LineFields, hasSize(2));
+      assertThat(filteredByPoAndP0LineFields.get(0).getWorkflowStatus(), is(WorkflowStatus.PENDING));
       assertThat(filteredByPoAndP0LineFields.get(0).getOrderType(), is(PurchaseOrder.OrderType.ONE_TIME));
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by Acquisitions unit... ");
@@ -145,7 +135,6 @@ public class OrdersAPITest extends TestBase {
       // PO lines and PO
       deleteTitles(poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
-      deleteTitles(poLineSampleId2);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
