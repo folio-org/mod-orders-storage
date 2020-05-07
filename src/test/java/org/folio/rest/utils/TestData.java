@@ -16,7 +16,7 @@ public class TestData {
   }
 
   public interface PoLine {
-    String DEFAULT = "data/po-lines/52590-1_pending_physical.json";
+    String DEFAULT = "data/po-lines/52590-1_pending_pe_mix.json";
     String DEFAULT_81 = "data/po-lines/81-1_pending_fomat-other.json";
   }
 

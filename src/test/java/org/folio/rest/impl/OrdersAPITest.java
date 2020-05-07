@@ -37,7 +37,7 @@ public class OrdersAPITest extends TestBase {
   private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
 
   private final String poLineSample = getFile("data/po-lines/81-1_pending_fomat-other.json");
-  private final String poLineSample2 = getFile("data/po-lines/52590-1_pending_physical.json");
+  private final String poLineSample2 = getFile("data/po-lines/52590-1_pending_pe_mix.json");
   private final PurchaseOrder purchaseOrderSample = getOrder("data/purchase-orders/81_ongoing_pending.json");
   private final PurchaseOrder purchaseOrderSample2 = getOrder("data/purchase-orders/52590_one-time_pending.json");
   private final String purchaseOrderWithoutPOLines= getFile("data/purchase-orders/313110_order_without_poLines.json");

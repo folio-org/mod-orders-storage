@@ -63,7 +63,7 @@ public class SearchOrderLinesTest extends TestBase {
   public void testgetPolineswithPOQuery() throws MalformedURLException {
     logger.info("--- mod-orders-storage po-lines: Verify query with field from PO and a field from PO Line");
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=workflowStatus=Pending and orderFormat=Physical");
-    assertThat(poLines, hasSize(4));
+    assertThat(poLines, hasSize(3));
     assertThat(poLines.get(0).getOrderFormat(), is(OrderFormat.PHYSICAL_RESOURCE));
   }
 
@@ -71,7 +71,7 @@ public class SearchOrderLinesTest extends TestBase {
   public void testgetPolineswithPOLinesQuery() throws MalformedURLException {
     logger.info("--- mod-orders-storage po-lines: Verify query on fields from PO Lines");
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=orderFormat==Physical Resource and physical.createInventory=Instance, Holding, Item");
-    assertThat(poLines, hasSize(3));
+    assertThat(poLines, hasSize(2));
     assertThat(poLines.get(0).getOrderFormat(), is(OrderFormat.PHYSICAL_RESOURCE));
     assertThat(poLines.get(0).getPhysical().getCreateInventory(), is(CreateInventory.INSTANCE_HOLDING_ITEM));
   }

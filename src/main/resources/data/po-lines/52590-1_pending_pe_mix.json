@@ -90,7 +90,7 @@
       "quantityPhysical": 4
     }
   ],
-  "orderFormat": "Physical Resource",
+  "orderFormat": "P/E Mix",
   "paymentStatus": "Pending",
    "physical": {
     "createInventory": "Instance, Holding, Item",
