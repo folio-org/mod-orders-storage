@@ -1,15 +1,15 @@
 {
-  "id": "90fb53f2-cdf1-11e8-a8d5-f2801f1b9fd1",
+  "id": "baec48dd-1594-2712-be8f-de336bc83fcc",
   "acquisitionMethod": "Purchase",
-  "agreementId": "e332be88-2ba3-43f7-a245-f5136bf2ffce",
+  "agreementId": "800b2f19-7134-4408-8145-3b04697b7de7",
   "alerts": [],
   "cancellationRestriction": false,
   "cancellationRestrictionNote": "",
   "checkinItems": false,
   "claims": [
     {
-      "claimed": false,
-      "grace": 60
+      "claimed": true,
+      "grace": 0
     }
   ],
   "collection": false,
@@ -53,7 +53,7 @@
     "trial": true,
     "userLimit": 0
   },
-  "fundDistribution": [
+   "fundDistribution": [
     {
       "code": "USHIST",
       "encumbrance": "e1a607b4-2ed3-4bd9-9c1e-3726737d5425",
@@ -70,7 +70,7 @@
     }
   ],
   "isPackage": true,
-  "locations": [
+    "locations": [
     {
       "locationId": "f34d27c6-a8eb-461b-acd6-5dea81771e70",
       "quantity": 2,
@@ -92,7 +92,7 @@
   ],
   "orderFormat": "P/E Mix",
   "paymentStatus": "Pending",
-  "physical": {
+   "physical": {
     "createInventory": "Instance, Holding, Item",
     "materialSupplier": "70fb4e66-cdf1-11e8-a8d5-f2801f1b9fd1",
     "materialType": "5ee11d91-f7e8-481d-b079-65d708582ccc",
@@ -102,25 +102,22 @@
     ]
   },
   "poLineDescription": "",
-  "poLineNumber": "313000-1",
-  "publicationDate": "2016",
-  "publisher": "ro*co films",
-  "purchaseOrderId": "05bdf3c8-01f0-4ddb-bd6c-6efd465f9e33",
+  "poLineNumber": "52590-1",
+  "purchaseOrderId": "0610be6d-0ddd-494b-b867-19f63d8b5d6d",
   "receiptDate": null,
-  "receiptStatus": "Partially Received",
+  "receiptStatus": "Pending",
   "reportingCodes": [],
-  "requester": "jcobb",
+  "requester": "",
   "rush": false,
-  "selector": "mreynolds",
+  "selector": "sgw",
   "source": "User",
   "tags": {
-    "tagList": [
-       "dvd",
-       "streaming"
+     "tagList": [
+        "membership"
      ]
   },
   "titleOrPackage": "Interesting Times",
-  "vendorDetail": {
+   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""

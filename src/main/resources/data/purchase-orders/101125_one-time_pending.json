@@ -1,6 +1,9 @@
 {
   "id": "9447d062-89ec-486e-a14b-572f3efb9f8c",
   "approved": false,
+  "acqUnitIds": [
+    "0ebb1f7d-983f-3026-8a4c-5318e0ebc041"
+  ],
   "manualPo": false,
   "orderType": "One-Time",
   "poNumber": "101125",
