@@ -97,18 +97,21 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     Title title = new Title().withId(UUID.randomUUID()
       .toString())
       .withPoLineId(poLine.getId())
+      .withPoLineNumber(poLine.getPoLineNumber())
       .withTitle(poLine.getTitleOrPackage())
       .withInstanceId(poLine.getInstanceId())
       .withContributors(poLine.getContributors())
       .withEdition(poLine.getEdition())
       .withPublisher(poLine.getPublisher())
-      .withPublishedDate(poLine.getPublicationDate());
+      .withPublishedDate(poLine.getPublicationDate())
+      .withExpectedReceiptDate(Objects.nonNull(poLine.getPhysical()) ? poLine.getPhysical().getExpectedReceiptDate() : null);
     if (Objects.nonNull(poLine.getDetails())) {
       title.withProductIds(poLine.getDetails()
         .getProductIds())
         .withSubscriptionFrom(poLine.getDetails().getSubscriptionFrom())
         .withSubscriptionTo(poLine.getDetails().getSubscriptionTo())
-        .withSubscriptionInterval(poLine.getDetails().getSubscriptionInterval());
+        .withSubscriptionInterval(poLine.getDetails().getSubscriptionInterval())
+        .withReceivingNote(poLine.getDetails().getReceivingNote());
     }
     return title;
   }
@@ -256,7 +259,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
   private boolean titleUpdateRequired(Title title, PoLine poLine) {
     return !title.equals(createTitleObject(poLine)
-      .withId(title.getId()));
+      .withId(title.getId())
+      .withMetadata(title.getMetadata()));
   }
 
   private Future<Tx<String>> deletePOLineById(Tx<String> tx) {

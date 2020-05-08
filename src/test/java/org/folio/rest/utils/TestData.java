@@ -11,15 +11,18 @@ public class TestData {
   }
 
   public interface PurchaseOrder {
-    String DEFAULT = "data/purchase-orders/313000_one-time_open.json";
+    String DEFAULT = "data/purchase-orders/52590_one-time_pending.json";
+    String DEFAULT_81 = "data/purchase-orders/81_ongoing_pending.json";
   }
 
   public interface PoLine {
-    String DEFAULT = "data/po-lines/313000-1_awaiting_receipt_mix-format.json";
+    String DEFAULT = "data/po-lines/52590-1_pending_pe_mix.json";
+    String DEFAULT_81 = "data/po-lines/81-1_pending_fomat-other.json";
   }
 
   public interface Piece {
-    String DEFAULT = "data/pieces/313000-03_created_by_item.json";
+    String DEFAULT = "data/pieces/52590_default.json";
+    String DEFAULT_81 = "data/pieces/81_default.json";
   }
 
   public interface Title {
@@ -28,7 +31,7 @@ public class TestData {
   }
 
   public interface OrderInvoiceRelationship {
-    String DEFAULT = "data/order-invoice-relationships/313000_123invoicenumber45.json";
+    String DEFAULT = "data/order-invoice-relationships/52590_default.json";
   }
 
   public interface OrderTemplate {
