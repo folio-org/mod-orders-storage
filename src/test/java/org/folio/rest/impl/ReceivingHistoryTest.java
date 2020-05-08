@@ -21,6 +21,8 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.IsolatedTenant;
 import org.folio.rest.utils.TestData;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,7 @@ public class ReceivingHistoryTest extends TestBase {
 
   private final PoLine poLineSample = getFileAsObject(TestData.PoLine.DEFAULT, PoLine.class);
   private final PoLine poLineSample2 = getFileAsObject(TestData.PoLine.DEFAULT_81, PoLine.class);
+  private final Title titleSample = getFileAsObject(TestData.Title.DEFAULT, Title.class);
   private final Piece pieceSample = getFileAsObject(TestData.Piece.DEFAULT, Piece.class);
   private final Piece pieceSample2 = getFileAsObject(TestData.Piece.DEFAULT_81, Piece.class);
   private final PurchaseOrder purchaseOrderSample = getFileAsObject(TestData.PurchaseOrder.DEFAULT, PurchaseOrder.class);
@@ -77,7 +80,15 @@ public class ReceivingHistoryTest extends TestBase {
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
 
       createEntity(TITLES.getEndpoint(), getFileAsObject(TITLES.getSampleFileName(), Title.class));
-      createEntity(TITLES.getEndpoint(), getFileAsObject(TestData.Title.INTERESTING_TIMES_TWO, Title.class));
+
+      String titleId2 = getData(TITLES.getEndpoint() + "?query=poLineId==" + poLineSample2.getId()).then()
+        .statusCode(200)
+        .extract()
+        .as(TitleCollection.class)
+        .getTitles().get(0).getId();
+
+      pieceSample2.setTitleId(titleId2);
+
       createEntity(PIECE.getEndpoint(), pieceSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
       createEntity(PIECE.getEndpoint(), pieceSample2);
@@ -158,6 +169,17 @@ public class ReceivingHistoryTest extends TestBase {
     createEntity(PURCHASE_ORDER.getEndpoint(), mapFrom(purchaseOrderSample2).encode(), ISOLATED_TENANT_HEADER);
     createEntity(PO_LINE.getEndpoint(), mapFrom(poLineSample).encode(), ISOLATED_TENANT_HEADER);
     createEntity(PO_LINE.getEndpoint(), mapFrom(poLineSample2).encode(), ISOLATED_TENANT_HEADER);
+
+    createEntity(TITLES.getEndpoint(), mapFrom(titleSample).encode(), ISOLATED_TENANT_HEADER);
+
+    String titleId2 = getData(TITLES.getEndpoint() + "?query=poLineId==" + poLineSample2.getId(), ISOLATED_TENANT_HEADER).then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class)
+      .getTitles().get(0).getId();
+
+    pieceSample2.setTitleId(titleId2);
+
     createEntity(PIECE.getEndpoint(), mapFrom(pieceSample).encode(), ISOLATED_TENANT_HEADER);
     createEntity(PIECE.getEndpoint(), mapFrom(pieceSample2).encode(), ISOLATED_TENANT_HEADER);
   }
