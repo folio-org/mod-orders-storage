@@ -4,6 +4,7 @@ import static io.vertx.core.json.JsonObject.mapFrom;
 import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
+import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -20,6 +21,8 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.IsolatedTenant;
 import org.folio.rest.utils.TestData;
 import org.junit.jupiter.api.Test;
@@ -38,6 +41,7 @@ public class ReceivingHistoryTest extends TestBase {
 
   private final PoLine poLineSample = getFileAsObject(TestData.PoLine.DEFAULT, PoLine.class);
   private final PoLine poLineSample2 = getFileAsObject(TestData.PoLine.DEFAULT_81, PoLine.class);
+  private final Title titleSample = getFileAsObject(TestData.Title.DEFAULT, Title.class);
   private final Piece pieceSample = getFileAsObject(TestData.Piece.DEFAULT, Piece.class);
   private final Piece pieceSample2 = getFileAsObject(TestData.Piece.DEFAULT_81, Piece.class);
   private final PurchaseOrder purchaseOrderSample = getFileAsObject(TestData.PurchaseOrder.DEFAULT, PurchaseOrder.class);
@@ -74,6 +78,17 @@ public class ReceivingHistoryTest extends TestBase {
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
+
+      createEntity(TITLES.getEndpoint(), getFileAsObject(TITLES.getSampleFileName(), Title.class));
+
+      String titleId2 = getData(TITLES.getEndpoint() + "?query=poLineId==" + poLineSample2.getId()).then()
+        .statusCode(200)
+        .extract()
+        .as(TitleCollection.class)
+        .getTitles().get(0).getId();
+
+      pieceSample2.setTitleId(titleId2);
+
       createEntity(PIECE.getEndpoint(), pieceSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
       createEntity(PIECE.getEndpoint(), pieceSample2);
@@ -92,8 +107,8 @@ public class ReceivingHistoryTest extends TestBase {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
-      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
+      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
     }
@@ -154,6 +169,17 @@ public class ReceivingHistoryTest extends TestBase {
     createEntity(PURCHASE_ORDER.getEndpoint(), mapFrom(purchaseOrderSample2).encode(), ISOLATED_TENANT_HEADER);
     createEntity(PO_LINE.getEndpoint(), mapFrom(poLineSample).encode(), ISOLATED_TENANT_HEADER);
     createEntity(PO_LINE.getEndpoint(), mapFrom(poLineSample2).encode(), ISOLATED_TENANT_HEADER);
+
+    createEntity(TITLES.getEndpoint(), mapFrom(titleSample).encode(), ISOLATED_TENANT_HEADER);
+
+    String titleId2 = getData(TITLES.getEndpoint() + "?query=poLineId==" + poLineSample2.getId(), ISOLATED_TENANT_HEADER).then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class)
+      .getTitles().get(0).getId();
+
+    pieceSample2.setTitleId(titleId2);
+
     createEntity(PIECE.getEndpoint(), mapFrom(pieceSample).encode(), ISOLATED_TENANT_HEADER);
     createEntity(PIECE.getEndpoint(), mapFrom(pieceSample2).encode(), ISOLATED_TENANT_HEADER);
   }
