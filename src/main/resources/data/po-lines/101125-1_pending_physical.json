@@ -85,7 +85,10 @@
   "selector": "",
   "source": "User",
   "tags": {
-        "tagList": []
+    "tagList": [
+      "giftsubscription",
+      "important"
+    ]
   },
   "titleOrPackage": "A semantic web primer",
   "vendorDetail": {

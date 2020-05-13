@@ -49,6 +49,11 @@
       "run": "after",
       "snippetPath": "data-migration/11.0.0/update_title.sql",
       "fromModuleVersion": "mod-orders-storage-11.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/11.0.0/pieces_table.sql",
+      "fromModuleVersion": "mod-orders-storage-11.0.0"
     }
   ],
   "tables": [
@@ -303,13 +308,40 @@
       ]
     },
     {
+      "tableName": "titles",
+      "fromModuleVersion": "mod-orders-storage-11.0.0",
+      "withMetadata": true,
+      "foreignKeys": [
+        {
+          "fieldName": "poLineId",
+          "targetTable":      "po_line",
+          "targetTableAlias": "poLine",
+          "tableAlias": "titles",
+          "tOps": "ADD"
+        },
+        {
+          "targetPath": ["poLineId", "purchaseOrderId"],
+          "targetTable":      "purchase_order",
+          "targetTableAlias": "purchaseOrder",
+          "tableAlias": "titles"
+        }
+      ]
+    },
+    {
       "tableName": "pieces",
-      "fromModuleVersion": "mod-orders-storage-7.0.0",
+      "fromModuleVersion": "mod-orders-storage-11.0.0",
       "withMetadata": true,
       "foreignKeys": [
         {
           "fieldName": "poLineId",
           "targetTable": "po_line"
+        },
+        {
+          "fieldName": "titleId",
+          "targetTable": "titles",
+          "targetTableAlias": "titles",
+          "tableAlias": "pieces",
+          "tOps": "ADD"
         }
       ],
       "index": [
@@ -404,26 +436,6 @@
          }
        ]
      },
-    {
-      "tableName": "titles",
-      "fromModuleVersion": "mod-orders-storage-11.0.0",
-      "withMetadata": true,
-      "foreignKeys": [
-        {
-          "fieldName": "poLineId",
-          "targetTable":      "po_line",
-          "targetTableAlias": "poLine",
-          "tableAlias": "titles",
-          "tOps": "ADD"
-        },
-        {
-          "targetPath": ["poLineId", "purchaseOrderId"],
-          "targetTable":      "purchase_order",
-          "targetTableAlias": "purchaseOrder",
-          "tableAlias": "titles"
-        }
-      ]
-    },
     {
       "tableName": "reasons_for_closure",
       "fromModuleVersion": "mod-orders-storage-10.0.0",

@@ -1,8 +1,6 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
-import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
+import static io.vertx.core.json.JsonObject.mapFrom;
 import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
@@ -13,27 +11,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 import java.net.MalformedURLException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.folio.rest.utils.IsolatedTenant;
+import org.folio.rest.utils.TestData;
 import org.junit.jupiter.api.Test;
 
-import io.restassured.http.Header;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
-
+@IsolatedTenant
 public class ReceivingHistoryTest extends TestBase {
 
   private static final Logger logger = LoggerFactory.getLogger(ReceivingHistoryTest.class);
@@ -45,29 +39,14 @@ public class ReceivingHistoryTest extends TestBase {
 
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
-  private final PoLine poLineSample = getFileAsObject("data/po-lines/268758-03_fully_received_electronic_resource.json",
-      PoLine.class);
-  private final PoLine poLineSample2 = getFileAsObject("data/po-lines/313000-1_awaiting_receipt_mix-format.json", PoLine.class);
-  private final Piece pieceSample = getFileAsObject("data/pieces/268758-03_02_create_by_holding.json", Piece.class);
-  private final Piece pieceSample2 = getFileAsObject("data/pieces/313000-03_created_by_item.json", Piece.class);
-  private final PurchaseOrder purchaseOrderSample = getFileAsObject("data/purchase-orders/268758_one-time_open.json",
-      PurchaseOrder.class);
-  private final PurchaseOrder purchaseOrderSample2 = getFileAsObject("data/purchase-orders/313000_one-time_open.json",
-      PurchaseOrder.class);
+  private final PoLine poLineSample = getFileAsObject(TestData.PoLine.DEFAULT, PoLine.class);
+  private final PoLine poLineSample2 = getFileAsObject(TestData.PoLine.DEFAULT_81, PoLine.class);
+  private final Title titleSample = getFileAsObject(TestData.Title.DEFAULT, Title.class);
+  private final Piece pieceSample = getFileAsObject(TestData.Piece.DEFAULT, Piece.class);
+  private final Piece pieceSample2 = getFileAsObject(TestData.Piece.DEFAULT_81, Piece.class);
+  private final PurchaseOrder purchaseOrderSample = getFileAsObject(TestData.PurchaseOrder.DEFAULT, PurchaseOrder.class);
+  private final PurchaseOrder purchaseOrderSample2 = getFileAsObject(TestData.PurchaseOrder.DEFAULT_81, PurchaseOrder.class);
   private static final Integer CREATED_ENTITIES_QUANTITY = 2;
-  private static final Header NEW_TENANT = new Header(OKAPI_HEADER_TENANT, "receivinghistorytest");
-
-  @BeforeAll
-  public static void before() throws MalformedURLException {
-    logger.info("Create a new tenant loading the sample data");
-    prepareTenant(NEW_TENANT, true);
-  }
-
-  @AfterAll
-  public static void after() throws MalformedURLException {
-    logger.info("Delete the created tenant");
-    deleteTenant(NEW_TENANT);
-  }
 
   @Test
   public void testReceivingHistory() throws MalformedURLException {
@@ -99,6 +78,17 @@ public class ReceivingHistoryTest extends TestBase {
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
+
+      createEntity(TITLES.getEndpoint(), getFileAsObject(TITLES.getSampleFileName(), Title.class));
+
+      String titleId2 = getData(TITLES.getEndpoint() + "?query=poLineId==" + poLineSample2.getId()).then()
+        .statusCode(200)
+        .extract()
+        .as(TitleCollection.class)
+        .getTitles().get(0).getId();
+
+      pieceSample2.setTitleId(titleId2);
+
       createEntity(PIECE.getEndpoint(), pieceSample);
       logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
       createEntity(PIECE.getEndpoint(), pieceSample2);
@@ -117,9 +107,8 @@ public class ReceivingHistoryTest extends TestBase {
       fail(e.getMessage());
     } finally {
       logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
-      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
-      deleteTitles(poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
+      deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
     }
@@ -128,25 +117,33 @@ public class ReceivingHistoryTest extends TestBase {
   @Test
   public void testGetReceivingHistoryByPiecesAndPoLinesFields() throws MalformedURLException {
     logger.info("--- mod-orders-storage receiving-history: Verify query with field from piece and a field from PO Line");
-    List<ReceivingHistory> receivingHistories = getReceiveHistoryByQuery(RECEIVING_HISTORY_ENDPOINT + "?query=supplement=true and poLineReceiptStatus=Partially Received");
-    assertThat(receivingHistories, hasSize(7));
+
+    initTwoPiecesWithAcqUnits();
+
+    List<ReceivingHistory> receivingHistories = getReceiveHistoryByQuery(RECEIVING_HISTORY_ENDPOINT + "?query=supplement=true and poLineReceiptStatus=Pending");
+    assertThat(receivingHistories, hasSize(2));
     assertThat(receivingHistories.get(0).getReceivingStatus(), is(ReceivingHistory.ReceivingStatus.RECEIVED));
   }
 
   @Test
   public void testGetReceivingHistoryWithLimit() throws MalformedURLException {
     logger.info("--- mod-orders-storage receiving-history: Verify the limit parameter");
-    List<ReceivingHistory> filteredHistoryByLimit = getReceiveHistoryByQuery(RECEIVING_HISTORY_ENDPOINT + "?limit=5");
-    assertThat(filteredHistoryByLimit, hasSize(5));
+
+    initTwoPiecesWithAcqUnits();
+
+    List<ReceivingHistory> filteredHistoryByLimit = getReceiveHistoryByQuery(RECEIVING_HISTORY_ENDPOINT + "?limit=1");
+    assertThat(filteredHistoryByLimit, hasSize(1));
   }
 
   @Test
   public void testGetReceivingHistoryByAcqUnits() throws MalformedURLException {
     logger.info("--- mod-orders-storage receiving-history: Verify query receiving-history by acq units");
 
+    initTwoPiecesWithAcqUnits();
+
     String notEmptyAcqUnitsQuery = "?query=acqUnitIds=\"\" NOT acqUnitIds==[]";
     List<ReceivingHistory> entries = getReceiveHistoryByQuery(RECEIVING_HISTORY_ENDPOINT + notEmptyAcqUnitsQuery);
-    assertThat(entries, hasSize(7));
+    assertThat(entries, hasSize(1));
   }
 
   @Test
@@ -156,11 +153,35 @@ public class ReceivingHistoryTest extends TestBase {
   }
 
   private List<ReceivingHistory> getReceiveHistoryByQuery(String endpoint) throws MalformedURLException {
-    return getData(endpoint, NEW_TENANT).then()
+    return getData(endpoint, ISOLATED_TENANT_HEADER).then()
       .statusCode(200)
       .extract()
       .as(ReceivingHistoryCollection.class)
       .getReceivingHistory();
+  }
+
+  private void initTwoPiecesWithAcqUnits() throws MalformedURLException {
+
+    purchaseOrderSample.getAcqUnitIds().add(UUID.randomUUID().toString());
+    purchaseOrderSample.getAcqUnitIds().add(UUID.randomUUID().toString());
+
+    createEntity(PURCHASE_ORDER.getEndpoint(), mapFrom(purchaseOrderSample).encode(), ISOLATED_TENANT_HEADER);
+    createEntity(PURCHASE_ORDER.getEndpoint(), mapFrom(purchaseOrderSample2).encode(), ISOLATED_TENANT_HEADER);
+    createEntity(PO_LINE.getEndpoint(), mapFrom(poLineSample).encode(), ISOLATED_TENANT_HEADER);
+    createEntity(PO_LINE.getEndpoint(), mapFrom(poLineSample2).encode(), ISOLATED_TENANT_HEADER);
+
+    createEntity(TITLES.getEndpoint(), mapFrom(titleSample).encode(), ISOLATED_TENANT_HEADER);
+
+    String titleId2 = getData(TITLES.getEndpoint() + "?query=poLineId==" + poLineSample2.getId(), ISOLATED_TENANT_HEADER).then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class)
+      .getTitles().get(0).getId();
+
+    pieceSample2.setTitleId(titleId2);
+
+    createEntity(PIECE.getEndpoint(), mapFrom(pieceSample).encode(), ISOLATED_TENANT_HEADER);
+    createEntity(PIECE.getEndpoint(), mapFrom(pieceSample2).encode(), ISOLATED_TENANT_HEADER);
   }
 
   private void verifyViewCollectionAfter(String endpoint) throws MalformedURLException {

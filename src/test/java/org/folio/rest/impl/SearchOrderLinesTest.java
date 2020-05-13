@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.folio.rest.jaxrs.model.Physical;
+import org.folio.rest.jaxrs.model.Physical.CreateInventory;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLine.OrderFormat;
 import org.folio.rest.jaxrs.model.PoLineCollection;
@@ -61,18 +62,18 @@ public class SearchOrderLinesTest extends TestBase {
   @Test
   public void testgetPolineswithPOQuery() throws MalformedURLException {
     logger.info("--- mod-orders-storage po-lines: Verify query with field from PO and a field from PO Line");
-    List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=workflowStatus=Open and orderFormat=Physical");
-    assertThat(poLines, hasSize(4));
+    List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=workflowStatus=Pending and orderFormat=Physical");
+    assertThat(poLines, hasSize(3));
     assertThat(poLines.get(0).getOrderFormat(), is(OrderFormat.PHYSICAL_RESOURCE));
   }
 
   @Test
   public void testgetPolineswithPOLinesQuery() throws MalformedURLException {
     logger.info("--- mod-orders-storage po-lines: Verify query on fields from PO Lines");
-    List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=orderFormat==Physical Resource and physical.createInventory=None");
+    List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=orderFormat==Physical Resource and physical.createInventory=Instance, Holding, Item");
     assertThat(poLines, hasSize(2));
     assertThat(poLines.get(0).getOrderFormat(), is(OrderFormat.PHYSICAL_RESOURCE));
-    assertThat(poLines.get(0).getPhysical().getCreateInventory(), is(Physical.CreateInventory.NONE));
+    assertThat(poLines.get(0).getPhysical().getCreateInventory(), is(CreateInventory.INSTANCE_HOLDING_ITEM));
   }
 
   @Test
