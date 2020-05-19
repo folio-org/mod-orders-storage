@@ -113,6 +113,18 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
+  public void testPoLineWillNotBeCreatedDueToNonExistingPackagePoLineId() throws MalformedURLException {
+
+    givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT));
+
+    PoLine poLine = getFileAsObject(TestData.PoLine.DEFAULT_52590_NON_PACKAGE, PoLine.class)
+      .withPackagePoLineId(UUID.randomUUID().toString());
+
+    postData(PO_LINE.getEndpoint(), poLine.toString(), ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(400);
+  }
+  @Test
   public void testPostOrdersLinesByIdPoLineWithoutId() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: post PoLine without purchaseOrderId");
 
