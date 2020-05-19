@@ -17,6 +17,9 @@ public class TestData {
 
   public interface PoLine {
     String DEFAULT = "data/po-lines/52590-1_pending_pe_mix.json";
+    String DEFAULT_52590_NON_PACKAGE_WITH_PACKAGE_POLINE_ID = "mockdata/po-lines/52590-1_pending_pe_mix_non_package_with_package_po_line_id.json";
+    String DEFAULT_52590_NON_PACKAGE = "mockdata/po-lines/52590-1_pending_pe_mix_non_package.json";
+    String DEFAULT_52590_PACKAGE = "mockdata/po-lines/52590-1_pending_pe_mix_package.json";
     String DEFAULT_81 = "data/po-lines/81-1_pending_fomat-other.json";
   }
 

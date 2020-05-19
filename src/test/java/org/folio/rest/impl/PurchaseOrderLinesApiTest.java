@@ -4,6 +4,7 @@ import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Title;
@@ -26,6 +27,7 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @IsolatedTenant
 public class PurchaseOrderLinesApiTest extends TestBase {
@@ -58,6 +60,56 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     getDataById(TITLES.getEndpointWithId(), TITLES.getId(), ISOLATED_TENANT_HEADER)
       .then()
       .statusCode(404);
+  }
+
+  @Test
+  public void testTitleHasBeenCreatedByNonPackagePoLineWithPackagePoLineId() throws MalformedURLException {
+
+    givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT),
+      Pair.of(PO_LINE, TestData.PoLine.DEFAULT_52590_PACKAGE),
+      Pair.of(PO_LINE, TestData.PoLine.DEFAULT_52590_NON_PACKAGE_WITH_PACKAGE_POLINE_ID));
+
+    List<Title> titles = getData(TITLES.getEndpoint() + "?query=poLineId==" + PO_LINE.getId(),
+      ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class)
+      .getTitles();
+
+    Title title = titles.get(0);
+
+    PoLine packagePoLine = getFileAsObject(TestData.PoLine.DEFAULT_52590_PACKAGE, PoLine.class);
+
+    assertEquals(title.getPackageName(), packagePoLine.getTitleOrPackage());
+    assertEquals(title.getPoLineNumber(), packagePoLine.getPoLineNumber());
+    assertEquals(title.getReceivingNote(), packagePoLine.getDetails().getReceivingNote());
+    assertEquals(title.getExpectedReceiptDate(), packagePoLine.getPhysical().getExpectedReceiptDate());
+  }
+
+  @Test
+  public void testTitleHasBeenCreatedByNonPackagePoLineWithoutPackagePoLineId() throws MalformedURLException {
+
+    givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT),
+      Pair.of(PO_LINE, TestData.PoLine.DEFAULT_52590_PACKAGE),
+      Pair.of(PO_LINE, TestData.PoLine.DEFAULT_52590_NON_PACKAGE));
+
+    List<Title> titles = getData(TITLES.getEndpoint() + "?query=poLineId==" + PO_LINE.getId(),
+      ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class)
+      .getTitles();
+
+    Title title = titles.get(0);
+
+    PoLine poLine = getFileAsObject(TestData.PoLine.DEFAULT_52590_NON_PACKAGE, PoLine.class);
+
+    assertNull(title.getPackageName());
+    assertEquals(title.getPoLineNumber(), poLine.getPoLineNumber());
+    assertEquals(title.getReceivingNote(), poLine.getDetails().getReceivingNote());
+    assertEquals(title.getExpectedReceiptDate(), poLine.getPhysical().getExpectedReceiptDate());
   }
 
   @Test
