@@ -30,12 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @IsolatedTenant
-public class PurchaseOrderLinesApiTest extends TestBase {
+class PurchaseOrderLinesApiTest extends TestBase {
 
   private final Logger logger = LoggerFactory.getLogger(PurchaseOrderLinesApiTest.class);
 
   @Test
-  public void testDeletePOLineByIdWithRelatedData() throws MalformedURLException {
+  void testDeletePOLineByIdWithRelatedData() throws MalformedURLException {
 
     givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT),
                   Pair.of(PO_LINE, TestData.PoLine.DEFAULT),
@@ -63,7 +63,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testTitleHasBeenCreatedByNonPackagePoLineWithPackagePoLineId() throws MalformedURLException {
+  void testTitleHasBeenCreatedByNonPackagePoLineWithPackagePoLineId() throws MalformedURLException {
 
     givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT),
       Pair.of(PO_LINE, TestData.PoLine.DEFAULT_52590_PACKAGE),
@@ -88,7 +88,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testTitleHasBeenCreatedByNonPackagePoLineWithoutPackagePoLineId() throws MalformedURLException {
+  void testTitleHasBeenCreatedByNonPackagePoLineWithoutPackagePoLineId() throws MalformedURLException {
 
     givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT),
       Pair.of(PO_LINE, TestData.PoLine.DEFAULT_52590_PACKAGE),
@@ -113,7 +113,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testPoLineWillNotBeCreatedDueToNonExistingPackagePoLineId() throws MalformedURLException {
+  void testPoLineWillNotBeCreatedDueToNonExistingPackagePoLineId() throws MalformedURLException {
 
     givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT));
 
@@ -125,7 +125,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
       .statusCode(400);
   }
   @Test
-  public void testPostOrdersLinesByIdPoLineWithoutId() throws MalformedURLException {
+  void testPostOrdersLinesByIdPoLineWithoutId() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: post PoLine without purchaseOrderId");
 
     TestEntities poLineTstEntities = PO_LINE;
@@ -139,7 +139,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testNonPackagePoLineRelatedTitleIsCreatedUpdated() throws MalformedURLException {
+  void testNonPackagePoLineRelatedTitleIsCreatedUpdated() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: post non-package PoLine associated title must be created or updated with poLine");
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
@@ -194,7 +194,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testNonPackagePoLineCreationFailsWithoutRelatedOrder() throws MalformedURLException {
+  void testNonPackagePoLineCreationFailsWithoutRelatedOrder() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: non-package PoLine creation fails w/o order");
 
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
@@ -206,7 +206,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testNonPackagePoLineUpdateFailsIfNotFound() throws MalformedURLException {
+  void testNonPackagePoLineUpdateFailsIfNotFound() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: non-package PoLine update fails if line not exist");
 
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
@@ -223,7 +223,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testNonPackagePoLineUpdateWithNonExistentPurchaseOrderId() throws MalformedURLException {
+  void testNonPackagePoLineUpdateWithNonExistentPurchaseOrderId() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: non-package PoLine update fails if set non-existent purchaseOrderId");
 
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
@@ -242,7 +242,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
   }
 
   @Test
-  public void testUpdateNonPackagePoLineWithoutTitle() throws MalformedURLException {
+  void testUpdateNonPackagePoLineWithoutTitle() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: update non-package PoLine without title must create title");
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
