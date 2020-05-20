@@ -117,10 +117,9 @@ class PurchaseOrderLinesApiTest extends TestBase {
 
     givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT));
 
-    PoLine poLine = getFileAsObject(TestData.PoLine.DEFAULT_52590_NON_PACKAGE, PoLine.class)
-      .withPackagePoLineId(UUID.randomUUID().toString());
+    JsonObject poLineJson = new JsonObject(getFile(TestData.PoLine.DEFAULT_52590_NON_PACKAGE_WITH_NOT_EXISTED_PACKAGE_POLINE));
 
-    postData(PO_LINE.getEndpoint(), poLine.toString(), ISOLATED_TENANT_HEADER)
+    postData(PO_LINE.getEndpoint(), poLineJson.toString(), ISOLATED_TENANT_HEADER)
       .then()
       .statusCode(400);
   }
