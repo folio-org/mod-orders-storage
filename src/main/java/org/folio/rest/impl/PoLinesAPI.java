@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import javax.ws.rs.core.Response.Status;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
@@ -84,13 +85,64 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     }
   }
 
+  private Future<PoLine> getPoLineById(String poLineId) {
+    Promise<PoLine> promise = Promise.promise();
+
+    getPgClient().getById(POLINE_TABLE, poLineId, PoLine.class, reply -> {
+      if(reply.failed()) {
+        handleFailure(promise, reply);
+      } else {
+        promise.complete(reply.result());
+      }
+    });
+
+    return promise.future();
+  }
+
   private Future<Tx<PoLine>> createTitle(Tx<PoLine> poLineTx) {
+    Promise<Tx<PoLine>> promise = Promise.promise();
+
+    String packagePoLineId = poLineTx.getEntity().getPackagePoLineId();
+
+    if (packagePoLineId != null) {
+      getPoLineById(packagePoLineId)
+        .setHandler(reply -> {
+          if (reply.failed() || reply.result() == null) {
+            logger.error("Can't find poLine with id={}", packagePoLineId);
+            promise.fail(new HttpStatusException(Status.BAD_REQUEST.getStatusCode()));
+          } else {
+            populateTitleForPackagePoLineAndSave(poLineTx, promise, packagePoLineId, reply.result());
+          }
+        });
+    } else {
+      return createTitleAndSave(poLineTx);
+    }
+
+    return promise.future();
+  }
+
+  private Future<Tx<PoLine>> createTitleAndSave(Tx<PoLine> poLineTx) {
     Title title = createTitleObject(poLineTx.getEntity());
-
     logger.debug("Creating new title record with id={}", title.getId());
-
     return save(poLineTx, title.getId(), title, TITLES_TABLE);
+  }
 
+  private void populateTitleForPackagePoLineAndSave(Tx<PoLine> poLineTx, Promise<Tx<PoLine>> promise, String packagePoLineId,
+    PoLine packagePoLine) {
+    Title title = createTitleObject(poLineTx.getEntity());
+    populateTitleBasedOnPackagePoLine(title, packagePoLine);
+
+    logger.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), packagePoLineId);
+
+    save(poLineTx, title.getId(), title, TITLES_TABLE)
+      .setHandler(saveResult -> {
+          if (saveResult.failed()) {
+            handleFailure(promise, saveResult);
+          } else {
+            promise.complete(saveResult.result());
+          }
+        }
+      );
   }
 
   private Title createTitleObject(PoLine poLine) {
@@ -114,6 +166,17 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
         .withReceivingNote(poLine.getDetails().getReceivingNote());
     }
     return title;
+  }
+
+  private void populateTitleBasedOnPackagePoLine(Title title, PoLine packagePoLine) {
+    title
+      .withPoLineNumber(packagePoLine.getPoLineNumber())
+      .withPackageName(packagePoLine.getTitleOrPackage())
+      .withExpectedReceiptDate(Objects.nonNull(packagePoLine.getPhysical()) ? packagePoLine.getPhysical().getExpectedReceiptDate() : null);
+    if (Objects.nonNull(packagePoLine.getDetails())) {
+      title
+        .withReceivingNote(packagePoLine.getDetails().getReceivingNote());
+    }
   }
 
   Future<Tx<PoLine>> createPoLine(Tx<PoLine> poLineTx) {
