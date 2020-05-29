@@ -1,8 +1,10 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
+import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Prefix;
 import org.folio.rest.jaxrs.model.PrefixCollection;
@@ -12,15 +14,25 @@ import org.folio.rest.jaxrs.model.Suffix;
 import org.folio.rest.jaxrs.model.SuffixCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageConfiguration;
 import org.folio.rest.persist.PgUtil;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.tools.messages.MessageConsts;
+import org.folio.rest.tools.messages.Messages;
+import org.folio.rest.tools.utils.TenantTool;
 
-import javax.ws.rs.core.Response;
-import java.util.Map;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class ConfigurationAPI implements OrdersStorageConfiguration {
+  private static final Logger log = LoggerFactory.getLogger(ConfigurationAPI.class);
 
   public static final String REASON_FOR_CLOSURE_TABLE = "reasons_for_closure";
   public static final String PREFIX_TABLE = "prefixes";
   public static final String SUFFIX_TABLE = "suffixes";
+
+  private final Messages messages = Messages.getInstance();
 
   @Override
   @Validate
@@ -50,7 +62,43 @@ public class ConfigurationAPI implements OrdersStorageConfiguration {
   @Override
   @Validate
   public void putOrdersStorageConfigurationReasonsForClosureById(String id, String lang, ReasonForClosure entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(REASON_FOR_CLOSURE_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageConfigurationReasonsForClosureByIdResponse.class, asyncResultHandler);
+     vertxContext.runOnContext(v -> {
+      String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+      try {
+        if (entity.getId() == null) {
+          entity.setId(id);
+        }
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).update(REASON_FOR_CLOSURE_TABLE, entity, id, reply -> {
+            try {
+              if (reply.succeeded()) {
+                if (reply.result().getUpdated() == 0) {
+                  asyncResultHandler.handle(io.vertx.core.Future
+                    .succeededFuture(PutOrdersStorageConfigurationReasonsForClosureByIdResponse
+                        .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
+                } else {
+                  asyncResultHandler.handle(io.vertx.core.Future
+                    .succeededFuture(PutOrdersStorageConfigurationReasonsForClosureByIdResponse.respond204()));
+                }
+              } else {
+                log.error(reply.cause().getMessage());
+                asyncResultHandler.handle(io.vertx.core.Future
+                  .succeededFuture(PutOrdersStorageConfigurationReasonsForClosureByIdResponse
+                      .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+              }
+            } catch (Exception e) {
+              log.error(e.getMessage(), e);
+              asyncResultHandler.handle(io.vertx.core.Future
+                .succeededFuture(PutOrdersStorageConfigurationReasonsForClosureByIdResponse
+                    .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+            }
+          });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+        asyncResultHandler.handle(io.vertx.core.Future
+          .succeededFuture(PutOrdersStorageConfigurationReasonsForClosureByIdResponse
+              .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+      }
+    });
   }
 
   @Override
@@ -81,7 +129,43 @@ public class ConfigurationAPI implements OrdersStorageConfiguration {
   @Override
   @Validate
   public void putOrdersStorageConfigurationPrefixesById(String id, String lang, Prefix entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(PREFIX_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageConfigurationPrefixesByIdResponse.class, asyncResultHandler);
+    vertxContext.runOnContext(v -> {
+      String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+      try {
+        if (entity.getId() == null) {
+          entity.setId(id);
+        }
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).update(PREFIX_TABLE, entity, id, reply -> {
+            try {
+              if (reply.succeeded()) {
+                if (reply.result().getUpdated() == 0) {
+                  asyncResultHandler.handle(io.vertx.core.Future
+                    .succeededFuture(PutOrdersStorageConfigurationPrefixesByIdResponse
+                      .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
+                } else {
+                  asyncResultHandler.handle(io.vertx.core.Future
+                    .succeededFuture(PutOrdersStorageConfigurationPrefixesByIdResponse.respond204()));
+                }
+              } else {
+                log.error(reply.cause().getMessage());
+                asyncResultHandler.handle(io.vertx.core.Future
+                  .succeededFuture(PutOrdersStorageConfigurationPrefixesByIdResponse
+                    .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+              }
+            } catch (Exception e) {
+              log.error(e.getMessage(), e);
+              asyncResultHandler.handle(io.vertx.core.Future
+                .succeededFuture(PutOrdersStorageConfigurationPrefixesByIdResponse
+                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+            }
+          });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+        asyncResultHandler.handle(io.vertx.core.Future
+          .succeededFuture(PutOrdersStorageConfigurationPrefixesByIdResponse
+            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+      }
+    });
   }
 
   @Override
@@ -112,6 +196,42 @@ public class ConfigurationAPI implements OrdersStorageConfiguration {
   @Override
   @Validate
   public void putOrdersStorageConfigurationSuffixesById(String id, String lang, Suffix entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(SUFFIX_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageConfigurationSuffixesByIdResponse.class, asyncResultHandler);
+    vertxContext.runOnContext(v -> {
+      String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+      try {
+        if (entity.getId() == null) {
+          entity.setId(id);
+        }
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).update(SUFFIX_TABLE, entity, id, reply -> {
+          try {
+            if (reply.succeeded()) {
+              if (reply.result().getUpdated() == 0) {
+                asyncResultHandler.handle(io.vertx.core.Future
+                  .succeededFuture(PutOrdersStorageConfigurationSuffixesByIdResponse
+                    .respond404WithTextPlain(messages.getMessage(lang, MessageConsts.NoRecordsUpdated))));
+              } else {
+                asyncResultHandler.handle(io.vertx.core.Future
+                  .succeededFuture(PutOrdersStorageConfigurationSuffixesByIdResponse.respond204()));
+              }
+            } else {
+              log.error(reply.cause().getMessage());
+              asyncResultHandler.handle(io.vertx.core.Future
+                .succeededFuture(PutOrdersStorageConfigurationSuffixesByIdResponse
+                  .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+            }
+          } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            asyncResultHandler.handle(io.vertx.core.Future
+              .succeededFuture(PutOrdersStorageConfigurationSuffixesByIdResponse
+                .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+          }
+        });
+      } catch (Exception e) {
+        log.error(e.getMessage(), e);
+        asyncResultHandler.handle(io.vertx.core.Future
+          .succeededFuture(PutOrdersStorageConfigurationSuffixesByIdResponse
+            .respond500WithTextPlain(messages.getMessage(lang, MessageConsts.InternalServerError))));
+      }
+    });
   }
 }
