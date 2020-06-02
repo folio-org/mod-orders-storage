@@ -129,7 +129,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
       if (reply.failed()) {
         handleFailure(promise, reply);
       } else {
-        log.info("POL number sequence for PO with id={} successfully deleted", reply.result().getUpdated(), tx.getEntity());
+        log.info("POL number sequence for PO with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
         promise.complete(tx);
       }
     });

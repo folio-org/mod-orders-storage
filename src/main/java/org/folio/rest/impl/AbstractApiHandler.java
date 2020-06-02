@@ -48,7 +48,7 @@ public abstract class AbstractApiHandler {
       if (reply.failed()) {
         handleFailure(promise, reply);
       } else {
-        if (reply.result().getUpdated() == 0) {
+        if (reply.result().rowCount() == 0) {
           promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           promise.complete(tx);

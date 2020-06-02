@@ -230,7 +230,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
         handleFailure(promise, reply);
       } else {
         logger.info("{} title of POLine with id={} successfully deleted", reply.result()
-          .getUpdated(), tx.getEntity());
+          .rowCount(), tx.getEntity());
         promise.complete(tx);
       }
     });
@@ -272,11 +272,12 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       if (event.failed()) {
         handleFailure(promise, event);
       } else {
-        if (event.result().getUpdated() == 0) {
+        if (event.result().rowCount() == 0) {
           promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        } else {
+          logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
+          promise.complete(poLineTx);
         }
-        logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
-        promise.complete(poLineTx);
       }
     });
     return promise.future();
@@ -342,7 +343,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
         handleFailure(promise, reply);
       } else {
         logger.info("{} pieces of POLine with id={} successfully deleted", reply.result()
-          .getUpdated(), tx.getEntity());
+          .rowCount(), tx.getEntity());
         promise.complete(tx);
       }
     });
