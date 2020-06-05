@@ -79,7 +79,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       tx.startTx().compose(this::createPoLine)
         .compose(this::createTitle)
         .compose(Tx::endTx)
-        .setHandler(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"));
+        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -106,7 +106,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
     if (packagePoLineId != null) {
       getPoLineById(packagePoLineId)
-        .setHandler(reply -> {
+        .onComplete(reply -> {
           if (reply.failed() || reply.result() == null) {
             logger.error("Can't find poLine with id={}", packagePoLineId);
             promise.fail(new HttpStatusException(Status.BAD_REQUEST.getStatusCode()));
@@ -135,7 +135,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     logger.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), packagePoLineId);
 
     save(poLineTx, title.getId(), title, TITLES_TABLE)
-      .setHandler(saveResult -> {
+      .onComplete(saveResult -> {
           if (saveResult.failed()) {
             handleFailure(promise, saveResult);
           } else {
@@ -212,7 +212,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
           .compose(this::deleteTitleById)
           .compose(this::deletePOLineById)
           .compose(Tx::endTx)
-          .setHandler(handleNoContentResponse(asyncResultHandler, tx, "POLine {} {} deleted"));
+          .onComplete(handleNoContentResponse(asyncResultHandler, tx, "POLine {} {} deleted"));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -256,7 +256,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       tx.startTx().compose(this::updatePoLine)
         .compose(this::upsertTitle)
         .compose(Tx::endTx)
-        .setHandler(handleNoContentResponse(asyncResultHandler, tx, "POLine {} {} updated"));
+        .onComplete(handleNoContentResponse(asyncResultHandler, tx, "POLine {} {} updated"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }

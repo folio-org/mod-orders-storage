@@ -58,7 +58,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
           .compose(this::createPurchaseOrder)
           .compose(this::createSequence)
           .compose(Tx::endTx)
-          .setHandler(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
+          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -115,7 +115,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         .compose(this::deletePolNumberSequence)
         .compose(this::deleteOrderById)
         .compose(Tx::endTx)
-        .setHandler(handleNoContentResponse(asyncResultHandler, tx, "Order {} {} deleted"));
+        .onComplete(handleNoContentResponse(asyncResultHandler, tx, "Order {} {} deleted"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
