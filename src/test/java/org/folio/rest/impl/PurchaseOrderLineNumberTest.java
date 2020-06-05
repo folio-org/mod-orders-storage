@@ -122,7 +122,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       .path("sequenceNumber"));
   }
 
-  private static RowSet execute(String query) {
+  private static RowSet<Row> execute(String query) {
     PostgresClient client = PostgresClient.getInstance(Vertx.vertx());
     CompletableFuture<RowSet> future = new CompletableFuture<>();
     RowSet rowSet = null;
