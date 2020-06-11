@@ -1,4 +1,29 @@
-## 10.1.0 - Unreleased
+## 11.1.0 - Unreleased
+## 11.0.0 - Released
+The main focus of this release:
+ Upgrade on new version of **RMB 30.0.2** 
+ Supporting titles for package purchase order lines
+ Schema updated with new fields**.
+ Also **major versions of APIs** were changed for **pieces**    
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v10.0.2...v11.0.0)
+
+### Stories
+* [MODORDSTOR-151](https://issues.folio.org/browse/MODORDSTOR-151) Support "title" and "package" order lines with packagePoLIne
+* [MODORDSTOR-150](https://issues.folio.org/browse/MODORDSTOR-150) mod-orders-storage: Update to RMB v30.0.2
+* [MODORDSTOR-148](https://issues.folio.org/browse/MODORDSTOR-148) Delete sample data for open and closed orders
+* [MODORDSTOR-136](https://issues.folio.org/browse/MODORDSTOR-136) Title, PoLine schema updates
+* [MODORDSTOR-135](https://issues.folio.org/browse/MODORDSTOR-135) Add titleId field to the piece schema and create a foreign key
+* [MODORDSTOR-133](https://issues.folio.org/browse/MODORDSTOR-133) Add poNumberPrefix and poNumberSuffix fields
+
+## 10.0.2 - Released
+Bugfix release to fix populating instanceId for titles
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v10.0.1...v10.0.2)
+
+### Bug Fixes
+* [MODORDSTOR-145](https://issues.folio.org/browse/MODORDSTOR-145) - Create title with populated instanceId upon creation of poLine
+
 ## 10.0.1 - Released
 Bugfix release to fix cascade deletion for titles
 
