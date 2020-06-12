@@ -27,7 +27,7 @@ public class HelperUtils {
 
   private static final String POL_NUMBER_PREFIX = "polNumber_";
   private static final String QUOTES_SYMBOL = "\"";
-  private static final Pattern orderBy = Pattern.compile("(?<=ORDER BY).*?(?=$|DESC.*$|LIMIT.*$|OFFSET.*$)");
+  private static final Pattern orderBy = Pattern.compile("(?<=ORDER BY).*?(?=$|LIMIT.*$|OFFSET.*$)");
 
   public static final String JSONB = "jsonb";
   public static final String METADATA = "metadata";
@@ -42,8 +42,9 @@ public class HelperUtils {
     Method respond400 = getRespond400(entitiesMetadataHolder, asyncResultHandler);
     try {
       Matcher matcher = orderBy.matcher(queryHolder.buildCQLQuery().toString());
+      String orderByFields = matcher.find() ? matcher.group(0).replaceAll(" DESC\\b", "") + ", " : "";  // \b = word boundary
       String inLowerUnaccentSortField = wrapInLowerUnaccent(String.format("%s->>'%s'", queryHolder.getSearchField(), sortField));
-      String distinctOn = matcher.find() ? matcher.group(0) + ", " + inLowerUnaccentSortField : inLowerUnaccentSortField;
+      String distinctOn = orderByFields + inLowerUnaccentSortField;
       PostgresClient postgresClient = PgUtil.postgresClient(vertxContext, okapiHeaders);
       postgresClient.get(queryHolder.getTable(), entitiesMetadataHolder.getClazz(), JSONB, queryHolder.buildCQLQuery(), true, false, null, distinctOn,
         reply -> processDbReply(entitiesMetadataHolder, asyncResultHandler, respond500, respond400, reply));

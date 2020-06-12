@@ -102,6 +102,12 @@ public class OrdersAPITest extends TestBase {
       assertThat(ordersWithTag, hasSize(1));
       assertThat("important", isIn(ordersWithTag.get(0).getTags().getTagList()));
 
+      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags, sort.descending... ");
+      List<PurchaseOrder> ordersWithTagDescending = getViewCollection(ORDERS_ENDPOINT + "?query=tags.tagList=important sortBy dateOrdered/sort.descending");
+
+      assertThat(ordersWithTagDescending, hasSize(1));
+      assertThat("important", isIn(ordersWithTagDescending.get(0).getTags().getTagList()));
+
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by PO and POLine fields... ");
       List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(ORDERS_ENDPOINT + "?query=workflowStatus==Pending AND orderType==One-Time");
       assertThat(filteredByPoAndP0LineFields, hasSize(2));
