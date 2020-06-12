@@ -32,7 +32,7 @@ public class PoNumberAPI implements OrdersStoragePoNumber {
         PostgresClient.getInstance(vertxContext.owner(), tenantId).select(PO_NUMBER_QUERY, reply -> {
           try {
             if (reply.succeeded()) {
-              String poNumber = reply.result().iterator().next().getLong(0).toString();
+              String poNumber = reply.result().getResults().get(0).getList().get(0).toString();
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePoNumber.GetOrdersStoragePoNumberResponse
                 .respond200WithApplicationJson(new PoNumber().withSequenceNumber(poNumber))));
             } else {

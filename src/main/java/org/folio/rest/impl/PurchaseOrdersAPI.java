@@ -58,7 +58,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
           .compose(this::createPurchaseOrder)
           .compose(this::createSequence)
           .compose(Tx::endTx)
-          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
+          .setHandler(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -115,7 +115,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         .compose(this::deletePolNumberSequence)
         .compose(this::deleteOrderById)
         .compose(Tx::endTx)
-        .onComplete(handleNoContentResponse(asyncResultHandler, tx, "Order {} {} deleted"));
+        .setHandler(handleNoContentResponse(asyncResultHandler, tx, "Order {} {} deleted"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -129,7 +129,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
       if (reply.failed()) {
         handleFailure(promise, reply);
       } else {
-        log.info("POL number sequence for PO with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
+        log.info("POL number sequence for PO with id={} successfully deleted", reply.result().getUpdated(), tx.getEntity());
         promise.complete(tx);
       }
     });
