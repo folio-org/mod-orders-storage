@@ -3,6 +3,7 @@ package org.folio.rest.persist;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.ext.sql.SQLConnection;
 
 public class Tx<T> {
 
