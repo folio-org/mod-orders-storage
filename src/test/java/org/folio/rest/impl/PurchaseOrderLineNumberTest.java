@@ -137,6 +137,6 @@ public class PurchaseOrderLineNumberTest extends TestBase {
     } catch (Exception e) {
       future.completeExceptionally(e);
     }
-   return resultSet;
+    return resultSet;
   }
 }
