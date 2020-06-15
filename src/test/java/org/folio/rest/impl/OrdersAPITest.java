@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -41,7 +42,6 @@ public class OrdersAPITest extends TestBase {
   private final PurchaseOrder purchaseOrderSample = getOrder("data/purchase-orders/81_ongoing_pending.json");
   private final PurchaseOrder purchaseOrderSample2 = getOrder("data/purchase-orders/52590_one-time_pending.json");
   private final String purchaseOrderWithoutPOLines= getFile("data/purchase-orders/313110_order_without_poLines.json");
-  private static final String APPLICATION_JSON = "application/json";
   private static final Integer CREATED_ORDERS_QUANTITY = 3;
   private static final Integer CREATED_PO_LINES_QUANTITY = 2;
   private static final Map<String, PurchaseOrder> expectedOrders = new HashMap<>();
@@ -101,6 +101,12 @@ public class OrdersAPITest extends TestBase {
 
       assertThat(ordersWithTag, hasSize(1));
       assertThat("important", isIn(ordersWithTag.get(0).getTags().getTagList()));
+
+      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags, sort.descending... ");
+      List<PurchaseOrder> pendingOrdersWithCreatedDateDescending = getViewCollection(ORDERS_ENDPOINT + "?lang=en&limit=30&offset=0&query=workflowStatus==Pending sortBy createdDate/sort.descending");
+
+      assertThat(pendingOrdersWithCreatedDateDescending, hasSize(3));
+      allActualOrders.forEach(order -> assertEquals("Pending", order.getWorkflowStatus().value()));
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by PO and POLine fields... ");
       List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(ORDERS_ENDPOINT + "?query=workflowStatus==Pending AND orderType==One-Time");

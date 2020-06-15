@@ -4,9 +4,10 @@ import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.METADATA;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
@@ -14,8 +15,9 @@ import org.folio.rest.jaxrs.resource.OrdersStorageReceivingHistory;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.QueryHolder;
 
-import javax.ws.rs.core.Response;
-import java.util.Map;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
 
 public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
 

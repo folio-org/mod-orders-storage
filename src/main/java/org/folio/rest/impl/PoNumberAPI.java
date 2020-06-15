@@ -1,10 +1,9 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.PoNumber;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoNumber;
@@ -13,8 +12,11 @@ import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.TenantTool;
 
-import javax.ws.rs.core.Response;
-import java.util.Map;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class PoNumberAPI implements OrdersStoragePoNumber {
 
@@ -32,7 +34,7 @@ public class PoNumberAPI implements OrdersStoragePoNumber {
         PostgresClient.getInstance(vertxContext.owner(), tenantId).select(PO_NUMBER_QUERY, reply -> {
           try {
             if (reply.succeeded()) {
-              String poNumber = reply.result().getResults().get(0).getList().get(0).toString();
+              String poNumber = reply.result().iterator().next().getLong(0).toString();
               asyncResultHandler.handle(io.vertx.core.Future.succeededFuture(OrdersStoragePoNumber.GetOrdersStoragePoNumberResponse
                 .respond200WithApplicationJson(new PoNumber().withSequenceNumber(poNumber))));
             } else {

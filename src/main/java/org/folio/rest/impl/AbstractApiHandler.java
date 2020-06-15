@@ -24,7 +24,7 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
 public abstract class AbstractApiHandler {
   protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-  private PostgresClient pgClient;
+  private final PostgresClient pgClient;
 
   AbstractApiHandler(PostgresClient pgClient) {
     this.pgClient = pgClient;
@@ -48,7 +48,7 @@ public abstract class AbstractApiHandler {
       if (reply.failed()) {
         handleFailure(promise, reply);
       } else {
-        if (reply.result().getUpdated() == 0) {
+        if (reply.result().rowCount() == 0) {
           promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           promise.complete(tx);
@@ -65,7 +65,7 @@ public abstract class AbstractApiHandler {
         logger.error(logMessage, cause, tx.getEntity(), "or associated data failed to be");
 
         // The result of rollback operation is not so important, main failure cause is used to build the response
-        tx.rollbackTransaction().setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
+        tx.rollbackTransaction().onComplete(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
       } else {
         logger.info(logMessage, tx.getEntity(), "and associated data were successfully");
         asyncResultHandler.handle(buildResponseWithLocation(result.result()
@@ -83,7 +83,7 @@ public abstract class AbstractApiHandler {
         logger.error(logMessage, cause, tx.getEntity(), "or associated data failed to be");
 
         // The result of rollback operation is not so important, main failure cause is used to build the response
-        tx.rollbackTransaction().setHandler(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
+        tx.rollbackTransaction().onComplete(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
       } else {
         logger.info(logMessage, tx.getEntity(), "and associated data were successfully");
         asyncResultHandler.handle(buildNoContentResponse());
