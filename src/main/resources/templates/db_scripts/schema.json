@@ -48,7 +48,7 @@
     {
       "run": "after",
       "snippetPath": "data-migration/11.0.0/update_title.sql",
-      "fromModuleVersion": "mod-orders-storage-11.0.0"
+      "fromModuleVersion": "mod-orders-storage-11.0.1"
     },
     {
       "run": "after",
