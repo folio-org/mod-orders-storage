@@ -106,7 +106,11 @@ public class OrdersAPITest extends TestBase {
       List<PurchaseOrder> pendingOrdersWithCreatedDateDescending = getViewCollection(ORDERS_ENDPOINT + "?lang=en&limit=30&offset=0&query=workflowStatus==Pending sortBy createdDate/sort.descending");
 
       assertThat(pendingOrdersWithCreatedDateDescending, hasSize(3));
-      allActualOrders.forEach(order -> assertEquals("Pending", order.getWorkflowStatus().value()));
+      pendingOrdersWithCreatedDateDescending.forEach(order -> assertEquals("Pending", order.getWorkflowStatus().value()));
+
+      List<PurchaseOrder> pendingOrdersWithCreatedDateAscending = getViewCollection(ORDERS_ENDPOINT + "?lang=en&limit=30&offset=0&query=workflowStatus==Pending sortBy createdDate/sort.ascending");
+      assertThat(pendingOrdersWithCreatedDateAscending, hasSize(3));
+      pendingOrdersWithCreatedDateAscending.forEach(order -> assertEquals("Pending", order.getWorkflowStatus().value()));
 
       logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by PO and POLine fields... ");
       List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(ORDERS_ENDPOINT + "?query=workflowStatus==Pending AND orderType==One-Time");
