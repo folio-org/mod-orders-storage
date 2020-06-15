@@ -1,9 +1,9 @@
 package org.folio.rest.persist;
 
-import org.folio.rest.jaxrs.resource.support.ResponseDelegate;
-
 import java.lang.reflect.Method;
 import java.util.List;
+
+import org.folio.rest.jaxrs.resource.support.ResponseDelegate;
 
 public class EntitiesMetadataHolder<T, E> {
 

@@ -1,14 +1,7 @@
 package org.folio.rest.impl;
 
-import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
-import io.restassured.response.Response;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import io.vertx.ext.sql.ResultSet;
-import org.folio.rest.persist.PostgresClient;
-import org.json.JSONObject;
-import org.junit.jupiter.api.Test;
+import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
+import static org.junit.Assert.assertEquals;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
@@ -16,8 +9,18 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
-import static org.junit.Assert.assertEquals;
+import org.folio.rest.persist.PostgresClient;
+import org.json.JSONObject;
+import org.junit.jupiter.api.Test;
+
+import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
+
+import io.restassured.response.Response;
+import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
 
 public class PurchaseOrderLineNumberTest extends TestBase {
 
@@ -80,10 +83,10 @@ public class PurchaseOrderLineNumberTest extends TestBase {
   private void testSequenceSupport() {
     execute(CREATE_SEQUENCE);
     execute(SETVAL);
-    ResultSet rs = execute(NEXTVAL);
+    RowSet<Row> rs = execute(NEXTVAL);
     execute(DROP_SEQUENCE);
-    String result = rs.toJson().getJsonArray("results").getList().get(0).toString();
-    assertEquals("[14]", result);
+    long result = rs.iterator().next().getLong(0);//toJson().getJsonArray("results").getList().get(0).toString();
+    assertEquals(14, result);
     try {
       execute(NEXTVAL);
     } catch(Exception e) {
@@ -120,10 +123,10 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       .path("sequenceNumber"));
   }
 
-  private static ResultSet execute(String query) {
+  private static RowSet<Row> execute(String query) {
     PostgresClient client = PostgresClient.getInstance(Vertx.vertx());
-    CompletableFuture<ResultSet> future = new CompletableFuture<>();
-    ResultSet resultSet = null;
+    CompletableFuture<RowSet<Row>> future = new CompletableFuture<>();
+    RowSet<Row> rowSet = null;
     try {
       client.select(query, result -> {
         if(result.succeeded()) {
@@ -133,10 +136,10 @@ public class PurchaseOrderLineNumberTest extends TestBase {
           future.completeExceptionally(result.cause());
         }
       });
-      resultSet = future.get(10, TimeUnit.SECONDS);
+      rowSet = future.get(10, TimeUnit.SECONDS);
     } catch (Exception e) {
       future.completeExceptionally(e);
     }
-    return resultSet;
+   return rowSet;
   }
 }

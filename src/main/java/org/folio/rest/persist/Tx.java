@@ -3,12 +3,11 @@ package org.folio.rest.persist;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.ext.sql.SQLConnection;
 
 public class Tx<T> {
 
-  private T entity;
-  private PostgresClient pgClient;
+  private final T entity;
+  private final PostgresClient pgClient;
   private AsyncResult<SQLConnection> sqlConnection;
 
   public Tx(T entity, PostgresClient pgClient) {
