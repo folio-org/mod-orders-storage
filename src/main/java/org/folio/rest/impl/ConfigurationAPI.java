@@ -1,8 +1,9 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Prefix;
 import org.folio.rest.jaxrs.model.PrefixCollection;
@@ -13,8 +14,9 @@ import org.folio.rest.jaxrs.model.SuffixCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageConfiguration;
 import org.folio.rest.persist.PgUtil;
 
-import javax.ws.rs.core.Response;
-import java.util.Map;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
 
 public class ConfigurationAPI implements OrdersStorageConfiguration {
 

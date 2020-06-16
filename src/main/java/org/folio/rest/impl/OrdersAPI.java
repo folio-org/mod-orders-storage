@@ -1,8 +1,12 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
+import static org.folio.rest.persist.HelperUtils.METADATA;
+import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
+
+import java.util.Map;
+
+import javax.ws.rs.core.Response;
+
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
@@ -10,11 +14,9 @@ import org.folio.rest.jaxrs.resource.OrdersStorageOrders;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.QueryHolder;
 
-import javax.ws.rs.core.Response;
-import java.util.Map;
-
-import static org.folio.rest.persist.HelperUtils.METADATA;
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
 
 public class OrdersAPI implements OrdersStorageOrders {
 
