@@ -1,4 +1,18 @@
 ## 11.1.0 - Unreleased
+
+## 11.0.1 - Released
+This release focused on migration to the latest version of RMB and fixing migration scripts
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.0.0...v11.0.1)
+
+### Stories
+* [MODORDSTOR-150](https://issues.folio.org/browse/MODORDSTOR-150) - Update to RMB v30.0.2
+
+### Bug Fixes
+* [MODORDSTOR-158](https://issues.folio.org/browse/MODORDSTOR-158) - Retrieving order collection in descending order fails
+* [MODORDSTOR-153](https://issues.folio.org/browse/MODORDSTOR-153) - Package name populated for non-package titles during migration to 11.0.0 version
+
+
 ## 11.0.0 - Released
 The focus of this release:
  Supporting titles for package purchase order lines
