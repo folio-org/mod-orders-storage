@@ -273,9 +273,10 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       } else {
         if (event.result().rowCount() == 0) {
           promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        } else {
+          logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
+          promise.complete(poLineTx);
         }
-        logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
-        promise.complete(poLineTx);
       }
     });
     return promise.future();
