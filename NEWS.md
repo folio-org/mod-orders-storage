@@ -1,5 +1,14 @@
 ## 11.1.0 - Unreleased
 
+## 11.0.2 - Released
+This release focused on fixing index creation upon module upgrade
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.0.1...v11.0.2)
+ 
+### Stories
+* [MODORDSTOR-162](https://issues.folio.org/browse/MODORDSTOR-162) - Update to RMB v30.2.3 fixing pg_catalog.pg_trgm
+
+
 ## 11.0.1 - Released
 This release focused on migration to the latest version of RMB and fixing migration scripts
  
