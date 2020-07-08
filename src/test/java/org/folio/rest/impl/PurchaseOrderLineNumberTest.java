@@ -10,13 +10,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.folio.rest.persist.PostgresClient;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
 
 import io.restassured.response.Response;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.sqlclient.Row;
@@ -71,7 +71,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
   }
 
   private void testPOEdit(String purchaseOrderSample, String sampleId) throws MalformedURLException {
-    JSONObject catJSON = new JSONObject(purchaseOrderSample);
+    JsonObject catJSON = new JsonObject(purchaseOrderSample);
     catJSON.put("id", sampleId);
     catJSON.put("poNumber", "666666");
     catJSON.put("workflowStatus", "Open");
