@@ -12,8 +12,6 @@ import java.util.concurrent.TimeUnit;
 import org.folio.rest.persist.PostgresClient;
 import org.junit.jupiter.api.Test;
 
-import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException;
-
 import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -87,11 +85,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
     execute(DROP_SEQUENCE);
     long result = rs.iterator().next().getLong(0);//toJson().getJsonArray("results").getList().get(0).toString();
     assertEquals(14, result);
-    try {
-      execute(NEXTVAL);
-    } catch(Exception e) {
-      assertEquals(GenericDatabaseException.class, e.getCause().getClass());
-    }
+    execute(NEXTVAL);
   }
 
   private void testGetPoLineNumberForExistedPO(String purchaseOrderId) throws MalformedURLException {
