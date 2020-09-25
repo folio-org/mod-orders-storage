@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-orders-storage</artifactId>
@@ -20,9 +21,9 @@
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <raml-module-builder.version>31.1.1</raml-module-builder.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit-jupiter-version>5.5.2</junit-jupiter-version>
+    <junit-jupiter-version>5.6.2</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
-    <argLine />
+    <argLine/>
   </properties>
 
   <repositories>
@@ -347,11 +348,12 @@
             <phase>prepare-package</phase>
             <configuration>
               <target>
-                <replace token="baseUri: http://github.com/org/folio/lsp-apis" value="baseUri: http://localhost:${http.port}/apis" dir="${basedir}/target/classes/apidocs/raml">
-                  <include name="**/*.raml" />
+                <replace token="baseUri: http://github.com/org/folio/lsp-apis" value="baseUri: http://localhost:${http.port}/apis"
+                         dir="${basedir}/target/classes/apidocs/raml">
+                  <include name="**/*.raml"/>
                 </replace>
                 <replace token="protocols: [ HTTPS ]" value="protocols: [ HTTP ]" dir="${basedir}/target/classes/apidocs/raml">
-                  <include name="**/*.raml" />
+                  <include name="**/*.raml"/>
                 </replace>
               </target>
             </configuration>
@@ -395,7 +397,7 @@
                   </excludes>
                 </filter>
               </filters>
-              <artifactSet />
+              <artifactSet/>
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
             </configuration>
           </execution>
@@ -419,17 +421,19 @@
         <version>2.22.2</version>
         <configuration>
           <systemPropertyVariables>
-            <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.Log4j2LogDelegateFactory</vertx.logger-delegate-factory-class-name>
+            <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.Log4j2LogDelegateFactory
+            </vertx.logger-delegate-factory-class-name>
           </systemPropertyVariables>
           <argLine>
             @{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
           </argLine>
-          <includes>
-            <include>org/folio/rest/impl/StorageTestSuite.java</include>
-          </includes>
           <excludes>
             <exclude>org/folio/rest/impl/*Test.java</exclude>
           </excludes>
+          <includes>
+            <include>org/folio/rest/impl/StorageTestSuite.java</include>
+            <include>org/folio/rest/**</include>
+          </includes>
           <!-- TODO: update to version 3.0.0 and remove useSystemClassLoader
                https://issues.folio.org/browse/FOLIO-1609
                https://issues.apache.org/jira/browse/SUREFIRE-1588
