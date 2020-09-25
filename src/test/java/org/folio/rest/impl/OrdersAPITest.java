@@ -11,15 +11,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
-import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.Arrays;
@@ -30,6 +21,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
+import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 
 public class OrdersAPITest extends TestBase {

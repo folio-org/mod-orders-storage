@@ -4,13 +4,15 @@ import static io.restassured.RestAssured.given;
 import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 
+import java.net.MalformedURLException;
+
+import org.folio.rest.jaxrs.model.Parameter;
+import org.folio.rest.jaxrs.model.TenantAttributes;
+
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.ValidatableResponse;
 import io.vertx.core.json.JsonObject;
-import java.net.MalformedURLException;
-import org.folio.rest.jaxrs.model.Parameter;
-import org.folio.rest.jaxrs.model.TenantAttributes;
 
 public class TenantApiTestUtil {
 

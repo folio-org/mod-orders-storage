@@ -11,11 +11,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;
+
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
@@ -26,6 +25,9 @@ import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.IsolatedTenant;
 import org.folio.rest.utils.TestData;
 import org.junit.jupiter.api.Test;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 @IsolatedTenant
 public class ReceivingHistoryTest extends TestBase {

@@ -3,24 +3,22 @@ package org.folio.rest.impl;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 
-import io.restassured.RestAssured;
-import io.restassured.response.ValidatableResponse;
-import io.vertx.core.Context;
-
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Map;
-
-import mockit.Mock;
-import mockit.MockUp;
 
 import org.folio.HttpStatus;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
-
 import org.junit.jupiter.api.Test;
+
+import io.restassured.RestAssured;
+import io.restassured.response.ValidatableResponse;
+import io.vertx.core.Context;
+import mockit.Mock;
+import mockit.MockUp;
 
 public class HelperUtilsTest extends TestBase {
 

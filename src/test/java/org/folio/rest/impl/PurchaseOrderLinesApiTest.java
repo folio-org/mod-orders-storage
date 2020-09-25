@@ -1,24 +1,5 @@
 package org.folio.rest.impl;
 
-import io.restassured.response.Response;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import java.util.List;
-import org.apache.commons.lang3.tuple.Pair;
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.Title;
-import org.folio.rest.jaxrs.model.TitleCollection;
-import org.folio.rest.utils.IsolatedTenant;
-import org.folio.rest.utils.TestData;
-import org.folio.rest.utils.TestEntities;
-import org.junit.jupiter.api.Test;
-
-import java.net.MalformedURLException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.folio.rest.utils.TestEntities.TITLES;
@@ -28,6 +9,26 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+
+import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.TitleCollection;
+import org.folio.rest.utils.IsolatedTenant;
+import org.folio.rest.utils.TestData;
+import org.folio.rest.utils.TestEntities;
+import org.junit.jupiter.api.Test;
+
+import io.restassured.response.Response;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 @IsolatedTenant
 class PurchaseOrderLinesApiTest extends TestBase {

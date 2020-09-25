@@ -1,12 +1,13 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.junit.jupiter.api.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.net.MalformedURLException;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.Test;
+
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 
 public class PoNumberTest extends TestBase {
@@ -30,11 +31,11 @@ public class PoNumberTest extends TestBase {
   }
 
   private int getPoNumberAsInt() throws MalformedURLException {
-    return new Integer(getData(PO_NUMBER_ENDPOINT)
+    return Integer.parseInt(getData(PO_NUMBER_ENDPOINT)
       .then()
-        .statusCode(200)
-        .extract()
-          .response()
-            .path("sequenceNumber"));
+      .statusCode(200)
+      .extract()
+      .response()
+      .path("sequenceNumber"));
   }
 }

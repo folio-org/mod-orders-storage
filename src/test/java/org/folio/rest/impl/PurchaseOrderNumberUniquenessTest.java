@@ -1,16 +1,17 @@
 package org.folio.rest.impl;
 
+import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
+import static org.junit.Assert.fail;
+
+import java.net.MalformedURLException;
+
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Test;
+
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
-
-import java.net.MalformedURLException;
-
-import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
-import static org.junit.Assert.fail;
 
 public class PurchaseOrderNumberUniquenessTest extends TestBase {
 
