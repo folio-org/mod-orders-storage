@@ -3,24 +3,24 @@ package org.folio.rest.impl;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 
-import io.restassured.RestAssured;
-import io.restassured.response.ValidatableResponse;
-import io.vertx.core.Context;
-
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Map;
 
-import mockit.Mock;
-import mockit.MockUp;
-
 import org.folio.HttpStatus;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
-
 import org.junit.jupiter.api.Test;
+
+import io.restassured.RestAssured;
+import io.restassured.response.ValidatableResponse;
+import io.vertx.core.Context;
+import mockit.Mock;
+import mockit.MockUp;
 
 public class HelperUtilsTest extends TestBase {
 
@@ -28,7 +28,7 @@ public class HelperUtilsTest extends TestBase {
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
   @Test
-  public void getEntitiesCollectionWithDistinctOnFailCqlExTest() throws Exception {
+  void getEntitiesCollectionWithDistinctOnFailCqlExTest() throws Exception {
     new MockUp<PgUtil>()
     {
       @Mock
@@ -40,7 +40,7 @@ public class HelperUtilsTest extends TestBase {
   }
 
   @Test
-  public void getReceivingHistoryCollectionWithDistinctOnFailCqlExTest() throws Exception {
+  void getReceivingHistoryCollectionWithDistinctOnFailCqlExTest() throws Exception {
     new MockUp<PgUtil>()
     {
       @Mock
@@ -53,8 +53,8 @@ public class HelperUtilsTest extends TestBase {
 
 
   @Test
-  public void entitiesMetadataHolderRespond400FailTest() throws Exception {
-    new MockUp<EntitiesMetadataHolder>()
+  void entitiesMetadataHolderRespond400FailTest() throws Exception {
+    new MockUp<EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection>>()
     {
       @Mock
       Method getRespond400WithTextPlainMethod() throws NoSuchMethodException {
@@ -65,8 +65,8 @@ public class HelperUtilsTest extends TestBase {
   }
 
   @Test
-  public void entitiesMetadataHolderRespond500FailTest() throws Exception {
-    new MockUp<EntitiesMetadataHolder>()
+  void entitiesMetadataHolderRespond500FailTest() throws Exception {
+    new MockUp<EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection>>()
     {
       @Mock
       Method getRespond500WithTextPlainMethod() throws NoSuchMethodException {
@@ -77,8 +77,8 @@ public class HelperUtilsTest extends TestBase {
   }
 
   @Test
-  public void entitiesMetadataHolderRespond200FailTest() throws Exception {
-    new MockUp<EntitiesMetadataHolder>()
+  void entitiesMetadataHolderRespond200FailTest() throws Exception {
+    new MockUp<EntitiesMetadataHolder<PurchaseOrder, PurchaseOrderCollection>>()
     {
       @Mock
       Method getRespond200WithApplicationJson() throws NoSuchMethodException {
@@ -89,7 +89,7 @@ public class HelperUtilsTest extends TestBase {
   }
 
   @Test
-  public void getEntitiesCollectionWithDistinctOnFailNpExTest() throws Exception {
+  void getEntitiesCollectionWithDistinctOnFailNpExTest() throws Exception {
     new MockUp<PgUtil>()
     {
       @Mock

@@ -434,6 +434,7 @@
           </systemPropertyVariables>
           <argLine>
             @{argLine} -javaagent:${settings.localRepository}/org/jmockit/jmockit/${jmockit.version}/jmockit-${jmockit.version}.jar
+            -Duser.language=en -Duser.region=US
           </argLine>
           <includes>
             <include>org/folio/rest/impl/StorageTestSuite.java</include>
