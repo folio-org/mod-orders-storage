@@ -13,12 +13,12 @@
   </licenses>
 
   <properties>
-    <aspectj.version>1.9.4</aspectj.version>
+    <aspectj.version>1.9.6</aspectj.version>
     <module_name>mod-orders-storage</module_name>
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>30.2.4</raml-module-builder.version>
+    <raml-module-builder.version>31.1.0</raml-module-builder.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.5.2</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
@@ -119,8 +119,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <release>11</release>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -220,9 +219,9 @@
       </plugin>
 
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
+        <groupId>com.nickwongdev</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.11</version>
+        <version>1.12.6</version>
         <configuration>
           <verbose>true</verbose>
           <showWeaveInfo>false</showWeaveInfo>
