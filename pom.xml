@@ -18,9 +18,9 @@
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>31.1.0</raml-module-builder.version>
+    <raml-module-builder.version>31.1.1</raml-module-builder.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit-jupiter-version>5.5.2</junit-jupiter-version>
+    <junit-jupiter-version>5.6.2</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
     <argLine />
   </properties>
@@ -38,14 +38,14 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-stack-depchain</artifactId>
-        <version>3.9.1</version>
+        <version>3.9.3</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.11.0</version>
+        <version>2.11.1</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -70,16 +70,6 @@
       <artifactId>domain-models-runtime</artifactId>
       <version>${raml-module-builder.version}</version>
     </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-unit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-mysql-postgresql-client</artifactId>
-    </dependency>
-
     <!-- test dependencies -->
     <dependency>
       <groupId>io.rest-assured</groupId>
@@ -127,7 +117,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>3.2.0</version>
         <executions>
           <execution>
             <id>addGeneratedSourceFolder</id>
@@ -147,7 +137,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <id>generate_interfaces</id>
@@ -352,7 +342,7 @@
         api console on IE -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.8</version>
+        <version>3.0.0</version>
         <executions>
           <execution>
             <phase>prepare-package</phase>
@@ -376,7 +366,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>3.2.4</version>
         <executions>
           <execution>
             <phase>package</phase>
