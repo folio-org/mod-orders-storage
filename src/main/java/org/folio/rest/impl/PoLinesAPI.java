@@ -41,7 +41,7 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLines {
 
-  static final String POLINE_TABLE = "po_line";
+  public static final String POLINE_TABLE = "po_line";
   private static final String PO_LINES_VIEW = "po_lines_view";
   private static final String POLINE_ID_FIELD = "poLineId";
 

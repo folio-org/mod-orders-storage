@@ -1,7 +1,5 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.persist.HelperUtils.SequenceQuery.GET_POL_NUMBER_FROM_SEQUENCE;
-
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -14,11 +12,15 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.messages.MessageConsts;
 import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.services.order.OrderSequenceRequestBuilder;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -27,6 +29,13 @@ public class PoLineNumberAPI implements OrdersStoragePoLineNumber {
   private static final Logger log = LoggerFactory.getLogger(PoLineNumberAPI.class);
   private final Messages messages = Messages.getInstance();
 
+  @Autowired
+  private OrderSequenceRequestBuilder orderSequenceRequestBuilder;
+
+  public PoLineNumberAPI(Vertx vertx, String tenantId) {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+  }
+
   @Validate
   @Override
   public void getOrdersStoragePoLineNumber(String purchaseOrderId, String lang, Map<String, String> okapiHeaders,
@@ -34,7 +43,7 @@ public class PoLineNumberAPI implements OrdersStoragePoLineNumber {
     vertxContext.runOnContext((Void v) -> {
       try {
         String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-        PostgresClient.getInstance(vertxContext.owner(), tenantId).selectSingle(GET_POL_NUMBER_FROM_SEQUENCE.getQuery(purchaseOrderId),
+        PostgresClient.getInstance(vertxContext.owner(), tenantId).selectSingle(orderSequenceRequestBuilder.buildPOLNumberQuery(purchaseOrderId),
           getPolNumberReply -> {
           try {
             if (getPolNumberReply.succeeded()) {

@@ -35,29 +35,29 @@ public class TenantReferenceAPI extends TenantAPI {
         hndlr.handle(res);
         return;
       }
-
-      //Always load this system data
-      Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
-      tenantAttributes.getParameters().add(parameter);
-
-      TenantLoading tl = new TenantLoading();
-      boolean loadData = buildDataLoadingParameters(tenantAttributes, tl);
-
-      if (loadData) {
-        tl.perform(tenantAttributes, headers, vertx, res1 -> {
-          if (res1.failed()) {
-            hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-              .respond500WithTextPlain(res1.cause().getLocalizedMessage())));
-            return;
-          }
-          hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-            .respond201WithApplicationJson("")));
-        });
-      } else {
-        hndlr.handle(res);
-      }
-
-    }, cntxt);
+      hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse.respond201WithApplicationJson("")));
+//      //Always load this system data
+//      Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
+//      tenantAttributes.getParameters().add(parameter);
+//
+//      TenantLoading tl = new TenantLoading();
+//      boolean loadData = buildDataLoadingParameters(tenantAttributes, tl);
+//
+//      if (loadData) {
+//        tl.perform(tenantAttributes, headers, vertx, res1 -> {
+//          if (res1.failed()) {
+//            hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
+//              .respond500WithTextPlain(res1.cause().getLocalizedMessage())));
+//            return;
+//          }
+//          hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
+//            .respond201WithApplicationJson("")));
+//        });
+//      } else {
+//        hndlr.handle(res);
+//      }
+    }
+    ,cntxt);
 
   }
 

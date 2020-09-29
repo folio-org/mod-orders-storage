@@ -104,6 +104,12 @@
       <version>${jmockit.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-di-support</artifactId>
+      <version>1.1.0</version>
+      <type>jar</type>
+    </dependency>
   </dependencies>
 
   <build>
