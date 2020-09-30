@@ -128,7 +128,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
                 }
               });
 
-      } else if(order.getWorkflowStatus()  == PurchaseOrder.WorkflowStatus.OPEN || order.getWorkflowStatus()  == PurchaseOrder.WorkflowStatus.CLOSED) {
+      } else {
         updateOrder( id, order, okapiHeaders, vertxContext)
           .onComplete(response -> {
             if (response.succeeded()) {
@@ -243,12 +243,14 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
 
   private void deleteSequence(PurchaseOrder order) {
     PurchaseOrder.WorkflowStatus status = order.getWorkflowStatus();
-    // Try to drop sequence for the POL number but ignore failures
-    getPgClient().execute(orderSequenceRequestBuilder.buildDropSequenceQuery(order.getId()), reply -> {
-      if (reply.failed()) {
-        log.error("POL number sequence for order with id={} failed to be dropped", reply.cause(), order.getId());
+    if(status == PurchaseOrder.WorkflowStatus.OPEN || status == PurchaseOrder.WorkflowStatus.CLOSED) {
+      // Try to drop sequence for the POL number but ignore failures
+      getPgClient().execute(orderSequenceRequestBuilder.buildDropSequenceQuery(order.getId()), reply -> {
+        if (reply.failed()) {
+          log.error("POL number sequence for order with id={} failed to be dropped", reply.cause(), order.getId());
         }
       });
+    }
   }
 
   private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx) {
