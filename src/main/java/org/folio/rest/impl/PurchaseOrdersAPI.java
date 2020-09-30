@@ -1,26 +1,18 @@
 package org.folio.rest.impl;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
-import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.PoLineNumber;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.folio.rest.jaxrs.resource.OrdersStoragePoLineNumber;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
-import org.folio.rest.tools.utils.AsyncResponseResult;
-import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.spring.SpringContextUtil;
@@ -37,9 +29,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.RowSet;
-import static java.util.Objects.nonNull;
 
 public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStoragePurchaseOrders {
 
@@ -158,11 +148,13 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     log.info("Update purchase order with id={}", order.getId());
     Promise<Response> promise = Promise.promise();
     PgUtil.put(PURCHASE_ORDER_TABLE, order, id, okapiHeaders, vertxContext, PutOrdersStoragePurchaseOrdersByIdResponse.class, reply -> {
-      if (reply.failed()) {
-        handleFailure(promise, reply);
-      } else {
+      if (reply.succeeded() && reply.result().getStatus() == 204) {
         log.info("Purchase order id={} successfully updated", id);
-        promise.complete(Response.status(204).build());
+        promise.complete(reply.result());
+      } else if (reply.succeeded() && reply.result().getStatus() != 204) {
+        promise.fail(new HttpStatusException(reply.result().getStatus(), reply.result().getEntity().toString()));
+      } else if (reply.failed()) {
+        handleFailure(promise, reply);
       }
     });
     return promise.future();
@@ -210,7 +202,6 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     try {
         getPgClient().execute(orderSequenceRequestBuilder.buildCreateSequenceQuery(order.getId(), start), reply -> {
           if (reply.failed()) {
-            promise.complete(null);
             log.error("POL number sequence for order with id={} is not created", reply.cause(), order.getId());
           }
           promise.complete(null);
