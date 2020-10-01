@@ -4,10 +4,6 @@ public class OrderSequenceRequestBuilder {
   private static final String POL_NUMBER_PREFIX = "polNumber_";
   private static final String QUOTES_SYMBOL = "\"";
 
-  public OrderSequenceRequestBuilder() {
-
-  }
-
   public String buildCreateSequenceQuery(String purchaseOrderId) {
     return "CREATE SEQUENCE IF NOT EXISTS " + constructSequenceName(purchaseOrderId) + " MINVALUE 1 MAXVALUE 999";
   }
