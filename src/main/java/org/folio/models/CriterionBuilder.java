@@ -1,4 +1,4 @@
-package org.folio.rest.persist;
+package org.folio.models;
 
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;

@@ -9,7 +9,7 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.persist.CriterionBuilder;
+import org.folio.models.CriterionBuilder;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
 
@@ -71,4 +71,5 @@ public class PoLinesService {
       return 1;
     }
   }
+
 }

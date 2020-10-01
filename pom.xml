@@ -23,6 +23,8 @@
     <junit-jupiter-version>5.6.2</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
     <vertx.version>3.9.1</vertx.version>
+    <sonar.exclusions>**/models/*.java</sonar.exclusions>
+    <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <argLine />
   </properties>
 

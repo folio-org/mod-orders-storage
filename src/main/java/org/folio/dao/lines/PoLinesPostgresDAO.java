@@ -1,6 +1,5 @@
 package org.folio.dao.lines;
 
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.folio.rest.impl.PoLinesAPI.POLINE_TABLE;
 import static org.folio.rest.persist.ResponseUtils.handleFailure;
 
@@ -21,7 +20,7 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class PoLinesPostgresDAO implements PoLinesDAO {
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final static Logger logger = LoggerFactory.getLogger(PoLinesPostgresDAO.class);
 
 
   @Override
