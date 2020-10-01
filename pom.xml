@@ -22,6 +22,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.6.2</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
+    <vertx.version>3.9.1</vertx.version>
     <argLine />
   </properties>
 
@@ -99,6 +100,12 @@
       <artifactId>folio-di-support</artifactId>
       <version>1.1.0</version>
       <type>jar</type>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-junit5</artifactId>
+      <version>${vertx.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

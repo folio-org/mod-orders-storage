@@ -103,31 +103,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       if(order.getWorkflowStatus() == PurchaseOrder.WorkflowStatus.PENDING) {
-        isPolNumberSequenceExist(order)
-              .onComplete(isPolNumberSequenceExist -> {
-                if (isPolNumberSequenceExist != null && !isPolNumberSequenceExist.result()) {
-                  poLinesService.getLinesLastSequence(order.getId(), vertxContext, okapiHeaders)
-                          .compose(startIndex -> createSequenceWithStart(order, startIndex + 1))
-                          .compose(v -> updateOrder( id, order, okapiHeaders, vertxContext))
-                          .onComplete(response -> {
-                            if (response.succeeded()) {
-                              asyncResultHandler.handle(response);
-                            } else {
-                              asyncResultHandler.handle(buildErrorResponse(response.cause()));
-                            }
-                          });
-                } else {
-                  updateOrder( id, order, okapiHeaders, vertxContext)
-                    .onComplete(response -> {
-                      if (response.succeeded()) {
-                        asyncResultHandler.handle(response);
-                      } else {
-                        asyncResultHandler.handle(buildErrorResponse(response.cause()));
-                      }
-                    });
-                }
-              });
-
+        updatePendingOrder(id, order, okapiHeaders, asyncResultHandler, vertxContext);
       } else {
         updateOrder( id, order, okapiHeaders, vertxContext)
           .onComplete(response -> {
@@ -142,6 +118,33 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
+  }
+
+  private void updatePendingOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    isPolNumberSequenceExist(order)
+          .onComplete(isPolNumberSequenceExist -> {
+            if (isPolNumberSequenceExist != null && !isPolNumberSequenceExist.result()) {
+              poLinesService.getLinesLastSequence(order.getId(), vertxContext, okapiHeaders)
+                      .compose(startIndex -> createSequenceWithStart(order, startIndex + 1))
+                      .compose(v -> updateOrder(id, order, okapiHeaders, vertxContext))
+                      .onComplete(response -> {
+                        if (response.succeeded()) {
+                          asyncResultHandler.handle(response);
+                        } else {
+                          asyncResultHandler.handle(buildErrorResponse(response.cause()));
+                        }
+                      });
+            } else {
+              updateOrder(id, order, okapiHeaders, vertxContext)
+                .onComplete(response -> {
+                  if (response.succeeded()) {
+                    asyncResultHandler.handle(response);
+                  } else {
+                    asyncResultHandler.handle(buildErrorResponse(response.cause()));
+                  }
+                });
+            }
+          });
   }
 
   private Future<Response> updateOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders, Context vertxContext) {
