@@ -30,6 +30,11 @@ public class DBClient {
     this.tenantId = tenantId;
   }
 
+  public DBClient(Context context, Map<String, String> headers, PostgresClient pgClient) {
+    this.pgClient = pgClient;
+    this.vertx = context.owner();
+    this.tenantId = TenantTool.tenantId(headers);
+  }
 
   public PostgresClient getPgClient() {
     return pgClient;
