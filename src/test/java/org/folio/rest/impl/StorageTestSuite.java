@@ -8,6 +8,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -138,4 +139,6 @@ public class StorageTestSuite {
   class PoLinesServiceTestNested extends PoLinesServiceTest {}
   @Nested
   class PoLinesPostgresDAOTestNested extends PoLinesPostgresDAOTest {}
+  @Nested
+  class DBClientTestNested extends DBClientTest {}
 }
