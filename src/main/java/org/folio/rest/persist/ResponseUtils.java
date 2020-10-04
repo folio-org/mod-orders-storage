@@ -6,13 +6,10 @@ import javax.ws.rs.core.Response;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class ResponseUtils {
 
-  private static final Logger logger = LoggerFactory.getLogger(ResponseUtils.class);
 
   private ResponseUtils() {
   }
