@@ -14,7 +14,7 @@ public class ResponseUtils {
   private ResponseUtils() {
   }
 
-  public static void handleFailure(Promise promise, AsyncResult reply) {
+  public static void handleFailure(Promise<?> promise, AsyncResult<?> reply) {
     Throwable cause = reply.cause();
     String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
     if (badRequestMessage != null) {
