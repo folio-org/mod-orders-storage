@@ -12,6 +12,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.pgclient.PgException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -30,6 +31,7 @@ public class DBClientTest {
   @BeforeEach
   public void initMocks() {
     context = Vertx.vertx().getOrCreateContext();
+    okapiHeaders.put("x-okapi-tenant", "diku");
   }
 
   @Test
@@ -99,7 +101,7 @@ public class DBClientTest {
   }
 
   @Test
-  public void testRollbackTransaction() {
+  public void testRollbackTransactionSucc() {
     PostgresClient postgresClient = mock(PostgresClient.class);
     DBClient dbClient = new DBClient(context, okapiHeaders, postgresClient);
     SQLConnection sqlConnection = mock(SQLConnection.class);
@@ -116,5 +118,45 @@ public class DBClientTest {
     dbClient.rollbackTransaction();
 
     verify(postgresClient).rollbackTx(eq(asyncCon), any(Handler.class));
+  }
+
+  @Test
+  public void testRollbackTransactionFail() {
+    PostgresClient postgresClient = mock(PostgresClient.class);
+    DBClient dbClient = new DBClient(context, okapiHeaders, postgresClient);
+    AsyncResult<SQLConnection> asyncCon = mock(AsyncResult.class);
+    doReturn(new PgException("message", "P1", "22P02", "Detail")).when(asyncCon).cause();
+
+    dbClient.setConnection(asyncCon);
+    doReturn(true).when(asyncCon).failed();
+    doAnswer(invocationOnMock -> {
+      Handler<AsyncResult<SQLConnection>> successHandler = invocationOnMock.getArgument(1);
+      successHandler.handle(Future.failedFuture(new PgException("message", "P1", "22P02", "Detail")));
+      return null;
+    }).when(postgresClient).rollbackTx(eq(asyncCon), any(Handler.class));
+
+    dbClient.rollbackTransaction();
+
+    verify(asyncCon).cause();
+  }
+
+  @Test
+  public void testGetTenantId() {
+    DBClient dbClient = new DBClient(context, okapiHeaders);
+    SQLConnection sqlConnection = mock(SQLConnection.class);
+    AsyncResult<SQLConnection> asyncCon = mock(AsyncResult.class);
+    doReturn(sqlConnection).when(asyncCon).result();
+
+    assertEquals("diku", dbClient.getTenantId());
+  }
+
+  @Test
+  public void testGetVertx() {
+    DBClient dbClient = new DBClient(context, okapiHeaders);
+    SQLConnection sqlConnection = mock(SQLConnection.class);
+    AsyncResult<SQLConnection> asyncCon = mock(AsyncResult.class);
+    doReturn(sqlConnection).when(asyncCon).result();
+
+    assertEquals(context.owner(), dbClient.getVertx());
   }
 }
