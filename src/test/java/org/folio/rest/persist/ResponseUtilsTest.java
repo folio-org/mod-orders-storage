@@ -25,16 +25,4 @@ public class ResponseUtilsTest {
     HttpStatusException exception = (HttpStatusException) promise.future().cause();
     assertEquals(exception.getStatusCode(), 400);
   }
-
-//  public static void handleFailure(Promise promise, AsyncResult reply) {
-//
-//
-//  }
-//ResponseUtilsTest  Throwable cause = reply.cause();
-//  String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
-//    if (badRequestMessage != null) {
-//    promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
-//  } else {
-//    promise.fail(new HttpStatusException(INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
-//  }
 }
