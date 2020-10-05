@@ -25,8 +25,6 @@ import io.vertx.core.logging.LoggerFactory;
 public class HelperUtils {
   private static final Logger log = LoggerFactory.getLogger(HelperUtils.class);
 
-  private static final String POL_NUMBER_PREFIX = "polNumber_";
-  private static final String QUOTES_SYMBOL = "\"";
   private static final Pattern orderBy = Pattern.compile("(?<=ORDER BY).*?(?=$|LIMIT.*$|OFFSET.*$)");
 
   public static final String JSONB = "jsonb";
@@ -34,7 +32,6 @@ public class HelperUtils {
   public static final String ID_FIELD_NAME = "id";
 
   private HelperUtils() {
-    throw new UnsupportedOperationException("Cannot instantiate utility class.");
   }
 
   public static <T, E> void getEntitiesCollectionWithDistinctOn(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, QueryHolder queryHolder, String sortField, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
@@ -119,34 +116,6 @@ public class HelperUtils {
 
   public static String getEndpoint(Class<?> clazz) {
     return clazz.getAnnotation(Path.class).value();
-  }
-
-  public enum SequenceQuery {
-
-    CREATE_SEQUENCE {
-      @Override
-      public String getQuery(String purchaseOrderId) {
-        return "CREATE SEQUENCE IF NOT EXISTS " + constructSequenceName(purchaseOrderId) + " MINVALUE 1 MAXVALUE 999";
-      }
-    },
-    GET_POL_NUMBER_FROM_SEQUENCE {
-      @Override
-      public String getQuery(String purchaseOrderId) {
-        return "SELECT * FROM NEXTVAL('" + constructSequenceName(purchaseOrderId) + "')";
-      }
-    },
-    DROP_SEQUENCE {
-      @Override
-      public String getQuery(String purchaseOrderId) {
-        return "DROP SEQUENCE IF EXISTS " + constructSequenceName(purchaseOrderId);
-      }
-    };
-
-    private static String constructSequenceName(String purchaseOrderId) {
-      return QUOTES_SYMBOL + POL_NUMBER_PREFIX + purchaseOrderId + QUOTES_SYMBOL;
-    }
-
-    public abstract String getQuery(String purchaseOrderId);
   }
 
   /**

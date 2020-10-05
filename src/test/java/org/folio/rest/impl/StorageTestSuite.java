@@ -6,10 +6,14 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.ResponseUtilsTest;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.services.lines.PoLinesServiceTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -132,5 +136,12 @@ public class StorageTestSuite {
   class TenantSampleDataTestNested extends TenantSampleDataTest{}
   @Nested
   class HelperUtilsTestNested extends HelperUtilsTest{}
-
+  @Nested
+  class PoLinesServiceTestNested extends PoLinesServiceTest {}
+  @Nested
+  class PoLinesPostgresDAOTestNested extends PoLinesPostgresDAOTest {}
+  @Nested
+  class DBClientTestNested extends DBClientTest {}
+  @Nested
+  class ResponseUtilsTestNested extends ResponseUtilsTest {}
 }
