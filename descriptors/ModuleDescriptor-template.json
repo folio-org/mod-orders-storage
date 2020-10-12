@@ -97,7 +97,7 @@
     },
     {
       "id": "orders-storage.po-lines",
-      "version": "9.3",
+      "version": "9.4",
       "handlers": [
         {
           "methods": ["GET"],
@@ -133,7 +133,7 @@
     },
     {
       "id": "orders-storage.purchase-orders",
-      "version": "7.1",
+      "version": "7.2",
       "handlers": [
         {
           "methods": ["GET"],

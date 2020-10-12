@@ -1,4 +1,17 @@
-## 11.1.0 - Unreleased
+## 11.2.0 - Unreleased
+
+## 11.1.0 - Released
+This release focused on updating module to the latest RMB v31.1.1 and JDK 11
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.0.2...v11.1.0)
+ 
+### Stories
+* [MODORDSTOR-173](https://issues.folio.org/browse/MODORDSTOR-173) - Update to RMB v31.1.1
+* [MODORDSTOR-169](https://issues.folio.org/browse/MODORDSTOR-169) - Migrate mod-orders-storage to JDK 11
+* [MODORDSTOR-147](https://issues.folio.org/browse/MODORDSTOR-147) - Add "resourceUrl" field to the "eresource" schema
+
+### Bug Fixes
+* [MODORDSTOR-177](https://issues.folio.org/browse/MODORDSTOR-177) - Does not save POL after unopen an order
 
 ## 11.0.2 - Released
 This release focused on fixing index creation upon module upgrade
