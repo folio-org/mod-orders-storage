@@ -3,7 +3,7 @@
 ## 11.1.0 - Released
 This release focused on updating module to the latest RMB v31.1.1 and JDK 11
  
-[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.0.2...v11.1.0)
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.0.3...v11.1.0)
  
 ### Stories
 * [MODORDSTOR-173](https://issues.folio.org/browse/MODORDSTOR-173) - Update to RMB v31.1.1
@@ -12,6 +12,16 @@ This release focused on updating module to the latest RMB v31.1.1 and JDK 11
 
 ### Bug Fixes
 * [MODORDSTOR-177](https://issues.folio.org/browse/MODORDSTOR-177) - Does not save POL after unopen an order
+
+
+## 11.0.3 - Released
+This release focused on fixing requests with limit=0 parameter
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.0.2...v11.0.3)
+
+* [MODORDSTOR-166](https://issues.folio.org/browse/MODORDSTOR-166) - Update to RMB 30.2.4 fixing limit=0 totalRecords
+* [MODORDSTOR-165](https://issues.folio.org/browse/MODORDSTOR-165) - Cannot create POL due to POL limit bug
+
 
 ## 11.0.2 - Released
 This release focused on fixing index creation upon module upgrade
