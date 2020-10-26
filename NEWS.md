@@ -1,5 +1,13 @@
 ## 11.2.0 - Unreleased
 
+## 11.1.1 - Released
+This release focused on fixing logging
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.1.0...v11.1.1)
+ 
+### Bug Fixes
+* [MODORDSTOR-186](https://issues.folio.org/browse/MODORDSTOR-186) - No logging in honeysuckle version
+
 ## 11.1.0 - Released
 This release focused on updating module to the latest RMB v31.1.1 and JDK 11
  
