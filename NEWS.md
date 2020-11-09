@@ -1,5 +1,13 @@
 ## 11.2.0 - Unreleased
 
+## 11.1.2 - Released
+This release focused on RMB upgrade
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.1.1...v11.1.2)
+ 
+### Bug Fixes
+* [MODORDSTOR-190](https://issues.folio.org/browse/MODORDSTOR-190) - mod-orders-storage: Update RMB
+
 ## 11.1.1 - Released
 This release focused on fixing logging
  
