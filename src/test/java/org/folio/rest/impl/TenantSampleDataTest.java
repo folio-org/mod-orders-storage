@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.impl.StorageTestSuite.getVertx;
 import static org.folio.rest.impl.StorageTestSuite.storageUrl;
 import static org.folio.rest.utils.TenantApiTestUtil.TENANT_ENDPOINT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
@@ -13,8 +14,17 @@ import static org.folio.rest.utils.TestEntities.SUFFIX;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.apache.commons.io.IOUtils;
 import org.folio.rest.jaxrs.model.Prefix;
 import org.folio.rest.jaxrs.model.PrefixCollection;
 import org.folio.rest.jaxrs.model.ReasonForClosure;
@@ -30,6 +40,7 @@ import io.restassured.http.Header;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 
@@ -40,6 +51,18 @@ public class TenantSampleDataTest extends TestBase{
   private static final Header NONEXISTENT_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "no_tenant");
   private static final Header ANOTHER_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "new_tenant");
   private static final Header PARTIAL_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "partial_tenant");
+
+  @BeforeAll
+  static void createFundTable() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+    InputStream tableInput = TenantSampleDataTest.class.getClassLoader().getResourceAsStream("finance_schema.sql");
+    String sqlFile = IOUtils.toString(Objects.requireNonNull(tableInput), StandardCharsets.UTF_8);
+    CompletableFuture<Void> schemaCreated = new CompletableFuture<>();
+    PostgresClient.getInstance(StorageTestSuite.getVertx()).runSQLFile(sqlFile, false)
+      .onComplete(listAsyncResult -> {
+        schemaCreated.complete(null);
+      });
+    schemaCreated.get(60, TimeUnit.SECONDS);
+  }
 
 
   @Test

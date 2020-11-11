@@ -54,6 +54,11 @@
       "run": "after",
       "snippetPath": "data-migration/11.0.0/pieces_table.sql",
       "fromModuleVersion": "mod-orders-storage-11.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/11.0.0/po_line_sync_fund_code.ftl",
+      "fromModuleVersion": "mod-orders-storage-11.1.3"
     }
   ],
   "tables": [
