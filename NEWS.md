@@ -1,5 +1,14 @@
 ## 11.2.0 - Unreleased
 
+## 11.1.3 - Released
+The only reason of this release is to fix fund distribution codes consistency within polines
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.1.2...v11.1.3)
+ 
+### Bug Fixes
+* [MODORDSTOR-193](https://issues.folio.org/browse/MODORDSTOR-193) - Create cross-module migration script for fill "fundDistribution.code" in POL
+
+
 ## 11.1.2 - Released
 This release focused on RMB upgrade
  
