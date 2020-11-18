@@ -1,5 +1,13 @@
 ## 11.2.0 - Unreleased
 
+## 11.1.4 - Released
+The only reason of this release is to fix Adding certain prefix and suffixes prevents user from being able to save
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.1.3...v11.1.4)
+ 
+### Bug Fixes
+* [MODORDSTOR-197](https://issues.folio.org/browse/MODORDSTOR-197) - Adding certain prefix and suffixes prevents user from being able to save
+
 ## 11.1.3 - Released
 The only reason of this release is to fix fund distribution codes consistency within polines
  
