@@ -1,4 +1,6 @@
 -- Update reEncumber
 UPDATE ${myuniversity}_${mymodule}.purchase_order
 SET jsonb = jsonb_set(jsonb, '{reEncumber}', 'true')
-WHERE jsonb -> 'reEncumber' = 'false' OR jsonb -> 'reEncumber' = '""' OR NOT jsonb ? 'reEncumber';
+WHERE NOT jsonb ? 'reEncumber'
+	OR (jsonb ->> 'reEncumber')::text = ''
+	OR NOT (jsonb ->> 'reEncumber')::boolean;
