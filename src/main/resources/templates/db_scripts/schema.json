@@ -48,7 +48,7 @@
     {
       "run": "after",
       "snippetPath": "data-migration/11.0.0/purchase_order_table_1.sql",
-      "fromModuleVersion": "mod-orders-storage-11.0.1"
+      "fromModuleVersion": "mod-orders-storage-11.2.0"
     },
     {
       "run": "after",
