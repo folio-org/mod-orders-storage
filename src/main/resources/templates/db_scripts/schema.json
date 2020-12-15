@@ -1,4 +1,5 @@
 {
+  "exactCount" : 20000,
   "scripts": [
     {
       "run": "after",
@@ -155,12 +156,14 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": "mod-orders-storage-10.0.0",
+      "fromModuleVersion": "mod-orders-storage-11.2.0",
       "withMetadata": true,
       "foreignKeys": [
         {
           "fieldName": "purchaseOrderId",
-          "targetTable": "purchase_order"
+          "targetTable": "purchase_order",
+          "tableAlias": "poLine",
+          "targetTableAlias": "purchaseOrder"
         }
       ],
       "index": [
