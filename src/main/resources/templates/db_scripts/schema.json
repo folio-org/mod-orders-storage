@@ -65,6 +65,11 @@
       "run": "after",
       "snippetPath": "data-migration/11.0.0/purchase_order_encumber_flag.sql",
       "fromModuleVersion": "mod-orders-storage-11.2.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/11.0.0/pol_status_for_ongoing_orders.sql",
+      "fromModuleVersion": "mod-orders-storage-11.2.0"
     }
   ],
   "tables": [
