@@ -1,6 +1,6 @@
 UPDATE ${myuniversity}_${mymodule}.po_line
 SET
-  jsonb = jsonb->'vendorDetail' - 'refNumber' || jsonb_build_object('referenceNumbers', json_build_array(jsonb_build_object(
+  jsonb = (jsonb || jsonb_set(jsonb, '{vendorDetail, referenceNumbers}', jsonb_build_array(jsonb_strip_nulls(jsonb_build_object(
         'refNumber', jsonb->'vendorDetail'->>'refNumber',
         'refNumberType',
             CASE
@@ -12,14 +12,8 @@ SET
                     THEN 'Vendor order reference number'
                 WHEN jsonb->'vendorDetail'->>'refNumberType' = 'Agent''s unique subscription reference number'
                     THEN 'Vendor subscription reference number'
-                ELSE ''
-            END
-        'vendorDetailsSource', 'OrderLine')))
+                ELSE null
+            END,
+        'vendorDetailsSource', 'OrderLine'))), true)) #- '{vendorDetail, refNumber}' #- '{vendorDetail, refNumberType}'
 WHERE
-  jsonb->'vendorDetail' ? 'refNumber';
-
-UPDATE ${myuniversity}_${mymodule}.po_line
-SET
-    jsonb = jsonb->'vendorDetail' - 'refNumberType'
-WHERE
-  jsonb->'vendorDetail' ? 'refNumberType';
+  jsonb ? 'vendorDetail' AND (jsonb->'vendorDetail' ? 'refNumber' OR jsonb->'vendorDetail' ? 'refNumberType');
