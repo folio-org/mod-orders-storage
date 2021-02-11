@@ -3,27 +3,30 @@ package org.folio.rest.utils;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
+import static org.folio.rest.utils.TenantApiTestUtil.purge;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 
 import io.restassured.http.Header;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.lang.reflect.Method;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class IsolatedTenantExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
-  private final Logger logger = LoggerFactory.getLogger(IsolatedTenantExtension.class);
+  private final Logger logger = LogManager.getLogger(IsolatedTenantExtension.class);
   private static final String ISOLATED_TENANT = "isolated";
+  private static TenantJob tenantJob;
 
   @Override
   public void beforeTestExecution(ExtensionContext context) throws Exception {
     if (hasTenantAnnotationClassOrMethod(context)) {
       final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, ISOLATED_TENANT);
 
-      prepareTenant(TENANT_HEADER, false);
+      tenantJob = prepareTenant(TENANT_HEADER, false, false);
       logger.info("Isolated tenant has been prepared");
     }
   }
@@ -33,7 +36,8 @@ public class IsolatedTenantExtension implements BeforeTestExecutionCallback, Aft
     if (hasTenantAnnotationClassOrMethod(context)) {
       final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, ISOLATED_TENANT);
 
-      deleteTenant(TENANT_HEADER);
+      purge(TENANT_HEADER);
+      deleteTenant(tenantJob, TENANT_HEADER);
       logger.info("Isolated tenant has been deleted");
 
     }

@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -43,7 +44,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
+import org.apache.logging.log4j.Logger;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -63,17 +64,20 @@ public class PoLinesPostgresDAOTest extends TestBase {
   @Mock
   private Logger logger;
 
+  private static TenantJob tenantJob;
+
+
   @BeforeEach
   public void initMocks() throws MalformedURLException {
     MockitoAnnotations.initMocks(this);
     poLinesPostgresDAO = Mockito.mock(PoLinesPostgresDAO.class, Mockito.CALLS_REAL_METHODS);
-    prepareTenant(TEST_TENANT_HEADER, false);
+    tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
   }
 
 
   @AfterEach
   void cleanupData() throws MalformedURLException {
-    deleteTenant(TEST_TENANT_HEADER);
+    deleteTenant(tenantJob, TEST_TENANT_HEADER);
   }
 
   @Test

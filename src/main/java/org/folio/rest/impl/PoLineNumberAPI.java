@@ -21,12 +21,12 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class PoLineNumberAPI implements OrdersStoragePoLineNumber {
 
-  private static final Logger log = LoggerFactory.getLogger(PoLineNumberAPI.class);
+  private static final Logger log = LogManager.getLogger(PoLineNumberAPI.class);
   private final Messages messages = Messages.getInstance();
 
   @Autowired

@@ -1,7 +1,7 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 
 public class PoNumberTest extends TestBase {
-  private final Logger logger = LoggerFactory.getLogger(PoNumberTest.class);
+  private final Logger logger = LogManager.getLogger(PoNumberTest.class);
 
   private static final String PO_NUMBER_ENDPOINT = "/orders-storage/po-number";
 

@@ -2,8 +2,8 @@ package org.folio.rest.impl;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @IsolatedTenant
 class PurchaseOrderLinesApiTest extends TestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(PurchaseOrderLinesApiTest.class);
+  private final Logger logger = LogManager.getLogger(PurchaseOrderLinesApiTest.class);
 
   @Test
   void testDeletePOLineByIdWithRelatedData() throws MalformedURLException {

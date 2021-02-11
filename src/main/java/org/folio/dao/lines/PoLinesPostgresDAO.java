@@ -14,13 +14,13 @@ import org.folio.rest.persist.Criteria.Criterion;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class PoLinesPostgresDAO implements PoLinesDAO {
 
-  private final static Logger logger = LoggerFactory.getLogger(PoLinesPostgresDAO.class);
+  private final static Logger logger = LogManager.getLogger(PoLinesPostgresDAO.class);
 
 
   @Override

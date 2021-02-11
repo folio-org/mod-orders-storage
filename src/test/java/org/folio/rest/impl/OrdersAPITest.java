@@ -12,8 +12,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 
 
 public class OrdersAPITest extends TestBase {
-  private final Logger logger = LoggerFactory.getLogger(OrdersAPITest.class);
+  private final Logger logger = LogManager.getLogger(OrdersAPITest.class);
 
   private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
 

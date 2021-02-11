@@ -15,13 +15,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EntitiesCrudTest extends TestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(EntitiesCrudTest.class);
+  private final Logger logger = LogManager.getLogger(EntitiesCrudTest.class);
   String sample = null;
 
   public static Stream<TestEntities> deleteOrder() {

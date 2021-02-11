@@ -11,8 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 @IsolatedTenant
 public class ReceivingHistoryTest extends TestBase {
 
-  private static final Logger logger = LoggerFactory.getLogger(ReceivingHistoryTest.class);
+  private static final Logger logger = LogManager.getLogger(ReceivingHistoryTest.class);
 
   private String poLineSampleId;
   private String poLineSampleId2;

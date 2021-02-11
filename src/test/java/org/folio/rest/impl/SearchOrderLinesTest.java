@@ -7,50 +7,50 @@ import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 import io.restassured.http.Header;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import org.folio.rest.jaxrs.model.Physical;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.Physical.CreateInventory;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLine.OrderFormat;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class SearchOrderLinesTest extends TestBase {
-  private static final Logger logger = LoggerFactory.getLogger(SearchOrderLinesTest.class);
+  private static final Logger logger = LogManager.getLogger(SearchOrderLinesTest.class);
 
   private static final String ORDER_LINES_ENDPOINT = "/orders-storage/order-lines";
   private static final String TENANT_NAME = "polinesearch";
   private static final Header NEW_TENANT = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
+  private static TenantJob tenantJob;
 
   @BeforeAll
   public static void before() throws MalformedURLException {
     logger.info("Create a new tenant loading the sample data");
-    prepareTenant(NEW_TENANT, true);
+    tenantJob = prepareTenant(NEW_TENANT, true, true);
   }
 
   @AfterAll
   public static void after() throws MalformedURLException {
     logger.info("Delete the created \"polinesearch\" tenant");
-    deleteTenant(NEW_TENANT);
+    deleteTenant(tenantJob, NEW_TENANT);
   }
 
   @Test
@@ -119,6 +119,7 @@ public class SearchOrderLinesTest extends TestBase {
     // 2. Update order adding one more acq unit
     String acqUnitId = UUID.randomUUID().toString();
     order.getAcqUnitIds().add(acqUnitId);
+    order.getMetadata().setCreatedByUserId(UUID.randomUUID().toString());
     putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), purchaseOrderId, JsonObject.mapFrom(order).encode(), NEW_TENANT);
 
     // Search lines by existing and new acq units

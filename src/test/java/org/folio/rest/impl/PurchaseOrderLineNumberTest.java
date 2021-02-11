@@ -15,14 +15,14 @@ import org.junit.jupiter.api.Test;
 import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 
 public class PurchaseOrderLineNumberTest extends TestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(PurchaseOrderLineNumberTest.class);
+  private final Logger logger = LogManager.getLogger(PurchaseOrderLineNumberTest.class);
 
   private static final String PO_ENDPOINT = "/orders-storage/purchase-orders";
   private static final String PO_LINE_NUMBER_ENDPOINT = "/orders-storage/po-line-number";
