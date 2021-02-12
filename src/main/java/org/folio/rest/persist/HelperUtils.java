@@ -19,11 +19,11 @@ import org.folio.rest.persist.interfaces.Results;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class HelperUtils {
-  private static final Logger log = LoggerFactory.getLogger(HelperUtils.class);
+  private static final Logger log = LogManager.getLogger(HelperUtils.class);
 
   private static final Pattern orderBy = Pattern.compile("(?<=ORDER BY).*?(?=$|LIMIT.*$|OFFSET.*$)");
 

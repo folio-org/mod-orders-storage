@@ -15,12 +15,12 @@ import org.folio.rest.tools.utils.TenantTool;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class PoNumberAPI implements OrdersStoragePoNumber {
 
-  private static final Logger log = LoggerFactory.getLogger(PoNumberAPI.class);
+  private static final Logger log = LogManager.getLogger(PoNumberAPI.class);
   private static final String PO_NUMBER_QUERY = "SELECT nextval('po_number')";
   private final Messages messages = Messages.getInstance();
 

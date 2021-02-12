@@ -2,8 +2,8 @@ package org.folio.rest.impl;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +14,7 @@ import static org.junit.Assert.fail;
 
 public class PurchaseOrderNumberUniquenessTest extends TestBase {
 
-  private final Logger logger = LoggerFactory.getLogger(PurchaseOrderNumberUniquenessTest.class);
+  private final Logger logger = LogManager.getLogger(PurchaseOrderNumberUniquenessTest.class);
 
   @Test
   public void testPoNumberUniqueness() throws MalformedURLException {

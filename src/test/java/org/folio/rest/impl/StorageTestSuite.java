@@ -4,10 +4,11 @@ import io.restassured.http.Header;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.ResponseUtilsTest;
@@ -37,11 +38,12 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 @RunWith(JUnitPlatform.class)
 
 public class StorageTestSuite {
-  private static final Logger logger = LoggerFactory.getLogger(StorageTestSuite.class);
+  private static final Logger logger = LogManager.getLogger(StorageTestSuite.class);
 
   private static Vertx vertx;
   private static int port = NetworkUtils.nextFreePort();
   public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
+  private static TenantJob tenantJob;
 
   private StorageTestSuite() {}
 
@@ -73,13 +75,13 @@ public class StorageTestSuite {
 
     startVerticle(options);
 
-    prepareTenant(TENANT_HEADER, false);
+    tenantJob = prepareTenant(TENANT_HEADER, false, false);
   }
 
   @AfterAll
   public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
     logger.info("Delete tenant");
-    deleteTenant(TENANT_HEADER);
+    deleteTenant(tenantJob, TENANT_HEADER);
 
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
 

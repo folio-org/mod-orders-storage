@@ -1,16 +1,5 @@
 package org.folio.rest.util;
 
-import java.lang.reflect.Field;
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.folio.rest.RestVerticle;
-import org.folio.rest.tools.utils.NetworkUtils;
-import org.folio.spring.SpringContextUtil;
-
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
 import io.vertx.core.AbstractVerticle;
@@ -21,6 +10,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.LoggerFactory;
+import java.lang.reflect.Field;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.folio.rest.RestVerticle;
+import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.spring.SpringContextUtil;
 
 public final class TestConfig {
 

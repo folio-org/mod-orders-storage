@@ -9,11 +9,11 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class InitAPIs implements InitAPI {
-  private final Logger logger = LoggerFactory.getLogger(InitAPIs.class);
+  private final Logger logger = LogManager.getLogger(InitAPIs.class);
 
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> resultHandler) {

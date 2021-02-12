@@ -2,66 +2,54 @@ package org.folio.rest.impl;
 
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import java.util.List;
 import java.util.Map;
-
 import javax.ws.rs.core.Response;
-
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-
 public class TenantReferenceAPI extends TenantAPI {
-  private static final Logger log = LoggerFactory.getLogger(TenantReferenceAPI.class);
+  private static final Logger log = LogManager.getLogger(TenantReferenceAPI.class);
 
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
 
   @Override
-  public void postTenant(TenantAttributes tenantAttributes, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
+  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
     log.info("postTenant");
-    Vertx vertx = cntxt.owner();
-    super.postTenant(tenantAttributes, headers, res -> {
-      if (res.failed() || (res.succeeded() && (res.result().getStatus() < 200 || res.result().getStatus() > 299))) {
-        hndlr.handle(res);
-        return;
-      }
+    Vertx vertx = vertxContext.owner();
+    Promise<Integer> promise = Promise.promise();
 
-      //Always load this system data
-      Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
-      tenantAttributes.getParameters().add(parameter);
+    //Always load this system data
+    Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
+    attributes.getParameters().add(parameter);
 
-      TenantLoading tl = new TenantLoading();
-      boolean loadData = buildDataLoadingParameters(tenantAttributes, tl);
+    TenantLoading tl = new TenantLoading();
+    buildDataLoadingParameters(attributes, tl);
 
-      if (loadData) {
-        tl.perform(tenantAttributes, headers, vertx, res1 -> {
-          if (res1.failed()) {
-            hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-              .respond500WithTextPlain(res1.cause().getLocalizedMessage())));
-            return;
-          }
-          hndlr.handle(io.vertx.core.Future.succeededFuture(PostTenantResponse
-            .respond201WithApplicationJson("")));
-        });
+    tl.perform(attributes, headers, vertx, res1 -> {
+      if (res1.failed()) {
+        promise.fail(res1.cause());
+
       } else {
-        hndlr.handle(res);
+        promise.complete(res1.result());
       }
 
-    }, cntxt);
+    });
 
+    return promise.future();
   }
-
-
 
   private boolean buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
     tl.withKey(PARAMETER_LOAD_SYSTEM)
@@ -102,15 +90,10 @@ public class TenantReferenceAPI extends TenantAPI {
   }
 
   @Override
-  public void getTenant(Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
-    log.info("getTenant");
-    super.getTenant(headers, hndlr, cntxt);
-  }
-
-  @Override
-  public void deleteTenant(Map<String, String> headers, Handler<AsyncResult<Response>> hndlr, Context cntxt) {
+  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr,
+    Context cntxt) {
     log.info("deleteTenant");
-    super.deleteTenant(headers, res -> {
+    super.deleteTenantByOperationId(operationId, headers, res -> {
       Vertx vertx = cntxt.owner();
       String tenantId = TenantTool.tenantId(headers);
       PostgresClient.getInstance(vertx, tenantId)

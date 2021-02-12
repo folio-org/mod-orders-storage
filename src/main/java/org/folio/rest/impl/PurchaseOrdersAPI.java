@@ -25,15 +25,15 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 
 public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStoragePurchaseOrders {
 
-  private static final Logger log = LoggerFactory.getLogger(PurchaseOrdersAPI.class);
+  private static final Logger log = LogManager.getLogger(PurchaseOrdersAPI.class);
   private static final String PURCHASE_ORDER_TABLE = "purchase_order";
 
   @Autowired
