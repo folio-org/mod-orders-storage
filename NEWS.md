@@ -1,4 +1,24 @@
-## 11.2.0 - Unreleased
+## 12.1.0 - Unreleased
+
+## 12.0.0 - Released
+The focus of this release update po_line schema with new fields to support finance and data import features.
+**Major versions of APIs** were changed for **orders-storage.po-lines** 
+ 
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.1.4...v12.0.0)
+ 
+### Stories
+* [MODORDSTOR-212](https://issues.folio.org/browse/MODORDSTOR-212) - Create migration script for ongoing orders
+* [MODORDSTOR-205](https://issues.folio.org/browse/MODORDSTOR-205) - mod-orders-storage: Update RMB
+* [MODORDSTOR-201](https://issues.folio.org/browse/MODORDSTOR-201) - Define "item summary" model for the acquisition accordion in inventory
+* [MODORDSTOR-187](https://issues.folio.org/browse/MODORDSTOR-187) - Create migration script for setting in all orders "reEncumber" = true
+* [MODORDSTOR-185](https://issues.folio.org/browse/MODORDSTOR-185) - Add field "exchangeRate" to the cost of POL
+* [MODORDSTOR-184](https://issues.folio.org/browse/MODORDSTOR-184) - Add fields to orders schemes needs for rollover
+* [MODORDSTOR-146](https://issues.folio.org/browse/MODORDSTOR-146) - Pair of "refNumber" and "refNumberType" in PO line should be an array
+* [MODORDSTOR-116](https://issues.folio.org/browse/MODORDSTOR-116) - Use cross-index subqueries instead of views
+
+### Bug Fixes
+* [MODORDSTOR-211](https://issues.folio.org/browse/MODORDSTOR-211) - Cannot enable module for tenant if uuid-ossp extension installed
+
 
 ## 11.1.4 - Released
 The only reason of this release is to fix Adding certain prefix and suffixes prevents user from being able to save
