@@ -12,6 +12,7 @@ import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.persist.TableNames;
 import org.folio.rest.persist.Tx;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
@@ -34,7 +35,6 @@ import io.vertx.sqlclient.RowSet;
 public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LogManager.getLogger(PurchaseOrdersAPI.class);
-  private static final String PURCHASE_ORDER_TABLE = "purchase_order";
 
   @Autowired
   private PoLinesService poLinesService;
@@ -51,7 +51,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   @Validate
   public void getOrdersStoragePurchaseOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.get(PURCHASE_ORDER_TABLE, PurchaseOrder.class, PurchaseOrderCollection.class, query, offset, limit, okapiHeaders,
+    PgUtil.get(TableNames.PURCHASE_ORDER_TABLE, PurchaseOrder.class, PurchaseOrderCollection.class, query, offset, limit, okapiHeaders,
         vertxContext, GetOrdersStoragePurchaseOrdersResponse.class, asyncResultHandler);
   }
 
@@ -78,7 +78,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   @Validate
   public void getOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.getById(PURCHASE_ORDER_TABLE, PurchaseOrder.class, id, okapiHeaders,vertxContext, GetOrdersStoragePurchaseOrdersByIdResponse.class, asyncResultHandler);
+    PgUtil.getById(TableNames.PURCHASE_ORDER_TABLE, PurchaseOrder.class, id, okapiHeaders,vertxContext, GetOrdersStoragePurchaseOrdersByIdResponse.class, asyncResultHandler);
   }
 
   @Override
@@ -89,12 +89,18 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
       Tx<String> tx = new Tx<>(id, getPgClient());
       tx.startTx()
         .compose(this::deletePolNumberSequence)
+        .compose(this::deleteOrderInvoicesRelation)
         .compose(this::deleteOrderById)
         .compose(Tx::endTx)
         .onComplete(handleNoContentResponse(asyncResultHandler, tx, "Order {} {} deleted"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
+  }
+
+  private Future<Tx<String>> deleteOrderInvoicesRelation(Tx<String> tx) {
+    log.info("Delete order->invoices relations with id={}", tx.getEntity());
+    return deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, "purchaseOrderId==" + tx.getEntity(), true);
   }
 
   @Validate
@@ -150,7 +156,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   private Future<Response> updateOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders, Context vertxContext) {
     log.info("Update purchase order with id={}", order.getId());
     Promise<Response> promise = Promise.promise();
-    PgUtil.put(PURCHASE_ORDER_TABLE, order, id, okapiHeaders, vertxContext, PutOrdersStoragePurchaseOrdersByIdResponse.class, reply -> {
+    PgUtil.put(TableNames.PURCHASE_ORDER_TABLE, order, id, okapiHeaders, vertxContext, PutOrdersStoragePurchaseOrdersByIdResponse.class, reply -> {
       if (reply.succeeded() && reply.result().getStatus() == 204) {
         log.info("Purchase order id={} successfully updated", id);
         promise.complete(reply.result());
@@ -264,12 +270,12 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
 
     log.debug("Creating new order with id={}", order.getId());
 
-    return save(tx, order.getId(), order, PURCHASE_ORDER_TABLE);
+    return save(tx, order.getId(), order, TableNames.PURCHASE_ORDER_TABLE);
   }
 
   private Future<Tx<String>> deleteOrderById(Tx<String> tx) {
     log.info("Delete PO with id={}", tx.getEntity());
-    return deleteById(tx, PURCHASE_ORDER_TABLE);
+    return deleteById(tx, TableNames.PURCHASE_ORDER_TABLE);
   }
 
   @Override

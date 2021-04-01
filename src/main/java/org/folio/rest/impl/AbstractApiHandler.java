@@ -58,6 +58,23 @@ public abstract class AbstractApiHandler {
     return promise.future();
   }
 
+  public Future<Tx<String>> deleteByQuery(Tx<String> tx, String table, String query, boolean silent) {
+    Promise<Tx<String>> promise = Promise.promise();
+    pgClient.delete(tx.getConnection(), table, query, reply -> {
+      if (reply.failed()) {
+        handleFailure(promise, reply);
+      } else {
+        if (!silent && reply.result().rowCount() == 0) {
+          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        } else {
+          promise.complete(tx);
+        }
+      }
+    });
+    return promise.future();
+  }
+
+
   public  <T> Handler<AsyncResult<Tx<T>>> handleResponseWithLocation(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx, String logMessage) {
     return result -> {
       if (result.failed()) {
