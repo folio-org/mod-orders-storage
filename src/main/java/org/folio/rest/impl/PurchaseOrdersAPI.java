@@ -14,6 +14,7 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.TableNames;
 import org.folio.rest.persist.Tx;
+import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.spring.SpringContextUtil;
@@ -100,7 +101,9 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
 
   private Future<Tx<String>> deleteOrderInvoicesRelation(Tx<String> tx) {
     log.info("Delete order->invoices relations with id={}", tx.getEntity());
-    return deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, "purchaseOrderId==" + tx.getEntity(), true);
+    CQLWrapper cqlWrapper = new CQLWrapper();
+    cqlWrapper.setWhereClause("WHERE jsonb ->> 'purchaseOrderId' = '" + tx.getEntity() + "'");
+    return deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper, true);
   }
 
   @Validate

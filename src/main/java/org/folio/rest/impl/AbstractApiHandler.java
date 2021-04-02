@@ -9,16 +9,17 @@ import java.net.URI;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
+import org.folio.rest.persist.cql.CQLWrapper;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public abstract class AbstractApiHandler {
@@ -58,7 +59,7 @@ public abstract class AbstractApiHandler {
     return promise.future();
   }
 
-  public Future<Tx<String>> deleteByQuery(Tx<String> tx, String table, String query, boolean silent) {
+  public Future<Tx<String>> deleteByQuery(Tx<String> tx, String table, CQLWrapper query, boolean silent) {
     Promise<Tx<String>> promise = Promise.promise();
     pgClient.delete(tx.getConnection(), table, query, reply -> {
       if (reply.failed()) {
