@@ -9,7 +9,7 @@ import org.folio.rest.jaxrs.model.OrderInvoiceRelationship;
 import org.folio.rest.jaxrs.model.OrderInvoiceRelationshipCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageOrderInvoiceRelns;
 import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.TableNames;
+import org.folio.models.TableNames;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;

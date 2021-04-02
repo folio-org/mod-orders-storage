@@ -12,7 +12,7 @@ import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.TableNames;
+import org.folio.models.TableNames;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.services.lines.PoLinesService;
