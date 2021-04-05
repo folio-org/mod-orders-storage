@@ -25,11 +25,11 @@ public class PurchaseOrdersAPITest extends TestBase {
       String purchaseOrderSampleId = UUID.randomUUID().toString();
       JsonObject purchaseOrder = JsonObject.mapFrom(purchaseOrderSample);
       purchaseOrder.put("id", purchaseOrderSampleId);
-      purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrder.encode());
+      purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrder.encode(), ISOLATED_TENANT_HEADER);
       List<PurchaseOrder> beforeDeleteOrders = getViewCollection(ORDERS_ENDPOINT);
       assertThat(beforeDeleteOrders, hasSize(1));
 
-      deleteData(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
+      deleteData(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId, ISOLATED_TENANT_HEADER);
 
       List<PurchaseOrder> afterOrders = getViewCollection(ORDERS_ENDPOINT);
       assertThat(afterOrders, hasSize(0));
@@ -41,12 +41,12 @@ public class PurchaseOrdersAPITest extends TestBase {
     String purchaseOrderSampleId = UUID.randomUUID().toString();
     JsonObject purchaseOrder = JsonObject.mapFrom(purchaseOrderSample);
     purchaseOrder.put("id", purchaseOrderSampleId);
-    createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrder.encode());
+    createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrder.encode(), ISOLATED_TENANT_HEADER);
     List<PurchaseOrder> beforeDeleteOrders = getViewCollection(ORDERS_ENDPOINT);
     assertThat(beforeDeleteOrders, hasSize(1));
 
     String nonExistedId = UUID.randomUUID().toString();
-    deleteData(PURCHASE_ORDER.getEndpointWithId(), nonExistedId);
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), nonExistedId, ISOLATED_TENANT_HEADER);
 
     List<PurchaseOrder> afterOrders = getViewCollection(ORDERS_ENDPOINT);
     assertThat(afterOrders, hasSize(1));
@@ -58,7 +58,7 @@ public class PurchaseOrdersAPITest extends TestBase {
 
 
   private List<PurchaseOrder> getViewCollection(String endpoint) throws MalformedURLException {
-    return getData(endpoint).as(PurchaseOrderCollection.class)
+    return getData(endpoint, ISOLATED_TENANT_HEADER).as(PurchaseOrderCollection.class)
       .getPurchaseOrders();
   }
 }
