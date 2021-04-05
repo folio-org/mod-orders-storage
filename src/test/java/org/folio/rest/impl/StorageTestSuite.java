@@ -147,7 +147,5 @@ public class StorageTestSuite {
   @Nested
   class ResponseUtilsTestNested extends ResponseUtilsTest {}
   @Nested
-  class PurchaseOrdersAPITestNested extends PurchaseOrdersAPITest {}
-  @Nested
   class AbstractApiHandlerTestNested extends AbstractApiHandlerTest {}
 }
