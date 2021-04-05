@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -13,6 +14,7 @@ import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.utils.IsolatedTenant;
 import org.junit.jupiter.api.Test;
 
+import io.restassured.http.Header;
 import io.vertx.core.json.JsonObject;
 
 @IsolatedTenant
@@ -51,6 +53,25 @@ public class PurchaseOrdersAPITest extends TestBase {
     List<PurchaseOrder> afterOrders = getViewCollection(ORDERS_ENDPOINT);
     assertThat(afterOrders, hasSize(1));
   }
+
+
+  @Test
+  public void shouldFailedWhenTryDeletePurchaseOrderFromNonExitedTenant() throws MalformedURLException {
+    String purchaseOrderSampleId = UUID.randomUUID().toString();
+    JsonObject purchaseOrder = JsonObject.mapFrom(purchaseOrderSample);
+    purchaseOrder.put("id", purchaseOrderSampleId);
+    Header FAILED_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "failed_tenant");
+    createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrder.encode(), ISOLATED_TENANT_HEADER);
+    List<PurchaseOrder> beforeDeleteOrders = getViewCollection(ORDERS_ENDPOINT);
+    assertThat(beforeDeleteOrders, hasSize(1));
+
+    String nonExistedId = UUID.randomUUID().toString();
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), nonExistedId, FAILED_TENANT_HEADER);
+
+    List<PurchaseOrder> afterOrders = getViewCollection(ORDERS_ENDPOINT);
+    assertThat(afterOrders, hasSize(1));
+  }
+
 
   private PurchaseOrder getOrder(String path) {
     return getFileAsObject(path, PurchaseOrder.class);
