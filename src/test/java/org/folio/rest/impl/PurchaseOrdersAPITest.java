@@ -6,20 +6,26 @@ import static org.junit.Assert.assertThat;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.UUID;
 
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
+import org.folio.rest.utils.IsolatedTenant;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.json.JsonObject;
 
+@IsolatedTenant
 public class PurchaseOrdersAPITest extends TestBase {
   private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
   private final PurchaseOrder purchaseOrderSample = getOrder("data/purchase-orders/81_ongoing_pending.json");
 
   @Test
   public void shouldSuccessfullyDeletePurchaseOrder() throws MalformedURLException {
-      String purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample).encode());
+      String purchaseOrderSampleId = UUID.randomUUID().toString();
+      JsonObject purchaseOrder = JsonObject.mapFrom(purchaseOrderSample);
+      purchaseOrder.put("id", purchaseOrderSampleId);
+      purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrder.encode());
       List<PurchaseOrder> beforeDeleteOrders = getViewCollection(ORDERS_ENDPOINT);
       assertThat(beforeDeleteOrders, hasSize(1));
 
@@ -32,11 +38,15 @@ public class PurchaseOrdersAPITest extends TestBase {
 
   @Test
   public void shouldFailedWhenTryDeletePurchaseOrder() throws MalformedURLException {
-    String purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample).encode());
+    String purchaseOrderSampleId = UUID.randomUUID().toString();
+    JsonObject purchaseOrder = JsonObject.mapFrom(purchaseOrderSample);
+    purchaseOrder.put("id", purchaseOrderSampleId);
+    createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrder.encode());
     List<PurchaseOrder> beforeDeleteOrders = getViewCollection(ORDERS_ENDPOINT);
     assertThat(beforeDeleteOrders, hasSize(1));
 
-    deleteData(PURCHASE_ORDER.getEndpointWithId(), "non-existed");
+    String nonExistedId = UUID.randomUUID().toString();
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), nonExistedId);
 
     List<PurchaseOrder> afterOrders = getViewCollection(ORDERS_ENDPOINT);
     assertThat(afterOrders, hasSize(1));
