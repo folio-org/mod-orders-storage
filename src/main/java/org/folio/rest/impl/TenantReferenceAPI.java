@@ -63,7 +63,7 @@ public class TenantReferenceAPI extends TenantAPI {
       });
   }
 
-  private Future loadDataFromFinanceStorageModule(Map<String, String> headers, Context vertxContext, String tenantId) {
+  private Future<Void> loadDataFromFinanceStorageModule(Map<String, String> headers, Context vertxContext, String tenantId) {
     return migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext);
   }
 

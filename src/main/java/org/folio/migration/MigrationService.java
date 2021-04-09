@@ -25,29 +25,24 @@ public class MigrationService {
     this.financeService = financeService;
   }
 
-  public Future syncAllFundCodeFromPoLineFundDistribution (Map<String, String> headers, Context vertxContext) {
+  public Future<Void> syncAllFundCodeFromPoLineFundDistribution (Map<String, String> headers, Context vertxContext) {
     Promise<Void> promise = Promise.promise();
     vertxContext.runOnContext(v -> {
       log.debug("Synchronizing fund codes from poLine fund distribution");
-
       DBClient client = new DBClient(vertxContext, headers);
-
-      //  Get list of aff funds
       financeService.getAllFunds(new RequestContext(vertxContext, headers))
-              //  TODO: Create map fund's ID > fundCode;
-              //  TODO: Creterea? Update SQL script?
-              .thenAccept(funds -> runSetFundCodeIntoPolScript(funds, client))
-              .whenComplete(v1 -> {
-                log.info("ok");
-                promise.complete();
-              })
-              .onFailure(v2 -> {
-                log.info("Some error");
-                promise.fail("Some error");
-              });
+                    .thenAccept(funds -> runSetFundCodeIntoPolScript(funds, client)
+                      .onSuccess(v1 -> {
+                        log.info("ok");
+                        promise.complete();
+                      })
+                      .onFailure(v2 -> {
+                        log.info("Some error");
+                        promise.fail("Some error");
+                      })
+                    );
     });
-
-    return promise.future();;
+    return promise.future();
   }
 
 
