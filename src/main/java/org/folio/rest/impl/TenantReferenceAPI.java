@@ -1,23 +1,22 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import org.apache.logging.log4j.Logger;
+import io.vertx.core.*;
 import org.apache.logging.log4j.LogManager;
-import java.util.List;
-import java.util.Map;
-import javax.ws.rs.core.Response;
+import org.apache.logging.log4j.Logger;
+import org.folio.okapi.common.ModuleId;
+import org.folio.okapi.common.SemVer;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
+
+import javax.ws.rs.core.Response;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
+import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 
 public class TenantReferenceAPI extends TenantAPI {
   private static final Logger log = LogManager.getLogger(TenantReferenceAPI.class);
@@ -29,8 +28,7 @@ public class TenantReferenceAPI extends TenantAPI {
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
     log.info("postTenant");
     Vertx vertx = vertxContext.owner();
-    Promise<Integer> promise = Promise.promise();
-
+//    Promise<Integer> promise = Promise.promise();
     //Always load this system data
     Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
     attributes.getParameters().add(parameter);
@@ -38,18 +36,59 @@ public class TenantReferenceAPI extends TenantAPI {
     TenantLoading tl = new TenantLoading();
     buildDataLoadingParameters(attributes, tl);
 
-    tl.perform(attributes, headers, vertx, res1 -> {
-      if (res1.failed()) {
-        promise.fail(res1.cause());
+    return Future.succeededFuture()
+      .compose(v -> migration(attributes, "mod-orders-storage-7.0.0", () -> loadDataFromFinanceStorageModule(headers, vertxContext, tenantId)))
+      .compose(v -> {
 
-      } else {
-        promise.complete(res1.result());
-      }
+        Promise<Integer> promise = Promise.promise();
 
-    });
-
-    return promise.future();
+        tl.perform(attributes, headers, vertx, res -> {
+          if (res.failed()) {
+            promise.fail(res.cause());
+          } else {
+            promise.complete(res.result());
+          }
+        });
+        return promise.future();
+      });
   }
+
+  private Future loadDataFromFinanceStorageModule(Map<String, String> headers, Context vertxContext, String tenantId) {
+    //  Create HTTPClient with headers.
+    //  Create Service with Fund logic.
+    //  Create get all funds request from finances module.
+    //  Update orders storage by comparing logic.
+
+    //    final String SYNC_ALL_FUNCODE_QUERY = "UPDATE ${myuniversity}_${mymodule}.po_line " +
+//                         "SET jsonb = " +
+//                         "( " +
+//                         "SELECT jsonb_set(jsonb, '{fundDistribution}', jsonb_agg(jsonb_set(distrib, '{code}', coalesce((SELECT jsonb -> 'code' FROM ${myuniversity}_mod_finance_storage.fund WHERE jsonb ->> 'id' = distrib ->> 'fundId'), distrib -> 'code', '\"\"')))) " +
+//                         "FROM jsonb_array_elements(jsonb -> 'fundDistribution') distrib" +
+//                         ") " +
+//                         "WHERE jsonb_array_length(jsonb -> 'fundDistribution') > 0;";
+//
+//    PostgresClient.getInstance(vertxContext.owner(), tenantId).execute(SYNC_ALL_FUNCODE_QUERY);
+//
+    return null;
+  }
+
+  private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {
+    SemVer moduleTo = moduleVersionToSemVer(migrationModule);
+    SemVer currentModuleVersion = moduleVersionToSemVer(attributes.getModuleFrom());
+    if (moduleTo.compareTo(currentModuleVersion) > 0){
+      return supplier.get();
+    }
+    return Future.succeededFuture();
+  }
+
+  private static SemVer moduleVersionToSemVer(String version) {
+    try {
+      return new SemVer(version);
+    } catch (IllegalArgumentException ex) {
+      return new ModuleId(version).getSemVer();
+    }
+  }
+
 
   private boolean buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
     tl.withKey(PARAMETER_LOAD_SYSTEM)

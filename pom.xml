@@ -74,6 +74,20 @@
 
   <dependencies>
     <dependency>
+      <groupId>one.util</groupId>
+      <artifactId>streamex</artifactId>
+      <version>0.7.3</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.github.tomakehurst/wiremock -->
+    <dependency>
+      <groupId>com.github.tomakehurst</groupId>
+      <artifactId>wiremock</artifactId>
+      <version>2.27.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-api-interfaces</artifactId>
       <version>${raml-module-builder.version}</version>
@@ -480,6 +494,40 @@
           </dependency>
         </dependencies>
       </plugin>
+
+      <plugin>
+        <groupId>org.jsonschema2pojo</groupId>
+        <artifactId>jsonschema2pojo-maven-plugin</artifactId>
+        <version>1.0.2</version>
+        <configuration>
+          <includes>*.json</includes>
+          <excludes>
+            <exclude>budget_expense_class_totals.json</exclude>
+            <exclude>budget_expense_class_totals_collection.json</exclude>
+            <exclude>budget_expense_class.json</exclude>
+            <exclude>budget_expense_class_collection.json</exclude>
+            <exclude>budget_rollover.json</exclude>
+            <exclude>encumbrance_rollover.json</exclude>
+            <exclude>ledger_fiscal_year_rollover.json</exclude>
+            <exclude>ledger_fiscal_year_rollover_collection.json</exclude>
+          </excludes>
+          <outputDirectory>${jsonschema2pojo_output_dir}</outputDirectory>
+          <generateBuilders>true</generateBuilders>
+        </configuration>
+        <executions>
+          <execution>
+            <id>mod-finance</id>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+            <configuration>
+              <sourceDirectory>${basedir}/ramls/acq-models/mod-finance/schemas</sourceDirectory>
+              <targetPackage>org.folio.rest.acq.model.finance</targetPackage>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
