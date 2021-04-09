@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import io.vertx.core.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.migration.MigrationService;
 import org.folio.okapi.common.ModuleId;
 import org.folio.okapi.common.SemVer;
 import org.folio.rest.jaxrs.model.Parameter;
@@ -10,6 +11,8 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -23,6 +26,13 @@ public class TenantReferenceAPI extends TenantAPI {
 
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
+  @Autowired
+  private MigrationService migrationService;
+
+  public TenantReferenceAPI() {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+    log.debug("Init TenantReferenceAPI");
+  }
 
   @Override
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
@@ -37,7 +47,7 @@ public class TenantReferenceAPI extends TenantAPI {
     buildDataLoadingParameters(attributes, tl);
 
     return Future.succeededFuture()
-      .compose(v -> migration(attributes, "mod-orders-storage-7.0.0", () -> loadDataFromFinanceStorageModule(headers, vertxContext, tenantId)))
+      .compose(v -> migration(attributes, "mod-orders-storage-11.0.0", () -> loadDataFromFinanceStorageModule(headers, vertxContext, tenantId)))
       .compose(v -> {
 
         Promise<Integer> promise = Promise.promise();
@@ -54,22 +64,7 @@ public class TenantReferenceAPI extends TenantAPI {
   }
 
   private Future loadDataFromFinanceStorageModule(Map<String, String> headers, Context vertxContext, String tenantId) {
-    //  Create HTTPClient with headers.
-    //  Create Service with Fund logic.
-    //  Create get all funds request from finances module.
-    //  Update orders storage by comparing logic.
-
-    //    final String SYNC_ALL_FUNCODE_QUERY = "UPDATE ${myuniversity}_${mymodule}.po_line " +
-//                         "SET jsonb = " +
-//                         "( " +
-//                         "SELECT jsonb_set(jsonb, '{fundDistribution}', jsonb_agg(jsonb_set(distrib, '{code}', coalesce((SELECT jsonb -> 'code' FROM ${myuniversity}_mod_finance_storage.fund WHERE jsonb ->> 'id' = distrib ->> 'fundId'), distrib -> 'code', '\"\"')))) " +
-//                         "FROM jsonb_array_elements(jsonb -> 'fundDistribution') distrib" +
-//                         ") " +
-//                         "WHERE jsonb_array_length(jsonb -> 'fundDistribution') > 0;";
-//
-//    PostgresClient.getInstance(vertxContext.owner(), tenantId).execute(SYNC_ALL_FUNCODE_QUERY);
-//
-    return null;
+    return migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext);
   }
 
   private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {

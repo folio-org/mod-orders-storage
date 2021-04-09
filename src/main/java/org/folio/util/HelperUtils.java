@@ -32,8 +32,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.folio.rest.RestConstants.OKAPI_URL;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.core.RestClient.OKAPI_URL;
 
 public class HelperUtils {
   public static final String ID = "id";
@@ -82,6 +82,7 @@ public class HelperUtils {
       throw new CompletionException(e);
     }
   }
+
 
   public static String getEndpointWithQuery(String query, Logger logger) {
     return isEmpty(query) ? EMPTY : "&query=" + encodeQuery(query, logger);
@@ -255,5 +256,4 @@ public class HelperUtils {
       });
     return idChunkMap;
   }
-
 }
