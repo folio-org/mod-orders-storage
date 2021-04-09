@@ -63,7 +63,7 @@ public class RestClient {
               logger.error("'POST {}' request failed. Request body: {}", endpoint, recordData.encodePrettily(), t.getCause());
               future.completeExceptionally(t.getCause());
               return null;
-            })
+            });
         } catch (Exception e) {
             logger.error("'POST {}' request failed. Request body: {}", endpoint, recordData.encodePrettily(), e);
             client.closeClient();

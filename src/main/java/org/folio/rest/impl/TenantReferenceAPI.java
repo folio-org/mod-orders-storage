@@ -47,7 +47,7 @@ public class TenantReferenceAPI extends TenantAPI {
     buildDataLoadingParameters(attributes, tl);
 
     return Future.succeededFuture()
-      .compose(v -> migration(attributes, "mod-orders-storage-11.0.0", () -> loadDataFromFinanceStorageModule(headers, vertxContext, tenantId)))
+      .compose(v -> migration(attributes, "mod-orders-storage-12.1.0", () -> loadDataFromFinanceStorageModule(headers, vertxContext, tenantId)))
       .compose(v -> {
 
         Promise<Integer> promise = Promise.promise();

@@ -58,8 +58,8 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/11.0.0/po_line_sync_fund_code.ftl",
-      "fromModuleVersion": "mod-orders-storage-11.1.3"
+      "snippetPath": "data-migration/11.0.0/po_line_sync_fund_code.sql",
+      "fromModuleVersion": "mod-orders-storage-12.1.0"
     },
     {
       "run": "after",
