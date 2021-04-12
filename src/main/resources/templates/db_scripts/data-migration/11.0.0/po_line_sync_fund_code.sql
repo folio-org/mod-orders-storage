@@ -1,6 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 CREATE OR REPLACE FUNCTION ${myuniversity}_${mymodule}.set_fund_code_into_pol(_funds_list jsonb) RETURNS VOID as $$
-    UPDATE diku_mod_orders_storage.po_line
+BEGIN
+    UPDATE ${myuniversity}_${mymodule}.po_line
        SET jsonb =
          (
             SELECT jsonb_set(jsonb, '{fundDistribution}',
@@ -10,7 +11,5 @@ CREATE OR REPLACE FUNCTION ${myuniversity}_${mymodule}.set_fund_code_into_pol(_f
                 )  FROM jsonb_array_elements(jsonb -> 'fundDistribution') distrib
           )
       WHERE jsonb_array_length(jsonb -> 'fundDistribution') > 0;
-
-    SELECT * FROM diku_mod_orders_storage.po_line
-    END;
+END;
 $$ LANGUAGE plpgsql;
