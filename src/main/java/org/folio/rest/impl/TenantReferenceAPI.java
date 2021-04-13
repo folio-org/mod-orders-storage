@@ -1,6 +1,17 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.*;
+import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.migration.MigrationService;
@@ -14,14 +25,8 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
-import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
-
 public class TenantReferenceAPI extends TenantAPI {
+
   private static final Logger log = LogManager.getLogger(TenantReferenceAPI.class);
 
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
@@ -38,8 +43,6 @@ public class TenantReferenceAPI extends TenantAPI {
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
     log.info("postTenant");
     Vertx vertx = vertxContext.owner();
-//    Promise<Integer> promise = Promise.promise();
-    //Always load this system data
     Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
     attributes.getParameters().add(parameter);
 
@@ -47,7 +50,8 @@ public class TenantReferenceAPI extends TenantAPI {
     buildDataLoadingParameters(attributes, tl);
 
     return Future.succeededFuture()
-      .compose(v -> migration(attributes, "mod-orders-storage-12.1.0", () -> loadDataFromFinanceStorageModule(headers, vertxContext, tenantId)))
+      .compose(v -> migration(attributes, "mod-orders-storage-12.1.0",
+        () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
       .compose(v -> {
 
         Promise<Integer> promise = Promise.promise();
@@ -63,15 +67,13 @@ public class TenantReferenceAPI extends TenantAPI {
       });
   }
 
-  private Future<Void> loadDataFromFinanceStorageModule(Map<String, String> headers, Context vertxContext, String tenantId) {
-    return migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext);
-  }
-
   private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {
-    SemVer moduleTo = moduleVersionToSemVer(migrationModule);
-    SemVer currentModuleVersion = moduleVersionToSemVer(attributes.getModuleFrom());
-    if (moduleTo.compareTo(currentModuleVersion) > 0){
-      return supplier.get();
+    if (attributes.getModuleFrom() != null) {
+      SemVer moduleTo = moduleVersionToSemVer(migrationModule);
+      SemVer currentModuleVersion = moduleVersionToSemVer(attributes.getModuleFrom());
+      if (moduleTo.compareTo(currentModuleVersion) > 0) {
+        return supplier.get();
+      }
     }
     return Future.succeededFuture();
   }
@@ -112,7 +114,7 @@ public class TenantReferenceAPI extends TenantAPI {
     // that value is considered,Priority of Parameters:
     // Tenant Attributes > command line parameter > default(false)
     boolean loadSample = Boolean.parseBoolean(MODULE_SPECIFIC_ARGS.getOrDefault(PARAMETER_LOAD_SAMPLE,
-        "false"));
+      "false"));
     List<Parameter> parameters = tenantAttributes.getParameters();
     for (Parameter parameter : parameters) {
       if (PARAMETER_LOAD_SAMPLE.equals(parameter.getKey())) {

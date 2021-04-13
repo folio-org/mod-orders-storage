@@ -6,7 +6,7 @@ BEGIN
          (
             SELECT jsonb_set(jsonb, '{fundDistribution}',
                  jsonb_agg(jsonb_set(distrib, '{code}',
-                      coalesce((SELECT funds -> 'code' FROM jsonb_array_elements('[{"id":"4428a37c-8bae-4f0d-865d-970d83d5ad55", "code" : "CODE"}]'::jsonb) funds WHERE funds ->> 'id' = distrib ->> 'fundId'), distrib -> 'code', '""'))
+                      coalesce((SELECT funds -> 'code' FROM jsonb_array_elements(_funds_list) funds WHERE funds ->> 'id' = distrib ->> 'fundId'), distrib -> 'code', '""'))
                       )
                 )  FROM jsonb_array_elements(jsonb -> 'fundDistribution') distrib
           )
