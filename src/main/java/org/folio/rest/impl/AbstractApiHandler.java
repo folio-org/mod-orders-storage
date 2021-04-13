@@ -9,16 +9,17 @@ import java.net.URI;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
+import org.folio.rest.persist.cql.CQLWrapper;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public abstract class AbstractApiHandler {
@@ -57,6 +58,23 @@ public abstract class AbstractApiHandler {
     });
     return promise.future();
   }
+
+  public Future<Tx<String>> deleteByQuery(Tx<String> tx, String table, CQLWrapper query, boolean silent) {
+    Promise<Tx<String>> promise = Promise.promise();
+    pgClient.delete(tx.getConnection(), table, query, reply -> {
+      if (reply.failed()) {
+        handleFailure(promise, reply);
+      } else {
+        if (!silent && reply.result().rowCount() == 0) {
+          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        } else {
+          promise.complete(tx);
+        }
+      }
+    });
+    return promise.future();
+  }
+
 
   public  <T> Handler<AsyncResult<Tx<T>>> handleResponseWithLocation(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx, String logMessage) {
     return result -> {
