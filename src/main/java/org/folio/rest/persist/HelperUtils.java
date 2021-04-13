@@ -2,9 +2,15 @@ package org.folio.rest.persist;
 
 import static org.folio.rest.persist.PgUtil.response;
 
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.handler.impl.HttpStatusException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -126,6 +132,32 @@ public class HelperUtils {
    */
   private static String wrapInLowerUnaccent(String term) {
     return String.format("lower(f_unaccent(%s))", term);
+  }
+
+  public static void verifyResponse(org.folio.rest.tools.client.Response response) {
+    if (!org.folio.rest.tools.client.Response.isSuccess(response.getCode())) {
+      throw new CompletionException(
+        new HttpStatusException(response.getCode(), response.getError().getString("errorMessage")));
+    }
+  }
+
+  public static JsonObject verifyAndExtractBody(org.folio.rest.tools.client.Response response) {
+    verifyResponse(response);
+    return response.getBody();
+  }
+
+  /**
+   * @param query string representing CQL query
+   * @param logger {@link Logger} to log error if any
+   * @return URL encoded string
+   */
+  public static String encodeQuery(String query, Logger logger) {
+    try {
+      return URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
+    } catch (UnsupportedEncodingException e) {
+      logger.error("Error happened while attempting to encode '{}'", query, e);
+      throw new CompletionException(e);
+    }
   }
 
 }

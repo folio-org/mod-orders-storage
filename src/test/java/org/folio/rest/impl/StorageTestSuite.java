@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.core.RestClientTest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.PostgresClient;
@@ -148,4 +149,6 @@ public class StorageTestSuite {
   class ResponseUtilsTestNested extends ResponseUtilsTest {}
   @Nested
   class AbstractApiHandlerTestNested extends AbstractApiHandlerTest {}
+  @Nested
+  class RestClientTestNested extends RestClientTest {}
 }

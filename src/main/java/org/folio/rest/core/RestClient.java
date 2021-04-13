@@ -4,7 +4,7 @@ import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.util.HelperUtils.verifyAndExtractBody;
+import static org.folio.rest.persist.HelperUtils.verifyAndExtractBody;
 
 import java.util.Collections;
 import java.util.Map;
@@ -16,10 +16,10 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.RestConstants;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.core.models.RequestEntry;
+import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.tools.client.HttpClientFactory;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.util.HelperUtils;
 
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
