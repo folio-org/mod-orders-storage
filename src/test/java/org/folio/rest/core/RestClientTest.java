@@ -7,13 +7,12 @@ import static org.folio.rest.util.TestConstants.X_OKAPI_TOKEN;
 import static org.folio.rest.util.TestConstants.X_OKAPI_USER_ID;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 
 import io.restassured.http.Header;
 import io.vertx.core.http.HttpMethod;
@@ -26,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import org.folio.rest.acq.model.finance.Transaction;
 import org.folio.rest.core.models.RequestContext;
-import org.folio.rest.core.models.RequestEntry;
 import org.folio.rest.tools.client.Response;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,72 +83,12 @@ public class RestClientTest {
   }
 
   @Test
-  void testPostShouldCreateEntity() throws Exception {
+  void testShouldReturnHttpClient() {
     RestClient restClient = Mockito.spy(new RestClient());
-
-    String uuid = UUID.randomUUID().toString();
-    Transaction expTransaction = new Transaction().withId(uuid);
-    Response response = new Response();
-    response.setBody(JsonObject.mapFrom(expTransaction));
-    response.setCode(201);
-
-    doReturn(httpClient).when(restClient).getHttpClient(okapiHeaders);
-    doReturn(completedFuture(response)).when(httpClient).request(eq(HttpMethod.POST), any(), eq(PURCHASE_ORDER.getEndpoint()), eq(okapiHeaders));
-    RequestEntry requestEntry = new RequestEntry(PURCHASE_ORDER.getEndpoint());
-    Transaction actTransaction = restClient.post(requestEntry, expTransaction, requestContext, Transaction.class).join();
-
-    assertThat(actTransaction, equalTo(expTransaction));
-  }
-
-  @Test
-  void testPutShouldCreateEntity() throws Exception {
-    RestClient restClient = Mockito.spy(new RestClient());
-
-    String uuid = UUID.randomUUID().toString();
-    Transaction expTransaction = new Transaction().withId(uuid);
-    Response response = new Response();
-    response.setCode(204);
-
-    doReturn(httpClient).when(restClient).getHttpClient(okapiHeaders);
-    String endpoint = PURCHASE_ORDER.getEndpoint() + "/{id}";
-    RequestEntry requestEntry = new RequestEntry(endpoint).withId(uuid);
-    doReturn(completedFuture(response)).when(httpClient).request(eq(HttpMethod.PUT), any(), eq(requestEntry.buildEndpoint()), eq(okapiHeaders));
-
-    restClient.put(requestEntry, expTransaction, requestContext).get();
-
-    verify(httpClient).request(eq(HttpMethod.PUT), any(), eq(requestEntry.buildEndpoint()), eq(okapiHeaders));
-  }
-
-  @Test
-  void testDeleteShouldCreateEntity() throws Exception {
-    RestClient restClient = Mockito.spy(new RestClient());
-
-    String uuid = UUID.randomUUID().toString();
-    Response response = new Response();
-    response.setCode(204);
-
-    doReturn(httpClient).when(restClient).getHttpClient(okapiHeaders);
-    String endpoint = PURCHASE_ORDER.getEndpoint() + "/{id}";
-    doReturn(completedFuture(response)).when(httpClient).request(eq(HttpMethod.DELETE), anyString(), eq(okapiHeaders));
-
-    RequestEntry requestEntry = new RequestEntry(endpoint).withId(uuid);
-    restClient.delete(requestEntry, requestContext).get();
-
-    verify(httpClient).request(eq(HttpMethod.DELETE), eq(requestEntry.buildEndpoint()), eq(okapiHeaders));
-  }
-
-  @Test
-  void testShouldThrowExceptionWhenCreatingEntity() {
-    assertThrows(CompletionException.class, () -> {
-
-      RestClient restClient = Mockito.spy(new RestClient());
-
-      String uuid = UUID.randomUUID().toString();
-      Transaction expTransaction = new Transaction().withId(uuid);
-      doReturn(httpClient).when(restClient).getHttpClient(okapiHeaders);
-      RequestEntry requestEntry = new RequestEntry(PURCHASE_ORDER.getEndpoint());
-      restClient.post(requestEntry, expTransaction, requestContext, Transaction.class).join();
-    });
+    HashMap<String, String> headers = new HashMap<>();
+    headers.put("x-okapi-url", "test");
+    HttpClientInterface httpClient = restClient.getHttpClient(headers);
+    assertThat(httpClient, notNullValue());
   }
 }
 
