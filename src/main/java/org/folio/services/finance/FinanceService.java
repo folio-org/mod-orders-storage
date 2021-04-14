@@ -22,7 +22,7 @@ public class FinanceService {
   }
 
   public CompletableFuture<List<Fund>> getAllFunds(RequestContext requestContext) {
-    RequestEntry requestEntry = new RequestEntry("/finance/funds?limit="+Integer.MAX_VALUE);
+    RequestEntry requestEntry = new RequestEntry("/finance-storage/funds?limit="+Integer.MAX_VALUE);
     return restClient.get(requestEntry, requestContext, FundCollection.class)
                      .thenApply(FundCollection::getFunds);
   }

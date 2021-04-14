@@ -58,7 +58,7 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/11.0.0/po_line_sync_fund_code.sql",
+      "snippetPath": "data-migration/12.0.0/po_line_sync_fund_code.sql",
       "fromModuleVersion": "mod-orders-storage-12.1.0"
     },
     {
