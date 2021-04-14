@@ -64,7 +64,8 @@ public class TenantReferenceAPI extends TenantAPI {
           }
         });
         return promise.future();
-      });
+      })
+      .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
   }
 
   private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {
