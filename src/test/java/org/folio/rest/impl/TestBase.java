@@ -1,5 +1,13 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.impl.StorageTestSuite.initSpringContext;
+import static org.folio.rest.impl.StorageTestSuite.storageUrl;
+import static org.folio.rest.utils.TestEntities.TITLES;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertEquals;
+
 import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
@@ -15,17 +23,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.config.ApplicationConfig;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-
-import static io.restassured.RestAssured.given;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.impl.StorageTestSuite.storageUrl;
-import static org.folio.rest.utils.TestEntities.TITLES;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
 
 /**
  * When not run from StorageTestSuite then this class invokes StorageTestSuite.before() and
@@ -49,6 +51,7 @@ public abstract class TestBase {
       invokeStorageTestSuiteAfter = true;
       StorageTestSuite.before();
     }
+    initSpringContext(ApplicationConfig.class);
   }
 
   @AfterAll

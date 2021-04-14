@@ -2,10 +2,8 @@ package org.folio.rest.impl;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.impl.StorageTestSuite.autowireDependencies;
-import static org.folio.rest.impl.StorageTestSuite.clearVertxContext;
-import static org.folio.rest.impl.StorageTestSuite.closeVertx;
 import static org.folio.rest.impl.StorageTestSuite.initSpringContext;
-import static org.folio.rest.util.TestConfig.isVerticleNotDeployed;
+import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postTenant;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -17,11 +15,12 @@ import io.restassured.http.Header;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
-import org.folio.services.migration.MigrationService;
 import org.folio.rest.core.RestClient;
 import org.folio.rest.jaxrs.model.TenantAttributes;
+import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.utils.TenantApiTestUtil;
 import org.folio.services.finance.FinanceService;
+import org.folio.services.migration.MigrationService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,11 +30,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
-class TenantReferenceAPITest {
+class TenantReferenceAPITest extends TestBase {
 
-  private static boolean runningOnOwn;
+  private static final Header MIGRATION_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "migration_tenant");
 
-  private static final Header PARTIAL_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "partial_tenant");
+  private static TenantJob tenantJob;
 
   @Autowired
   private MigrationService migrationService;
@@ -47,10 +46,6 @@ class TenantReferenceAPITest {
 
   @BeforeAll
   public static void before() throws InterruptedException, ExecutionException, TimeoutException, IOException {
-    if (isVerticleNotDeployed()) {
-      StorageTestSuite.before();
-      runningOnOwn = true;
-    }
     initSpringContext(ContextConfiguration.class);
   }
 
@@ -61,10 +56,7 @@ class TenantReferenceAPITest {
 
   @AfterAll
   public static void after() {
-    clearVertxContext();
-    if (runningOnOwn) {
-      closeVertx();
-    }
+    deleteTenant(tenantJob, MIGRATION_TENANT_HEADER);
   }
 
   public static class ContextConfiguration {
@@ -94,7 +86,7 @@ class TenantReferenceAPITest {
   void testToVerifyWhetherMigrationForDifferentVersionShouldRun(String version, Integer times) {
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
     tenantAttributes.setModuleFrom(version);
-    postTenant(PARTIAL_TENANT_HEADER, tenantAttributes);
+    tenantJob = postTenant(MIGRATION_TENANT_HEADER, tenantAttributes);
     verify(migrationService, times(times)).syncAllFundCodeFromPoLineFundDistribution(any(), any());
   }
 }
