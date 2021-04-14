@@ -455,13 +455,22 @@
       "handlers": [
         {
           "methods": ["POST"],
-          "pathPattern": "/_/tenant"
+          "pathPattern": "/_/tenant",
+          "modulePermissions": [
+            "finance-storage.funds.collection.get"
+          ]
         },
         {
           "methods": ["GET", "DELETE"],
           "pathPattern": "/_/tenant/{id}"
         }
       ]
+    }
+  ],
+  "requires": [
+    {
+      "id": "finance-storage.funds",
+      "version": "3.0"
     }
   ],
   "permissionSets" : [
