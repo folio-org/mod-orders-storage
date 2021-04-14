@@ -2,7 +2,7 @@ package org.folio.config;
 
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
-import org.folio.migration.MigrationService;
+import org.folio.services.migration.MigrationService;
 import org.folio.rest.core.RestClient;
 import org.folio.services.finance.FinanceService;
 import org.folio.services.lines.PoLinesService;

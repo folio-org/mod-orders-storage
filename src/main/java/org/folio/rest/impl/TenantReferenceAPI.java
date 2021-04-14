@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.migration.MigrationService;
+import org.folio.services.migration.MigrationService;
 import org.folio.okapi.common.ModuleId;
 import org.folio.okapi.common.SemVer;
 import org.folio.rest.jaxrs.model.Parameter;

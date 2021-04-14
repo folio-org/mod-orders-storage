@@ -1,4 +1,4 @@
-package org.folio.migration;
+package org.folio.services.migration;
 
 import static org.folio.rest.persist.ResponseUtils.handleFailure;
 
@@ -41,7 +41,13 @@ public class MigrationService {
             log.error("Cross Migration for fund code synchronization failed");
             promise.fail(v2.getCause());
           })
-        );
+        )
+        .exceptionally(throwable -> {
+          log.error("Cross Migration for fund code synchronization failed");
+          promise.fail(throwable.getCause());
+          return null;
+        });
+
     });
     return promise.future();
   }
