@@ -1,33 +1,25 @@
 package org.folio.rest.core;
 
 import static java.util.Objects.nonNull;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.persist.HelperUtils.verifyAndExtractBody;
 
-import java.util.Collections;
+import io.vertx.core.http.HttpMethod;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import org.folio.rest.RestConstants;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.core.models.RequestEntry;
-import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.tools.client.HttpClientFactory;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.folio.rest.tools.utils.TenantTool;
-
-import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
 
 public class RestClient {
 
     private static final Logger logger = LogManager.getLogger();
     private static final String EXCEPTION_CALLING_ENDPOINT_MSG = "Exception calling %s %s - %s";
+    public static final String OKAPI_URL = "x-okapi-url";
 
 
     public <T> CompletableFuture<T> getById(String baseEndpoint, String id, RequestContext requestContext, Class<T> responseType) {
@@ -75,7 +67,7 @@ public class RestClient {
     }
 
     protected HttpClientInterface getHttpClient(Map<String, String> okapiHeaders) {
-        final String okapiURL = okapiHeaders.getOrDefault(RestConstants.OKAPI_URL, "");
+        final String okapiURL = okapiHeaders.getOrDefault(RestClient.OKAPI_URL, "");
         final String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(OKAPI_HEADER_TENANT));
 
         return HttpClientFactory.getHttpClient(okapiURL, tenantId);

@@ -1,8 +1,8 @@
 package org.folio.rest.core;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static org.folio.rest.RestConstants.OKAPI_URL;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.core.RestClient.OKAPI_URL;
 import static org.folio.rest.util.TestConstants.X_OKAPI_TOKEN;
 import static org.folio.rest.util.TestConstants.X_OKAPI_USER_ID;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
