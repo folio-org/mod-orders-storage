@@ -43,7 +43,7 @@ public class RequestEntry {
     if (StringUtils.isEmpty(query)) {
       return this;
     }
-    queryParams.put("query", encodeQuery(query, logger));
+    queryParams.put("query", encodeQuery(query));
     return this;
   }
 

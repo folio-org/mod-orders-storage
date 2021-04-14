@@ -148,14 +148,13 @@ public class HelperUtils {
 
   /**
    * @param query string representing CQL query
-   * @param logger {@link Logger} to log error if any
    * @return URL encoded string
    */
-  public static String encodeQuery(String query, Logger logger) {
+  public static String encodeQuery(String query) {
     try {
       return URLEncoder.encode(query, StandardCharsets.UTF_8.toString());
     } catch (UnsupportedEncodingException e) {
-      logger.error("Error happened while attempting to encode '{}'", query, e);
+      log.error("Error happened while attempting to encode '{}'", query, e);
       throw new CompletionException(e);
     }
   }
