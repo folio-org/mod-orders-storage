@@ -1,4 +1,11 @@
 ## 12.1.0 - Unreleased
+## 12.0.1 - Released
+The focus of this release Implement Cross Module migration
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v12.0.0...v12.0.1)
+
+### Bug Fixes
+* [MODORDSTOR-213](https://issues.folio.org/browse/MODORDSTOR-213) - Illegal cross-module *_mod_finance_storage.fund access on migration
 
 ## 12.0.0 - Released
 The focus of this release update po_line schema with new fields to support finance and data import features.
