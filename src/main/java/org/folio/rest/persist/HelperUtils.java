@@ -40,19 +40,23 @@ public class HelperUtils {
   private HelperUtils() {
   }
 
-  public static <T, E> void getEntitiesCollectionWithDistinctOn(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, QueryHolder queryHolder, String sortField, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
+  public static <T, E> void getEntitiesCollectionWithDistinctOn(EntitiesMetadataHolder<T, E> entitiesMetadataHolder,
+      QueryHolder queryHolder, String sortField, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext,
+      Map<String, String> okapiHeaders) {
     Method respond500 = getRespond500(entitiesMetadataHolder, asyncResultHandler);
     Method respond400 = getRespond400(entitiesMetadataHolder, asyncResultHandler);
     try {
-      Matcher matcher = orderBy.matcher(queryHolder.buildCQLQuery().toString());
-      String orderByFields = matcher.find() ? matcher.group(0).replaceAll(" DESC\\b", "") + ", " : "";  // \b = word boundary
+      Matcher matcher = orderBy.matcher(queryHolder.buildCQLQuery()
+        .toString());
+      String orderByFields = matcher.find() ? matcher.group(0)
+        .replaceAll(" DESC\\b", "") + ", " : ""; // \b = word boundary
 
       String inLowerUnaccentSortField = wrapInLowerUnaccent(String.format("%s->>'%s'", queryHolder.getSearchField(), sortField));
       String distinctOn = orderByFields + inLowerUnaccentSortField;
 
       PostgresClient postgresClient = PgUtil.postgresClient(vertxContext, okapiHeaders);
-      postgresClient.get(queryHolder.getTable(), entitiesMetadataHolder.getClazz(), JSONB, queryHolder.buildCQLQuery(), true, false, null, distinctOn,
-        reply -> processDbReply(entitiesMetadataHolder, asyncResultHandler, respond500, respond400, reply));
+      postgresClient.get(queryHolder.getTable(), entitiesMetadataHolder.getClazz(), JSONB, queryHolder.buildCQLQuery(), true, false,
+          null, distinctOn, reply -> processDbReply(entitiesMetadataHolder, asyncResultHandler, respond500, respond400, reply));
     } catch (CQLQueryValidationException e) {
       log.error(e.getMessage(), e);
       asyncResultHandler.handle(response(e.getMessage(), respond400, respond500));
@@ -79,20 +83,27 @@ public class HelperUtils {
     return new Criterion(a);
   }
 
-  private static <T, E> void processDbReply(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, Handler<AsyncResult<Response>> asyncResultHandler, Method respond500, Method respond400, AsyncResult<Results<T>> reply) {
+  private static <T, E> void processDbReply(EntitiesMetadataHolder<T, E> entitiesMetadataHolder,
+      Handler<AsyncResult<Response>> asyncResultHandler, Method respond500, Method respond400, AsyncResult<Results<T>> reply) {
     try {
       Method respond200 = entitiesMetadataHolder.getRespond200WithApplicationJson();
       if (reply.succeeded()) {
-        E collection = entitiesMetadataHolder.getCollectionClazz().getDeclaredConstructor().newInstance();
-        List<T> results = reply.result().getResults();
-        Method setResults =  entitiesMetadataHolder.getSetResultsMethod();
-        Method setTotalRecordsMethod =  entitiesMetadataHolder.getSetTotalRecordsMethod();
+        E collection = entitiesMetadataHolder.getCollectionClazz()
+          .getDeclaredConstructor()
+          .newInstance();
+        List<T> results = reply.result()
+          .getResults();
+        Method setResults = entitiesMetadataHolder.getSetResultsMethod();
+        Method setTotalRecordsMethod = entitiesMetadataHolder.getSetTotalRecordsMethod();
         setResults.invoke(collection, results);
-        Integer totalRecords = reply.result().getResultInfo().getTotalRecords();
+        Integer totalRecords = reply.result()
+          .getResultInfo()
+          .getTotalRecords();
         setTotalRecordsMethod.invoke(collection, totalRecords);
         asyncResultHandler.handle(response(collection, respond200, respond500));
       } else {
-        asyncResultHandler.handle(response(reply.cause().getLocalizedMessage(), respond400, respond500));
+        asyncResultHandler.handle(response(reply.cause()
+          .getLocalizedMessage(), respond400, respond500));
       }
     } catch (Exception e) {
       log.error(e.getMessage(), e);
@@ -100,7 +111,8 @@ public class HelperUtils {
     }
   }
 
-  private static Method getRespond500(EntitiesMetadataHolder entitiesMetadataHolder, Handler<AsyncResult<Response>> asyncResultHandler) {
+  private static Method getRespond500(EntitiesMetadataHolder entitiesMetadataHolder,
+      Handler<AsyncResult<Response>> asyncResultHandler) {
     try {
       return entitiesMetadataHolder.getRespond500WithTextPlainMethod();
     } catch (Exception e) {
@@ -110,7 +122,8 @@ public class HelperUtils {
     }
   }
 
-  private static Method getRespond400(EntitiesMetadataHolder entitiesMetadataHolder, Handler<AsyncResult<Response>> asyncResultHandler) {
+  private static Method getRespond400(EntitiesMetadataHolder entitiesMetadataHolder,
+      Handler<AsyncResult<Response>> asyncResultHandler) {
     try {
       return entitiesMetadataHolder.getRespond400WithTextPlainMethod();
     } catch (Exception e) {
@@ -121,7 +134,8 @@ public class HelperUtils {
   }
 
   public static String getEndpoint(Class<?> clazz) {
-    return clazz.getAnnotation(Path.class).value();
+    return clazz.getAnnotation(Path.class)
+      .value();
   }
 
   /**
@@ -136,8 +150,8 @@ public class HelperUtils {
 
   public static void verifyResponse(org.folio.rest.tools.client.Response response) {
     if (!org.folio.rest.tools.client.Response.isSuccess(response.getCode())) {
-      throw new CompletionException(
-        new HttpStatusException(response.getCode(), response.getError().getString("errorMessage")));
+      throw new CompletionException(new HttpStatusException(response.getCode(), response.getError()
+        .getString("errorMessage")));
     }
   }
 

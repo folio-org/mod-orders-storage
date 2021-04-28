@@ -14,7 +14,7 @@
     {
       "run": "after",
       "snippetPath": "views/order_lines_view.sql",
-      "fromModuleVersion": "mod-orders-storage-7.0.0"
+      "fromModuleVersion": "mod-orders-storage-12.1.0"
     },
     {
       "run": "after",

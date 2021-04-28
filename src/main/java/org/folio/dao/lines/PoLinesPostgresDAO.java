@@ -1,6 +1,6 @@
 package org.folio.dao.lines;
 
-import static org.folio.rest.impl.PoLinesAPI.POLINE_TABLE;
+import static org.folio.models.TableNames.POLINE_TABLE;
 import static org.folio.rest.persist.ResponseUtils.handleFailure;
 
 import java.util.List;

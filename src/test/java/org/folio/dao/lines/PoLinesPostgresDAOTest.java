@@ -1,7 +1,7 @@
 package org.folio.dao.lines;
 
+import static org.folio.models.TableNames.POLINE_TABLE;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.impl.PoLinesAPI.POLINE_TABLE;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
