@@ -16,7 +16,7 @@ stages:
   steps:
   - applyAppConfig:
       catalogTemplate: p-n6zpg:thunderjet-helmcharts-mod-orders-storage
-      version: 0.1.26
+      version: 0.1.32
       answers:
         image.repository: docker.dev.folio.org/mod-orders-storage
         image.tag: thunderjet-latest
