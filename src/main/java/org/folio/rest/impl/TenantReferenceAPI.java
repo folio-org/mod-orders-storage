@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.services.migration.MigrationService;
 import org.folio.okapi.common.ModuleId;
 import org.folio.okapi.common.SemVer;
 import org.folio.rest.jaxrs.model.Parameter;
@@ -22,6 +21,7 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.services.migration.MigrationService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,6 +52,8 @@ public class TenantReferenceAPI extends TenantAPI {
     return Future.succeededFuture()
       .compose(v -> migration(attributes, "mod-orders-storage-12.1.0",
         () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
+      .compose(v -> migration(attributes, "mod-orders-storage-12.1.0",
+        () -> migrationService.syncHoldingIds(headers, vertxContext)))
       .compose(v -> {
 
         Promise<Integer> promise = Promise.promise();
@@ -69,7 +71,10 @@ public class TenantReferenceAPI extends TenantAPI {
   }
 
   private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {
-    if (attributes.getModuleFrom() != null) {
+    Boolean runCrossMigration = attributes.getParameters().stream().filter(it -> it.getKey().equals("skipCrossMigration"))
+      .findFirst().map(parameter -> !Boolean.valueOf(parameter.getValue())).orElse(true);
+
+    if (attributes.getModuleFrom() != null && runCrossMigration) {
       SemVer moduleTo = moduleVersionToSemVer(migrationModule);
       SemVer currentModuleVersion = moduleVersionToSemVer(attributes.getModuleFrom());
       if (moduleTo.compareTo(currentModuleVersion) > 0) {

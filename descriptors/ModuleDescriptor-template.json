@@ -457,7 +457,8 @@
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
           "modulePermissions": [
-            "finance-storage.funds.collection.get"
+            "finance-storage.funds.collection.get",
+            "inventory-storage.holdings.collection.get"
           ]
         },
         {
@@ -471,6 +472,10 @@
     {
       "id": "finance-storage.funds",
       "version": "3.0"
+    },
+    {
+      "id": "holdings-storage",
+      "version": "4.6"
     }
   ],
   "permissionSets" : [

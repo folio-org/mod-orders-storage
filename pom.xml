@@ -23,6 +23,7 @@
     <junit-jupiter-version>5.6.2</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
     <vertx.version>4.0.0</vertx.version>
+    <lombok.version>1.18.16</lombok.version>
     <sonar.exclusions>**/models/*.java, **/core/FolioVertxCompletableFuture.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <argLine />
@@ -77,6 +78,12 @@
       <groupId>one.util</groupId>
       <artifactId>streamex</artifactId>
       <version>0.7.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
     </dependency>
 
     <dependency>
@@ -143,11 +150,19 @@
 
     <plugins>
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
           <release>11</release>
           <encoding>UTF-8</encoding>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
 

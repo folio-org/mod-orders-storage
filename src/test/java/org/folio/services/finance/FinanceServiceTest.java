@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import org.folio.models.HoldingCollection;
 import org.folio.rest.acq.model.finance.Fund;
 import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
@@ -31,7 +32,7 @@ public class FinanceServiceTest {
   }
   @Test
   void testShouldExecuteRestClientGetIfCallAllFunds(){
-    when(restClient.get(any(), any(), any())).thenReturn(CompletableFuture.completedFuture(List.of(new Fund())));
+    when(restClient.get(any(), any(), any())).thenReturn(CompletableFuture.completedFuture(List.of(new HoldingCollection())));
     financeService.getAllFunds(Mockito.mock(RequestContext.class));
     verify(restClient, times(1)).get(any(),any(),any());
   }
