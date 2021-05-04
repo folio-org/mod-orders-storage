@@ -34,8 +34,10 @@ import org.folio.rest.persist.ResponseUtilsTest;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.finance.FinanceServiceTest;
+import org.folio.services.inventory.InventoryServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.migration.MigrationServiceTest;
+import org.folio.services.piece.PieceServiceTest;
 import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -185,6 +187,10 @@ public class StorageTestSuite {
   class TenantReferenceAPITestNested extends TenantReferenceAPITest{}
   @Nested
   class FinanceServiceTestNested extends FinanceServiceTest{}
+  @Nested
+  class InventoryServiceTestNested extends InventoryServiceTest {}
+  @Nested
+  class PieceServiceTestNested extends PieceServiceTest {}
   @Nested
   class MigrationServiceTestNested extends MigrationServiceTest{}
   @Nested
