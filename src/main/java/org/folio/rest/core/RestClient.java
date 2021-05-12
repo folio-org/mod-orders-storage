@@ -7,6 +7,7 @@ import static org.folio.rest.persist.HelperUtils.verifyAndExtractBody;
 import io.vertx.core.http.HttpMethod;
 import java.net.URI;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,10 +33,7 @@ public class RestClient {
         final String okapiURL = requestContext.getHeaders().getOrDefault(RestClient.OKAPI_URL, "");
         final String okapiPath = URI.create(okapiURL).getPath();
         final String apiPath = requestEntry.buildEndpoint();
-        if (okapiPath == null) {
-          return apiPath;
-        }
-        return okapiPath + apiPath;
+        return Objects.requireNonNullElse(okapiPath, "") + apiPath;
     }
 
     public <S> CompletableFuture<S> get(RequestEntry requestEntry, RequestContext requestContext, Class<S> responseType) {
