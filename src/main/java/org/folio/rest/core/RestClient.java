@@ -5,6 +5,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.persist.HelperUtils.verifyAndExtractBody;
 
 import io.vertx.core.http.HttpMethod;
+import java.net.URI;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.apache.logging.log4j.LogManager;
@@ -27,9 +28,19 @@ public class RestClient {
         return get(requestEntry, requestContext, responseType);
     }
 
+    static String endpoint(RequestEntry requestEntry, RequestContext requestContext) {
+        final String okapiURL = requestContext.getHeaders().getOrDefault(RestClient.OKAPI_URL, "");
+        final String okapiPath = URI.create(okapiURL).getPath();
+        final String apiPath = requestEntry.buildEndpoint();
+        if (okapiPath == null) {
+          return apiPath;
+        }
+        return okapiPath + apiPath;
+    }
+
     public <S> CompletableFuture<S> get(RequestEntry requestEntry, RequestContext requestContext, Class<S> responseType) {
         CompletableFuture<S> future = new CompletableFuture<>();
-        String endpoint = requestEntry.buildEndpoint();
+        String endpoint = endpoint(requestEntry, requestContext);
         HttpClientInterface client = getHttpClient(requestContext.getHeaders());
         if (logger.isDebugEnabled()) {
             logger.debug("Calling GET {}", endpoint);

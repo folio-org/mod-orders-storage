@@ -25,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import org.folio.rest.acq.model.finance.Transaction;
 import org.folio.rest.core.models.RequestContext;
+import org.folio.rest.core.models.RequestEntry;
 import org.folio.rest.tools.client.Response;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,11 +49,16 @@ public class RestClientTest {
   public void initMocks(){
     MockitoAnnotations.openMocks(this);
     okapiHeaders = new HashMap<>();
-    okapiHeaders.put(OKAPI_URL, "http://localhost:" + 8081);
+    okapiHeaders.put(OKAPI_URL, "http://localhost:" + 8081 + "/okapi");
     okapiHeaders.put(X_OKAPI_TOKEN.getName(), X_OKAPI_TOKEN.getValue());
     okapiHeaders.put(X_OKAPI_TENANT.getName(), X_OKAPI_TENANT.getValue());
     okapiHeaders.put(X_OKAPI_USER_ID.getName(), X_OKAPI_USER_ID.getValue());
     requestContext = new RequestContext(ctxMock, okapiHeaders);
+  }
+
+  @Test
+  void testEndpoint() {
+    assertThat(RestClient.endpoint(new RequestEntry("/foo/bar"), requestContext), equalTo("/okapi/foo/bar"));
   }
 
   @Test
