@@ -59,6 +59,8 @@ public class RestClientTest {
   @Test
   void testEndpoint() {
     assertThat(RestClient.endpoint(new RequestEntry("/foo/bar"), requestContext), equalTo("/okapi/foo/bar"));
+    okapiHeaders.put(OKAPI_URL, "http://localhost");
+    assertThat(RestClient.endpoint(new RequestEntry("/foo/bar"), requestContext), equalTo("/foo/bar"));
   }
 
   @Test
