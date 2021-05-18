@@ -13,8 +13,8 @@
     },
     {
       "run": "after",
-      "snippetPath": "views/order_lines_view.sql",
-      "fromModuleVersion": "mod-orders-storage-7.0.0"
+      "snippet": "DROP VIEW IF EXISTS order_lines_view;",
+      "fromModuleVersion": "mod-orders-storage-12.1.0"
     },
     {
       "run": "after",
@@ -23,8 +23,8 @@
     },
     {
       "run": "after",
-      "snippetPath": "views/po_lines_view.sql",
-      "fromModuleVersion": "mod-orders-storage-7.0.0"
+      "snippet": "DROP VIEW IF EXISTS po_lines_view;",
+      "fromModuleVersion": "mod-orders-storage-12.1.0"
     },
     {
       "run": "after",

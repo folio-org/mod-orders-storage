@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.PoNumber;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoNumber;
@@ -15,8 +17,6 @@ import org.folio.rest.tools.utils.TenantTool;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 
 public class PoNumberAPI implements OrdersStoragePoNumber {
 

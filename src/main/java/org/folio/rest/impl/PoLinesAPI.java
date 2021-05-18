@@ -1,12 +1,11 @@
 package org.folio.rest.impl;
 
+import static org.folio.models.TableNames.POLINE_TABLE;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.JSONB;
-import static org.folio.rest.persist.HelperUtils.METADATA;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
 import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
-import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
 
 import java.util.List;
 import java.util.Map;
@@ -21,11 +20,9 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLines;
-import org.folio.rest.persist.EntitiesMetadataHolder;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.QueryHolder;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.interfaces.Results;
@@ -41,8 +38,6 @@ import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLines {
 
-  public static final String POLINE_TABLE = "po_line";
-  private static final String PO_LINES_VIEW = "po_lines_view";
   private static final String POLINE_ID_FIELD = "poLineId";
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
@@ -53,13 +48,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   @Validate
   public void getOrdersStoragePoLines(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      EntitiesMetadataHolder<PoLine, PoLineCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(PoLine.class,
-          PoLineCollection.class, GetOrdersStoragePoLinesResponse.class);
-      QueryHolder cql = new QueryHolder(PO_LINES_VIEW, METADATA, query, offset, limit, lang);
-      getEntitiesCollectionWithDistinctOn(entitiesMetadataHolder, cql, ID_FIELD_NAME, asyncResultHandler, vertxContext,
-          okapiHeaders);
-    });
+    PgUtil.get(POLINE_TABLE, PoLine.class, PoLineCollection.class, query, offset, limit, okapiHeaders, vertxContext,
+      OrdersStoragePoLines.GetOrdersStoragePoLinesResponse.class, asyncResultHandler);
   }
 
   @Override
@@ -287,8 +277,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     PoLine poLine = poLineTx.getEntity();
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
-    Title newTitle = createTitleObject(poLine)
-      .withId(title.getId());
+    Title newTitle = createTitleObject(poLine).withId(title.getId());
 
     getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, newTitle, JSONB, criterion.toString(), false, event -> {
       if (event.failed()) {

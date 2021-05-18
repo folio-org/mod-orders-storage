@@ -29,6 +29,7 @@ import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.utils.TestEntities;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ import org.junit.jupiter.api.Test;
 public class SearchOrderLinesTest extends TestBase {
   private static final Logger logger = LogManager.getLogger(SearchOrderLinesTest.class);
 
-  private static final String ORDER_LINES_ENDPOINT = "/orders-storage/order-lines";
+  private static final String ORDER_LINES_ENDPOINT = "/orders-storage/po-lines";
   private static final String TENANT_NAME = "polinesearch";
   private static final Header NEW_TENANT = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
   private static TenantJob tenantJob;
@@ -62,7 +63,7 @@ public class SearchOrderLinesTest extends TestBase {
   @Test
   public void testgetPolineswithPOQuery() throws MalformedURLException {
     logger.info("--- mod-orders-storage po-lines: Verify query with field from PO and a field from PO Line");
-    List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=workflowStatus=Pending and orderFormat=Physical");
+    List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=purchaseOrder.workflowStatus=Pending and orderFormat==Physical Resource");
     assertThat(poLines, hasSize(3));
     assertThat(poLines.get(0).getOrderFormat(), is(OrderFormat.PHYSICAL_RESOURCE));
   }
@@ -96,7 +97,7 @@ public class SearchOrderLinesTest extends TestBase {
     logger.info("--- mod-orders-storage po-lines: Verify query PO Lines by acq units");
 
     // Check that there are PO Line(s) associated with an order which has acquisition unit(s) assigned
-    String notEmptyAcqUnitsQuery = "?query=acqUnitIds=\"\" NOT acqUnitIds==[]";
+    String notEmptyAcqUnitsQuery = "?query=purchaseOrder.acqUnitIds=\"\" NOT purchaseOrder.acqUnitIds==[]";
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + notEmptyAcqUnitsQuery);
     assertThat(poLines, hasSize(1));
     String purchaseOrderId = poLines.get(0).getPurchaseOrderId();
@@ -123,7 +124,7 @@ public class SearchOrderLinesTest extends TestBase {
     putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), purchaseOrderId, JsonObject.mapFrom(order).encode(), NEW_TENANT);
 
     // Search lines by existing and new acq units
-    verifySearchByAcqUnit(String.format("?query=acqUnitIds=(%s and %s)", order.getAcqUnitIds().get(0), acqUnitId), purchaseOrderId);
+    verifySearchByAcqUnit(String.format("?query=purchaseOrder.acqUnitIds=(%s and %s)", order.getAcqUnitIds().get(0), acqUnitId), purchaseOrderId);
   }
 
   @Test
@@ -134,12 +135,12 @@ public class SearchOrderLinesTest extends TestBase {
 
   private void verifySearchByAcqUnit(String acqUnitQuery, String poId) throws MalformedURLException {
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + acqUnitQuery);
-    assertThat(poLines, hasSize(1));
+    MatcherAssert.assertThat(poLines, hasSize(1));
     verifyFilteredLinesByAcqUnits(poLines, poId);
 
     // Check that acq units can be used as search query for `po-lines` endpoint
     poLines = queryAndGetPOLines(PO_LINE.getEndpoint() + acqUnitQuery);
-    assertThat(poLines, hasSize(1));
+    MatcherAssert.assertThat(poLines, hasSize(1));
     verifyFilteredLinesByAcqUnits(poLines, poId);
   }
 
