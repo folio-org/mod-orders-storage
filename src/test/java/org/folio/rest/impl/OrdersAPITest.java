@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import static org.folio.rest.impl.HelperUtilsTest.ORDERS_ENDPOINT;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -34,8 +35,6 @@ import java.util.stream.Collectors;
 
 public class OrdersAPITest extends TestBase {
   private final Logger logger = LogManager.getLogger(OrdersAPITest.class);
-
-  private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
 
   private final String poLineSample = getFile("data/po-lines/81-1_pending_fomat-other.json");
   private final String poLineSample2 = getFile("data/po-lines/52590-1_pending_pe_mix.json");
