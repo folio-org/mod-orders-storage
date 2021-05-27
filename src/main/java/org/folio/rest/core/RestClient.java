@@ -1,6 +1,5 @@
 package org.folio.rest.core;
 
-import static java.util.Objects.nonNull;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.persist.HelperUtils.verifyAndExtractBody;
 
@@ -46,8 +45,11 @@ public class RestClient {
                     })
                     .thenAccept(body -> {
                         client.closeClient();
+                        if (body == null) {
+                            throw new NullPointerException("Expected JSON but got null from GET " + endpoint);
+                        }
                         if (logger.isDebugEnabled()) {
-                            logger.debug("The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
+                            logger.debug("The response body for GET {}: {}", endpoint, body.encodePrettily());
                         }
                         S responseEntity = body.mapTo(responseType);
                         future.complete(responseEntity);
@@ -55,7 +57,8 @@ public class RestClient {
                     .exceptionally(t -> {
                         client.closeClient();
                         logger.error(String.format(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint, requestContext), t);
-                        future.completeExceptionally(t.getCause());
+                        Throwable cause = t.getCause() == null ? t : t.getCause();
+                        future.completeExceptionally(cause);
                         return null;
                     });
         } catch (Exception e) {
