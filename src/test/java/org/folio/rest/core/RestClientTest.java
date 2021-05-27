@@ -7,6 +7,7 @@ import static org.folio.rest.util.TestConstants.X_OKAPI_TOKEN;
 import static org.folio.rest.util.TestConstants.X_OKAPI_USER_ID;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import org.folio.rest.acq.model.finance.Transaction;
 import org.folio.rest.core.models.RequestContext;
+import org.folio.rest.core.models.RequestEntry;
 import org.folio.rest.tools.client.Response;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,6 +85,16 @@ public class RestClientTest {
   }
 
   @Test
+  void testShouldThrowNullPointerExceptionOnEmptyResult() throws Exception {
+    RestClient restClient = Mockito.spy(new RestClient());
+    doReturn(httpClient).when(restClient).getHttpClient(okapiHeaders);
+    doReturn(completedFuture(null)).when(httpClient).request(eq(HttpMethod.GET), anyString(), eq(okapiHeaders));
+    CompletableFuture<Transaction> result = restClient.get(new RequestEntry("/"), requestContext, Transaction.class);
+    var e = assertThrows(CompletionException.class, result::join);
+    assertThat(e.getCause(), instanceOf(NullPointerException.class));
+  }
+
+  @Test
   void testShouldReturnHttpClient() {
     RestClient restClient = Mockito.spy(new RestClient());
     HashMap<String, String> headers = new HashMap<>();
@@ -91,5 +103,3 @@ public class RestClientTest {
     assertThat(httpClient, notNullValue());
   }
 }
-
-
