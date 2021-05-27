@@ -7,6 +7,7 @@ import static org.folio.rest.util.TestConstants.X_OKAPI_TOKEN;
 import static org.folio.rest.util.TestConstants.X_OKAPI_USER_ID;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -88,10 +89,16 @@ public class RestClientTest {
   void testShouldThrowNullPointerExceptionOnEmptyResult() throws Exception {
     RestClient restClient = Mockito.spy(new RestClient());
     doReturn(httpClient).when(restClient).getHttpClient(okapiHeaders);
-    doReturn(completedFuture(null)).when(httpClient).request(eq(HttpMethod.GET), anyString(), eq(okapiHeaders));
+
+    Response response = new Response();
+    response.setBody(null);
+    response.setCode(200);
+    doReturn(completedFuture(response)).when(httpClient).request(eq(HttpMethod.GET), anyString(), eq(okapiHeaders));
+
     CompletableFuture<Transaction> result = restClient.get(new RequestEntry("/"), requestContext, Transaction.class);
     var e = assertThrows(CompletionException.class, result::join);
     assertThat(e.getCause(), instanceOf(NullPointerException.class));
+    assertThat(e.getCause().getMessage(), is("Expected JSON but got null from GET /"));
   }
 
   @Test
