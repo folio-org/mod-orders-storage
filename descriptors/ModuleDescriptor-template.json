@@ -97,7 +97,7 @@
     },
     {
       "id": "orders-storage.po-lines",
-      "version": "10.0",
+      "version": "11.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -123,17 +123,12 @@
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/po-lines/{id}",
           "permissionsRequired": ["orders-storage.po-lines.item.delete"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/order-lines",
-          "permissionsRequired": ["orders-storage.po-lines.collection.get"]
         }
       ]
     },
     {
       "id": "orders-storage.purchase-orders",
-      "version": "7.2",
+      "version": "8.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -159,11 +154,6 @@
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/purchase-orders/{id}",
           "permissionsRequired": ["orders-storage.purchase-orders.item.delete"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/orders",
-          "permissionsRequired": ["orders-storage.purchase-orders.collection.get"]
         }
       ]
     },

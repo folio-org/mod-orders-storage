@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import static org.folio.models.TableNames.RECEIVING_HISTORY_VIEW_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.METADATA;
 import static org.folio.rest.persist.HelperUtils.getEntitiesCollectionWithDistinctOn;
@@ -20,8 +21,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 
 public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
-
-  private static final String RECEIVING_HISTORY_VIEW_TABLE = "receiving_history_view";
 
   @Override
   @Validate

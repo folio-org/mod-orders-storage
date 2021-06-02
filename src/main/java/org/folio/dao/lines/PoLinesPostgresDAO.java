@@ -1,12 +1,14 @@
 package org.folio.dao.lines;
 
-import static org.folio.rest.impl.PoLinesAPI.POLINE_TABLE;
+import static org.folio.models.TableNames.POLINE_TABLE;
 import static org.folio.rest.persist.ResponseUtils.handleFailure;
 
 import java.util.List;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -14,14 +16,11 @@ import org.folio.rest.persist.Criteria.Criterion;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.handler.impl.HttpStatusException;
 
 public class PoLinesPostgresDAO implements PoLinesDAO {
 
-  private final static Logger logger = LogManager.getLogger(PoLinesPostgresDAO.class);
-
+  private static final Logger logger = LogManager.getLogger(PoLinesPostgresDAO.class);
 
   @Override
   public Future<List<PoLine>> getPoLines(Criterion criterion, DBClient client) {
@@ -30,8 +29,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
         if (reply.failed()) {
           handleFailure(promise, reply);
         } else {
-          List<PoLine> budgets = reply.result()
-            .getResults();
+          List<PoLine> budgets = reply.result().getResults();
           promise.complete(budgets);
         }
       });

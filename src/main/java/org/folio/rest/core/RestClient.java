@@ -4,9 +4,9 @@ import static java.util.Objects.nonNull;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.persist.HelperUtils.verifyAndExtractBody;
 
-import io.vertx.core.http.HttpMethod;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.core.models.RequestContext;
@@ -14,6 +14,8 @@ import org.folio.rest.core.models.RequestEntry;
 import org.folio.rest.tools.client.HttpClientFactory;
 import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.folio.rest.tools.utils.TenantTool;
+
+import io.vertx.core.http.HttpMethod;
 
 public class RestClient {
 

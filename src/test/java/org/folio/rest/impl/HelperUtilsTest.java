@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 
 public class HelperUtilsTest extends TestBase {
 
-  private static final String ORDERS_ENDPOINT = "/orders-storage/orders";
+  static final String ORDERS_ENDPOINT = "/orders-storage/purchase-orders";
   private static final String RECEIVING_HISTORY_ENDPOINT = "/orders-storage/receiving-history";
 
   @Test
@@ -41,7 +41,7 @@ public class HelperUtilsTest extends TestBase {
         throw new CQLQueryValidationException(null);
       }
     };
-    get(storageUrl(ORDERS_ENDPOINT)).statusCode(HttpStatus.HTTP_BAD_REQUEST.toInt())
+    get(storageUrl(ORDERS_ENDPOINT)).statusCode(HttpStatus.HTTP_INTERNAL_SERVER_ERROR.toInt())
       .contentType(TEXT_PLAIN);
   }
 
