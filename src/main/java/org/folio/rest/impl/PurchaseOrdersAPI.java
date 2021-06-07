@@ -29,7 +29,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 
@@ -164,7 +164,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         log.info("Purchase order id={} successfully updated", id);
         promise.complete(reply.result());
       } else if (reply.succeeded() && reply.result().getStatus() != 204) {
-        promise.fail(new HttpStatusException(reply.result().getStatus(), reply.result().getEntity().toString()));
+        promise.fail(new HttpException(reply.result().getStatus(), reply.result().getEntity().toString()));
       } else if (reply.failed()) {
         handleFailure(promise, reply);
       }
@@ -204,7 +204,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         }
       });
     } catch (Exception e) {
-      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()));
+      promise.fail(new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()));
     }
     return promise.future();
   }
@@ -238,7 +238,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         });
       }
     } catch (Exception e) {
-      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()));
+      promise.fail(new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), e.getMessage()));
     }
     return promise.future();
   }

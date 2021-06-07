@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.pgclient.PgException;
 
 public class ResponseUtilsTest {
@@ -22,7 +22,7 @@ public class ResponseUtilsTest {
 
     ResponseUtils.handleFailure(promise, reply);
 
-    HttpStatusException exception = (HttpStatusException) promise.future().cause();
+    HttpException exception = (HttpException) promise.future().cause();
     assertEquals(exception.getStatusCode(), 400);
   }
 }

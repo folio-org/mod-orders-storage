@@ -22,10 +22,6 @@ import org.folio.spring.SpringContextUtil;
 
 public final class TestConfig {
 
-  static {
-    System.setProperty(LoggerFactory.LOGGER_DELEGATE_FACTORY_CLASS_NAME, "io.vertx.core.logging.Log4j2LogDelegateFactory");
-  }
-
   public static final int mockPort = NetworkUtils.nextFreePort();
   public static final Header X_OKAPI_URL = new Header(TestConstants.OKAPI_URL, "http://localhost:" + mockPort);
 

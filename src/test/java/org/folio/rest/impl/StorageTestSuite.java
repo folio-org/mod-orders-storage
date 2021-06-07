@@ -25,6 +25,7 @@ import java.util.concurrent.TimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
+import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.RestClientTest;
 import org.folio.rest.jaxrs.model.TenantJob;
@@ -32,6 +33,7 @@ import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.ResponseUtilsTest;
 import org.folio.rest.tools.client.test.HttpClientMock2;
+import org.folio.rest.tools.utils.Envs;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
@@ -40,11 +42,9 @@ import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
-import org.junit.platform.runner.JUnitPlatform;
-import org.junit.runner.RunWith;
 
+import org.testcontainers.containers.PostgreSQLContainer;
 
-@RunWith(JUnitPlatform.class)
 
 public class StorageTestSuite {
   private static final Logger logger = LogManager.getLogger(StorageTestSuite.class);
@@ -53,6 +53,9 @@ public class StorageTestSuite {
   private static int port = NetworkUtils.nextFreePort();
   public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
   private static TenantJob tenantJob;
+  private static PostgreSQLContainer<?> postgresSQLContainer;
+  public static final String POSTGRES_DOCKER_IMAGE = "postgres:12-alpine";
+
 
   private StorageTestSuite() {}
 
@@ -101,17 +104,16 @@ public class StorageTestSuite {
   }
 
   @BeforeAll
-  public static void before() throws IOException, InterruptedException, ExecutionException, TimeoutException {
+  public static void before() throws InterruptedException, ExecutionException, TimeoutException {
 
     // tests expect English error messages only, no Danish/German/...
     Locale.setDefault(Locale.US);
 
-
     vertx = Vertx.vertx();
 
-    logger.info("Start embedded database");
-    PostgresClient.setIsEmbedded(true);
-    PostgresClient.getInstance(vertx).startEmbeddedPostgres();
+    logger.info("Start container database");
+
+    PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
     DeploymentOptions options = new DeploymentOptions();
 
@@ -141,7 +143,7 @@ public class StorageTestSuite {
 
     undeploymentComplete.get(20, TimeUnit.SECONDS);
     logger.info("Stop database");
-    PostgresClient.stopEmbeddedPostgres();
+    PostgresClient.stopPostgresTester();
   }
 
   private static void startVerticle(DeploymentOptions options)

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.pgclient.PgConnection;
@@ -76,7 +76,7 @@ public class AbstractApiHandlerTest {
     testContext.assertFailure(abstractApiHandler.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), false))
       .onComplete(event -> {
         testContext.verify(() -> {
-          HttpStatusException exception = (HttpStatusException) event.cause();
+          HttpException exception = (HttpException) event.cause();
           assertEquals(404, exception.getStatusCode());
         });
         testContext.completeNow();
@@ -123,9 +123,7 @@ public class AbstractApiHandlerTest {
     //Act
     testContext.assertComplete(abstractApiHandler.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), true))
       .onComplete(event -> {
-        testContext.verify(() -> {
-          assertEquals(tx, event.result());
-        });
+        testContext.verify(() -> assertEquals(tx, event.result()));
         testContext.completeNow();
       });
   }

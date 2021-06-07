@@ -105,7 +105,7 @@ public class SearchOrderLinesTest extends TestBase {
     // Check that the same result if querying `po-lines` endpoint
     List<PoLine> poLines2 = queryAndGetPOLines(PO_LINE.getEndpoint() + notEmptyAcqUnitsQuery);
     assertThat(poLines, hasSize(poLines2.size()));
-    assertThat(poLines, containsInAnyOrder(poLines2.toArray()));
+    MatcherAssert.assertThat(poLines, containsInAnyOrder(poLines2.toArray()));
 
     logger.info("--- mod-orders-storage orders test: verify that no duplicated lines returned if more then one acq unit assigned");
 
