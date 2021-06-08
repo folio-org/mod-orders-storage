@@ -30,7 +30,7 @@ import javax.ws.rs.core.Response;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 
 public class PoLinesServiceTest {
   @InjectMocks
@@ -135,11 +135,11 @@ public class PoLinesServiceTest {
   @Test
   public void shouldFailedWhenRetrievePoLines() {
     String poID = UUID.randomUUID().toString();
-    doThrow(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), "badRequestMessage"))
+    doThrow(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "badRequestMessage"))
                         .when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
 
-    HttpStatusException thrown = assertThrows(
-      HttpStatusException.class,
+    HttpException thrown = assertThrows(
+      HttpException.class,
       () -> poLinesService.getPoLinesByOrderId(poID, context, okapiHeaders).result(),      "Expected exception"
     );
 

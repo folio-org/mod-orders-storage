@@ -45,7 +45,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import org.apache.logging.log4j.Logger;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.pgclient.PgException;
@@ -69,7 +69,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
 
   @BeforeEach
   public void initMocks() throws MalformedURLException {
-    MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.openMocks(this);
     poLinesPostgresDAO = Mockito.mock(PoLinesPostgresDAO.class, Mockito.CALLS_REAL_METHODS);
     tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
   }
@@ -146,7 +146,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLineById(id, client))
       .onComplete(event -> {
-        HttpStatusException exception = (HttpStatusException) event.cause();
+        HttpException exception = (HttpException) event.cause();
         testContext.verify(() -> {
           assertEquals(404, exception.getStatusCode());
           assertEquals("Not Found", exception.getPayload());
@@ -162,14 +162,14 @@ public class PoLinesPostgresDAOTest extends TestBase {
 
     doAnswer((Answer<Void>) invocation -> {
       Handler<AsyncResult<Results<PoLine>>> handler = invocation.getArgument(2);
-      handler.handle(Future.failedFuture(new HttpStatusException(500, "Error")));
+      handler.handle(Future.failedFuture(new HttpException(500, "Error")));
       return null;
     }).when(postgresClient).getById(eq(POLINE_TABLE), eq(id), any(Handler.class));
 
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLineById(id, client))
       .onComplete(event -> {
-        HttpStatusException exception = (HttpStatusException) event.cause();
+        HttpException exception = (HttpException) event.cause();
         testContext.verify(() -> {
           assertEquals(500, exception.getStatusCode());
           assertEquals("Internal Server Error", exception.getPayload());
@@ -186,13 +186,13 @@ public class PoLinesPostgresDAOTest extends TestBase {
 
     doAnswer((Answer<Void>) invocation -> {
       Handler<AsyncResult<Results<PoLine>>> handler = invocation.getArgument(4);
-      handler.handle(Future.failedFuture(new HttpStatusException(500, "Error")));
+      handler.handle(Future.failedFuture(new HttpException(500, "Error")));
       return null;
     }).when(postgresClient).get(eq(POLINE_TABLE), eq(PoLine.class), eq(criterion), eq(false), any(Handler.class));
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLines(criterion, client))
       .onComplete(event -> {
-        HttpStatusException exception = (HttpStatusException) event.cause();
+        HttpException exception = (HttpException) event.cause();
         testContext.verify(() -> {
           assertEquals(500, exception.getStatusCode());
           assertEquals("Internal Server Error", exception.getPayload());

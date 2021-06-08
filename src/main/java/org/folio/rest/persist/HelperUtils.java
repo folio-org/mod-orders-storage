@@ -3,7 +3,7 @@ package org.folio.rest.persist;
 import static org.folio.rest.persist.PgUtil.response;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
@@ -137,7 +137,7 @@ public class HelperUtils {
   public static void verifyResponse(org.folio.rest.tools.client.Response response) {
     if (!org.folio.rest.tools.client.Response.isSuccess(response.getCode())) {
       throw new CompletionException(
-        new HttpStatusException(response.getCode(), response.getError().getString("errorMessage")));
+        new HttpException(response.getCode(), response.getError().getString("errorMessage")));
     }
   }
 

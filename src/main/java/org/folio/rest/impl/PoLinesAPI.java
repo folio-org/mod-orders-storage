@@ -34,7 +34,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 
 public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLines {
 
@@ -99,7 +99,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
         .onComplete(reply -> {
           if (reply.failed() || reply.result() == null) {
             logger.error("Can't find poLine with id={}", packagePoLineId);
-            promise.fail(new HttpStatusException(Status.BAD_REQUEST.getStatusCode()));
+            promise.fail(new HttpException(Status.BAD_REQUEST.getStatusCode()));
           } else {
             populateTitleForPackagePoLineAndSave(poLineTx, promise, packagePoLineId, reply.result());
           }
@@ -262,7 +262,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
         handleFailure(promise, event);
       } else {
         if (event.result().rowCount() == 0) {
-          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
           promise.complete(poLineTx);

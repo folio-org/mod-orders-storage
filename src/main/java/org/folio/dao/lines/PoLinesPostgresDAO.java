@@ -16,7 +16,7 @@ import org.folio.rest.persist.Criteria.Criterion;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 
 public class PoLinesPostgresDAO implements PoLinesDAO {
 
@@ -49,7 +49,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
       } else {
         final JsonObject po_line = reply.result();
         if (po_line == null) {
-          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           logger.debug("PoLine with id={} successfully extracted", id);
           promise.complete(po_line.mapTo(PoLine.class));

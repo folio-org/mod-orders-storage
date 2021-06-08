@@ -20,7 +20,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.ext.web.handler.impl.HttpStatusException;
+import io.vertx.ext.web.handler.HttpException;
 
 public abstract class AbstractApiHandler {
   protected final Logger logger = LogManager.getLogger(this.getClass());
@@ -50,7 +50,7 @@ public abstract class AbstractApiHandler {
         handleFailure(promise, reply);
       } else {
         if (reply.result().rowCount() == 0) {
-          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           promise.complete(tx);
         }
@@ -66,7 +66,7 @@ public abstract class AbstractApiHandler {
         handleFailure(promise, reply);
       } else {
         if (!silent && reply.result().rowCount() == 0) {
-          promise.fail(new HttpStatusException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           promise.complete(tx);
         }
@@ -79,7 +79,7 @@ public abstract class AbstractApiHandler {
   public  <T> Handler<AsyncResult<Tx<T>>> handleResponseWithLocation(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx, String logMessage) {
     return result -> {
       if (result.failed()) {
-        HttpStatusException cause = (HttpStatusException) result.cause();
+        HttpException cause = (HttpException) result.cause();
         logger.error(logMessage, cause, tx.getEntity(), "or associated data failed to be");
 
         // The result of rollback operation is not so important, main failure cause is used to build the response
@@ -97,7 +97,7 @@ public abstract class AbstractApiHandler {
   public <T> Handler<AsyncResult<Tx<T>>> handleNoContentResponse(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx, String logMessage) {
     return result -> {
       if (result.failed()) {
-        HttpStatusException cause = (HttpStatusException) result.cause();
+        HttpException cause = (HttpException) result.cause();
         logger.error(logMessage, cause, tx.getEntity(), "or associated data failed to be");
 
         // The result of rollback operation is not so important, main failure cause is used to build the response
@@ -113,9 +113,9 @@ public abstract class AbstractApiHandler {
     Throwable cause = reply.cause();
     String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
     if (badRequestMessage != null) {
-      promise.fail(new HttpStatusException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+      promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
     } else {
-      promise.fail(new HttpStatusException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
+      promise.fail(new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
     }
   }
 
@@ -132,9 +132,9 @@ public abstract class AbstractApiHandler {
     final String message;
     final int code;
 
-    if (throwable instanceof HttpStatusException) {
-      code = ((HttpStatusException) throwable).getStatusCode();
-      message =  ((HttpStatusException) throwable).getPayload();
+    if (throwable instanceof HttpException) {
+      code = ((HttpException) throwable).getStatusCode();
+      message =  ((HttpException) throwable).getPayload();
     } else {
       code = INTERNAL_SERVER_ERROR.getStatusCode();
       message =  throwable.getMessage();
