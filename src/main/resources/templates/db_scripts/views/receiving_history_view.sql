@@ -2,7 +2,7 @@ CREATE
 OR REPLACE VIEW receiving_history_view AS
 SELECT pieces.id AS id,
        json_build_object(
-           'id', pieces.jsonb ->>'id',
+           'id', pieces.id,
            'caption', pieces.jsonb ->>'caption',
            'comment', pieces.jsonb ->>'comment',
            'dateOrdered', purchase_order.jsonb ->>'dateOrdered',
@@ -22,7 +22,7 @@ SELECT pieces.id AS id,
            'receiptDate', pieces.jsonb ->>'receiptDate') AS jsonb,
 
        json_build_object(
-           'id', pieces.jsonb ->>'id',
+           'id', pieces.id,
            'caption', pieces.jsonb ->>'caption',
            'comment', pieces.jsonb ->>'comment',
            'acqUnitIds', purchase_order.jsonb ->>'acqUnitIds',
@@ -41,5 +41,6 @@ SELECT pieces.id AS id,
            'receivingStatus', pieces.jsonb ->>'receivingStatus',
            'supplement', pieces.jsonb ->>'supplement',
            'receiptDate', pieces.jsonb ->>'receiptDate')::jsonb AS metadata
-FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb ->>'poLineId' = po_line.jsonb->>'id' LEFT OUTER JOIN purchase_order
-    ON po_line.jsonb->>'purchaseOrderId' = purchase_order.jsonb->>'id';
+FROM pieces
+LEFT OUTER JOIN po_line ON (pieces.jsonb->>'poLineId')::uuid = po_line.id
+LEFT OUTER JOIN purchase_order ON (po_line.jsonb->>'purchaseOrderId')::uuid = purchase_order.id;
