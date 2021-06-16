@@ -1,4 +1,25 @@
-## 12.1.0 - Unreleased
+## 13.1.0 - Unreleased
+
+## 13.0.0 - Released
+This release contains performance improvements, RMB updated up to v33.0.0, added personal disclosure form 
+**Major versions of APIs** were changed for **orders-storage.po-lines**
+**Major versions of APIs** were changed for **orders-storage.purchase-orders**
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v12.0.1...v13.0.0)
+
+### Stories
+* [MODORDSTOR-229](https://issues.folio.org/browse/MODORDSTOR-229) - Switch GET /orders-storage/orders search to cross-index approach
+* [MODORDSTOR-228](https://issues.folio.org/browse/MODORDSTOR-228) - Switch GET /orders-storage/po-lines search to cross-index approach
+* [MODORDSTOR-218](https://issues.folio.org/browse/MODORDSTOR-218) - mod-orders-storage: Update RMB
+* [MODORDSTOR-213](https://issues.folio.org/browse/MODORDSTOR-213) - Illegal cross-module *_mod_finance_storage.fund access on migration
+* [MODORDSTOR-208](https://issues.folio.org/browse/MODORDSTOR-208) - Add personal data disclosure form
+* [MODORDSTOR-141](https://issues.folio.org/browse/MODORDSTOR-141) - DB changes for order-invoice-relationships table
+
+
+### Bug Fixes
+* [MODORDSTOR-227](https://issues.folio.org/browse/MODORDSTOR-227) - System supplied "reason for closure" misspelled
+* [MODORDSTOR-211](https://issues.folio.org/browse/MODORDSTOR-211) - Cannot enable module for tenant if uuid-ossp extension installed
+
 ## 12.0.1 - Released
 The focus of this release Implement Cross Module migration
 
