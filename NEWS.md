@@ -5,7 +5,7 @@ This release contains performance improvements, RMB updated up to v33.0.0, added
 **Major versions of APIs** were changed for **orders-storage.po-lines**
 **Major versions of APIs** were changed for **orders-storage.purchase-orders**
 
-[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v11.1.4...v12.0.0)
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v12.0.1...v13.0.0)
 
 ### Stories
 * [MODORDSTOR-229](https://issues.folio.org/browse/MODORDSTOR-229) - Switch GET /orders-storage/orders search to cross-index approach
