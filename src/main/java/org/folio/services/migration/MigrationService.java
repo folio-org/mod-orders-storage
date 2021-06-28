@@ -78,7 +78,8 @@ public class MigrationService {
   private String getFundsAsJsonString(List<Fund> funds) {
     var processedFunds = funds.stream()
       .map(fund -> fund.withName(replaceSingleQuote(fund.getName()))
-        .withDescription(replaceSingleQuote(fund.getDescription())))
+        .withDescription(replaceSingleQuote(fund.getDescription()))
+        .withCode(replaceSingleQuote(fund.getCode())))
       .collect(Collectors.toList());
 
     return new JsonArray(processedFunds).encode();
