@@ -1,5 +1,13 @@
 ## 13.1.0 - Unreleased
 
+## 13.0.1 - Released
+This release fixes migration issue
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.0...v13.0.1)
+
+### Bug Fixes
+* [MODORDSTOR-233](https://issues.folio.org/browse/MODORDSTOR-233) - Migration issue from mod-orders-storage v12.0.1(Iris) to v13.0.0(Juniper)
+
+
 ## 13.0.0 - Released
 This release contains performance improvements, RMB updated up to v33.0.0, added personal disclosure form 
 **Major versions of APIs** were changed for **orders-storage.po-lines**
