@@ -1,5 +1,14 @@
 ## 13.1.0 - Unreleased
 
+## 13.0.2 - Released
+  This release fixes issue with populating publication date 
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.1...v13.0.2)
+
+### Bug Fixes
+* [MODORDSTOR-237](https://issues.folio.org/browse/MODORDSTOR-237) - Publication date not populated when using "Title look up"
+
+
 ## 13.0.1 - Released
 This release fixes migration issue
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.0...v13.0.1)
