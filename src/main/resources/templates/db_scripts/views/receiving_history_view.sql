@@ -43,7 +43,7 @@ SELECT pieces.id AS id,
            'poLineNumber', po_line.jsonb ->>'poLineNumber',
            'purchaseOrderId', po_line.jsonb ->>'purchaseOrderId',
            'poLineReceiptStatus', po_line.jsonb ->>'receiptStatus',
-           'receiptDate', pieces.jsonb ->>'receiptDate'
+           'receiptDate', pieces.jsonb ->>'receiptDate',
            'receivedDate', pieces.jsonb ->>'receivedDate',
            'receivingNote', po_line.jsonb -> 'details' ->> 'receivingNote',
            'receivingStatus', pieces.jsonb ->>'receivingStatus',
