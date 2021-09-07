@@ -4,7 +4,7 @@
     {
       "run": "after",
       "snippetPath": "views/receiving_history_view.sql",
-      "fromModuleVersion": "mod-orders-storage-10.0.0"
+      "fromModuleVersion": "mod-orders-storage-13.1.0"
     },
     {
       "run": "after",
