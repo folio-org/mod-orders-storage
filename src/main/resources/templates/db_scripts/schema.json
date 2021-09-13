@@ -80,6 +80,11 @@
       "run": "before",
       "snippetPath": "data-migration/12.0.0/delete_order_invoices_relation_duplicates.ftl",
       "fromModuleVersion": "mod-orders-storage-12.1.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/13.0.0/restriction_for_fund_codes.sql",
+      "fromModuleVersion": "mod-orders-storage-13.1.0"
     }
   ],
   "tables": [
