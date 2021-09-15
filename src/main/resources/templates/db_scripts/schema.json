@@ -83,7 +83,7 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/13.0.0/restriction_for_fund_codes.sql",
+      "snippetPath": "data-migration/13.1.0/restriction_for_fund_codes.sql",
       "fromModuleVersion": "mod-orders-storage-13.1.0"
     }
   ],
