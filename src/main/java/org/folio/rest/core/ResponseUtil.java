@@ -27,6 +27,10 @@ public class ResponseUtil {
     promise.fail(new HttpException(httpCode, errors));
   }
 
+  public static void handleFailure(Promise<?> promise, AsyncResult<?> reply) {
+    handleFailure(promise, reply.cause());
+  }
+
   private static int extractHttpCode(Throwable cause) {
      if (cause instanceof io.vertx.ext.web.handler.HttpException) {
       return ((io.vertx.ext.web.handler.HttpException) cause).getStatusCode();
@@ -34,10 +38,6 @@ public class ResponseUtil {
       return ((HttpException) cause).getCode();
     }
     return INTERNAL_SERVER_ERROR.getStatusCode();
-  }
-
-  public static void handleFailure(Promise<?> promise, AsyncResult<?> reply) {
-    handleFailure(promise, reply);
   }
 }
 

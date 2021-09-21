@@ -41,9 +41,9 @@ public class MigrationService {
             logger.debug("Run script step : Cross Migration for fund code synchronization completed");
             promise.complete();
           })
-          .onFailure(v2 -> {
+          .onFailure(throwable -> {
             logger.error("Run script step : Cross Migration for fund code synchronization failed for {} numbers of funds", funds.size());
-            ResponseUtil.handleFailure(promise, v2);
+            ResponseUtil.handleFailure(promise, throwable);
            })
         )
         .exceptionally(throwable -> {
@@ -79,10 +79,9 @@ public class MigrationService {
 
   private String getFundsAsJsonString(List<Fund> funds) {
     var processedFunds = funds.stream()
-      .map(originFund -> new FundCodeMigrationDto(originFund.getId()).withFundCode(originFund.getCode()))
-    //  .map(fund -> fund.withCode(replaceSingleQuote(fund.getCode())))
+      .map(originFund -> new FundCodeMigrationDto(originFund.getId())
+                          .withFundCode(replaceSingleQuote(originFund.getCode())))
       .collect(Collectors.toList());
-
     return new JsonArray(processedFunds).encode();
   }
 

@@ -24,13 +24,13 @@ public class ExceptionUtil {
   }
 
   public static Errors convertToErrors(Throwable throwable) {
-    final Throwable cause = throwable.getCause() == null ? throwable : throwable.getCause();
+    final Throwable cause = Optional.ofNullable(throwable.getCause()).orElse(throwable);
     Errors errors;
     String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
     if (badRequestMessage != null) {
       errors = convertPgExceptions(badRequestMessage, POSTGRE_SQL_ERROR);
     } else if (cause instanceof io.vertx.ext.web.handler.HttpException) {
-      errors = convertVertxHttpException((io.vertx.ext.web.handler.HttpException) throwable);
+      errors = convertVertxHttpException((io.vertx.ext.web.handler.HttpException) cause);
     } else if (cause instanceof HttpException) {
       errors = ((HttpException) cause).getErrors();
       List<Error> errorList = errors.getErrors().stream().map(ExceptionUtil::mapToError).collect(toList());
