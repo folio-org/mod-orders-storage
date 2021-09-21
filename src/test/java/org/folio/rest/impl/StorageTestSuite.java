@@ -12,7 +12,7 @@ import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
-import java.io.IOException;
+
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,9 +31,8 @@ import org.folio.rest.core.RestClientTest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.ResponseUtilsTest;
+import org.folio.rest.persist.ExceptionUtilTest;
 import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.folio.rest.tools.utils.Envs;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
@@ -198,7 +197,7 @@ public class StorageTestSuite {
   @Nested
   class DBClientTestNested extends DBClientTest {}
   @Nested
-  class ResponseUtilsTestNested extends ResponseUtilsTest {}
+  class ExceptionUtilTestNested extends ExceptionUtilTest {}
   @Nested
   class AbstractApiHandlerTestNested extends AbstractApiHandlerTest {}
   @Nested

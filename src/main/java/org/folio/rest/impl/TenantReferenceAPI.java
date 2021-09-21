@@ -2,19 +2,15 @@ package org.folio.rest.impl;
 
 import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+
 import javax.ws.rs.core.Response;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.services.migration.MigrationService;
+import org.folio.migration.MigrationService;
 import org.folio.okapi.common.ModuleId;
 import org.folio.okapi.common.SemVer;
 import org.folio.rest.jaxrs.model.Parameter;
@@ -24,6 +20,13 @@ import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 
 public class TenantReferenceAPI extends TenantAPI {
 
@@ -50,7 +53,7 @@ public class TenantReferenceAPI extends TenantAPI {
     buildDataLoadingParameters(attributes, tl);
 
     return Future.succeededFuture()
-      .compose(v -> migration(attributes, "mod-orders-storage-12.1.0",
+      .compose(v -> migration(attributes, "mod-orders-storage-13.0.3",
         () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
       .compose(v -> {
 

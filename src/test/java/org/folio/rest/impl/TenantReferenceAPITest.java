@@ -20,7 +20,7 @@ import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.utils.TenantApiTestUtil;
 import org.folio.services.finance.FinanceService;
-import org.folio.services.migration.MigrationService;
+import org.folio.migration.MigrationService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
