@@ -27,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.core.RestClientTest;
 import org.folio.rest.impl.AbstractApiHandlerTest;
 import org.folio.rest.impl.EntitiesCrudTest;
@@ -214,4 +215,6 @@ public class StorageTestSuite {
   class AbstractApiHandlerTestNested extends AbstractApiHandlerTest {}
   @Nested
   class RestClientTestNested extends RestClientTest {}
+  @Nested
+  class ResponseUtilTestNested extends ResponseUtilTest {}
 }
