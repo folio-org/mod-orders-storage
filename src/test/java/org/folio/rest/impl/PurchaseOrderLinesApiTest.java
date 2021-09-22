@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @IsolatedTenant
-class PurchaseOrderLinesApiTest extends TestBase {
+public class PurchaseOrderLinesApiTest extends TestBase {
 
   private final Logger logger = LogManager.getLogger(PurchaseOrderLinesApiTest.class);
 

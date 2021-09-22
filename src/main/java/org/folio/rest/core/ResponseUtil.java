@@ -23,7 +23,9 @@ public class ResponseUtil {
     Throwable cause = Optional.ofNullable(throwable.getCause()).orElse(throwable);
     Errors errors = ExceptionUtil.convertToErrors(throwable);
     int httpCode = extractHttpCode(cause);
-    logger.error("Failure : {}", ExceptionUtil.errorAsString(errors));
+    if (logger.isErrorEnabled()) {
+      logger.error("Failure : {}", ExceptionUtil.errorAsString(errors));
+    }
     promise.fail(new HttpException(httpCode, errors));
   }
 
