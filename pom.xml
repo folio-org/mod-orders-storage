@@ -477,7 +477,7 @@
             -Duser.language=en -Duser.region=US
           </argLine>
           <includes>
-            <include>org/folio/rest/impl/StorageTestSuite.java</include>
+            <include>org/folio/StorageTestSuite.java</include>
           </includes>
           <!-- TODO: update to version 3.0.0 and remove useSystemClassLoader
                https://issues.folio.org/browse/FOLIO-1609
