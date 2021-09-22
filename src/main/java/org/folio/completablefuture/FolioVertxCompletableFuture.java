@@ -1,4 +1,4 @@
-package org.folio.rest.core;
+package org.folio.completablefuture;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
