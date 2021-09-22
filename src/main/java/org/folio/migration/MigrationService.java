@@ -80,7 +80,7 @@ public class MigrationService {
   private String getFundsAsJsonString(List<Fund> funds) {
     var processedFunds = funds.stream()
       .map(originFund -> new FundCodeMigrationDto(originFund.getId())
-                          .withFundCode(replaceSingleQuote(originFund.getCode())))
+                .withCode(replaceSingleQuote(originFund.getCode())))
       .collect(Collectors.toList());
     return new JsonArray(processedFunds).encode();
   }

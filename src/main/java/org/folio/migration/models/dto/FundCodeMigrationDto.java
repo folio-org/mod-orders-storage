@@ -21,10 +21,10 @@ public class FundCodeMigrationDto {
   @Pattern(regexp = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$")
   private String id;
 
-  @JsonProperty("fundCode")
+  @JsonProperty("code")
   @JsonPropertyDescription("Fund code")
   @Valid
-  private String fundCode;
+  private String code;
 
   public FundCodeMigrationDto(String id) {
     this.id = id;
@@ -45,18 +45,18 @@ public class FundCodeMigrationDto {
     return this;
   }
 
-  @JsonProperty("fundCode")
-  public String getFundCode() {
-    return fundCode;
+  @JsonProperty("code")
+  public String getCode() {
+    return code;
   }
 
-  @JsonProperty("fundCode")
-  public void setFundCode(String fundCode) {
-    this.fundCode = fundCode;
+  @JsonProperty("code")
+  public void setCode(String code) {
+    this.code = code;
   }
 
-  public FundCodeMigrationDto withFundCode(String fundCode) {
-    this.fundCode = fundCode;
+  public FundCodeMigrationDto withCode(String code) {
+    this.code = code;
     return this;
   }
 
