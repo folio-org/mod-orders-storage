@@ -1,6 +1,6 @@
 package org.folio.rest.utils;
 
-import static org.folio.rest.impl.StorageTestSuite.URL_TO_HEADER;
+import static org.folio.StorageTestSuite.URL_TO_HEADER;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import io.restassured.http.Header;

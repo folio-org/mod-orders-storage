@@ -5,10 +5,12 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.persist.HelperUtils.verifyAndExtractBody;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.completablefuture.FolioVertxCompletableFuture;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.core.models.RequestEntry;
 import org.folio.rest.tools.client.HttpClientFactory;
@@ -30,7 +32,7 @@ public class RestClient {
     }
 
     public <S> CompletableFuture<S> get(RequestEntry requestEntry, RequestContext requestContext, Class<S> responseType) {
-        CompletableFuture<S> future = new CompletableFuture<>();
+        CompletableFuture<S> future = new FolioVertxCompletableFuture<>(requestContext.getContext());
         String endpoint = requestEntry.buildEndpoint();
         HttpClientInterface client = getHttpClient(requestContext.getHeaders());
         if (logger.isDebugEnabled()) {
@@ -51,7 +53,9 @@ public class RestClient {
                         if (logger.isDebugEnabled()) {
                             logger.debug("The response body for GET {}: {}", endpoint, nonNull(body) ? body.encodePrettily() : null);
                         }
-                        S responseEntity = body.mapTo(responseType);
+
+                        S responseEntity = Optional.ofNullable(body).map(bodyP -> bodyP.mapTo(responseType))
+                                                  .orElse(null);
                         future.complete(responseEntity);
                     })
                     .exceptionally(t -> {
@@ -68,11 +72,10 @@ public class RestClient {
         return future;
     }
 
-    protected HttpClientInterface getHttpClient(Map<String, String> okapiHeaders) {
+    public HttpClientInterface getHttpClient(Map<String, String> okapiHeaders) {
         final String okapiURL = okapiHeaders.getOrDefault(RestClient.OKAPI_URL, "");
         final String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(OKAPI_HEADER_TENANT));
 
         return HttpClientFactory.getHttpClient(okapiURL, tenantId);
-
     }
 }

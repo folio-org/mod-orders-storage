@@ -1,15 +1,17 @@
 package org.folio.services.lines;
 
 import static java.util.Objects.nonNull;
-import static org.folio.rest.persist.ResponseUtils.handleFailure;
 
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
-import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.models.CriterionBuilder;
+import org.folio.rest.core.ResponseUtil;
+import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
 
@@ -18,6 +20,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
 public class PoLinesService {
+  private static final Logger logger = LogManager.getLogger(PoLinesService.class);
+
   private PoLinesDAO poLinesDAO;
 
   public PoLinesService(PoLinesDAO poLinesDAO) {
@@ -34,7 +38,8 @@ public class PoLinesService {
     poLinesDAO.getPoLines(criterion, client)
       .onComplete(reply -> {
         if (reply.failed()) {
-          handleFailure(promise, reply);
+          logger.error("Retrieve POLs failed : {}", criterion.toString());
+          ResponseUtil.handleFailure(promise, reply.cause());
         } else {
           promise.complete(reply.result());
         }

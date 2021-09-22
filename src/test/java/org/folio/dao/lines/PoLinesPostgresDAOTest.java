@@ -9,24 +9,23 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.logging.log4j.Logger;
+import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.SQLConnection;
 import org.folio.rest.persist.interfaces.Results;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,18 +36,14 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
-import javax.ws.rs.core.Response;
 import io.restassured.http.Header;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import org.apache.logging.log4j.Logger;
-import io.vertx.ext.web.handler.HttpException;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import io.vertx.pgclient.PgException;
 
 @ExtendWith(VertxExtension.class)
 public class PoLinesPostgresDAOTest extends TestBase {
@@ -148,8 +143,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
       .onComplete(event -> {
         HttpException exception = (HttpException) event.cause();
         testContext.verify(() -> {
-          assertEquals(404, exception.getStatusCode());
-          assertEquals("Not Found", exception.getPayload());
+          assertEquals(404, exception.getCode());
+          assertEquals("Not Found", exception.getErrors().getErrors().get(0).getMessage());
         });
         testContext.completeNow();
       });
@@ -171,8 +166,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
       .onComplete(event -> {
         HttpException exception = (HttpException) event.cause();
         testContext.verify(() -> {
-          assertEquals(500, exception.getStatusCode());
-          assertEquals("Internal Server Error", exception.getPayload());
+          assertEquals(500, exception.getCode());
+          assertEquals("Error", exception.getErrors().getErrors().get(0).getMessage());
         });
         testContext.completeNow();
       });
@@ -194,8 +189,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
       .onComplete(event -> {
         HttpException exception = (HttpException) event.cause();
         testContext.verify(() -> {
-          assertEquals(500, exception.getStatusCode());
-          assertEquals("Internal Server Error", exception.getPayload());
+          assertEquals(500, exception.getCode());
+          assertEquals("Error", exception.getErrors().getErrors().get(0).getMessage());
         });
         testContext.completeNow();
       });

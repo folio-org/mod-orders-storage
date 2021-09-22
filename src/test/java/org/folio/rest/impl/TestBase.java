@@ -2,8 +2,8 @@ package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.impl.StorageTestSuite.initSpringContext;
-import static org.folio.rest.impl.StorageTestSuite.storageUrl;
+import static org.folio.StorageTestSuite.initSpringContext;
+import static org.folio.StorageTestSuite.storageUrl;
 import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -23,6 +23,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.StorageTestSuite;
 import org.folio.config.ApplicationConfig;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.TestEntities;
@@ -36,11 +37,11 @@ import org.junit.jupiter.api.BeforeAll;
  */
 public abstract class TestBase {
 
-  static final String NON_EXISTED_ID = "bad500aa-aaaa-500a-aaaa-aaaaaaaaaaaa";
-  private static final String TENANT_NAME = "diku";
-  static final String ISOLATED_TENANT = "isolated";
-  static final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
-  static final Header ISOLATED_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, ISOLATED_TENANT);
+  public static final String NON_EXISTED_ID = "bad500aa-aaaa-500a-aaaa-aaaaaaaaaaaa";
+  public static final String TENANT_NAME = "diku";
+  public static final String ISOLATED_TENANT = "isolated";
+  public static final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TENANT_NAME);
+  public static final Header ISOLATED_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, ISOLATED_TENANT);
 
   private static boolean invokeStorageTestSuiteAfter = false;
 
