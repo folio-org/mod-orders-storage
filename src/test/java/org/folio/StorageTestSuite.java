@@ -1,18 +1,9 @@
-package org.folio.rest.impl;
+package org.folio;
 
 import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 
-import io.restassured.http.Header;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Verticle;
-import io.vertx.core.Vertx;
-import io.vertx.core.impl.VertxImpl;
-import io.vertx.core.json.JsonObject;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,18 +13,31 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
+import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.core.RestClientTest;
+import org.folio.rest.impl.AbstractApiHandlerTest;
+import org.folio.rest.impl.EntitiesCrudTest;
+import org.folio.rest.impl.HelperUtilsTest;
+import org.folio.rest.impl.OrdersAPITest;
+import org.folio.rest.impl.PoNumberTest;
+import org.folio.rest.impl.PurchaseOrderLineNumberTest;
+import org.folio.rest.impl.PurchaseOrderLinesApiTest;
+import org.folio.rest.impl.PurchaseOrderNumberUniquenessTest;
+import org.folio.rest.impl.ReceivingHistoryTest;
+import org.folio.rest.impl.SearchOrderLinesTest;
+import org.folio.rest.impl.TenantReferenceAPITest;
+import org.folio.rest.impl.TenantSampleDataTest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
+import org.folio.rest.persist.ExceptionUtilTest;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.ResponseUtilsTest;
 import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.folio.rest.tools.utils.Envs;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
@@ -42,8 +46,16 @@ import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
-
 import org.testcontainers.containers.PostgreSQLContainer;
+
+import io.restassured.http.Header;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Context;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Verticle;
+import io.vertx.core.Vertx;
+import io.vertx.core.impl.VertxImpl;
+import io.vertx.core.json.JsonObject;
 
 
 public class StorageTestSuite {
@@ -166,31 +178,31 @@ public class StorageTestSuite {
   }
 
   @Nested
-  class EntitiesCrudTestNested extends EntitiesCrudTest{}
+  class EntitiesCrudTestNested extends EntitiesCrudTest {}
   @Nested
-  class OrdersAPITestNested extends OrdersAPITest{}
+  class OrdersAPITestNested extends OrdersAPITest {}
   @Nested
-  class PoNumberTestNested extends PoNumberTest{}
+  class PoNumberTestNested extends PoNumberTest {}
   @Nested
   class PurchaseOrderLineApiTest extends PurchaseOrderLinesApiTest {}
   @Nested
-  class PurchaseOrderLineNumberTestNested extends PurchaseOrderLineNumberTest{}
+  class PurchaseOrderLineNumberTestNested extends PurchaseOrderLineNumberTest {}
   @Nested
-  class PurchaseOrderNumberUniquenessTestNested extends PurchaseOrderNumberUniquenessTest{}
+  class PurchaseOrderNumberUniquenessTestNested extends PurchaseOrderNumberUniquenessTest {}
   @Nested
-  class ReceivingHistoryTestNested extends ReceivingHistoryTest{}
+  class ReceivingHistoryTestNested extends ReceivingHistoryTest {}
   @Nested
-  class SearchOrderLinesTestNested extends SearchOrderLinesTest{}
+  class SearchOrderLinesTestNested extends SearchOrderLinesTest {}
   @Nested
-  class TenantSampleDataTestNested extends TenantSampleDataTest{}
+  class TenantSampleDataTestNested extends TenantSampleDataTest {}
   @Nested
-  class TenantReferenceAPITestNested extends TenantReferenceAPITest{}
+  class TenantReferenceAPITestNested extends TenantReferenceAPITest {}
   @Nested
   class FinanceServiceTestNested extends FinanceServiceTest{}
   @Nested
   class MigrationServiceTestNested extends MigrationServiceTest{}
   @Nested
-  class HelperUtilsTestNested extends HelperUtilsTest{}
+  class HelperUtilsTestNested extends HelperUtilsTest {}
   @Nested
   class PoLinesServiceTestNested extends PoLinesServiceTest {}
   @Nested
@@ -198,9 +210,11 @@ public class StorageTestSuite {
   @Nested
   class DBClientTestNested extends DBClientTest {}
   @Nested
-  class ResponseUtilsTestNested extends ResponseUtilsTest {}
+  class ExceptionUtilTestNested extends ExceptionUtilTest {}
   @Nested
   class AbstractApiHandlerTestNested extends AbstractApiHandlerTest {}
   @Nested
   class RestClientTestNested extends RestClientTest {}
+  @Nested
+  class ResponseUtilTestNested extends ResponseUtilTest {}
 }

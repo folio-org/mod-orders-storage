@@ -1,6 +1,4 @@
-package org.folio.services.migration;
-
-import static org.folio.rest.persist.ResponseUtils.handleFailure;
+package org.folio.migration;
 
 import java.util.List;
 import java.util.Map;
@@ -8,7 +6,9 @@ import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.migration.models.dto.FundCodeMigrationDto;
 import org.folio.rest.acq.model.finance.Fund;
+import org.folio.rest.core.ResponseUtil;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
@@ -20,8 +20,10 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 
 public class MigrationService {
+  private static final Logger logger = LogManager.getLogger(MigrationService.class);
+  public static final String PG_CLIENT_EXECUTE_FUND_CODE_MIGRATION_FAILED =
+              "PgClient.execute() step : Migration script for fund code synchronization failed : function {}";
 
-  private static final Logger log = LogManager.getLogger(MigrationService.class);
   private final FinanceService financeService;
 
   public MigrationService(FinanceService financeService) {
@@ -31,25 +33,24 @@ public class MigrationService {
   public Future<Void> syncAllFundCodeFromPoLineFundDistribution(Map<String, String> headers, Context vertxContext) {
     Promise<Void> promise = Promise.promise();
     vertxContext.runOnContext(v -> {
-      log.debug("Cross Migration for fund code synchronization started");
+      logger.debug("Cross Migration for fund code synchronization started");
       DBClient client = new DBClient(vertxContext, headers);
       financeService.getAllFunds(new RequestContext(vertxContext, headers))
         .thenAccept(funds -> runSetFundCodeIntoPolScript(funds, client)
           .onSuccess(v1 -> {
-            log.debug("Cross Migration for fund code synchronization completed");
+            logger.debug("Run script step : Cross Migration for fund code synchronization completed");
             promise.complete();
           })
-          .onFailure(v2 -> {
-            log.error("Cross Migration for fund code synchronization failed");
-            promise.fail(v2.getCause());
-          })
+          .onFailure(throwable -> {
+            logger.error("Run script step : Cross Migration for fund code synchronization failed for {} numbers of funds", funds.size());
+            ResponseUtil.handleFailure(promise, throwable);
+           })
         )
         .exceptionally(throwable -> {
-          log.error("Cross Migration for fund code synchronization failed");
-          promise.fail(throwable.getCause());
+          logger.error("Get all funds step failed: Cross Migration for fund code synchronization failed");
+          ResponseUtil.handleFailure(promise, throwable);
           return null;
         });
-
     });
     return promise.future();
   }
@@ -69,7 +70,8 @@ public class MigrationService {
         if (event.succeeded()) {
           promise.complete();
         } else {
-          handleFailure(promise, event);
+          logger.error(PG_CLIENT_EXECUTE_FUND_CODE_MIGRATION_FAILED, "set_fund_code_into_pol");
+          ResponseUtil.handleFailure(promise, event.cause());
         }
       });
     return promise.future();
@@ -77,11 +79,9 @@ public class MigrationService {
 
   private String getFundsAsJsonString(List<Fund> funds) {
     var processedFunds = funds.stream()
-      .map(fund -> fund.withName(replaceSingleQuote(fund.getName()))
-        .withDescription(replaceSingleQuote(fund.getDescription()))
-        .withCode(replaceSingleQuote(fund.getCode())))
+      .map(originFund -> new FundCodeMigrationDto(originFund.getId())
+                .withCode(replaceSingleQuote(originFund.getCode())))
       .collect(Collectors.toList());
-
     return new JsonArray(processedFunds).encode();
   }
 

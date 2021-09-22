@@ -24,7 +24,7 @@
     <jmockit.version>1.49</jmockit.version>
     <vertx.version>4.1.0.CR1</vertx.version>
     <lombok.version>1.18.16</lombok.version>
-    <sonar.exclusions>**/models/*.java, **/core/FolioVertxCompletableFuture.java</sonar.exclusions>
+    <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <testcontainers.version>1.15.3</testcontainers.version>
     <postgres.image>postgres:12-alpine</postgres.image>
@@ -477,7 +477,7 @@
             -Duser.language=en -Duser.region=US
           </argLine>
           <includes>
-            <include>org/folio/rest/impl/StorageTestSuite.java</include>
+            <include>org/folio/StorageTestSuite.java</include>
           </includes>
           <!-- TODO: update to version 3.0.0 and remove useSystemClassLoader
                https://issues.folio.org/browse/FOLIO-1609

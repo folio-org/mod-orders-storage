@@ -1,7 +1,6 @@
 package org.folio.dao.lines;
 
 import static org.folio.models.TableNames.POLINE_TABLE;
-import static org.folio.rest.persist.ResponseUtils.handleFailure;
 
 import java.util.List;
 
@@ -9,6 +8,8 @@ import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.rest.core.ResponseUtil;
+import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -16,7 +17,7 @@ import org.folio.rest.persist.Criteria.Criterion;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.handler.HttpException;
+
 
 public class PoLinesPostgresDAO implements PoLinesDAO {
 
@@ -27,7 +28,8 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
     Promise<List<PoLine>> promise = Promise.promise();
     client.getPgClient().get(POLINE_TABLE, PoLine.class, criterion, false, reply -> {
         if (reply.failed()) {
-          handleFailure(promise, reply);
+          logger.error("Retrieve POLs failed : {}", criterion.toString());
+          ResponseUtil.handleFailure(promise, reply);
         } else {
           List<PoLine> budgets = reply.result().getResults();
           promise.complete(budgets);
@@ -44,8 +46,8 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
 
     client.getPgClient().getById(POLINE_TABLE, id, reply -> {
       if (reply.failed()) {
-        logger.error("PoLine retrieval with id={} failed", reply.cause(), id);
-        handleFailure(promise, reply);
+        logger.error("PoLine retrieval with id={} failed", id);
+        ResponseUtil.handleFailure(promise, reply);
       } else {
         final JsonObject po_line = reply.result();
         if (po_line == null) {

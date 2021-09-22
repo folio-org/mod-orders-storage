@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import org.folio.migration.MigrationService;
 import org.folio.rest.acq.model.finance.Fund;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
