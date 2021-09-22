@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import org.folio.rest.exceptions.HttpException;
 import org.junit.jupiter.api.Test;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
-import io.vertx.ext.web.handler.HttpException;
 import io.vertx.pgclient.PgException;
 
 public class ResponseUtilTest {
@@ -23,6 +23,6 @@ public class ResponseUtilTest {
     ResponseUtil.handleFailure(promise, reply);
 
     HttpException exception = (HttpException) promise.future().cause();
-    assertEquals(exception.getStatusCode(), 400);
+    assertEquals(exception.getCode(), 500);
   }
 }
