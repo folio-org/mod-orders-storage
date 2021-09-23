@@ -1,5 +1,14 @@
 ## 13.1.0 - Unreleased
 
+## 13.0.3 - Released
+This release fixes migration of funds which contain values with single quotes
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.2...v13.0.3)
+
+### Bug Fixes
+* [MODORDSTOR-248](https://issues.folio.org/browse/MODORDSTOR-248) - Tenant migration from Iris-hotfix-3 to Juniper failed
+
+
 ## 13.0.2 - Released
   This release fixes issue with populating publication date 
 
