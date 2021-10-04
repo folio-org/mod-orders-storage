@@ -16,6 +16,7 @@ Added field to Piece schema for support holding
 
 ### Bug Fixes
 * [MODORDSTOR-250](https://issues.folio.org/browse/MODORDSTOR-250) - Kiwi - Tenant migration from Iris-hotfix-3 to Juniper failed
+* [MODORDSTOR-237](https://issues.folio.org/browse/MODORDSTOR-237) - BE - Publication date not populated when using "Title look up"
 
 ## 13.0.0 - Released
 This release contains performance improvements, RMB updated up to v33.0.0, added personal disclosure form 
