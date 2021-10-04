@@ -1,4 +1,4 @@
-## 14.0.0 - Unreleased
+## 13.2.0 - Unreleased
 
 ## 13.1.0 - Released
 Added new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
