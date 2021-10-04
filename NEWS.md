@@ -1,11 +1,12 @@
 ## 14.0.0 - Unreleased
 
 ## 13.1.0 - Released
-This release contains: 
 Added new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
 Migration script for Fund code in the fund distribution of the order line":" replaced with hyphen "-"
 Updated piece schema to include Copy number, Enumeration AND Chronology
 Added field to Piece schema for support holding
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.4...v13.1.0)
 
 ### Stories
 * [MODORDSTOR-240](https://issues.folio.org/browse/MODORDSTOR-240) - Add new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
