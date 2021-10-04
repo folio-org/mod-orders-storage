@@ -9,10 +9,10 @@ Added field to Piece schema for support holding
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.4...v13.1.0)
 
 ### Stories
+* [MODORDSTOR-235](https://issues.folio.org/browse/MODORDSTOR-235) - Add field to Piece schema for support holding
 * [MODORDSTOR-240](https://issues.folio.org/browse/MODORDSTOR-240) - Add new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
 * [MODORDSTOR-243](https://issues.folio.org/browse/MODORDSTOR-243) - Migration script for Fund code in the fund distribution of the order line":" replace with hyphen "-"
 * [MODORDSTOR-244](https://issues.folio.org/browse/MODORDSTOR-244) - Update piece schema to include Copy number, Enumeration AND Chronology
-* [MODORDSTOR-235](https://issues.folio.org/browse/MODORDSTOR-235) - Add field to Piece schema for support holding
 
 ### Bug Fixes
 * [MODORDSTOR-250](https://issues.folio.org/browse/MODORDSTOR-250) - Kiwi - Tenant migration from Iris-hotfix-3 to Juniper failed
