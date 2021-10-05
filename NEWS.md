@@ -1,4 +1,22 @@
-## 13.1.0 - Unreleased
+## 13.2.0 - Unreleased
+
+## 13.1.0 - Released
+Added new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
+Migration script for Fund code in the fund distribution of the order line":" replaced with hyphen "-"
+Updated piece schema to include Copy number, Enumeration AND Chronology
+Added field to Piece schema for support holding
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.0...v13.1.0)
+
+### Stories
+* [MODORDSTOR-244](https://issues.folio.org/browse/MODORDSTOR-244) - Update piece schema to include Copy number, Enumeration AND Chronology
+* [MODORDSTOR-243](https://issues.folio.org/browse/MODORDSTOR-243) - Migration script for Fund code in the fund distribution of the order line":" replace with hyphen "-"
+* [MODORDSTOR-240](https://issues.folio.org/browse/MODORDSTOR-240) - Add new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
+* [MODORDSTOR-235](https://issues.folio.org/browse/MODORDSTOR-235) - Add field to Piece schema for support holding
+
+### Bug Fixes
+* [MODORDSTOR-250](https://issues.folio.org/browse/MODORDSTOR-250) - Kiwi - Tenant migration from Iris-hotfix-3 to Juniper failed
+* [MODORDSTOR-237](https://issues.folio.org/browse/MODORDSTOR-237) - BE - Publication date not populated when using "Title look up"
 
 ## 13.0.0 - Released
 This release contains performance improvements, RMB updated up to v33.0.0, added personal disclosure form 
