@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import io.vertx.core.Vertx;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.AcquisitionsUnit;
 import org.folio.rest.jaxrs.model.AcquisitionsUnitCollection;
@@ -15,11 +16,18 @@ import org.folio.rest.persist.PgUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import org.folio.services.acquisitions.AcquisitionService;
 
 public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
 
   private static final String ACQUISITIONS_UNIT_TABLE = "acquisitions_unit";
   private static final String ACQUISITIONS_UNIT_MEMBERSHIP_TABLE = "acquisitions_unit_membership";
+
+  private AcquisitionService acquisitionService;
+
+  public AcquisitionsUnitsAPI(Vertx vertx, String tenantId) {
+    acquisitionService = new AcquisitionService(vertx, tenantId);
+  }
 
   @Override
   @Validate
@@ -32,7 +40,7 @@ public class AcquisitionsUnitsAPI implements AcquisitionsUnitsStorage {
   @Override
   @Validate
   public void postAcquisitionsUnitsStorageUnits(String lang, AcquisitionsUnit entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.post(ACQUISITIONS_UNIT_TABLE, entity, okapiHeaders, vertxContext, PostAcquisitionsUnitsStorageUnitsResponse.class, asyncResultHandler);
+    acquisitionService.createAcquisitionsUnit(entity, vertxContext, asyncResultHandler);
   }
 
   @Override
