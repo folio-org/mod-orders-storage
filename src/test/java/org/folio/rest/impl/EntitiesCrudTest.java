@@ -106,20 +106,6 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT"}, mode = EnumSource.Mode.INCLUDE)
-  public void testUniqueKeyConstraintAcquisitionUnit(TestEntities testEntity) throws MalformedURLException {
-    logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
-    JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
-    duplicateEntity.remove("id");
-    Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
-    response.then().log().ifValidationFails().statusCode(400);
-
-    Pattern pattern = Pattern.compile("(already exists|uniqueField)");
-    Matcher matcher = pattern.matcher(response.getBody().asString());
-    Assertions.assertTrue(matcher.find());
-  }
-
-  @ParameterizedTest
   @Order(6)
   @EnumSource(value = TestEntities.class)
   public void testPutById(TestEntities testEntity) throws MalformedURLException {
@@ -172,6 +158,21 @@ public class EntitiesCrudTest extends TestBase {
     logger.info(String.format("--- mod-orders-storages %s test: Verify %s is deleted with ID: %s", testEntity.name(),
         testEntity.name(), testEntity.getId()));
     testVerifyEntityDeletion(testEntity.getEndpointWithId(), testEntity.getId());
+  }
+
+  @ParameterizedTest
+  @Order(11)
+  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT"}, mode = EnumSource.Mode.INCLUDE)
+  public void testUniqueKeyConstraintAcquisitionUnit(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
+    JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
+    duplicateEntity.remove("id");
+    Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
+    response.then().log().ifValidationFails().statusCode(400);
+
+    Pattern pattern = Pattern.compile("(already exists|uniqueField)");
+    Matcher matcher = pattern.matcher(response.getBody().asString());
+    Assertions.assertTrue(matcher.find());
   }
 
   @ParameterizedTest
