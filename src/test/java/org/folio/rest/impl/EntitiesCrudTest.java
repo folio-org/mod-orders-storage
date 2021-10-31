@@ -168,13 +168,14 @@ public class EntitiesCrudTest extends TestBase {
     JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
     duplicateEntity.remove("id");
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
-    response.then().log().ifValidationFails().statusCode(400);
+    response.then().log().ifValidationFails().statusCode(201);
 
 //    Pattern pattern = Pattern.compile("(already exists|uniqueField)");
 //    Matcher matcher = pattern.matcher(response.getBody().asString());
 //    Assertions.assertTrue(matcher.find());
 //    assertTrue(response.asString().contains("value already exists in table"));
     assertTrue(response.asString().contains("Field Name must be unique"));
+    //assertTrue(response.asString().contains("Field Name must be unique"));
   }
 
   @ParameterizedTest
