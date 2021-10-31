@@ -168,7 +168,7 @@ public class EntitiesCrudTest extends TestBase {
     JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
     duplicateEntity.remove("id");
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
-    response.then().log().ifValidationFails().statusCode(400);
+    response.then().log().ifValidationFails().statusCode(201);
 
     Pattern pattern = Pattern.compile("(already exists|uniqueField)");
     Matcher matcher = pattern.matcher(response.getBody().asString());
