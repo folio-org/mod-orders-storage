@@ -174,8 +174,8 @@ public class EntitiesCrudTest extends TestBase {
 //    Matcher matcher = pattern.matcher(response.getBody().asString());
 //    Assertions.assertTrue(matcher.find());
 //    assertTrue(response.asString().contains("value already exists in table"));
-    assertTrue(response.asString().contains("Field Name must be unique"));
     //assertTrue(response.asString().contains("Field Name must be unique"));
+    assertTrue(response.asString().contains("already exists|uniqueField"));
   }
 
   @ParameterizedTest
