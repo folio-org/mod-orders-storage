@@ -173,7 +173,8 @@ public class EntitiesCrudTest extends TestBase {
 //    Pattern pattern = Pattern.compile("(already exists|uniqueField)");
 //    Matcher matcher = pattern.matcher(response.getBody().asString());
 //    Assertions.assertTrue(matcher.find());
-    assertTrue(response.asString().contains("value already exists in table"));
+//    assertTrue(response.asString().contains("value already exists in table"));
+    assertTrue(response.asString().contains("already exists|uniqueField"));
   }
 
   @ParameterizedTest
