@@ -93,18 +93,41 @@ public class EntitiesCrudTest extends TestBase {
 
   @ParameterizedTest
   @Order(5)
-  @EnumSource(value = TestEntities.class, names = {"REASON_FOR_CLOSURE", "PREFIX", "SUFFIX"}, mode = EnumSource.Mode.INCLUDE)
+  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT", "REASON_FOR_CLOSURE", "PREFIX", "SUFFIX"}, mode = EnumSource.Mode.INCLUDE)
   public void testUniqueKeyConstraint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
     JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
     duplicateEntity.remove("id");
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
-    response.then().log().ifValidationFails()
-    .statusCode(422);
-    assertTrue(response.asString().contains("value already exists in table"));
+    if (testEntity.name() != "ACQUISITIONS_UNIT") {
+      response.then().log().ifValidationFails()
+        .statusCode(422);
+      assertTrue(response.asString().contains("value already exists in table"));
+    }
+    else {
+      response.then().log().ifValidationFails().statusCode(400);
+      Pattern pattern = Pattern.compile("(already exists|uniqueField)");
+      Matcher matcher = pattern.matcher(response.getBody().asString());
+      Assertions.assertTrue(matcher.find());
+    }
 
   }
+/*
+  @ParameterizedTest
+  @Order(6)
+  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT"}, mode = EnumSource.Mode.INCLUDE)
+  public void testUniqueKeyConstraintAcquisitionUnit(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
+    JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
+    duplicateEntity.remove("id");
+    Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
+    response.then().log().ifValidationFails().statusCode(400);
 
+    Pattern pattern = Pattern.compile("(already exists|uniqueField)");
+    Matcher matcher = pattern.matcher(response.getBody().asString());
+    Assertions.assertTrue(matcher.find());
+  }
+*/
   @ParameterizedTest
   @Order(6)
   @EnumSource(value = TestEntities.class)
@@ -160,20 +183,7 @@ public class EntitiesCrudTest extends TestBase {
     testVerifyEntityDeletion(testEntity.getEndpointWithId(), testEntity.getId());
   }
 
-  @ParameterizedTest
-  @Order(11)
-  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT"}, mode = EnumSource.Mode.INCLUDE)
-  public void testUniqueKeyConstraintAcquisitionUnit(TestEntities testEntity) throws MalformedURLException {
-    logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
-    JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
-    duplicateEntity.remove("id");
-    Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
-    response.then().log().ifValidationFails().statusCode(400);
 
-    Pattern pattern = Pattern.compile("(already exists|uniqueField)");
-    Matcher matcher = pattern.matcher(response.getBody().asString());
-    Assertions.assertTrue(matcher.find());
-  }
 
   @ParameterizedTest
   @EnumSource(value = TestEntities.class, names = {"PO_LINE", "PIECE", "ORDER_INVOICE_RELNS"}, mode = EnumSource.Mode.INCLUDE)
