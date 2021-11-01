@@ -35,10 +35,10 @@ public class AcquisitionService {
 
   public void createAcquisitionsUnit(AcquisitionsUnit acquisitionsUnit, Context vertxContext, Handler<AsyncResult<Response>> asyncResultHandler) {
     vertxContext.runOnContext(v -> createAcquisitionsUnit(acquisitionsUnit)
-      .onSuccess(group -> {
+      .onSuccess(entity -> {
         logger.debug("AcquisitionService with id {} created", acquisitionsUnit.getId());
         asyncResultHandler.handle(Future.succeededFuture(
-          AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.respond201WithApplicationJson(group, headersFor201())));
+          AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.respond201WithApplicationJson(entity, headersFor201())));
       })
       .onFailure(throwable -> {
         logger.error("AcquisitionService creation with id {} failed", acquisitionsUnit.getId(), throwable);

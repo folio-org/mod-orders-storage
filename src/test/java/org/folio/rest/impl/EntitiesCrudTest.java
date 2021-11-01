@@ -160,7 +160,7 @@ public class EntitiesCrudTest extends TestBase {
     testVerifyEntityDeletion(testEntity.getEndpointWithId(), testEntity.getId());
   }
 
-  @ParameterizedTest
+  /*@ParameterizedTest
   @Order(11)
   @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT"}, mode = EnumSource.Mode.INCLUDE)
   public void testUniqueKeyConstraintAcquisitionUnit(TestEntities testEntity) throws MalformedURLException {
@@ -176,7 +176,7 @@ public class EntitiesCrudTest extends TestBase {
 //    assertTrue(response.asString().contains("value already exists in table"));
     //assertTrue(response.asString().contains("Field Name must be unique"));
     //assertTrue(response.asString().contains("already exists|uniqueField"));
-  }
+  }*/
 
   @ParameterizedTest
   @EnumSource(value = TestEntities.class, names = {"PO_LINE", "PIECE", "ORDER_INVOICE_RELNS"}, mode = EnumSource.Mode.INCLUDE)
