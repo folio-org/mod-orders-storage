@@ -3,9 +3,12 @@ package org.folio.rest.impl;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.MalformedURLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.folio.rest.utils.TestEntities;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -96,9 +99,17 @@ public class EntitiesCrudTest extends TestBase {
     JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
     duplicateEntity.remove("id");
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
-    response.then().log().ifValidationFails()
-    .statusCode(422);
-    assertTrue(response.asString().contains("value already exists in table"));
+    if (testEntity.name() != "ACQUISITIONS_UNIT") {
+      response.then().log().ifValidationFails()
+        .statusCode(422);
+      assertTrue(response.asString().contains("value already exists in table"));
+    }
+    else {
+      response.then().log().ifValidationFails().statusCode(400);
+      Pattern pattern = Pattern.compile("(already exists|uniqueField)");
+      Matcher matcher = pattern.matcher(response.getBody().asString());
+      Assertions.assertTrue(matcher.find());
+    }
 
   }
 
@@ -156,6 +167,8 @@ public class EntitiesCrudTest extends TestBase {
         testEntity.name(), testEntity.getId()));
     testVerifyEntityDeletion(testEntity.getEndpointWithId(), testEntity.getId());
   }
+
+
 
   @ParameterizedTest
   @EnumSource(value = TestEntities.class, names = {"PO_LINE", "PIECE", "ORDER_INVOICE_RELNS"}, mode = EnumSource.Mode.INCLUDE)

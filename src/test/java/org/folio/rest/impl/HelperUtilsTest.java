@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.CompletionException;
 import mockit.Mock;
 import mockit.MockUp;
+import org.apache.commons.lang.StringUtils;
 import org.folio.HttpStatus;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
@@ -25,6 +26,7 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.tools.client.Response;
+import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -125,6 +127,18 @@ public class HelperUtilsTest extends TestBase {
     assertThrows(CompletionException.class, () -> {
       HelperUtils.verifyResponse(response);
     });
+  }
+
+  @Test
+  public void testSQLUniqueConstraintFound() {
+    String constraintName = HelperUtils.getSQLUniqueConstraintName("unique constraint \"idx_name_code\"");
+    Assert.assertEquals("idx_name_code", constraintName);
+  }
+
+  @Test
+  public void testSQLUniqueConstraintNotFound() {
+    String constraintName = HelperUtils.getSQLUniqueConstraintName("error \"error\"");
+    Assert.assertEquals(StringUtils.EMPTY, constraintName);
   }
 
   private ValidatableResponse get(URL endpoint) {

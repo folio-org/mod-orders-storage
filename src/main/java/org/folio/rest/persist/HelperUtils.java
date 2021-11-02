@@ -1,6 +1,7 @@
 package org.folio.rest.persist;
 
 import static org.folio.rest.persist.PgUtil.response;
+import static org.folio.rest.exceptions.ErrorCodes.UNIQUE_FIELD_CONSTRAINT_ERROR;
 
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
@@ -8,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
@@ -17,6 +19,9 @@ import java.util.regex.Pattern;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
+import org.folio.rest.jaxrs.model.Error;
+import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
@@ -159,4 +164,25 @@ public class HelperUtils {
     }
   }
 
+  public static String getSQLUniqueConstraintName(String errorMessage) {
+    if (!StringUtils.isEmpty(errorMessage)) {
+      Pattern pattern = Pattern.compile("(unique constraint)\\s+\"(?<constraint>.*?)\"");
+      Matcher matcher = pattern.matcher(errorMessage);
+      if (matcher.find()) {
+        return matcher.group("constraint");
+      }
+    }
+    return StringUtils.EMPTY;
+  }
+
+  public static Error buildFieldConstraintError(String entityName, String fieldName) {
+    final String FIELD_NAME = "field";
+    final String ENTITY_NAME = "entity";
+    String description = MessageFormat.format(UNIQUE_FIELD_CONSTRAINT_ERROR.getDescription(), fieldName);
+    String code = MessageFormat.format(UNIQUE_FIELD_CONSTRAINT_ERROR.getCode(), entityName, fieldName);
+    Error error = new Error().withCode(code).withMessage(description);
+    error.getParameters().add(new Parameter().withKey(FIELD_NAME).withValue(fieldName));
+    error.getParameters().add(new Parameter().withKey(ENTITY_NAME).withValue(entityName));
+    return error;
+  }
 }
