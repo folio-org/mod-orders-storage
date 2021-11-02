@@ -7,7 +7,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.builder.error.NameCodeConstraintErrorBuilder;
+import org.folio.builders.error.NameCodeConstraintErrorBuilder;
 import org.folio.rest.jaxrs.model.AcquisitionsUnit;
 import org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage;
 import org.folio.rest.persist.PostgresClient;

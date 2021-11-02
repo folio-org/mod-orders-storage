@@ -1,4 +1,4 @@
-package org.folio.builder.error;
+package org.folio.builders.error;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonObject;
