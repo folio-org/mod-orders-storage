@@ -166,6 +166,9 @@
         },
         {
           "fieldName": "closeReason.note"
+        },
+        {
+          "fieldName": "acqUnitIds"
         }
       ]
     },
@@ -280,6 +283,13 @@
         },
         {
           "fieldName": "selector"
+        },
+        {
+          "fieldName": "vendorDetail.referenceNumbers",
+          "caseSensitive": false,
+          "removeAccents": true,
+          "arraySubfield": "refNumber",
+          "arrayModifiers": ["refNumberType", "vendorDetailsSource"]
         }
       ],
       "ginIndex": [
@@ -439,6 +449,16 @@
       "uniqueIndex": [
         {
             "fieldName" : "name"
+        }
+      ],
+      "index": [
+        {
+          "fieldName": "isDeleted",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "protectRead",
+          "caseSensitive": false
         }
       ]
     },
