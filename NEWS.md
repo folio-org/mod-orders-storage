@@ -1,5 +1,14 @@
 ## 13.2.0 - Unreleased
 
+## 13.1.1 - Released
+The focus of this release add several database indices in order to speedup search requests 
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.0...v13.1.1)
+
+### Bug Fixes
+* [MODORDSTOR-255](https://issues.folio.org/browse/MODORDSTOR-255) - Add indexes to improve searching speed of polines
+
+
 ## 13.1.0 - Released
 Added new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
 Migration script for Fund code in the fund distribution of the order line":" replaced with hyphen "-"
