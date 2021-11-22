@@ -1,5 +1,14 @@
 ## 13.1.0 - Unreleased
 
+## 13.0.4 - Released
+This release contains performance improvement across poline table
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.3...v13.0.4)
+
+### Bug Fixes
+* [MODORDSTOR-261](https://issues.folio.org/browse/MODORDSTOR-261) - Add indexes to improve searching speed of polines
+
+
 ## 13.0.3 - Released
 This release fixes migration of funds which contain values with single quotes
 
