@@ -85,6 +85,11 @@
       "run": "after",
       "snippetPath": "data-migration/13.1.0/restriction_for_fund_codes.sql",
       "fromModuleVersion": "mod-orders-storage-13.1.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/13.3.0/add_acquisition_method_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.3.0"
     }
   ],
   "tables": [
