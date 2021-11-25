@@ -45,6 +45,10 @@ public class TestData {
     String DEFAULT = "data/acquisitions-units/acquisitions-unit.json";
   }
 
+  public interface AcquisitionMethods {
+    String DEFAULT = "data/acquisition-methods/acquisition-method.json";
+  }
+
   public interface AcquisitionsUnitMembership {
     String DEFAULT = "data/acquisitions-units-memberships/acquisition_unit_membership.json";
   }

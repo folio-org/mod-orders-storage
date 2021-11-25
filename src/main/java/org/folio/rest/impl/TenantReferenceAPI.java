@@ -94,7 +94,8 @@ public class TenantReferenceAPI extends TenantAPI {
   private boolean buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
     tl.withKey(PARAMETER_LOAD_SYSTEM)
       .withLead("data/system")
-      .add("reasons-for-closure", "orders-storage/configuration/reasons-for-closure");
+      .add("reasons-for-closure", "orders-storage/configuration/reasons-for-closure")
+      .add("acquisition-methods", "orders-storage/acquisition-methods");
     if (isLoadSample(tenantAttributes)) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
