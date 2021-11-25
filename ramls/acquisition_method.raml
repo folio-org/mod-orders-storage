@@ -8,8 +8,9 @@ documentation:
     content: <b>CRUD APIs used to manage acquisition method.</b>
 
 types:
-  acquisition-method: !include acq-models/mod-orders-storage/schemas/acquisition_method.json
-  acquisition-method-collection: !include acq-models/mod-orders-storage/schemas/acquisition_method_collection.json
+  acquisitionMethod: !include acq-models/mod-orders-storage/schemas/acquisition_method.json
+  acquisitionMethodCollection: !include acq-models/mod-orders-storage/schemas/acquisition_method_collection.json
+  errors: !include raml-util/schemas/errors.schema
   UUID:
     type: string
     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -21,16 +22,19 @@ traits:
   language: !include raml-util/traits/language.raml
 
 resourceTypes:
-  collection: !include raml-util/rtypes/collection.raml
-  collection-item: !include raml-util/rtypes/item-collection.raml
+  collection: !include raml-util/rtypes/collection-with-json-response.raml
+  collection-item: !include raml-util/rtypes/item-collection-with-json-response.raml
+  collection-get: !include raml-util/rtypes/collection-get-with-json-response.raml
 
 /orders-storage/acquisition-methods:
+  displayName: Acquisition methods
+  description: Acquisition methods APIs
   type:
     collection:
       exampleCollection: !include acq-models/mod-orders-storage/examples/acquisition_method_collection.sample
       exampleItem: !include acq-models/mod-orders-storage/examples/acquisition_method_get.sample
-      schemaCollection: acquisition-method-collection
-      schemaItem: acquisition-method
+      schemaCollection: acquisitionMethodCollection
+      schemaItem: acquisitionMethod
   get:
     description: Get list of acquisition methods
     is: [
@@ -42,8 +46,10 @@ resourceTypes:
       id:
         description: The UUID of a Acquisition method
         type: UUID
+    displayName: Acquisition method
+    description: Get, Delete or Update a specific acquisition method
     type:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/acquisition_method_get.sample
-        schema: acquisition-method
+        schema: acquisitionMethod
 

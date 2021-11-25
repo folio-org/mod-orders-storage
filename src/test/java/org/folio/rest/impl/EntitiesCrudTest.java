@@ -39,6 +39,7 @@ public class EntitiesCrudTest extends TestBase {
       TestEntities.ORDER_TEMPLATE,
       TestEntities.ACQUISITIONS_UNIT_MEMBERSHIPS,
       TestEntities.ACQUISITIONS_UNIT,
+      TestEntities.ACQUISITION_METHOD,
       TestEntities.REASON_FOR_CLOSURE,
       TestEntities.PREFIX,
       TestEntities.SUFFIX);

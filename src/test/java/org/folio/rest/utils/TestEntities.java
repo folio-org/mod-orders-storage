@@ -1,18 +1,6 @@
 package org.folio.rest.utils;
 
-import org.folio.rest.jaxrs.model.AcquisitionsUnit;
-import org.folio.rest.jaxrs.model.AcquisitionsUnitMembership;
-import org.folio.rest.jaxrs.model.Alert;
-import org.folio.rest.jaxrs.model.OrderInvoiceRelationship;
-import org.folio.rest.jaxrs.model.OrderTemplate;
-import org.folio.rest.jaxrs.model.Piece;
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.Prefix;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.ReasonForClosure;
-import org.folio.rest.jaxrs.model.ReportingCode;
-import org.folio.rest.jaxrs.model.Suffix;
-import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.*;
 
 public enum TestEntities {
   // the below order is important to satisfy the foreign key constraints
@@ -25,6 +13,7 @@ public enum TestEntities {
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, TestData.OrderInvoiceRelationship.DEFAULT, "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 0),
   ORDER_TEMPLATE("/orders-storage/order-templates", OrderTemplate.class, TestData.OrderTemplate.DEFAULT, "templateCode", "Amazon-A", 5),
   ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, TestData.AcquisitionsUnit.DEFAULT, "name", "met", 1),
+  ACQUISITION_METHOD("/orders-storage/acquisition-methods", AcquisitionMethod.class, TestData.AcquisitionMethods.DEFAULT, "value", "New Method", 1),
   ACQUISITIONS_UNIT_MEMBERSHIPS("/acquisitions-units-storage/memberships", AcquisitionsUnitMembership.class, TestData.AcquisitionsUnitMembership.DEFAULT, "userId", "f8e41958-a378-4051-ae6e-429d231acb66", 1),
   REASON_FOR_CLOSURE("/orders-storage/configuration/reasons-for-closure", ReasonForClosure.class, TestData.ReasonForClosure.DEFAULT, "reason", "New reason for closure", 1),
   PREFIX("/orders-storage/configuration/prefixes", Prefix.class, TestData.Prefix.DEFAULT , "description", "New description", 1),
@@ -84,6 +73,12 @@ public enum TestEntities {
   }
 
   public int getEstimatedSystemDataRecordsQuantity() {
-    return REASON_FOR_CLOSURE == this ? 18 : 0;
+    if (REASON_FOR_CLOSURE == this) {
+      return 18;
+    }
+    if (ACQUISITION_METHOD == this) {
+      return 13;
+    }
+    return 0;
   }
 }
