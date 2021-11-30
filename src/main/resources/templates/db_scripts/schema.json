@@ -88,8 +88,8 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/13.3.0/add_acquisition_method_table.sql",
-      "fromModuleVersion": "mod-orders-storage-13.3.0"
+      "snippetPath": "data-migration/14.0.0/add_acquisition_method_table.sql",
+      "fromModuleVersion": "mod-orders-storage-14.0.0"
     },
     {
       "run": "after",
