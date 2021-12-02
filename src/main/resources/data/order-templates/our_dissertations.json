@@ -3,7 +3,7 @@
   "templateCode": "Dissert",
   "templateDescription": "Use to create orders for our dissertations going to the archives; change the pub year each year",
   "templateName": "Our dissertations",
-  "acquisitionMethod": "Gift",
+  "acquisitionMethod": "0a4163a5-d225-4007-ad90-2fb41b73efab",
   "approved": true,
   "cost": {
     "listUnitPrice": 0,

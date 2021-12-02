@@ -88,8 +88,8 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/13.3.0/add_acquisition_method_table.sql",
-      "fromModuleVersion": "mod-orders-storage-13.3.0"
+      "snippetPath": "data-migration/14.0.0/update_acquisition_method_in_po_line.sql",
+      "fromModuleVersion": "mod-orders-storage-13.2.0"
     }
   ],
   "tables": [
@@ -530,6 +530,10 @@
           "fieldName" : "name"
         }
       ]
+    },
+    {
+      "tableName": "acquisition_method",
+      "fromModuleVersion": "mod-orders-storage-13.2.0"
     }
   ]
 }
