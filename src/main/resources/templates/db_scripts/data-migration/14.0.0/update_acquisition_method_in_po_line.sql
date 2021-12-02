@@ -6,5 +6,5 @@ SET jsonb = (
                                  FROM ${myuniversity}_${mymodule}.acquisition_method t
                                  WHERE t.jsonb->>'value' = b.jsonb ->> 'acquisitionMethod'))
   )
-WHERE b.jsonb->> 'acquisitionMethod' NOTNULL
+WHERE b.jsonb->> 'acquisitionMethod' IS NOT NULL
   AND b.jsonb->> 'acquisitionMethod'!~ '[0-9]';
