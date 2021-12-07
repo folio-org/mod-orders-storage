@@ -14,7 +14,13 @@ import org.folio.rest.jaxrs.model.AcquisitionMethod;
 import org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods;
 import org.folio.rest.persist.PostgresClient;
 
-import io.vertx.core.*;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+
 
 public class AcquisitionMethodService {
 
