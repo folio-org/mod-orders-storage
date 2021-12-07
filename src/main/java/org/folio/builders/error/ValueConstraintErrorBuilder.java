@@ -13,7 +13,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 
-public class AcquisitionMethodConstraintErrorBuilder {
+public class ValueConstraintErrorBuilder {
 
   public <T> HttpException buildException(AsyncResult<T> reply, Class<?> clazz ) {
     String error = convertExceptionToStringError(reply, clazz);
