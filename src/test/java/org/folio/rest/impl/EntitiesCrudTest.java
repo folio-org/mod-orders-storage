@@ -94,27 +94,34 @@ public class EntitiesCrudTest extends TestBase {
 
   @ParameterizedTest
   @Order(5)
-  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT", "REASON_FOR_CLOSURE", "PREFIX", "SUFFIX", "ACQUISITION_METHOD"}, mode = EnumSource.Mode.INCLUDE)
+  @EnumSource(value = TestEntities.class, names = {"REASON_FOR_CLOSURE", "PREFIX", "SUFFIX"}, mode = EnumSource.Mode.INCLUDE)
   public void testUniqueKeyConstraint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
     JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
     duplicateEntity.remove("id");
     Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
-    if (TestEntities.ACQUISITIONS_UNIT != testEntity && TestEntities.ACQUISITION_METHOD != testEntity) {
-      response.then().log().ifValidationFails().statusCode(422);
-      assertTrue(response.asString().contains("value already exists in table"));
-    }
-    else {
-      response.then().log().ifValidationFails().statusCode(400);
-      Pattern pattern = Pattern.compile("(already exists|uniqueField)");
-      Matcher matcher = pattern.matcher(response.getBody().asString());
-      Assertions.assertTrue(matcher.find());
-    }
 
+    response.then().log().ifValidationFails().statusCode(422);
+    assertTrue(response.asString().contains("value already exists in table"));
   }
 
   @ParameterizedTest
   @Order(6)
+  @EnumSource(value = TestEntities.class, names = {"ACQUISITIONS_UNIT", "ACQUISITION_METHOD"}, mode = EnumSource.Mode.INCLUDE)
+  public void testUniqueKeyConstraintWithClearErrorCode(TestEntities testEntity) throws MalformedURLException {
+    logger.info(String.format("--- mod-orders-storage %s test: Cannot Create Duplicate Entry %s ... ", testEntity.name(), testEntity.name()));
+    JsonObject duplicateEntity = new JsonObject(getFile(testEntity.getSampleFileName()));
+    duplicateEntity.remove("id");
+
+    Response response = postData(testEntity.getEndpoint(), duplicateEntity.toString());
+    response.then().log().ifValidationFails().statusCode(400);
+    Pattern pattern = Pattern.compile("(already exists|uniqueField)");
+    Matcher matcher = pattern.matcher(response.getBody().asString());
+    Assertions.assertTrue(matcher.find());
+  }
+
+  @ParameterizedTest
+  @Order(7)
   @EnumSource(value = TestEntities.class)
   public void testPutById(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Editing %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -127,7 +134,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(7)
+  @Order(8)
   @EnumSource(value = TestEntities.class)
   public void testVerifyPut(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storage %s test: Fetching updated %s with ID: %s", testEntity.name(),
@@ -136,7 +143,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(8)
+  @Order(9)
   @EnumSource(value = TestEntities.class, names = {"PURCHASE_ORDER"}, mode = EnumSource.Mode.INCLUDE)
   public void testDeleteEndpointForeignKeyFailure(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -148,7 +155,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(9)
+  @Order(10)
   @MethodSource("deleteOrder")
   public void testDeleteEndpoint(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", testEntity.name(), testEntity.name(),
@@ -160,7 +167,7 @@ public class EntitiesCrudTest extends TestBase {
   }
 
   @ParameterizedTest
-  @Order(10)
+  @Order(11)
   @EnumSource(TestEntities.class)
   public void testVerifyDelete(TestEntities testEntity) throws MalformedURLException {
     logger.info(String.format("--- mod-orders-storages %s test: Verify %s is deleted with ID: %s", testEntity.name(),
