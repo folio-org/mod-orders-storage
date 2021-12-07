@@ -533,7 +533,12 @@
     },
     {
       "tableName": "acquisition_method",
-      "fromModuleVersion": "mod-orders-storage-13.2.0"
+      "fromModuleVersion": "mod-orders-storage-13.2.0",
+      "uniqueIndex": [
+        {
+          "fieldName" : "value"
+        }
+      ]
     }
   ]
 }
