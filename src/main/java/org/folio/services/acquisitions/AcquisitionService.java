@@ -54,8 +54,7 @@ public class AcquisitionService {
     pgClient.save(ACQUISITIONS_UNIT_TABLE, acquisitionsUnit.getId(), acquisitionsUnit, reply -> {
       if (reply.failed()) {
         promise.fail(nameCodeConstraintErrorBuilder.buildException(reply, AcquisitionsUnit.class));
-      }
-      else {
+      } else {
         promise.complete(acquisitionsUnit);
       }
     });
