@@ -4,6 +4,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import io.vertx.core.Vertx;
 import org.folio.rest.jaxrs.model.AcquisitionMethod;
 import org.folio.rest.jaxrs.model.AcquisitionMethodCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods;
@@ -12,9 +13,16 @@ import org.folio.rest.persist.PgUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import org.folio.services.acquisitions.AcquisitionMethodService;
 
 public class AcquisitionMethodAPI implements OrdersStorageAcquisitionMethods {
   private static final String ACQUISITION_METHOD = "acquisition_method";
+
+  private AcquisitionMethodService acquisitionMethodService;
+
+  public AcquisitionMethodAPI(Vertx vertx, String tenantId) {
+    this.acquisitionMethodService = new AcquisitionMethodService(vertx, tenantId);
+  }
 
   @Override
   public void getOrdersStorageAcquisitionMethods(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
@@ -26,8 +34,7 @@ public class AcquisitionMethodAPI implements OrdersStorageAcquisitionMethods {
   @Override
   public void postOrdersStorageAcquisitionMethods(String lang, AcquisitionMethod entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.post(ACQUISITION_METHOD, entity, okapiHeaders, vertxContext,
-        OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse.class, asyncResultHandler);
+    acquisitionMethodService.createAcquisitionsMethod(entity, vertxContext, asyncResultHandler);
   }
 
   @Override
