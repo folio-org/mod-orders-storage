@@ -1,5 +1,13 @@
 ## 13.2.0 - Unreleased
 
+## 13.1.2 - Released
+This bugfix release focused on fixing Log4j vulnerability
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.1.1...v13.1.2)
+
+### Bug Fixes
+* [MODORDSTOR-269](https://issues.folio.org/browse/MODORDSTOR-269) - Log4j vulnerability verification and correction
+
 ## 13.1.1 - Released
 The focus of this release add several database indices in order to speedup search requests 
 
