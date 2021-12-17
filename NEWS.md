@@ -1,5 +1,14 @@
 ## 13.1.0 - Unreleased
 
+## 13.0.5 - Released
+
+The focus of this release was to fix Log4j vulnerability
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.0.4...v13.0.5)
+
+### Bug Fixes
+* [MODORDSTOR-270](https://issues.folio.org/browse/MODORDSTOR-270) - Juniper R2 2021 - Log4j vulnerability verification and correction
+
 ## 13.0.4 - Released
 This release contains performance improvement across poline table
 
