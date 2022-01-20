@@ -64,4 +64,9 @@ public class TestData {
   public interface Suffix {
     String DEFAULT = "data/configuration/suffixes/suffix.json";
   }
+
+  public interface ExportHistory {
+    String EXPORT_HISTORY_1 = "mockdata/export-history/99fb699a-cdf1-11e9-a9d9-f2801f1b9aa1.json";
+    String EXPORT_HISTORY_2 = "mockdata/export-history/99fb699a-cdf1-11e9-a9d9-f2801f1b9aa2.json";
+  }
 }

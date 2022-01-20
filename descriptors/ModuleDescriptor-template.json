@@ -469,7 +469,6 @@
         }
       ]
     },
-    ,
     {
       "id": "orders-storage.export-history",
       "version": "1.0",
@@ -483,6 +482,16 @@
           "methods": ["GET"],
           "pathPattern": "/orders-storage/export-history/{id}",
           "permissionsRequired": ["orders-storage.export-history.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/export-history/{id}",
+          "permissionsRequired": ["orders-storage.export-history.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/export-history/{id}",
+          "permissionsRequired": ["orders-storage.export-history.item.delete"]
         }
       ]
     },
