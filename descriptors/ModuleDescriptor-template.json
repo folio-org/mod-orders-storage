@@ -474,6 +474,11 @@
       "version": "1.0",
       "handlers": [
         {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/export-history",
+          "permissionsRequired": ["orders-storage.export-history.item.post"]
+        },
+        {
           "methods": ["GET"],
           "pathPattern": "/orders-storage/export-history",
           "permissionsRequired": ["orders-storage.export-history.collection.get"]
@@ -1079,12 +1084,40 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.export-history.get",
+      "displayName" : "orders-storage-export-history-collection get",
+      "description" : "Get a collection of export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.post",
+      "displayName" : "orders-storage-export-history-item post",
+      "description" : "Create a new export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.get",
+      "displayName" : "orders-storage-export-history-item get",
+      "description" : "Fetch a export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.put",
+      "displayName" : "orders-storage-export-history-item put",
+      "description" : "Update a export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.delete",
+      "displayName" : "orders-storage-export-history-item delete",
+      "description" : "Delete a export history"
+    },
+    {
       "permissionName" : "orders-storage.export-history.all",
       "displayName" : "All orders-storage export history perms",
       "description" : "All permissions for the orders-storage - export history",
       "subPermissions" : [
+        "orders-storage.export-history.item.post",
         "orders-storage.export-history.collection.get",
-        "orders-storage.export-history.item.get"
+        "orders-storage.export-history.item.get",
+        "orders-storage.export-history.item.put",
+        "orders-storage.export-history.item.delete"
       ]
     },
     {

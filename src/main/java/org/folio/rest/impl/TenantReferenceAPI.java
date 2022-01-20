@@ -50,25 +50,25 @@ public class TenantReferenceAPI extends TenantAPI {
     attributes.getParameters().add(parameter);
 
     TenantLoading tl = new TenantLoading();
-    buildDataLoadingParameters(attributes, tl);
+  //  buildDataLoadingParameters(attributes, tl);
 
-    return Future.succeededFuture()
-      .compose(v -> migration(attributes, "mod-orders-storage-13.0.3",
-        () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
-      .compose(v -> {
-
-        Promise<Integer> promise = Promise.promise();
-
-        tl.perform(attributes, headers, vertx, res -> {
-          if (res.failed()) {
-            promise.fail(res.cause());
-          } else {
-            promise.complete(res.result());
-          }
-        });
-        return promise.future();
-      })
-      .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
+    return Future.succeededFuture();
+//      .compose(v -> migration(attributes, "mod-orders-storage-13.0.3",
+//        () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
+//      .compose(v -> {
+//
+//        Promise<Integer> promise = Promise.promise();
+//
+//        tl.perform(attributes, headers, vertx, res -> {
+//          if (res.failed()) {
+//            promise.fail(res.cause());
+//          } else {
+//            promise.complete(res.result());
+//          }
+//        });
+//        return promise.future();
+//      })
+//      .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
   }
 
   private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {
