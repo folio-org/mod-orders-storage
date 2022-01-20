@@ -5,6 +5,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.purge;
+import static org.folio.rest.utils.TestEntities.EXPORT_HISTORY;
 import static org.folio.rest.utils.TestEntities.PREFIX;
 import static org.folio.rest.utils.TestEntities.REASON_FOR_CLOSURE;
 import static org.folio.rest.utils.TestEntities.SUFFIX;
@@ -16,11 +17,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -98,7 +103,10 @@ public class TenantSampleDataTest extends TestBase {
       tenantAttributes = TenantApiTestUtil.prepareTenantBody(true, true);
       tenantJob = postTenant(PARTIAL_TENANT_HEADER, tenantAttributes);
 
-      for (TestEntities entity : TestEntities.values()) {
+      List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
+                                                .filter(entity -> !EXPORT_HISTORY.equals(entity))
+                                                .collect(Collectors.toList());
+      for (TestEntities entity : entitySamples) {
         logger.info("Test expected quantity for " + entity.name());
         verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
       }
@@ -160,7 +168,10 @@ public class TenantSampleDataTest extends TestBase {
     logger.info("upgrading Module with sample");
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(true, false);
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
-    for (TestEntities entity : TestEntities.values()) {
+    List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
+      .filter(entity -> !EXPORT_HISTORY.equals(entity))
+      .collect(Collectors.toList());
+    for (TestEntities entity : entitySamples) {
       logger.info("Test expected quantity for " + entity.name());
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() + entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
     }
@@ -173,8 +184,10 @@ public class TenantSampleDataTest extends TestBase {
 
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
-
-    for(TestEntities te: TestEntities.values()) {
+    List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
+      .filter(entity -> !EXPORT_HISTORY.equals(entity))
+      .collect(Collectors.toList());
+    for(TestEntities te: entitySamples) {
       verifyCollectionQuantity(te.getEndpoint(), te.getEstimatedSystemDataRecordsQuantity());
     }
     return tenantJob;

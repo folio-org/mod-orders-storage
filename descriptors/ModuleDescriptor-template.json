@@ -470,6 +470,37 @@
       ]
     },
     {
+      "id": "orders-storage.export-history",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/export-history",
+          "permissionsRequired": ["orders-storage.export-history.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/export-history",
+          "permissionsRequired": ["orders-storage.export-history.collection.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/export-history/{id}",
+          "permissionsRequired": ["orders-storage.export-history.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/export-history/{id}",
+          "permissionsRequired": ["orders-storage.export-history.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/export-history/{id}",
+          "permissionsRequired": ["orders-storage.export-history.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -1053,6 +1084,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.export-history.get",
+      "displayName" : "orders-storage-export-history-collection get",
+      "description" : "Get a collection of export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.post",
+      "displayName" : "orders-storage-export-history-item post",
+      "description" : "Create a new export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.get",
+      "displayName" : "orders-storage-export-history-item get",
+      "description" : "Fetch a export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.put",
+      "displayName" : "orders-storage-export-history-item put",
+      "description" : "Update a export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.item.delete",
+      "displayName" : "orders-storage-export-history-item delete",
+      "description" : "Delete a export history"
+    },
+    {
+      "permissionName" : "orders-storage.export-history.all",
+      "displayName" : "All orders-storage export history perms",
+      "description" : "All permissions for the orders-storage - export history",
+      "subPermissions" : [
+        "orders-storage.export-history.item.post",
+        "orders-storage.export-history.collection.get",
+        "orders-storage.export-history.item.get",
+        "orders-storage.export-history.item.put",
+        "orders-storage.export-history.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -1073,7 +1141,8 @@
         "acquisitions-units-storage.memberships.all",
         "orders-storage.configuration.reasons-for-closure.all",
         "orders-storage.configuration.prefixes.all",
-        "orders-storage.configuration.suffixes.all"
+        "orders-storage.configuration.suffixes.all",
+        "orders-storage.export-history.all"
       ]
     }
   ],

@@ -42,7 +42,8 @@ public class EntitiesCrudTest extends TestBase {
       TestEntities.ACQUISITION_METHOD,
       TestEntities.REASON_FOR_CLOSURE,
       TestEntities.PREFIX,
-      TestEntities.SUFFIX);
+      TestEntities.SUFFIX,
+      TestEntities.EXPORT_HISTORY);
   }
 
   @ParameterizedTest

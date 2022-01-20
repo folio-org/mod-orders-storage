@@ -539,6 +539,23 @@
           "fieldName" : "value"
         }
       ]
+    },
+    {
+      "tableName": "export_history",
+      "fromModuleVersion": "mod-orders-storage-13.2.0",
+      "withMetadata": true,
+      "index": [
+        {
+          "fieldName": "exportDate",
+          "caseSensitive": false
+        }
+      ],
+      "uniqueIndex": [
+        {
+          "fieldName": "exportJobId",
+          "caseSensitive": false
+        }
+      ]
     }
   ]
 }
