@@ -8,9 +8,13 @@ import org.folio.services.finance.FinanceService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 @Configuration
+@ComponentScan({ "org.folio.verticles", "org.folio.event.listener" })
+@Import({ KafkaConsumersConfiguration.class })
 public class ApplicationConfig {
 
   @Bean

@@ -23,7 +23,7 @@
     <junit-jupiter-version>5.7.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
     <vertx.version>4.1.0.CR1</vertx.version>
-    <lombok.version>1.18.16</lombok.version>
+    <lombok.version>1.18.18</lombok.version>
     <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <testcontainers.version>1.15.3</testcontainers.version>
@@ -158,6 +158,18 @@
       <artifactId>postgres-testing</artifactId>
       <version>${raml-module-builder.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-kafka-wrapper</artifactId>
+      <version>2.4.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <optional>true</optional>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
