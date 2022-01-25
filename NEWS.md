@@ -1,4 +1,13 @@
-## 13.2.0 - Unreleased
+## 13.2.4 - Unreleased
+
+## 13.1.3 - Released
+This bugfix release focused on fixing the maximum number of returned orders for export
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.1.2...v13.1.3)
+
+### Bug Fixes
+* [MODORDSTOR-273](https://issues.folio.org/browse/MODORDSTOR-273) - Order export limit is preventing Large library from exporting orders
+
 
 ## 13.1.2 - Released
 This bugfix release focused on fixing Log4j vulnerability
