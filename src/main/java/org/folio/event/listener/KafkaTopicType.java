@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum KafkaTopicType {
-  EXPORT_HISTORY_CREATE("data-export.export-history.create");
+  EXPORT_HISTORY_CREATE("edi-export-history.create");
 
   private final String topicName;
 }

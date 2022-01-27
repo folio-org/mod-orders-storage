@@ -338,7 +338,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   }
 
   @Override
-  String getEndpoint(Object entity) {
+  protected String getEndpoint(Object entity) {
     return HelperUtils.getEndpoint(OrdersStoragePoLines.class) + JsonObject.mapFrom(entity).getString("id");
   }
 }

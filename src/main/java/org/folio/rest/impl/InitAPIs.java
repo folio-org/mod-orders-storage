@@ -19,10 +19,10 @@ import io.vertx.core.Vertx;
 
 public class InitAPIs implements InitAPI {
   private final Logger logger = LogManager.getLogger(InitAPIs.class);
-  @Value("${kafka.verticle.consumer.instancesNumber:1}")
+  @Value("${kafka.consumer.verticle.instancesNumber:1}")
   private int kafkaConsumersVerticleNumber;
 
-  @Value("${kafka.verticle.deploy.mandatory:false}")
+  @Value("${consumer.verticle.mandatory:false}")
   private boolean isConsumersVerticleMandatory;
 
   @Override

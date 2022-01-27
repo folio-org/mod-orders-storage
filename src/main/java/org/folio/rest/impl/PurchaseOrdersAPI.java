@@ -282,7 +282,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   }
 
   @Override
-  String getEndpoint(Object entity) {
+  protected String getEndpoint(Object entity) {
     return HelperUtils.getEndpoint(OrdersStoragePurchaseOrders.class) + JsonObject.mapFrom(entity).getString("id");
   }
 }
