@@ -237,7 +237,7 @@ public class StorageTestSuite {
   @Nested
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
-  class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
+  class XKafkaEventUtilTestNested extends KafkaEventUtilTest {}
   @Nested
-  class VertxKafkaConsumerWrapperTestNested extends VertxKafkaConsumerWrapperTest {}
+  class XVertxKafkaConsumerWrapperTestNested extends VertxKafkaConsumerWrapperTest {}
 }
