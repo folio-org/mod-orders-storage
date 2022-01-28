@@ -1,5 +1,6 @@
 package org.folio;
 
+import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.useDefaults;
 import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
@@ -14,6 +15,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
@@ -67,9 +69,15 @@ public class StorageTestSuite {
   private static TenantJob tenantJob;
   private static PostgreSQLContainer<?> postgresSQLContainer;
   public static final String POSTGRES_DOCKER_IMAGE = "postgres:12-alpine";
-
-
+  public static EmbeddedKafkaCluster kafkaCluster;
+  public static final String KAFKA_ENV_VALUE = "test-env";
+  private static final String KAFKA_HOST = "KAFKA_HOST";
+  private static final String KAFKA_PORT = "KAFKA_PORT";
+  private static final String KAFKA_ENV = "ENV";
+  private static final String OKAPI_URL_KEY = "OKAPI_URL";
+  public static final int mockPort = NetworkUtils.nextFreePort();
   private StorageTestSuite() {}
+
 
   public static URL storageUrl(String path) throws MalformedURLException {
     return new URL("http", "localhost", port, path);
@@ -127,6 +135,14 @@ public class StorageTestSuite {
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
+    kafkaCluster = EmbeddedKafkaCluster.provisionWith(useDefaults());
+    kafkaCluster.start();
+    String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
+    System.setProperty(KAFKA_HOST, hostAndPort[0]);
+    System.setProperty(KAFKA_PORT, hostAndPort[1]);
+    System.setProperty(KAFKA_ENV, KAFKA_ENV_VALUE);
+    System.setProperty(OKAPI_URL_KEY, "http://localhost:" + mockPort);
+
     DeploymentOptions options = new DeploymentOptions();
 
     options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
@@ -140,6 +156,7 @@ public class StorageTestSuite {
   @AfterAll
   public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
     logger.info("Delete tenant");
+    kafkaCluster.stop();
     deleteTenant(tenantJob, TENANT_HEADER);
 
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();

@@ -25,6 +25,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 
 public class TenantReferenceAPI extends TenantAPI {
@@ -45,30 +46,29 @@ public class TenantReferenceAPI extends TenantAPI {
   public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
     log.info("postTenant");
     Vertx vertx = vertxContext.owner();
-//    Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
-//    attributes.getParameters().add(parameter);
-//
-//    TenantLoading tl = new TenantLoading();
-//    buildDataLoadingParameters(attributes, tl);
-//
-//    return Future.succeededFuture()
-//      .compose(v -> migration(attributes, "mod-orders-storage-13.0.3",
-//        () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
-//      .compose(v -> {
-//
-//        Promise<Integer> promise = Promise.promise();
-//
-//        tl.perform(attributes, headers, vertx, res -> {
-//          if (res.failed()) {
-//            promise.fail(res.cause());
-//          } else {
-//            promise.complete(res.result());
-//          }
-//        });
-//        return promise.future();
-//      })
-//      .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
-    return Future.succeededFuture();
+    Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
+    attributes.getParameters().add(parameter);
+
+    TenantLoading tl = new TenantLoading();
+    buildDataLoadingParameters(attributes, tl);
+
+    return Future.succeededFuture()
+      .compose(v -> migration(attributes, "mod-orders-storage-13.0.3",
+        () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
+      .compose(v -> {
+
+        Promise<Integer> promise = Promise.promise();
+
+        tl.perform(attributes, headers, vertx, res -> {
+          if (res.failed()) {
+            promise.fail(res.cause());
+          } else {
+            promise.complete(res.result());
+          }
+        });
+        return promise.future();
+      })
+      .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
   }
 
   private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {

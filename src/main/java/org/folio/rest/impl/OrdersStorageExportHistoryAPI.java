@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.ExportHistory;
@@ -21,6 +23,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStorageExportHistory {
+  private static final Logger logger = LogManager.getLogger(OrdersStorageExportHistoryAPI.class);
   public static final String EXPORT_HISTORY_TABLE = "export_history";
 
   private ExportHistoryService exportHistoryService;
@@ -42,10 +45,11 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
   @Validate
   public void postOrdersStorageExportHistory(String lang, ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
     exportHistoryService.createExportHistory(entity)
       .onComplete(result -> {
         if (result.succeeded()) {
-          asyncResultHandler.handle(buildResponseWithLocation(result.result(), getEndpoint(result.result().getClass())));
+          asyncResultHandler.handle(buildResponseWithLocation(result.result(), getEndpoint(result.result())));
         } else {
           asyncResultHandler.handle(Future.failedFuture(result.cause()));
         }
