@@ -19,6 +19,7 @@ import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
+import org.folio.event.KafkaEventUtilTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
@@ -45,6 +46,7 @@ import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.migration.MigrationServiceTest;
 import org.folio.spring.SpringContextUtil;
+import org.folio.verticles.VertxKafkaConsumerWrapperTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -234,4 +236,8 @@ public class StorageTestSuite {
   class RestClientTestNested extends RestClientTest {}
   @Nested
   class ResponseUtilTestNested extends ResponseUtilTest {}
+  @Nested
+  class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
+  @Nested
+  class VertxKafkaConsumerWrapperTestNested extends VertxKafkaConsumerWrapperTest {}
 }

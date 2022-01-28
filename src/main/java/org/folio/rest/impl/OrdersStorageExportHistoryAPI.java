@@ -11,8 +11,10 @@ import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.ExportHistoryCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageExportHistory;
+import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
+import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.order.ExportHistoryService;
 
 import io.vertx.core.AsyncResult;
@@ -21,15 +23,19 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.folio.models.TableNames.EXPORT_HISTORY_TABLE;
 
 public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStorageExportHistory {
   private static final Logger logger = LogManager.getLogger(OrdersStorageExportHistoryAPI.class);
-  public static final String EXPORT_HISTORY_TABLE = "export_history";
 
+  @Autowired
   private ExportHistoryService exportHistoryService;
 
-  public OrdersStorageExportHistoryAPI(Vertx vertx, String tenantId) {
-    this.exportHistoryService = new ExportHistoryService(vertx, tenantId);
+  public OrdersStorageExportHistoryAPI() {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
   @Override
@@ -45,8 +51,7 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
   @Validate
   public void postOrdersStorageExportHistory(String lang, ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-
-    exportHistoryService.createExportHistory(entity)
+    exportHistoryService.createExportHistory(entity, new DBClient(vertxContext.owner(), TenantTool.tenantId(okapiHeaders)))
       .onComplete(result -> {
         if (result.succeeded()) {
           asyncResultHandler.handle(buildResponseWithLocation(result.result(), getEndpoint(result.result())));

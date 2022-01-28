@@ -1,12 +1,11 @@
 package org.folio.rest.persist;
 
-import org.folio.rest.persist.Criteria.Criterion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockitoAnnotations;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;

@@ -1,6 +1,5 @@
 package org.folio.verticles;
 
-import org.folio.event.listener.BaseAsyncRecordHandler;
 import org.folio.kafka.AsyncRecordHandler;
 import org.folio.kafka.KafkaConsumerWrapper;
 
@@ -14,7 +13,7 @@ public class VertxKafkaConsumerWrapper<K, V> implements Handler<KafkaConsumerRec
   private final AsyncRecordHandler<K, V> asyncRecordHandler;
 
   public VertxKafkaConsumerWrapper(KafkaConsumerWrapper<K, V> kafkaConsumerWrapper,
-                                   BaseAsyncRecordHandler<K, V> asyncRecordHandler) {
+                                   AsyncRecordHandler<K, V> asyncRecordHandler) {
     this.kafkaConsumerWrapper = kafkaConsumerWrapper;
     this.asyncRecordHandler = asyncRecordHandler;
   }

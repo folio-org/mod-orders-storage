@@ -2,7 +2,6 @@ package org.folio.rest.util;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import static org.folio.rest.util.TestConstants.VALID_OKAPI_TOKEN;
 import static org.folio.rest.util.TestConstants.X_OKAPI_TENANT;
 import static org.folio.rest.util.TestConstants.X_OKAPI_USER_ID;
 

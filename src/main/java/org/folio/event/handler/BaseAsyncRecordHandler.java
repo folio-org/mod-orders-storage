@@ -1,14 +1,15 @@
-package org.folio.event.listener;
+package org.folio.event.handler;
+
+import org.folio.kafka.AsyncRecordHandler;
 
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
-import org.folio.kafka.AsyncRecordHandler;
 
 public abstract class BaseAsyncRecordHandler<K, V> implements AsyncRecordHandler<K, V> {
   private final Vertx vertx;
   private final Context context;
 
-  public BaseAsyncRecordHandler(Vertx vertx, Context context) {
+  protected BaseAsyncRecordHandler(Vertx vertx, Context context) {
     this.vertx = vertx;
     this.context = context;
   }

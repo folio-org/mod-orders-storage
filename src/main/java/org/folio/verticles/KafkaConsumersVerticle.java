@@ -1,9 +1,12 @@
 package org.folio.verticles;
 
+import io.vertx.core.Context;
+import io.vertx.core.Vertx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.event.listener.EdiExportOrdersHistoryAsyncRecordHandler;
-import org.folio.event.listener.KafkaTopicType;
+import org.folio.event.handler.BaseAsyncRecordHandler;
+import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandler;
+import org.folio.event.handler.KafkaTopicType;
 import org.folio.kafka.GlobalLoadSensor;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaConsumerWrapper;
@@ -18,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+
+import javax.annotation.PostConstruct;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -34,12 +39,19 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
   private final AbstractApplicationContext springContext;
   private final KafkaConfig kafkaConfig;
   private VertxKafkaConsumerWrapper<String, String> vertxKafkaConsumerWrapper;
+  private BaseAsyncRecordHandler<String, String> ediExportOrdersHistoryKafkaHandler;
 
   @Autowired
   public KafkaConsumersVerticle(KafkaConfig kafkaConfig,
                                 AbstractApplicationContext springContext) {
     this.springContext = springContext;
     this.kafkaConfig = kafkaConfig;
+  }
+
+  @Override
+  public void init(Vertx vertx, Context context) {
+    super.init(vertx, context);
+    ediExportOrdersHistoryKafkaHandler = new EdiExportOrdersHistoryAsyncRecordHandler(context, vertx);
   }
 
   @Override
@@ -64,7 +76,6 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
       .subscriptionDefinition(subscriptionDefinition)
       .build();
 
-    var ediExportOrdersHistoryKafkaHandler = new EdiExportOrdersHistoryAsyncRecordHandler(context, vertx);
     vertxKafkaConsumerWrapper = new VertxKafkaConsumerWrapper<>(consumerWrapper, ediExportOrdersHistoryKafkaHandler);
     String moduleName = "mod-orders-storage";
     consumerWrapper.start(ediExportOrdersHistoryKafkaHandler, moduleName)
