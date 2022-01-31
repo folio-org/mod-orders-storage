@@ -1,4 +1,4 @@
-package org.folio.event;
+package org.folio.event.handler;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.util.TestConfig.autowireDependencies;
@@ -14,6 +14,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import java.util.Calendar;
 import java.util.List;
@@ -25,9 +26,10 @@ import io.vertx.core.json.JsonObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
-import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandler;
 import org.folio.rest.jaxrs.model.ExportHistory;
+import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
+import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -49,6 +51,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
   public EdiExportOrdersHistoryAsyncRecordHandler ediExportOrdersHistoryAsyncRecordHandler;
   @Autowired
   public ExportHistoryService exportHistoryService;
+  @Autowired
+  PoLinesService poLinesService;
   @Autowired
   public Context context;
   @Autowired
@@ -123,9 +127,18 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
           "key", Json.encode(exportHistory), recordHeaders);
     var record = new KafkaConsumerRecordImpl(consumerRecord) ;
     doReturn(Future.succeededFuture(exportHistory)).when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
+    List<PoLine> poLines = List.of(new PoLine().withId(lineId));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(DBClient.class));
+    doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(poLines), any(DBClient.class));
+
     String actExpString = (String) ediExportOrdersHistoryAsyncRecordHandler.handle(record).result();
     ExportHistory actExp = new JsonObject(actExpString).mapTo(ExportHistory.class);
+
+    verify(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(DBClient.class));
+    verify(poLinesService).updatePoLines(eq(poLines), any(DBClient.class));
+
     assertEquals(exportHistory, actExp);
+    assertEquals(exportHistory.getExportDate(), poLines.get(0).getLastEDIExportDate());
   }
 
   @Test
@@ -156,6 +169,11 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     @Bean
     public ExportHistoryService exportHistoryService() {
       return mock(ExportHistoryService.class);
+    }
+
+    @Bean
+    public PoLinesService poLinesService() {
+      return mock(PoLinesService.class);
     }
 
     @Bean

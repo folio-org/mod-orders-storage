@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
@@ -184,5 +185,14 @@ public class HelperUtils {
     error.getParameters().add(new Parameter().withKey(FIELD_NAME).withValue(fieldName));
     error.getParameters().add(new Parameter().withKey(ENTITY_NAME).withValue(entityName));
     return error;
+  }
+
+  public static String getFullTableName(String tenantId, String tableName) {
+    return PostgresClient.convertToPsqlStandard(tenantId) + "." + tableName;
+  }
+
+  public static String getQueryValues(List<JsonObject> entities) {
+    return entities.stream().map(entity -> "('" + entity.getString("id") + "', '" + entity.encode() + "'::json)").collect(
+      Collectors.joining(","));
   }
 }

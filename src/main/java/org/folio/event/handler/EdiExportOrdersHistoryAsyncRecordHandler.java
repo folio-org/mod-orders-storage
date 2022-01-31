@@ -2,13 +2,17 @@ package org.folio.event.handler;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.KafkaEventUtil;
 import org.folio.rest.jaxrs.model.ExportHistory;
+import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
+import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 
 import io.vertx.core.Context;
@@ -25,6 +29,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
 
   @Autowired
   private ExportHistoryService exportHistoryService;
+  @Autowired
+  private PoLinesService poLinesService;
 
   public EdiExportOrdersHistoryAsyncRecordHandler(Context context, Vertx vertx) {
    super(vertx, context);
@@ -39,18 +45,30 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
                                 .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
 
       exportHistoryService.createExportHistory(exportHistory, new DBClient(getVertx(), tenantId))
-                          .onComplete(reply -> {
-                            if (reply.failed()) {
-                              logger.error("Can't store export history : {}", kafkaRecord.value());
-                              promise.fail(reply.cause());
-                            } else {
-                              promise.complete(kafkaRecord.value());
-                            }
-                          });
+        .compose(createdExportHistory -> {
+                return poLinesService.getPoLinesByLineIds(exportHistory.getExportedPoLineIds(), new DBClient(getVertx(), tenantId))
+                              .map(poLines -> updatePoLinesWithExportHistoryData(exportHistory, poLines))
+                              .compose(poLines -> poLinesService.updatePoLines(poLines, new DBClient(getVertx(), tenantId)))
+                              .map(updatedLines -> createdExportHistory);
+        })
+        .onComplete(reply -> {
+          if (reply.failed()) {
+            logger.error("Can't store export history : {}", kafkaRecord.value());
+            promise.fail(reply.cause());
+          } else {
+            promise.complete(kafkaRecord.value());
+          }
+        });
       return promise.future();
     } catch (Exception e) {
       logger.error("Failed to process export history kafka record from topic {} for tenant {}", kafkaRecord, e);
       return Future.failedFuture(e);
     }
+  }
+
+  private List<PoLine> updatePoLinesWithExportHistoryData(ExportHistory exportHistory, List<PoLine> poLines) {
+    return poLines.stream()
+                  .map(poLine -> poLine.withLastEDIExportDate(exportHistory.getExportDate()))
+                  .collect(Collectors.toList());
   }
 }
