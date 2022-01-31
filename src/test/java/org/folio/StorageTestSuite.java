@@ -19,6 +19,7 @@ import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
+import org.folio.event.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.event.KafkaEventUtilTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
@@ -237,7 +238,9 @@ public class StorageTestSuite {
   @Nested
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
-  class XKafkaEventUtilTestNested extends KafkaEventUtilTest {}
-  @Nested
-  class XVertxKafkaConsumerWrapperTestNested extends VertxKafkaConsumerWrapperTest {}
+  class EdiExportOrdersHistoryAsyncRecordHandlerTestNested extends EdiExportOrdersHistoryAsyncRecordHandlerTest {}
+//  @Nested
+//  class XKafkaEventUtilTestNested extends KafkaEventUtilTest {}
+//  @Nested
+//  class XVertxKafkaConsumerWrapperTestNested extends VertxKafkaConsumerWrapperTest {}
 }
