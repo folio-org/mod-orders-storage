@@ -38,7 +38,7 @@ public class VertxKafkaConsumerWrapperTest {
 
   @Test
   void shouldDelegateHandleToCoreWrapper() {
-    var consumerRecord = new ConsumerRecord("topik", 1, 1, "key", "value");
+    var consumerRecord = new ConsumerRecord("topic", 1, 1, "key", "value");
     var record = new KafkaConsumerRecordImpl(consumerRecord) ;
     doNothing().when(kafkaConsumerWrapper).handle(record);
     //When

@@ -24,7 +24,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
   private static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
 
   @Autowired
-  ExportHistoryService exportHistoryService;
+  private ExportHistoryService exportHistoryService;
 
   public EdiExportOrdersHistoryAsyncRecordHandler(Context context, Vertx vertx) {
    super(vertx, context);

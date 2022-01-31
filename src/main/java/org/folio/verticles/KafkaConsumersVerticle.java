@@ -22,8 +22,6 @@ import org.springframework.stereotype.Component;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 
-import javax.annotation.PostConstruct;
-
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class KafkaConsumersVerticle extends AbstractVerticle {
