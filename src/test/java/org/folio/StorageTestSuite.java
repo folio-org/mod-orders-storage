@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
+import net.mguenther.kafka.junit.TopicConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
@@ -138,6 +139,8 @@ public class StorageTestSuite {
 
     kafkaCluster = EmbeddedKafkaCluster.provisionWith(useDefaults());
     kafkaCluster.start();
+    String topic = "test-env.Default.test-tenant.edi-export-history.create";
+    kafkaCluster.createTopic(TopicConfig.forTopic(topic).build());
     String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
     System.setProperty(KAFKA_HOST, hostAndPort[0]);
     System.setProperty(KAFKA_PORT, hostAndPort[1]);

@@ -112,7 +112,7 @@ public class PoLinesService {
     }
   }
 
-  private String buildUpdatePoLineBatchQuery(Collection<PoLine> poLines, String tenantId) {
+  public static String buildUpdatePoLineBatchQuery(Collection<PoLine> poLines, String tenantId) {
     List<JsonObject> jsonPoLines = poLines.stream()
       .map(JsonObject::mapFrom)
       .collect(toList());

@@ -65,7 +65,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
   public Future<Integer> updatePoLines(String sql, DBClient client) {
     Promise<Integer> promise = Promise.promise();
 
-    client.getPgClient().execute(client.getConnection(), sql, reply -> {
+    client.getPgClient().execute(sql, reply -> {
       if (reply.failed()) {
         handleFailure(promise, reply);
       } else {
