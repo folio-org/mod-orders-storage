@@ -1,6 +1,6 @@
 package org.folio.rest.impl;
 
-import static org.folio.models.TableNames.POLINE_TABLE;
+import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.JSONB;
@@ -48,7 +48,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   @Validate
   public void getOrdersStoragePoLines(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.get(POLINE_TABLE, PoLine.class, PoLineCollection.class, query, offset, limit, okapiHeaders, vertxContext,
+    PgUtil.get(PO_LINE_TABLE, PoLine.class, PoLineCollection.class, query, offset, limit, okapiHeaders, vertxContext,
       OrdersStoragePoLines.GetOrdersStoragePoLinesResponse.class, asyncResultHandler);
   }
 
@@ -57,7 +57,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   public void postOrdersStoragePoLines(String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      PgUtil.post(POLINE_TABLE, poLine, okapiHeaders, vertxContext, PostOrdersStoragePoLinesResponse.class, asyncResultHandler);
+      PgUtil.post(PO_LINE_TABLE, poLine, okapiHeaders, vertxContext, PostOrdersStoragePoLinesResponse.class, asyncResultHandler);
     } else {
       createPoLineWithTitle(poLine, asyncResultHandler);
     }
@@ -78,7 +78,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   private Future<PoLine> getPoLineById(String poLineId) {
     Promise<PoLine> promise = Promise.promise();
 
-    getPgClient().getById(POLINE_TABLE, poLineId, PoLine.class, reply -> {
+    getPgClient().getById(PO_LINE_TABLE, poLineId, PoLine.class, reply -> {
       if(reply.failed()) {
         handleFailure(promise, reply);
       } else {
@@ -177,7 +177,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     }
     logger.debug("Creating new poLine record with id={}", poLine.getId());
 
-    return save(poLineTx, poLine.getId(), poLine, POLINE_TABLE);
+    return save(poLineTx, poLine.getId(), poLine, PO_LINE_TABLE);
 
   }
 
@@ -185,7 +185,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   @Validate
   public void getOrdersStoragePoLinesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.getById(POLINE_TABLE, PoLine.class, id, okapiHeaders, vertxContext, GetOrdersStoragePoLinesByIdResponse.class,
+    PgUtil.getById(PO_LINE_TABLE, PoLine.class, id, okapiHeaders, vertxContext, GetOrdersStoragePoLinesByIdResponse.class,
         asyncResultHandler);
   }
 
@@ -231,7 +231,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   public void putOrdersStoragePoLinesById(String id, String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      PgUtil.put(POLINE_TABLE, poLine, id, okapiHeaders, vertxContext, PutOrdersStoragePoLinesByIdResponse.class,
+      PgUtil.put(PO_LINE_TABLE, poLine, id, okapiHeaders, vertxContext, PutOrdersStoragePoLinesByIdResponse.class,
           asyncResultHandler);
     } else {
       updatePoLineWithTitle(id, poLine, asyncResultHandler);
@@ -257,7 +257,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
 
-    getPgClient().update(poLineTx.getConnection(), POLINE_TABLE, poLine, JSONB, criterion.toString(), true, event -> {
+    getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, event -> {
       if (event.failed()) {
         handleFailure(promise, event);
       } else {
@@ -317,7 +317,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
   private Future<Tx<String>> deletePOLineById(Tx<String> tx) {
     logger.info("Delete POLine with id={}", tx.getEntity());
-    return deleteById(tx, POLINE_TABLE);
+    return deleteById(tx, PO_LINE_TABLE);
   }
 
   private Future<Tx<String>> deletePiecesByPOLineId(Tx<String> tx) {
@@ -338,7 +338,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   }
 
   @Override
-  String getEndpoint(Object entity) {
+  protected String getEndpoint(Object entity) {
     return HelperUtils.getEndpoint(OrdersStoragePoLines.class) + JsonObject.mapFrom(entity).getString("id");
   }
 }

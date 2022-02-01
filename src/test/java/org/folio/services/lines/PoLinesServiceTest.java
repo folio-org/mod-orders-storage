@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -144,6 +143,37 @@ public class PoLinesServiceTest {
     );
 
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), thrown.getStatusCode());
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+  }
+
+  @Test
+  public void shouldRetrievePoLinesIfAllOfThemExist() {
+    List<PoLine> poLines = new ArrayList<>();
+    String poID = UUID.randomUUID().toString();
+    int expIndex = 3;
+    PoLine poLine = new PoLine().withPurchaseOrderId(poID).withPoLineNumber("1000-" + expIndex);
+    poLines.add(poLine);
+
+    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+
+    List<PoLine> actPoLines = poLinesService.getPoLinesByLineIds(List.of(poID), context, okapiHeaders).result();
+
+    assertEquals(poLines, actPoLines);
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+  }
+
+  @Test
+  public void shouldFailedWhenRetrievePoLinesIsFailedInTheDAOLayer() {
+    String poID = UUID.randomUUID().toString();
+    doThrow(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), "notFound"))
+      .when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+
+    HttpException thrown = assertThrows(
+      HttpException.class,
+      () -> poLinesService.getPoLinesByLineIds(List.of(poID), context, okapiHeaders).result(),      "Expected exception"
+    );
+
+    assertEquals(Response.Status.NOT_FOUND.getStatusCode(), thrown.getStatusCode());
     verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
   }
 }

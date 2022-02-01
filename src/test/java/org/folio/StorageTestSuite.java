@@ -1,5 +1,6 @@
 package org.folio;
 
+import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.useDefaults;
 import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
@@ -17,6 +18,8 @@ import java.util.concurrent.TimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
+import org.folio.event.KafkaEventUtilTest;
+import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
@@ -43,6 +46,7 @@ import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.migration.MigrationServiceTest;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.PomReaderUtilTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -56,6 +60,8 @@ import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
+import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
+import net.mguenther.kafka.junit.TopicConfig;
 
 
 public class StorageTestSuite {
@@ -67,9 +73,15 @@ public class StorageTestSuite {
   private static TenantJob tenantJob;
   private static PostgreSQLContainer<?> postgresSQLContainer;
   public static final String POSTGRES_DOCKER_IMAGE = "postgres:12-alpine";
-
-
+  public static EmbeddedKafkaCluster kafkaCluster;
+  public static final String KAFKA_ENV_VALUE = "test-env";
+  private static final String KAFKA_HOST = "KAFKA_HOST";
+  private static final String KAFKA_PORT = "KAFKA_PORT";
+  private static final String KAFKA_ENV = "ENV";
+  private static final String OKAPI_URL_KEY = "OKAPI_URL";
+  public static final int mockPort = NetworkUtils.nextFreePort();
   private StorageTestSuite() {}
+
 
   public static URL storageUrl(String path) throws MalformedURLException {
     return new URL("http", "localhost", port, path);
@@ -127,6 +139,16 @@ public class StorageTestSuite {
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
+    kafkaCluster = EmbeddedKafkaCluster.provisionWith(useDefaults());
+    kafkaCluster.start();
+    String topic = "test-env.Default.test-tenant.edi-export-history.create";
+    kafkaCluster.createTopic(TopicConfig.forTopic(topic).build());
+    String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
+    System.setProperty(KAFKA_HOST, hostAndPort[0]);
+    System.setProperty(KAFKA_PORT, hostAndPort[1]);
+    System.setProperty(KAFKA_ENV, KAFKA_ENV_VALUE);
+    System.setProperty(OKAPI_URL_KEY, "http://localhost:" + mockPort);
+
     DeploymentOptions options = new DeploymentOptions();
 
     options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
@@ -140,6 +162,7 @@ public class StorageTestSuite {
   @AfterAll
   public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
     logger.info("Delete tenant");
+    kafkaCluster.stop();
     deleteTenant(tenantJob, TENANT_HEADER);
 
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
@@ -217,4 +240,10 @@ public class StorageTestSuite {
   class RestClientTestNested extends RestClientTest {}
   @Nested
   class ResponseUtilTestNested extends ResponseUtilTest {}
+  @Nested
+  class EdiExportOrdersHistoryAsyncRecordHandlerTestNested extends EdiExportOrdersHistoryAsyncRecordHandlerTest {}
+  @Nested
+  class PomReaderUtilTestNested extends PomReaderUtilTest {}
+  @Nested
+  class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
 }

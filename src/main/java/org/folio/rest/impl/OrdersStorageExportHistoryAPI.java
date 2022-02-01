@@ -4,18 +4,39 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.ExportHistoryCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageExportHistory;
+import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
+import org.folio.rest.tools.utils.TenantTool;
+import org.folio.services.order.ExportHistoryService;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class OrdersStorageExportHistoryAPI implements OrdersStorageExportHistory {
-  private static final String EXPORT_HISTORY_TABLE = "export_history";
+import static org.folio.models.TableNames.EXPORT_HISTORY_TABLE;
+
+public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStorageExportHistory {
+  private static final Logger logger = LogManager.getLogger(OrdersStorageExportHistoryAPI.class);
+
+  @Autowired
+  private ExportHistoryService exportHistoryService;
+
+  public OrdersStorageExportHistoryAPI() {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+  }
 
   @Override
   @Validate
@@ -27,11 +48,19 @@ public class OrdersStorageExportHistoryAPI implements OrdersStorageExportHistory
   }
 
   @Override
-  public void postOrdersStorageExportHistory(boolean createItem, String lang, ExportHistory entity,
+  @Validate
+  public void postOrdersStorageExportHistory(String lang, ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.post(EXPORT_HISTORY_TABLE, entity, okapiHeaders, vertxContext,
-                PostOrdersStorageExportHistoryResponse.class, asyncResultHandler);
+    exportHistoryService.createExportHistory(entity, new DBClient(vertxContext.owner(), TenantTool.tenantId(okapiHeaders)))
+      .onComplete(result -> {
+        if (result.succeeded()) {
+          asyncResultHandler.handle(buildResponseWithLocation(result.result(), getEndpoint(result.result())));
+        } else {
+          asyncResultHandler.handle(Future.failedFuture(result.cause()));
+        }
+      });
   }
+
 
   @Override
   @Validate
@@ -54,5 +83,10 @@ public class OrdersStorageExportHistoryAPI implements OrdersStorageExportHistory
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(EXPORT_HISTORY_TABLE, entity, id, okapiHeaders, vertxContext,
       OrdersStorageExportHistory.PutOrdersStorageExportHistoryByIdResponse.class, asyncResultHandler);
+  }
+
+  @Override
+  protected String getEndpoint(Object entity) {
+    return HelperUtils.getEndpoint(OrdersStorageExportHistory.class) + JsonObject.mapFrom(entity).getString("id");
   }
 }

@@ -56,7 +56,7 @@ public class AbstractApiHandlerTest {
     query = mock(Query.class);
     abstractApiHandler = new AbstractApiHandler(spyPGClient) {
       @Override
-      String getEndpoint(Object entity) {
+      protected String getEndpoint(Object entity) {
         return "orders-storage/purchase-order";
       }
     };
