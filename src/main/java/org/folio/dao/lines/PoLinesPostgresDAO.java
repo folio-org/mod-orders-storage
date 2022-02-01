@@ -1,6 +1,6 @@
 package org.folio.dao.lines;
 
-import static org.folio.models.TableNames.POLINE_TABLE;
+import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.rest.core.ResponseUtil.handleFailure;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
   @Override
   public Future<List<PoLine>> getPoLines(Criterion criterion, DBClient client) {
     Promise<List<PoLine>> promise = Promise.promise();
-    client.getPgClient().get(POLINE_TABLE, PoLine.class, criterion, false, reply -> {
+    client.getPgClient().get(PO_LINE_TABLE, PoLine.class, criterion, false, reply -> {
         if (reply.failed()) {
           logger.error("Retrieve POLs failed : {}", criterion.toString());
           handleFailure(promise, reply);
@@ -44,7 +44,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
 
     logger.debug("Get po_line={}", id);
 
-    client.getPgClient().getById(POLINE_TABLE, id, reply -> {
+    client.getPgClient().getById(PO_LINE_TABLE, id, reply -> {
       if (reply.failed()) {
         logger.error("PoLine retrieval with id={} failed", id);
         handleFailure(promise, reply);

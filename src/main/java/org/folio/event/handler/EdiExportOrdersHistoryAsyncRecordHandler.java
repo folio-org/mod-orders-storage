@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -46,9 +47,10 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
       ExportHistory exportHistory = new JsonObject(kafkaRecord.value()).mapTo(ExportHistory.class);
       String tenantId = Optional.ofNullable(KafkaEventUtil.extractValueFromHeaders(kafkaRecord.headers(), OKAPI_HEADER_TENANT))
                                 .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
+      Map<String, String> okapiHeaders = Map.of(OKAPI_HEADER_TENANT, tenantId);
       exportHistoryService.createExportHistory(exportHistory, new DBClient(getVertx(), tenantId))
         .compose(createdExportHistory -> {
-           return poLinesService.getPoLinesByLineIds(exportHistory.getExportedPoLineIds(), new DBClient(getVertx(), tenantId))
+           return poLinesService.getPoLinesByLineIds(exportHistory.getExportedPoLineIds(), getContext(), okapiHeaders)
                       .map(poLines -> updatePoLinesWithExportHistoryData(exportHistory, poLines))
                       .compose(poLines -> {
                         if (CollectionUtils.isNotEmpty(poLines)) {

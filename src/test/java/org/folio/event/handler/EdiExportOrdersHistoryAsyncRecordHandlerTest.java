@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -128,13 +129,14 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     var record = new KafkaConsumerRecordImpl(consumerRecord) ;
     doReturn(Future.succeededFuture(exportHistory)).when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
     List<PoLine> poLines = List.of(new PoLine().withId(lineId));
-    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(DBClient.class));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(Context.class), any(
+      Map.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(poLines), any(DBClient.class));
 
     String actExpString = (String) ediExportOrdersHistoryAsyncRecordHandler.handle(record).result();
     ExportHistory actExp = new JsonObject(actExpString).mapTo(ExportHistory.class);
 
-    verify(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(DBClient.class));
+    verify(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(Context.class), any(Map.class));
     verify(poLinesService).updatePoLines(eq(poLines), any(DBClient.class));
 
     assertEquals(exportHistory, actExp);

@@ -1,6 +1,6 @@
 package org.folio.dao.lines;
 
-import static org.folio.models.TableNames.POLINE_TABLE;
+import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
@@ -82,11 +82,11 @@ public class PoLinesPostgresDAOTest extends TestBase {
     PoLine poLine = new PoLine().withId(id);
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
-    client.getPgClient().save(POLINE_TABLE, id, poLine, event -> {
+    client.getPgClient().save(PO_LINE_TABLE, id, poLine, event -> {
       promise1.complete();
     });
     Promise<Void> promise2 = Promise.promise();
-    client.getPgClient().save(POLINE_TABLE, poLine, event -> {
+    client.getPgClient().save(PO_LINE_TABLE, poLine, event -> {
       promise2.complete();
     });
     Criterion criterion = new Criterion().addCriterion(new Criteria().addField("id").setOperation("=").setVal(id).setJSONB(false));
@@ -109,11 +109,11 @@ public class PoLinesPostgresDAOTest extends TestBase {
     PoLine poLine = new PoLine().withId(id);
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
-    client.getPgClient().save(POLINE_TABLE, id, poLine, event -> {
+    client.getPgClient().save(PO_LINE_TABLE, id, poLine, event -> {
       promise1.complete();
     });
     Promise<Void> promise2 = Promise.promise();
-    client.getPgClient().save(POLINE_TABLE, poLine, event -> {
+    client.getPgClient().save(PO_LINE_TABLE, poLine, event -> {
       promise2.complete();
     });
     testContext.assertComplete(promise1.future()
@@ -137,7 +137,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
       Handler<AsyncResult<Results<PoLine>>> handler = invocation.getArgument(2);
       handler.handle(Future.succeededFuture(null));
       return null;
-    }).when(postgresClient).getById(eq(POLINE_TABLE), eq(id), any(Handler.class));
+    }).when(postgresClient).getById(eq(PO_LINE_TABLE), eq(id), any(Handler.class));
 
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLineById(id, client))
@@ -160,7 +160,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
       Handler<AsyncResult<Results<PoLine>>> handler = invocation.getArgument(2);
       handler.handle(Future.failedFuture(new HttpException(500, "Error")));
       return null;
-    }).when(postgresClient).getById(eq(POLINE_TABLE), eq(id), any(Handler.class));
+    }).when(postgresClient).getById(eq(PO_LINE_TABLE), eq(id), any(Handler.class));
 
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLineById(id, client))
@@ -184,7 +184,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
       Handler<AsyncResult<Results<PoLine>>> handler = invocation.getArgument(4);
       handler.handle(Future.failedFuture(new HttpException(500, "Error")));
       return null;
-    }).when(postgresClient).get(eq(POLINE_TABLE), eq(PoLine.class), eq(criterion), eq(false), any(Handler.class));
+    }).when(postgresClient).get(eq(PO_LINE_TABLE), eq(PoLine.class), eq(criterion), eq(false), any(Handler.class));
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLines(criterion, client))
       .onComplete(event -> {
@@ -203,11 +203,11 @@ public class PoLinesPostgresDAOTest extends TestBase {
     PoLine poLine = new PoLine().withId(id);
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
-    client.getPgClient().save(POLINE_TABLE, id, poLine, event -> {
+    client.getPgClient().save(PO_LINE_TABLE, id, poLine, event -> {
       promise1.complete();
     });
     Promise<Void> promise2 = Promise.promise();
-    client.getPgClient().save(POLINE_TABLE, poLine, event -> {
+    client.getPgClient().save(PO_LINE_TABLE, poLine, event -> {
       promise2.complete();
     });
     String sql = "UPDATE test_tenant_mod_orders_storage.po_line AS po_line SET jsonb = b.jsonb " +

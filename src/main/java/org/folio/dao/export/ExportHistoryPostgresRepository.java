@@ -16,6 +16,7 @@ import io.vertx.core.Promise;
 public class ExportHistoryPostgresRepository implements ExportHistoryRepository {
   private static final Logger logger = LogManager.getLogger(ExportHistoryPostgresRepository.class);
 
+  @Override
   public Future<ExportHistory> createExportHistory(ExportHistory exportHistory, DBClient client) {
     logger.info("Creating new export history with id={}", exportHistory.getId());
     Promise<ExportHistory> promise = Promise.promise();
