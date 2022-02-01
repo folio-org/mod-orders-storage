@@ -1,4 +1,4 @@
-package org.folio.event.handler;
+package org.folio.event;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

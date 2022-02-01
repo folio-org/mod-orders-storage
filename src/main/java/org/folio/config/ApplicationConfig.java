@@ -50,11 +50,13 @@ public class ApplicationConfig {
     return new MigrationService(financeService);
   }
 
-  @Bean ExportHistoryRepository exportHistoryRepository() {
+  @Bean
+  ExportHistoryRepository exportHistoryRepository() {
     return new ExportHistoryPostgresRepository();
   }
 
-  @Bean ExportHistoryService exportHistoryService(ExportHistoryRepository exportHistoryRepository) {
+  @Bean
+  ExportHistoryService exportHistoryService(ExportHistoryRepository exportHistoryRepository) {
     return new ExportHistoryService(exportHistoryRepository);
   }
 

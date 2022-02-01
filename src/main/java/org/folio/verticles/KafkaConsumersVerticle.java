@@ -6,12 +6,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.handler.BaseAsyncRecordHandler;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandler;
-import org.folio.event.handler.KafkaTopicType;
+import org.folio.event.KafkaTopicType;
 import org.folio.kafka.GlobalLoadSensor;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaConsumerWrapper;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.kafka.SubscriptionDefinition;
+import org.folio.util.PomReaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -36,7 +37,7 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
 
   private final AbstractApplicationContext springContext;
   private final KafkaConfig kafkaConfig;
-  private VertxKafkaConsumerWrapper<String, String> vertxKafkaConsumerWrapper;
+  private KafkaConsumerWrapper<String, String> consumerWrapper;
   private BaseAsyncRecordHandler<String, String> ediExportOrdersHistoryKafkaHandler;
 
   @Autowired
@@ -49,19 +50,14 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
   @Override
   public void init(Vertx vertx, Context context) {
     super.init(vertx, context);
+    context.put("springContext", springContext);
     ediExportOrdersHistoryKafkaHandler = new EdiExportOrdersHistoryAsyncRecordHandler(context, vertx);
   }
 
   @Override
   public void start(Promise<Void> startPromise) {
-    context.put("springContext", springContext);
-
     logger.info("Kafka config: {}", kafkaConfig);
 
-    initEdiExportKafkaListener(startPromise);
-  }
-
-  private void initEdiExportKafkaListener(Promise<Void> startPromise) {
     SubscriptionDefinition subscriptionDefinition = KafkaTopicNameHelper.createSubscriptionDefinition(kafkaConfig.getEnvId(),
       KafkaTopicNameHelper.getDefaultNameSpace(), KafkaTopicType.EXPORT_HISTORY_CREATE.getTopicName());
 
@@ -74,15 +70,13 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
       .subscriptionDefinition(subscriptionDefinition)
       .build();
 
-    vertxKafkaConsumerWrapper = new VertxKafkaConsumerWrapper<>(consumerWrapper, ediExportOrdersHistoryKafkaHandler);
-    String moduleName = "mod-orders-storage";
-    consumerWrapper.start(ediExportOrdersHistoryKafkaHandler, moduleName)
-                   .onComplete(startPromise::handle);
+    consumerWrapper.start(ediExportOrdersHistoryKafkaHandler, PomReaderUtil.INSTANCE.constructModuleVersionAndVersion(PomReaderUtil.INSTANCE.getModuleName(), PomReaderUtil.INSTANCE.getVersion()))
+      .onComplete(ar -> startPromise.handle(ar));
   }
 
   @Override
   public void stop(Promise<Void> stopPromise) {
-    vertxKafkaConsumerWrapper.stop().onComplete(stopPromise::handle);
+    consumerWrapper.stop().onComplete(stopPromise::handle);
   }
 
 }

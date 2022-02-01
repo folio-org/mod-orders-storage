@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.KafkaEventUtil;
@@ -14,6 +15,8 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -21,7 +24,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
   private static final Logger logger = LogManager.getLogger(EdiExportOrdersHistoryAsyncRecordHandler.class);
@@ -34,6 +36,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
 
   public EdiExportOrdersHistoryAsyncRecordHandler(Context context, Vertx vertx) {
    super(vertx, context);
+    SpringContextUtil.autowireDependencies(this, context);
   }
 
   @Override
@@ -46,10 +49,16 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
 
       exportHistoryService.createExportHistory(exportHistory, new DBClient(getVertx(), tenantId))
         .compose(createdExportHistory -> {
-                return poLinesService.getPoLinesByLineIds(exportHistory.getExportedPoLineIds(), new DBClient(getVertx(), tenantId))
-                              .map(poLines -> updatePoLinesWithExportHistoryData(exportHistory, poLines))
-                              .compose(poLines -> poLinesService.updatePoLines(poLines, new DBClient(getVertx(), tenantId)))
-                              .map(updatedLines -> createdExportHistory);
+           return poLinesService.getPoLinesByLineIds(exportHistory.getExportedPoLineIds(), new DBClient(getVertx(), tenantId))
+                      .map(poLines -> updatePoLinesWithExportHistoryData(exportHistory, poLines))
+                      .compose(poLines -> {
+                        if (CollectionUtils.isNotEmpty(poLines)) {
+                          return poLinesService.updatePoLines(poLines, new DBClient(getVertx(), tenantId));
+                        }
+                        logger.info("Export EDI date was not updated : {}", createdExportHistory.getId());
+                        return Future.succeededFuture(0);
+                      })
+                      .map(updatedLines -> createdExportHistory);
         })
         .onComplete(reply -> {
           if (reply.failed()) {
