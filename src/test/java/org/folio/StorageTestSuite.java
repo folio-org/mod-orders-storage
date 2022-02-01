@@ -241,10 +241,8 @@ public class StorageTestSuite {
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
   class EdiExportOrdersHistoryAsyncRecordHandlerTestNested extends EdiExportOrdersHistoryAsyncRecordHandlerTest {}
-  @Nested
-  class PomReaderUtilTestNested extends PomReaderUtilTest {}
+//  @Nested
+//  class PomReaderUtilTestNested extends PomReaderUtilTest {}
 //  @Nested
 //  class XKafkaEventUtilTestNested extends KafkaEventUtilTest {}
-//  @Nested
-//  class XVertxKafkaConsumerWrapperTestNested extends VertxKafkaConsumerWrapperTest {}
 }

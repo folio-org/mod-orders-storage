@@ -3,13 +3,11 @@ package org.folio.event.handler;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.event.KafkaEventUtil;
 import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
@@ -22,7 +20,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 
 public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
@@ -43,10 +41,10 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaRecord) {
     try {
       Promise<String> promise = Promise.promise();
-      ExportHistory exportHistory = Json.decodeValue(kafkaRecord.value(), ExportHistory.class);
-      String tenantId = Optional.ofNullable(KafkaEventUtil.extractValueFromHeaders(kafkaRecord.headers(), OKAPI_HEADER_TENANT))
-                                .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
-
+      ExportHistory exportHistory = new JsonObject(kafkaRecord.value()).mapTo(ExportHistory.class);
+//      String tenantId = Optional.ofNullable(KafkaEventUtil.extractValueFromHeaders(kafkaRecord.headers(), OKAPI_HEADER_TENANT))
+//                                .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
+      String tenantId = "diku";
       exportHistoryService.createExportHistory(exportHistory, new DBClient(getVertx(), tenantId))
         .compose(createdExportHistory -> {
            return poLinesService.getPoLinesByLineIds(exportHistory.getExportedPoLineIds(), new DBClient(getVertx(), tenantId))
