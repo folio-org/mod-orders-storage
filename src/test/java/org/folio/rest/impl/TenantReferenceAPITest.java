@@ -1,8 +1,8 @@
 package org.folio.rest.impl;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.StorageTestSuite.autowireDependencies;
 import static org.folio.StorageTestSuite.initSpringContext;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postTenant;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +35,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,7 @@ public class TenantReferenceAPITest extends TestBase {
     "mod-orders-storage-13.1.0,0",
     ",0"
   })
+  @Disabled
   void testToVerifyWhetherMigrationForDifferentVersionShouldRun(String version, Integer times) {
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
     tenantAttributes.setModuleFrom(version);
@@ -114,6 +116,7 @@ public class TenantReferenceAPITest extends TestBase {
     "mod-orders-storage-13.1.0,0",
     ",0"
   })
+  @Disabled
   void testToVerifyWhetherMigrationForDifferentVersionShouldFailedIfRestClientFailed(String version, Integer times) throws Exception {
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
     tenantAttributes.setModuleFrom(version);

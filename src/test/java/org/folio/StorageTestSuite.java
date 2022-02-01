@@ -15,11 +15,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
-import net.mguenther.kafka.junit.TopicConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
+import org.folio.event.KafkaEventUtilTest;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
@@ -61,6 +60,8 @@ import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
+import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
+import net.mguenther.kafka.junit.TopicConfig;
 
 
 public class StorageTestSuite {
@@ -241,8 +242,8 @@ public class StorageTestSuite {
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
   class EdiExportOrdersHistoryAsyncRecordHandlerTestNested extends EdiExportOrdersHistoryAsyncRecordHandlerTest {}
-//  @Nested
-//  class PomReaderUtilTestNested extends PomReaderUtilTest {}
-//  @Nested
-//  class XKafkaEventUtilTestNested extends KafkaEventUtilTest {}
+  @Nested
+  class PomReaderUtilTestNested extends PomReaderUtilTest {}
+  @Nested
+  class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
 }
