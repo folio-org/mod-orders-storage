@@ -25,7 +25,7 @@ public class PomReaderUtilTest {
 
   @Test
   void testGetModuleName() {
-    assertThat(PomReaderUtil.INSTANCE.getModuleName(), is("data_import_processing_core"));
+    assertThat(PomReaderUtil.INSTANCE.getModuleName(), is("mod_orders_storage"));
   }
 
   @Test
@@ -50,21 +50,21 @@ public class PomReaderUtilTest {
 
     pom.readIt(null, "META-INF/maven/io.vertx");  // force reading from Jar
     // first dependency in main pom
-    assertThat(pom.getModuleName(), is("vertx_ext_parent"));
+    assertThat(pom.getModuleName(), is("vertx_parent"));
   }
 
   @Test
   void readFromJarNoPom() {
     PomReaderUtil pom = PomReaderUtil.INSTANCE;
 
-    assertThrows(NullPointerException.class, () -> pom.readIt(null, "ramls"));
+    assertThrows(IOException.class, () -> pom.readIt(null, "ramls"));
   }
 
   @Test
   void readFromJarNoResource() {
     PomReaderUtil pom = PomReaderUtil.INSTANCE;
 
-    assertThrows(NullPointerException.class, () -> pom.readIt(null, "pom/pom-sample.xml"));
+    assertThrows(IOException.class, () -> pom.readIt(null, "pom/pom-sample.xml"));
   }
 
   @Test
@@ -78,7 +78,7 @@ public class PomReaderUtilTest {
   void otherPom() {
     PomReaderUtil pom = PomReaderUtil.INSTANCE;
 
-    pom.init("src/test/resources/org/folio/processing/pom/pom-sample.xml");
+    pom.init("src/test/resources/pom/pom-sample.xml");
     assertThat(PomReaderUtil.INSTANCE.getModuleName(), is("mod_inventory_storage"));
     assertThat(PomReaderUtil.INSTANCE.getVersion(), is("19.4.0"));
   }
