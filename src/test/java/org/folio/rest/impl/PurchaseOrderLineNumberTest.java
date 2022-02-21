@@ -5,10 +5,12 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.folio.rest.jaxrs.model.PoLineNumber;
 import org.folio.rest.persist.PostgresClient;
 import org.junit.jupiter.api.Test;
 
@@ -44,9 +46,13 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       String purchaseOrderSample = getFile(PURCHASE_ORDER.getSampleFileName());
       Response response = postData(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
 
-      logger.info("--- mod-orders-storage PO test: Testing POL numbers retrieving for existed PO ... ");
+      logger.info("--- mod-orders-storage PO test: Testing 10 POL numbers retrieving from 1 to 10 for existed PO ... ");
       sampleId = response.then().extract().path("id");
-      testGetPoLineNumberForExistedPO(sampleId);
+      testGetPoLineNumbersForExistedPO(1, sampleId, 10);
+
+      logger.info("--- mod-orders-storage PO test: Testing 20 POL numbers retrieving from 11 to 30 for existed PO ... ");
+      sampleId = response.then().extract().path("id");
+      testGetPoLineNumbersForExistedPO(11, sampleId, 20);
 
       logger.info("--- mod-orders-storage PO test: Testing POL numbers retrieving for non-existed PO ... ");
       testGetPoLineNumberForNonExistedPO("non-existed-po-id");
@@ -88,14 +94,12 @@ public class PurchaseOrderLineNumberTest extends TestBase {
     execute(NEXTVAL);
   }
 
-  private void testGetPoLineNumberForExistedPO(String purchaseOrderId) throws MalformedURLException {
-    int poLineNumberInitial = retrievePoLineNumber(purchaseOrderId);
-    int i = 0; int numOfCalls = 2;
-    while(i++ < numOfCalls) {
-      retrievePoLineNumber(purchaseOrderId);
+  private void testGetPoLineNumbersForExistedPO(int curNum, String purchaseOrderId, int poLineNumbersQuantity) throws MalformedURLException {
+    List<String> poLineNumbers = retrievePoLineNumber(purchaseOrderId, poLineNumbersQuantity);
+    for (int i = 0; i < poLineNumbersQuantity; i++) {
+      assertEquals(curNum, Integer.parseInt(poLineNumbers.get(i)));
+      curNum++;
     }
-    int poLineNumberLast = retrievePoLineNumber(purchaseOrderId);
-    assertEquals(i, poLineNumberLast - poLineNumberInitial);
   }
 
   private void testGetPoLineNumberForNonExistedPO(String purchaseOrderId) throws MalformedURLException {
@@ -106,15 +110,17 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       .statusCode(400);
   }
 
-  private int retrievePoLineNumber(String purchaseOrderId) throws MalformedURLException {
+  private List<String> retrievePoLineNumber(String purchaseOrderId, int poLineNumbersQuantity) throws MalformedURLException {
     Map<String, Object> params = new HashMap<>();
     params.put("purchaseOrderId", purchaseOrderId);
-    return Integer.parseInt(getDataByParam(PO_LINE_NUMBER_ENDPOINT, params)
+    params.put("poLineNumbers", poLineNumbersQuantity);
+
+    return getDataByParam(PO_LINE_NUMBER_ENDPOINT, params)
       .then()
       .statusCode(200)
       .extract()
-      .response()
-      .path("sequenceNumber"));
+      .as(PoLineNumber.class)
+      .getSequenceNumbers();
   }
 
   private static RowSet<Row> execute(String query) {
