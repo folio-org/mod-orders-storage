@@ -12,8 +12,8 @@ public class OrderSequenceRequestBuilder {
     return "CREATE SEQUENCE IF NOT EXISTS " + constructSequenceName(purchaseOrderId) + "START " + start +" MINVALUE 1 MAXVALUE 999";
   }
 
-  public String buildPOLNumberQuery(String purchaseOrderId) {
-    return "SELECT * FROM NEXTVAL('" + constructSequenceName(purchaseOrderId) + "')";
+  public String buildPOLNumberQuery(String purchaseOrderId, int poLineNumbers) {
+    return "SELECT NEXTVAL('" + constructSequenceName(purchaseOrderId) + "') from generate_series(1," + poLineNumbers + ")";
   }
 
   public String buildDropSequenceQuery(String purchaseOrderId) {
