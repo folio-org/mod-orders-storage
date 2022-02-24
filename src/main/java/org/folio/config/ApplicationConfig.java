@@ -7,6 +7,7 @@ import org.folio.dao.lines.PoLinesPostgresDAO;
 import org.folio.migration.MigrationService;
 import org.folio.rest.core.RestClient;
 import org.folio.services.finance.FinanceService;
+import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
@@ -33,6 +34,10 @@ public class ApplicationConfig {
   @Bean
   PoLinesService poLinesService(PoLinesDAO poLinesDAO) {
     return new PoLinesService(poLinesDAO);
+  }
+
+  @Bean PoLineNumbersService poLineNumbersService() {
+    return new PoLineNumbersService();
   }
 
   @Bean

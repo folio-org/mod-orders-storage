@@ -243,7 +243,7 @@
     },
     {
       "id": "orders-storage.po-line-number",
-      "version": "1.0",
+      "version": "2.0",
       "handlers": [
         {
           "methods": ["GET"],
