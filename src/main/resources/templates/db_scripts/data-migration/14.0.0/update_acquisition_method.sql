@@ -20,6 +20,10 @@ DECLARE acqMethodIds json := '{
 
 BEGIN
 
+IF EXISTS (
+  SELECT 1 FROM information_schema.tables WHERE table_schema = '${myuniversity}_${mymodule}' AND table_name = 'po_line'
+) THEN
+
 UPDATE ${myuniversity}_${mymodule}.po_line pol
   SET jsonb = jsonb || jsonb_build_object('acquisitionMethod', acqMethodIds->>(pol.jsonb ->> 'acquisitionMethod'))
   WHERE pol.jsonb->> 'acquisitionMethod' IS NOT NULL
@@ -29,5 +33,7 @@ UPDATE ${myuniversity}_${mymodule}.order_templates ot
   SET jsonb = jsonb || jsonb_build_object('acquisitionMethod', acqMethodIds->>(ot.jsonb ->> 'acquisitionMethod'))
   WHERE ot.jsonb->> 'acquisitionMethod' IS NOT NULL
     AND ot.jsonb->> 'acquisitionMethod'!~ '[0-9]';
+
+END IF;
 
 END $$;
