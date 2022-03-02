@@ -1,4 +1,25 @@
-## 13.2.0 - Unreleased
+## 14.1.0 - Unreleased
+
+## 14.0.0 - Released
+The focus of this release is to add EDI export support
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.0...v14.1.0)
+
+### Stories
+* [MODORDSTOR-277](https://issues.folio.org/browse/MODORDSTOR-277) - Add field "lastEDIExportDate" into POL to support filtering
+* [MODORDSTOR-275](https://issues.folio.org/browse/MODORDSTOR-275) - Implement Kafaka consumer for EDI export job finish message
+* [MODORDSTOR-274](https://issues.folio.org/browse/MODORDSTOR-274) - Create export_history table, schema, API
+* [MODORDSTOR-266](https://issues.folio.org/browse/MODORDSTOR-266) - Save flag "automaticExport" in the POL to support EDIFACT orders export
+* [MODORDSTOR-265](https://issues.folio.org/browse/MODORDSTOR-265) - Orders Template should support hidden fields functionality
+* [MODORDSTOR-263](https://issues.folio.org/browse/MODORDSTOR-263) - Add 4 "Acquisition methods" to enumeration list
+* [MODORDSTOR-259](https://issues.folio.org/browse/MODORDSTOR-259) - Create Acquisition method schema and API
+* [MODORDSTOR-256](https://issues.folio.org/browse/MODORDSTOR-256) - Define Acquisition method schema as controlled vocabulary
+* [MODORDSTOR-252](https://issues.folio.org/browse/MODORDSTOR-252) - Return readable error on UI if Acquisition unit already exist
+
+
+### Bug Fixes
+* [MODORDSTOR-267](https://issues.folio.org/browse/MODORDSTOR-267) - Rename collection field name for Acquisition method collection
+
 
 ## 13.1.0 - Released
 Added new fields to receiving history view: displayOnHolding, enumeration, chronology, discoverySuppress
