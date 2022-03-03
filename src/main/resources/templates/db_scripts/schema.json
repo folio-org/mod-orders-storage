@@ -87,8 +87,8 @@
       "fromModuleVersion": "mod-orders-storage-13.1.0"
     },
     {
-      "run": "after",
-      "snippetPath": "data-migration/14.0.0/update_acquisition_method_in_po_line.sql",
+      "run": "before",
+      "snippetPath": "data-migration/14.0.0/update_acquisition_method.ftl",
       "fromModuleVersion": "mod-orders-storage-13.2.0"
     }
   ],
