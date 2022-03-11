@@ -1109,6 +1109,11 @@
       "description" : "Delete a export history"
     },
     {
+      "permissionName" : "orders-storage.export-history.collection.get",
+      "displayName" : "orders-storage-export-history-collection get",
+      "description" : "Fetch export history collection"
+    },
+    {
       "permissionName" : "orders-storage.export-history.all",
       "displayName" : "All orders-storage export history perms",
       "description" : "All permissions for the orders-storage - export history",
