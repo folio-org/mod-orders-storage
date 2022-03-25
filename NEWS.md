@@ -1,9 +1,20 @@
-## 14.1.0 - Unreleased
+## 13.2.2 - Unreleased
 
-## 14.0.0 - Released
+## 13.2.1 - Released
+The primary focus of this release was to fix an issue with performance of saving purchase order lines
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.2.0...v13.2.1)
+
+### Technical tasks
+* [MODORDSTOR-222](https://issues.folio.org/browse/MODORDSTOR-222) - Make /orders-storage/po-line-number endpoint return list of poLine numbers
+
+### Bug Fixes
+* [MODORDSTOR-284](https://issues.folio.org/browse/MODORDSTOR-284) - Undefined permission 'orders-storage.export-history.collection.get'
+
+## 13.2.0 - Released
 The focus of this release is to add EDI export support
 
-[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.0...v14.1.0)
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.1.0...v13.2.0)
 
 ### Stories
 * [MODORDSTOR-277](https://issues.folio.org/browse/MODORDSTOR-277) - Add field "lastEDIExportDate" into POL to support filtering
