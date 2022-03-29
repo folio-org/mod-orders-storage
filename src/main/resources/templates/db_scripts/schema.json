@@ -92,7 +92,7 @@
       "fromModuleVersion": "mod-orders-storage-13.2.0"
     },
     {
-      "run": "before",
+      "run": "after",
       "snippetPath": "data-migration/13.2.0/update_ongoing_manual_renewal.sql",
       "fromModuleVersion": "mod-orders-storage-13.2.2"
     }
