@@ -88,8 +88,13 @@
     },
     {
       "run": "before",
-      "snippetPath": "data-migration/14.0.0/update_acquisition_method.ftl",
+      "snippetPath": "data-migration/13.2.0/update_acquisition_method.ftl",
       "fromModuleVersion": "mod-orders-storage-13.2.0"
+    },
+    {
+      "run": "before",
+      "snippetPath": "data-migration/13.2.0/update_ongoing_manual_renewal.sql",
+      "fromModuleVersion": "mod-orders-storage-13.2.2"
     }
   ],
   "tables": [
