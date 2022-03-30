@@ -1,5 +1,6 @@
 .idea/
 .settings/
+.gradle/
 *.iml
 /target
 /src/main/java/org/folio/rest/client/*
