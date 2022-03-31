@@ -291,13 +291,16 @@
       ],
       "fullTextIndex": [
         {
-          "fieldName": "publisher"
+          "fieldName": "publisher",
+          "tOps": "DELETE"
         },
         {
-          "fieldName": "donor"
+          "fieldName": "donor",
+          "tOps": "DELETE"
         },
         {
-          "fieldName": "selector"
+          "fieldName": "selector",
+          "tOps": "DELETE"
         },
         {
           "fieldName": "vendorDetail.referenceNumbers",
@@ -329,12 +332,7 @@
           "tOps": "ADD"
         },
         {
-          "fieldName": "vendor.vendorAccount",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "vendor.refNumber",
+          "fieldName": "vendorDetail.vendorAccount",
           "caseSensitive": false,
           "removeAccents": true
         },
@@ -355,6 +353,33 @@
         },
         {
           "fieldName": "poLineNumber",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "publisher",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "donor",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "selector",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "vendorDetail.referenceNumbers",
+          "caseSensitive": false,
+          "removeAccents": true,
+          "arraySubfield": "refNumber",
+          "arrayModifiers": ["refNumberType", "vendorDetailsSource"]
+        },
+        {
+          "fieldName": "physical.volumes",
           "caseSensitive": false,
           "removeAccents": true
         }
