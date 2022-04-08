@@ -1,4 +1,14 @@
-## 13.2.2 - Unreleased
+## 13.3.0 - Unreleased
+
+## 13.2.2 - Released
+The primary focused on improving performance of poline search
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.2.1...v13.2.2)
+
+### Bug Fixes
+* [MODORDSTOR-291](https://issues.folio.org/browse/MODORDSTOR-291) - Performance Issue: GET API for order-lines is slow
+* [MODORDSTOR-286](https://issues.folio.org/browse/MODORDSTOR-286) - Manual renewal "NO" checkbox checked in Orders Search and filter settings is not associated with order
+
 
 ## 13.2.1 - Released
 The primary focus of this release was to fix an issue with performance of saving purchase order lines
