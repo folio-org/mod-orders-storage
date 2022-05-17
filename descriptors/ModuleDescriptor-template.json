@@ -522,7 +522,7 @@
   "requires": [
     {
       "id": "finance-storage.funds",
-      "version": "3.0"
+      "version": "4.0"
     }
   ],
   "permissionSets" : [
