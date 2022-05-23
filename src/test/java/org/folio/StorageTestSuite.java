@@ -46,6 +46,7 @@ import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.migration.MigrationServiceTest;
 import org.folio.spring.SpringContextUtil;
+import org.folio.orders.handler.OrderLineUpdateInstanceHandlerTest;
 import org.folio.util.PomReaderUtilTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -246,4 +247,6 @@ public class StorageTestSuite {
   class PomReaderUtilTestNested extends PomReaderUtilTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
+  @Nested
+  class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
 }

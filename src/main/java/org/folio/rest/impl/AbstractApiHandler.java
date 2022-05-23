@@ -25,51 +25,6 @@ public abstract class AbstractApiHandler extends BaseApi {
     this.pgClient = pgClient;
   }
 
-  public <T> Future<Tx<T>> save(Tx<T> tx, String id, Object entity, String table) {
-    Promise<Tx<T>> promise = Promise.promise();
-    pgClient.save(tx.getConnection(), table, id, entity, reply -> {
-      if (reply.failed()) {
-        handleFailure(promise, reply);
-      } else {
-        promise.complete(tx);
-      }
-    });
-    return promise.future();
-  }
-
-  public Future<Tx<String>> deleteById(Tx<String> tx, String table) {
-    Promise<Tx<String>> promise = Promise.promise();
-    pgClient.delete(tx.getConnection(), table, tx.getEntity(), reply -> {
-      if (reply.failed()) {
-        handleFailure(promise, reply);
-      } else {
-        if (reply.result().rowCount() == 0) {
-          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
-        } else {
-          promise.complete(tx);
-        }
-      }
-    });
-    return promise.future();
-  }
-
-  public Future<Tx<String>> deleteByQuery(Tx<String> tx, String table, CQLWrapper query, boolean silent) {
-    Promise<Tx<String>> promise = Promise.promise();
-    pgClient.delete(tx.getConnection(), table, query, reply -> {
-      if (reply.failed()) {
-        handleFailure(promise, reply);
-      } else {
-        if (!silent && reply.result().rowCount() == 0) {
-          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
-        } else {
-          promise.complete(tx);
-        }
-      }
-    });
-    return promise.future();
-  }
-
-
   public  <T> Handler<AsyncResult<Tx<T>>> handleResponseWithLocation(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx, String logMessage) {
     return result -> {
       if (result.failed()) {
@@ -88,22 +43,19 @@ public abstract class AbstractApiHandler extends BaseApi {
     };
   }
 
-  public <T> Handler<AsyncResult<Tx<T>>> handleNoContentResponse(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx, String logMessage) {
+  public static <T> Handler<AsyncResult<Tx<T>>> handleNoContentResponse(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx) {
     return result -> {
       if (result.failed()) {
         HttpException cause = (HttpException) result.cause();
-        logger.error(logMessage, cause, tx.getEntity(), "or associated data failed to be");
-
         // The result of rollback operation is not so important, main failure cause is used to build the response
         tx.rollbackTransaction().onComplete(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
       } else {
-        logger.info(logMessage, tx.getEntity(), "and associated data were successfully");
         asyncResultHandler.handle(buildNoContentResponse());
       }
     };
   }
 
-  public void handleFailure(Promise promise, AsyncResult reply) {
+  public static void handleFailure(Promise promise, AsyncResult reply) {
     Throwable cause = reply.cause();
     String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
     if (badRequestMessage != null) {
@@ -111,18 +63,6 @@ public abstract class AbstractApiHandler extends BaseApi {
     } else {
       promise.fail(new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
     }
-  }
-
-  public Future<Response> buildResponseWithLocation(Object body, String endpoint) {
-    return super.buildResponseWithLocation(body, endpoint);
-  }
-
-  public Future<Response> buildNoContentResponse() {
-    return Future.succeededFuture(Response.noContent().build());
-  }
-
-  public Future<Response> buildErrorResponse(Throwable throwable) {
-    return super.buildErrorResponse(throwable);
   }
 
   public PostgresClient getPgClient() {

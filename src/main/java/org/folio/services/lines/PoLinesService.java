@@ -4,17 +4,25 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.rest.core.BaseApi.buildErrorResponse;
+import static org.folio.rest.impl.AbstractApiHandler.handleNoContentResponse;
+import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
+import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
+import static org.folio.rest.persist.HelperUtils.JSONB;
+import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
+import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
-import io.vertx.core.CompositeFuture;
-import one.util.streamex.StreamEx;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -22,17 +30,29 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.models.CriterionBuilder;
 import org.folio.rest.core.ResponseUtil;
+import org.folio.rest.impl.AbstractApiHandler;
+import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.rest.persist.interfaces.Results;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.handler.HttpException;
+import one.util.streamex.StreamEx;
+import org.folio.util.PostgresUtil;
 
 public class PoLinesService {
   private static final Logger logger = LogManager.getLogger(PoLinesService.class);
+  private static final String POLINE_ID_FIELD = "poLineId";
 
   private PoLinesDAO poLinesDAO;
 
@@ -57,6 +77,74 @@ public class PoLinesService {
         }
       });
     return promise.future();
+  }
+
+  public void deleteById(String id, Handler<AsyncResult<Response>> asyncResultHandler, Context context, Map<String, String> headers) {
+    try {
+      DBClient client = new DBClient(context, headers);
+      context.runOnContext(v -> {
+        Tx<String> tx = new Tx<>(id, client.getPgClient());
+        logger.info("Delete POLine");
+        tx.startTx()
+          .compose(line -> deletePiecesByPOLineId(line, client))
+          .compose(line -> deleteTitleById(line, client))
+          .compose(line -> deletePOLineById(line, client))
+          .compose(Tx::endTx)
+          .onComplete(handleNoContentResponse(asyncResultHandler, tx));
+        logger.info("POLine {} was deleted", tx.getEntity());
+      });
+    } catch (Exception e) {
+      asyncResultHandler.handle(buildErrorResponse(e));
+    }
+  }
+
+  public Future<Tx<PoLine>> createTitle(Tx<PoLine> poLineTx, DBClient client) {
+    Promise<Tx<PoLine>> promise = Promise.promise();
+
+    String packagePoLineId = poLineTx.getEntity().getPackagePoLineId();
+
+    if (packagePoLineId != null) {
+      getPoLineById(packagePoLineId, client)
+        .onComplete(reply -> {
+          if (reply.failed() || reply.result() == null) {
+            logger.error("Can't find poLine with id={}", packagePoLineId);
+            promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
+          } else {
+            populateTitleForPackagePoLineAndSave(poLineTx, promise, packagePoLineId, reply.result(), client);
+          }
+        });
+    } else {
+      return createTitleAndSave(poLineTx, client);
+    }
+
+    return promise.future();
+  }
+
+  public Future<Tx<PoLine>> createPoLine(Tx<PoLine> poLineTx, DBClient client) {
+    PoLine poLine = poLineTx.getEntity();
+    if (poLine.getId() == null) {
+      poLine.setId(UUID.randomUUID()
+        .toString());
+    }
+    logger.debug("Creating new poLine record with id={}", poLine.getId());
+
+    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
+
+    return postgresUtil.save(poLineTx, poLine.getId(), poLine, PO_LINE_TABLE);
+  }
+
+  public void updatePoLineWithTitle(String id, PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler, DBClient client) {
+    try {
+      Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
+      poLine.setId(id);
+      tx.startTx().compose(line -> updatePoLine(line, client))
+        .compose(line -> upsertTitle(line, client))
+        .compose(Tx::endTx)
+        .onComplete(handleNoContentResponse(asyncResultHandler, tx));
+      logger.info("POLine {} and associated data were successfully updated", tx.getEntity());
+    } catch (Exception e) {
+      asyncResultHandler.handle(buildErrorResponse(e));
+    }
   }
 
   public Future<List<PoLine>> getPoLinesByLineIds(List<String> poLineIds, Context context, Map<String, String> headers) {
@@ -141,13 +229,189 @@ public class PoLinesService {
     }
   }
 
-  public static String buildUpdatePoLineBatchQuery(Collection<PoLine> poLines, String tenantId) {
+  private String buildUpdatePoLineBatchQuery(Collection<PoLine> poLines, String tenantId) {
     List<JsonObject> jsonPoLines = poLines.stream()
       .map(JsonObject::mapFrom)
       .collect(toList());
     return String.format(
       "UPDATE %s AS po_line SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = po_line.id;",
       getFullTableName(tenantId, PO_LINE_TABLE), getQueryValues(jsonPoLines));
+  }
+
+  private Future<PoLine> getPoLineById(String poLineId, DBClient client) {
+    Promise<PoLine> promise = Promise.promise();
+
+    client.getPgClient().getById(PO_LINE_TABLE, poLineId, PoLine.class, reply -> {
+      if(reply.failed()) {
+        AbstractApiHandler.handleFailure(promise, reply);
+      } else {
+        promise.complete(reply.result());
+      }
+    });
+
+    return promise.future();
+  }
+
+  private void populateTitleForPackagePoLineAndSave(Tx<PoLine> poLineTx, Promise<Tx<PoLine>> promise, String packagePoLineId,
+    PoLine packagePoLine, DBClient client) {
+    Title title = createTitleObject(poLineTx.getEntity());
+    populateTitleBasedOnPackagePoLine(title, packagePoLine);
+
+    logger.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), packagePoLineId);
+
+    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
+    postgresUtil.save(poLineTx, title.getId(), title, TITLES_TABLE)
+      .onComplete(saveResult -> {
+          if (saveResult.failed()) {
+            AbstractApiHandler.handleFailure(promise, saveResult);
+          } else {
+            promise.complete(saveResult.result());
+          }
+        }
+      );
+  }
+
+  private Future<Tx<String>> deleteTitleById(Tx<String> tx, DBClient client) {
+    logger.info("Delete title by POLine id={}", tx.getEntity());
+
+    Promise<Tx<String>> promise = Promise.promise();
+    Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
+    client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, reply -> {
+      if (reply.failed()) {
+        AbstractApiHandler.handleFailure(promise, reply);
+      } else {
+        logger.info("{} title of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
+        promise.complete(tx);
+      }
+    });
+    return promise.future();
+  }
+
+  private Future<Tx<PoLine>> updatePoLine(Tx<PoLine> poLineTx, DBClient client) {
+    Promise<Tx<PoLine>> promise = Promise.promise();
+    PoLine poLine = poLineTx.getEntity();
+
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
+    client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, event -> {
+      if (event.failed()) {
+        AbstractApiHandler.handleFailure(promise, event);
+      } else {
+        if (event.result().rowCount() == 0) {
+          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        } else {
+          logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
+          promise.complete(poLineTx);
+        }
+      }
+    });
+    return promise.future();
+  }
+
+  private Future<Tx<PoLine>> createTitleAndSave(Tx<PoLine> poLineTx, DBClient client) {
+    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
+    Title title = createTitleObject(poLineTx.getEntity());
+    logger.debug("Creating new title record with id={}", title.getId());
+    return postgresUtil.save(poLineTx, title.getId(), title, TITLES_TABLE);
+  }
+
+  private Future<Tx<PoLine>> updateTitle(Tx<PoLine> poLineTx, Title title, DBClient client) {
+    Promise<Tx<PoLine>> promise = Promise.promise();
+    PoLine poLine = poLineTx.getEntity();
+
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
+    Title newTitle = createTitleObject(poLine).withId(title.getId());
+
+    client.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, newTitle, JSONB, criterion.toString(), false, event -> {
+      if (event.failed()) {
+        AbstractApiHandler.handleFailure(promise, event);
+      } else {
+        logger.info("Title record {} was successfully updated", title);
+        promise.complete(poLineTx);
+      }
+    });
+    return promise.future();
+  }
+
+  private Future<Tx<String>> deletePiecesByPOLineId(Tx<String> tx, DBClient client) {
+    logger.info("Delete pieces by POLine id={}", tx.getEntity());
+
+    Promise<Tx<String>> promise = Promise.promise();
+    Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
+
+    client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
+      if (reply.failed()) {
+        AbstractApiHandler.handleFailure(promise, reply);
+      } else {
+        logger.info("{} pieces of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
+        promise.complete(tx);
+      }
+    });
+    return promise.future();
+  }
+
+  private Future<Tx<String>> deletePOLineById(Tx<String> tx, DBClient client) {
+    logger.info("Delete POLine with id={}", tx.getEntity());
+    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
+    return postgresUtil.deleteById(tx, PO_LINE_TABLE);
+  }
+
+  private Title createTitleObject(PoLine poLine) {
+    Title title = new Title().withId(UUID.randomUUID()
+        .toString())
+      .withPoLineId(poLine.getId())
+      .withPoLineNumber(poLine.getPoLineNumber())
+      .withTitle(poLine.getTitleOrPackage())
+      .withInstanceId(poLine.getInstanceId())
+      .withContributors(poLine.getContributors())
+      .withEdition(poLine.getEdition())
+      .withPublisher(poLine.getPublisher())
+      .withPublishedDate(poLine.getPublicationDate())
+      .withExpectedReceiptDate(Objects.nonNull(poLine.getPhysical()) ? poLine.getPhysical().getExpectedReceiptDate() : null);
+    if (Objects.nonNull(poLine.getDetails())) {
+      title.withProductIds(poLine.getDetails()
+          .getProductIds())
+        .withSubscriptionFrom(poLine.getDetails().getSubscriptionFrom())
+        .withSubscriptionTo(poLine.getDetails().getSubscriptionTo())
+        .withSubscriptionInterval(poLine.getDetails().getSubscriptionInterval())
+        .withReceivingNote(poLine.getDetails().getReceivingNote());
+    }
+    return title;
+  }
+
+  private void populateTitleBasedOnPackagePoLine(Title title, PoLine packagePoLine) {
+    title
+      .withPoLineNumber(packagePoLine.getPoLineNumber())
+      .withPackageName(packagePoLine.getTitleOrPackage())
+      .withExpectedReceiptDate(Objects.nonNull(packagePoLine.getPhysical()) ? packagePoLine.getPhysical().getExpectedReceiptDate() : null);
+    if (Objects.nonNull(packagePoLine.getDetails())) {
+      title
+        .withReceivingNote(packagePoLine.getDetails().getReceivingNote());
+    }
+  }
+
+  private Future<Tx<PoLine>> upsertTitle(Tx<PoLine> poLineTx, DBClient client) {
+    Promise<Results<Title>> promise = Promise.promise();
+    PoLine poLine = poLineTx.getEntity();
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
+
+    client.getPgClient().get(poLineTx.getConnection(), TITLES_TABLE, Title.class, criterion, true, false, promise);
+    return promise.future()
+      .compose(result -> {
+        List<Title> titles = result.getResults();
+        if (titles.isEmpty()) {
+          return createTitle(poLineTx, client);
+        } else if (titleUpdateRequired(titles.get(0), poLine)) {
+          return updateTitle(poLineTx, titles.get(0), client);
+        }
+        return Future.succeededFuture(poLineTx);
+      })
+      .recover(Future::failedFuture);
+  }
+
+  private boolean titleUpdateRequired(Title title, PoLine poLine) {
+    return !title.equals(createTitleObject(poLine)
+      .withId(title.getId())
+      .withMetadata(title.getMetadata()));
   }
 
 }
