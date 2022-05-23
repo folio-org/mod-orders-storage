@@ -18,6 +18,7 @@ import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.PostgresUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
@@ -93,7 +94,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         .compose(this::deleteOrderInvoicesRelation)
         .compose(this::deleteOrderById)
         .compose(Tx::endTx)
-        .onComplete(handleNoContentResponse(asyncResultHandler, tx, "Order {} {} deleted"));
+        .onComplete(handleNoContentResponse(asyncResultHandler, tx));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -103,7 +104,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     log.info("Delete order->invoices relations with id={}", tx.getEntity());
     CQLWrapper cqlWrapper = new CQLWrapper();
     cqlWrapper.setWhereClause("WHERE jsonb ->> 'purchaseOrderId' = '" + tx.getEntity() + "'");
-    return deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper, true);
+    PostgresUtil postgresUtil = new PostgresUtil(getPgClient());
+    return postgresUtil.deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper, true);
   }
 
   @Validate
@@ -273,12 +275,14 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
 
     log.debug("Creating new order with id={}", order.getId());
 
-    return save(tx, order.getId(), order, TableNames.PURCHASE_ORDER_TABLE);
+    PostgresUtil postgresUtil = new PostgresUtil(getPgClient());
+    return postgresUtil.save(tx, order.getId(), order, TableNames.PURCHASE_ORDER_TABLE);
   }
 
   private Future<Tx<String>> deleteOrderById(Tx<String> tx) {
     log.info("Delete PO with id={}", tx.getEntity());
-    return deleteById(tx, TableNames.PURCHASE_ORDER_TABLE);
+    PostgresUtil postgresUtil = new PostgresUtil(getPgClient());
+    return postgresUtil.deleteById(tx, TableNames.PURCHASE_ORDER_TABLE);
   }
 
   @Override
