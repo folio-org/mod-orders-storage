@@ -78,7 +78,7 @@ public class ApplicationConfig {
 
   @Bean
   OrderLinePatchOperationHandlerResolver operationHandlerResolver(OrderLineUpdateInstanceHandler orderLineUpdateInstanceHandler) {
-    Map<OrderLinePatchOperationType, PatchOperationHandler> handlers = new HashMap<>();
+    Map<OrderLinePatchOperationType, PatchOperationHandler> handlers = new EnumMap<>(OrderLinePatchOperationType.class);
     handlers.put(OrderLinePatchOperationType.REPLACE_INSTANCE_REF, orderLineUpdateInstanceHandler);
     return new OrderLinePatchOperationHandlerResolver(handlers);
   }
