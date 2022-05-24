@@ -202,6 +202,8 @@ public class StorageTestSuite {
   }
 
   @Nested
+  class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
+  @Nested
   class EntitiesCrudTestNested extends EntitiesCrudTest {}
   @Nested
   class OrdersAPITestNested extends OrdersAPITest {}
@@ -247,6 +249,4 @@ public class StorageTestSuite {
   class PomReaderUtilTestNested extends PomReaderUtilTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
-  @Nested
-  class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
 }
