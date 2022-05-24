@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.rest.core.ResponseUtil.handleFailure;
+import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.JSONB;
@@ -28,7 +29,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.models.CriterionBuilder;
-import org.folio.rest.core.ResponseUtil;
 import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Title;
@@ -228,13 +228,13 @@ public class PoLinesService {
       getFullTableName(tenantId, PO_LINE_TABLE), getQueryValues(jsonPoLines));
   }
 
-  private Future<PoLine> getPoLineById(String poLineId, DBClient client) {
+  public Future<PoLine> getPoLineById(String poLineId, DBClient client) {
     Promise<PoLine> promise = Promise.promise();
 
     client.getPgClient().getById(PO_LINE_TABLE, poLineId, PoLine.class, reply -> {
       if(reply.failed()) {
         logger.error("Retrieve POL failed : {}", reply.toString());
-        handleFailure(promise, reply);
+        httpHandleFailure(promise, reply);
       } else {
         promise.complete(reply.result());
       }
@@ -253,7 +253,7 @@ public class PoLinesService {
     client.save(poLineTx, title.getId(), title, TITLES_TABLE)
       .onComplete(saveResult -> {
           if (saveResult.failed()) {
-            handleFailure(promise, saveResult);
+            httpHandleFailure(promise, saveResult);
           } else {
             promise.complete(saveResult.result());
           }
@@ -269,7 +269,7 @@ public class PoLinesService {
     client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, reply -> {
       if (reply.failed()) {
         logger.error("Delete title failed : {}", criterion.toString());
-        handleFailure(promise, reply);
+        httpHandleFailure(promise, reply);
       } else {
         logger.info("{} title of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
         promise.complete(tx);
@@ -286,7 +286,7 @@ public class PoLinesService {
     client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, event -> {
       if (event.failed()) {
         logger.error("Update POLs failed : {}", criterion.toString());
-        handleFailure(promise, event);
+        httpHandleFailure(promise, event);
       } else {
         if (event.result().rowCount() == 0) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
@@ -314,7 +314,7 @@ public class PoLinesService {
 
     client.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, newTitle, JSONB, criterion.toString(), false, event -> {
       if (event.failed()) {
-        handleFailure(promise, event);
+        httpHandleFailure(promise, event);
       } else {
         logger.info("Title record {} was successfully updated", title);
         promise.complete(poLineTx);
@@ -332,7 +332,7 @@ public class PoLinesService {
     client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
       if (reply.failed()) {
         logger.error("Delete Pieces failed : {}", criterion.toString());
-        handleFailure(promise, reply);
+        httpHandleFailure(promise, reply);
       } else {
         logger.info("{} pieces of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
         promise.complete(tx);

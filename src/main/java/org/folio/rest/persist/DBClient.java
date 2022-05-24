@@ -14,7 +14,7 @@ import io.vertx.core.Vertx;
 
 import javax.ws.rs.core.Response;
 
-import static org.folio.rest.core.ResponseUtil.handleFailure;
+import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 
 public class DBClient {
 
@@ -90,7 +90,7 @@ public class DBClient {
     Promise<Tx<T>> promise = Promise.promise();
     pgClient.save(tx.getConnection(), table, id, entity, reply -> {
       if (reply.failed()) {
-        handleFailure(promise, reply);
+        httpHandleFailure(promise, reply);
       } else {
         promise.complete(tx);
       }
@@ -102,7 +102,7 @@ public class DBClient {
     Promise<Tx<String>> promise = Promise.promise();
     pgClient.delete(tx.getConnection(), table, tx.getEntity(), reply -> {
       if (reply.failed()) {;
-        handleFailure(promise, reply);
+        httpHandleFailure(promise, reply);
       } else {
         if (reply.result().rowCount() == 0) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
@@ -118,7 +118,7 @@ public class DBClient {
     Promise<Tx<String>> promise = Promise.promise();
     pgClient.delete(tx.getConnection(), table, query, reply -> {
       if (reply.failed()) {
-        handleFailure(promise, reply);
+        httpHandleFailure(promise, reply);
       } else {
         if (!silent && reply.result().rowCount() == 0) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));

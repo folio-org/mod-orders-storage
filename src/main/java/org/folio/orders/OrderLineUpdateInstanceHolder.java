@@ -15,4 +15,12 @@ public class OrderLineUpdateInstanceHolder {
   public StoragePatchOrderLineRequest getPatchOrderLineRequest() {
     return patchOrderLineRequest;
   }
+
+  public void setStoragePoLine(PoLine storagePoLine) {
+    this.storagePoLine = storagePoLine;
+  }
+
+  public void setPatchOrderLineRequest(StoragePatchOrderLineRequest patchOrderLineRequest) {
+    this.patchOrderLineRequest = patchOrderLineRequest;
+  }
 }

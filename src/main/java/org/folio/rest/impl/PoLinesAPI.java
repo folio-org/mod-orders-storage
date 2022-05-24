@@ -19,6 +19,7 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderLinePatchOperationService;
+import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
@@ -36,6 +37,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
     super(PostgresClient.getInstance(vertx, tenantId));
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
   @Override
@@ -115,7 +117,12 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   @Override
   public void patchOrdersStoragePoLinesById(String id, StoragePatchOrderLineRequest entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
-    orderLinePatchOperationService.patch(entity, requestContext);
+    try {
+      RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
+      poLinesService.getPoLineById(id, new DBClient(vertxContext, okapiHeaders))
+        .onComplete(poLine -> orderLinePatchOperationService.patch(poLine.result(), entity, requestContext));
+    } catch (Exception e) {
+      asyncResultHandler.handle(buildErrorResponse(e));
+    }
   }
 }
