@@ -36,7 +36,7 @@ public class ResponseUtil {
     promise.fail(new HttpException(httpCode, errors));
   }
 
-  public static void httpHandleFailure(Promise promise, AsyncResult reply) {
+  public static void httpHandleFailure(Promise<?> promise, AsyncResult<?> reply) {
     Throwable cause = reply.cause();
     String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
     if (badRequestMessage != null) {

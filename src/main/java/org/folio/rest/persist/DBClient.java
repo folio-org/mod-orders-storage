@@ -101,7 +101,7 @@ public class DBClient {
   public Future<Tx<String>> deleteById(Tx<String> tx, String table) {
     Promise<Tx<String>> promise = Promise.promise();
     pgClient.delete(tx.getConnection(), table, tx.getEntity(), reply -> {
-      if (reply.failed()) {;
+      if (reply.failed()) {
         httpHandleFailure(promise, reply);
       } else {
         if (reply.result().rowCount() == 0) {

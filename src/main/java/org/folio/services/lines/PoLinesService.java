@@ -65,7 +65,7 @@ public class PoLinesService {
     poLinesDAO.getPoLines(criterion, client)
       .onComplete(reply -> {
         if (reply.failed()) {
-          logger.error("Retrieve POLs failed : {}", criterion.toString());
+          logger.error("Retrieve POLs failed : {}", criterion);
           handleFailure(promise, reply.cause());
         } else {
           promise.complete(reply.result());
@@ -187,7 +187,7 @@ public class PoLinesService {
     poLinesDAO.getPoLines(criterion, dbClient)
       .onComplete(reply -> {
         if (reply.failed()) {
-          logger.error("Retrieve POLs failed : {}", criterion.toString());
+          logger.error("Retrieve POLs failed : {}", criterion);
           handleFailure(promise, reply.cause());
         } else {
           promise.complete(reply.result());
@@ -245,7 +245,7 @@ public class PoLinesService {
 
     client.getPgClient().getById(PO_LINE_TABLE, poLineId, PoLine.class, reply -> {
       if(reply.failed()) {
-        logger.error("Retrieve POL failed : {}", reply.toString());
+        logger.error("Retrieve POL failed : {}", reply);
         httpHandleFailure(promise, reply);
       } else {
         promise.complete(reply.result());
@@ -280,7 +280,7 @@ public class PoLinesService {
     Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
     client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, reply -> {
       if (reply.failed()) {
-        logger.error("Delete title failed : {}", criterion.toString());
+        logger.error("Delete title failed : {}", criterion);
         httpHandleFailure(promise, reply);
       } else {
         logger.info("{} title of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
@@ -297,7 +297,7 @@ public class PoLinesService {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, event -> {
       if (event.failed()) {
-        logger.error("Update POLs failed : {}", criterion.toString());
+        logger.error("Update POLs failed : {}", criterion);
         httpHandleFailure(promise, event);
       } else {
         if (event.result().rowCount() == 0) {
@@ -343,7 +343,7 @@ public class PoLinesService {
 
     client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
       if (reply.failed()) {
-        logger.error("Delete Pieces failed : {}", criterion.toString());
+        logger.error("Delete Pieces failed : {}", criterion);
         httpHandleFailure(promise, reply);
       } else {
         logger.info("{} pieces of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
