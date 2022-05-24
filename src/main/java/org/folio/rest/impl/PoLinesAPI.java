@@ -86,7 +86,13 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       poLinesService.deleteById(id, vertxContext, okapiHeaders)
-        .onComplete(tx -> handleNoContentResponse(asyncResultHandler, tx.result()));
+        .onComplete(result -> {
+          if (result.failed()) {
+            asyncResultHandler.handle(buildErrorResponse(result.cause()));
+          } else {
+            asyncResultHandler.handle(buildNoContentResponse());
+          }
+        });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -102,7 +108,13 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     } else {
       try {
         poLinesService.updatePoLineWithTitle(id, poLine, new DBClient(vertxContext, okapiHeaders))
-          .onComplete(tx -> handleNoContentResponse(asyncResultHandler, tx.result()));
+          .onComplete(result -> {
+            if (result.failed()) {
+              asyncResultHandler.handle(buildErrorResponse(result.cause()));
+            } else {
+              asyncResultHandler.handle(buildNoContentResponse());
+            }
+          });
       } catch (Exception e) {
         asyncResultHandler.handle(buildErrorResponse(e));
       }

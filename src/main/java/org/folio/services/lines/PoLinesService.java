@@ -74,33 +74,45 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Tx<String>> deleteById(String id, Context context, Map<String, String> headers) {
+  public Future<Void> deleteById(String id, Context context, Map<String, String> headers) {
     DBClient client = new DBClient(context, headers);
-    Promise<Tx<String>> promise = Promise.promise();
+    Promise<Void> promise = Promise.promise();
+    Tx<String> tx = new Tx<>(id, client.getPgClient());
     context.runOnContext(v -> {
-      Tx<String> tx = new Tx<>(id, client.getPgClient());
       logger.info("Delete POLine");
       tx.startTx()
-        .compose(line -> deletePiecesByPOLineId(line, client))
-        .compose(line -> deleteTitleById(line, client))
-        .compose(line -> deletePOLineById(line, client))
-        .compose(Tx::endTx);
-      logger.info("POLine {} was deleted", tx.getEntity());
-      promise.complete(tx);
+        .compose(result -> deletePiecesByPOLineId(result, client))
+        .compose(result -> deleteTitleById(result, client))
+        .compose(result -> deletePOLineById(result, client))
+        .compose(Tx::endTx)
+        .onComplete(result -> {
+          if (result.failed()) {
+            tx.rollbackTransaction().onComplete(res -> promise.fail(result.cause()));
+          } else {
+            logger.info("POLine {} was deleted", tx.getEntity());
+            promise.complete(null);
+          }
+        });
       });
     return promise.future();
   }
 
-  public Future<Tx<PoLine>> updatePoLineWithTitle(String id, PoLine poLine, DBClient client) {
+  public Future<Void> updatePoLineWithTitle(String id, PoLine poLine, DBClient client) {
     Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
-    Promise<Tx<PoLine>> promise = Promise.promise();
+    Promise<Void> promise = Promise.promise();
     poLine.setId(id);
     tx.startTx()
       .compose(line -> updatePoLine(line, client))
       .compose(line -> upsertTitle(line, client))
-      .compose(Tx::endTx);
-    logger.info("POLine {} and associated data were successfully updated", tx.getEntity());
-    promise.complete(tx);
+      .compose(Tx::endTx)
+      .onComplete(result -> {
+        if (result.failed()) {
+          tx.rollbackTransaction().onComplete(res -> promise.fail(result.cause()));
+        } else {
+          logger.info("POLine {} and associated data were successfully updated", tx.getEntity());
+          promise.complete(null);
+        }
+      });
     return promise.future();
   }
 
