@@ -82,7 +82,12 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   @Validate
   public void deleteOrdersStoragePoLinesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    poLinesService.deleteById(id, asyncResultHandler, vertxContext, okapiHeaders);
+    try {
+      poLinesService.deleteById(id, vertxContext, okapiHeaders)
+        .onComplete(tx -> handleNoContentResponse(asyncResultHandler, tx.result()));
+    } catch (Exception e) {
+      asyncResultHandler.handle(buildErrorResponse(e));
+    }
   }
 
   @Override
@@ -93,7 +98,12 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       PgUtil.put(PO_LINE_TABLE, poLine, id, okapiHeaders, vertxContext, PutOrdersStoragePoLinesByIdResponse.class,
           asyncResultHandler);
     } else {
-      poLinesService.updatePoLineWithTitle(id, poLine, asyncResultHandler, new DBClient(vertxContext, okapiHeaders));
+      try {
+        poLinesService.updatePoLineWithTitle(id, poLine, new DBClient(vertxContext, okapiHeaders))
+          .onComplete(tx -> handleNoContentResponse(asyncResultHandler, tx.result()));
+      } catch (Exception e) {
+        asyncResultHandler.handle(buildErrorResponse(e));
+      }
     }
   }
 

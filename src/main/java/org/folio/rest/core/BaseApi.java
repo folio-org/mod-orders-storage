@@ -17,11 +17,11 @@ public abstract class BaseApi {
       .header(CONTENT_TYPE, APPLICATION_JSON).entity(body).build());
   }
 
-  public static Future<Response> buildNoContentResponse() {
+  public Future<Response> buildNoContentResponse() {
     return Future.succeededFuture(Response.noContent().build());
   }
 
-  public static Future<Response> buildErrorResponse(Throwable throwable) {
+  public Future<Response> buildErrorResponse(Throwable throwable) {
     final String message;
     final int code;
 
@@ -36,7 +36,7 @@ public abstract class BaseApi {
     return Future.succeededFuture(buildErrorResponse(code, message));
   }
 
-  private static Response buildErrorResponse(int code, String message) {
+  private Response buildErrorResponse(int code, String message) {
     return Response.status(code)
       .header(CONTENT_TYPE, TEXT_PLAIN)
       .entity(message)

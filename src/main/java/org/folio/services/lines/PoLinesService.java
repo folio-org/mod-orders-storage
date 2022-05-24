@@ -4,8 +4,7 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
-import static org.folio.rest.core.BaseApi.buildErrorResponse;
-import static org.folio.rest.impl.AbstractApiHandler.handleNoContentResponse;
+import static org.folio.rest.core.ResponseUtil.handleFailure;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.JSONB;
@@ -30,7 +29,6 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.models.CriterionBuilder;
 import org.folio.rest.core.ResponseUtil;
-import org.folio.rest.impl.AbstractApiHandler;
 import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Title;
@@ -39,16 +37,13 @@ import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.interfaces.Results;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 import one.util.streamex.StreamEx;
-import org.folio.util.PostgresUtil;
 
 public class PoLinesService {
   private static final Logger logger = LogManager.getLogger(PoLinesService.class);
@@ -71,7 +66,7 @@ public class PoLinesService {
       .onComplete(reply -> {
         if (reply.failed()) {
           logger.error("Retrieve POLs failed : {}", criterion.toString());
-          ResponseUtil.handleFailure(promise, reply.cause());
+          handleFailure(promise, reply.cause());
         } else {
           promise.complete(reply.result());
         }
@@ -79,23 +74,34 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public void deleteById(String id, Handler<AsyncResult<Response>> asyncResultHandler, Context context, Map<String, String> headers) {
-    try {
-      DBClient client = new DBClient(context, headers);
-      context.runOnContext(v -> {
-        Tx<String> tx = new Tx<>(id, client.getPgClient());
-        logger.info("Delete POLine");
-        tx.startTx()
-          .compose(line -> deletePiecesByPOLineId(line, client))
-          .compose(line -> deleteTitleById(line, client))
-          .compose(line -> deletePOLineById(line, client))
-          .compose(Tx::endTx)
-          .onComplete(handleNoContentResponse(asyncResultHandler, tx));
-        logger.info("POLine {} was deleted", tx.getEntity());
+  public Future<Tx<String>> deleteById(String id, Context context, Map<String, String> headers) {
+    DBClient client = new DBClient(context, headers);
+    Promise<Tx<String>> promise = Promise.promise();
+    context.runOnContext(v -> {
+      Tx<String> tx = new Tx<>(id, client.getPgClient());
+      logger.info("Delete POLine");
+      tx.startTx()
+        .compose(line -> deletePiecesByPOLineId(line, client))
+        .compose(line -> deleteTitleById(line, client))
+        .compose(line -> deletePOLineById(line, client))
+        .compose(Tx::endTx);
+      logger.info("POLine {} was deleted", tx.getEntity());
+      promise.complete(tx);
       });
-    } catch (Exception e) {
-      asyncResultHandler.handle(buildErrorResponse(e));
-    }
+    return promise.future();
+  }
+
+  public Future<Tx<PoLine>> updatePoLineWithTitle(String id, PoLine poLine, DBClient client) {
+    Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
+    Promise<Tx<PoLine>> promise = Promise.promise();
+    poLine.setId(id);
+    tx.startTx()
+      .compose(line -> updatePoLine(line, client))
+      .compose(line -> upsertTitle(line, client))
+      .compose(Tx::endTx);
+    logger.info("POLine {} and associated data were successfully updated", tx.getEntity());
+    promise.complete(tx);
+    return promise.future();
   }
 
   public Future<Tx<PoLine>> createTitle(Tx<PoLine> poLineTx, DBClient client) {
@@ -128,23 +134,7 @@ public class PoLinesService {
     }
     logger.debug("Creating new poLine record with id={}", poLine.getId());
 
-    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
-
-    return postgresUtil.save(poLineTx, poLine.getId(), poLine, PO_LINE_TABLE);
-  }
-
-  public void updatePoLineWithTitle(String id, PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler, DBClient client) {
-    try {
-      Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
-      poLine.setId(id);
-      tx.startTx().compose(line -> updatePoLine(line, client))
-        .compose(line -> upsertTitle(line, client))
-        .compose(Tx::endTx)
-        .onComplete(handleNoContentResponse(asyncResultHandler, tx));
-      logger.info("POLine {} and associated data were successfully updated", tx.getEntity());
-    } catch (Exception e) {
-      asyncResultHandler.handle(buildErrorResponse(e));
-    }
+    return client.save(poLineTx, poLine.getId(), poLine, PO_LINE_TABLE);
   }
 
   public Future<List<PoLine>> getPoLinesByLineIds(List<String> poLineIds, Context context, Map<String, String> headers) {
@@ -186,7 +176,7 @@ public class PoLinesService {
       .onComplete(reply -> {
         if (reply.failed()) {
           logger.error("Retrieve POLs failed : {}", criterion.toString());
-          ResponseUtil.handleFailure(promise, reply.cause());
+          handleFailure(promise, reply.cause());
         } else {
           promise.complete(reply.result());
         }
@@ -243,7 +233,8 @@ public class PoLinesService {
 
     client.getPgClient().getById(PO_LINE_TABLE, poLineId, PoLine.class, reply -> {
       if(reply.failed()) {
-        AbstractApiHandler.handleFailure(promise, reply);
+        logger.error("Retrieve POL failed : {}", reply.toString());
+        handleFailure(promise, reply);
       } else {
         promise.complete(reply.result());
       }
@@ -259,11 +250,10 @@ public class PoLinesService {
 
     logger.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), packagePoLineId);
 
-    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
-    postgresUtil.save(poLineTx, title.getId(), title, TITLES_TABLE)
+    client.save(poLineTx, title.getId(), title, TITLES_TABLE)
       .onComplete(saveResult -> {
           if (saveResult.failed()) {
-            AbstractApiHandler.handleFailure(promise, saveResult);
+            handleFailure(promise, saveResult);
           } else {
             promise.complete(saveResult.result());
           }
@@ -278,7 +268,8 @@ public class PoLinesService {
     Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
     client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, reply -> {
       if (reply.failed()) {
-        AbstractApiHandler.handleFailure(promise, reply);
+        logger.error("Delete title failed : {}", criterion.toString());
+        handleFailure(promise, reply);
       } else {
         logger.info("{} title of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
         promise.complete(tx);
@@ -294,7 +285,8 @@ public class PoLinesService {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, event -> {
       if (event.failed()) {
-        AbstractApiHandler.handleFailure(promise, event);
+        logger.error("Update POLs failed : {}", criterion.toString());
+        handleFailure(promise, event);
       } else {
         if (event.result().rowCount() == 0) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
@@ -308,10 +300,9 @@ public class PoLinesService {
   }
 
   private Future<Tx<PoLine>> createTitleAndSave(Tx<PoLine> poLineTx, DBClient client) {
-    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
     Title title = createTitleObject(poLineTx.getEntity());
     logger.debug("Creating new title record with id={}", title.getId());
-    return postgresUtil.save(poLineTx, title.getId(), title, TITLES_TABLE);
+    return client.save(poLineTx, title.getId(), title, TITLES_TABLE);
   }
 
   private Future<Tx<PoLine>> updateTitle(Tx<PoLine> poLineTx, Title title, DBClient client) {
@@ -323,7 +314,7 @@ public class PoLinesService {
 
     client.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, newTitle, JSONB, criterion.toString(), false, event -> {
       if (event.failed()) {
-        AbstractApiHandler.handleFailure(promise, event);
+        handleFailure(promise, event);
       } else {
         logger.info("Title record {} was successfully updated", title);
         promise.complete(poLineTx);
@@ -340,7 +331,8 @@ public class PoLinesService {
 
     client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
       if (reply.failed()) {
-        AbstractApiHandler.handleFailure(promise, reply);
+        logger.error("Delete Pieces failed : {}", criterion.toString());
+        handleFailure(promise, reply);
       } else {
         logger.info("{} pieces of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
         promise.complete(tx);
@@ -351,8 +343,7 @@ public class PoLinesService {
 
   private Future<Tx<String>> deletePOLineById(Tx<String> tx, DBClient client) {
     logger.info("Delete POLine with id={}", tx.getEntity());
-    PostgresUtil postgresUtil = new PostgresUtil(client.getPgClient());
-    return postgresUtil.deleteById(tx, PO_LINE_TABLE);
+    return client.deleteById(tx, PO_LINE_TABLE);
   }
 
   private Title createTitleObject(PoLine poLine) {

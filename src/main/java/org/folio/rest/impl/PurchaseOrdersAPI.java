@@ -9,6 +9,7 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
+import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
@@ -18,7 +19,6 @@ import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.PostgresUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
@@ -33,6 +33,8 @@ import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.handler.HttpException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+
+import static org.folio.rest.core.ResponseUtil.handleFailure;
 
 public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStoragePurchaseOrders {
 
@@ -62,11 +64,12 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   public void postOrdersStoragePurchaseOrders(String lang, PurchaseOrder entity, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
+      DBClient client = new DBClient(vertxContext, okapiHeaders);
       vertxContext.runOnContext(v -> {
         log.debug("Creating a new purchase order");
         Tx<PurchaseOrder> tx = new Tx<>(entity, getPgClient());
         tx.startTx()
-          .compose(this::createPurchaseOrder)
+          .compose(e -> createPurchaseOrder(e, client))
           .compose(this::createSequence)
           .compose(Tx::endTx)
           .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
@@ -89,10 +92,11 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       Tx<String> tx = new Tx<>(id, getPgClient());
+      DBClient client = new DBClient(vertxContext, okapiHeaders);
       tx.startTx()
         .compose(this::deletePolNumberSequence)
-        .compose(this::deleteOrderInvoicesRelation)
-        .compose(this::deleteOrderById)
+        .compose(e -> deleteOrderInvoicesRelation(e, client))
+        .compose(e -> deleteOrderById(e, client))
         .compose(Tx::endTx)
         .onComplete(handleNoContentResponse(asyncResultHandler, tx));
     } catch (Exception e) {
@@ -100,12 +104,11 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     }
   }
 
-  private Future<Tx<String>> deleteOrderInvoicesRelation(Tx<String> tx) {
+  private Future<Tx<String>> deleteOrderInvoicesRelation(Tx<String> tx, DBClient client) {
     log.info("Delete order->invoices relations with id={}", tx.getEntity());
     CQLWrapper cqlWrapper = new CQLWrapper();
     cqlWrapper.setWhereClause("WHERE jsonb ->> 'purchaseOrderId' = '" + tx.getEntity() + "'");
-    PostgresUtil postgresUtil = new PostgresUtil(getPgClient());
-    return postgresUtil.deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper, true);
+    return client.deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper, true);
   }
 
   @Validate
@@ -267,7 +270,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     }
   }
 
-  private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx) {
+  private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx, DBClient client) {
     PurchaseOrder order = tx.getEntity();
     if (order.getId() == null) {
       order.setId(UUID.randomUUID().toString());
@@ -275,14 +278,12 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
 
     log.debug("Creating new order with id={}", order.getId());
 
-    PostgresUtil postgresUtil = new PostgresUtil(getPgClient());
-    return postgresUtil.save(tx, order.getId(), order, TableNames.PURCHASE_ORDER_TABLE);
+    return client.save(tx, order.getId(), order, TableNames.PURCHASE_ORDER_TABLE);
   }
 
-  private Future<Tx<String>> deleteOrderById(Tx<String> tx) {
+  private Future<Tx<String>> deleteOrderById(Tx<String> tx, DBClient client) {
     log.info("Delete PO with id={}", tx.getEntity());
-    PostgresUtil postgresUtil = new PostgresUtil(getPgClient());
-    return postgresUtil.deleteById(tx, TableNames.PURCHASE_ORDER_TABLE);
+    return client.deleteById(tx, TableNames.PURCHASE_ORDER_TABLE);
   }
 
   @Override

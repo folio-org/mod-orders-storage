@@ -5,15 +5,11 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.core.BaseApi;
-import org.folio.rest.persist.PgExceptionUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
-import org.folio.rest.persist.cql.CQLWrapper;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
 import io.vertx.ext.web.handler.HttpException;
 
 public abstract class AbstractApiHandler extends BaseApi {
@@ -43,7 +39,7 @@ public abstract class AbstractApiHandler extends BaseApi {
     };
   }
 
-  public static <T> Handler<AsyncResult<Tx<T>>> handleNoContentResponse(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx) {
+  public <T> Handler<AsyncResult<Tx<T>>> handleNoContentResponse(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx) {
     return result -> {
       if (result.failed()) {
         HttpException cause = (HttpException) result.cause();
@@ -53,16 +49,6 @@ public abstract class AbstractApiHandler extends BaseApi {
         asyncResultHandler.handle(buildNoContentResponse());
       }
     };
-  }
-
-  public static void handleFailure(Promise promise, AsyncResult reply) {
-    Throwable cause = reply.cause();
-    String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
-    if (badRequestMessage != null) {
-      promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
-    } else {
-      promise.fail(new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
-    }
   }
 
   public PostgresClient getPgClient() {
