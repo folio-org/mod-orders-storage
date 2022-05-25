@@ -16,15 +16,27 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
 
   @Override
   public CompletableFuture<Void> handler(OrderLineUpdateInstanceHolder holder, RequestContext context) {
-    CreateInventoryType createInventoryType;
-    if (holder.getStoragePoLine().getOrderFormat().equals(PoLine.OrderFormat.PHYSICAL_RESOURCE)) {
-      createInventoryType = CreateInventoryType.fromValue(holder.getStoragePoLine().getPhysical().getCreateInventory().value());
-    } else if (holder.getStoragePoLine().getOrderFormat().equals(PoLine.OrderFormat.ELECTRONIC_RESOURCE)) {
-      createInventoryType = CreateInventoryType.fromValue(holder.getStoragePoLine().getEresource().getCreateInventory().value());
-    } else {
-      throw new IllegalArgumentException("Invalid order format passed: " + holder.getStoragePoLine().getOrderFormat());
-    }
+    PoLine storagePoLine = holder.getStoragePoLine();
 
-    return orderLineUpdateInstanceStrategyResolver.resolver(createInventoryType).updateInstance(holder, context);
+    switch (storagePoLine.getOrderFormat()) {
+    case P_E_MIX:
+      return orderLineUpdateInstanceStrategyResolver
+        .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
+        .updateInstance(holder, context)
+        .thenCompose(v -> orderLineUpdateInstanceStrategyResolver
+          .resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value()))
+          .updateInstance(holder, context));
+    case ELECTRONIC_RESOURCE:
+      return orderLineUpdateInstanceStrategyResolver
+        .resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value()))
+        .updateInstance(holder, context);
+    case OTHER:
+    case PHYSICAL_RESOURCE:
+      return orderLineUpdateInstanceStrategyResolver
+        .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
+        .updateInstance(holder, context);
+    default:
+      return CompletableFuture.completedFuture(null);
+    }
   }
 }
