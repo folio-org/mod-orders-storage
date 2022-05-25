@@ -1,8 +1,6 @@
-package org.folio.orders.handler;
+package org.folio.orders.lines.update;
 
 import lombok.RequiredArgsConstructor;
-import org.folio.orders.OrderLineUpdateInstanceHolder;
-import org.folio.orders.strategy.OrderLineUpdateInstanceStrategyResolver;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -15,7 +13,7 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
   private final OrderLineUpdateInstanceStrategyResolver orderLineUpdateInstanceStrategyResolver;
 
   @Override
-  public CompletableFuture<Void> handler(OrderLineUpdateInstanceHolder holder, RequestContext context) {
+  public CompletableFuture<Void> handle(OrderLineUpdateInstanceHolder holder, RequestContext context) {
     PoLine storagePoLine = holder.getStoragePoLine();
 
     switch (storagePoLine.getOrderFormat()) {

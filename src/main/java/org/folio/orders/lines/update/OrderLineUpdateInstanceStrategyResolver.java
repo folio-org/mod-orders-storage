@@ -1,4 +1,4 @@
-package org.folio.orders.strategy;
+package org.folio.orders.lines.update;
 
 import lombok.RequiredArgsConstructor;
 import org.folio.rest.jaxrs.model.CreateInventoryType;

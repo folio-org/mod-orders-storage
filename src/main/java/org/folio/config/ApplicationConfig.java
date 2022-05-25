@@ -1,7 +1,6 @@
 package org.folio.config;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.folio.dao.export.ExportHistoryPostgresRepository;
@@ -16,15 +15,15 @@ import org.folio.services.finance.FinanceService;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
-import org.folio.services.order.OrderLinePatchOperationService;
+import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
-import org.folio.orders.handler.OrderLinePatchOperationHandlerResolver;
-import org.folio.orders.handler.OrderLineUpdateInstanceHandler;
-import org.folio.orders.strategy.OrderLineUpdateInstanceStrategy;
-import org.folio.orders.strategy.OrderLineUpdateInstanceStrategyResolver;
-import org.folio.orders.handler.PatchOperationHandler;
-import org.folio.orders.strategy.WithHoldingOrderLineUpdateInstanceStrategy;
-import org.folio.orders.strategy.WithoutHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.orders.lines.update.OrderLinePatchOperationHandlerResolver;
+import org.folio.orders.lines.update.OrderLineUpdateInstanceHandler;
+import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategy;
+import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategyResolver;
+import org.folio.orders.lines.update.PatchOperationHandler;
+import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

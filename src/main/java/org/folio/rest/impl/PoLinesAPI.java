@@ -18,7 +18,7 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.services.lines.PoLinesService;
-import org.folio.services.order.OrderLinePatchOperationService;
+import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 

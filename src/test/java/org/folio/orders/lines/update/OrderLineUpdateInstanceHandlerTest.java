@@ -1,4 +1,4 @@
-package org.folio.orders.handler;
+package org.folio.orders.lines.update;
 
 import static org.folio.rest.core.RestClient.OKAPI_URL;
 import static org.folio.rest.impl.TestBase.TENANT_HEADER;
@@ -15,19 +15,19 @@ import static org.mockito.Mockito.spy;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.folio.orders.OrderLineUpdateInstanceHolder;
-import org.folio.orders.strategy.OrderLineUpdateInstanceStrategy;
-import org.folio.orders.strategy.OrderLineUpdateInstanceStrategyResolver;
-import org.folio.orders.strategy.WithHoldingOrderLineUpdateInstanceStrategy;
-import org.folio.orders.strategy.WithoutHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
+import org.folio.rest.jaxrs.model.Eresource;
 import org.folio.rest.jaxrs.model.Physical;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -93,7 +93,91 @@ public class OrderLineUpdateInstanceHandlerTest {
     OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHandlerTest.StubOrderLineUpdateInstanceHolder();
 
     assertThrows(NotImplementedException.class, () ->
-      orderLineUpdateInstanceHandler.handler(orderLineUpdateInstanceHolder, requestContext));
+      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
+
+  }
+
+  @Test
+  public void shouldThrowNotImplementedExceptionForMIXOrderFormat() {
+    String orderLineId = UUID.randomUUID().toString();
+    PoLine poLine = new PoLine().
+        withId(orderLineId).
+        withOrderFormat(PoLine.OrderFormat.P_E_MIX)
+      .withPhysical(new Physical()
+        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING))
+      .withEresource(new Eresource().withCreateInventory(Eresource.CreateInventory.INSTANCE));
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
+    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+
+    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
+    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
+    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+
+    assertThrows(NotImplementedException.class, () ->
+      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
+
+  }
+
+  @Test
+  public void shouldThrowNotImplementedExceptionForPhysicalOrderFormat() {
+    String orderLineId = UUID.randomUUID().toString();
+    PoLine poLine = new PoLine().
+        withId(orderLineId).
+        withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
+      .withPhysical(new Physical()
+        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING));
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
+    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+
+    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
+    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
+    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+
+    assertThrows(NotImplementedException.class, () ->
+      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
+
+  }
+
+  @Test
+  public void shouldThrowNotImplementedExceptionForEresourceOrderFormat() {
+    String orderLineId = UUID.randomUUID().toString();
+    PoLine poLine = new PoLine().
+        withId(orderLineId).
+        withOrderFormat(PoLine.OrderFormat.ELECTRONIC_RESOURCE)
+      .withEresource(new Eresource().withCreateInventory(Eresource.CreateInventory.INSTANCE));
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
+    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+
+    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
+    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
+    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+
+    assertThrows(NotImplementedException.class, () ->
+      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
+
+  }
+
+  @Test
+  public void shouldThrowNotImplementedExceptionForOtherOrderFormat() {
+    String orderLineId = UUID.randomUUID().toString();
+    PoLine poLine = new PoLine().
+        withId(orderLineId).
+        withOrderFormat(PoLine.OrderFormat.OTHER)
+      .withPhysical(new Physical()
+        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING));
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
+    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+
+    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
+    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
+    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+
+    assertThrows(NotImplementedException.class, () ->
+      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
 
   }
 

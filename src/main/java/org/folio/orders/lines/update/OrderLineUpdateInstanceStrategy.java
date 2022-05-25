@@ -1,6 +1,5 @@
-package org.folio.orders.strategy;
+package org.folio.orders.lines.update;
 
-import org.folio.orders.OrderLineUpdateInstanceHolder;
 import org.folio.rest.core.models.RequestContext;
 
 import java.util.concurrent.CompletableFuture;

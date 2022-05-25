@@ -1,4 +1,4 @@
-package org.folio.orders;
+package org.folio.orders.lines.update;
 
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;

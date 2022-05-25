@@ -1,4 +1,4 @@
-package org.folio.orders.handler;
+package org.folio.orders.lines.update;
 
 import java.util.Map;
 

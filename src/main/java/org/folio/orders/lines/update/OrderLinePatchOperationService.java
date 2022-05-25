@@ -1,20 +1,15 @@
-package org.folio.services.order;
+package org.folio.orders.lines.update;
 
 import java.util.concurrent.CompletableFuture;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import org.folio.completablefuture.FolioVertxCompletableFuture;
-import org.folio.orders.OrderLineUpdateInstanceHolder;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
-import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
-import org.folio.orders.handler.OrderLinePatchOperationHandlerResolver;
-
-import lombok.RequiredArgsConstructor;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
+
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class OrderLinePatchOperationService {
@@ -32,7 +27,7 @@ public class OrderLinePatchOperationService {
 
         operationHandlerResolver
           .resolve(OrderLinePatchOperationType.fromValue(rq.getOperation().value()))
-          .handler(orderLineUpdateInstanceHolder, context);
+          .handle(orderLineUpdateInstanceHolder, context);
       })
       .onComplete(res -> {
         if (res.failed()) {
