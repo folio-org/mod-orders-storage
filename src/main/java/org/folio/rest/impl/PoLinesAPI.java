@@ -131,8 +131,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
-      poLinesService.getPoLineById(id, new DBClient(vertxContext, okapiHeaders))
-        .onComplete(poLine -> orderLinePatchOperationService.patch(poLine.result(), entity, requestContext));
+      DBClient client = new DBClient(vertxContext, okapiHeaders);
+      orderLinePatchOperationService.patch(id, entity, requestContext, client);
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }

@@ -84,8 +84,9 @@ public class ApplicationConfig {
   }
 
   @Bean
-  OrderLinePatchOperationService orderLinePatchOperationService (OrderLinePatchOperationHandlerResolver operationHandlerResolver) {
-    return new OrderLinePatchOperationService(operationHandlerResolver);
+  OrderLinePatchOperationService orderLinePatchOperationService (OrderLinePatchOperationHandlerResolver operationHandlerResolver,
+      PoLinesService poLinesService) {
+    return new OrderLinePatchOperationService(operationHandlerResolver, poLinesService);
   }
 
   @Bean PoLineNumbersService poLineNumbersService() {
