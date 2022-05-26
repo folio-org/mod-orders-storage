@@ -7,7 +7,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.folio.models.TableNames;
+import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.SQLConnection;
 import org.folio.rest.persist.Tx;
@@ -17,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.handler.HttpException;
@@ -41,6 +46,9 @@ public class AbstractApiHandlerTest {
   private Tx<String> tx;
   private Query<RowSet<Row>> query;
   private AbstractApiHandler abstractApiHandler;
+  private Context context;
+  private Map<String, String> headers;
+  private DBClient client;
 
   @BeforeEach
   void init() throws Exception {
@@ -60,6 +68,9 @@ public class AbstractApiHandlerTest {
         return "orders-storage/purchase-order";
       }
     };
+    headers = mock(HashMap.class);
+    context = mock(Context.class);
+    client = new DBClient(context, headers, spyPGClient);
   }
 
   @Test
@@ -70,7 +81,7 @@ public class AbstractApiHandlerTest {
     when(mockPGConnection.preparedQuery(any())).thenReturn(preparedQuery);
     when(preparedQuery.execute()).thenReturn(Future.succeededFuture(rowSet));
     //Act
-    testContext.assertFailure(abstractApiHandler.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), false))
+    testContext.assertFailure(client.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), false))
       .onComplete(event -> {
         testContext.verify(() -> {
           HttpException exception = (HttpException) event.cause();
@@ -89,7 +100,7 @@ public class AbstractApiHandlerTest {
     when(preparedQuery.execute()).thenReturn(Future.succeededFuture(rowSet));
     doReturn(rowSet).when(asyncRowSet).result();
     //Act
-    testContext.assertComplete(abstractApiHandler.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), true))
+    testContext.assertComplete(client.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), true))
       .onComplete(event -> {
         testContext.verify(() -> {
           assertEquals(tx, event.result());
@@ -109,7 +120,7 @@ public class AbstractApiHandlerTest {
     doReturn(1).when(rowSet).rowCount();
 
     //Act
-    testContext.assertComplete(abstractApiHandler.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), true))
+    testContext.assertComplete(client.deleteByQuery(tx, TableNames.PURCHASE_ORDER_TABLE, new CQLWrapper().setWhereClause("purchaseOrderId"), true))
       .onComplete(event -> {
         testContext.verify(() -> assertEquals(tx, event.result()));
         testContext.completeNow();

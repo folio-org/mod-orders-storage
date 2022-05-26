@@ -16,6 +16,7 @@ import org.folio.rest.jaxrs.model.Errors;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
+import org.folio.rest.persist.PgExceptionUtil;
 
 import javax.ws.rs.core.Response;
 
@@ -33,6 +34,16 @@ public class ResponseUtil {
       logger.error("Failure : {}", ExceptionUtil.errorAsString(errors));
     }
     promise.fail(new HttpException(httpCode, errors));
+  }
+
+  public static void httpHandleFailure(Promise<?> promise, AsyncResult<?> reply) {
+    Throwable cause = reply.cause();
+    String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
+    if (badRequestMessage != null) {
+      promise.fail(new io.vertx.ext.web.handler.HttpException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+    } else {
+      promise.fail(new io.vertx.ext.web.handler.HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
+    }
   }
 
   public static void handleFailure(Promise<?> promise, AsyncResult<?> reply) {
