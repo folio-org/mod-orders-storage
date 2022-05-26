@@ -1,11 +1,11 @@
 package org.folio.orders.lines.update;
 
-import lombok.RequiredArgsConstructor;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.PoLine;
 
-import java.util.concurrent.CompletableFuture;
+import io.vertx.core.Future;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
@@ -13,7 +13,7 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
   private final OrderLineUpdateInstanceStrategyResolver orderLineUpdateInstanceStrategyResolver;
 
   @Override
-  public CompletableFuture<Void> handle(OrderLineUpdateInstanceHolder holder, RequestContext context) {
+  public Future<Void> handle(OrderLineUpdateInstanceHolder holder, RequestContext context) {
     PoLine storagePoLine = holder.getStoragePoLine();
 
     switch (storagePoLine.getOrderFormat()) {
@@ -21,7 +21,7 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
       return orderLineUpdateInstanceStrategyResolver
         .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
         .updateInstance(holder, context)
-        .thenCompose(v -> orderLineUpdateInstanceStrategyResolver
+        .compose(v -> orderLineUpdateInstanceStrategyResolver
           .resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value()))
           .updateInstance(holder, context));
     case ELECTRONIC_RESOURCE:
@@ -34,7 +34,7 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
         .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
         .updateInstance(holder, context);
     default:
-      return CompletableFuture.completedFuture(null);
+      return Future.succeededFuture(null);
     }
   }
 }

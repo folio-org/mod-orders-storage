@@ -5,12 +5,12 @@ import org.folio.orders.lines.update.OrderLineUpdateInstanceHolder;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
 
-import java.util.concurrent.CompletableFuture;
+import io.vertx.core.Future;
 
 public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpdateInstanceStrategy {
 
   @Override
-  public CompletableFuture<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
+  public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
     throw new NotImplementedException();
   }
 }

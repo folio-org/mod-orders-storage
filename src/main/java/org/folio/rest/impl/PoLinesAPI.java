@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -18,7 +19,6 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.services.lines.PoLinesService;
-import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -128,13 +128,13 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
 
   @Override
   public void patchOrdersStoragePoLinesById(String id, StoragePatchOrderLineRequest entity,
-      Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    try {
-      RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
-      DBClient client = new DBClient(vertxContext, okapiHeaders);
-      orderLinePatchOperationService.patch(id, entity, requestContext, client);
-    } catch (Exception e) {
-      asyncResultHandler.handle(buildErrorResponse(e));
-    }
+        Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
+    RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
+    DBClient client = new DBClient(vertxContext, okapiHeaders);
+    orderLinePatchOperationService.patch(id, entity, requestContext, client)
+      .onFailure(t -> {
+        asyncResultHandler.handle(buildErrorResponse(t));
+      });
   }
 }

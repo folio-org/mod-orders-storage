@@ -2,9 +2,9 @@ package org.folio.orders.lines.update;
 
 import org.folio.rest.core.models.RequestContext;
 
-import java.util.concurrent.CompletableFuture;
+import io.vertx.core.Future;
 
 public interface OrderLineUpdateInstanceStrategy {
 
-  public CompletableFuture<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext);
+  public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext);
 }
