@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.folio.dao.lines.PoLinesDAO;
+import org.folio.dao.lines.PoLinesPostgresDAO;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
@@ -28,6 +30,9 @@ import org.folio.rest.jaxrs.model.Eresource;
 import org.folio.rest.jaxrs.model.Physical;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
+import org.folio.services.lines.PoLinesService;
+import org.folio.services.piece.PieceService;
+import org.folio.services.title.TitleService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +46,14 @@ import io.vertx.core.impl.EventLoopContext;
 
 public class OrderLineUpdateInstanceHandlerTest {
 
+  @Autowired
+  TitleService titleService;
+  @Autowired
+  PieceService pieceService;
+  @Autowired
+  PoLinesService poLinesService;
+  @Autowired
+  PoLinesDAO poLinesDAO;
   @Autowired
   OrderLineUpdateInstanceHandler orderLineUpdateInstanceHandler;
   @Autowired
@@ -91,10 +104,6 @@ public class OrderLineUpdateInstanceHandlerTest {
   @Test
   public void shouldThrowNotImplementedException() {
     OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHandlerTest.StubOrderLineUpdateInstanceHolder();
-
-    assertThrows(NotImplementedException.class, () ->
-      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
-
   }
 
   @Test
@@ -114,9 +123,6 @@ public class OrderLineUpdateInstanceHandlerTest {
     orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
     orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
 
-    assertThrows(NotImplementedException.class, () ->
-      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
-
   }
 
   @Test
@@ -135,9 +141,6 @@ public class OrderLineUpdateInstanceHandlerTest {
     orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
     orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
 
-    assertThrows(NotImplementedException.class, () ->
-      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
-
   }
 
   @Test
@@ -154,9 +157,6 @@ public class OrderLineUpdateInstanceHandlerTest {
     OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
     orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
     orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
-
-    assertThrows(NotImplementedException.class, () ->
-      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
 
   }
 
@@ -176,9 +176,6 @@ public class OrderLineUpdateInstanceHandlerTest {
     orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
     orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
 
-    assertThrows(NotImplementedException.class, () ->
-      orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext));
-
   }
 
 
@@ -195,14 +192,32 @@ public class OrderLineUpdateInstanceHandlerTest {
   }
 
    static class ContextConfiguration {
+     @Bean
+     PoLinesDAO poLinesDAO() {
+       return new PoLinesPostgresDAO();
+     }
+     @Bean
+     PoLinesService poLinesService(PoLinesDAO poLinesDAO) {
+       return new PoLinesService(poLinesDAO);
+     }
+     @Bean
+     PieceService pieceService() {
+       return new PieceService();
+     }
+
+     @Bean
+     TitleService titleService() {
+       return new TitleService();
+     }
+
     @Bean
-    WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy() {
-      return spy(new WithHoldingOrderLineUpdateInstanceStrategy());
+    WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy(PoLinesService poLinesService, TitleService titleService, PieceService pieceService) {
+      return spy(new WithHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService, pieceService));
     }
 
     @Bean
-    WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy() {
-      return spy(new WithoutHoldingOrderLineUpdateInstanceStrategy());
+    WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy(PoLinesService poLinesService, TitleService titleService) {
+      return spy(new WithoutHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService));
     }
 
     @Bean
