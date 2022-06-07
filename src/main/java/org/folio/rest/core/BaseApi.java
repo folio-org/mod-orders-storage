@@ -18,7 +18,7 @@ public abstract class BaseApi {
   }
 
   public Future<Response> buildNoContentResponse() {
-    return  Future.succeededFuture(Response.noContent().build());
+    return Future.succeededFuture(Response.noContent().build());
   }
 
   public Future<Response> buildErrorResponse(Throwable throwable) {

@@ -16,7 +16,7 @@ import io.vertx.core.Handler;
 
 public class TitlesAPI implements OrdersStorageTitles {
 
-  static final String TITLES_TABLE = "titles";
+  public static final String TITLES_TABLE = "titles";
 
   @Override
   @Validate
