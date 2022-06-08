@@ -7,6 +7,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -44,8 +45,6 @@ public class PieceServiceTest extends TestBase {
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
 
   PieceService pieceService = new PieceService();
-  @Mock
-  private PostgresClient postgresClient;
 
   private static TenantJob tenantJob;
   private final String newHoldingId = UUID.randomUUID().toString();
@@ -104,6 +103,49 @@ public class PieceServiceTest extends TestBase {
         });
         testContext.completeNow();
       });
+  }
+
+  @Test
+  void shouldFailedGetPiecesByPoLineId(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+    String incorrectPoLineId = UUID.randomUUID().toString();
+
+    PoLine poLine = new PoLine().withId(poLineId);
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withPoLineId(poLineId);
+
+    Promise<Void> promise1 = Promise.promise();
+    Promise<Void> promise2 = Promise.promise();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+
+    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      promise1.complete();
+      logger.info("PoLine was saved");
+    });
+
+
+    promise1.future().onComplete(v -> {
+      client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
+        if (event.failed()) {
+          promise2.fail(event.cause());
+        } else {
+          promise2.complete();
+          logger.info("Piece was saved");
+        }
+      });
+    });
+
+    testContext.assertComplete(promise2.future()
+        .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
+        .onFailure(event -> {
+          String exception = String.format("Pieces with poLineId=%s was not found", incorrectPoLineId);
+          testContext.verify(() -> {
+            assertEquals(event.getMessage(), exception);
+          });
+          testContext.completeNow();
+        }));
   }
 
   @Test
