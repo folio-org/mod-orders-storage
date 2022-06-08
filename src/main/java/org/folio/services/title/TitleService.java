@@ -21,11 +21,11 @@ import io.vertx.core.Promise;
 public class TitleService {
 
   private static final Logger logger = LogManager.getLogger(TitleService.class);
-  private final String PO_LINE_ID = "poLineId";
+  private static final String POLINE_ID_FIELD = "poLineId";
 
   public Future<Title> getTitleByPoLineId(String poLineId, DBClient client) {
     Promise<Title> promise = Promise.promise();
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID, poLineId);
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
     client.getPgClient().get(TITLES_TABLE, Title.class, criterion, false, reply -> {
       if(reply.failed()) {
         logger.error("Retrieve Title failed : {}", reply);
@@ -49,7 +49,7 @@ public class TitleService {
   private Future<Tx<PoLine>> updateInstanceIdForTitle(Tx<PoLine> poLineTx, Title title, String instanceId, DBClient client) {
     Promise<Tx<PoLine>> promise = Promise.promise();
 
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID, poLineTx.getEntity().getId());
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineTx.getEntity().getId());
     title.setInstanceId(instanceId);
     client.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, title, JSONB, criterion.toString(), false, event -> {
       if (event.failed()) {

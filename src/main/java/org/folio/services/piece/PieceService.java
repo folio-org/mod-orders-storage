@@ -29,11 +29,11 @@ import io.vertx.core.json.JsonObject;
 public class PieceService {
 
   private static final Logger logger = LogManager.getLogger(PieceService.class);
-  private final String PO_LINE_ID = "poLineId";
+  private static final String POLINE_ID_FIELD = "poLineId";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     Promise<List<Piece>> promise = Promise.promise();
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID, poLineId);
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
     client.getPgClient().get(PIECES_TABLE, Piece.class, criterion, false, reply -> {
       if(reply.failed()) {
         logger.error("Retrieve Pieces failed : {}", reply);
@@ -84,17 +84,15 @@ public class PieceService {
   private Future<Tx<PoLine>> updateHoldingForPieces(Tx<PoLine> poLineTx, List<Piece> pieces, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
     List<Piece> updatedPieces = new ArrayList<>();
     List<Holding> holdings = replaceInstanceRef.getHoldings();
-    holdings.forEach(holding -> {
-      updatedPieces.addAll(pieces.stream().filter(piece -> piece.getHoldingId().equals(holding.getFromHoldingId()))
-        .peek(piece -> {
-          if (holding.getToHoldingId() != null) {
-            piece.setHoldingId(holding.getToHoldingId());
-          } else {
-            piece.setLocationId(holding.getToLocationId());
-          }
-        })
-        .collect(Collectors.toList()));
-    });
+    holdings.forEach(holding -> updatedPieces.addAll(pieces.stream().filter(piece -> piece.getHoldingId().equals(holding.getFromHoldingId()))
+      .peek(piece -> {
+        if (holding.getToHoldingId() != null) {
+          piece.setHoldingId(holding.getToHoldingId());
+        } else {
+          piece.setLocationId(holding.getToLocationId());
+        }
+      })
+      .collect(Collectors.toList())));
 
     return updatePieces(poLineTx, updatedPieces, client);
   }
