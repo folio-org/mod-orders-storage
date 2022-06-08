@@ -46,7 +46,7 @@ public class WithoutHoldingOrderLineUpdateInstanceStrategy implements OrderLineU
             if (result.failed()) {
               tx.rollbackTransaction().onComplete(res -> promise.fail(result.cause()));
             } else {
-              logger.info("Instance {} was updated successfully", tx.getEntity());
+              logger.info("Instance was updated successfully for poLine={}", tx.getEntity().getId());
               promise.complete(null);
             }
           });

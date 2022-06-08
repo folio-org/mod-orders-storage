@@ -22,13 +22,11 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -41,7 +39,7 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class PieceServiceTest extends TestBase {
 
-  static final String TEST_TENANT = "test_tenant";
+  static final String TEST_TENANT = "test_piece_tenant";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
 
   PieceService pieceService = new PieceService();

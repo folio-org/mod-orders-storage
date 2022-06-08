@@ -1,50 +1,76 @@
 package org.folio.orders.lines.update;
 
-import static org.folio.rest.core.RestClient.OKAPI_URL;
-import static org.folio.rest.impl.TestBase.TENANT_HEADER;
+import static org.folio.StorageTestSuite.clearVertxContext;
+import static org.folio.StorageTestSuite.initSpringContext;
+import static org.folio.models.TableNames.PIECES_TABLE;
+import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.models.TableNames.TITLES_TABLE;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.util.TestConfig.autowireDependencies;
-import static org.folio.rest.util.TestConfig.clearVertxContext;
 import static org.folio.rest.util.TestConfig.deployVerticle;
-import static org.folio.rest.util.TestConfig.initSpringContext;
 import static org.folio.rest.util.TestConfig.isVerticleNotDeployed;
-import static org.folio.rest.util.TestConstants.X_OKAPI_TOKEN;
-import static org.folio.rest.util.TestConstants.X_OKAPI_USER_ID;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
+import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.spy;
 
+import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
+import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.Eresource;
+import org.folio.rest.jaxrs.model.Holding;
+import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.Physical;
+import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
+import org.folio.rest.jaxrs.model.TenantJob;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.title.TitleService;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
-import io.vertx.core.impl.EventLoopContext;
+import io.restassured.http.Header;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 
-public class OrderLineUpdateInstanceHandlerTest {
+@ExtendWith(VertxExtension.class)
+public class OrderLineUpdateInstanceHandlerTest extends TestBase {
+
+  static final String TEST_TENANT = "test_update_instance_tenant";
+  private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
+  private Map<String, String> headers = new HashMap<>(Collections.singletonMap(OKAPI_HEADER_TENANT, TEST_TENANT));
 
   @Autowired
   TitleService titleService;
@@ -63,21 +89,23 @@ public class OrderLineUpdateInstanceHandlerTest {
   @Autowired
   WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy;
 
-  @Mock
-  private EventLoopContext ctxMock;
-  private RequestContext requestContext;
-  private Map<String, String> okapiHeaders;
+  private static TenantJob tenantJob;
+  private final String newHoldingId = UUID.randomUUID().toString();
+  private final String newInstanceId = UUID.randomUUID().toString();
+  private final Logger logger = LogManager.getLogger(OrderLineUpdateInstanceHandlerTest.class);
   private static boolean runningOnOwn;
 
   @BeforeEach
-  public void initMocks(){
+  public void initMocks() throws MalformedURLException {
     MockitoAnnotations.openMocks(this);
-    okapiHeaders = new HashMap<>();
-    okapiHeaders.put(OKAPI_URL, "http://localhost:" + 8081);
-    okapiHeaders.put(X_OKAPI_TOKEN.getName(), X_OKAPI_TOKEN.getValue());
-    okapiHeaders.put(TENANT_HEADER.getName(), TENANT_HEADER.getValue());
-    okapiHeaders.put(X_OKAPI_USER_ID.getName(), X_OKAPI_USER_ID.getValue());
-    requestContext = new RequestContext(ctxMock, okapiHeaders);
+    pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
+    tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
+    autowireDependencies(this);
+  }
+
+  @AfterEach
+  void cleanupData() throws MalformedURLException {
+    deleteTenant(tenantJob, TEST_TENANT_HEADER);
   }
 
   @BeforeAll
@@ -96,99 +124,299 @@ public class OrderLineUpdateInstanceHandlerTest {
     }
   }
 
-  @BeforeEach
-  void beforeEach() {
-    autowireDependencies(this);
-  }
-
   @Test
-  public void shouldThrowNotImplementedException() {
-    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHandlerTest.StubOrderLineUpdateInstanceHolder();
-  }
+  public void shouldUpdatePhysicalWithHolding(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String titleId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+    String holdingId = UUID.randomUUID().toString();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
 
-  @Test
-  public void shouldThrowNotImplementedExceptionForMIXOrderFormat() {
-    String orderLineId = UUID.randomUUID().toString();
-    PoLine poLine = new PoLine().
-        withId(orderLineId).
-        withOrderFormat(PoLine.OrderFormat.P_E_MIX)
+    Location location = new Location()
+      .withHoldingId(holdingId)
+      .withQuantityPhysical(1)
+      .withQuantity(1)
+      .withQuantityElectronic(0);
+
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withInstanceId(instanceId)
+      .withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
       .withPhysical(new Physical()
-        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING))
-      .withEresource(new Eresource().withCreateInventory(Eresource.CreateInventory.INSTANCE));
+        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING_ITEM))
+      .withLocations(List.of(location));
+    Title title = new Title()
+      .withId(titleId)
+      .withPoLineId(poLineId)
+      .withInstanceId(instanceId);
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withPoLineId(poLineId)
+      .withTitleId(titleId)
+      .withHoldingId(holdingId);
+    Holding holding = new Holding()
+      .withFromHoldingId(holdingId)
+      .withToHoldingId(newHoldingId);
+    ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
+      .withNewInstanceId(newInstanceId)
+      .withHoldings(List.of(holding));
 
-    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
-    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+    Promise<Void> promise1 = Promise.promise();
+    Promise<Void> promise2 = Promise.promise();
+    Promise<Void> promise3 = Promise.promise();
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest()
+      .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
+      .withReplaceInstanceRef(replaceInstanceRef);
 
     OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
     orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
     orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
 
+    RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
+
+    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      promise1.complete();
+      logger.info("PoLine was saved");
+    });
+
+    promise1.future()
+      .onComplete(v -> {
+        client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
+          if (event.failed()) {
+            promise2.fail(event.cause());
+          } else {
+            promise2.complete();
+            logger.info("Title was saved");
+          }
+        });
+      })
+      .onComplete(v -> {
+        client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
+          if (event.failed()) {
+            promise3.fail(event.cause());
+          } else {
+            promise3.complete();
+            logger.info("Piece was saved");
+          }
+        });
+      });
+
+    testContext.assertComplete(promise2.future()
+      .compose(v -> promise3.future())
+      .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+      .onComplete(event -> {
+        Title actTitle = event.result();
+        testContext.verify(() -> {
+          assertThat(actTitle.getId(), is(titleId));
+          assertThat(actTitle.getInstanceId(), is(newInstanceId));
+        });
+        testContext.completeNow();
+      })
+      .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
+      .onComplete(event -> {
+        List<Piece> actPieces = event.result();
+        testContext.verify(() -> {
+          assertThat(actPieces.get(0).getId(), is(pieceId));
+          assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
+        });
+        testContext.completeNow();
+      })
+      .compose(v -> poLinesService.getPoLineById(poLineId, client))
+      .onComplete(event -> {
+        PoLine actPoLine = event.result();
+        testContext.verify(() -> {
+          assertThat(actPoLine.getId(), is(poLineId));
+          assertThat(actPoLine.getInstanceId(), is(newInstanceId));
+          assertThat(actPoLine.getLocations().get(0).getHoldingId(), is(newHoldingId));
+        });
+        testContext.completeNow();
+      });
   }
 
   @Test
-  public void shouldThrowNotImplementedExceptionForPhysicalOrderFormat() {
-    String orderLineId = UUID.randomUUID().toString();
-    PoLine poLine = new PoLine().
-        withId(orderLineId).
-        withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
+  public void shouldUpdatePhysicalWithSameHolding(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String titleId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+    String holdingId = UUID.randomUUID().toString();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+
+    Location location = new Location()
+      .withHoldingId(holdingId)
+      .withQuantityPhysical(1)
+      .withQuantity(1)
+      .withQuantityElectronic(0);
+
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withInstanceId(instanceId)
+      .withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
       .withPhysical(new Physical()
-        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING));
+        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING_ITEM))
+      .withLocations(List.of(location));
+    Title title = new Title()
+      .withId(titleId)
+      .withPoLineId(poLineId)
+      .withInstanceId(instanceId);
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withPoLineId(poLineId)
+      .withTitleId(titleId)
+      .withHoldingId(holdingId);
+    Holding holding = new Holding()
+      .withFromHoldingId(holdingId)
+      .withToHoldingId(holdingId);
+    ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
+      .withNewInstanceId(newInstanceId)
+      .withHoldings(List.of(holding));
 
-    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
-    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+    Promise<Void> promise1 = Promise.promise();
+    Promise<Void> promise2 = Promise.promise();
+    Promise<Void> promise3 = Promise.promise();
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest()
+      .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
+      .withReplaceInstanceRef(replaceInstanceRef);
 
     OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
     orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
     orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
 
+    RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
+
+    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      promise1.complete();
+      logger.info("PoLine was saved");
+    });
+
+    promise1.future()
+      .onComplete(v -> {
+        client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
+          if (event.failed()) {
+            promise2.fail(event.cause());
+          } else {
+            promise2.complete();
+            logger.info("Title was saved");
+          }
+        });
+      })
+      .onComplete(v -> {
+        client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
+          if (event.failed()) {
+            promise3.fail(event.cause());
+          } else {
+            promise3.complete();
+            logger.info("Piece was saved");
+          }
+        });
+      });
+
+    testContext.assertComplete(promise2.future()
+        .compose(v -> promise3.future())
+        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+      .onComplete(event -> {
+        Title actTitle = event.result();
+        testContext.verify(() -> {
+          assertThat(actTitle.getId(), is(titleId));
+          assertThat(actTitle.getInstanceId(), is(newInstanceId));
+        });
+        testContext.completeNow();
+      })
+      .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
+      .onComplete(event -> {
+        List<Piece> actPieces = event.result();
+        testContext.verify(() -> {
+          assertThat(actPieces.get(0).getId(), is(pieceId));
+          assertThat(actPieces.get(0).getHoldingId(), is(holdingId));
+        });
+        testContext.completeNow();
+      })
+      .compose(v -> poLinesService.getPoLineById(poLineId, client))
+      .onComplete(event -> {
+        PoLine actPoLine = event.result();
+        testContext.verify(() -> {
+          assertThat(actPoLine.getId(), is(poLineId));
+          assertThat(actPoLine.getInstanceId(), is(newInstanceId));
+          assertThat(actPoLine.getLocations().get(0).getHoldingId(), is(holdingId));
+        });
+        testContext.completeNow();
+      });
   }
 
   @Test
-  public void shouldThrowNotImplementedExceptionForEresourceOrderFormat() {
-    String orderLineId = UUID.randomUUID().toString();
-    PoLine poLine = new PoLine().
-        withId(orderLineId).
-        withOrderFormat(PoLine.OrderFormat.ELECTRONIC_RESOURCE)
-      .withEresource(new Eresource().withCreateInventory(Eresource.CreateInventory.INSTANCE));
+  public void shouldUpdateEresourceWithoutHolding(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String titleId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
 
-    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
-    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withInstanceId(instanceId)
+      .withOrderFormat(PoLine.OrderFormat.ELECTRONIC_RESOURCE)
+      .withEresource(new Eresource()
+        .withCreateInventory(Eresource.CreateInventory.INSTANCE));
+    Title title = new Title()
+      .withId(titleId)
+      .withPoLineId(poLineId)
+      .withInstanceId(instanceId);
+    ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
+      .withNewInstanceId(newInstanceId)
+      .withHoldings(Collections.emptyList());
+
+    Promise<Void> promise1 = Promise.promise();
+    Promise<Void> promise2 = Promise.promise();
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest()
+      .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
+      .withReplaceInstanceRef(replaceInstanceRef);
 
     OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
     orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
     orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
 
-  }
+    RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
 
-  @Test
-  public void shouldThrowNotImplementedExceptionForOtherOrderFormat() {
-    String orderLineId = UUID.randomUUID().toString();
-    PoLine poLine = new PoLine().
-        withId(orderLineId).
-        withOrderFormat(PoLine.OrderFormat.OTHER)
-      .withPhysical(new Physical()
-        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING));
+    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      promise1.complete();
+      logger.info("PoLine was saved");
+    });
 
-    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest();
-    patchOrderLineRequest.withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF);
+    promise1.future()
+      .onComplete(v -> client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
+        if (event.failed()) {
+          promise2.fail(event.cause());
+        } else {
+          promise2.complete();
+          logger.info("Title was saved");
+        }
+      }));
 
-    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
-    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
-    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
-
-  }
-
-
-  static class StubOrderLineUpdateInstanceHolder extends OrderLineUpdateInstanceHolder {
-
-    public PoLine getStoragePoLine() {
-      PoLine poLine = new PoLine();
-      Physical physical = new Physical();
-      physical.setCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING);
-      poLine.setPhysical(physical);
-      poLine.setOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE);
-      return poLine;
-    }
+    testContext.assertComplete(promise2.future()
+        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+      .onComplete(event -> {
+        Title actTitle = event.result();
+        testContext.verify(() -> {
+          assertThat(actTitle.getId(), is(titleId));
+          assertThat(actTitle.getInstanceId(), is(newInstanceId));
+        });
+        testContext.completeNow();
+      })
+      .compose(v -> poLinesService.getPoLineById(poLineId, client))
+      .onComplete(event -> {
+        PoLine actPoLine = event.result();
+        testContext.verify(() -> {
+          assertThat(actPoLine.getId(), is(poLineId));
+          assertThat(actPoLine.getInstanceId(), is(newInstanceId));
+        });
+        testContext.completeNow();
+      });
   }
 
    static class ContextConfiguration {

@@ -49,8 +49,7 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
         logger.info("Update Instance");
         tx.startTx()
           .compose(poLineTx -> titleService.updateTitle(poLineTx, instanceId, client))
-          .compose(poLineTx -> pieceService.updatePieces(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
-          .compose(poLineTx -> updateLocation(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
+          .compose(poLineTx -> updateHoldings(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
           .compose(poLineTx -> poLinesService.updateInstanceIdForPoLine(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
           .compose(Tx::endTx)
           .onComplete(result -> {
@@ -67,7 +66,23 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
     return promise.future();
   }
 
-  private Future<Tx<PoLine>> updateLocation(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
+  private Future<Tx<PoLine>> updateHoldings(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
+    List<Holding> holdings = replaceInstanceRef.getHoldings();
+
+    if (!isUpdatedHolding(holdings)) {
+      logger.info("Holding does not require an update");
+      return Future.succeededFuture(poLineTx);
+    } else {
+      return pieceService.updatePieces(poLineTx, replaceInstanceRef, client)
+        .compose(v -> updateLocation(poLineTx, replaceInstanceRef));
+    }
+  }
+
+  private boolean isUpdatedHolding(List<Holding> holdings) {
+    return holdings.stream().noneMatch(holding -> holding.getFromHoldingId().equals(holding.getToHoldingId()));
+  }
+
+  private Future<Tx<PoLine>> updateLocation(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef) {
     PoLine poLine = poLineTx.getEntity();
     List<Holding> holdings = replaceInstanceRef.getHoldings();
     List<Location> updatedLocation = new ArrayList<>();
