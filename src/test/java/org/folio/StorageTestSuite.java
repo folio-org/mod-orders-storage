@@ -204,8 +204,6 @@ public class StorageTestSuite {
   }
 
   @Nested
-  class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
-  @Nested
   class EntitiesCrudTestNested extends EntitiesCrudTest {}
   @Nested
   class OrdersAPITestNested extends OrdersAPITest {}
@@ -255,4 +253,6 @@ public class StorageTestSuite {
   class PieceServiceTestNested extends PieceServiceTest {}
   @Nested
   class TitleServiceTestNested extends TitleServiceTest {}
+  @Nested
+  class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
 }

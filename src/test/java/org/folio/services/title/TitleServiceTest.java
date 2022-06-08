@@ -36,7 +36,7 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class TitleServiceTest extends TestBase {
 
-  static final String TEST_TENANT = "test_title_tenant";
+  static final String TEST_TENANT = "test_tenant";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
 
   TitleService titleService = new TitleService();

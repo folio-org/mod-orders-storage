@@ -68,7 +68,7 @@ import io.vertx.junit5.VertxTestContext;
 @ExtendWith(VertxExtension.class)
 public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
-  static final String TEST_TENANT = "test_update_instance_tenant";
+  static final String TEST_TENANT = "test_tenant";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
   private Map<String, String> headers = new HashMap<>(Collections.singletonMap(OKAPI_HEADER_TENANT, TEST_TENANT));
 
