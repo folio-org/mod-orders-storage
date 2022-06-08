@@ -35,15 +35,12 @@ import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
-class TitleServiceTest extends TestBase {
+public class TitleServiceTest extends TestBase {
 
   static final String TEST_TENANT = "test_tenant";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
 
   TitleService titleService = new TitleService();
-  @Mock
-  private PostgresClient postgresClient;
-
   private static TenantJob tenantJob;
   private final String newInstanceId = UUID.randomUUID().toString();
   private final Logger logger = LogManager.getLogger(TitleService.class);
@@ -108,7 +105,6 @@ class TitleServiceTest extends TestBase {
             });
             testContext.completeNow();
           })));
-
   }
 
   @Test

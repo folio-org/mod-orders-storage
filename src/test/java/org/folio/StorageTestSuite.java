@@ -45,6 +45,8 @@ import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.migration.MigrationServiceTest;
+import org.folio.services.piece.PieceServiceTest;
+import org.folio.services.title.TitleServiceTest;
 import org.folio.spring.SpringContextUtil;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
 import org.folio.util.PomReaderUtilTest;
@@ -249,4 +251,8 @@ public class StorageTestSuite {
   class PomReaderUtilTestNested extends PomReaderUtilTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
+  @Nested
+  class PieceServiceTestNested extends PieceServiceTest {}
+  @Nested
+  class TitleServiceTestNested extends TitleServiceTest {}
 }
