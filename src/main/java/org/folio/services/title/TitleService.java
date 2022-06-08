@@ -1,7 +1,7 @@
 package org.folio.services.title;
 
+import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
-import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
 
