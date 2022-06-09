@@ -41,7 +41,8 @@ public class PieceService {
       } else {
         List<Piece> result = reply.result().getResults();
         if (result.isEmpty()) {
-          promise.fail(new Exception(String.format("Pieces with poLineId=%s was not found", poLineId)));
+          logger.info(String.format("Pieces with poLineId=%s was not found", poLineId));
+          promise.complete(null);
         } else {
           promise.complete(result);
         }
@@ -84,6 +85,10 @@ public class PieceService {
   private Future<Tx<PoLine>> updateHoldingForPieces(Tx<PoLine> poLineTx, List<Piece> pieces, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
     List<Piece> updatedPieces = new ArrayList<>();
     List<Holding> holdings = replaceInstanceRef.getHoldings();
+    if (pieces == null) {
+      logger.info("Pieces wasn't updated");
+      return Future.succeededFuture(poLineTx);
+    }
     holdings.forEach(holding -> updatedPieces.addAll(pieces.stream().filter(piece -> piece.getHoldingId().equals(holding.getFromHoldingId()))
       .peek(piece -> {
         if (holding.getToHoldingId() != null) {

@@ -97,10 +97,10 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
   @BeforeEach
   public void initMocks() throws MalformedURLException {
-    MockitoAnnotations.openMocks(this);
-    pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
-    tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
     autowireDependencies(this);
+    MockitoAnnotations.openMocks(this);
+    tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
+    pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
   }
 
   @AfterEach

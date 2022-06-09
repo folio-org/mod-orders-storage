@@ -7,7 +7,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -62,7 +62,7 @@ public class PieceServiceTest extends TestBase {
   }
 
   @Test
-  void getPiecesByPoLineId(Vertx vertx, VertxTestContext testContext) {
+  void shouldReturnPiecesByPoLineId(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
 
@@ -108,11 +108,13 @@ public class PieceServiceTest extends TestBase {
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
     String incorrectPoLineId = UUID.randomUUID().toString();
+    String holdingId = UUID.randomUUID().toString();
 
     PoLine poLine = new PoLine().withId(poLineId);
     Piece piece = new Piece()
       .withId(pieceId)
-      .withPoLineId(poLineId);
+      .withPoLineId(poLineId)
+      .withHoldingId(holdingId);
 
     Promise<Void> promise1 = Promise.promise();
     Promise<Void> promise2 = Promise.promise();
@@ -137,17 +139,17 @@ public class PieceServiceTest extends TestBase {
 
     testContext.assertComplete(promise2.future()
         .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
-        .onFailure(event -> {
-          String exception = String.format("Pieces with poLineId=%s was not found", incorrectPoLineId);
+        .onComplete(event -> {
+          List<Piece> actPieces = event.result();
           testContext.verify(() -> {
-            assertEquals(event.getMessage(), exception);
+            assertNull(actPieces);
           });
           testContext.completeNow();
         }));
   }
 
   @Test
-  public void shouldUpdatePieces(Vertx vertx, VertxTestContext testContext) {
+  void shouldUpdatePieces(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
@@ -200,6 +202,5 @@ public class PieceServiceTest extends TestBase {
             testContext.completeNow();
           })));
   }
-
 
 }

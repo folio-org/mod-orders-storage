@@ -57,7 +57,7 @@ public class TitleServiceTest extends TestBase {
   }
 
   @Test
-  public void shouldUpdateTitle(Vertx vertx, VertxTestContext testContext) {
+  void shouldUpdateTitle(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String titleId = UUID.randomUUID().toString();
     String instanceId = UUID.randomUUID().toString();
@@ -107,7 +107,7 @@ public class TitleServiceTest extends TestBase {
   }
 
   @Test
-  void getTitleByPoLineId(Vertx vertx, VertxTestContext testContext) {
+  void shouldReturnTitleByPoLineId(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String titleId = UUID.randomUUID().toString();
     String instanceId = UUID.randomUUID().toString();
