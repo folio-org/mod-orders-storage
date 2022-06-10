@@ -13,6 +13,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 
 import java.net.MalformedURLException;
@@ -25,6 +26,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import io.vertx.ext.web.handler.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
@@ -234,6 +236,42 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         });
         testContext.completeNow();
       });
+  }
+
+  @Test
+  public void shouldFailedUpdatePhysicalWithHolding(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withInstanceId(instanceId)
+      .withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
+      .withPhysical(new Physical()
+        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING_ITEM));
+
+    ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
+      .withNewInstanceId(newInstanceId)
+      .withHoldings(Collections.emptyList());
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest()
+      .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
+      .withReplaceInstanceRef(replaceInstanceRef);
+
+    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
+    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
+    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+
+    RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
+
+    testContext.assertComplete(orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)
+        .onFailure(event -> {
+          String exception = "ReplaceInstanceRef or Holdings not present";
+          testContext.verify(() -> {
+            assertEquals(((HttpException) event).getPayload(), exception);
+          });
+          testContext.completeNow();
+        }));
   }
 
   @Test
