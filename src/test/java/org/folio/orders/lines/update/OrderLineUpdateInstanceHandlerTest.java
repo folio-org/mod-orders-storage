@@ -31,8 +31,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
+import org.folio.migration.MigrationService;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
@@ -47,6 +49,7 @@ import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.DBClient;
+import org.folio.services.finance.FinanceService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.title.TitleService;
@@ -82,6 +85,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
   PoLinesService poLinesService;
   @Autowired
   PoLinesDAO poLinesDAO;
+  @Autowired
+  MigrationService migrationService;
   @Autowired
   OrderLineUpdateInstanceHandler orderLineUpdateInstanceHandler;
   @Autowired
@@ -476,31 +481,45 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
        return new TitleService();
      }
 
-    @Bean
-    WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy(PoLinesService poLinesService, TitleService titleService, PieceService pieceService) {
-      return spy(new WithHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService, pieceService));
-    }
+     @Bean
+     RestClient restClient() {
+       return new RestClient();
+     }
 
-    @Bean
-    WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy(PoLinesService poLinesService, TitleService titleService) {
-      return spy(new WithoutHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService));
-    }
+     @Bean FinanceService financeService(RestClient restClient) {
+       return new FinanceService(restClient);
+     }
 
-    @Bean
-    OrderLineUpdateInstanceStrategyResolver orderLineUpdateInstanceStrategyResolver(WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy,
-      WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy) {
-      Map<CreateInventoryType, OrderLineUpdateInstanceStrategy> strategies = new EnumMap<>(CreateInventoryType.class);
-      strategies.put(CreateInventoryType.INSTANCE_HOLDING_ITEM, withHoldingOrderLineUpdateInstanceStrategy);
-      strategies.put(CreateInventoryType.INSTANCE_HOLDING, withHoldingOrderLineUpdateInstanceStrategy);
-      strategies.put(CreateInventoryType.INSTANCE, withoutHoldingOrderLineUpdateInstanceStrategy);
-      strategies.put(CreateInventoryType.NONE, withoutHoldingOrderLineUpdateInstanceStrategy);
-      return spy(new OrderLineUpdateInstanceStrategyResolver(strategies));
-    }
+     @Bean
+     MigrationService migrationService(FinanceService financeService) {
+       return new MigrationService(financeService);
+     }
 
-    @Bean
-    OrderLineUpdateInstanceHandler orderLineUpdateInstanceHandler(OrderLineUpdateInstanceStrategyResolver orderLineUpdateInstanceStrategyResolver) {
-      return spy(new OrderLineUpdateInstanceHandler(orderLineUpdateInstanceStrategyResolver));
-    }
+     @Bean
+     WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy(PoLinesService poLinesService, TitleService titleService, PieceService pieceService) {
+       return spy(new WithHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService, pieceService));
+     }
+
+     @Bean
+     WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy(PoLinesService poLinesService, TitleService titleService) {
+       return spy(new WithoutHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService));
+     }
+
+     @Bean
+     OrderLineUpdateInstanceStrategyResolver orderLineUpdateInstanceStrategyResolver(WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy,
+       WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy) {
+       Map<CreateInventoryType, OrderLineUpdateInstanceStrategy> strategies = new EnumMap<>(CreateInventoryType.class);
+       strategies.put(CreateInventoryType.INSTANCE_HOLDING_ITEM, withHoldingOrderLineUpdateInstanceStrategy);
+       strategies.put(CreateInventoryType.INSTANCE_HOLDING, withHoldingOrderLineUpdateInstanceStrategy);
+       strategies.put(CreateInventoryType.INSTANCE, withoutHoldingOrderLineUpdateInstanceStrategy);
+       strategies.put(CreateInventoryType.NONE, withoutHoldingOrderLineUpdateInstanceStrategy);
+       return spy(new OrderLineUpdateInstanceStrategyResolver(strategies));
+     }
+
+     @Bean
+     OrderLineUpdateInstanceHandler orderLineUpdateInstanceHandler(OrderLineUpdateInstanceStrategyResolver orderLineUpdateInstanceStrategyResolver) {
+       return spy(new OrderLineUpdateInstanceHandler(orderLineUpdateInstanceStrategyResolver));
+     }
   }
 
 }
