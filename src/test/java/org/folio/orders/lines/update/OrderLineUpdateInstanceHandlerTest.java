@@ -271,7 +271,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     testContext.assertComplete(orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)
         .onFailure(event -> {
-          String exception = "ReplaceInstanceRef or Holdings not present";
+          String exception = "ReplaceInstanceRef or Holdings is not present";
           testContext.verify(() -> {
             assertEquals(((HttpException) event).getPayload(), exception);
           });

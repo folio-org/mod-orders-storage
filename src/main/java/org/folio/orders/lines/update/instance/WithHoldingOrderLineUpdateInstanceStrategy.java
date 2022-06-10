@@ -38,8 +38,8 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
     Promise<Void> promise = Promise.promise();
     if (holder.getPatchOrderLineRequest().getReplaceInstanceRef() == null
         || holder.getPatchOrderLineRequest().getReplaceInstanceRef().getHoldings().isEmpty()) {
-      logger.error("ReplaceInstanceRef or Holdings not present");
-      promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef or Holdings not present"));
+      logger.error("ReplaceInstanceRef or Holdings is not present");
+      promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef or Holdings is not present"));
     } else {
       DBClient client = new DBClient(rqContext.getContext(), rqContext.getHeaders());
       Tx<PoLine> tx = new Tx<>(holder.getStoragePoLine(), client.getPgClient());

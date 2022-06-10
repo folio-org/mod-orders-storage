@@ -29,8 +29,8 @@ public class WithoutHoldingOrderLineUpdateInstanceStrategy implements OrderLineU
   public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
     Promise<Void> promise = Promise.promise();
     if (holder.getPatchOrderLineRequest().getReplaceInstanceRef() == null) {
-      logger.error("ReplaceInstanceRef or Holdings not present");
-      promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef  not present"));
+      logger.error("ReplaceInstanceRef is not present");
+      promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef is not present"));
     } else {
       DBClient client = new DBClient(rqContext.getContext(), rqContext.getHeaders());
       Tx<PoLine> tx = new Tx<>(holder.getStoragePoLine(), client.getPgClient());
