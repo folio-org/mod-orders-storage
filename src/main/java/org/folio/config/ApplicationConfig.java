@@ -24,6 +24,8 @@ import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategyResolver;
 import org.folio.orders.lines.update.PatchOperationHandler;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.services.piece.PieceService;
+import org.folio.services.title.TitleService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -50,13 +52,23 @@ public class ApplicationConfig {
   }
 
   @Bean
-  WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy() {
-    return new WithHoldingOrderLineUpdateInstanceStrategy();
+  PieceService pieceService() {
+    return new PieceService();
   }
 
   @Bean
-  WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy() {
-    return new WithoutHoldingOrderLineUpdateInstanceStrategy();
+  TitleService titleService() {
+    return new TitleService();
+  }
+
+  @Bean
+  WithHoldingOrderLineUpdateInstanceStrategy withHoldingOrderLineUpdateInstanceStrategy(TitleService titleService, PoLinesService poLinesService, PieceService pieceService) {
+    return new WithHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService, pieceService);
+  }
+
+  @Bean
+  WithoutHoldingOrderLineUpdateInstanceStrategy withoutHoldingOrderLineUpdateInstanceStrategy(TitleService titleService, PoLinesService poLinesService) {
+    return new WithoutHoldingOrderLineUpdateInstanceStrategy(titleService, poLinesService);
   }
 
   @Bean

@@ -31,6 +31,7 @@ import org.folio.dao.lines.PoLinesDAO;
 import org.folio.models.CriterionBuilder;
 import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Tx;
@@ -255,6 +256,12 @@ public class PoLinesService {
     return promise.future();
   }
 
+  public Future<Tx<PoLine>> updateInstanceIdForPoLine(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
+    poLineTx.getEntity().setInstanceId(replaceInstanceRef.getNewInstanceId());
+
+    return updatePoLine(poLineTx, client);
+  }
+
   private void populateTitleForPackagePoLineAndSave(Tx<PoLine> poLineTx, Promise<Tx<PoLine>> promise, String packagePoLineId,
     PoLine packagePoLine, DBClient client) {
     Title title = createTitleObject(poLineTx.getEntity());
@@ -290,7 +297,7 @@ public class PoLinesService {
     return promise.future();
   }
 
-  private Future<Tx<PoLine>> updatePoLine(Tx<PoLine> poLineTx, DBClient client) {
+  public Future<Tx<PoLine>> updatePoLine(Tx<PoLine> poLineTx, DBClient client) {
     Promise<Tx<PoLine>> promise = Promise.promise();
     PoLine poLine = poLineTx.getEntity();
 
@@ -303,7 +310,7 @@ public class PoLinesService {
         if (event.result().rowCount() == 0) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
-          logger.info("POLine record {} was successfully updated", poLineTx.getEntity());
+          logger.info("POLine record {} was successfully updated", poLineTx.getEntity().getId());
           promise.complete(poLineTx);
         }
       }

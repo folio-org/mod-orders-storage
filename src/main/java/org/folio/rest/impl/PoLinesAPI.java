@@ -133,6 +133,12 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
     DBClient client = new DBClient(vertxContext, okapiHeaders);
     orderLinePatchOperationService.patch(id, entity, requestContext, client)
-      .onFailure(t -> asyncResultHandler.handle(buildErrorResponse(t)));
+      .onComplete(result -> {
+        if (result.failed()) {
+          asyncResultHandler.handle(buildErrorResponse(result.cause()));
+        } else {
+          asyncResultHandler.handle(buildNoContentResponse());
+        }
+      });
   }
 }
