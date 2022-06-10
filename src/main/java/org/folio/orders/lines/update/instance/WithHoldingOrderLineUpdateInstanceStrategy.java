@@ -37,7 +37,7 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
   public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
     Promise<Void> promise = Promise.promise();
     if (holder.getPatchOrderLineRequest().getReplaceInstanceRef() == null
-        || holder.getPatchOrderLineRequest().getReplaceInstanceRef().getHoldings() == null) {
+        || holder.getPatchOrderLineRequest().getReplaceInstanceRef().getHoldings().isEmpty()) {
       logger.error("ReplaceInstanceRef or Holdings not present");
       promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef or Holdings not present"));
     } else {
