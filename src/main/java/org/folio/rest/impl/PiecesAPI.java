@@ -16,7 +16,7 @@ import io.vertx.core.Handler;
 
 public class PiecesAPI implements OrdersStoragePieces {
 
-  static final String PIECES_TABLE = "pieces";
+  public static final String PIECES_TABLE = "pieces";
 
   @Override
   @Validate

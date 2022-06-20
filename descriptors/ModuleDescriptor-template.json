@@ -97,7 +97,7 @@
     },
     {
       "id": "orders-storage.po-lines",
-      "version": "12.0",
+      "version": "12.1",
       "handlers": [
         {
           "methods": ["GET"],
@@ -123,6 +123,11 @@
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/po-lines/{id}",
           "permissionsRequired": ["orders-storage.po-lines.item.delete"]
+        },
+        {
+          "methods": ["PATCH"],
+          "pathPattern": "/orders-storage/po-lines/{id}",
+          "permissionsRequired": ["orders-storage.po-lines.item.patch"]
         }
       ]
     },
@@ -522,7 +527,7 @@
   "requires": [
     {
       "id": "finance-storage.funds",
-      "version": "3.0"
+      "version": "4.0"
     }
   ],
   "permissionSets" : [
@@ -663,6 +668,11 @@
       "description" : "Delete a po line"
     },
     {
+      "permissionName" : "orders-storage.po-lines.item.patch",
+      "displayName" : "po-line-item parch",
+      "description" : "Parch a po line"
+    },
+    {
       "permissionName" : "orders-storage.po-lines.all",
       "displayName" : "All po line perms",
       "description" : "All permissions for the po line",
@@ -671,7 +681,8 @@
         "orders-storage.po-lines.item.post",
         "orders-storage.po-lines.item.get",
         "orders-storage.po-lines.item.put",
-        "orders-storage.po-lines.item.delete"
+        "orders-storage.po-lines.item.delete",
+        "orders-storage.po-lines.item.patch"
       ]
     },
     {
