@@ -269,14 +269,14 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
 
-    testContext.assertComplete(orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)
-        .onFailure(event -> {
-          String exception = "ReplaceInstanceRef or Holdings is not present";
-          testContext.verify(() -> {
-            assertEquals(((HttpException) event).getPayload(), exception);
-          });
-          testContext.completeNow();
-        }));
+    testContext.assertFailure(orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext))
+      .onFailure(event -> {
+        String exception = "ReplaceInstanceRef or Holdings is not present";
+        testContext.verify(() -> {
+          assertEquals(((HttpException) event).getPayload(), exception);
+        });
+        testContext.completeNow();
+      });
   }
 
   @Test
