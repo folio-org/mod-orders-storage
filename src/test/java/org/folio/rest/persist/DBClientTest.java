@@ -1,9 +1,9 @@
 package org.folio.rest.persist;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import io.vertx.core.AsyncResult;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.verify;
 public class DBClientTest {
 
   private Context context;
-  private Map<String, String> okapiHeaders = new HashMap<>();
+  private Map<String, String> okapiHeaders = new CaseInsensitiveMap<>();
 
   @BeforeEach
   public void initMocks() {
