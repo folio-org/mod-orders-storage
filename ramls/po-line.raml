@@ -10,6 +10,10 @@ documentation:
 types:
     po-line: !include acq-models/mod-orders-storage/schemas/po_line.json
     po-line-collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
+    create-inventory-type: !include acq-models/mod-orders/schemas/createInventoryType.json
+    order-line-patch-operation-type: !include acq-models/mod-orders/schemas/patch_order_line_operation_type.json
+    storage-patch-order-line-request: !include acq-models/mod-orders-storage/schemas/storage_patch_order_line_request.json
+    storage-replace-order-line-instance: !include acq-models/mod-orders-storage/schemas/storage_replace_order_line_instance_ref.json
     UUID:
      type: string
      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -46,4 +50,19 @@ resourceTypes:
       collection-item:
         exampleItem: !include acq-models/mod-orders-storage/examples/po_line_get.sample
         schema: po-line
-
+    patch:
+      description: Apply partial modifications to a order line
+      body:
+        application/json:
+          description: Storage patch request
+          type: storage-patch-order-line-request
+          example:
+            strict: false
+            value: !include acq-models/mod-orders-storage/examples/storage_patch_order_line_request.sample
+      responses:
+        204:
+          description: Successful modifications
+        404:
+          description: No content
+        500:
+          description: Error

@@ -2,6 +2,8 @@ package org.folio.rest.persist;
 
 import java.util.Map;
 
+import io.vertx.ext.web.handler.HttpException;
+import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.tools.utils.TenantTool;
 
 import io.vertx.core.AsyncResult;
@@ -9,6 +11,10 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+
+import javax.ws.rs.core.Response;
+
+import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 
 public class DBClient {
 
@@ -77,6 +83,50 @@ public class DBClient {
     } else {
       pgClient.rollbackTx(sqlConnection, promise);
     }
+    return promise.future();
+  }
+
+  public <T> Future<Tx<T>> save(Tx<T> tx, String id, Object entity, String table) {
+    Promise<Tx<T>> promise = Promise.promise();
+    pgClient.save(tx.getConnection(), table, id, entity, reply -> {
+      if (reply.failed()) {
+        httpHandleFailure(promise, reply);
+      } else {
+        promise.complete(tx);
+      }
+    });
+    return promise.future();
+  }
+
+  public Future<Tx<String>> deleteById(Tx<String> tx, String table) {
+    Promise<Tx<String>> promise = Promise.promise();
+    pgClient.delete(tx.getConnection(), table, tx.getEntity(), reply -> {
+      if (reply.failed()) {
+        httpHandleFailure(promise, reply);
+      } else {
+        if (reply.result().rowCount() == 0) {
+          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        } else {
+          promise.complete(tx);
+        }
+      }
+    });
+    return promise.future();
+  }
+
+  public Future<Tx<String>> deleteByQuery(Tx<String> tx, String table, CQLWrapper query, boolean silent) {
+    Promise<Tx<String>> promise = Promise.promise();
+    pgClient.delete(tx.getConnection(), table, query, reply -> {
+      if (reply.failed()) {
+        httpHandleFailure(promise, reply);
+      } else {
+        if (!silent && reply.result().rowCount() == 0) {
+          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        } else {
+          promise.complete(tx);
+        }
+      }
+    });
     return promise.future();
   }
 
