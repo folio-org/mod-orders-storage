@@ -1,13 +1,27 @@
-## 14.1.0 - Unreleased
+## 13.4.0 - Unreleased
 
-## 14.0.0 - Released
+## 13.3.0 - Released (Morning Glory R2 2022)
+
+The focus of this release is to implement PO line instance change functionality
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.2.0...v13.3.0)
+
+### Stories
+* [MODORDSTOR-305](https://issues.folio.org/browse/MODORDSTOR-305) - Upgrade RAML Module Builder
+* [MODORDSTOR-299](https://issues.folio.org/browse/MODORDSTOR-299) - Implement PATCH Storage API for updating Instance Reference for Non-package order line
+* [MODORDSTOR-298](https://issues.folio.org/browse/MODORDSTOR-298) - Define new Storage API for updating Instance Reference for Non-package order line
+* [MODORDSTOR-297](https://issues.folio.org/browse/MODORDSTOR-297) - Define data model for supporting edit instance connection logic of POL
+
+### Bug Fixes
+* [MODORDSTOR-306](https://issues.folio.org/browse/MODORDSTOR-306) - "Must acknowledge receiving note" becomes unchecked after opening order
+
+## 13.2.0 - Released
 The focus of this release is to add EDI export support
 
-[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.0...v14.1.0)
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.1.0...v13.2.0)
 
 ### Stories
 * [MODORDSTOR-277](https://issues.folio.org/browse/MODORDSTOR-277) - Add field "lastEDIExportDate" into POL to support filtering
-* [MODORDSTOR-275](https://issues.folio.org/browse/MODORDSTOR-275) - Implement Kafaka consumer for EDI export job finish message
+* [MODORDSTOR-275](https://issues.folio.org/browse/MODORDSTOR-275) - Implement Kafka consumer for EDI export job finish message
 * [MODORDSTOR-274](https://issues.folio.org/browse/MODORDSTOR-274) - Create export_history table, schema, API
 * [MODORDSTOR-266](https://issues.folio.org/browse/MODORDSTOR-266) - Save flag "automaticExport" in the POL to support EDIFACT orders export
 * [MODORDSTOR-265](https://issues.folio.org/browse/MODORDSTOR-265) - Orders Template should support hidden fields functionality
