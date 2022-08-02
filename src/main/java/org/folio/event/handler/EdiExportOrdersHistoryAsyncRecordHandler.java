@@ -44,6 +44,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaRecord) {
     try {
       Promise<String> promise = Promise.promise();
+      kafkaRecord.headers().forEach(header -> logger.info("Header key: " + header.key() + ", Header value: " + header.value()));
+
       ExportHistory exportHistory = new JsonObject(kafkaRecord.value()).mapTo(ExportHistory.class);
       String tenantId = Optional.ofNullable(KafkaEventUtil.extractValueFromHeaders(kafkaRecord.headers(), OKAPI_HEADER_TENANT))
                                 .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
