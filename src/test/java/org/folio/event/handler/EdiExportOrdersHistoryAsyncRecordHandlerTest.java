@@ -1,6 +1,5 @@
 package org.folio.event.handler;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.util.TestConfig.autowireDependencies;
 import static org.folio.rest.util.TestConfig.clearVertxContext;
 import static org.folio.rest.util.TestConfig.deployVerticle;
@@ -48,6 +47,9 @@ import io.vertx.core.json.Json;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
 public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
+
+  private static final String TENANT_KEY_LOWER_CASE = "x-okapi-tenant"; // header key for tenant comes in lower case from mod-data-export-spring
+
   @Autowired
   public EdiExportOrdersHistoryAsyncRecordHandler ediExportOrdersHistoryAsyncRecordHandler;
   @Autowired
@@ -120,7 +122,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       .withExportType("EDIFACT_ORDERS_EXPORT")
       .withExportedPoLineIds(List.of(lineId))
       .withExportDate(Calendar.getInstance().getTime());
-    RecordHeader header = new RecordHeader(OKAPI_HEADER_TENANT, "diku".getBytes());
+    RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, "diku".getBytes());
     RecordHeaders recordHeaders = new RecordHeaders();
     recordHeaders.add(header);
     var consumerRecord = new ConsumerRecord("topic", 1, 1,
@@ -152,7 +154,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       .withExportType("EDIFACT_ORDERS_EXPORT")
       .withExportedPoLineIds(List.of(lineId))
       .withExportDate(Calendar.getInstance().getTime());
-    RecordHeader header = new RecordHeader(OKAPI_HEADER_TENANT, "diku".getBytes());
+    RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, "diku".getBytes());
     RecordHeaders recordHeaders = new RecordHeaders();
     recordHeaders.add(header);
     var consumerRecord = new ConsumerRecord("topic", 1, 1,

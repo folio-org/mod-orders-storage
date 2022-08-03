@@ -12,7 +12,7 @@ public final class KafkaEventUtil {
 
   public static String extractValueFromHeaders(List<KafkaHeader> headers, String key) {
     return headers.stream()
-      .filter(header -> header.key().equals(key))
+      .filter(header -> header.key().equalsIgnoreCase(key))
       .findFirst()
       .map(header -> header.value().toString())
       .orElse(null);
