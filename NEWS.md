@@ -1,5 +1,14 @@
 ## 13.4.0 - Unreleased
 
+## 13.3.1 (Bug Fix) - Released
+The focus of this release is to fix issue when already exported orders are included repeatedly in next exports
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.3.0...v13.3.1)
+
+### Bug Fixes
+* [MODORDSTOR-309](https://issues.folio.org/browse/MODORDSTOR-309) - Already exported orders are included repeatedly in next exports
+
+
 ## 13.3.0 - Released (Morning Glory R2 2022)
 
 The focus of this release is to implement PO line instance change functionality
