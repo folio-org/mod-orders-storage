@@ -462,6 +462,131 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       });
   }
 
+  @Test
+  public void shouldUpdateWhenUsingPOLineWithP_E_MIXOrderFormatAndOnlyPhysicalPieces(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String titleId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+    String holdingId1 = UUID.randomUUID().toString();
+    String holdingId2 = UUID.randomUUID().toString();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+
+    Location location1 = new Location()
+      .withHoldingId(holdingId1)
+      .withQuantityPhysical(1)
+      .withQuantity(1)
+      .withQuantityElectronic(0);
+
+    Location location2 = new Location()
+      .withHoldingId(holdingId1)
+      .withQuantityPhysical(0)
+      .withQuantity(1)
+      .withQuantityElectronic(1);
+
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withInstanceId(instanceId)
+      .withOrderFormat(PoLine.OrderFormat.P_E_MIX)
+      .withPhysical(new Physical()
+        .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING_ITEM))
+      .withEresource(new Eresource()
+        .withCreateInventory(Eresource.CreateInventory.INSTANCE_HOLDING_ITEM))
+      .withLocations(List.of(location1, location2));
+    Title title = new Title()
+      .withId(titleId)
+      .withPoLineId(poLineId)
+      .withInstanceId(instanceId);
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withPoLineId(poLineId)
+      .withTitleId(titleId)
+      .withHoldingId(holdingId2);
+
+    Holding holding = new Holding()
+      .withFromHoldingId(holdingId1)
+      .withToHoldingId(UUID.randomUUID().toString());
+    Holding holding2 = new Holding()
+      .withFromHoldingId(holdingId2)
+      .withToHoldingId(UUID.randomUUID().toString());
+    ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
+      .withNewInstanceId(newInstanceId)
+      .withHoldings(List.of(holding, holding2));
+
+    Promise<Void> promise1 = Promise.promise();
+    Promise<Void> promise2 = Promise.promise();
+    Promise<Void> promise3 = Promise.promise();
+
+    StoragePatchOrderLineRequest patchOrderLineRequest = new StoragePatchOrderLineRequest()
+      .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
+      .withReplaceInstanceRef(replaceInstanceRef);
+
+    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
+    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
+    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+
+    RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
+
+    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      promise1.complete();
+      logger.info("PoLine was saved");
+    });
+
+    promise1.future()
+      .onComplete(v -> {
+        client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
+          if (event.failed()) {
+            promise2.fail(event.cause());
+          } else {
+            promise2.complete();
+            logger.info("Title was saved");
+          }
+        });
+      })
+      .onComplete(v -> {
+        client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
+          if (event.failed()) {
+            promise3.fail(event.cause());
+          } else {
+            promise3.complete();
+            logger.info("Piece was saved");
+          }
+        });
+      });
+
+    testContext.assertComplete(promise2.future()
+        .compose(v -> promise3.future())
+        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+      .onComplete(event -> {
+        Title actTitle = event.result();
+        testContext.verify(() -> {
+          assertThat(actTitle.getId(), is(titleId));
+          assertThat(actTitle.getInstanceId(), is(newInstanceId));
+        });
+        testContext.completeNow();
+      })
+      .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
+      .onComplete(event -> {
+        List<Piece> actPieces = event.result();
+        testContext.verify(() -> {
+          assertThat(actPieces.get(0).getId(), is(pieceId));
+          assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
+        });
+        testContext.completeNow();
+      })
+      .compose(v -> poLinesService.getPoLineById(poLineId, client))
+      .onComplete(event -> {
+        PoLine actPoLine = event.result();
+        testContext.verify(() -> {
+          assertThat(actPoLine.getId(), is(poLineId));
+          assertThat(actPoLine.getInstanceId(), is(newInstanceId));
+          assertThat(actPoLine.getLocations().get(0).getHoldingId(), is(newHoldingId));
+        });
+        testContext.completeNow();
+      });
+  }
+
    static class ContextConfiguration {
      @Bean
      PoLinesDAO poLinesDAO() {
