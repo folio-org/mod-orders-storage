@@ -31,7 +31,7 @@ public class PieceService {
 
   private static final Logger logger = LogManager.getLogger(PieceService.class);
   private static final String POLINE_ID_FIELD = "poLineId";
-  private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} wasn't updated";
+  private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     Promise<List<Piece>> promise = Promise.promise();
@@ -43,7 +43,7 @@ public class PieceService {
       } else {
         List<Piece> result = reply.result().getResults();
         if (result.isEmpty()) {
-          logger.info(String.format("Pieces with poLineId=%s was not found", poLineId));
+          logger.info("Pieces with poLineId={} was not found", poLineId);
           promise.complete(null);
         } else {
           promise.complete(result);
@@ -56,6 +56,7 @@ public class PieceService {
 
   private Future<Tx<PoLine>> updatePieces(Tx<PoLine> poLineTx, List<Piece> pieces, DBClient client) {
     Promise<Tx<PoLine>> promise = Promise.promise();
+    String poLineId = poLineTx.getEntity().getId();
 
     if(CollectionUtils.isNotEmpty(pieces)) {
       String query = buildUpdatePieceBatchQuery(pieces, client.getTenantId());
@@ -64,12 +65,12 @@ public class PieceService {
           logger.error("Update Pieces failed : {}", reply);
           httpHandleFailure(promise, reply);
         } else {
-          logger.info("Pieces was successfully updated");
+          logger.info("Pieces with poLineId={} was successfully updated", poLineId);
           promise.complete(poLineTx);
         }
       });
     } else {
-      logger.info(PIECE_NOT_UPDATED, poLineTx.getEntity().getId());
+      logger.info(PIECE_NOT_UPDATED, poLineId);
       promise.complete(poLineTx);
     }
     return promise.future();
