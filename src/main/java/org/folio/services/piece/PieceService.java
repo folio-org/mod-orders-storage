@@ -38,7 +38,7 @@ public class PieceService {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
     client.getPgClient().get(PIECES_TABLE, Piece.class, criterion, false, reply -> {
       if(reply.failed()) {
-        logger.error("Retrieve Pieces failed : {}", reply);
+        logger.error("Retrieve pieces by poLineId={} failed : {}", poLineId, reply);
         httpHandleFailure(promise, reply);
       } else {
         List<Piece> result = reply.result().getResults();
@@ -62,7 +62,7 @@ public class PieceService {
       String query = buildUpdatePieceBatchQuery(pieces, client.getTenantId());
       client.getPgClient().execute(poLineTx.getConnection(), query, reply -> {
         if (reply.failed()) {
-          logger.error("Update Pieces failed : {}", reply);
+          logger.error("Update pieces with poLineId={} failed : {}", poLineId, reply);
           httpHandleFailure(promise, reply);
         } else {
           logger.info("Pieces with poLineId={} was successfully updated", poLineId);
