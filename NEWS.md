@@ -1,5 +1,14 @@
 ## 13.4.0 - Unreleased
 
+## 13.3.2 (Morning Glory Bug Fix) - Released
+The focus of this release is to fix issue when changing instance POL updates, but items not appearing
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.3.1...v13.3.2)
+
+### Bug Fixes
+* [MODORDSTOR-311](https://issues.folio.org/browse/MODORDSTOR-311) - Change instance updates POL details but not UUID and items not appearing
+
+
 ## 13.3.1 (Bug Fix) - Released
 The focus of this release is to fix issue when already exported orders are included repeatedly in next exports
 
