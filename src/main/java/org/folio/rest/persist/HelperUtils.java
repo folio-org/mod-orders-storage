@@ -192,7 +192,7 @@ public class HelperUtils {
   }
 
   public static String getQueryValues(List<JsonObject> entities) {
-    return entities.stream().map(entity -> "('" + entity.getString("id") + "', '" + entity.encode() + "'::json)").collect(
+    return entities.stream().map(entity -> "('" + entity.getString("id") + "', $$" + entity.encode() + "$$::json)").collect(
       Collectors.joining(","));
   }
 }
