@@ -43,6 +43,7 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.finance.FinanceServiceTest;
+import org.folio.services.lines.PoLIneServiceVertxTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.migration.MigrationServiceTest;
 import org.folio.services.piece.PieceServiceTest;
@@ -255,4 +256,6 @@ public class StorageTestSuite {
   class TitleServiceTestNested extends TitleServiceTest {}
   @Nested
   class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
+  @Nested
+  class PoLIneServiceVertxTestNested extends PoLIneServiceVertxTest {}
 }
