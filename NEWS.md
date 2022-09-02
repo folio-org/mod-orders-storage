@@ -1,5 +1,14 @@
 ## 13.4.0 - Unreleased
 
+## 13.3.3 (Morning Glory Bug Fix) - Released
+The focus of this release is to fix issue with Edifact export duplicates when title contains single quote
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.3.2...v13.3.3)
+
+### Bug Fixes
+* [MODORDSTOR-313](https://issues.folio.org/browse/MODORDSTOR-313) - Already exported order line contains single quote is included repeatedly in next exports
+
+
 ## 13.3.2 (Morning Glory Bug Fix) - Released
 The focus of this release is to fix issue when changing instance POL updates, but items not appearing
 
