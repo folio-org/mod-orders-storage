@@ -585,7 +585,23 @@
           "fieldName": "exportJobId",
           "caseSensitive": false
         }
+      ],
+      "foreignKeys": [
+        {
+          "fieldName": "polineIds",
+          "targetTable": "po_line",
+          "tableAlias": "exportHistory",
+          "targetTableAlias": "poLine",
+          "tOps": "ADD"
+        },
+        {
+          "targetPath": ["poLineId", "purchaseOrderId"],
+          "targetTable": "purchase_order",
+          "targetTableAlias": "purchaseOrder",
+          "tableAlias": "exportHistory"
+        }
       ]
+
     }
   ]
 }
