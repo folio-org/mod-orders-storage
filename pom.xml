@@ -28,7 +28,7 @@
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <testcontainers.version>1.17.4</testcontainers.version>
     <postgres.image>postgres:12-alpine</postgres.image>
-    <log4j.version>2.17.2</log4j.version>
+    <log4j.version>2.19.0</log4j.version>
     <argLine />
   </properties>
 
