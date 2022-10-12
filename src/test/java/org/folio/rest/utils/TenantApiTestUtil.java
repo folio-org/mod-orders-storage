@@ -27,13 +27,14 @@ public class TenantApiTestUtil {
 
   public static TenantAttributes prepareTenantBody(Boolean isLoadSampleData, Boolean isLoadReferenceData) {
     TenantAttributes tenantAttributes = new TenantAttributes();
+    String moduleId = String.format("%s-%s", ModuleName.getModuleName(), ModuleName.getModuleVersion());
 
     List<Parameter> parameters = new ArrayList<>();
     parameters.add(new Parameter().withKey("loadReference").withValue(isLoadReferenceData.toString()));
     parameters.add(new Parameter().withKey("loadSample").withValue(isLoadSampleData.toString()));
     parameters.add(new Parameter().withKey(LOAD_SYNC_PARAMETER).withValue("true"));
 
-    tenantAttributes.withModuleTo(ModuleName.getModuleName()).withParameters(parameters);
+    tenantAttributes.withModuleTo(moduleId).withParameters(parameters);
 
     return tenantAttributes;
   }
