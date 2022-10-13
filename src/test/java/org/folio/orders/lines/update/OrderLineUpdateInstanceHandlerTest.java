@@ -31,10 +31,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
-import org.folio.migration.MigrationService;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
-import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
@@ -49,7 +47,6 @@ import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.DBClient;
-import org.folio.services.finance.FinanceService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.title.TitleService;
@@ -85,8 +82,6 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
   PoLinesService poLinesService;
   @Autowired
   PoLinesDAO poLinesDAO;
-  @Autowired
-  MigrationService migrationService;
   @Autowired
   OrderLineUpdateInstanceHandler orderLineUpdateInstanceHandler;
   @Autowired
@@ -604,20 +599,6 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
      @Bean
      TitleService titleService() {
        return new TitleService();
-     }
-
-     @Bean
-     RestClient restClient() {
-       return new RestClient();
-     }
-
-     @Bean FinanceService financeService(RestClient restClient) {
-       return new FinanceService(restClient);
-     }
-
-     @Bean
-     MigrationService migrationService(FinanceService financeService) {
-       return new MigrationService(financeService);
      }
 
      @Bean
