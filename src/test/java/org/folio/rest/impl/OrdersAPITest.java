@@ -15,13 +15,11 @@ import static org.junit.Assert.fail;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -171,27 +169,14 @@ public class OrdersAPITest extends TestBase {
     return getFileAsObject(path, PurchaseOrder.class);
   }
 
-  private void verifyOrdersConformity(Object actual, Object expected) {
-    Map<Field, Object> actualFieldValueMap = getFieldValueMap(actual);
-    Map<Field, Object> expectedFieldValueMap = getFieldValueMap(expected);
-    for(Map.Entry<Field, Object> e : expectedFieldValueMap.entrySet()) {
-      if(!EXCLUDED_FIELD_NAMES.contains(e.getKey().getName())) {
-        assertThat(EqualsBuilder.reflectionEquals(e.getValue(), actualFieldValueMap.get(e.getKey())), is(true));
-      }
-    }
-  }
-
-  private Map<Field, Object> getFieldValueMap(Object obj) {
-    Map<Field, Object> fieldValueMap = new HashMap<>();
-    Arrays.stream(obj.getClass().getDeclaredFields()).forEach(field -> {
-      try {
-        field.setAccessible(true);
-        fieldValueMap.put(field, field.get(obj));
-      } catch (IllegalAccessException e) {
-        logger.error("--- mod-orders-storage orders test: error extracting fields value", e);
-      }
+  private void verifyOrdersConformity(PurchaseOrder actual, PurchaseOrder expected) {
+    var actualJson = JsonObject.mapFrom(actual);
+    var expectedJson = JsonObject.mapFrom(expected);
+    EXCLUDED_FIELD_NAMES.forEach(excludedFieldName -> {
+      actualJson.remove(excludedFieldName);
+      expectedJson.remove(excludedFieldName);
     });
-    return fieldValueMap;
+    assertThat(actualJson, is(expectedJson));
   }
 
   private List<PurchaseOrder> getViewCollection(String endpoint) throws MalformedURLException {
