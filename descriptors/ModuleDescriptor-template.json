@@ -524,12 +524,6 @@
       ]
     }
   ],
-  "requires": [
-    {
-      "id": "finance-storage.funds",
-      "version": "4.0"
-    }
-  ],
   "permissionSets" : [
     {
       "permissionName" : "orders-storage.alerts.collection.get",

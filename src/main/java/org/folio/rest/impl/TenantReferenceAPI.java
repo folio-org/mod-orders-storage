@@ -4,23 +4,16 @@ import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
-
 import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.migration.MigrationService;
-import org.folio.okapi.common.ModuleId;
-import org.folio.okapi.common.SemVer;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.spring.SpringContextUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -34,8 +27,6 @@ public class TenantReferenceAPI extends TenantAPI {
 
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
-  @Autowired
-  private MigrationService migrationService;
 
   public TenantReferenceAPI() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -53,8 +44,6 @@ public class TenantReferenceAPI extends TenantAPI {
     buildDataLoadingParameters(attributes, tl);
 
     return Future.succeededFuture()
-      .compose(v -> migration(attributes, "mod-orders-storage-13.0.3",
-        () -> migrationService.syncAllFundCodeFromPoLineFundDistribution(headers, vertxContext)))
       .compose(v -> {
 
         Promise<Integer> promise = Promise.promise();
@@ -69,25 +58,6 @@ public class TenantReferenceAPI extends TenantAPI {
         return promise.future();
       })
       .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
-  }
-
-  private Future<Void> migration(TenantAttributes attributes, String migrationModule, Supplier<Future<Void>> supplier) {
-    if (attributes.getModuleFrom() != null) {
-      SemVer moduleTo = moduleVersionToSemVer(migrationModule);
-      SemVer currentModuleVersion = moduleVersionToSemVer(attributes.getModuleFrom());
-      if (moduleTo.compareTo(currentModuleVersion) > 0) {
-        return supplier.get();
-      }
-    }
-    return Future.succeededFuture();
-  }
-
-  private static SemVer moduleVersionToSemVer(String version) {
-    try {
-      return new SemVer(version);
-    } catch (IllegalArgumentException ex) {
-      return new ModuleId(version).getSemVer();
-    }
   }
 
 

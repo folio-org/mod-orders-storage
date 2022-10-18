@@ -23,7 +23,6 @@ import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
-import org.folio.rest.core.RestClientTest;
 import org.folio.rest.impl.AbstractApiHandlerTest;
 import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.HelperUtilsTest;
@@ -34,7 +33,6 @@ import org.folio.rest.impl.PurchaseOrderLinesApiTest;
 import org.folio.rest.impl.PurchaseOrderNumberUniquenessTest;
 import org.folio.rest.impl.ReceivingHistoryTest;
 import org.folio.rest.impl.SearchOrderLinesTest;
-import org.folio.rest.impl.TenantReferenceAPITest;
 import org.folio.rest.impl.TenantSampleDataTest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
@@ -42,10 +40,8 @@ import org.folio.rest.persist.ExceptionUtilTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
-import org.folio.services.finance.FinanceServiceTest;
 import org.folio.services.lines.PoLIneServiceVertxTest;
 import org.folio.services.lines.PoLinesServiceTest;
-import org.folio.services.migration.MigrationServiceTest;
 import org.folio.services.piece.PieceServiceTest;
 import org.folio.services.title.TitleServiceTest;
 import org.folio.spring.SpringContextUtil;
@@ -223,12 +219,6 @@ public class StorageTestSuite {
   @Nested
   class TenantSampleDataTestNested extends TenantSampleDataTest {}
   @Nested
-  class TenantReferenceAPITestNested extends TenantReferenceAPITest {}
-  @Nested
-  class FinanceServiceTestNested extends FinanceServiceTest{}
-  @Nested
-  class MigrationServiceTestNested extends MigrationServiceTest{}
-  @Nested
   class HelperUtilsTestNested extends HelperUtilsTest {}
   @Nested
   class PoLinesServiceTestNested extends PoLinesServiceTest {}
@@ -240,8 +230,6 @@ public class StorageTestSuite {
   class ExceptionUtilTestNested extends ExceptionUtilTest {}
   @Nested
   class AbstractApiHandlerTestNested extends AbstractApiHandlerTest {}
-  @Nested
-  class RestClientTestNested extends RestClientTest {}
   @Nested
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
