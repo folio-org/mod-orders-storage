@@ -1,8 +1,17 @@
-## 13.4.0 - Unreleased
+## 13.5.0 - Unreleased
+
+## 13.4.0 - Released (Morning Glory R2 2022)
+The focus of this release is to update RAML Module Builder
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.3.0...v13.4.0)
+
+### Bug Fixes
+* [MODORDSTOR-317](https://issues.folio.org/browse/MODORDSTOR-317) - Upgrade RAML Module Builder
+
 
 ## 13.3.0 - Released (Morning Glory R2 2022)
-
 The focus of this release is to implement PO line instance change functionality
+
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.2.0...v13.3.0)
 
 ### Stories
