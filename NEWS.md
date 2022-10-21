@@ -1,12 +1,14 @@
 ## 13.5.0 - Unreleased
 
 ## 13.4.0 - Released (Morning Glory R2 2022)
-The focus of this release is to update RAML Module Builder
+The focus of this release is to update RAML Module Builder and remove mod-finance-storage dependency
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.3.0...v13.4.0)
 
-### Bug Fixes
+### Stories
 * [MODORDSTOR-317](https://issues.folio.org/browse/MODORDSTOR-317) - Upgrade RAML Module Builder
+* [MODORDSTOR-226](https://issues.folio.org/browse/MODORDSTOR-226) - Remove mod-finance-storage dependency (finance-storage.funds)
+* [MODORDSTOR-319](https://issues.folio.org/browse/MODORDSTOR-319) - Replace field.setAccessible(true) for JDK 17
 
 
 ## 13.3.0 - Released (Morning Glory R2 2022)
