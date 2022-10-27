@@ -1,5 +1,14 @@
 ## 13.4.0 - Unreleased
 
+## 13.3.4 (Morning Glory Hot Fix 1) - Released
+The focus of this release was to add copyright notice for FolioVertxCompletableFuture
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.3.3...v13.3.4)
+
+### Bug Fixes
+* [FOLIO-3604](https://issues.folio.org/browse/FOLIO-3604) - FolioVertxCompletableFuture copyright violation
+
+
 ## 13.3.3 (Morning Glory Bug Fix) - Released
 The focus of this release is to fix issue with Edifact export duplicates when title contains single quote
 
