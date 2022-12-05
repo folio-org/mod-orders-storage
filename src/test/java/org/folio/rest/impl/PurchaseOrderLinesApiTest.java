@@ -2,16 +2,24 @@ package org.folio.rest.impl;
 
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.StorageTestSuite;
+import org.folio.event.AuditEventType;
+import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.IsolatedTenant;
 import org.folio.rest.utils.TestData;
 import org.folio.rest.utils.TestEntities;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
@@ -26,8 +34,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @IsolatedTenant
 public class PurchaseOrderLinesApiTest extends TestBase {
@@ -122,7 +128,12 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     postData(PO_LINE.getEndpoint(), poLineJson.toString(), ISOLATED_TENANT_HEADER)
       .then()
       .statusCode(400);
+
+    // 400 status, so create order line event should not be produced
+    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    assertTrue(CollectionUtils.isEmpty(sentCreateOrderLineEvents));
   }
+
   @Test
   void testPostOrdersLinesByIdPoLineWithoutId() throws MalformedURLException {
     logger.info("--- mod-orders-storage orders test: post PoLine without purchaseOrderId");
@@ -135,6 +146,10 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     Response response = postData(poLineTstEntities.getEndpoint(), data.toString());
     response.then()
       .statusCode(422);
+
+    // 422 status, so create order line event should not be produced
+    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    assertTrue(CollectionUtils.isEmpty(sentCreateOrderLineEvents));
   }
 
   @Test
@@ -186,6 +201,16 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertThat(titleAfter.getTitle(), is(newTitle));
     assertEquals(titleAfter.getInstanceId(), poLine.getInstanceId());
 
+    // we have 1 created order, so 1 Create event should be sent
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1);
+    assertEquals(1, sentCreateOrderEvents.size());
+    checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+
+    // we have 1 created po line and 1 updated po line, so 2 events should not be produced
+    List<String> sendCreatePoLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1);
+    assertEquals(2, sendCreatePoLineEvents.size());
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.EDIT);
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
     deleteData(PO_LINE.getEndpointWithId(), poLine.getId());
@@ -202,6 +227,10 @@ public class PurchaseOrderLinesApiTest extends TestBase {
       .then()
         .statusCode(400)
         .body(containsString(jsonLine.getString("purchaseOrderId")));
+
+    // create order line is failed, so event should not be sent
+    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    assertTrue(CollectionUtils.isEmpty(sentCreateOrderLineEvents));
   }
 
   @Test
@@ -217,6 +246,15 @@ public class PurchaseOrderLinesApiTest extends TestBase {
       .then()
       .statusCode(404)
       .body(containsString(javax.ws.rs.core.Response.Status.NOT_FOUND.getReasonPhrase()));
+
+    // we have 1 created order, so 1 Create event should be sent
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1);
+    assertEquals(1, sentCreateOrderEvents.size());
+    checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+
+    // update is not completed because po line not found, so event for update should not be sent
+    List<String> sentUpdateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    assertTrue(CollectionUtils.isEmpty(sentUpdateOrderLineEvents));
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
   }
@@ -288,6 +326,17 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertThat(titleAfter.getPoLineId(), is(poLine.getId()));
     assertThat(titleAfter.getProductIds(), hasSize(0));
     assertThat(titleAfter.getTitle(), is(newTitle));
+
+    // we have 1 created order, so 1 Create event should be sent
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkEventWithTypeSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1);
+    assertEquals(1, sentCreateOrderEvents.size());
+    checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+
+    // we have 1 created po line and 1 update po line, so 1 Create event and 1 Update event should be sent
+    List<String> sendCreatePoLineEvents = StorageTestSuite.checkEventWithTypeSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1);
+    assertEquals(2, sendCreatePoLineEvents.size());
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.EDIT);
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"), ISOLATED_TENANT_HEADER);
     deleteData(PO_LINE.getEndpointWithId(), poLine.getId(), ISOLATED_TENANT_HEADER);

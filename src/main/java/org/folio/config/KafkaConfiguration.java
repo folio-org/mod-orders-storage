@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class KafkaConsumersConfiguration {
+public class KafkaConfiguration {
 
   @Value("${KAFKA_HOST:kafka}")
   private String kafkaHost;

@@ -1,13 +1,19 @@
 package org.folio;
 
 import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.useDefaults;
+import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
+import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 
+import lombok.SneakyThrows;
+import net.mguenther.kafka.junit.ObserveKeyValues;
+import org.folio.kafka.KafkaTopicNameHelper;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -198,6 +204,25 @@ public class StorageTestSuite {
     });
 
     deploymentComplete.get(60, TimeUnit.SECONDS);
+  }
+
+  @SneakyThrows
+  public static List<String> checkEventWithTypeSent(String tenant, String eventType, int expected) {
+    String topicToObserve = formatToKafkaTopicName(tenant, eventType);
+    List<String> observedValues = kafkaCluster.observeValues(ObserveKeyValues.on(topicToObserve, expected)
+      .with(GROUP_ID_CONFIG, "test-consumers")
+      .observeFor(30, TimeUnit.SECONDS)
+      .build());
+    return observedValues;
+  }
+
+  @SneakyThrows
+  public static List<String> checkEventWithTypeSent(String eventType, int expected) {
+    return checkEventWithTypeSent("diku", eventType, expected);
+  }
+
+  private static String formatToKafkaTopicName(String tenant, String eventType) {
+    return KafkaTopicNameHelper.formatTopicName(KAFKA_ENV_VALUE, getDefaultNameSpace(), tenant, eventType);
   }
 
   @Nested

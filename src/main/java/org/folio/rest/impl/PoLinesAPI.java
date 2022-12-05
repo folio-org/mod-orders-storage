@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import org.folio.event.service.AuditEventProducer;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 
 import java.util.Map;
@@ -9,6 +10,7 @@ import javax.ws.rs.core.Response;
 import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.models.RequestContext;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
@@ -34,6 +36,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   private PoLinesService poLinesService;
   @Autowired
   private OrderLinePatchOperationService orderLinePatchOperationService;
+  @Autowired
+  private AuditEventProducer auditProducer;
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
     super(PostgresClient.getInstance(vertx, tenantId));
@@ -54,6 +58,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       PgUtil.post(PO_LINE_TABLE, poLine, okapiHeaders, vertxContext, PostOrdersStoragePoLinesResponse.class, asyncResultHandler);
+      auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders);
     } else {
       createPoLineWithTitle(poLine, asyncResultHandler, vertxContext, okapiHeaders);
     }
@@ -66,7 +71,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       tx.startTx().compose(line -> poLinesService.createPoLine(line, client))
         .compose(line -> poLinesService.createTitle(line, client))
         .compose(Tx::endTx)
-        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"));
+        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"))
+        .compose(ar -> auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -105,6 +111,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       PgUtil.put(PO_LINE_TABLE, poLine, id, okapiHeaders, vertxContext, PutOrdersStoragePoLinesByIdResponse.class,
           asyncResultHandler);
+      auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders);
     } else {
       try {
         poLinesService.updatePoLineWithTitle(id, poLine, new DBClient(vertxContext, okapiHeaders))
@@ -112,7 +119,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
             if (result.failed()) {
               asyncResultHandler.handle(buildErrorResponse(result.cause()));
             } else {
-              asyncResultHandler.handle(buildNoContentResponse());
+              auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders)
+                .onComplete(ar -> asyncResultHandler.handle(buildNoContentResponse()));
             }
           });
       } catch (Exception e) {

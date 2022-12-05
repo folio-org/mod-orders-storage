@@ -1,9 +1,12 @@
 package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
+import io.vertx.core.json.Json;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.StorageTestSuite.initSpringContext;
 import static org.folio.StorageTestSuite.storageUrl;
+import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -28,6 +31,8 @@ import org.folio.config.ApplicationConfig;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeAll;
 
 /**
@@ -267,4 +272,24 @@ public abstract class TestBase {
     return new JsonObject(getFile(path)).mapTo(clazz);
   }
 
+  protected void checkOrderEventContent(String eventPayload, OrderAuditEvent.Action action) {
+    OrderAuditEvent event = Json.decodeValue(eventPayload, OrderAuditEvent.class);
+    Assertions.assertEquals(action, event.getAction());
+    assertNotNull(event.getId());
+    assertNotNull(event.getOrderId());
+    assertNotNull(event.getActionDate());
+    assertNotNull(event.getEventDate());
+    assertNotNull(event.getPurchaseOrder());
+  }
+
+  protected void checkOrderLineEventContent(String eventPayload, OrderLineAuditEvent.Action action) {
+    OrderLineAuditEvent event = Json.decodeValue(eventPayload, OrderLineAuditEvent.class);
+    Assertions.assertEquals(action, event.getAction());
+    assertNotNull(event.getId());
+    assertNotNull(event.getOrderId());
+    assertNotNull(event.getOrderLineId());
+    assertNotNull(event.getActionDate());
+    assertNotNull(event.getEventDate());
+    assertNotNull(event.getPoLine());
+  }
 }

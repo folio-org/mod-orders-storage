@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum KafkaTopicType {
-  EXPORT_HISTORY_CREATE("edi-export-history.create");
+public enum AuditEventType {
+  ACQ_ORDER_CHANGED("ACQ_ORDER_CHANGED"),
+  ACQ_ORDER_LINE_CHANGED("ACQ_ORDER_LINE_CHANGED");
 
   private final String topicName;
 }

@@ -128,7 +128,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     var consumerRecord = new ConsumerRecord("topic", 1, 1,
               2, null, 1L, 1,1,
           "key", Json.encode(exportHistory), recordHeaders);
-    var record = new KafkaConsumerRecordImpl(consumerRecord) ;
+    var record = new KafkaConsumerRecordImpl(consumerRecord);
     doReturn(Future.succeededFuture(exportHistory)).when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
     List<PoLine> poLines = List.of(new PoLine().withId(lineId));
     doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(Context.class), any(

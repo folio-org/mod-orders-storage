@@ -1,6 +1,10 @@
 package org.folio.rest.impl;
 
+import org.folio.StorageTestSuite;
+import org.folio.event.AuditEventType;
 import static org.folio.rest.impl.HelperUtilsTest.ORDERS_ENDPOINT;
+import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -134,6 +138,19 @@ public class OrdersAPITest extends TestBase {
       // Check that acq units can be used as search query for `purchase-orders` endpoint
       filteredByUnit = getViewCollection(PURCHASE_ORDER.getEndpoint() + acqUnitQuery);
       verifyExpectedOrders(filteredByUnit, purchaseOrderWithoutPOLinesId);
+
+      // for 3 created orders 3 create events should be produced
+      List<String> sentCreateOrderEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), CREATED_ORDERS_QUANTITY);
+      assertEquals(CREATED_ORDERS_QUANTITY.intValue(), sentCreateOrderEvents.size());
+      checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+      checkOrderEventContent(sentCreateOrderEvents.get(1), OrderAuditEvent.Action.CREATE);
+      checkOrderEventContent(sentCreateOrderEvents.get(2), OrderAuditEvent.Action.CREATE);
+
+      // for 2 created order lines 2 create events should be produced
+      List<String> sendCreatePoLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), CREATED_PO_LINES_QUANTITY);
+      assertEquals(CREATED_PO_LINES_QUANTITY.intValue(), sendCreatePoLineEvents.size());
+      checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
+      checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.CREATE);
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: orders API ERROR: " + e.getMessage(), e);
       fail(e.getMessage());

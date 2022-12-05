@@ -5,7 +5,9 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import org.folio.event.service.AuditEventProducer;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
@@ -44,6 +46,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   private PoLinesService poLinesService;
   @Autowired
   private OrderSequenceRequestBuilder orderSequenceRequestBuilder;
+  @Autowired
+  private AuditEventProducer auditProducer;
 
   public PurchaseOrdersAPI(Vertx vertx, String tenantId) {
     super(PostgresClient.getInstance(vertx, tenantId));
@@ -72,7 +76,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
           .compose(e -> createPurchaseOrder(e, client))
           .compose(this::createSequence)
           .compose(Tx::endTx)
-          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
+          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"))
+          .compose(ar -> auditProducer.sendOrderEvent(entity, OrderAuditEvent.Action.CREATE, okapiHeaders));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -122,8 +127,11 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         updateOrder( id, order, okapiHeaders, vertxContext)
           .onComplete(response -> {
             if (response.succeeded()) {
-              deleteSequence(order);
-              asyncResultHandler.handle(response);
+              auditProducer.sendOrderEvent(order, OrderAuditEvent.Action.EDIT, okapiHeaders)
+                .onComplete(ar -> {
+                  deleteSequence(order);
+                  asyncResultHandler.handle(response);
+                });
             } else {
               asyncResultHandler.handle(buildErrorResponse(response.cause()));
             }
@@ -143,7 +151,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
                       .compose(v -> updateOrder(id, order, okapiHeaders, vertxContext))
                       .onComplete(response -> {
                         if (response.succeeded()) {
-                          asyncResultHandler.handle(response);
+                          auditProducer.sendOrderEvent(order, OrderAuditEvent.Action.EDIT, okapiHeaders)
+                            .onComplete(ar -> asyncResultHandler.handle(response));
                         } else {
                           asyncResultHandler.handle(buildErrorResponse(response.cause()));
                         }
@@ -152,7 +161,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
               updateOrder(id, order, okapiHeaders, vertxContext)
                 .onComplete(response -> {
                   if (response.succeeded()) {
-                    asyncResultHandler.handle(response);
+                    auditProducer.sendOrderEvent(order, OrderAuditEvent.Action.EDIT, okapiHeaders)
+                      .onComplete(ar -> asyncResultHandler.handle(response));
                   } else {
                     asyncResultHandler.handle(buildErrorResponse(response.cause()));
                   }
