@@ -114,13 +114,13 @@ public class AuditEventProducer {
     Promise<Boolean> promise = Promise.promise();
 
     KafkaProducer<String, String> producer = createProducer(eventType.getTopicName());
-    producer.write(record, war -> {
+    producer.write(record, ar -> {
       producer.end(ear -> producer.close());
-      if (war.succeeded()) {
-        logger.info("Event with type {} was sent to kafka", eventType);
+      if (ar.succeeded()) {
+        logger.info("Event with type {} was sent to kafka topic {}", eventType, topicName);
         promise.complete(true);
       } else {
-        Throwable cause = war.cause();
+        Throwable cause = ar.cause();
         logger.error("Producer write error for event {}",  eventType, cause);
         promise.fail(cause);
       }

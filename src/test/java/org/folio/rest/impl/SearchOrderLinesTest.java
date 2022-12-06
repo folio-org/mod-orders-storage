@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
+import io.restassured.http.Headers;
 import io.restassured.http.Header;
 import io.vertx.core.json.JsonObject;
 import java.net.MalformedURLException;
@@ -121,7 +122,7 @@ public class SearchOrderLinesTest extends TestBase {
     String acqUnitId = UUID.randomUUID().toString();
     order.getAcqUnitIds().add(acqUnitId);
     order.getMetadata().setCreatedByUserId(UUID.randomUUID().toString());
-    putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), purchaseOrderId, JsonObject.mapFrom(order).encode(), NEW_TENANT);
+    putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), purchaseOrderId, JsonObject.mapFrom(order).encode(), new Headers(NEW_TENANT));
 
     // Search lines by existing and new acq units
     verifySearchByAcqUnit(String.format("?query=purchaseOrder.acqUnitIds=(%s and %s)", order.getAcqUnitIds().get(0), acqUnitId), purchaseOrderId);

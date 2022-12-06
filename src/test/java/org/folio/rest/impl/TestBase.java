@@ -1,13 +1,15 @@
 package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
+import io.restassured.http.Headers;
 import io.vertx.core.json.Json;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.StorageTestSuite.initSpringContext;
 import static org.folio.StorageTestSuite.storageUrl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import static org.folio.rest.utils.TestEntities.TITLES;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_USERID_HEADER;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 
@@ -80,7 +82,7 @@ public abstract class TestBase {
       String id = new JsonObject(sample).getString("id");
       pair.getLeft().setId(id);
 
-      postData(pair.getLeft().getEndpoint(), sample, ISOLATED_TENANT_HEADER)
+      postData(pair.getLeft().getEndpoint(), sample, new Headers(ISOLATED_TENANT_HEADER))
         .then()
         .statusCode(201);
     }
@@ -142,12 +144,12 @@ public abstract class TestBase {
   }
 
   Response postData(String endpoint, String input) throws MalformedURLException {
-    return postData(endpoint, input, TENANT_HEADER);
+    return postData(endpoint, input, new Headers(TENANT_HEADER));
   }
 
-  Response postData(String endpoint, String input, Header tenant) throws MalformedURLException {
+  Response postData(String endpoint, String input, Headers headers) throws MalformedURLException {
     return given()
-      .header(tenant)
+      .headers(headers)
       .accept(ContentType.JSON)
       .contentType(ContentType.JSON)
       .body(input)
@@ -165,24 +167,28 @@ public abstract class TestBase {
   }
 
   String createEntity(String endpoint, String entity, Header tenant) throws MalformedURLException {
-    return postData(endpoint, entity, tenant)
-      .then().log().all()
-        .statusCode(201)
-        .extract()
-          .path("id");
+    return createEntity(endpoint, entity, new Headers(tenant));
   }
 
-  Response putData(String endpoint, String id, String input, Header tenant) throws MalformedURLException {
+  String createEntity(String endpoint, String entity, Headers headers) throws MalformedURLException {
+    return postData(endpoint, entity, headers)
+      .then().log().all()
+      .statusCode(201)
+      .extract()
+      .path("id");
+  }
+
+  Response putData(String endpoint, String id, String input, Headers headers) throws MalformedURLException {
     return given()
       .pathParam("id", id)
-      .header(tenant)
+      .headers(headers)
       .contentType(ContentType.JSON)
       .body(input)
       .put(storageUrl(endpoint));
   }
 
   Response putData(String endpoint, String id, String input) throws MalformedURLException {
-    return putData(endpoint, id, input, TENANT_HEADER);
+    return putData(endpoint, id, input, new Headers(TENANT_HEADER));
   }
 
   void deleteDataSuccess(String endpoint, String id) throws MalformedURLException {
@@ -270,6 +276,16 @@ public abstract class TestBase {
 
   <T> T getFileAsObject(String path, Class<T> clazz) {
     return new JsonObject(getFile(path)).mapTo(clazz);
+  }
+
+  protected Headers getDikuTenantHeaders(String userId) {
+    Header userIdHeader = new Header(OKAPI_USERID_HEADER, userId);
+    return new Headers(TENANT_HEADER, userIdHeader);
+  }
+
+  protected Headers getIsolatedTenantHeaders(String userId) {
+    Header userIdHeader = new Header(OKAPI_USERID_HEADER, userId);
+    return new Headers(ISOLATED_TENANT_HEADER, userIdHeader);
   }
 
   protected void checkOrderEventContent(String eventPayload, OrderAuditEvent.Action action) {

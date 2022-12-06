@@ -1,7 +1,6 @@
 package org.folio;
 
 import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.useDefaults;
-import static org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG;
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
@@ -67,7 +66,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
-import net.mguenther.kafka.junit.TopicConfig;
 
 
 public class StorageTestSuite {
@@ -147,8 +145,6 @@ public class StorageTestSuite {
 
     kafkaCluster = EmbeddedKafkaCluster.provisionWith(useDefaults());
     kafkaCluster.start();
-    String topic = "test-env.Default.test-tenant.edi-export-history.create";
-    kafkaCluster.createTopic(TopicConfig.forTopic(topic).build());
     String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
     System.setProperty(KAFKA_HOST, hostAndPort[0]);
     System.setProperty(KAFKA_PORT, hostAndPort[1]);
@@ -207,18 +203,19 @@ public class StorageTestSuite {
   }
 
   @SneakyThrows
-  public static List<String> checkEventWithTypeSent(String tenant, String eventType, int expected) {
+  public static List<String> checkKafkaEventSent(String tenant, String eventType, int expected, String userId) {
     String topicToObserve = formatToKafkaTopicName(tenant, eventType);
     List<String> observedValues = kafkaCluster.observeValues(ObserveKeyValues.on(topicToObserve, expected)
-      .with(GROUP_ID_CONFIG, "test-consumers")
+      .filterOnHeaders(val -> {
+        var header = val.lastHeader(RestVerticle.OKAPI_USERID_HEADER.toLowerCase());
+        if (Objects.nonNull(header)) {
+          return new String(header.value()).equalsIgnoreCase(userId);
+        }
+        return false;
+      })
       .observeFor(30, TimeUnit.SECONDS)
       .build());
     return observedValues;
-  }
-
-  @SneakyThrows
-  public static List<String> checkEventWithTypeSent(String eventType, int expected) {
-    return checkEventWithTypeSent("diku", eventType, expected);
   }
 
   private static String formatToKafkaTopicName(String tenant, String eventType) {

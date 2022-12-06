@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import io.restassured.http.Headers;
 import io.restassured.response.Response;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
@@ -125,12 +126,15 @@ public class PurchaseOrderLinesApiTest extends TestBase {
 
     JsonObject poLineJson = new JsonObject(getFile(TestData.PoLine.DEFAULT_52590_NON_PACKAGE_WITH_NOT_EXISTED_PACKAGE_POLINE));
 
-    postData(PO_LINE.getEndpoint(), poLineJson.toString(), ISOLATED_TENANT_HEADER)
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getIsolatedTenantHeaders(userId);
+
+    postData(PO_LINE.getEndpoint(), poLineJson.toString(), headers)
       .then()
       .statusCode(400);
 
     // 400 status, so create order line event should not be produced
-    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0, userId);
     assertTrue(CollectionUtils.isEmpty(sentCreateOrderLineEvents));
   }
 
@@ -143,12 +147,15 @@ public class PurchaseOrderLinesApiTest extends TestBase {
 
     data.remove("purchaseOrderId");
 
-    Response response = postData(poLineTstEntities.getEndpoint(), data.toString());
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
+
+    Response response = postData(poLineTstEntities.getEndpoint(), data.toString(), headers);
     response.then()
       .statusCode(422);
 
     // 422 status, so create order line event should not be produced
-    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0, userId);
     assertTrue(CollectionUtils.isEmpty(sentCreateOrderLineEvents));
   }
 
@@ -158,8 +165,11 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString()).then().statusCode(201);
-    Response response = postData(PO_LINE.getEndpoint(), jsonLine.toString());
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
+
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), headers).then().statusCode(201);
+    Response response = postData(PO_LINE.getEndpoint(), jsonLine.toString(), headers);
     PoLine poLine = response.then()
       .statusCode(201)
       .extract().as(PoLine.class);
@@ -185,8 +195,8 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     String instanceId = UUID.randomUUID().toString();
 
     titleBefore.setInstanceId(instanceId);
-    putData(TITLES.getEndpointWithId(), titleBefore.getId(), JsonObject.mapFrom(titleBefore).encode()).then().statusCode(204);
-    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode()).then().statusCode(204);
+    putData(TITLES.getEndpointWithId(), titleBefore.getId(), JsonObject.mapFrom(titleBefore).encode(), headers).then().statusCode(204);
+    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode(), headers).then().statusCode(204);
 
     titleCollection = getDataByParam(TITLES.getEndpoint(), params)
       .then()
@@ -202,12 +212,12 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertEquals(titleAfter.getInstanceId(), poLine.getInstanceId());
 
     // we have 1 created order, so 1 Create event should be sent
-    List<String> sentCreateOrderEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1);
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME,  AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1, userId);
     assertEquals(1, sentCreateOrderEvents.size());
     checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
 
     // we have 1 created po line and 1 updated po line, so 2 events should not be produced
-    List<String> sendCreatePoLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1);
+    List<String> sendCreatePoLineEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1, userId);
     assertEquals(2, sendCreatePoLineEvents.size());
     checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
     checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.EDIT);
@@ -223,13 +233,16 @@ public class PurchaseOrderLinesApiTest extends TestBase {
 
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PO_LINE.getEndpoint(), jsonLine.toString(), ISOLATED_TENANT_HEADER)
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getIsolatedTenantHeaders(userId);
+
+    postData(PO_LINE.getEndpoint(), jsonLine.toString(), headers)
       .then()
         .statusCode(400)
         .body(containsString(jsonLine.getString("purchaseOrderId")));
 
     // create order line is failed, so event should not be sent
-    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    List<String> sentCreateOrderLineEvents = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0, userId);
     assertTrue(CollectionUtils.isEmpty(sentCreateOrderLineEvents));
   }
 
@@ -240,20 +253,23 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString()).then().statusCode(201);
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
 
-    putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString())
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), headers).then().statusCode(201);
+
+    putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString(), headers)
       .then()
       .statusCode(404)
       .body(containsString(javax.ws.rs.core.Response.Status.NOT_FOUND.getReasonPhrase()));
 
     // we have 1 created order, so 1 Create event should be sent
-    List<String> sentCreateOrderEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1);
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1, userId);
     assertEquals(1, sentCreateOrderEvents.size());
     checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
 
     // update is not completed because po line not found, so event for update should not be sent
-    List<String> sentUpdateOrderLineEvents = StorageTestSuite.checkEventWithTypeSent(AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0);
+    List<String> sentUpdateOrderLineEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0, userId);
     assertTrue(CollectionUtils.isEmpty(sentUpdateOrderLineEvents));
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
@@ -266,14 +282,27 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), ISOLATED_TENANT_HEADER).then().statusCode(201);
-    postData(PO_LINE.getEndpoint(), jsonLine.toString(), ISOLATED_TENANT_HEADER).then().statusCode(201);
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getIsolatedTenantHeaders(userId);
+
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), headers).then().statusCode(201);
+    postData(PO_LINE.getEndpoint(), jsonLine.toString(), headers).then().statusCode(201);
 
     jsonLine.put("purchaseOrderId", NON_EXISTED_ID);
-    putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString(), ISOLATED_TENANT_HEADER)
+    putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString(), headers)
       .then()
       .statusCode(400)
       .body(containsString(NON_EXISTED_ID));
+
+    // we have 1 created order, so 1 Create event should be sent
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1, userId);
+    assertEquals(1, sentCreateOrderEvents.size());
+    checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+
+    // we have 1 created po line and 1 update po line, that was not updated due to 400 status, so 1 event should be sent
+    List<String> sendCreatePoLineEvents = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1, userId);
+    assertEquals(1, sendCreatePoLineEvents.size());
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
   }
@@ -284,8 +313,11 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
 
-    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), ISOLATED_TENANT_HEADER).then().statusCode(201);
-    Response response = postData(PO_LINE.getEndpoint(), jsonLine.toString(), ISOLATED_TENANT_HEADER);
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getIsolatedTenantHeaders(userId);
+
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), headers).then().statusCode(201);
+    Response response = postData(PO_LINE.getEndpoint(), jsonLine.toString(), headers);
     PoLine poLine = response.then()
       .statusCode(201)
       .extract().as(PoLine.class);
@@ -311,7 +343,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
 
     deleteData(TITLES.getEndpointWithId(), titleBefore.getId(), ISOLATED_TENANT_HEADER);
 
-    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode(), ISOLATED_TENANT_HEADER)
+    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode(), headers)
       .then()
       .statusCode(204);
 
@@ -328,12 +360,12 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertThat(titleAfter.getTitle(), is(newTitle));
 
     // we have 1 created order, so 1 Create event should be sent
-    List<String> sentCreateOrderEvents = StorageTestSuite.checkEventWithTypeSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1);
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1, userId);
     assertEquals(1, sentCreateOrderEvents.size());
     checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
 
     // we have 1 created po line and 1 update po line, so 1 Create event and 1 Update event should be sent
-    List<String> sendCreatePoLineEvents = StorageTestSuite.checkEventWithTypeSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1);
+    List<String> sendCreatePoLineEvents = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1, userId);
     assertEquals(2, sendCreatePoLineEvents.size());
     checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
     checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.EDIT);
