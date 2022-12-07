@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.handler.BaseAsyncRecordHandler;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandler;
-import org.folio.event.KafkaTopicType;
+import org.folio.event.ExportEventType;
 import org.folio.kafka.GlobalLoadSensor;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaConsumerWrapper;
@@ -59,7 +59,7 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
     logger.info("Kafka config: {}", kafkaConfig);
 
     SubscriptionDefinition subscriptionDefinition = KafkaTopicNameHelper.createSubscriptionDefinition(kafkaConfig.getEnvId(),
-      KafkaTopicNameHelper.getDefaultNameSpace(), KafkaTopicType.EXPORT_HISTORY_CREATE.getTopicName());
+      KafkaTopicNameHelper.getDefaultNameSpace(), ExportEventType.EXPORT_HISTORY_CREATE.getTopicName());
 
     KafkaConsumerWrapper<String, String> consumerWrapper = KafkaConsumerWrapper.<String, String>builder()
       .context(context)

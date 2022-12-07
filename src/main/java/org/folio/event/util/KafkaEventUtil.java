@@ -1,4 +1,4 @@
-package org.folio.event;
+package org.folio.event.util;
 
 import io.vertx.kafka.client.producer.KafkaHeader;
 

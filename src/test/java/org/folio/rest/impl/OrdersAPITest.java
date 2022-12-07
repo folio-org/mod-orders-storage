@@ -1,5 +1,10 @@
 package org.folio.rest.impl;
 
+import io.restassured.http.Headers;
+import org.folio.StorageTestSuite;
+import org.folio.event.AuditEventType;
+import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import static org.folio.rest.impl.HelperUtilsTest.ORDERS_ENDPOINT;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
@@ -56,28 +61,31 @@ public class OrdersAPITest extends TestBase {
       String acqUnitId1 = UUID.randomUUID().toString();
       String acqUnitId2 = UUID.randomUUID().toString();
 
+      String userId = UUID.randomUUID().toString();
+      Headers headers = getDikuTenantHeaders(userId);
+
       logger.info("--- mod-orders-storage orders test: Creating Purchase order 1...");
       // assign 2 units
       purchaseOrderSample.getAcqUnitIds().add(acqUnitId1);
       purchaseOrderSample.getAcqUnitIds().add(acqUnitId2);
-      purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample).encode());
+      purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample).encode(), headers);
 
       expectedOrders.put(purchaseOrderSampleId, purchaseOrderSample);
       logger.info("--- mod-orders-storage orders test: Creating Purchase order 2...");
       // assign 1 unit
       purchaseOrderSample2.getAcqUnitIds().add(acqUnitId1);
-      purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample2).encode());
+      purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample2).encode(), headers);
 
       expectedOrders.put(purchaseOrderSampleId2, purchaseOrderSample2);
       logger.info("--- mod-orders-storage orders test: Creating Purchase order without PoLines...");
-      purchaseOrderWithoutPOLinesId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines);
+      purchaseOrderWithoutPOLinesId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, headers);
       expectedOrders.put(purchaseOrderWithoutPOLinesId, new JsonObject(purchaseOrderWithoutPOLines).mapTo(PurchaseOrder.class));
       verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ORDERS_QUANTITY);
 
       logger.info("--- mod-orders-storage orders test: Creating PoLine 1...");
-      poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
+      poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample, headers);
       logger.info("--- mod-orders-storage orders test: Creating PoLine 2 ...");
-      poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
+      poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2, headers);
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_PO_LINES_QUANTITY);
 
 
@@ -134,6 +142,19 @@ public class OrdersAPITest extends TestBase {
       // Check that acq units can be used as search query for `purchase-orders` endpoint
       filteredByUnit = getViewCollection(PURCHASE_ORDER.getEndpoint() + acqUnitQuery);
       verifyExpectedOrders(filteredByUnit, purchaseOrderWithoutPOLinesId);
+
+      // for 3 created orders 3 create events should be produced
+      List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), CREATED_ORDERS_QUANTITY, userId);
+      assertEquals(CREATED_ORDERS_QUANTITY.intValue(), sentCreateOrderEvents.size());
+      checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+      checkOrderEventContent(sentCreateOrderEvents.get(1), OrderAuditEvent.Action.CREATE);
+      checkOrderEventContent(sentCreateOrderEvents.get(2), OrderAuditEvent.Action.CREATE);
+
+      // for 2 created order lines 2 create events should be produced
+      List<String> sendCreatePoLineEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), CREATED_PO_LINES_QUANTITY, userId);
+      assertEquals(CREATED_PO_LINES_QUANTITY.intValue(), sendCreatePoLineEvents.size());
+      checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
+      checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.CREATE);
     } catch (Exception e) {
       logger.error("--- mod-orders-storage-test: orders API ERROR: " + e.getMessage(), e);
       fail(e.getMessage());

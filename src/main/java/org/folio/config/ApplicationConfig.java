@@ -7,6 +7,8 @@ import org.folio.dao.export.ExportHistoryPostgresRepository;
 import org.folio.dao.export.ExportHistoryRepository;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
+import org.folio.event.service.AuditEventProducer;
+import org.folio.kafka.KafkaConfig;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.services.lines.PoLineNumbersService;
@@ -30,7 +32,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ComponentScan({ "org.folio.verticles", "org.folio.event.listener" })
-@Import({ KafkaConsumersConfiguration.class })
+@Import({ KafkaConfiguration.class })
 public class ApplicationConfig {
 
   @Bean
@@ -111,4 +113,8 @@ public class ApplicationConfig {
     return new ExportHistoryService(exportHistoryRepository);
   }
 
+  @Bean
+  AuditEventProducer auditEventProducerService(KafkaConfig kafkaConfig) {
+    return new AuditEventProducer(kafkaConfig);
+  }
 }
