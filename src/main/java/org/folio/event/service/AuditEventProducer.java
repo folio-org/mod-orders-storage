@@ -76,9 +76,11 @@ public class AuditEventProducer {
     event.withOrderSnapshot(order);
     if (OrderAuditEvent.Action.CREATE == eventAction) {
       event.setUserId(order.getMetadata().getCreatedByUserId());
+      event.setUserName(order.getMetadata().getCreatedByUsername());
       event.setActionDate(order.getMetadata().getCreatedDate());
     } else if (OrderAuditEvent.Action.EDIT == eventAction) {
       event.setUserId(order.getMetadata().getUpdatedByUserId());
+      event.setUserName(order.getMetadata().getUpdatedByUsername());
       event.setActionDate(order.getMetadata().getUpdatedDate());
     }
     return event;
@@ -94,9 +96,11 @@ public class AuditEventProducer {
     event.withOrderLineSnapshot(poLine);
     if (OrderLineAuditEvent.Action.CREATE == eventAction) {
       event.setUserId(poLine.getMetadata().getCreatedByUserId());
+      event.setUserName(poLine.getMetadata().getCreatedByUsername());
       event.setActionDate(poLine.getMetadata().getCreatedDate());
     } else if (OrderLineAuditEvent.Action.EDIT == eventAction) {
       event.setUserId(poLine.getMetadata().getUpdatedByUserId());
+      event.setUserName(poLine.getMetadata().getUpdatedByUsername());
       event.setActionDate(poLine.getMetadata().getUpdatedDate());
     }
     return event;
