@@ -121,11 +121,11 @@ public class AuditEventProducer {
     producer.write(record, ar -> {
       producer.end(ear -> producer.close());
       if (ar.succeeded()) {
-        logger.info("Event with type {} was sent to kafka topic {}", eventType, topicName);
+        logger.info("Event with type '{}' was sent to kafka topic '{}'", eventType, topicName);
         promise.complete(true);
       } else {
         Throwable cause = ar.cause();
-        logger.error("Producer write error for event {}",  eventType, cause);
+        logger.error("Producer write error for event '{}'",  eventType, cause);
         promise.fail(cause);
       }
     });
