@@ -1,6 +1,6 @@
 <!--
   If you have a relevant JIRA issue number, please put it in the issue title.
-  Example: MODINVOSTO-70 Logging Improvement
+  Example: MODORDSTOR-70 Logging Improvement
 
   TL;DR
     - https://www.youtube.com/watch?v=5aHmO_S8FQ4
@@ -23,7 +23,7 @@
   section."
 
   If you have a relevant JIRA issue, add a link directly to the issue URL here.
-  Example: https://issues.folio.org/browse/MODINVOSTO-70
+  Example: https://issues.folio.org/browse/MODORDSTOR-70
  -->
 
 ## Approach
