@@ -91,6 +91,7 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertEquals(title.getPackageName(), packagePoLine.getTitleOrPackage());
     assertEquals(title.getPoLineNumber(), packagePoLine.getPoLineNumber());
     assertEquals(title.getReceivingNote(), packagePoLine.getDetails().getReceivingNote());
+    assertEquals(title.getIsAcknowledged(), packagePoLine.getDetails().getIsAcknowledged());
     assertEquals(title.getExpectedReceiptDate(), packagePoLine.getPhysical().getExpectedReceiptDate());
   }
 

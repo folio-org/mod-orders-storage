@@ -37,6 +37,7 @@
       }
     ],
     "receivingNote": "",
+    "isAcknowledged": "false",
     "subscriptionFrom": "2018-07-20T00:00:00.000Z",
     "subscriptionInterval": 1095,
     "subscriptionTo": "2021-07-19T00:00:00.000Z"
