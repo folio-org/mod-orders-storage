@@ -383,7 +383,8 @@ public class PoLinesService {
         .withSubscriptionFrom(poLine.getDetails().getSubscriptionFrom())
         .withSubscriptionTo(poLine.getDetails().getSubscriptionTo())
         .withSubscriptionInterval(poLine.getDetails().getSubscriptionInterval())
-        .withReceivingNote(poLine.getDetails().getReceivingNote());
+        .withReceivingNote(poLine.getDetails().getReceivingNote())
+        .withIsAcknowledged(poLine.getDetails().getIsAcknowledged());
     }
     return title;
   }
