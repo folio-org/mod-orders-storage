@@ -52,7 +52,7 @@
 -->
 
 ## Pre-Merge Checklist:
-Before merging this PR, please go through the following list and take appropriate action.
+Before merging this PR, please go through the following list and take appropriate actions.
 
 - Does this PR meet or exceed the expected quality standards?
   - [ ] Code coverage on new code is 80% or greater
