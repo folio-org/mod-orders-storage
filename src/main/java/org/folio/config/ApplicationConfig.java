@@ -3,11 +3,16 @@ package org.folio.config;
 import java.util.EnumMap;
 import java.util.Map;
 
+import io.vertx.core.Vertx;
+import org.folio.dao.PostgresClientFactory;
+import org.folio.dao.audit.AuditOutboxLockRepository;
+import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.dao.export.ExportHistoryPostgresRepository;
 import org.folio.dao.export.ExportHistoryRepository;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
 import org.folio.event.service.AuditEventProducer;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.kafka.KafkaConfig;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
@@ -116,5 +121,27 @@ public class ApplicationConfig {
   @Bean
   AuditEventProducer auditEventProducerService(KafkaConfig kafkaConfig) {
     return new AuditEventProducer(kafkaConfig);
+  }
+
+  @Bean
+  PostgresClientFactory postgresClientFactory(Vertx vertx) {
+    return new PostgresClientFactory(vertx);
+  }
+
+  @Bean
+  AuditOutboxLockRepository auditOutboxLockRepository(PostgresClientFactory pgClientFactory) {
+    return new AuditOutboxLockRepository(pgClientFactory);
+  }
+
+  @Bean
+  AuditOutboxEventsLogRepository auditOutboxRepository(PostgresClientFactory pgClientFactory) {
+    return new AuditOutboxEventsLogRepository(pgClientFactory);
+  }
+
+  @Bean
+  AuditOutboxService auditOutboxService(AuditOutboxLockRepository lockRepository,
+                                        AuditOutboxEventsLogRepository repository,
+                                        AuditEventProducer producer) {
+    return new AuditOutboxService(lockRepository, repository, producer);
   }
 }

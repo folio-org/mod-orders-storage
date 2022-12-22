@@ -1,0 +1,18 @@
+#%RAML 1.0
+title: "mod-orders-storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1.0
+
+documentation:
+  - title: Audit events API
+    content: <b>Audit events API. This API is intended for internal use only by the Timer interface.</b>
+
+types:
+  order-audit-event: !include acq-models/mod-orders-storage/schemas/order_audit_event.json
+  order-line-audit-event: !include acq-models/mod-orders-storage/schemas/order_line_audit_event.json
+  outbox-event-log: !include acq-models/mod-orders-storage/schemas/outbox_event_log.json
+
+/orders-storage/audit-events:
+  /process:
+    post:
+      description: Read audit events from DB and send them to Kafka

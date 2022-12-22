@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import org.folio.event.service.AuditEventProducer;
+import org.folio.event.service.AuditOutboxService;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 
 import java.util.Map;
@@ -38,6 +39,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   private OrderLinePatchOperationService orderLinePatchOperationService;
   @Autowired
   private AuditEventProducer auditProducer;
+  @Autowired
+  private AuditOutboxService auditOutboxService;
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
     super(PostgresClient.getInstance(vertx, tenantId));
@@ -70,9 +73,9 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       Tx<PoLine> tx = new Tx<>(poLine, getPgClient());
       tx.startTx().compose(line -> poLinesService.createPoLine(line, client))
         .compose(line -> poLinesService.createTitle(line, client))
+        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(tx, OrderLineAuditEvent.Action.CREATE, okapiHeaders))
         .compose(Tx::endTx)
-        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"))
-        .compose(ar -> auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders));
+        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
