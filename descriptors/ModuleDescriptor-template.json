@@ -506,16 +506,16 @@
       ]
     },
     {
-      "id": "orders-storage.audit-events",
+      "id": "orders-storage.audit-outbox",
       "version": "1.0",
       "handlers": [
         {
           "methods": [
             "POST"
           ],
-          "pathPattern": "/orders-storage/audit-events/process",
+          "pathPattern": "/orders-storage/audit-outbox/process",
           "permissionsRequired": [
-            "orders-storage.audit-events.process"
+            "orders-storage.audit-outbox.process"
           ],
           "modulePermissions": [
           ]
@@ -549,10 +549,10 @@
           "methods": [
             "POST"
           ],
-          "pathPattern": "/orders-storage/audit-events/process",
+          "pathPattern": "/orders-storage/audit-outbox/process",
           "modulePermissions": [],
           "unit": "second",
-          "delay": "5"
+          "delay": "2"
         }
       ]
     }
@@ -1164,16 +1164,16 @@
       ]
     },
     {
-      "permissionName" : "orders-storage.audit-events.process",
-      "displayName" : "orders-storage-audit-event-process",
+      "permissionName" : "orders-storage.audit-outbox.process",
+      "displayName" : "orders-storage-audit-outbox-process",
       "description" : "Fetch audit events and send them to kafka"
     },
     {
-      "permissionName" : "orders-storage.audit-events.all",
-      "displayName" : "All orders-storage audit event perms",
-      "description" : "All permissions for the orders-storage - audit events",
+      "permissionName" : "orders-storage.audit-outbox.all",
+      "displayName" : "All orders-storage audit outbox perms",
+      "description" : "All permissions for the orders-storage - audit outbox",
       "subPermissions" : [
-        "orders-storage.audit-events.process"
+        "orders-storage.audit-outbox.process"
       ]
     },
     {

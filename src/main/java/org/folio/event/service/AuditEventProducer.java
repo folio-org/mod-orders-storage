@@ -16,6 +16,7 @@ import org.folio.kafka.KafkaHeaderUtils;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.OutboxEventLog.EntityType;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.tools.utils.TenantTool;
@@ -46,7 +47,7 @@ public class AuditEventProducer {
     OrderAuditEvent event = getOrderEvent(order, eventAction);
     logger.info("Starting to send event with id: {} for Order to Kafka for orderId: {}", event.getId(), order.getId());
     String eventPayload = Json.encode(event);
-    return sendToKafka(AuditEventType.ACQ_ORDER_CHANGED, eventPayload, okapiHeaders, event.getOrderId());
+    return sendToKafka(AuditEventType.ACQ_ORDER_CHANGED, eventPayload, okapiHeaders, event.getOrderId(), EntityType.ORDER);
   }
 
   /**
@@ -64,7 +65,7 @@ public class AuditEventProducer {
     OrderLineAuditEvent event = getOrderLineEvent(poLine, eventAction);
     logger.info("Starting to send event wit id: {} for Order Line to Kafka for orderLineId: {}", event.getId(), poLine.getId());
     String eventPayload = Json.encode(event);
-    return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, eventPayload, okapiHeaders, event.getOrderLineId());
+    return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, eventPayload, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE);
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
@@ -76,11 +77,9 @@ public class AuditEventProducer {
     event.withOrderSnapshot(order);
     if (OrderAuditEvent.Action.CREATE == eventAction) {
       event.setUserId(order.getMetadata().getCreatedByUserId());
-      event.setUserName(order.getMetadata().getCreatedByUsername());
       event.setActionDate(order.getMetadata().getCreatedDate());
     } else if (OrderAuditEvent.Action.EDIT == eventAction) {
       event.setUserId(order.getMetadata().getUpdatedByUserId());
-      event.setUserName(order.getMetadata().getUpdatedByUsername());
       event.setActionDate(order.getMetadata().getUpdatedDate());
     }
     return event;
@@ -96,11 +95,9 @@ public class AuditEventProducer {
     event.withOrderLineSnapshot(poLine);
     if (OrderLineAuditEvent.Action.CREATE == eventAction) {
       event.setUserId(poLine.getMetadata().getCreatedByUserId());
-      event.setUserName(poLine.getMetadata().getCreatedByUsername());
       event.setActionDate(poLine.getMetadata().getCreatedDate());
     } else if (OrderLineAuditEvent.Action.EDIT == eventAction) {
       event.setUserId(poLine.getMetadata().getUpdatedByUserId());
-      event.setUserName(poLine.getMetadata().getUpdatedByUsername());
       event.setActionDate(poLine.getMetadata().getUpdatedDate());
     }
     return event;
@@ -109,7 +106,8 @@ public class AuditEventProducer {
   private Future<Boolean> sendToKafka(AuditEventType eventType,
                                       String eventPayload,
                                       Map<String, String> okapiHeaders,
-                                      String key) {
+                                      String key,
+                                      EntityType entityType) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
     List<KafkaHeader> kafkaHeaders = KafkaHeaderUtils.kafkaHeadersFromMap(okapiHeaders);
     String topicName = createTopicName(kafkaConfig.getEnvId(), tenantId, eventType.getTopicName());
@@ -121,11 +119,11 @@ public class AuditEventProducer {
     producer.write(record, ar -> {
       producer.end(ear -> producer.close());
       if (ar.succeeded()) {
-        logger.info("Event with type '{}' was sent to kafka topic '{}'", eventType, topicName);
+        logger.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
         promise.complete(true);
       } else {
         Throwable cause = ar.cause();
-        logger.error("Producer write error for event '{}'",  eventType, cause);
+        logger.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType, entityType, key, topicName, cause);
         promise.fail(cause);
       }
     });

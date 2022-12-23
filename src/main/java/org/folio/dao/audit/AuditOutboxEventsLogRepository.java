@@ -9,6 +9,7 @@ import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.SQLConnection;
 
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ public class AuditOutboxEventsLogRepository {
   private static final String ENTITY_TYPE_FIELD = "entity_type";
   private static final String ACTION_FIELD = "action";
   private static final String PAYLOAD_FIELD = "payload";
-  private static final String INSERT_SQL = "INSERT INTO %s.%s (event_id, entity, action, payload) VALUES ($1, $2, $3, $4)";
+  private static final String INSERT_SQL = "INSERT INTO %s.%s (event_id, entity_type, action, payload) VALUES ($1, $2, $3, $4)";
   private static final String SELECT_EVENT_LOGS = "SELECT * FROM %s.%s LIMIT 1000";
   public static final String DELETE_SQL = "DELETE from %s.%s where event_id = ANY ($1)";
 
@@ -38,14 +39,13 @@ public class AuditOutboxEventsLogRepository {
   /**
    * Fetches event logs from outbox table.
    *
+   * @param conn the sql connection from transaction
    * @param tenantId the tenant id
    * @return future with list of fetched event logs
    */
-  public Future<List<OutboxEventLog>> fetchEventLogs(String tenantId) {
-    Promise<RowSet<Row>> promise = Promise.promise();
+  public Future<List<OutboxEventLog>> fetchEventLogs(Conn conn, String tenantId) {
     String query = String.format(SELECT_EVENT_LOGS, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
-    pgClientFactory.createInstance(tenantId).execute(query, promise);
-    return promise.future().map(this::mapResultSetToEventLogs);
+    return conn.execute(query).map(this::mapResultSetToEventLogs);
   }
 
   /**
@@ -67,17 +67,17 @@ public class AuditOutboxEventsLogRepository {
   /**
    * Deletes outbox logs by event ids in batch.
    *
+   * @param conn the sql connection from transaction
    * @param eventIds the event ids to delete
    * @param tenantId the tenant id
    * @return future row count how many records have been deleted
    */
-  public Future<Integer> deleteBatch(List<String> eventIds, String tenantId) {
+  public Future<Integer> deleteBatch(Conn conn, List<String> eventIds, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
     UUID[] uuids = eventIds.stream().map(UUID::fromString).collect(Collectors.toList()).toArray(UUID[]::new);
     String deleteQuery = format(DELETE_SQL, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
     Tuple queryParams = Tuple.of(uuids);
-    pgClientFactory.createInstance(tenantId).execute(deleteQuery, queryParams, promise);
-    return promise.future().map(SqlResult::rowCount);
+    return conn.execute(deleteQuery, queryParams).map(SqlResult::rowCount);
   }
 
   private List<OutboxEventLog> mapResultSetToEventLogs(RowSet<Row> resultSet) {
@@ -87,7 +87,7 @@ public class AuditOutboxEventsLogRepository {
         .withEventId(row.getValue(EVENT_ID_FIELD).toString())
         .withEntityType(OutboxEventLog.EntityType.fromValue(row.getString(ENTITY_TYPE_FIELD)))
         .withAction(row.getString(ACTION_FIELD))
-        .withPayload(row.getJsonObject(PAYLOAD_FIELD).toString());
+        .withPayload(row.getString(PAYLOAD_FIELD));
       result.add(log);
     }
     return result;

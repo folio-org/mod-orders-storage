@@ -4,11 +4,10 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.audit.AuditOutboxLockRepository;
+import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
@@ -17,6 +16,7 @@ import org.folio.rest.jaxrs.model.OutboxEventLog;
 import org.folio.rest.jaxrs.model.OutboxEventLog.EntityType;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.SQLConnection;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.tools.utils.TenantTool;
@@ -31,30 +31,39 @@ public class AuditOutboxService {
 
   private static final Logger logger = LogManager.getLogger(AuditOutboxService.class);
 
-  private final AuditOutboxLockRepository lockRepository;
   private final AuditOutboxEventsLogRepository repository;
   private final AuditEventProducer producer;
+  private final PostgresClientFactory pgClientFactory;
 
-  public AuditOutboxService(AuditOutboxLockRepository lockRepository,
-                            AuditOutboxEventsLogRepository repository,
-                            AuditEventProducer producer) {
-    this.lockRepository = lockRepository;
+  public AuditOutboxService(AuditOutboxEventsLogRepository repository,
+                            AuditEventProducer producer,
+                            PostgresClientFactory pgClientFactory) {
     this.repository = repository;
     this.producer = producer;
+    this.pgClientFactory = pgClientFactory;
   }
 
+  /**
+   * Reads outbox event logs from DB and send them to Kafka
+   * and delete from outbox table in the single transaction.
+   *
+   * @param okapiHeaders the okapi headers
+   */
   public void processOutboxEventLogs(Map<String, String> okapiHeaders) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
     Promise<Void> promise = Promise.promise();
-    /*lockRepository.lockTable(tenantId)
-      .map(res -> {
 
-      });*/
-    repository.fetchEventLogs(tenantId)
+    PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
+
+    pgClient.withTrans(conn -> repository.fetchEventLogs(conn, tenantId)
       .compose(logs -> {
         logger.debug("Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
-        List<Future<Boolean>> futures = getKafkaFutures(logs, okapiHeaders);
+        if (CollectionUtils.isEmpty(logs)) {
+          promise.complete();
+          return Future.succeededFuture();
+        }
 
+        List<Future<Boolean>> futures = getKafkaFutures(logs, okapiHeaders);
         return GenericCompositeFuture.join(futures)
           .map(logs.stream().map(OutboxEventLog::getEventId).collect(Collectors.toList()))
           .onComplete(ar -> {
@@ -62,7 +71,7 @@ public class AuditOutboxService {
             if (CollectionUtils.isEmpty(eventIds)) {
               promise.complete();
             } else {
-              repository.deleteBatch(eventIds, tenantId)
+              repository.deleteBatch(conn, eventIds, tenantId)
                 .onSuccess(rowsCount -> {
                   logger.info("{} logs have been deleted from outbox table", rowsCount);
                   promise.complete();
@@ -73,7 +82,8 @@ public class AuditOutboxService {
                 });
             }
           });
-      });
+      })
+    );
   }
 
   /**
