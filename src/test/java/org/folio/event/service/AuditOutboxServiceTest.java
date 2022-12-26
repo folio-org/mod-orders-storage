@@ -1,28 +1,19 @@
 package org.folio.event.service;
 
-import io.restassured.http.Header;
+
 import io.vertx.core.*;
-import io.vertx.core.json.Json;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.pgclient.PgConnection;
-import io.vertx.sqlclient.Query;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Transaction;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.StorageTestSuite;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
-import org.folio.models.TableNames;
-import org.folio.rest.impl.AbstractApiHandler;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.*;
-import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.SQLConnection;
 import org.folio.rest.persist.Tx;
-import org.folio.rest.persist.cql.CQLWrapper;
-import org.folio.services.piece.PieceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,16 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.folio.models.TableNames.PIECES_TABLE;
-import static org.folio.models.TableNames.PO_LINE_TABLE;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
-import static org.folio.rest.RestVerticle.getHttpServerOptions;
-import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(VertxExtension.class)
