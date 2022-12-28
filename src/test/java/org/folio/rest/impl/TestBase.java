@@ -3,6 +3,7 @@ package org.folio.rest.impl;
 import static io.restassured.RestAssured.given;
 import io.restassured.http.Headers;
 import io.vertx.core.json.Json;
+import static javax.ws.rs.core.Response.Status;
 import static org.folio.StorageTestSuite.initSpringContext;
 import static org.folio.StorageTestSuite.storageUrl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
@@ -209,6 +210,18 @@ public abstract class TestBase {
       .delete(storageUrl(endpoint));
   }
 
+  void callAuditOutboxApi(Headers headers) throws MalformedURLException {
+    given()
+      .headers(headers)
+      .accept(ContentType.JSON)
+      .contentType(ContentType.JSON)
+      .post(storageUrl("/orders-storage/audit-outbox/process"))
+      .then()
+      .log()
+      .all()
+      .statusCode(Status.OK.getStatusCode());
+  }
+
   void deleteTitles(String poLineId) throws MalformedURLException {
     Map<String, Object> params = new HashMap<>();
     params.put("query", "poLineId==" + poLineId);
@@ -301,6 +314,11 @@ public abstract class TestBase {
   protected void checkOrderLineEventContent(String eventPayload, OrderLineAuditEvent.Action action) {
     OrderLineAuditEvent event = Json.decodeValue(eventPayload, OrderLineAuditEvent.class);
     Assertions.assertEquals(action, event.getAction());
+    checkOrderLineEventContent(eventPayload);
+  }
+
+  protected void checkOrderLineEventContent(String eventPayload) {
+    OrderLineAuditEvent event = Json.decodeValue(eventPayload, OrderLineAuditEvent.class);
     assertNotNull(event.getId());
     assertNotNull(event.getOrderId());
     assertNotNull(event.getOrderLineId());

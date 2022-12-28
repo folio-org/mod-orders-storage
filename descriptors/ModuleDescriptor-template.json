@@ -1199,7 +1199,7 @@
         "orders-storage.configuration.prefixes.all",
         "orders-storage.configuration.suffixes.all",
         "orders-storage.export-history.all",
-        "orders-storage.audit-events.all"
+        "orders-storage.audit-outbox.all"
       ]
     }
   ],

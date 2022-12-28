@@ -73,7 +73,6 @@ public class AuditOutboxEventsLogRepository {
    * @return future row count how many records have been deleted
    */
   public Future<Integer> deleteBatch(Conn conn, List<String> eventIds, String tenantId) {
-    Promise<RowSet<Row>> promise = Promise.promise();
     UUID[] uuids = eventIds.stream().map(UUID::fromString).collect(Collectors.toList()).toArray(UUID[]::new);
     String deleteQuery = format(DELETE_SQL, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
     Tuple queryParams = Tuple.of(uuids);

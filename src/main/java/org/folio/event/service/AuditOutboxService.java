@@ -49,7 +49,7 @@ public class AuditOutboxService {
    *
    * @param okapiHeaders the okapi headers
    */
-  public void processOutboxEventLogs(Map<String, String> okapiHeaders) {
+  public Future<Void> processOutboxEventLogs(Map<String, String> okapiHeaders) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
     Promise<Void> promise = Promise.promise();
 
@@ -57,11 +57,11 @@ public class AuditOutboxService {
 
     pgClient.withTrans(conn -> repository.fetchEventLogs(conn, tenantId)
       .compose(logs -> {
-        logger.debug("Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
         if (CollectionUtils.isEmpty(logs)) {
           promise.complete();
           return Future.succeededFuture();
         }
+        logger.info("Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
 
         List<Future<Boolean>> futures = getKafkaFutures(logs, okapiHeaders);
         return GenericCompositeFuture.join(futures)
@@ -84,6 +84,7 @@ public class AuditOutboxService {
           });
       })
     );
+    return promise.future();
   }
 
   /**
