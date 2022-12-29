@@ -260,6 +260,8 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     String userId = UUID.randomUUID().toString();
     Headers headers = getDikuTenantHeaders(userId);
 
+    callAuditOutboxApi(getDikuTenantHeaders(UUID.randomUUID().toString())); // to clean outbox table before test cases in the current test start
+
     postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), headers).then().statusCode(201);
 
     putData(PO_LINE.getEndpointWithId(), jsonLine.getString("id"), jsonLine.toString(), headers)
