@@ -143,6 +143,8 @@ public class OrdersAPITest extends TestBase {
       filteredByUnit = getViewCollection(PURCHASE_ORDER.getEndpoint() + acqUnitQuery);
       verifyExpectedOrders(filteredByUnit, purchaseOrderWithoutPOLinesId);
 
+      callAuditOutboxApi(headers);
+
       // for 3 created orders 3 create events should be produced
       List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), CREATED_ORDERS_QUANTITY, userId);
       assertEquals(CREATED_ORDERS_QUANTITY.intValue(), sentCreateOrderEvents.size());

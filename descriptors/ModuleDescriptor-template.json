@@ -506,6 +506,23 @@
       ]
     },
     {
+      "id": "orders-storage.audit-outbox",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/orders-storage/audit-outbox/process",
+          "permissionsRequired": [
+            "orders-storage.audit-outbox.process"
+          ],
+          "modulePermissions": [
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -520,6 +537,22 @@
         {
           "methods": ["GET", "DELETE"],
           "pathPattern": "/_/tenant/{id}"
+        }
+      ]
+    },
+    {
+      "id": "_timer",
+      "version": "1.0",
+      "interfaceType": "system",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/orders-storage/audit-outbox/process",
+          "modulePermissions": [],
+          "unit": "second",
+          "delay": "2"
         }
       ]
     }
@@ -1131,6 +1164,19 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.audit-outbox.process",
+      "displayName" : "orders-storage-audit-outbox-process",
+      "description" : "Fetch audit events and send them to kafka"
+    },
+    {
+      "permissionName" : "orders-storage.audit-outbox.all",
+      "displayName" : "All orders-storage audit outbox perms",
+      "description" : "All permissions for the orders-storage - audit outbox",
+      "subPermissions" : [
+        "orders-storage.audit-outbox.process"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -1152,7 +1198,8 @@
         "orders-storage.configuration.reasons-for-closure.all",
         "orders-storage.configuration.prefixes.all",
         "orders-storage.configuration.suffixes.all",
-        "orders-storage.export-history.all"
+        "orders-storage.export-history.all",
+        "orders-storage.audit-outbox.all"
       ]
     }
   ],

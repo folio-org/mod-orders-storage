@@ -6,16 +6,17 @@ import java.util.UUID;
 import javax.ws.rs.core.Response;
 
 import org.folio.event.service.AuditEventProducer;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
+import org.folio.models.TableNames;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.models.TableNames;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.services.lines.PoLinesService;
@@ -48,6 +49,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   private OrderSequenceRequestBuilder orderSequenceRequestBuilder;
   @Autowired
   private AuditEventProducer auditProducer;
+  @Autowired
+  private AuditOutboxService auditOutboxService;
 
   public PurchaseOrdersAPI(Vertx vertx, String tenantId) {
     super(PostgresClient.getInstance(vertx, tenantId));
@@ -75,9 +78,9 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         tx.startTx()
           .compose(e -> createPurchaseOrder(e, client))
           .compose(this::createSequence)
+          .compose(ar -> auditOutboxService.saveOrderOutboxLog(tx, OrderAuditEvent.Action.CREATE, okapiHeaders))
           .compose(Tx::endTx)
-          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"))
-          .compose(ar -> auditProducer.sendOrderEvent(entity, OrderAuditEvent.Action.CREATE, okapiHeaders));
+          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -195,7 +198,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
       if (reply.failed()) {
         handleFailure(promise, reply);
       } else {
-        log.info("POL number sequence for PO with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
+        log.info("POL number sequence={} for PO with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
         promise.complete(tx);
       }
     });
@@ -211,7 +214,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     try {
       getPgClient().execute(tx.getConnection(), orderSequenceRequestBuilder.buildCreateSequenceQuery(orderId), reply -> {
         if (reply.failed()) {
-          log.error("POL number sequence creation for order with id={} failed", reply.cause(), orderId);
+          log.error("POL number sequence creation for order with id={} failed", orderId, reply.cause());
           handleFailure(promise, reply);
         } else {
           log.debug("POL number sequence for order with id={} successfully created", orderId);
@@ -229,7 +232,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     try {
         getPgClient().execute(orderSequenceRequestBuilder.buildCreateSequenceQuery(order.getId(), start), reply -> {
           if (reply.failed()) {
-            log.error("POL number sequence for order with id={} is not created", reply.cause(), order.getId());
+            log.error("POL number sequence for order with id={} is not created", order.getId(), reply.cause());
           }
           promise.complete(null);
         });
@@ -246,7 +249,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         getPgClient().select(orderSequenceRequestBuilder.buildSequenceExistQuery(order.getId()), reply -> {
           if ((reply.failed()) || (reply.succeeded() && getSequenceAsLong(reply.result()) <= 0)) {
             promise.complete(false);
-            log.error("POL number sequence for order with id={} is not exist", reply.cause(), order.getId());
+            log.error("POL number sequence for order with id={} is not exist", order.getId(), reply.cause());
           } else {
             promise.complete(true);
           }
@@ -274,7 +277,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
       // Try to drop sequence for the POL number but ignore failures
       getPgClient().execute(orderSequenceRequestBuilder.buildDropSequenceQuery(order.getId()), reply -> {
         if (reply.failed()) {
-          log.error("POL number sequence for order with id={} failed to be dropped", reply.cause(), order.getId());
+          log.error("POL number sequence for order with id={} failed to be dropped", order.getId(), reply.cause());
         }
       });
     }
