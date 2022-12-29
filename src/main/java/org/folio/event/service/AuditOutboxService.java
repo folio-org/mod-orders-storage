@@ -136,17 +136,14 @@ public class AuditOutboxService {
   private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> logs, Map<String, String> okapiHeaders) {
     List<Future<Boolean>> futures = new ArrayList<>();
     for (OutboxEventLog log : logs) {
-      switch (log.getEntityType()) {
-        case ORDER:
-          PurchaseOrder purchaseOrder = Json.decodeValue(log.getPayload(), PurchaseOrder.class);
-          OrderAuditEvent.Action orderAction = OrderAuditEvent.Action.fromValue(log.getAction());
-          futures.add(producer.sendOrderEvent(purchaseOrder, orderAction, okapiHeaders));
-          break;
-        case ORDER_LINE:
-          PoLine poLine = Json.decodeValue(log.getPayload(), PoLine.class);
-          OrderLineAuditEvent.Action orderLineAction = OrderLineAuditEvent.Action.fromValue(log.getAction());
-          futures.add(producer.sendOrderLineEvent(poLine, orderLineAction, okapiHeaders));
-          break;
+      if (EntityType.ORDER == log.getEntityType()) {
+        PurchaseOrder purchaseOrder = Json.decodeValue(log.getPayload(), PurchaseOrder.class);
+        OrderAuditEvent.Action orderAction = OrderAuditEvent.Action.fromValue(log.getAction());
+        futures.add(producer.sendOrderEvent(purchaseOrder, orderAction, okapiHeaders));
+      } else if (EntityType.ORDER_LINE == log.getEntityType()) {
+        PoLine poLine = Json.decodeValue(log.getPayload(), PoLine.class);
+        OrderLineAuditEvent.Action orderLineAction = OrderLineAuditEvent.Action.fromValue(log.getAction());
+        futures.add(producer.sendOrderLineEvent(poLine, orderLineAction, okapiHeaders));
       }
     }
     return futures;
