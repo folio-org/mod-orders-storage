@@ -118,6 +118,27 @@ public class AuditOutboxService {
   /**
    * Saves order line outbox log.
    *
+   * @param conn connection in transaction
+   * @param poLine the poLine
+   * @param action action for order line
+   * @param okapiHeaders the okapi headers
+   * @return future with saved outbox log in the same transaction
+   */
+  public Future<PoLine> saveOrderLineOutboxLog(Conn conn, PoLine poLine, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    Promise<PoLine> promise = Promise.promise();
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+    OutboxEventLog outboxLog = getOrderLineOutboxLog(action, poLine);
+    repository.saveEventLog(conn, outboxLog, tenantId)
+      .onComplete(reply -> {
+        logSaveResult(reply, poLine.getId());
+        promise.complete(poLine);
+      });
+    return promise.future();
+  }
+
+  /**
+   * Saves order line outbox log.
+   *
    * @param tx open transaction that will be used to save audit log
    * @param action action for order line
    * @param okapiHeaders the okapi headers

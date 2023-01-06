@@ -117,7 +117,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
       auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders);
     } else {
       try {
-        poLinesService.updatePoLineWithTitle(id, poLine, new DBClient(vertxContext, okapiHeaders))
+        poLinesService.updatePoLineWithTitle(id, poLine, okapiHeaders)
           .onComplete(result -> {
             if (result.failed()) {
               asyncResultHandler.handle(buildErrorResponse(result.cause()));

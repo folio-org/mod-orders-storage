@@ -29,8 +29,13 @@ import java.util.concurrent.TimeoutException;
 import io.vertx.ext.web.handler.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.dao.PostgresClientFactory;
+import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
+import org.folio.event.service.AuditEventProducer;
+import org.folio.event.service.AuditOutboxService;
+import org.folio.kafka.KafkaConfig;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
@@ -587,9 +592,32 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
      PoLinesDAO poLinesDAO() {
        return new PoLinesPostgresDAO();
      }
+
      @Bean
-     PoLinesService poLinesService(PoLinesDAO poLinesDAO) {
-       return new PoLinesService(poLinesDAO);
+     PoLinesService poLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
+       return new PoLinesService(poLinesDAO, pgClientFactory, auditOutboxService);
+     }
+
+     @Bean
+     PostgresClientFactory postgresClientFactory(Vertx vertx) {
+       return new PostgresClientFactory(vertx);
+     }
+
+     @Bean
+     AuditEventProducer auditEventProducerService(KafkaConfig kafkaConfig) {
+       return new AuditEventProducer(kafkaConfig);
+     }
+
+     @Bean
+     AuditOutboxEventsLogRepository auditOutboxRepository(PostgresClientFactory pgClientFactory) {
+       return new AuditOutboxEventsLogRepository(pgClientFactory);
+     }
+
+     @Bean
+     AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository repository,
+                                           AuditEventProducer producer,
+                                           PostgresClientFactory pgClientFactory) {
+       return new AuditOutboxService(repository, producer, pgClientFactory);
      }
      @Bean
      PieceService pieceService() {

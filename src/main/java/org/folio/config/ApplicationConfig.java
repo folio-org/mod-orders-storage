@@ -45,8 +45,8 @@ public class ApplicationConfig {
   }
 
   @Bean
-  PoLinesService poLinesService(PoLinesDAO poLinesDAO) {
-    return new PoLinesService(poLinesDAO);
+  PoLinesService poLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
+    return new PoLinesService(poLinesDAO, pgClientFactory, auditOutboxService);
   }
 
   @Bean
