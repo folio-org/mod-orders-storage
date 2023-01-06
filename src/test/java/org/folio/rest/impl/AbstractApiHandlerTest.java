@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import org.folio.event.service.AuditOutboxService;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -46,6 +47,7 @@ public class AbstractApiHandlerTest {
   private Tx<String> tx;
   private Query<RowSet<Row>> query;
   private AbstractApiHandler abstractApiHandler;
+  private AuditOutboxService auditOutboxService;
   private Context context;
   private Map<String, String> headers;
   private DBClient client;
@@ -62,7 +64,7 @@ public class AbstractApiHandlerTest {
     rowSet = mock(RowSet.class);
     tx = mock(Tx.class);
     query = mock(Query.class);
-    abstractApiHandler = new AbstractApiHandler(spyPGClient) {
+    abstractApiHandler = new AbstractApiHandler("spyPGClient") {
       @Override
       protected String getEndpoint(Object entity) {
         return "orders-storage/purchase-order";

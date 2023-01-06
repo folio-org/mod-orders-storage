@@ -50,18 +50,42 @@ public class AuditOutboxEventsLogRepository {
 
   /**
    * Saves event log to outbox table.
+   * Accepts @{@link AsyncResult} with connection that is in transaction.
    *
    * @param connection the sql connection that shares the same transaction
    * @param eventLog   the event log to save
-   * @param tenantId   he tenant id
+   * @param tenantId   the tenant id
    * @return future true if event log has been saved
    */
   public Future<Boolean> saveEventLog(AsyncResult<SQLConnection> connection, OutboxEventLog eventLog, String tenantId) {
     Promise<RowSet<Row>> promise = Promise.promise();
-    String query = String.format(INSERT_SQL, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
-    Tuple queryParams = Tuple.of(eventLog.getEventId(), eventLog.getEntityType().value(), eventLog.getAction(), eventLog.getPayload());
+    String query = getCreateQuery(tenantId);
+    Tuple queryParams = getCreateParams(eventLog);
     pgClientFactory.createInstance(tenantId).execute(connection, query, queryParams, promise);
     return promise.future().map(resultSet -> resultSet.size() == 1);
+  }
+
+  /**
+   * Saves event log to outbox table.
+   * Accepts @{@link Conn} that is in trnsaction.
+   *
+   * @param conn     the sql connection that shares the same transaction
+   * @param eventLog the event log to save
+   * @param tenantId the tenant id
+   * @return future true if event log has been saved
+   */
+  public Future<Boolean> saveEventLog(Conn conn, OutboxEventLog eventLog, String tenantId) {
+    String query = getCreateQuery(tenantId);
+    Tuple queryParams = getCreateParams(eventLog);
+    return conn.execute(query, queryParams).map(resultSet -> resultSet.size() == 1);
+  }
+
+  private String getCreateQuery(String tenantId) {
+    return String.format(INSERT_SQL, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
+  }
+
+  private Tuple getCreateParams(OutboxEventLog eventLog) {
+    return Tuple.of(eventLog.getEventId(), eventLog.getEntityType().value(), eventLog.getAction(), eventLog.getPayload());
   }
 
   /**

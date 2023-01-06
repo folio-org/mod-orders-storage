@@ -43,7 +43,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   private AuditOutboxService auditOutboxService;
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
-    super(PostgresClient.getInstance(vertx, tenantId));
+    super(tenantId);
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
@@ -75,7 +75,7 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
         .compose(line -> poLinesService.createTitle(line, client))
         .compose(line -> auditOutboxService.saveOrderLineOutboxLog(tx, OrderLineAuditEvent.Action.CREATE, okapiHeaders))
         .compose(Tx::endTx)
-        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created"));
+        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created", okapiHeaders));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }

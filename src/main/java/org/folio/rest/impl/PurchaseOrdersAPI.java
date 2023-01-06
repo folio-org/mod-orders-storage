@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import org.folio.event.service.AuditEventProducer;
+import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
@@ -19,6 +19,7 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.cql.CQLWrapper;
+import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.spring.SpringContextUtil;
@@ -48,12 +49,13 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   @Autowired
   private OrderSequenceRequestBuilder orderSequenceRequestBuilder;
   @Autowired
-  private AuditEventProducer auditProducer;
-  @Autowired
   private AuditOutboxService auditOutboxService;
+  @Autowired
+  private PostgresClientFactory pgClientFactory;
 
+  @Autowired
   public PurchaseOrdersAPI(Vertx vertx, String tenantId) {
-    super(PostgresClient.getInstance(vertx, tenantId));
+    super(tenantId);
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     log.debug("Init PurchaseOrdersAPI creating PostgresClient");
   }
@@ -80,7 +82,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
           .compose(this::createSequence)
           .compose(ar -> auditOutboxService.saveOrderOutboxLog(tx, OrderAuditEvent.Action.CREATE, okapiHeaders))
           .compose(Tx::endTx)
-          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created"));
+          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created", okapiHeaders));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -130,11 +132,9 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         updateOrder( id, order, okapiHeaders, vertxContext)
           .onComplete(response -> {
             if (response.succeeded()) {
-              auditProducer.sendOrderEvent(order, OrderAuditEvent.Action.EDIT, okapiHeaders)
-                .onComplete(ar -> {
-                  deleteSequence(order);
-                  asyncResultHandler.handle(response);
-                });
+              deleteSequence(order);
+              auditOutboxService.processOutboxEventLogs(okapiHeaders);
+              asyncResultHandler.handle(response);
             } else {
               asyncResultHandler.handle(buildErrorResponse(response.cause()));
             }
@@ -154,8 +154,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
                       .compose(v -> updateOrder(id, order, okapiHeaders, vertxContext))
                       .onComplete(response -> {
                         if (response.succeeded()) {
-                          auditProducer.sendOrderEvent(order, OrderAuditEvent.Action.EDIT, okapiHeaders)
-                            .onComplete(ar -> asyncResultHandler.handle(response));
+                          auditOutboxService.processOutboxEventLogs(okapiHeaders);
+                          asyncResultHandler.handle(response);
                         } else {
                           asyncResultHandler.handle(buildErrorResponse(response.cause()));
                         }
@@ -164,8 +164,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
               updateOrder(id, order, okapiHeaders, vertxContext)
                 .onComplete(response -> {
                   if (response.succeeded()) {
-                    auditProducer.sendOrderEvent(order, OrderAuditEvent.Action.EDIT, okapiHeaders)
-                      .onComplete(ar -> asyncResultHandler.handle(response));
+                    auditOutboxService.processOutboxEventLogs(okapiHeaders);
+                    asyncResultHandler.handle(response);
                   } else {
                     asyncResultHandler.handle(buildErrorResponse(response.cause()));
                   }
@@ -177,17 +177,22 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   private Future<Response> updateOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders, Context vertxContext) {
     log.info("Update purchase order with id={}", order.getId());
     Promise<Response> promise = Promise.promise();
-    PgUtil.put(TableNames.PURCHASE_ORDER_TABLE, order, id, okapiHeaders, vertxContext, PutOrdersStoragePurchaseOrdersByIdResponse.class, reply -> {
-      if (reply.succeeded() && reply.result().getStatus() == 204) {
-        log.info("Purchase order id={} successfully updated", id);
-        promise.complete(reply.result());
-      } else if (reply.succeeded() && reply.result().getStatus() != 204) {
-        promise.fail(new HttpException(reply.result().getStatus(), reply.result().getEntity().toString()));
-      } else if (reply.failed()) {
-        handleFailure(promise, reply);
-      }
+    String tenantId = TenantTool.tenantId(okapiHeaders);
+    PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
+    return pgClient.withTrans(conn -> {
+      conn
+        .update(TableNames.PURCHASE_ORDER_TABLE, order, id)
+        .compose(ar -> auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.EDIT, okapiHeaders))
+        .onComplete(reply -> {
+          if (reply.succeeded()) {
+            log.info("Purchase order id={} successfully updated", id);
+            promise.complete();
+          } else {
+            handleFailure(promise, reply);
+          }
+        });
+      return promise.future();
     });
-    return promise.future();
   }
 
   private Future<Tx<String>> deletePolNumberSequence(Tx<String> tx) {

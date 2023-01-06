@@ -551,8 +551,8 @@
           ],
           "pathPattern": "/orders-storage/audit-outbox/process",
           "modulePermissions": [],
-          "unit": "second",
-          "delay": "2"
+          "unit": "minute",
+          "delay": "15"
         }
       ]
     }
