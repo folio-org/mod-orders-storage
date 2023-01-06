@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditEventProducer;
 import org.folio.event.service.AuditOutboxService;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
@@ -16,10 +17,8 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLines;
-import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.HelperUtils;
-import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.Tx;
+import org.folio.rest.persist.*;
+import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +39,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   private AuditEventProducer auditProducer;
   @Autowired
   private AuditOutboxService auditOutboxService;
+  @Autowired
+  private PostgresClientFactory pgClientFactory;
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
     super(tenantId);
@@ -111,7 +112,19 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   public void putOrdersStoragePoLinesById(String id, String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders);
+      String tenantId = TenantTool.tenantId(okapiHeaders);
+      PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
+
+      pgClient.withTrans(conn -> poLinesService.updatePoLine(conn, poLine)
+        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders))
+        .onComplete(result -> {
+          if (result.failed()) {
+            asyncResultHandler.handle(buildErrorResponse(result.cause()));
+          } else {
+            auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders)
+              .onComplete(ar -> asyncResultHandler.handle(buildNoContentResponse()));
+          }
+        }));
     } else {
       try {
         poLinesService.updatePoLineWithTitle(id, poLine, okapiHeaders)
