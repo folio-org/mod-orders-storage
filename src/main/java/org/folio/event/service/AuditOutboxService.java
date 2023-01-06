@@ -50,7 +50,8 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with integer how many records have been processed
    */
-  public Future<Integer> processOutboxEventLogs(Map<String, String> okapiHeaders) {String tenantId = TenantTool.tenantId(okapiHeaders);
+  public Future<Integer> processOutboxEventLogs(Map<String, String> okapiHeaders) {
+    String tenantId = TenantTool.tenantId(okapiHeaders);
     PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
     return pgClient.withTrans(conn -> repository.fetchEventLogs(conn, tenantId)
       .compose(logs -> {

@@ -118,6 +118,7 @@ public class PoLinesService {
         .onComplete(reply -> {
           if (reply.succeeded()) {
             logger.info("POLine {} and associated data were successfully updated", poLine);
+            auditOutboxService.processOutboxEventLogs(okapiHeaders);
             promise.complete(null);
           } else {
             handleFailure(promise, reply);
