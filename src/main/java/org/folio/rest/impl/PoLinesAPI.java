@@ -19,7 +19,6 @@ import org.folio.rest.jaxrs.resource.OrdersStoragePoLines;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
@@ -112,8 +111,6 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   public void putOrdersStoragePoLinesById(String id, String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      PgUtil.put(PO_LINE_TABLE, poLine, id, okapiHeaders, vertxContext, PutOrdersStoragePoLinesByIdResponse.class,
-          asyncResultHandler);
       auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders);
     } else {
       try {
