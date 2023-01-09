@@ -60,8 +60,12 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   public void postOrdersStoragePoLines(String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      PgUtil.post(PO_LINE_TABLE, poLine, okapiHeaders, vertxContext, PostOrdersStoragePoLinesResponse.class, asyncResultHandler);
-      auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders);
+      DBClient client = new DBClient(vertxContext, okapiHeaders);
+      Tx<PoLine> tx = new Tx<>(poLine, getPgClient());
+      tx.startTx().compose(line -> poLinesService.createPoLine(line, client))
+        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(tx, OrderLineAuditEvent.Action.CREATE, okapiHeaders))
+        .compose(Tx::endTx)
+        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created", okapiHeaders));
     } else {
       createPoLineWithTitle(poLine, asyncResultHandler, vertxContext, okapiHeaders);
     }
@@ -121,8 +125,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
           if (result.failed()) {
             asyncResultHandler.handle(buildErrorResponse(result.cause()));
           } else {
-            auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders)
-              .onComplete(ar -> asyncResultHandler.handle(buildNoContentResponse()));
+            auditOutboxService.processOutboxEventLogs(okapiHeaders);
+            asyncResultHandler.handle(buildNoContentResponse());
           }
         }));
     } else {
@@ -132,8 +136,8 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
             if (result.failed()) {
               asyncResultHandler.handle(buildErrorResponse(result.cause()));
             } else {
-              auditProducer.sendOrderLineEvent(poLine, OrderLineAuditEvent.Action.EDIT, okapiHeaders)
-                .onComplete(ar -> asyncResultHandler.handle(buildNoContentResponse()));
+              auditOutboxService.processOutboxEventLogs(okapiHeaders);
+              asyncResultHandler.handle(buildNoContentResponse());
             }
           });
       } catch (Exception e) {

@@ -18,7 +18,7 @@ public class KafkaConfiguration {
   private int replicationFactor;
   @Value("${MAX_REQUEST_SIZE:1048576}")
   private int maxRequestSize;
-  @Value("${ENV:FOLIO}")
+  @Value("${ENV:folio}")
   private String envId;
 
   @Bean

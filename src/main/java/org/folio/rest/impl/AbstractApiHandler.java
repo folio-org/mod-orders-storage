@@ -3,7 +3,6 @@ package org.folio.rest.impl;
 import javax.ws.rs.core.Response;
 
 import io.vertx.core.Vertx;
-import io.vertx.pgclient.impl.PgConnectionFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
@@ -44,14 +43,10 @@ public abstract class AbstractApiHandler extends BaseApi {
         // The result of rollback operation is not so important, main failure cause is used to build the response
         tx.rollbackTransaction().onComplete(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
       } else {
-        auditOutboxService.processOutboxEventLogs(okapiHeaders)
-          .onComplete(ar -> {
-            logger.info(logMessage, tx.getEntity(), "and associated data were successfully");
-            asyncResultHandler.handle(buildResponseWithLocation(result.result()
-                .getEntity(),
-              getEndpoint(result.result()
-                .getEntity())));
-          });
+        auditOutboxService.processOutboxEventLogs(okapiHeaders);
+        logger.info(logMessage, tx.getEntity(), "and associated data were successfully");
+        asyncResultHandler.handle(buildResponseWithLocation(result.result().getEntity(),
+          getEndpoint(result.result().getEntity())));
       }
     };
   }

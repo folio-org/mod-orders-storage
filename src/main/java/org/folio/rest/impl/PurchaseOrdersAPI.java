@@ -186,7 +186,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         .onComplete(reply -> {
           if (reply.succeeded()) {
             log.info("Purchase order id={} successfully updated", id);
-            promise.complete();
+            promise.complete(Response.noContent().build());
           } else {
             handleFailure(promise, reply);
           }

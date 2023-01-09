@@ -43,7 +43,21 @@ public class TenantReferenceAPI extends TenantAPI {
     TenantLoading tl = new TenantLoading();
     buildDataLoadingParameters(attributes, tl);
 
-    return Future.succeededFuture();
+    return Future.succeededFuture()
+      .compose(v -> {
+
+        Promise<Integer> promise = Promise.promise();
+
+        tl.perform(attributes, headers, vertx, res -> {
+          if (res.failed()) {
+            promise.fail(res.cause());
+          } else {
+            promise.complete(res.result());
+          }
+        });
+        return promise.future();
+      })
+      .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
   }
 
 
