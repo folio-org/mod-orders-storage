@@ -2,6 +2,7 @@ package org.folio.orders.lines.update;
 
 import static org.folio.StorageTestSuite.clearVertxContext;
 import static org.folio.StorageTestSuite.initSpringContext;
+import org.folio.dao.InternalLockRepository;
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.models.TableNames.TITLES_TABLE;
@@ -614,10 +615,16 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
      }
 
      @Bean
-     AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository repository,
+     InternalLockRepository internalLockRepository(PostgresClientFactory pgClientFactory) {
+       return new InternalLockRepository(pgClientFactory);
+     }
+
+     @Bean
+     AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
+                                           InternalLockRepository lockRepository,
                                            AuditEventProducer producer,
                                            PostgresClientFactory pgClientFactory) {
-       return new AuditOutboxService(repository, producer, pgClientFactory);
+       return new AuditOutboxService(outboxRepository, lockRepository, producer, pgClientFactory);
      }
      @Bean
      PieceService pieceService() {

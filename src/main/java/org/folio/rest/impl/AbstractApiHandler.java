@@ -1,37 +1,28 @@
 package org.folio.rest.impl;
 
-import javax.ws.rs.core.Response;
-
-import io.vertx.core.Vertx;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.dao.PostgresClientFactory;
-import org.folio.event.service.AuditOutboxService;
-import org.folio.rest.core.BaseApi;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.Tx;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.ext.web.handler.HttpException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.event.service.AuditOutboxService;
+import org.folio.rest.core.BaseApi;
+import org.folio.rest.persist.Tx;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public abstract class AbstractApiHandler extends BaseApi {
   protected final Logger logger = LogManager.getLogger(this.getClass());
 
-  private final PostgresClient pgClient;
-
-  @Autowired
-  private PostgresClientFactory postgresClientFactory;
   @Autowired
   private AuditOutboxService auditOutboxService;
 
-  AbstractApiHandler(String tenantId) {
+  AbstractApiHandler() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
-    pgClient = postgresClientFactory.createInstance(tenantId);
   }
 
   public  <T> Handler<AsyncResult<Tx<T>>> handleResponseWithLocation(Handler<AsyncResult<Response>> asyncResultHandler, Tx<T> tx, String logMessage, Map<String, String> okapiHeaders) {
@@ -61,9 +52,5 @@ public abstract class AbstractApiHandler extends BaseApi {
         asyncResultHandler.handle(buildNoContentResponse());
       }
     };
-  }
-
-  public PostgresClient getPgClient() {
-    return pgClient;
   }
 }

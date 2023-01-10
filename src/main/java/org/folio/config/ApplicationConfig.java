@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import io.vertx.core.Vertx;
+import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.dao.export.ExportHistoryPostgresRepository;
@@ -133,9 +134,15 @@ public class ApplicationConfig {
   }
 
   @Bean
-  AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository repository,
+  InternalLockRepository internalLockRepository(PostgresClientFactory pgClientFactory) {
+    return new InternalLockRepository(pgClientFactory);
+  }
+
+  @Bean
+  AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
+                                        InternalLockRepository lockRepository,
                                         AuditEventProducer producer,
                                         PostgresClientFactory pgClientFactory) {
-    return new AuditOutboxService(repository, producer, pgClientFactory);
+    return new AuditOutboxService(outboxRepository, lockRepository, producer, pgClientFactory);
   }
 }

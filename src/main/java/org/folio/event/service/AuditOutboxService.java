@@ -7,6 +7,7 @@ import io.vertx.core.json.Json;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.okapi.common.GenericCompositeFuture;
@@ -31,14 +32,19 @@ public class AuditOutboxService {
 
   private static final Logger logger = LogManager.getLogger(AuditOutboxService.class);
 
-  private final AuditOutboxEventsLogRepository repository;
+  private static final String OUTBOX_LOCK_NAME = "audit_outbox";
+
+  private final AuditOutboxEventsLogRepository outboxRepository;
+  private final InternalLockRepository lockRepository;
   private final AuditEventProducer producer;
   private final PostgresClientFactory pgClientFactory;
 
-  public AuditOutboxService(AuditOutboxEventsLogRepository repository,
+  public AuditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
+                            InternalLockRepository lockRepository,
                             AuditEventProducer producer,
                             PostgresClientFactory pgClientFactory) {
-    this.repository = repository;
+    this.outboxRepository = outboxRepository;
+    this.lockRepository = lockRepository;
     this.producer = producer;
     this.pgClientFactory = pgClientFactory;
   }
@@ -53,7 +59,8 @@ public class AuditOutboxService {
   public Future<Integer> processOutboxEventLogs(Map<String, String> okapiHeaders) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
     PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
-    return pgClient.withTrans(conn -> repository.fetchEventLogs(conn, tenantId)
+    return pgClient.withTrans(conn -> lockRepository.selectWithLocking(conn, OUTBOX_LOCK_NAME, tenantId)
+      .compose(retrievedCount -> outboxRepository.fetchEventLogs(conn, tenantId))
       .compose(logs -> {
         if (CollectionUtils.isEmpty(logs)) {
           return Future.succeededFuture(0);
@@ -65,7 +72,7 @@ public class AuditOutboxService {
           .map(logs.stream().map(OutboxEventLog::getEventId).collect(Collectors.toList()))
           .compose(eventIds -> {
             if (CollectionUtils.isNotEmpty(eventIds)) {
-              return repository.deleteBatch(conn, eventIds, tenantId)
+              return outboxRepository.deleteBatch(conn, eventIds, tenantId)
                 .onSuccess(rowsCount -> logger.info("{} logs have been deleted from outbox table", rowsCount))
                 .onFailure(ex -> logger.error("Logs deletion filed", ex));
             }
@@ -87,7 +94,7 @@ public class AuditOutboxService {
     Promise<Tx<PurchaseOrder>> promise = Promise.promise();
     String tenantId = TenantTool.tenantId(okapiHeaders);
     OutboxEventLog outboxLog = getOrderOutboxLog(action, tx.getEntity());
-    repository.saveEventLog(tx.getConnection(), outboxLog, tenantId)
+    outboxRepository.saveEventLog(tx.getConnection(), outboxLog, tenantId)
       .onComplete(reply -> {
         logSaveResult(reply, tx.getEntity().getId());
         promise.complete(tx);
@@ -108,7 +115,7 @@ public class AuditOutboxService {
     Promise<PurchaseOrder> promise = Promise.promise();
     String tenantId = TenantTool.tenantId(okapiHeaders);
     OutboxEventLog outboxLog = getOrderOutboxLog(action, entity);
-    repository.saveEventLog(conn, outboxLog, tenantId)
+    outboxRepository.saveEventLog(conn, outboxLog, tenantId)
       .onComplete(reply -> {
         logSaveResult(reply, entity.getId());
         promise.complete(entity);
@@ -129,7 +136,7 @@ public class AuditOutboxService {
     Promise<PoLine> promise = Promise.promise();
     String tenantId = TenantTool.tenantId(okapiHeaders);
     OutboxEventLog outboxLog = getOrderLineOutboxLog(action, poLine);
-    repository.saveEventLog(conn, outboxLog, tenantId)
+    outboxRepository.saveEventLog(conn, outboxLog, tenantId)
       .onComplete(reply -> {
         logSaveResult(reply, poLine.getId());
         promise.complete(poLine);
@@ -149,7 +156,7 @@ public class AuditOutboxService {
     Promise<Tx<PoLine>> promise = Promise.promise();
     String tenantId = TenantTool.tenantId(okapiHeaders);
     OutboxEventLog outboxLog = getOrderLineOutboxLog(action, tx.getEntity());
-    repository.saveEventLog(tx.getConnection(), outboxLog, tenantId)
+    outboxRepository.saveEventLog(tx.getConnection(), outboxLog, tenantId)
       .onComplete(reply -> {
         logSaveResult(reply, tx.getEntity().getId());
         promise.complete(tx);

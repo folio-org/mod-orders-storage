@@ -8,6 +8,7 @@ import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import java.util.Optional;
 
 import io.vertx.core.Future;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.exceptions.ExceptionUtil;
@@ -38,9 +39,10 @@ public class ResponseUtil {
 
   public static void httpHandleFailure(Promise<?> promise, AsyncResult<?> reply) {
     Throwable cause = reply.cause();
-    String badRequestMessage = PgExceptionUtil.badRequestMessage(cause);
-    if (badRequestMessage != null) {
-      promise.fail(new io.vertx.ext.web.handler.HttpException(Response.Status.BAD_REQUEST.getStatusCode(), badRequestMessage));
+    if (cause instanceof io.vertx.ext.web.handler.HttpException) {
+      promise.fail(cause);
+    } else if (StringUtils.isNotBlank(PgExceptionUtil.badRequestMessage(cause))) {
+      promise.fail(new io.vertx.ext.web.handler.HttpException(Response.Status.BAD_REQUEST.getStatusCode(), PgExceptionUtil.badRequestMessage(cause)));
     } else {
       promise.fail(new io.vertx.ext.web.handler.HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
     }

@@ -28,7 +28,6 @@ import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
-import org.folio.rest.impl.AbstractApiHandlerTest;
 import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.HelperUtilsTest;
 import org.folio.rest.impl.OrdersAPITest;
@@ -250,8 +249,6 @@ public class StorageTestSuite {
   class DBClientTestNested extends DBClientTest {}
   @Nested
   class ExceptionUtilTestNested extends ExceptionUtilTest {}
-  @Nested
-  class AbstractApiHandlerTestNested extends AbstractApiHandlerTest {}
   @Nested
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested

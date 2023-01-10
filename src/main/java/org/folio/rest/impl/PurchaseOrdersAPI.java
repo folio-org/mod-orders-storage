@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.annotations.Validate;
+import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
@@ -44,6 +45,8 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
 
   private static final Logger log = LogManager.getLogger(PurchaseOrdersAPI.class);
 
+  private final PostgresClient pgClient;
+
   @Autowired
   private PoLinesService poLinesService;
   @Autowired
@@ -55,9 +58,9 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
 
   @Autowired
   public PurchaseOrdersAPI(Vertx vertx, String tenantId) {
-    super(tenantId);
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
     log.debug("Init PurchaseOrdersAPI creating PostgresClient");
+    pgClient = pgClientFactory.createInstance(tenantId);
   }
 
   @Override
@@ -182,13 +185,17 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     return pgClient.withTrans(conn -> {
       conn
         .update(TableNames.PURCHASE_ORDER_TABLE, order, id)
-        .compose(ar -> auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.EDIT, okapiHeaders))
-        .onComplete(reply -> {
+        .compose(reply -> {
+          if (reply.rowCount() == 0) {
+            return Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+          }
+          return auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.EDIT, okapiHeaders);
+        }).onComplete(reply -> {
           if (reply.succeeded()) {
             log.info("Purchase order id={} successfully updated", id);
             promise.complete(Response.noContent().build());
           } else {
-            handleFailure(promise, reply);
+            httpHandleFailure(promise, reply);
           }
         });
       return promise.future();
@@ -307,5 +314,9 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   @Override
   protected String getEndpoint(Object entity) {
     return HelperUtils.getEndpoint(OrdersStoragePurchaseOrders.class) + JsonObject.mapFrom(entity).getString("id");
+  }
+
+  public PostgresClient getPgClient() {
+    return pgClient;
   }
 }

@@ -222,9 +222,8 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     // we have 1 created po line and 1 updated po line, so 2 events should not be produced
     List<String> sendCreatePoLineEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1, userId);
     assertEquals(2, sendCreatePoLineEvents.size());
-    // TODO events order check will be possible after MODORDSTOR-326
-    checkOrderLineEventContent(sendCreatePoLineEvents.get(0));
-    checkOrderLineEventContent(sendCreatePoLineEvents.get(1));
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.EDIT);
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
     deleteData(PO_LINE.getEndpointWithId(), poLine.getId());
@@ -379,9 +378,8 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     // we have 1 created po line and 1 update po line, so 1 Create event and 1 Update event should be sent
     List<String> sendCreatePoLineEvents = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 1, userId);
     assertEquals(2, sendCreatePoLineEvents.size());
-    // TODO events order check will be possible after MODORDSTOR-326
-    checkOrderLineEventContent(sendCreatePoLineEvents.get(0));
-    checkOrderLineEventContent(sendCreatePoLineEvents.get(1));
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
+    checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.EDIT);
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"), ISOLATED_TENANT_HEADER);
     deleteData(PO_LINE.getEndpointWithId(), poLine.getId(), ISOLATED_TENANT_HEADER);

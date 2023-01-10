@@ -314,11 +314,6 @@ public abstract class TestBase {
   protected void checkOrderLineEventContent(String eventPayload, OrderLineAuditEvent.Action action) {
     OrderLineAuditEvent event = Json.decodeValue(eventPayload, OrderLineAuditEvent.class);
     Assertions.assertEquals(action, event.getAction());
-    checkOrderLineEventContent(eventPayload);
-  }
-
-  protected void checkOrderLineEventContent(String eventPayload) {
-    OrderLineAuditEvent event = Json.decodeValue(eventPayload, OrderLineAuditEvent.class);
     assertNotNull(event.getId());
     assertNotNull(event.getOrderId());
     assertNotNull(event.getOrderLineId());

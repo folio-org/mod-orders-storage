@@ -121,7 +121,7 @@ public class PoLinesService {
             auditOutboxService.processOutboxEventLogs(okapiHeaders);
             promise.complete(null);
           } else {
-            handleFailure(promise, reply);
+            httpHandleFailure(promise, reply);
           }
         }));
     return promise.future();

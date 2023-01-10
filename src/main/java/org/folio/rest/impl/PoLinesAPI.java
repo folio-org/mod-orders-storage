@@ -1,7 +1,6 @@
 package org.folio.rest.impl;
 
 import org.folio.dao.PostgresClientFactory;
-import org.folio.event.service.AuditEventProducer;
 import org.folio.event.service.AuditOutboxService;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 
@@ -31,20 +30,20 @@ import io.vertx.core.json.JsonObject;
 
 public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLines {
 
+  private final PostgresClient pgClient;
+
   @Autowired
   private PoLinesService poLinesService;
   @Autowired
   private OrderLinePatchOperationService orderLinePatchOperationService;
-  @Autowired
-  private AuditEventProducer auditProducer;
   @Autowired
   private AuditOutboxService auditOutboxService;
   @Autowired
   private PostgresClientFactory pgClientFactory;
 
   public PoLinesAPI(Vertx vertx, String tenantId) {
-    super(tenantId);
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+    pgClient = pgClientFactory.createInstance(tenantId);
   }
 
   @Override
@@ -165,5 +164,9 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
           asyncResultHandler.handle(buildNoContentResponse());
         }
       });
+  }
+
+  public PostgresClient getPgClient() {
+    return pgClient;
   }
 }
