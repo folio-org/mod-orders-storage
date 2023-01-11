@@ -134,8 +134,8 @@ public class ApplicationConfig {
   }
 
   @Bean
-  InternalLockRepository internalLockRepository(PostgresClientFactory pgClientFactory) {
-    return new InternalLockRepository(pgClientFactory);
+  InternalLockRepository internalLockRepository() {
+    return new InternalLockRepository();
   }
 
   @Bean

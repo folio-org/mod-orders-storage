@@ -10,12 +10,6 @@ public class InternalLockRepository {
   private static final String TABLE_NAME = "internal_lock";
   private static final String SELECT_WITH_LOCKING = "SELECT * FROM %s.%s WHERE lock_name = $1 FOR UPDATE";
 
-  private final PostgresClientFactory pgClientFactory;
-
-  public InternalLockRepository(PostgresClientFactory pgClientFactory) {
-    this.pgClientFactory = pgClientFactory;
-  }
-
   /**
    * Performs SELECT FOR UPDATE statement in order to implement locking.
    * Lock released after transaction's commit.

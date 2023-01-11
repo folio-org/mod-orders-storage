@@ -132,7 +132,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
       if(order.getWorkflowStatus() == PurchaseOrder.WorkflowStatus.PENDING) {
         updatePendingOrder(id, order, okapiHeaders, asyncResultHandler, vertxContext);
       } else {
-        updateOrder( id, order, okapiHeaders, vertxContext)
+        updateOrder( id, order, okapiHeaders)
           .onComplete(response -> {
             if (response.succeeded()) {
               deleteSequence(order);
@@ -154,7 +154,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
             if (isPolNumberSequenceExist != null && !isPolNumberSequenceExist.result()) {
               poLinesService.getLinesLastSequence(order.getId(), vertxContext, okapiHeaders)
                       .compose(startIndex -> createSequenceWithStart(order, startIndex + 1))
-                      .compose(v -> updateOrder(id, order, okapiHeaders, vertxContext))
+                      .compose(v -> updateOrder(id, order, okapiHeaders))
                       .onComplete(response -> {
                         if (response.succeeded()) {
                           auditOutboxService.processOutboxEventLogs(okapiHeaders);
@@ -164,7 +164,7 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
                         }
                       });
             } else {
-              updateOrder(id, order, okapiHeaders, vertxContext)
+              updateOrder(id, order, okapiHeaders)
                 .onComplete(response -> {
                   if (response.succeeded()) {
                     auditOutboxService.processOutboxEventLogs(okapiHeaders);
@@ -177,11 +177,9 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
           });
   }
 
-  private Future<Response> updateOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders, Context vertxContext) {
+  private Future<Response> updateOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders) {
     log.info("Update purchase order with id={}", order.getId());
     Promise<Response> promise = Promise.promise();
-    String tenantId = TenantTool.tenantId(okapiHeaders);
-    PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
     return pgClient.withTrans(conn -> {
       conn
         .update(TableNames.PURCHASE_ORDER_TABLE, order, id)

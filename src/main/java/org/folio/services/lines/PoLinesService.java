@@ -515,25 +515,6 @@ public class PoLinesService {
     }
   }
 
-  private Future<Tx<PoLine>> upsertTitle(Tx<PoLine> poLineTx, DBClient client) {
-    Promise<Results<Title>> promise = Promise.promise();
-    PoLine poLine = poLineTx.getEntity();
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
-
-    client.getPgClient().get(poLineTx.getConnection(), TITLES_TABLE, Title.class, criterion, true, false, promise);
-    return promise.future()
-      .compose(result -> {
-        List<Title> titles = result.getResults();
-        if (titles.isEmpty()) {
-          return createTitle(poLineTx, client);
-        } else if (titleUpdateRequired(titles.get(0), poLine)) {
-          return updateTitle(poLineTx, titles.get(0), client);
-        }
-        return Future.succeededFuture(poLineTx);
-      })
-      .recover(Future::failedFuture);
-  }
-
   private Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
     Promise<Results<Title>> promise = Promise.promise();
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());

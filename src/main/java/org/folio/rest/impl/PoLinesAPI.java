@@ -115,9 +115,6 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   public void putOrdersStoragePoLinesById(String id, String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      String tenantId = TenantTool.tenantId(okapiHeaders);
-      PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
-
       pgClient.withTrans(conn -> poLinesService.updatePoLine(conn, poLine)
         .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders))
         .onComplete(result -> {
