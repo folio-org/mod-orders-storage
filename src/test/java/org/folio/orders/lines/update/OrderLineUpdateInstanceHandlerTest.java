@@ -2,7 +2,6 @@ package org.folio.orders.lines.update;
 
 import static org.folio.StorageTestSuite.clearVertxContext;
 import static org.folio.StorageTestSuite.initSpringContext;
-import org.folio.dao.InternalLockRepository;
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.models.TableNames.TITLES_TABLE;
@@ -15,6 +14,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import java.net.MalformedURLException;
@@ -31,12 +31,9 @@ import io.vertx.ext.web.handler.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
-import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
-import org.folio.event.service.AuditEventProducer;
 import org.folio.event.service.AuditOutboxService;
-import org.folio.kafka.KafkaConfig;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
@@ -595,6 +592,11 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
      }
 
      @Bean
+     AuditOutboxService auditOutboxService() {
+       return mock(AuditOutboxService.class);
+     }
+
+     @Bean
      PoLinesService poLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
        return new PoLinesService(poLinesDAO, pgClientFactory, auditOutboxService);
      }
@@ -604,28 +606,6 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
        return new PostgresClientFactory(vertx);
      }
 
-     @Bean
-     AuditEventProducer auditEventProducerService(KafkaConfig kafkaConfig) {
-       return new AuditEventProducer(kafkaConfig);
-     }
-
-     @Bean
-     AuditOutboxEventsLogRepository auditOutboxRepository(PostgresClientFactory pgClientFactory) {
-       return new AuditOutboxEventsLogRepository(pgClientFactory);
-     }
-
-     @Bean
-     InternalLockRepository internalLockRepository(PostgresClientFactory pgClientFactory) {
-       return new InternalLockRepository(pgClientFactory);
-     }
-
-     @Bean
-     AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
-                                           InternalLockRepository lockRepository,
-                                           AuditEventProducer producer,
-                                           PostgresClientFactory pgClientFactory) {
-       return new AuditOutboxService(outboxRepository, lockRepository, producer, pgClientFactory);
-     }
      @Bean
      PieceService pieceService() {
        return new PieceService();
