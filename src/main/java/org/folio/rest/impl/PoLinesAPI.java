@@ -1,5 +1,7 @@
 package org.folio.rest.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
@@ -10,14 +12,17 @@ import javax.ws.rs.core.Response;
 
 import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.core.BaseApi;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLines;
-import org.folio.rest.persist.*;
-import org.folio.rest.tools.utils.TenantTool;
+import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.HelperUtils;
+import org.folio.rest.persist.PgUtil;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +33,8 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
-public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLines {
+public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
+  private static final Logger log = LogManager.getLogger(PoLinesAPI.class);
 
   private final PostgresClient pgClient;
 
@@ -59,26 +65,36 @@ public class PoLinesAPI extends AbstractApiHandler implements OrdersStoragePoLin
   public void postOrdersStoragePoLines(String lang, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      DBClient client = new DBClient(vertxContext, okapiHeaders);
-      Tx<PoLine> tx = new Tx<>(poLine, getPgClient());
-      tx.startTx().compose(line -> poLinesService.createPoLine(line, client))
-        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(tx, OrderLineAuditEvent.Action.CREATE, okapiHeaders))
-        .compose(Tx::endTx)
-        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created", okapiHeaders));
+      pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
+        .compose(poLineId -> auditOutboxService.saveOrderLineOutboxLog(conn, poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders))
+        .onComplete(reply -> {
+          if (reply.failed()) {
+            log.error("Order Line with id {} creation failed", poLine.getId(), reply.cause());
+            asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+          } else {
+            auditOutboxService.processOutboxEventLogs(okapiHeaders);
+            asyncResultHandler.handle(buildResponseWithLocation(poLine, getEndpoint(poLine)));
+          }
+        }));
     } else {
-      createPoLineWithTitle(poLine, asyncResultHandler, vertxContext, okapiHeaders);
+      createPoLineWithTitle(poLine, asyncResultHandler, okapiHeaders);
     }
   }
 
-  private void createPoLineWithTitle(PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
+  private void createPoLineWithTitle(PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler, Map<String, String> okapiHeaders) {
     try {
-      DBClient client = new DBClient(vertxContext, okapiHeaders);
-      Tx<PoLine> tx = new Tx<>(poLine, getPgClient());
-      tx.startTx().compose(line -> poLinesService.createPoLine(line, client))
-        .compose(line -> poLinesService.createTitle(line, client))
-        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(tx, OrderLineAuditEvent.Action.CREATE, okapiHeaders))
-        .compose(Tx::endTx)
-        .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "POLine {} {} created", okapiHeaders));
+      pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
+        .compose(poLineId -> poLinesService.createTitle(conn, poLine))
+        .compose(title -> auditOutboxService.saveOrderLineOutboxLog(conn, poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders))
+        .onComplete(reply -> {
+          if (reply.failed()) {
+            log.error("Order Line with id {} and Title creation failed", poLine.getId(), reply.cause());
+            asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+          } else {
+            auditOutboxService.processOutboxEventLogs(okapiHeaders);
+            asyncResultHandler.handle(buildResponseWithLocation(poLine, getEndpoint(poLine)));
+          }
+        }));
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }

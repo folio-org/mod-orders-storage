@@ -8,19 +8,20 @@ import javax.ws.rs.core.Response;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.core.BaseApi;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
 import org.folio.models.TableNames;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.cql.CQLWrapper;
-import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.spring.SpringContextUtil;
@@ -41,7 +42,7 @@ import io.vertx.sqlclient.RowSet;
 
 import static org.folio.rest.core.ResponseUtil.handleFailure;
 
-public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStoragePurchaseOrders {
+public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LogManager.getLogger(PurchaseOrdersAPI.class);
 
@@ -76,16 +77,20 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
   public void postOrdersStoragePurchaseOrders(String lang, PurchaseOrder entity, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
-      DBClient client = new DBClient(vertxContext, okapiHeaders);
       vertxContext.runOnContext(v -> {
         log.debug("Creating a new purchase order");
-        Tx<PurchaseOrder> tx = new Tx<>(entity, getPgClient());
-        tx.startTx()
-          .compose(e -> createPurchaseOrder(e, client))
-          .compose(this::createSequence)
-          .compose(ar -> auditOutboxService.saveOrderOutboxLog(tx, OrderAuditEvent.Action.CREATE, okapiHeaders))
-          .compose(Tx::endTx)
-          .onComplete(handleResponseWithLocation(asyncResultHandler, tx, "Order {} {} created", okapiHeaders));
+        pgClient.withTrans(conn -> createPurchaseOrder(conn, entity)
+          .compose(orderId -> createSequence(conn, orderId))
+          .compose(ar -> auditOutboxService.saveOrderOutboxLog(conn, entity, OrderAuditEvent.Action.CREATE, okapiHeaders))
+          .onComplete(reply -> {
+            if (reply.failed()) {
+              log.error("Order with id {} creation failed", entity.getId(), reply.cause());
+              asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+            } else {
+              auditOutboxService.processOutboxEventLogs(okapiHeaders);
+              asyncResultHandler.handle(buildResponseWithLocation(entity, getEndpoint(entity)));
+            }
+          }));
       });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
@@ -111,7 +116,15 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
         .compose(e -> deleteOrderInvoicesRelation(e, client))
         .compose(e -> deleteOrderById(e, client))
         .compose(Tx::endTx)
-        .onComplete(handleNoContentResponse(asyncResultHandler, tx));
+        .onComplete(result -> {
+          if (result.failed()) {
+            HttpException cause = (HttpException) result.cause();
+            // The result of rollback operation is not so important, main failure cause is used to build the response
+            tx.rollbackTransaction().onComplete(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
+          } else {
+            asyncResultHandler.handle(buildNoContentResponse());
+          }
+        });
     } catch (Exception e) {
       asyncResultHandler.handle(buildErrorResponse(e));
     }
@@ -216,19 +229,19 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     return promise.future();
   }
 
-  private Future<Tx<PurchaseOrder>> createSequence(Tx<PurchaseOrder> tx) {
-    Promise<Tx<PurchaseOrder>> promise = Promise.promise();
+  private Future<Void> createSequence(Conn conn, String orderId) {
+    Promise<Void> promise = Promise.promise();
 
-    String orderId = tx.getEntity().getId();
     log.debug("Creating POL number sequence for order with id={}", orderId);
     try {
-      getPgClient().execute(tx.getConnection(), orderSequenceRequestBuilder.buildCreateSequenceQuery(orderId), reply -> {
+      conn.execute(orderSequenceRequestBuilder.buildCreateSequenceQuery(orderId))
+        .onComplete(reply -> {
         if (reply.failed()) {
           log.error("POL number sequence creation for order with id={} failed", orderId, reply.cause());
           handleFailure(promise, reply);
         } else {
           log.debug("POL number sequence for order with id={} successfully created", orderId);
-          promise.complete(tx);
+          promise.complete();
         }
       });
     } catch (Exception e) {
@@ -293,15 +306,25 @@ public class PurchaseOrdersAPI extends AbstractApiHandler implements OrdersStora
     }
   }
 
-  private Future<Tx<PurchaseOrder>> createPurchaseOrder(Tx<PurchaseOrder> tx, DBClient client) {
-    PurchaseOrder order = tx.getEntity();
+  private Future<String> createPurchaseOrder(Conn conn, PurchaseOrder order) {
+    Promise<String> promise = Promise.promise();
+
     if (order.getId() == null) {
       order.setId(UUID.randomUUID().toString());
     }
-
     log.debug("Creating new order with id={}", order.getId());
 
-    return client.save(tx, order.getId(), order, TableNames.PURCHASE_ORDER_TABLE);
+    conn.save(TableNames.PURCHASE_ORDER_TABLE, order.getId(), order)
+      .onComplete(result -> {
+        if (result.failed()) {
+          httpHandleFailure(promise, result);
+        } else {
+          log.info("Purchase order with id {} has been created", order.getId());
+          promise.complete(order.getId());
+        }
+      });
+
+    return promise.future();
   }
 
   private Future<Tx<String>> deleteOrderById(Tx<String> tx, DBClient client) {

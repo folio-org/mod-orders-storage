@@ -129,8 +129,8 @@ public class ApplicationConfig {
   }
 
   @Bean
-  AuditOutboxEventsLogRepository auditOutboxRepository(PostgresClientFactory pgClientFactory) {
-    return new AuditOutboxEventsLogRepository(pgClientFactory);
+  AuditOutboxEventsLogRepository auditOutboxRepository() {
+    return new AuditOutboxEventsLogRepository();
   }
 
   @Bean

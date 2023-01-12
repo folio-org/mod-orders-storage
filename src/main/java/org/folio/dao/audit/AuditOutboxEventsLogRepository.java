@@ -1,16 +1,12 @@
 package org.folio.dao.audit;
 
-import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
-import org.folio.dao.PostgresClientFactory;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
 import org.folio.rest.persist.Conn;
-import org.folio.rest.persist.SQLConnection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,12 +26,6 @@ public class AuditOutboxEventsLogRepository {
   private static final String SELECT_EVENT_LOGS = "SELECT * FROM %s.%s LIMIT 1000";
   public static final String DELETE_SQL = "DELETE from %s.%s where event_id = ANY ($1)";
 
-  private final PostgresClientFactory pgClientFactory;
-
-  public AuditOutboxEventsLogRepository(PostgresClientFactory pgClientFactory) {
-    this.pgClientFactory = pgClientFactory;
-  }
-
   /**
    * Fetches event logs from outbox table.
    *
@@ -50,23 +40,6 @@ public class AuditOutboxEventsLogRepository {
 
   /**
    * Saves event log to outbox table.
-   * Accepts @{@link AsyncResult} with connection that is in transaction.
-   *
-   * @param connection the sql connection that shares the same transaction
-   * @param eventLog   the event log to save
-   * @param tenantId   the tenant id
-   * @return future true if event log has been saved
-   */
-  public Future<Boolean> saveEventLog(AsyncResult<SQLConnection> connection, OutboxEventLog eventLog, String tenantId) {
-    Promise<RowSet<Row>> promise = Promise.promise();
-    String query = getCreateQuery(tenantId);
-    Tuple queryParams = getCreateParams(eventLog);
-    pgClientFactory.createInstance(tenantId).execute(connection, query, queryParams, promise);
-    return promise.future().map(resultSet -> resultSet.size() == 1);
-  }
-
-  /**
-   * Saves event log to outbox table.
    * Accepts @{@link Conn} that is in trnsaction.
    *
    * @param conn     the sql connection that shares the same transaction
@@ -75,17 +48,9 @@ public class AuditOutboxEventsLogRepository {
    * @return future true if event log has been saved
    */
   public Future<Boolean> saveEventLog(Conn conn, OutboxEventLog eventLog, String tenantId) {
-    String query = getCreateQuery(tenantId);
-    Tuple queryParams = getCreateParams(eventLog);
+    String query = String.format(INSERT_SQL, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
+    Tuple queryParams = Tuple.of(eventLog.getEventId(), eventLog.getEntityType().value(), eventLog.getAction(), eventLog.getPayload());
     return conn.execute(query, queryParams).map(resultSet -> resultSet.size() == 1);
-  }
-
-  private String getCreateQuery(String tenantId) {
-    return String.format(INSERT_SQL, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
-  }
-
-  private Tuple getCreateParams(OutboxEventLog eventLog) {
-    return Tuple.of(eventLog.getEventId(), eventLog.getEntityType().value(), eventLog.getAction(), eventLog.getPayload());
   }
 
   /**

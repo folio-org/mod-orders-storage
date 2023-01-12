@@ -19,7 +19,6 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.Tx;
 import org.folio.rest.tools.utils.TenantTool;
 
 import java.util.ArrayList;
@@ -85,40 +84,19 @@ public class AuditOutboxService {
   /**
    * Saves order outbox log.
    *
-   * @param tx open transaction that will be used to save audit log
-   * @param action action for order
-   * @param okapiHeaders the okapi headers
-   * @return future with saved outbox log in the same transaction
-   */
-  public Future<Tx<PurchaseOrder>> saveOrderOutboxLog(Tx<PurchaseOrder> tx, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Promise<Tx<PurchaseOrder>> promise = Promise.promise();
-    String tenantId = TenantTool.tenantId(okapiHeaders);
-    OutboxEventLog outboxLog = getOrderOutboxLog(action, tx.getEntity());
-    outboxRepository.saveEventLog(tx.getConnection(), outboxLog, tenantId)
-      .onComplete(reply -> {
-        logSaveResult(reply, tx.getEntity().getId());
-        promise.complete(tx);
-      });
-    return promise.future();
-  }
-
-  /**
-   * Saves order outbox log. Using new approach to work with transactions without deprecate methods.
-   *
    * @param conn connection in transaction
    * @param entity the purchase order
    * @param action the event action
    * @param okapiHeaders okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<PurchaseOrder> saveOrderOutboxLog(Conn conn, PurchaseOrder entity, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Promise<PurchaseOrder> promise = Promise.promise();
-    String tenantId = TenantTool.tenantId(okapiHeaders);
-    OutboxEventLog outboxLog = getOrderOutboxLog(action, entity);
-    outboxRepository.saveEventLog(conn, outboxLog, tenantId)
+  public Future<Void> saveOrderOutboxLog(Conn conn, PurchaseOrder entity, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    Promise<Void> promise = Promise.promise();
+    String order = Json.encode(entity);
+    saveOutboxLog(conn, action.value(), EntityType.ORDER, order, okapiHeaders)
       .onComplete(reply -> {
         logSaveResult(reply, entity.getId());
-        promise.complete(entity);
+        promise.complete();
       });
     return promise.future();
   }
@@ -132,34 +110,13 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<PoLine> saveOrderLineOutboxLog(Conn conn, PoLine poLine, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Promise<PoLine> promise = Promise.promise();
-    String tenantId = TenantTool.tenantId(okapiHeaders);
-    OutboxEventLog outboxLog = getOrderLineOutboxLog(action, poLine);
-    outboxRepository.saveEventLog(conn, outboxLog, tenantId)
+  public Future<Void> saveOrderLineOutboxLog(Conn conn, PoLine poLine, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    Promise<Void> promise = Promise.promise();
+    String orderLine = Json.encode(poLine);
+    saveOutboxLog(conn, action.value(), EntityType.ORDER_LINE, orderLine, okapiHeaders)
       .onComplete(reply -> {
         logSaveResult(reply, poLine.getId());
-        promise.complete(poLine);
-      });
-    return promise.future();
-  }
-
-  /**
-   * Saves order line outbox log.
-   *
-   * @param tx open transaction that will be used to save audit log
-   * @param action action for order line
-   * @param okapiHeaders the okapi headers
-   * @return future with saved outbox log in the same transaction
-   */
-  public Future<Tx<PoLine>> saveOrderLineOutboxLog(Tx<PoLine> tx, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Promise<Tx<PoLine>> promise = Promise.promise();
-    String tenantId = TenantTool.tenantId(okapiHeaders);
-    OutboxEventLog outboxLog = getOrderLineOutboxLog(action, tx.getEntity());
-    outboxRepository.saveEventLog(tx.getConnection(), outboxLog, tenantId)
-      .onComplete(reply -> {
-        logSaveResult(reply, tx.getEntity().getId());
-        promise.complete(tx);
+        promise.complete();
       });
     return promise.future();
   }
@@ -180,24 +137,20 @@ public class AuditOutboxService {
     return futures;
   }
 
-  private OutboxEventLog getOrderOutboxLog(OrderAuditEvent.Action action, PurchaseOrder entity) {
-    String order = Json.encode(entity);
-    return getOutboxLog(action.value(), EntityType.ORDER, order);
-  }
+  private Future<Boolean> saveOutboxLog(Conn conn,
+                                        String action,
+                                        EntityType entityType,
+                                        String entity,
+                                        Map<String, String> okapiHeaders) {
+    String tenantId = TenantTool.tenantId(okapiHeaders);
 
-  private OutboxEventLog getOrderLineOutboxLog(OrderLineAuditEvent.Action action, PoLine entity) {
-    String orderLine = Json.encode(entity);
-    return getOutboxLog(action.value(), EntityType.ORDER_LINE, orderLine);
-  }
-
-  private OutboxEventLog getOutboxLog(String action,
-                                      EntityType entityType,
-                                      String entity) {
-    return new OutboxEventLog()
+    OutboxEventLog log = new OutboxEventLog()
       .withEventId(UUID.randomUUID().toString())
       .withAction(action)
       .withEntityType(entityType)
       .withPayload(entity);
+
+    return outboxRepository.saveEventLog(conn, log, tenantId);
   }
 
   private void logSaveResult(AsyncResult<Boolean> reply, String entityId) {
