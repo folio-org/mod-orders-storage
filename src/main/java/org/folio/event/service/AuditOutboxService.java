@@ -143,12 +143,4 @@ public class AuditOutboxService {
 
     return outboxRepository.saveEventLog(conn, log, tenantId);
   }
-
-  private void logSaveResult(AsyncResult<Boolean> reply, String entityId) {
-    if (reply.failed()) {
-      logger.warn("Could not save outbox audit log for order line with id {}", entityId, reply.cause());
-    } else {
-      logger.info("Outbox log has been saved for order line id: {}", entityId);
-    }
-  }
 }
