@@ -23,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
@@ -170,6 +171,24 @@ public class OrdersAPITest extends TestBase {
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderWithoutPOLinesId);
     }
+  }
+
+  @Test
+  public void testUpdateOrder() throws MalformedURLException {
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
+    String orderId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, headers);
+    putData("/orders-storage/purchase-orders/{id}", orderId, purchaseOrderWithoutPOLines, headers)
+      .then()
+      .statusCode(204);
+
+    // we have 1 created order, 1 edited order so 2 events should be sent
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 2, userId);
+    Assertions.assertEquals(2, sentCreateOrderEvents.size());
+    checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+    checkOrderEventContent(sentCreateOrderEvents.get(1), OrderAuditEvent.Action.EDIT);
+
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), orderId);
   }
 
   private void verifyExpectedOrders(List<PurchaseOrder> filteredOrders, String... poIds) {

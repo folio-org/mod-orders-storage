@@ -27,13 +27,15 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.lines.PoLinesDAO;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
 import org.folio.rest.impl.PiecesAPI;
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
-import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.*;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.interfaces.Results;
@@ -45,15 +47,20 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 import one.util.streamex.StreamEx;
+import org.folio.rest.tools.utils.TenantTool;
 
 public class PoLinesService {
   private static final Logger logger = LogManager.getLogger(PoLinesService.class);
   private static final String POLINE_ID_FIELD = "poLineId";
 
   private PoLinesDAO poLinesDAO;
+  private final PostgresClientFactory pgClientFactory;
+  private final AuditOutboxService auditOutboxService;
 
-  public PoLinesService(PoLinesDAO poLinesDAO) {
+  public PoLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
     this.poLinesDAO = poLinesDAO;
+    this.pgClientFactory = pgClientFactory;
+    this.auditOutboxService = auditOutboxService;
   }
 
   public Future<List<PoLine>> getPoLinesByOrderId(String purchaseOrderId, Context context, Map<String, String> headers) {
@@ -98,56 +105,67 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Void> updatePoLineWithTitle(String id, PoLine poLine, DBClient client) {
-    Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
+  public Future<Void> updatePoLineWithTitle(String id, PoLine poLine, Map<String, String> okapiHeaders) {
+    String tenantId = TenantTool.tenantId(okapiHeaders);
     Promise<Void> promise = Promise.promise();
     poLine.setId(id);
-    tx.startTx()
-      .compose(line -> updatePoLine(line, client))
-      .compose(line -> upsertTitle(line, client))
-      .compose(Tx::endTx)
-      .onComplete(result -> {
-        if (result.failed()) {
-          tx.rollbackTransaction().onComplete(res -> promise.fail(result.cause()));
-        } else {
-          logger.info("POLine {} and associated data were successfully updated", tx.getEntity());
-          promise.complete(null);
-        }
-      });
+
+    PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
+
+    pgClient.withTrans(conn -> updatePoLine(conn, poLine)
+        .compose(line -> updateTitle(conn, line))
+        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders))
+        .onComplete(reply -> {
+          if (reply.succeeded()) {
+            logger.info("POLine {} and associated data were successfully updated", poLine);
+            auditOutboxService.processOutboxEventLogs(okapiHeaders);
+            promise.complete(null);
+          } else {
+            httpHandleFailure(promise, reply);
+          }
+        }));
     return promise.future();
   }
 
-  public Future<Tx<PoLine>> createTitle(Tx<PoLine> poLineTx, DBClient client) {
-    Promise<Tx<PoLine>> promise = Promise.promise();
+  public Future<PoLine> createTitle(Conn conn, PoLine poLine) {
+    Promise<PoLine> promise = Promise.promise();
 
-    String packagePoLineId = poLineTx.getEntity().getPackagePoLineId();
-
-    if (packagePoLineId != null) {
-      getPoLineById(packagePoLineId, client)
+    if (poLine.getPackagePoLineId() != null) {
+      getPoLineById(conn, poLine.getPackagePoLineId())
         .onComplete(reply -> {
           if (reply.failed() || reply.result() == null) {
-            logger.error("Can't find poLine with id={}", packagePoLineId);
+            logger.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
             promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
           } else {
-            populateTitleForPackagePoLineAndSave(poLineTx, promise, packagePoLineId, reply.result(), client);
+            populateTitleForPackagePoLineAndSave(conn, promise, poLine, reply.result());
           }
         });
     } else {
-      return createTitleAndSave(poLineTx, client);
+      return createTitleAndSave(conn, poLine);
     }
-
     return promise.future();
   }
 
-  public Future<Tx<PoLine>> createPoLine(Tx<PoLine> poLineTx, DBClient client) {
-    PoLine poLine = poLineTx.getEntity();
+  public Future<String> createPoLine(Conn conn, PoLine poLine) {
+    Promise<String> promise = Promise.promise();
+
     if (poLine.getId() == null) {
       poLine.setId(UUID.randomUUID()
         .toString());
     }
     logger.debug("Creating new poLine record with id={}", poLine.getId());
 
-    return client.save(poLineTx, poLine.getId(), poLine, PO_LINE_TABLE);
+    conn.save(PO_LINE_TABLE, poLine.getId(), poLine)
+      .onComplete(result -> {
+        if (result.failed()) {
+          httpHandleFailure(promise, result);
+        } else {
+          logger.info("PoLine with id {} has been created", poLine.getId());
+          promise.complete(poLine.getId());
+        }
+      });
+
+    return promise.future();
   }
 
   public Future<List<PoLine>> getPoLinesByLineIds(List<String> poLineIds, Context context, Map<String, String> headers) {
@@ -256,28 +274,41 @@ public class PoLinesService {
     return promise.future();
   }
 
+  public Future<PoLine> getPoLineById(Conn conn, String poLineId) {
+    Promise<PoLine> promise = Promise.promise();
+
+    conn.getById(PO_LINE_TABLE, poLineId, PoLine.class)
+      .onComplete(reply -> {
+        if(reply.failed()) {
+          logger.error("Retrieve POL failed : {}", reply);
+          httpHandleFailure(promise, reply);
+        } else {
+          promise.complete(reply.result());
+        }
+      });
+    return promise.future();
+  }
+
   public Future<Tx<PoLine>> updateInstanceIdForPoLine(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
     poLineTx.getEntity().setInstanceId(replaceInstanceRef.getNewInstanceId());
 
     return updatePoLine(poLineTx, client);
   }
 
-  private void populateTitleForPackagePoLineAndSave(Tx<PoLine> poLineTx, Promise<Tx<PoLine>> promise, String packagePoLineId,
-    PoLine packagePoLine, DBClient client) {
-    Title title = createTitleObject(poLineTx.getEntity());
+  private void populateTitleForPackagePoLineAndSave(Conn conn, Promise<PoLine> promise, PoLine poLine,
+                                                    PoLine packagePoLine) {
+    Title title = createTitleObject(poLine);
     populateTitleBasedOnPackagePoLine(title, packagePoLine);
+    logger.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), poLine.getPackagePoLineId());
 
-    logger.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), packagePoLineId);
-
-    client.save(poLineTx, title.getId(), title, TITLES_TABLE)
+    conn.save(TITLES_TABLE, title.getId(), title)
       .onComplete(saveResult -> {
-          if (saveResult.failed()) {
-            httpHandleFailure(promise, saveResult);
-          } else {
-            promise.complete(saveResult.result());
-          }
+        if (saveResult.failed()) {
+          httpHandleFailure(promise, saveResult);
+        } else {
+          promise.complete(poLine);
         }
-      );
+      });
   }
 
   private Future<Tx<String>> deleteTitleById(Tx<String> tx, DBClient client) {
@@ -318,27 +349,58 @@ public class PoLinesService {
     return promise.future();
   }
 
-  private Future<Tx<PoLine>> createTitleAndSave(Tx<PoLine> poLineTx, DBClient client) {
-    Title title = createTitleObject(poLineTx.getEntity());
-    logger.debug("Creating new title record with id={}", title.getId());
-    return client.save(poLineTx, title.getId(), title, TITLES_TABLE);
+  public Future<PoLine> updatePoLine(Conn conn, PoLine poLine) {
+    Promise<PoLine> promise = Promise.promise();
+
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
+    conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
+      .onComplete(result -> {
+        if (result.failed()) {
+          logger.error("Update POLs failed : {}", criterion);
+          httpHandleFailure(promise, result);
+        } else {
+          if (result.result().rowCount() == 0) {
+            promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+          } else {
+            logger.info("POLine record {} was successfully updated", poLine.getId());
+            promise.complete(poLine);
+          }
+        }
+      });
+    return promise.future();
   }
 
-  private Future<Tx<PoLine>> updateTitle(Tx<PoLine> poLineTx, Title title, DBClient client) {
-    Promise<Tx<PoLine>> promise = Promise.promise();
-    PoLine poLine = poLineTx.getEntity();
+  private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine) {
+    Promise<PoLine> promise = Promise.promise();
+    Title title = createTitleObject(poLine);
+    logger.debug("Creating new title record with id={}", title.getId());
+
+    conn.save(TITLES_TABLE, title.getId(), title)
+      .onComplete(saveResult -> {
+        if (saveResult.failed()) {
+          httpHandleFailure(promise, saveResult);
+        } else {
+          promise.complete(poLine);
+        }
+      });
+    return promise.future();
+  }
+
+  private Future<PoLine> updateTitle(Conn conn, Title title, PoLine poLine) {
+    Promise<PoLine> promise = Promise.promise();
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
     Title newTitle = createTitleObject(poLine).withIsAcknowledged(title.getIsAcknowledged()).withId(title.getId());
 
-    client.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, newTitle, JSONB, criterion.toString(), false, event -> {
-      if (event.failed()) {
-        httpHandleFailure(promise, event);
-      } else {
-        logger.info("Title record {} was successfully updated", title);
-        promise.complete(poLineTx);
-      }
-    });
+    conn.update(TITLES_TABLE, newTitle, JSONB, criterion.toString(), false)
+      .onComplete(result -> {
+        if (result.failed()) {
+          httpHandleFailure(promise, result);
+        } else {
+          logger.info("Title record {} was successfully updated", title);
+          promise.complete(poLine);
+        }
+      });
     return promise.future();
   }
 
@@ -400,24 +462,21 @@ public class PoLinesService {
     }
   }
 
-  private Future<Tx<PoLine>> upsertTitle(Tx<PoLine> poLineTx, DBClient client) {
-    Promise<Results<Title>> promise = Promise.promise();
-    PoLine poLine = poLineTx.getEntity();
+  private Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
 
-    client.getPgClient().get(poLineTx.getConnection(), TITLES_TABLE, Title.class, criterion, true, false, promise);
-    return promise.future()
+    return conn.get(TITLES_TABLE, Title.class, criterion, true)
       .compose(result -> {
         List<Title> titles = result.getResults();
         if (titles.isEmpty()) {
-          return createTitle(poLineTx, client);
+          return createTitle(conn, poLine);
         } else if (titleUpdateRequired(titles.get(0), poLine)) {
-          return updateTitle(poLineTx, titles.get(0), client);
+          return updateTitle(conn, titles.get(0), poLine);
         }
-        return Future.succeededFuture(poLineTx);
-      })
-      .recover(Future::failedFuture);
+        return Future.succeededFuture(poLine);
+      });
   }
+
 
   private boolean titleUpdateRequired(Title title, PoLine poLine) {
     return !title.equals(createTitleObject(poLine)

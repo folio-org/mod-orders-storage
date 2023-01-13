@@ -100,6 +100,11 @@
       "run": "after",
       "snippetPath": "tables/create_audit_outbox_table.sql",
       "fromModuleVersion": "mod-orders-storage-13.5.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "tables/create_internal_lock_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.5.0"
     }
   ],
   "tables": [

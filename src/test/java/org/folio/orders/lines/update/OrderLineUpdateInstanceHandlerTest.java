@@ -14,6 +14,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 import java.net.MalformedURLException;
@@ -29,8 +30,10 @@ import java.util.concurrent.TimeoutException;
 import io.vertx.ext.web.handler.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
@@ -587,10 +590,22 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
      PoLinesDAO poLinesDAO() {
        return new PoLinesPostgresDAO();
      }
+
      @Bean
-     PoLinesService poLinesService(PoLinesDAO poLinesDAO) {
-       return new PoLinesService(poLinesDAO);
+     AuditOutboxService auditOutboxService() {
+       return mock(AuditOutboxService.class);
      }
+
+     @Bean
+     PoLinesService poLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
+       return new PoLinesService(poLinesDAO, pgClientFactory, auditOutboxService);
+     }
+
+     @Bean
+     PostgresClientFactory postgresClientFactory(Vertx vertx) {
+       return new PostgresClientFactory(vertx);
+     }
+
      @Bean
      PieceService pieceService() {
        return new PieceService();

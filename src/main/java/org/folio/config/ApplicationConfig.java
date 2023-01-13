@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import io.vertx.core.Vertx;
+import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.dao.export.ExportHistoryPostgresRepository;
@@ -45,8 +46,8 @@ public class ApplicationConfig {
   }
 
   @Bean
-  PoLinesService poLinesService(PoLinesDAO poLinesDAO) {
-    return new PoLinesService(poLinesDAO);
+  PoLinesService poLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
+    return new PoLinesService(poLinesDAO, pgClientFactory, auditOutboxService);
   }
 
   @Bean
@@ -128,14 +129,20 @@ public class ApplicationConfig {
   }
 
   @Bean
-  AuditOutboxEventsLogRepository auditOutboxRepository(PostgresClientFactory pgClientFactory) {
-    return new AuditOutboxEventsLogRepository(pgClientFactory);
+  AuditOutboxEventsLogRepository auditOutboxRepository() {
+    return new AuditOutboxEventsLogRepository();
   }
 
   @Bean
-  AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository repository,
+  InternalLockRepository internalLockRepository() {
+    return new InternalLockRepository();
+  }
+
+  @Bean
+  AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
+                                        InternalLockRepository lockRepository,
                                         AuditEventProducer producer,
                                         PostgresClientFactory pgClientFactory) {
-    return new AuditOutboxService(repository, producer, pgClientFactory);
+    return new AuditOutboxService(outboxRepository, lockRepository, producer, pgClientFactory);
   }
 }
