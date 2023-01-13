@@ -463,13 +463,9 @@ public class PoLinesService {
   }
 
   private Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
-    Promise<Results<Title>> promise = Promise.promise();
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
 
-    conn.get(TITLES_TABLE, Title.class, criterion, true)
-      .onComplete(promise);
-
-    return promise.future()
+    return conn.get(TITLES_TABLE, Title.class, criterion, true)
       .compose(result -> {
         List<Title> titles = result.getResults();
         if (titles.isEmpty()) {
@@ -478,8 +474,7 @@ public class PoLinesService {
           return updateTitle(conn, titles.get(0), poLine);
         }
         return Future.succeededFuture(poLine);
-      })
-      .recover(Future::failedFuture);
+      });
   }
 
 
