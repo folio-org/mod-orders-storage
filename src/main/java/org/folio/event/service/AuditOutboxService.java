@@ -2,7 +2,6 @@ package org.folio.event.service;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.json.Json;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -90,15 +89,11 @@ public class AuditOutboxService {
    * @param okapiHeaders okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Void> saveOrderOutboxLog(Conn conn, PurchaseOrder entity, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Promise<Void> promise = Promise.promise();
+  public Future<Boolean> saveOrderOutboxLog(Conn conn, PurchaseOrder entity, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
     String order = Json.encode(entity);
-    saveOutboxLog(conn, action.value(), EntityType.ORDER, order, okapiHeaders)
-      .onComplete(reply -> {
-        logSaveResult(reply, entity.getId());
-        promise.complete();
-      });
-    return promise.future();
+    return saveOutboxLog(conn, action.value(), EntityType.ORDER, order, okapiHeaders)
+      .onSuccess(reply -> logger.info("Outbox log has been saved for order id: {}", entity.getId()))
+      .onFailure(e -> logger.warn("Could not save outbox audit log for order with id {}", entity.getId(), e));
   }
 
   /**
@@ -110,15 +105,11 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Void> saveOrderLineOutboxLog(Conn conn, PoLine poLine, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Promise<Void> promise = Promise.promise();
+  public Future<Boolean> saveOrderLineOutboxLog(Conn conn, PoLine poLine, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
     String orderLine = Json.encode(poLine);
-    saveOutboxLog(conn, action.value(), EntityType.ORDER_LINE, orderLine, okapiHeaders)
-      .onComplete(reply -> {
-        logSaveResult(reply, poLine.getId());
-        promise.complete();
-      });
-    return promise.future();
+    return saveOutboxLog(conn, action.value(), EntityType.ORDER_LINE, orderLine, okapiHeaders)
+      .onSuccess(reply -> logger.info("Outbox log has been saved for order line id: {}", poLine.getId()))
+      .onFailure(e -> logger.warn("Could not save outbox audit log for order line with id {}", poLine.getId(), e));
   }
 
   private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> logs, Map<String, String> okapiHeaders) {
