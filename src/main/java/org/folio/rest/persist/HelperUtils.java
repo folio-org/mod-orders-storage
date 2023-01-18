@@ -147,11 +147,6 @@ public class HelperUtils {
     }
   }
 
-  public static JsonObject verifyAndExtractBody(org.folio.rest.tools.client.Response response) {
-    verifyResponse(response);
-    return response.getBody();
-  }
-
   /**
    * @param query string representing CQL query
    * @return URL encoded string
