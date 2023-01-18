@@ -14,6 +14,7 @@ import org.folio.event.AuditEventType;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaHeaderUtils;
 import org.folio.kafka.KafkaTopicNameHelper;
+import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog.EntityType;
@@ -69,26 +70,28 @@ public class AuditEventProducer {
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
+    Metadata metadata = order.getMetadata();
     return new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
       .withOrderId(order.getId())
       .withEventDate(new Date())
-      .withActionDate(order.getMetadata().getUpdatedDate())
-      .withOrderSnapshot(order.withMetadata(null)) // not populate metadata to not include it in snapshot's comparation in UI
-      .withUserId(order.getMetadata().getUpdatedByUserId());
+      .withActionDate(metadata.getUpdatedDate())
+      .withUserId(metadata.getUpdatedByUserId())
+      .withOrderSnapshot(order.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
   }
 
   private OrderLineAuditEvent getOrderLineEvent(PoLine poLine, OrderLineAuditEvent.Action eventAction) {
+    Metadata metadata = poLine.getMetadata();
     return new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
       .withOrderId(poLine.getPurchaseOrderId())
       .withOrderLineId(poLine.getId())
       .withEventDate(new Date())
-      .withActionDate(poLine.getMetadata().getUpdatedDate())
-      .withOrderLineSnapshot(poLine.withMetadata(null)) // not populate metadata to not include it in snapshot's comparation in UI
-      .withUserId(poLine.getMetadata().getUpdatedByUserId());
+      .withActionDate(metadata.getUpdatedDate())
+      .withUserId(metadata.getUpdatedByUserId())
+      .withOrderLineSnapshot(poLine.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,
