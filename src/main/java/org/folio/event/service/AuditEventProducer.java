@@ -69,38 +69,26 @@ public class AuditEventProducer {
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
-    OrderAuditEvent event = new OrderAuditEvent();
-    event.setId(UUID.randomUUID().toString());
-    event.setAction(eventAction);
-    event.setOrderId(order.getId());
-    event.setEventDate(new Date());
-    event.withOrderSnapshot(order);
-    if (OrderAuditEvent.Action.CREATE == eventAction) {
-      event.setUserId(order.getMetadata().getCreatedByUserId());
-      event.setActionDate(order.getMetadata().getCreatedDate());
-    } else if (OrderAuditEvent.Action.EDIT == eventAction) {
-      event.setUserId(order.getMetadata().getUpdatedByUserId());
-      event.setActionDate(order.getMetadata().getUpdatedDate());
-    }
-    return event;
+    return new OrderAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(eventAction)
+      .withOrderId(order.getId())
+      .withEventDate(new Date())
+      .withActionDate(order.getMetadata().getUpdatedDate())
+      .withOrderSnapshot(order.withMetadata(null)) // not populate metadata to not include it in snapshot's comparation in UI
+      .withUserId(order.getMetadata().getUpdatedByUserId());
   }
 
   private OrderLineAuditEvent getOrderLineEvent(PoLine poLine, OrderLineAuditEvent.Action eventAction) {
-    OrderLineAuditEvent event = new OrderLineAuditEvent();
-    event.setId(UUID.randomUUID().toString());
-    event.setAction(eventAction);
-    event.setOrderId(poLine.getPurchaseOrderId());
-    event.setOrderLineId(poLine.getId());
-    event.setEventDate(new Date());
-    event.withOrderLineSnapshot(poLine);
-    if (OrderLineAuditEvent.Action.CREATE == eventAction) {
-      event.setUserId(poLine.getMetadata().getCreatedByUserId());
-      event.setActionDate(poLine.getMetadata().getCreatedDate());
-    } else if (OrderLineAuditEvent.Action.EDIT == eventAction) {
-      event.setUserId(poLine.getMetadata().getUpdatedByUserId());
-      event.setActionDate(poLine.getMetadata().getUpdatedDate());
-    }
-    return event;
+    return new OrderLineAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(eventAction)
+      .withOrderId(poLine.getPurchaseOrderId())
+      .withOrderLineId(poLine.getId())
+      .withEventDate(new Date())
+      .withActionDate(poLine.getMetadata().getUpdatedDate())
+      .withOrderLineSnapshot(poLine.withMetadata(null)) // not populate metadata to not include it in snapshot's comparation in UI
+      .withUserId(poLine.getMetadata().getUpdatedByUserId());
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,
