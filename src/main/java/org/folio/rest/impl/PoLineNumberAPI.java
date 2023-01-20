@@ -12,7 +12,6 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLineNumber;
 import org.folio.rest.persist.HelperUtils;
-import org.folio.rest.tools.messages.Messages;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.spring.SpringContextUtil;
@@ -22,9 +21,7 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumber {
-
   private static final Logger logger = LogManager.getLogger(PoLineNumbersService.class);
-  private final org.folio.rest.tools.messages.Messages messages = Messages.getInstance();
 
   @Autowired
   private PoLineNumbersService poLineNumbersService;
