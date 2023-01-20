@@ -76,25 +76,19 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
   @Validate
   public void postOrdersStoragePurchaseOrders(String lang, PurchaseOrder entity, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    try {
-      vertxContext.runOnContext(v -> {
-        log.debug("Creating a new purchase order");
-        pgClient.withTrans(conn -> createPurchaseOrder(conn, entity)
-          .compose(orderId -> createSequence(conn, orderId))
-          .compose(ar -> auditOutboxService.saveOrderOutboxLog(conn, entity, OrderAuditEvent.Action.CREATE, okapiHeaders))
-          .onComplete(reply -> {
-            if (reply.failed()) {
-              log.error("Order with id {} creation failed", entity.getId(), reply.cause());
-              asyncResultHandler.handle(buildErrorResponse(reply.cause()));
-            } else {
-              auditOutboxService.processOutboxEventLogs(okapiHeaders);
-              asyncResultHandler.handle(buildResponseWithLocation(entity, getEndpoint(entity)));
-            }
-          }));
-      });
-    } catch (Exception e) {
-      asyncResultHandler.handle(buildErrorResponse(e));
-    }
+    log.debug("Creating a new purchase order");
+    pgClient.withTrans(conn -> createPurchaseOrder(conn, entity)
+      .compose(orderId -> createSequence(conn, orderId))
+      .compose(ar -> auditOutboxService.saveOrderOutboxLog(conn, entity, OrderAuditEvent.Action.CREATE, okapiHeaders)))
+      .onComplete(reply -> {
+        if (reply.failed()) {
+          log.error("Order with id: {} creation failed", entity.getId(), reply.cause());
+          asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+        } else {
+          auditOutboxService.processOutboxEventLogs(okapiHeaders);
+          asyncResultHandler.handle(buildResponseWithLocation(entity, getEndpoint(entity)));
+        }
+    });
   }
 
   @Override
@@ -119,6 +113,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
         .onComplete(result -> {
           if (result.failed()) {
             HttpException cause = (HttpException) result.cause();
+            log.error("Delete Order with id: {} failed", id, cause);
             // The result of rollback operation is not so important, main failure cause is used to build the response
             tx.rollbackTransaction().onComplete(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
           } else {
@@ -152,6 +147,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
               auditOutboxService.processOutboxEventLogs(okapiHeaders);
               asyncResultHandler.handle(response);
             } else {
+              log.error("Update Order with id: {} failed", id, response.cause());
               asyncResultHandler.handle(buildErrorResponse(response.cause()));
             }
           });
@@ -173,6 +169,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
                           auditOutboxService.processOutboxEventLogs(okapiHeaders);
                           asyncResultHandler.handle(response);
                         } else {
+                          log.error("Update pending order with id: {} failed", id, response.cause());
                           asyncResultHandler.handle(buildErrorResponse(response.cause()));
                         }
                       });
@@ -183,6 +180,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
                     auditOutboxService.processOutboxEventLogs(okapiHeaders);
                     asyncResultHandler.handle(response);
                   } else {
+                    log.error("Update pending order with id: {} failed", id, response.cause());
                     asyncResultHandler.handle(buildErrorResponse(response.cause()));
                   }
                 });
@@ -193,24 +191,24 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
   private Future<Response> updateOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders) {
     log.info("Update purchase order with id={}", order.getId());
     Promise<Response> promise = Promise.promise();
-    return pgClient.withTrans(conn -> {
-      conn
-        .update(TableNames.PURCHASE_ORDER_TABLE, order, id)
-        .compose(reply -> {
-          if (reply.rowCount() == 0) {
-            return Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
-          }
-          return auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.EDIT, okapiHeaders);
-        }).onComplete(reply -> {
-          if (reply.succeeded()) {
-            log.info("Purchase order id={} successfully updated", id);
-            promise.complete(Response.noContent().build());
-          } else {
-            httpHandleFailure(promise, reply);
-          }
-        });
-      return promise.future();
+    pgClient.withTrans(conn ->
+      conn.update(TableNames.PURCHASE_ORDER_TABLE, order, id)
+      .compose(reply -> {
+        if (reply.rowCount() == 0) {
+          return Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
+        }
+        return auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.EDIT, okapiHeaders);
+      }))
+      .onComplete(reply -> {
+        if (reply.succeeded()) {
+          log.info("Purchase order id={} successfully updated", id);
+          promise.complete(Response.noContent().build());
+        } else {
+          log.error("Update order with id: {} failed", id, reply.cause());
+          httpHandleFailure(promise, reply);
+        }
     });
+    return promise.future();
   }
 
   private Future<Tx<String>> deletePolNumberSequence(Tx<String> tx) {
@@ -219,6 +217,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
     Promise<Tx<String>> promise = Promise.promise();
     getPgClient().execute(tx.getConnection(), orderSequenceRequestBuilder.buildDropSequenceQuery(tx.getEntity()), reply -> {
       if (reply.failed()) {
+        log.error("Delete pol number sequence failed", reply.cause());
         handleFailure(promise, reply);
       } else {
         log.info("POL number sequence={} for PO with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
