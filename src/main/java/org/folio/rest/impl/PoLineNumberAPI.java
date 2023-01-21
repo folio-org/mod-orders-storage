@@ -21,7 +21,7 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumber {
-  private static final Logger logger = LogManager.getLogger(PoLineNumbersService.class);
+  private static final Logger logger = LogManager.getLogger(PoLineNumberAPI.class);
 
   @Autowired
   private PoLineNumbersService poLineNumbersService;
