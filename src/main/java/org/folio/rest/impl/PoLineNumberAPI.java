@@ -41,7 +41,7 @@ public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumbe
           logger.error("Could not retrieve po line number for orderId: {}", purchaseOrderId, reply.cause());
           asyncResultHandler.handle(buildErrorResponse(reply.cause()));
         } else {
-          asyncResultHandler.handle(buildResponseWithLocation(reply.result(), getEndpoint(reply.result())));
+          asyncResultHandler.handle(buildOkResponse(reply.result()));
         }
       });
   }

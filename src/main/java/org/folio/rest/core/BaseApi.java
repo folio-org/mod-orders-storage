@@ -21,6 +21,10 @@ public abstract class BaseApi {
     return Future.succeededFuture(Response.noContent().build());
   }
 
+  public Future<Response> buildOkResponse(Object body) {
+    return Future.succeededFuture(Response.ok(body).build());
+  }
+
   public Future<Response> buildErrorResponse(Throwable throwable) {
     final String message;
     final int code;
