@@ -1,34 +1,28 @@
 package org.folio.rest.impl;
 
-import java.util.Map;
-
-import javax.ws.rs.core.Response;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.rest.RestVerticle;
-import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.resource.OrdersStoragePoLineNumber;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.tools.messages.Messages;
-import org.folio.rest.tools.utils.TenantTool;
-import org.folio.services.lines.PoLineNumbersService;
-import org.folio.services.order.OrderSequenceRequestBuilder;
-import org.folio.spring.SpringContextUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.rest.RestVerticle;
+import org.folio.rest.annotations.Validate;
+import org.folio.rest.core.BaseApi;
+import org.folio.rest.jaxrs.resource.OrdersStoragePoLineNumber;
+import org.folio.rest.persist.HelperUtils;
+import org.folio.rest.tools.utils.TenantTool;
+import org.folio.services.lines.PoLineNumbersService;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class PoLineNumberAPI implements OrdersStoragePoLineNumber {
+import javax.ws.rs.core.Response;
+import java.util.Map;
 
-  private static final Logger log = LogManager.getLogger(PoLineNumberAPI.class);
-  private final Messages messages = Messages.getInstance();
+public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumber {
+  private static final Logger logger = LogManager.getLogger(PoLineNumberAPI.class);
 
-  @Autowired
-  private OrderSequenceRequestBuilder orderSequenceRequestBuilder;
   @Autowired
   private PoLineNumbersService poLineNumbersService;
 
@@ -40,10 +34,20 @@ public class PoLineNumberAPI implements OrdersStoragePoLineNumber {
   @Override
   public void getOrdersStoragePoLineNumber(String purchaseOrderId, int poLineNumbers, String lang, Map<String, String> okapiHeaders,
      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-      PostgresClient.getInstance(vertxContext.owner(), tenantId)
-        .select(orderSequenceRequestBuilder.buildPOLNumberQuery(purchaseOrderId, poLineNumbers),
-        reply -> poLineNumbersService.retrievePoLineNumber(reply, asyncResultHandler, lang));});
+    String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
+    poLineNumbersService.retrievePoLineNumber(purchaseOrderId, poLineNumbers, tenantId)
+      .onComplete(reply -> {
+        if (reply.failed()) {
+          logger.error("Could not retrieve po line number for orderId: {}", purchaseOrderId, reply.cause());
+          asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+        } else {
+          asyncResultHandler.handle(buildOkResponse(reply.result()));
+        }
+      });
+  }
+
+  @Override
+  protected String getEndpoint(Object entity) {
+    return HelperUtils.getEndpoint(OrdersStoragePoLineNumber.class) + JsonObject.mapFrom(entity).getString("id");
   }
 }
