@@ -38,7 +38,6 @@ import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.rest.persist.interfaces.Results;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
@@ -114,7 +113,7 @@ public class PoLinesService {
 
     pgClient.withTrans(conn -> updatePoLine(conn, poLine)
         .compose(line -> updateTitle(conn, line))
-        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders))
+        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders)))
         .onComplete(reply -> {
           if (reply.succeeded()) {
             logger.info("POLine {} and associated data were successfully updated", poLine);
@@ -123,7 +122,7 @@ public class PoLinesService {
           } else {
             httpHandleFailure(promise, reply);
           }
-        }));
+        });
     return promise.future();
   }
 
@@ -180,10 +179,10 @@ public class PoLinesService {
               .onComplete(result -> {
                 if (result.succeeded()) {
                    promise.complete(result.result().list().stream()
-                                           .map(chunkList -> (List<PoLine>)chunkList)
-                                           .filter(CollectionUtils::isNotEmpty)
-                       .                   flatMap(Collection::stream)
-                                           .collect(toList()));
+                     .map(chunkList -> (List<PoLine>)chunkList)
+                     .filter(CollectionUtils::isNotEmpty)
+                     .flatMap(Collection::stream)
+                     .collect(toList()));
                 } else {
                    promise.fail(result.cause());
                 }

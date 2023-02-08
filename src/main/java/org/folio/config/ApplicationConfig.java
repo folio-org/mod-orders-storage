@@ -99,8 +99,8 @@ public class ApplicationConfig {
     return new OrderLinePatchOperationService(operationHandlerResolver, poLinesService);
   }
 
-  @Bean PoLineNumbersService poLineNumbersService() {
-    return new PoLineNumbersService();
+  @Bean PoLineNumbersService poLineNumbersService(OrderSequenceRequestBuilder orderSequenceBuilder, PostgresClientFactory pgClientFactory) {
+    return new PoLineNumbersService(orderSequenceBuilder, pgClientFactory);
   }
 
   @Bean

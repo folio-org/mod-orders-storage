@@ -14,6 +14,7 @@ import org.folio.event.AuditEventType;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaHeaderUtils;
 import org.folio.kafka.KafkaTopicNameHelper;
+import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog.EntityType;
@@ -69,38 +70,28 @@ public class AuditEventProducer {
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
-    OrderAuditEvent event = new OrderAuditEvent();
-    event.setId(UUID.randomUUID().toString());
-    event.setAction(eventAction);
-    event.setOrderId(order.getId());
-    event.setEventDate(new Date());
-    event.withOrderSnapshot(order);
-    if (OrderAuditEvent.Action.CREATE == eventAction) {
-      event.setUserId(order.getMetadata().getCreatedByUserId());
-      event.setActionDate(order.getMetadata().getCreatedDate());
-    } else if (OrderAuditEvent.Action.EDIT == eventAction) {
-      event.setUserId(order.getMetadata().getUpdatedByUserId());
-      event.setActionDate(order.getMetadata().getUpdatedDate());
-    }
-    return event;
+    Metadata metadata = order.getMetadata();
+    return new OrderAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(eventAction)
+      .withOrderId(order.getId())
+      .withEventDate(new Date())
+      .withActionDate(metadata.getUpdatedDate())
+      .withUserId(metadata.getUpdatedByUserId())
+      .withOrderSnapshot(order.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
   }
 
   private OrderLineAuditEvent getOrderLineEvent(PoLine poLine, OrderLineAuditEvent.Action eventAction) {
-    OrderLineAuditEvent event = new OrderLineAuditEvent();
-    event.setId(UUID.randomUUID().toString());
-    event.setAction(eventAction);
-    event.setOrderId(poLine.getPurchaseOrderId());
-    event.setOrderLineId(poLine.getId());
-    event.setEventDate(new Date());
-    event.withOrderLineSnapshot(poLine);
-    if (OrderLineAuditEvent.Action.CREATE == eventAction) {
-      event.setUserId(poLine.getMetadata().getCreatedByUserId());
-      event.setActionDate(poLine.getMetadata().getCreatedDate());
-    } else if (OrderLineAuditEvent.Action.EDIT == eventAction) {
-      event.setUserId(poLine.getMetadata().getUpdatedByUserId());
-      event.setActionDate(poLine.getMetadata().getUpdatedDate());
-    }
-    return event;
+    Metadata metadata = poLine.getMetadata();
+    return new OrderLineAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(eventAction)
+      .withOrderId(poLine.getPurchaseOrderId())
+      .withOrderLineId(poLine.getId())
+      .withEventDate(new Date())
+      .withActionDate(metadata.getUpdatedDate())
+      .withUserId(metadata.getUpdatedByUserId())
+      .withOrderLineSnapshot(poLine.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,
