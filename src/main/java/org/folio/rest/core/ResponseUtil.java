@@ -22,7 +22,7 @@ import org.folio.rest.persist.PgExceptionUtil;
 import javax.ws.rs.core.Response;
 
 public class ResponseUtil {
-  private static final Logger logger = LogManager.getLogger(ResponseUtil.class);
+  private static final Logger log = LogManager.getLogger();
 
   private ResponseUtil() {
   }
@@ -31,14 +31,15 @@ public class ResponseUtil {
     Throwable cause = Optional.ofNullable(throwable.getCause()).orElse(throwable);
     Errors errors = ExceptionUtil.convertToErrors(throwable);
     int httpCode = extractHttpCode(cause);
-    if (logger.isErrorEnabled()) {
-      logger.error("Failure : {}", ExceptionUtil.errorAsString(errors));
+    if (log.isErrorEnabled()) {
+      log.error("Failure : {}", ExceptionUtil.errorAsString(errors));
     }
     promise.fail(new HttpException(httpCode, errors));
   }
 
   public static void httpHandleFailure(Promise<?> promise, AsyncResult<?> reply) {
     Throwable cause = reply.cause();
+    log.error(cause);
     if (cause instanceof io.vertx.ext.web.handler.HttpException) {
       promise.fail(cause);
     } else if (StringUtils.isNotBlank(PgExceptionUtil.badRequestMessage(cause))) {

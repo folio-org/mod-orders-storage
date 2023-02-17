@@ -29,8 +29,7 @@ import org.junit.jupiter.api.Test;
 
 @IsolatedTenant
 public class ReceivingHistoryTest extends TestBase {
-
-  private static final Logger logger = LogManager.getLogger(ReceivingHistoryTest.class);
+  private static final Logger log = LogManager.getLogger();
 
   private String poLineSampleId;
   private String poLineSampleId2;
@@ -51,33 +50,33 @@ public class ReceivingHistoryTest extends TestBase {
   @Test
   public void testReceivingHistory() throws MalformedURLException {
     try {
-      logger.info("--- mod-orders-storage receiving_history test: Before pieces creation ... ");
+      log.info("--- mod-orders-storage receiving_history test: Before pieces creation ... ");
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, 0);
 
-      logger.info("--- mod-orders-storage receiving_history test: Creating orders, lines and pieces ...");
+      log.info("--- mod-orders-storage receiving_history test: Creating orders, lines and pieces ...");
 
       String acqUnitId1 = UUID.randomUUID().toString();
       String acqUnitId2 = UUID.randomUUID().toString();
 
-      logger.info("--- mod-orders-storage receiving_history test: Creating Purchase order 1...");
+      log.info("--- mod-orders-storage receiving_history test: Creating Purchase order 1...");
       // assign 2 units
       purchaseOrderSample.getAcqUnitIds().add(acqUnitId1);
       purchaseOrderSample.getAcqUnitIds().add(acqUnitId2);
       purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
 
-      logger.info("--- mod-orders-storage receiving_history test: Creating Detail 2 ...");
+      log.info("--- mod-orders-storage receiving_history test: Creating Detail 2 ...");
       // assign 1 unit
       purchaseOrderSample2.getAcqUnitIds().add(acqUnitId1);
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample2);
       verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
-      logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 1...");
+      log.info("--- mod-orders-storage receiving_history test: Creating PoLine 1...");
       poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample);
-      logger.info("--- mod-orders-storage receiving_history test: Creating PoLine 2 ...");
+      log.info("--- mod-orders-storage receiving_history test: Creating PoLine 2 ...");
       poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2);
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_ENTITIES_QUANTITY);
 
-      logger.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
+      log.info("--- mod-orders-storage receiving_history test: Creating Piece 1...");
 
       createEntity(TITLES.getEndpoint(), getFileAsObject(TITLES.getSampleFileName(), Title.class));
 
@@ -90,23 +89,23 @@ public class ReceivingHistoryTest extends TestBase {
       pieceSample2.setTitleId(titleId2);
 
       createEntity(PIECE.getEndpoint(), pieceSample);
-      logger.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
+      log.info("--- mod-orders-storage receiving_history test: Creating Piece 2 ...");
       createEntity(PIECE.getEndpoint(), pieceSample2);
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT, CREATED_ENTITIES_QUANTITY);
 
-      logger.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
+      log.info("--- mod-orders-storage pieces test: After receiving_history View created ...");
       verifyViewCollectionAfter(RECEIVING_HISTORY_ENDPOINT);
 
-      logger.info("--- mod-orders-storage pieces test: Searching by acquisition units ...");
+      log.info("--- mod-orders-storage pieces test: Searching by acquisition units ...");
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=" + acqUnitId1, 2);
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=" + acqUnitId2, 1);
       verifyCollectionQuantity(String.format(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=(%s and %s)", acqUnitId1, acqUnitId2), 1);
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=" + UUID.randomUUID().toString(), 0);
     } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
+      log.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
       fail(e.getMessage());
     } finally {
-      logger.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
+      log.info("--- mod-orders-storage receiving_history test: Clean-up Detail, PoLine and Pieces ...");
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId2);
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderSampleId);
@@ -116,7 +115,7 @@ public class ReceivingHistoryTest extends TestBase {
 
   @Test
   public void testGetReceivingHistoryByPiecesAndPoLinesFields() throws MalformedURLException {
-    logger.info("--- mod-orders-storage receiving-history: Verify query with field from piece and a field from PO Line");
+    log.info("--- mod-orders-storage receiving-history: Verify query with field from piece and a field from PO Line");
 
     initTwoPiecesWithAcqUnits();
 
@@ -127,7 +126,7 @@ public class ReceivingHistoryTest extends TestBase {
 
   @Test
   public void testGetReceivingHistoryWithLimit() throws MalformedURLException {
-    logger.info("--- mod-orders-storage receiving-history: Verify the limit parameter");
+    log.info("--- mod-orders-storage receiving-history: Verify the limit parameter");
 
     initTwoPiecesWithAcqUnits();
 
@@ -137,7 +136,7 @@ public class ReceivingHistoryTest extends TestBase {
 
   @Test
   public void testGetReceivingHistoryByAcqUnits() throws MalformedURLException {
-    logger.info("--- mod-orders-storage receiving-history: Verify query receiving-history by acq units");
+    log.info("--- mod-orders-storage receiving-history: Verify query receiving-history by acq units");
 
     initTwoPiecesWithAcqUnits();
 
@@ -148,7 +147,7 @@ public class ReceivingHistoryTest extends TestBase {
 
   @Test
   public void testGetReceivingHistoryWithInvalidCQLQuery() throws MalformedURLException {
-    logger.info("--- mod-orders-storage orders test: Invalid CQL query");
+    log.info("--- mod-orders-storage orders test: Invalid CQL query");
     testInvalidCQLQuery(RECEIVING_HISTORY_ENDPOINT + "?query=invalid-query");
   }
 

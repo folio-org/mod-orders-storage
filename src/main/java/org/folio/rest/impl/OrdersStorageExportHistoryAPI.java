@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.folio.models.TableNames.EXPORT_HISTORY_TABLE;
 
 public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStorageExportHistory {
-  private static final Logger logger = LogManager.getLogger(OrdersStorageExportHistoryAPI.class);
+  private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private ExportHistoryService exportHistoryService;
@@ -52,11 +52,12 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
   public void postOrdersStorageExportHistory(String lang, ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     exportHistoryService.createExportHistory(entity, new DBClient(vertxContext.owner(), TenantTool.tenantId(okapiHeaders)))
-      .onComplete(result -> {
-        if (result.succeeded()) {
-          asyncResultHandler.handle(buildResponseWithLocation(result.result(), getEndpoint(result.result())));
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          asyncResultHandler.handle(buildResponseWithLocation(ar.result(), getEndpoint(ar.result())));
         } else {
-          asyncResultHandler.handle(Future.failedFuture(result.cause()));
+          log.error("postOrdersStorageExportHistory failed, exportHistoryId={}", entity.getId(), ar.cause());
+          asyncResultHandler.handle(Future.failedFuture(ar.cause()));
         }
       });
   }

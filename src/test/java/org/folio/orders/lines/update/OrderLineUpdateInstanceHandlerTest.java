@@ -72,6 +72,7 @@ import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
 public class OrderLineUpdateInstanceHandlerTest extends TestBase {
+  private static final Logger log = LogManager.getLogger();
 
   static final String TEST_TENANT = "test_tenant";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
@@ -97,7 +98,6 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
   private static TenantJob tenantJob;
   private final String newHoldingId = UUID.randomUUID().toString();
   private final String newInstanceId = UUID.randomUUID().toString();
-  private final Logger logger = LogManager.getLogger(OrderLineUpdateInstanceHandlerTest.class);
   private static boolean runningOnOwn;
 
   @BeforeEach
@@ -183,27 +183,27 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     promise1.future()
       .onComplete(v -> {
-        client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
-          if (event.failed()) {
-            promise2.fail(event.cause());
+        client.getPgClient().save(TITLES_TABLE, titleId, title, ar -> {
+          if (ar.failed()) {
+            promise2.fail(ar.cause());
           } else {
             promise2.complete();
-            logger.info("Title was saved");
+            log.info("Title was saved");
           }
         });
       })
       .onComplete(v -> {
-        client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
-          if (event.failed()) {
-            promise3.fail(event.cause());
+        client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
+          if (ar.failed()) {
+            promise3.fail(ar.cause());
           } else {
             promise3.complete();
-            logger.info("Piece was saved");
+            log.info("Piece was saved");
           }
         });
       });
@@ -212,8 +212,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .compose(v -> promise3.future())
       .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
       .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
-      .onComplete(event -> {
-        Title actTitle = event.result();
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
           assertThat(actTitle.getInstanceId(), is(newInstanceId));
@@ -221,8 +221,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.completeNow();
       })
       .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
-      .onComplete(event -> {
-        List<Piece> actPieces = event.result();
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
           assertThat(actPieces.get(0).getId(), is(pieceId));
           assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
@@ -230,8 +230,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.completeNow();
       })
       .compose(v -> poLinesService.getPoLineById(poLineId, client))
-      .onComplete(event -> {
-        PoLine actPoLine = event.result();
+      .onComplete(ar -> {
+        PoLine actPoLine = ar.result();
         testContext.verify(() -> {
           assertThat(actPoLine.getId(), is(poLineId));
           assertThat(actPoLine.getInstanceId(), is(newInstanceId));
@@ -331,27 +331,27 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     promise1.future()
       .onComplete(v -> {
-        client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
-          if (event.failed()) {
-            promise2.fail(event.cause());
+        client.getPgClient().save(TITLES_TABLE, titleId, title, ar -> {
+          if (ar.failed()) {
+            promise2.fail(ar.cause());
           } else {
             promise2.complete();
-            logger.info("Title was saved");
+            log.info("Title was saved");
           }
         });
       })
       .onComplete(v -> {
-        client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
-          if (event.failed()) {
-            promise3.fail(event.cause());
+        client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
+          if (ar.failed()) {
+            promise3.fail(ar.cause());
           } else {
             promise3.complete();
-            logger.info("Piece was saved");
+            log.info("Piece was saved");
           }
         });
       });
@@ -360,8 +360,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         .compose(v -> promise3.future())
         .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
       .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
-      .onComplete(event -> {
-        Title actTitle = event.result();
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
           assertThat(actTitle.getInstanceId(), is(newInstanceId));
@@ -369,8 +369,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.completeNow();
       })
       .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
-      .onComplete(event -> {
-        List<Piece> actPieces = event.result();
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
           assertThat(actPieces.get(0).getId(), is(pieceId));
           assertThat(actPieces.get(0).getHoldingId(), is(holdingId));
@@ -378,8 +378,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.completeNow();
       })
       .compose(v -> poLinesService.getPoLineById(poLineId, client))
-      .onComplete(event -> {
-        PoLine actPoLine = event.result();
+      .onComplete(ar -> {
+        PoLine actPoLine = ar.result();
         testContext.verify(() -> {
           assertThat(actPoLine.getId(), is(poLineId));
           assertThat(actPoLine.getInstanceId(), is(newInstanceId));
@@ -425,24 +425,24 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     promise1.future()
-      .onComplete(v -> client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
-        if (event.failed()) {
-          promise2.fail(event.cause());
+      .onComplete(v -> client.getPgClient().save(TITLES_TABLE, titleId, title, ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
         } else {
           promise2.complete();
-          logger.info("Title was saved");
+          log.info("Title was saved");
         }
       }));
 
     testContext.assertComplete(promise2.future()
         .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
       .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
-      .onComplete(event -> {
-        Title actTitle = event.result();
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
           assertThat(actTitle.getInstanceId(), is(newInstanceId));
@@ -450,8 +450,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.completeNow();
       })
       .compose(v -> poLinesService.getPoLineById(poLineId, client))
-      .onComplete(event -> {
-        PoLine actPoLine = event.result();
+      .onComplete(ar -> {
+        PoLine actPoLine = ar.result();
         testContext.verify(() -> {
           assertThat(actPoLine.getId(), is(poLineId));
           assertThat(actPoLine.getInstanceId(), is(newInstanceId));
@@ -527,27 +527,27 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     promise1.future()
       .onComplete(v -> {
-        client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
-          if (event.failed()) {
-            promise2.fail(event.cause());
+        client.getPgClient().save(TITLES_TABLE, titleId, title, ar -> {
+          if (ar.failed()) {
+            promise2.fail(ar.cause());
           } else {
             promise2.complete();
-            logger.info("Title was saved");
+            log.info("Title was saved");
           }
         });
       })
       .onComplete(v -> {
-        client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
-          if (event.failed()) {
-            promise3.fail(event.cause());
+        client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
+          if (ar.failed()) {
+            promise3.fail(ar.cause());
           } else {
             promise3.complete();
-            logger.info("Piece was saved");
+            log.info("Piece was saved");
           }
         });
       });
@@ -556,8 +556,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         .compose(v -> promise3.future())
         .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
       .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
-      .onComplete(event -> {
-        Title actTitle = event.result();
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
           assertThat(actTitle.getInstanceId(), is(newInstanceId));
@@ -565,8 +565,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.completeNow();
       })
       .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
-      .onComplete(event -> {
-        List<Piece> actPieces = event.result();
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
           assertThat(actPieces.get(0).getId(), is(pieceId));
           assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
@@ -574,8 +574,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.completeNow();
       })
       .compose(v -> poLinesService.getPoLineById(poLineId, client))
-      .onComplete(event -> {
-        PoLine actPoLine = event.result();
+      .onComplete(ar -> {
+        PoLine actPoLine = ar.result();
         testContext.verify(() -> {
           assertThat(actPoLine.getId(), is(poLineId));
           assertThat(actPoLine.getInstanceId(), is(newInstanceId));

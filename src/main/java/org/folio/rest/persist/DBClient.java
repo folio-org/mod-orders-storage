@@ -88,9 +88,9 @@ public class DBClient {
 
   public <T> Future<Tx<T>> save(Tx<T> tx, String id, Object entity, String table) {
     Promise<Tx<T>> promise = Promise.promise();
-    pgClient.save(tx.getConnection(), table, id, entity, reply -> {
-      if (reply.failed()) {
-        httpHandleFailure(promise, reply);
+    pgClient.save(tx.getConnection(), table, id, entity, ar -> {
+      if (ar.failed()) {
+        httpHandleFailure(promise, ar);
       } else {
         promise.complete(tx);
       }
@@ -100,11 +100,11 @@ public class DBClient {
 
   public Future<Tx<String>> deleteById(Tx<String> tx, String table) {
     Promise<Tx<String>> promise = Promise.promise();
-    pgClient.delete(tx.getConnection(), table, tx.getEntity(), reply -> {
-      if (reply.failed()) {
-        httpHandleFailure(promise, reply);
+    pgClient.delete(tx.getConnection(), table, tx.getEntity(), ar -> {
+      if (ar.failed()) {
+        httpHandleFailure(promise, ar);
       } else {
-        if (reply.result().rowCount() == 0) {
+        if (ar.result().rowCount() == 0) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           promise.complete(tx);
@@ -116,11 +116,11 @@ public class DBClient {
 
   public Future<Tx<String>> deleteByQuery(Tx<String> tx, String table, CQLWrapper query, boolean silent) {
     Promise<Tx<String>> promise = Promise.promise();
-    pgClient.delete(tx.getConnection(), table, query, reply -> {
-      if (reply.failed()) {
-        httpHandleFailure(promise, reply);
+    pgClient.delete(tx.getConnection(), table, query, ar -> {
+      if (ar.failed()) {
+        httpHandleFailure(promise, ar);
       } else {
-        if (!silent && reply.result().rowCount() == 0) {
+        if (!silent && ar.result().rowCount() == 0) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           promise.complete(tx);

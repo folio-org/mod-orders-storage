@@ -49,7 +49,7 @@ import one.util.streamex.StreamEx;
 import org.folio.rest.tools.utils.TenantTool;
 
 public class PoLinesService {
-  private static final Logger logger = LogManager.getLogger(PoLinesService.class);
+  private static final Logger log = LogManager.getLogger();
   private static final String POLINE_ID_FIELD = "poLineId";
 
   private PoLinesDAO poLinesDAO;
@@ -70,12 +70,13 @@ public class PoLinesService {
       .build();
     DBClient client = new DBClient(context, headers);
     poLinesDAO.getPoLines(criterion, client)
-      .onComplete(reply -> {
-        if (reply.failed()) {
-          logger.error("Retrieve POLs failed : {}", criterion);
-          handleFailure(promise, reply.cause());
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("Retrieve po lines failed, purchaseOrderId={}", purchaseOrderId, ar.cause());
+          handleFailure(promise, ar.cause());
         } else {
-          promise.complete(reply.result());
+          log.trace("Retrieved po lines, purchaseOrderId={}", purchaseOrderId);
+          promise.complete(ar.result());
         }
       });
     return promise.future();
@@ -86,17 +87,18 @@ public class PoLinesService {
     Promise<Void> promise = Promise.promise();
     Tx<String> tx = new Tx<>(id, client.getPgClient());
     context.runOnContext(v -> {
-      logger.info("Delete POLine");
+      log.info("Delete po line, id={}", id);
       tx.startTx()
         .compose(result -> deletePiecesByPOLineId(result, client))
         .compose(result -> deleteTitleById(result, client))
         .compose(result -> deletePOLineById(result, client))
         .compose(Tx::endTx)
-        .onComplete(result -> {
-          if (result.failed()) {
-            tx.rollbackTransaction().onComplete(res -> promise.fail(result.cause()));
+        .onComplete(ar -> {
+          if (ar.failed()) {
+            log.error("Delete po line failed, rolling back, id={}", id, ar.cause());
+            tx.rollbackTransaction().onComplete(res -> promise.fail(ar.cause()));
           } else {
-            logger.info("POLine {} was deleted", tx.getEntity());
+            log.debug("Po line deleteById complete, id={}", id);
             promise.complete(null);
           }
         });
@@ -114,35 +116,35 @@ public class PoLinesService {
     pgClient.withTrans(conn -> updatePoLine(conn, poLine)
         .compose(line -> updateTitle(conn, line))
         .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders)))
-        .onComplete(reply -> {
-          if (reply.succeeded()) {
-            logger.info("POLine {} and associated data were successfully updated", poLine);
+        .onComplete(ar -> {
+          if (ar.succeeded()) {
+            log.info("POLine and associated data were successfully updated, id={}", id);
             auditOutboxService.processOutboxEventLogs(okapiHeaders);
             promise.complete(null);
           } else {
-            httpHandleFailure(promise, reply);
+            log.error("updatePoLineWithTitle failed, id={}, poLine={}", id,
+              JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+            httpHandleFailure(promise, ar);
           }
         });
     return promise.future();
   }
 
   public Future<PoLine> createTitle(Conn conn, PoLine poLine) {
-    Promise<PoLine> promise = Promise.promise();
-
     if (poLine.getPackagePoLineId() != null) {
+      Promise<PoLine> promise = Promise.promise();
       getPoLineById(conn, poLine.getPackagePoLineId())
-        .onComplete(reply -> {
-          if (reply.failed() || reply.result() == null) {
-            logger.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
+        .onComplete(ar -> {
+          if (ar.failed() || ar.result() == null) {
+            log.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
             promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
           } else {
-            populateTitleForPackagePoLineAndSave(conn, promise, poLine, reply.result());
+            populateTitleForPackagePoLineAndSave(conn, promise, poLine, ar.result());
           }
         });
-    } else {
-      return createTitleAndSave(conn, poLine);
+      return promise.future();
     }
-    return promise.future();
+    return createTitleAndSave(conn, poLine);
   }
 
   public Future<String> createPoLine(Conn conn, PoLine poLine) {
@@ -152,14 +154,15 @@ public class PoLinesService {
       poLine.setId(UUID.randomUUID()
         .toString());
     }
-    logger.debug("Creating new poLine record with id={}", poLine.getId());
+    log.debug("Creating new poLine record with id={}", poLine.getId());
 
     conn.save(PO_LINE_TABLE, poLine.getId(), poLine)
-      .onComplete(result -> {
-        if (result.failed()) {
-          httpHandleFailure(promise, result);
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("createPoLine failed, poLine={}", JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+          httpHandleFailure(promise, ar);
         } else {
-          logger.info("PoLine with id {} has been created", poLine.getId());
+          log.info("PoLine with id {} has been created", poLine.getId());
           promise.complete(poLine.getId());
         }
       });
@@ -168,6 +171,7 @@ public class PoLinesService {
   }
 
   public Future<List<PoLine>> getPoLinesByLineIds(List<String> poLineIds, Context context, Map<String, String> headers) {
+    log.trace("getPoLinesByLineIds, poLineIds={}", poLineIds);
     if (CollectionUtils.isEmpty(poLineIds)) {
       return Future.succeededFuture(Collections.emptyList());
     }
@@ -176,17 +180,19 @@ public class PoLinesService {
     CompositeFuture.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ)
                         .map(chunkIds -> getPoLinesChunkByLineIds(chunkIds, context, headers))
                         .collect(toList()))
-              .onComplete(result -> {
-                if (result.succeeded()) {
-                   promise.complete(result.result().list().stream()
-                     .map(chunkList -> (List<PoLine>)chunkList)
-                     .filter(CollectionUtils::isNotEmpty)
-                     .flatMap(Collection::stream)
-                     .collect(toList()));
-                } else {
-                   promise.fail(result.cause());
-                }
-              });
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          log.trace("getPoLinesByLineIds completed, poLineIds={}", poLineIds);
+          promise.complete(ar.result().list().stream()
+            .map(chunkList -> (List<PoLine>)chunkList)
+            .filter(CollectionUtils::isNotEmpty)
+            .flatMap(Collection::stream)
+            .collect(toList()));
+        } else {
+          log.error("getPoLinesByLineIds failed, poLineIds={}", poLineIds, ar.cause());
+          promise.fail(ar.cause());
+        }
+      });
     return promise.future();
   }
 
@@ -203,12 +209,12 @@ public class PoLinesService {
 
     Criterion criterion = criterionBuilder.build();
     poLinesDAO.getPoLines(criterion, dbClient)
-      .onComplete(reply -> {
-        if (reply.failed()) {
-          logger.error("Retrieve POLs failed : {}", criterion);
-          handleFailure(promise, reply.cause());
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("getPoLinesByLineIds(lineIds, dbClient) failed, criterion={}", criterion, ar.cause());
+          handleFailure(promise, ar.cause());
         } else {
-          promise.complete(reply.result());
+          promise.complete(ar.result());
         }
       });
     return promise.future();
@@ -261,12 +267,12 @@ public class PoLinesService {
   public Future<PoLine> getPoLineById(String poLineId, DBClient client) {
     Promise<PoLine> promise = Promise.promise();
 
-    client.getPgClient().getById(PO_LINE_TABLE, poLineId, PoLine.class, reply -> {
-      if(reply.failed()) {
-        logger.error("Retrieve POL failed : {}", reply);
-        httpHandleFailure(promise, reply);
+    client.getPgClient().getById(PO_LINE_TABLE, poLineId, PoLine.class, ar -> {
+      if (ar.failed()) {
+        log.error("getPoLineById(poLineId, client) failed, poLineId={}", poLineId, ar.cause());
+        httpHandleFailure(promise, ar);
       } else {
-        promise.complete(reply.result());
+        promise.complete(ar.result());
       }
     });
 
@@ -277,12 +283,12 @@ public class PoLinesService {
     Promise<PoLine> promise = Promise.promise();
 
     conn.getById(PO_LINE_TABLE, poLineId, PoLine.class)
-      .onComplete(reply -> {
-        if(reply.failed()) {
-          logger.error("Retrieve POL failed : {}", reply);
-          httpHandleFailure(promise, reply);
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("getPoLineById(conn, poLineId) failed, poLineId={}", poLineId, ar.cause());
+          httpHandleFailure(promise, ar);
         } else {
-          promise.complete(reply.result());
+          promise.complete(ar.result());
         }
       });
     return promise.future();
@@ -298,12 +304,14 @@ public class PoLinesService {
                                                     PoLine packagePoLine) {
     Title title = createTitleObject(poLine);
     populateTitleBasedOnPackagePoLine(title, packagePoLine);
-    logger.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), poLine.getPackagePoLineId());
+    log.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), poLine.getPackagePoLineId());
 
     conn.save(TITLES_TABLE, title.getId(), title)
-      .onComplete(saveResult -> {
-        if (saveResult.failed()) {
-          httpHandleFailure(promise, saveResult);
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("populateTitleForPackagePoLineAndSave failed, titleId={}, packagePoLineId={}",
+            title.getId(), poLine.getPackagePoLineId(), ar.cause());
+          httpHandleFailure(promise, ar);
         } else {
           promise.complete(poLine);
         }
@@ -311,16 +319,16 @@ public class PoLinesService {
   }
 
   private Future<Tx<String>> deleteTitleById(Tx<String> tx, DBClient client) {
-    logger.info("Delete title by POLine id={}", tx.getEntity());
+    log.info("Delete title by POLine id={}", tx.getEntity());
 
     Promise<Tx<String>> promise = Promise.promise();
     Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
-    client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, reply -> {
-      if (reply.failed()) {
-        logger.error("Delete title failed : {}", criterion);
-        httpHandleFailure(promise, reply);
+    client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, ar -> {
+      if (ar.failed()) {
+        log.error("Delete title failed, criterion={}", criterion, ar.cause());
+        httpHandleFailure(promise, ar);
       } else {
-        logger.info("{} title of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
+        log.info("{} title(s) of POLine with id={} successfully deleted", ar.result().rowCount(), tx.getEntity());
         promise.complete(tx);
       }
     });
@@ -332,15 +340,17 @@ public class PoLinesService {
     PoLine poLine = poLineTx.getEntity();
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
-    client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, event -> {
-      if (event.failed()) {
-        logger.error("Update POLs failed : {}", criterion);
-        httpHandleFailure(promise, event);
+    client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, ar -> {
+      if (ar.failed()) {
+        log.error("updatePoLine(poLineTx, client) failed, poLine={}",
+          JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+        httpHandleFailure(promise, ar);
       } else {
-        if (event.result().rowCount() == 0) {
+        if (ar.result().rowCount() == 0) {
+          log.error("updatePoLine(poLineTx, client): no line was updated");
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
-          logger.info("POLine record {} was successfully updated", poLineTx.getEntity().getId());
+          log.info("updatePoLine(poLineTx, client) complete, poLineId={}", poLineTx.getEntity().getId());
           promise.complete(poLineTx);
         }
       }
@@ -353,15 +363,17 @@ public class PoLinesService {
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
-      .onComplete(result -> {
-        if (result.failed()) {
-          logger.error("Update POLs failed : {}", criterion);
-          httpHandleFailure(promise, result);
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("updatePoLine(conn, poLine) failed, poLine={}",
+            JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+          httpHandleFailure(promise, ar);
         } else {
-          if (result.result().rowCount() == 0) {
+          if (ar.result().rowCount() == 0) {
+            log.error("updatePoLine(conn, poLine): no line was updated");
             promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
           } else {
-            logger.info("POLine record {} was successfully updated", poLine.getId());
+            log.info("updatePoLine(conn, poLine) complete, poLineId={}", poLine.getId());
             promise.complete(poLine);
           }
         }
@@ -372,13 +384,16 @@ public class PoLinesService {
   private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine) {
     Promise<PoLine> promise = Promise.promise();
     Title title = createTitleObject(poLine);
-    logger.debug("Creating new title record with id={}", title.getId());
+    log.debug("Creating new title record with id={}", title.getId());
 
     conn.save(TITLES_TABLE, title.getId(), title)
-      .onComplete(saveResult -> {
-        if (saveResult.failed()) {
-          httpHandleFailure(promise, saveResult);
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("createTitleAndSave failed to save title, title={}",
+            JsonObject.mapFrom(title).encodePrettily(), ar.cause());
+          httpHandleFailure(promise, ar);
         } else {
+          log.info("createTitleAndSave complete, titleId={}", title.getId());
           promise.complete(poLine);
         }
       });
@@ -392,11 +407,13 @@ public class PoLinesService {
     Title newTitle = createTitleObject(poLine).withIsAcknowledged(title.getIsAcknowledged()).withId(title.getId());
 
     conn.update(TITLES_TABLE, newTitle, JSONB, criterion.toString(), false)
-      .onComplete(result -> {
-        if (result.failed()) {
-          httpHandleFailure(promise, result);
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("updateTitle(conn, title, poLine) failed, newTitle={}",
+            JsonObject.mapFrom(newTitle).encodePrettily(), ar.cause());
+          httpHandleFailure(promise, ar);
         } else {
-          logger.info("Title record {} was successfully updated", title);
+          log.info("updateTitle(conn, title, poLine) complete, titleId={}", title.getId());
           promise.complete(poLine);
         }
       });
@@ -404,17 +421,17 @@ public class PoLinesService {
   }
 
   private Future<Tx<String>> deletePiecesByPOLineId(Tx<String> tx, DBClient client) {
-    logger.info("Delete pieces by POLine id={}", tx.getEntity());
+    log.info("Delete pieces by POLine id={}", tx.getEntity());
 
     Promise<Tx<String>> promise = Promise.promise();
     Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
 
-    client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, reply -> {
-      if (reply.failed()) {
-        logger.error("Delete Pieces failed : {}", criterion);
-        httpHandleFailure(promise, reply);
+    client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, ar -> {
+      if (ar.failed()) {
+        log.error("Delete Pieces failed, criterion={}", criterion, ar.cause());
+        httpHandleFailure(promise, ar);
       } else {
-        logger.info("{} pieces of POLine with id={} successfully deleted", reply.result().rowCount(), tx.getEntity());
+        log.info("{} pieces of POLine with id={} successfully deleted", ar.result().rowCount(), tx.getEntity());
         promise.complete(tx);
       }
     });
@@ -422,7 +439,7 @@ public class PoLinesService {
   }
 
   private Future<Tx<String>> deletePOLineById(Tx<String> tx, DBClient client) {
-    logger.info("Delete POLine with id={}", tx.getEntity());
+    log.info("Delete POLine with id={}", tx.getEntity());
     return client.deleteById(tx, PO_LINE_TABLE);
   }
 
@@ -473,6 +490,14 @@ public class PoLinesService {
           return updateTitle(conn, titles.get(0), poLine);
         }
         return Future.succeededFuture(poLine);
+      })
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          log.error("updateTitle(conn, poLine) failed, poLine={}",
+            JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+        } else {
+          log.info("updateTitle(conn, poLine) complete, poLineId={}", poLine.getId());
+        }
       });
   }
 

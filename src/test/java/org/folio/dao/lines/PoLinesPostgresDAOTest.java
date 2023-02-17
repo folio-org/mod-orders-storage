@@ -93,8 +93,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
     testContext.assertComplete(promise1.future()
       .compose(aVoid -> promise2.future())
       .compose(o -> poLinesPostgresDAO.getPoLines(criterion, client)))
-      .onComplete(event -> {
-        List<PoLine> poLines = event.result();
+      .onComplete(ar -> {
+        List<PoLine> poLines = ar.result();
         testContext.verify(() -> {
           assertThat(poLines, hasSize(1));
           assertThat(poLines.get(0).getId(), is(id));
@@ -119,8 +119,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
     testContext.assertComplete(promise1.future()
       .compose(aVoid -> promise2.future())
       .compose(o -> poLinesPostgresDAO.getPoLineById(id, client)))
-      .onComplete(event -> {
-        PoLine actPoLine = event.result();
+      .onComplete(ar -> {
+        PoLine actPoLine = ar.result();
         testContext.verify(() -> {
           assertThat(actPoLine.getId(), is(id));
         });
@@ -141,8 +141,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
 
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLineById(id, client))
-      .onComplete(event -> {
-        HttpException exception = (HttpException) event.cause();
+      .onComplete(ar -> {
+        HttpException exception = (HttpException) ar.cause();
         testContext.verify(() -> {
           assertEquals(404, exception.getCode());
           assertEquals("Not Found", exception.getErrors().getErrors().get(0).getMessage());
@@ -164,8 +164,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
 
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLineById(id, client))
-      .onComplete(event -> {
-        HttpException exception = (HttpException) event.cause();
+      .onComplete(ar -> {
+        HttpException exception = (HttpException) ar.cause();
         testContext.verify(() -> {
           assertEquals(500, exception.getCode());
           assertEquals("Error", exception.getErrors().getErrors().get(0).getMessage());
@@ -187,8 +187,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
     }).when(postgresClient).get(eq(PO_LINE_TABLE), eq(PoLine.class), eq(criterion), eq(false), any(Handler.class));
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLines(criterion, client))
-      .onComplete(event -> {
-        HttpException exception = (HttpException) event.cause();
+      .onComplete(ar -> {
+        HttpException exception = (HttpException) ar.cause();
         testContext.verify(() -> {
           assertEquals(500, exception.getCode());
           assertEquals("Error", exception.getErrors().getErrors().get(0).getMessage());
@@ -216,8 +216,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
     testContext.assertComplete(promise1.future()
         .compose(aVoid -> promise2.future())
         .compose(o -> poLinesPostgresDAO.updatePoLines(sql, client)))
-      .onComplete(event -> {
-        Integer numUpdLines = event.result();
+      .onComplete(ar -> {
+        Integer numUpdLines = ar.result();
         testContext.verify(() -> {
           assertThat(1, is(numUpdLines));
         });
@@ -243,8 +243,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
 
 
     testContext.assertFailure(poLinesPostgresDAO.updatePoLines(sql, client))
-      .onComplete(event -> {
-        HttpException exception = (HttpException) event.cause();
+      .onComplete(ar -> {
+        HttpException exception = (HttpException) ar.cause();
         testContext.verify(() -> {
           assertEquals(500, exception.getCode());
           assertEquals("Error", exception.getErrors().getErrors().get(0).getMessage());

@@ -22,15 +22,13 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 
 public class TenantReferenceAPI extends TenantAPI {
-
-  private static final Logger log = LogManager.getLogger(TenantReferenceAPI.class);
-
+  private static final Logger log = LogManager.getLogger();
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
 
   public TenantReferenceAPI() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
-    log.debug("Init TenantReferenceAPI");
+    log.trace("Init TenantReferenceAPI");
   }
 
   @Override
@@ -103,7 +101,7 @@ public class TenantReferenceAPI extends TenantAPI {
   @Override
   public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr,
     Context cntxt) {
-    log.info("deleteTenant");
+    log.info("deleteTenant, operationId={}", operationId);
     super.deleteTenantByOperationId(operationId, headers, res -> {
       Vertx vertx = cntxt.owner();
       String tenantId = TenantTool.tenantId(headers);

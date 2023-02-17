@@ -22,9 +22,9 @@ import static org.folio.rest.core.ResponseUtil.buildErrorResponse;
 import static org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.headersFor201;
 
 public class AcquisitionService {
-
-  private final Logger logger = LogManager.getLogger(this.getClass());
+  private static final Logger log = LogManager.getLogger();
   private static final String ACQUISITIONS_UNIT_TABLE = "acquisitions_unit";
+
   private final PostgresClient pgClient;
   private final NameCodeConstraintErrorBuilder nameCodeConstraintErrorBuilder;
 
@@ -36,12 +36,12 @@ public class AcquisitionService {
   public void createAcquisitionsUnit(AcquisitionsUnit acquisitionsUnit, Context vertxContext, Handler<AsyncResult<Response>> asyncResultHandler) {
     vertxContext.runOnContext(v -> createAcquisitionsUnit(acquisitionsUnit)
       .onSuccess(entity -> {
-        logger.debug("AcquisitionService with id {} created", acquisitionsUnit.getId());
+        log.info("AcquisitionService with id {} created", acquisitionsUnit.getId());
         asyncResultHandler.handle(Future.succeededFuture(
           AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.respond201WithApplicationJson(entity, headersFor201())));
       })
       .onFailure(throwable -> {
-        logger.error("AcquisitionService creation with id {} failed", acquisitionsUnit.getId(), throwable);
+        log.error("AcquisitionService creation with id {} failed", acquisitionsUnit.getId(), throwable);
         asyncResultHandler.handle(buildErrorResponse(throwable));
       }));
   }
@@ -51,9 +51,9 @@ public class AcquisitionService {
     if (acquisitionsUnit.getId() == null) {
       acquisitionsUnit.setId(UUID.randomUUID().toString());
     }
-    pgClient.save(ACQUISITIONS_UNIT_TABLE, acquisitionsUnit.getId(), acquisitionsUnit, reply -> {
-      if (reply.failed()) {
-        promise.fail(nameCodeConstraintErrorBuilder.buildException(reply, AcquisitionsUnit.class));
+    pgClient.save(ACQUISITIONS_UNIT_TABLE, acquisitionsUnit.getId(), acquisitionsUnit, ar -> {
+      if (ar.failed()) {
+        promise.fail(nameCodeConstraintErrorBuilder.buildException(ar, AcquisitionsUnit.class));
       }
       else {
         promise.complete(acquisitionsUnit);

@@ -88,8 +88,8 @@ public class PoLIneServiceVertxTest extends TestBase {
     testContext.assertComplete(promise1.future()
         .compose(aVoid -> promise2.future())
         .compose(o -> poLinesService.updatePoLines(List.of(poLine), client)))
-      .onComplete(event -> {
-        Integer numUpdLines = event.result();
+      .onComplete(ar -> {
+        Integer numUpdLines = ar.result();
         testContext.verify(() -> {
           assertThat(1, is(numUpdLines));
         });

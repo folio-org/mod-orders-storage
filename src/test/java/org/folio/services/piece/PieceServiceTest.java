@@ -38,6 +38,7 @@ import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
 public class PieceServiceTest extends TestBase {
+  private static final Logger log = LogManager.getLogger();
 
   static final String TEST_TENANT = "test_tenant";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
@@ -47,7 +48,6 @@ public class PieceServiceTest extends TestBase {
   private static TenantJob tenantJob;
   private final String newHoldingId = UUID.randomUUID().toString();
   private final String newInstanceId = UUID.randomUUID().toString();
-  private final Logger logger = LogManager.getLogger(PieceService.class);
 
   @BeforeEach
   public void initMocks() throws MalformedURLException {
@@ -77,25 +77,25 @@ public class PieceServiceTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
 
     promise1.future().onComplete(v -> {
-      client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
-        if (event.failed()) {
-          promise2.fail(event.cause());
+      client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
         } else {
           promise2.complete();
-          logger.info("Piece was saved");
+          log.info("Piece was saved");
         }
       });
     });
 
     testContext.assertComplete(promise2.future()
         .compose(o -> pieceService.getPiecesByPoLineId(poLineId, client)))
-      .onComplete(event -> {
-        List<Piece> actPieces = event.result();
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
           assertThat(actPieces.get(0).getId(), is(pieceId));
         });
@@ -122,25 +122,25 @@ public class PieceServiceTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
 
     promise1.future().onComplete(v -> {
-      client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
-        if (event.failed()) {
-          promise2.fail(event.cause());
+      client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
         } else {
           promise2.complete();
-          logger.info("Piece was saved");
+          log.info("Piece was saved");
         }
       });
     });
 
     testContext.assertComplete(promise2.future()
         .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
-        .onComplete(event -> {
-          List<Piece> actPieces = event.result();
+        .onComplete(ar -> {
+          List<Piece> actPieces = ar.result();
           testContext.verify(() -> {
             assertNull(actPieces);
           });
@@ -172,16 +172,16 @@ public class PieceServiceTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     promise1.future().onComplete(v -> {
-      client.getPgClient().save(PIECES_TABLE, pieceId, piece, event -> {
-        if (event.failed()) {
-          promise2.fail(event.cause());
+      client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
         } else {
           promise2.complete();
-          logger.info("Piece was saved");
+          log.info("Piece was saved");
         }
       });
     });
@@ -193,8 +193,8 @@ public class PieceServiceTest extends TestBase {
             .compose(o -> pieceService.updatePieces(poLineTx, replaceInstanceRef, client)))
         .compose(Tx::endTx)
         .onComplete(v -> pieceService.getPiecesByPoLineId(poLineId, client)
-          .onComplete(event -> {
-            List<Piece> actPieces = event.result();
+          .onComplete(ar -> {
+            List<Piece> actPieces = ar.result();
             testContext.verify(() -> {
               assertThat(actPieces.get(0).getId(), is(pieceId));
               assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));

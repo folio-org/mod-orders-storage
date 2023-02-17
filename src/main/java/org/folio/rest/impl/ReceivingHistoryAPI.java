@@ -9,6 +9,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.ReceivingHistory;
 import org.folio.rest.jaxrs.model.ReceivingHistoryCollection;
@@ -21,11 +23,13 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 
 public class ReceivingHistoryAPI implements OrdersStorageReceivingHistory {
+  private static final Logger log = LogManager.getLogger();
 
   @Override
   @Validate
   public void getOrdersStorageReceivingHistory(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    log.info("getOrdersStorageReceivingHistory, query={query}");
     vertxContext.runOnContext((Void v) -> {
       EntitiesMetadataHolder<ReceivingHistory, ReceivingHistoryCollection> entitiesMetadataHolder = new EntitiesMetadataHolder<>(ReceivingHistory.class, ReceivingHistoryCollection.class, GetOrdersStorageReceivingHistoryResponse.class, "setReceivingHistory");
       QueryHolder cql = new QueryHolder(RECEIVING_HISTORY_VIEW_TABLE, METADATA, query, offset, limit, lang);

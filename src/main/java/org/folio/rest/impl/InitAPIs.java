@@ -23,7 +23,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.jackson.DatabindCodec;
 
 public class InitAPIs implements InitAPI {
-  private final Logger logger = LogManager.getLogger(InitAPIs.class);
+  private static final Logger log = LogManager.getLogger();
+
   @Value("${kafka.consumer.verticle.instancesNumber:1}")
   private int kafkaConsumersVerticleNumber;
 
@@ -53,12 +54,12 @@ public class InitAPIs implements InitAPI {
           }
         });
       },
-      result -> {
-        if (result.succeeded()) {
+      ar -> {
+        if (ar.succeeded()) {
           resultHandler.handle(Future.succeededFuture(true));
         } else {
-          logger.error("Failure to init API", result.cause());
-          resultHandler.handle(Future.failedFuture(result.cause()));
+          log.error("Failure to init API", ar.cause());
+          resultHandler.handle(Future.failedFuture(ar.cause()));
         }
       });
   }
@@ -73,7 +74,7 @@ public class InitAPIs implements InitAPI {
     vertx.deployVerticle(() -> springContext.getBean(KafkaConsumersVerticle.class), deploymentOptions, promise);
 
     return promise.future()
-      .onSuccess(ar -> logger.info("KafkaConsumersVerticle was successfully started"))
-      .onFailure(e -> logger.error("KafkaConsumersVerticle was not successfully started", e));
+      .onSuccess(ar -> log.info("KafkaConsumersVerticle was successfully started"))
+      .onFailure(e -> log.error("KafkaConsumersVerticle was not successfully started", e));
   }
 }

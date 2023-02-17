@@ -27,7 +27,7 @@ import io.vertx.core.Promise;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class KafkaConsumersVerticle extends AbstractVerticle {
 
-  private static final Logger logger = LogManager.getLogger(KafkaConsumersVerticle.class);
+  private static final Logger log = LogManager.getLogger();
   private static final GlobalLoadSensor GLOBAL_LOAD_SENSOR = new GlobalLoadSensor();
 
   @Value("${kafka.export.orders.loadLimit:5}")
@@ -56,7 +56,7 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
 
   @Override
   public void start(Promise<Void> startPromise) {
-    logger.info("Kafka config: {}", kafkaConfig);
+    log.info("Kafka config: {}", kafkaConfig);
 
     SubscriptionDefinition subscriptionDefinition = KafkaTopicNameHelper.createSubscriptionDefinition(kafkaConfig.getEnvId(),
       KafkaTopicNameHelper.getDefaultNameSpace(), ExportEventType.EXPORT_HISTORY_CREATE.getTopicName());
