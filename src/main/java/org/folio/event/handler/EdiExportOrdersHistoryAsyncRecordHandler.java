@@ -42,7 +42,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaRecord) {
-    log.debug("EdiExportOrdersHistoryAsyncRecordHandler.handle, kafkaRecord={}", kafkaRecord.value());
+    if (log.isDebugEnabled())
+      log.debug("EdiExportOrdersHistoryAsyncRecordHandler.handle, kafkaRecord={}", kafkaRecord.value());
     try {
       Promise<String> promise = Promise.promise();
       ExportHistory exportHistory = new JsonObject(kafkaRecord.value()).mapTo(ExportHistory.class);
