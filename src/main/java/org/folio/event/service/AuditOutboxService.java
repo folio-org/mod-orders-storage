@@ -114,16 +114,16 @@ public class AuditOutboxService {
       .onFailure(e -> log.warn("Could not save outbox audit log for order line with id {}", poLine.getId(), e));
   }
 
-  private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> logs, Map<String, String> okapiHeaders) {
+  private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {
     List<Future<Boolean>> futures = new ArrayList<>();
-    for (OutboxEventLog log : logs) {
-      if (EntityType.ORDER == log.getEntityType()) {
-        PurchaseOrder purchaseOrder = Json.decodeValue(log.getPayload(), PurchaseOrder.class);
-        OrderAuditEvent.Action orderAction = OrderAuditEvent.Action.fromValue(log.getAction());
+    for (OutboxEventLog eventLog : eventLogs) {
+      if (EntityType.ORDER == eventLog.getEntityType()) {
+        PurchaseOrder purchaseOrder = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);
+        OrderAuditEvent.Action orderAction = OrderAuditEvent.Action.fromValue(eventLog.getAction());
         futures.add(producer.sendOrderEvent(purchaseOrder, orderAction, okapiHeaders));
-      } else if (EntityType.ORDER_LINE == log.getEntityType()) {
-        PoLine poLine = Json.decodeValue(log.getPayload(), PoLine.class);
-        OrderLineAuditEvent.Action orderLineAction = OrderLineAuditEvent.Action.fromValue(log.getAction());
+      } else if (EntityType.ORDER_LINE == eventLog.getEntityType()) {
+        PoLine poLine = Json.decodeValue(eventLog.getPayload(), PoLine.class);
+        OrderLineAuditEvent.Action orderLineAction = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
         futures.add(producer.sendOrderLineEvent(poLine, orderLineAction, okapiHeaders));
       }
     }
@@ -137,12 +137,12 @@ public class AuditOutboxService {
                                         Map<String, String> okapiHeaders) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
-    OutboxEventLog log = new OutboxEventLog()
+    OutboxEventLog eventLog = new OutboxEventLog()
       .withEventId(UUID.randomUUID().toString())
       .withAction(action)
       .withEntityType(entityType)
       .withPayload(entity);
 
-    return outboxRepository.saveEventLog(conn, log, tenantId);
+    return outboxRepository.saveEventLog(conn, eventLog, tenantId);
   }
 }

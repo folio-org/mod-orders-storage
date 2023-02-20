@@ -48,12 +48,12 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
         log.error("getPoLineById failed, id={}", id);
         handleFailure(promise, ar);
       } else {
-        final JsonObject po_line = ar.result();
-        if (po_line == null) {
+        final JsonObject poLine = ar.result();
+        if (poLine == null) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
           log.trace("getPoLineById success, id={}", id);
-          promise.complete(po_line.mapTo(PoLine.class));
+          promise.complete(poLine.mapTo(PoLine.class));
         }
       }
     });

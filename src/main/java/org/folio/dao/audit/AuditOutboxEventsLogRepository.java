@@ -80,12 +80,12 @@ public class AuditOutboxEventsLogRepository {
   private List<OutboxEventLog> mapResultSetToEventLogs(RowSet<Row> resultSet) {
     List<OutboxEventLog> result = new ArrayList<>();
     for (Row row : resultSet) {
-      OutboxEventLog log = new OutboxEventLog()
+      OutboxEventLog eventLog = new OutboxEventLog()
         .withEventId(row.getValue(EVENT_ID_FIELD).toString())
         .withEntityType(OutboxEventLog.EntityType.fromValue(row.getString(ENTITY_TYPE_FIELD)))
         .withAction(row.getString(ACTION_FIELD))
         .withPayload(row.getString(PAYLOAD_FIELD));
-      result.add(log);
+      result.add(eventLog);
     }
     return result;
   }

@@ -65,7 +65,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
         })
         .onComplete(ar -> {
           if (ar.failed()) {
-            log.error("Can't store export history, kafkaRecord={}", kafkaRecord.value(), ar.cause());
+            if (log.isErrorEnabled())
+              log.error("Can't store export history, kafkaRecord={}", kafkaRecord.value(), ar.cause());
             promise.fail(ar.cause());
           } else {
             log.debug("Completed EdiExportOrdersHistoryAsyncRecordHandler.handle");
