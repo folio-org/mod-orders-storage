@@ -89,11 +89,11 @@ public class PieceService {
     return getPiecesByPoLineId(poLineTx.getEntity().getId(), client)
       .compose(pieces -> updateHoldingForPieces(poLineTx, pieces, replaceInstanceRef, client))
       .onComplete(ar -> {
-        if (ar.succeeded()) {
-          log.debug("updatePieces(poLineTx, replaceInstanceRef, client) complete");
-        } else {
+        if (ar.failed()) {
           log.error("updatePieces(poLineTx, replaceInstanceRef, client) failed, poLineId={}",
             poLineTx.getEntity().getId(), ar.cause());
+        } else {
+          log.debug("updatePieces(poLineTx, replaceInstanceRef, client) complete");
         }
       });
   }

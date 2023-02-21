@@ -69,11 +69,11 @@ public class TitleService {
     return getTitleByPoLineId(poLineTx.getEntity().getId(), client)
       .compose(title -> updateInstanceIdForTitle(poLineTx, title, instanceId, client))
       .onComplete(ar -> {
-        if (ar.succeeded()) {
-          log.debug("updateTitle(poLineTx, instanceId, client) complete");
-        } else {
+        if (ar.failed()) {
           log.error("updateTitle(poLineTx, instanceId, client) failed, poLineId={}, instanceId={}",
             poLineTx.getEntity().getId(), instanceId, ar.cause());
+        } else {
+          log.debug("updateTitle(poLineTx, instanceId, client) complete");
         }
       });
   }
