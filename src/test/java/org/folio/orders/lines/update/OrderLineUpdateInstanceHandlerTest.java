@@ -597,8 +597,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
      }
 
      @Bean
-     PoLinesService poLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
-       return new PoLinesService(poLinesDAO, pgClientFactory, auditOutboxService);
+     PoLinesService poLinesService(PoLinesDAO poLinesDAO, AuditOutboxService auditOutboxService) {
+       return new PoLinesService(poLinesDAO, auditOutboxService);
      }
 
      @Bean

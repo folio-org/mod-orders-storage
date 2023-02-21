@@ -27,7 +27,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
@@ -52,12 +51,10 @@ public class PoLinesService {
   private static final String POLINE_ID_FIELD = "poLineId";
 
   private PoLinesDAO poLinesDAO;
-  private final PostgresClientFactory pgClientFactory;
   private final AuditOutboxService auditOutboxService;
 
-  public PoLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
+  public PoLinesService(PoLinesDAO poLinesDAO, AuditOutboxService auditOutboxService) {
     this.poLinesDAO = poLinesDAO;
-    this.pgClientFactory = pgClientFactory;
     this.auditOutboxService = auditOutboxService;
   }
 
