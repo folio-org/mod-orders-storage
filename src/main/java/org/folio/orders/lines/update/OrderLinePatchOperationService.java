@@ -18,8 +18,9 @@ public class OrderLinePatchOperationService {
   private final OrderLinePatchOperationHandlerResolver operationHandlerResolver;
   private final PoLinesService poLinesService;
 
-  public Future<Void> patch(String poLineId, StoragePatchOrderLineRequest rq, RequestContext context, DBClient client) {
+  public Future<Void> patch(String poLineId, StoragePatchOrderLineRequest rq, RequestContext context) {
     log.info("patch, poLineId={}", poLineId);
+    DBClient client = context.toDBClient();
     return poLinesService.getPoLineById(poLineId, client).compose(poLine -> {
       OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
       orderLineUpdateInstanceHolder.setStoragePoLine(poLine);

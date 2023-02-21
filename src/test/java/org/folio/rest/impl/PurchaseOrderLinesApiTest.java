@@ -13,6 +13,8 @@ import org.folio.event.AuditEventType;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.IsolatedTenant;
@@ -383,6 +385,30 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"), ISOLATED_TENANT_HEADER);
     deleteData(PO_LINE.getEndpointWithId(), poLine.getId(), ISOLATED_TENANT_HEADER);
     deleteData(TITLES.getEndpointWithId(), titleAfter.getId(), ISOLATED_TENANT_HEADER);
+  }
+
+  @Test
+  void testPatchPoLineFails() throws MalformedURLException {
+    log.info("--- mod-orders-storage orders test: PoLine patch fails");
+
+    givenTestData(Pair.of(PURCHASE_ORDER, TestData.PurchaseOrder.DEFAULT),
+      Pair.of(PO_LINE, TestData.PoLine.DEFAULT));
+
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getIsolatedTenantHeaders(userId);
+
+    ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
+      .withNewInstanceId(UUID.randomUUID().toString());
+    StoragePatchOrderLineRequest patchRequest = new StoragePatchOrderLineRequest()
+      .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
+      .withReplaceInstanceRef(replaceInstanceRef);
+
+    String poLineId = PO_LINE.getId();
+    String patchRequestString = JsonObject.mapFrom(patchRequest).encode();
+
+    patchData(PO_LINE.getEndpointWithId(), poLineId, patchRequestString, headers)
+      .then()
+      .statusCode(400);
   }
 
 }

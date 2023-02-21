@@ -19,7 +19,6 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLines;
-import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
@@ -121,7 +120,8 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
   public void deleteOrdersStoragePoLinesById(String id, String lang, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
-      poLinesService.deleteById(id, vertxContext, okapiHeaders)
+      RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
+      poLinesService.deleteById(id, requestContext)
         .onComplete(ar -> {
           if (ar.failed()) {
             log.error("Delete order line failed, id={}", id, ar.cause());
@@ -156,7 +156,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
         });
     } else {
       try {
-        poLinesService.updatePoLineWithTitle(id, poLine, okapiHeaders)
+        poLinesService.updatePoLineWithTitle(id, poLine, new RequestContext(vertxContext, okapiHeaders))
           .onComplete(ar -> {
             if (ar.failed()) {
               log.error("Update order line with title failed, id={}, poLine={}", id,
@@ -184,8 +184,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
         Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
-    DBClient client = new DBClient(vertxContext, okapiHeaders);
-    orderLinePatchOperationService.patch(id, entity, requestContext, client)
+    orderLinePatchOperationService.patch(id, entity, requestContext)
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("Patch order line failed, id={}, entity={}", id,

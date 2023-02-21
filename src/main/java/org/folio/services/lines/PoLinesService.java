@@ -31,11 +31,11 @@ import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
+import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.*;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
 
@@ -46,7 +46,6 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 import one.util.streamex.StreamEx;
-import org.folio.rest.tools.utils.TenantTool;
 
 public class PoLinesService {
   private static final Logger log = LogManager.getLogger();
@@ -82,11 +81,11 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Void> deleteById(String id, Context context, Map<String, String> headers) {
-    DBClient client = new DBClient(context, headers);
+  public Future<Void> deleteById(String id, RequestContext requestContext) {
+    DBClient client = requestContext.toDBClient();
     Promise<Void> promise = Promise.promise();
     Tx<String> tx = new Tx<>(id, client.getPgClient());
-    context.runOnContext(v -> {
+    requestContext.getContext().runOnContext(v -> {
       log.info("Delete po line, id={}", id);
       tx.startTx()
         .compose(result -> deletePiecesByPOLineId(result, client))
@@ -106,14 +105,13 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Void> updatePoLineWithTitle(String id, PoLine poLine, Map<String, String> okapiHeaders) {
-    String tenantId = TenantTool.tenantId(okapiHeaders);
+  public Future<Void> updatePoLineWithTitle(String id, PoLine poLine, RequestContext requestContext) {
+    Map<String, String> okapiHeaders = requestContext.getHeaders();
+    DBClient client = requestContext.toDBClient();
     Promise<Void> promise = Promise.promise();
     poLine.setId(id);
 
-    PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
-
-    pgClient.withTrans(conn -> updatePoLine(conn, poLine)
+    client.getPgClient().withTrans(conn -> updatePoLine(conn, poLine)
         .compose(line -> updateTitle(conn, line))
         .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders)))
         .onComplete(ar -> {
@@ -492,7 +490,7 @@ public class PoLinesService {
         return Future.succeededFuture(poLine);
       })
       .onComplete(ar -> {
-        if (ar.succeeded()) {
+        if (ar.failed()) {
           log.error("updateTitle(conn, poLine) failed, poLine={}",
             JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
         } else {

@@ -174,7 +174,7 @@ public class OrdersAPITest extends TestBase {
   }
 
   @Test
-  public void testUpdateOrder() throws MalformedURLException {
+  public void testUpdatePendingOrder() throws MalformedURLException {
     String userId = UUID.randomUUID().toString();
     Headers headers = getDikuTenantHeaders(userId);
     String orderId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, headers);
@@ -189,6 +189,41 @@ public class OrdersAPITest extends TestBase {
     checkOrderEventContent(sentCreateOrderEvents.get(1), OrderAuditEvent.Action.EDIT);
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), orderId);
+  }
+
+  @Test
+  public void testOpenOrder() throws MalformedURLException {
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
+    String orderId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, headers);
+    PurchaseOrder openOrder = (new JsonObject(purchaseOrderWithoutPOLines)).mapTo(PurchaseOrder.class);
+    openOrder.setWorkflowStatus(WorkflowStatus.OPEN);
+    String orderString = JsonObject.mapFrom(openOrder).encode();
+    putData("/orders-storage/purchase-orders/{id}", orderId, orderString, headers)
+      .then()
+      .statusCode(204);
+
+    // we have 1 created order, 1 edited order so 2 events should be sent
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 2, userId);
+    Assertions.assertEquals(2, sentCreateOrderEvents.size());
+    checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+    checkOrderEventContent(sentCreateOrderEvents.get(1), OrderAuditEvent.Action.EDIT);
+
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), orderId);
+  }
+
+  @Test
+  public void testFailUpdateOpenOrder() throws MalformedURLException {
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
+    String orderId = UUID.randomUUID().toString();
+    PurchaseOrder openOrder = new PurchaseOrder()
+      .withId(orderId)
+      .withWorkflowStatus(WorkflowStatus.OPEN);
+    String orderString = JsonObject.mapFrom(openOrder).encode();
+    putData("/orders-storage/purchase-orders/{id}", orderId, orderString, headers)
+      .then()
+      .statusCode(404);
   }
 
   private void verifyExpectedOrders(List<PurchaseOrder> filteredOrders, String... poIds) {

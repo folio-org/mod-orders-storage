@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.vertx.core.Context;
+import org.folio.rest.persist.DBClient;
 
 public class RequestContext {
   private Context context;
@@ -28,5 +29,9 @@ public class RequestContext {
 
   public Map<String, String> getHeaders() {
     return Collections.unmodifiableMap(headers);
+  }
+
+  public DBClient toDBClient() {
+    return new DBClient(this);
   }
 }
