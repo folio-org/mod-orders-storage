@@ -1,4 +1,21 @@
-## 13.5.0 - Unreleased
+## 13.6.0 - Unreleased
+
+## 13.5.0 - Released (Orchid R1 2023)
+The focus of this release is to replace PGUtil to use PostgresClient and 
+implement transactional outbox pattern to store audit log in the transactional manner
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.4.0...v13.5.0)
+
+### Stories
+* [MODORDSTOR-333](https://issues.folio.org/browse/MODORDSTOR-333) - Improve handling of audit log for createdDate and createdBy
+* [MODORDSTOR-332](https://issues.folio.org/browse/MODORDSTOR-332) - Implement lock mechanism for Outbox Event Log
+* [MODORDSTOR-328](https://issues.folio.org/browse/MODORDSTOR-328) - Add isAcknowledged field for poLine details
+* [MODORDSTOR-326](https://issues.folio.org/browse/MODORDSTOR-326) - Replace PGUtil for Edit Order Line to use PostgresClient directly
+* [MODORDSTOR-325](https://issues.folio.org/browse/MODORDSTOR-325) - Replace PGUtil for Edit Order to use PostgresClient directly
+* [MODORDSTOR-324](https://issues.folio.org/browse/MODORDSTOR-324) - Add audit log message schemas and producer for sending these Kafka messages
+* [MODORDSTOR-323](https://issues.folio.org/browse/MODORDSTOR-323) - Implement transactional outbox pattern to store audit log in the transactional manner
+* [MODORDSTOR-321](https://issues.folio.org/browse/MODORDSTOR-321) - Logging improvement - Configuration
+
 
 ## 13.4.0 - Released (Morning Glory R2 2022)
 The focus of this release is to update RAML Module Builder and remove mod-finance-storage dependency
