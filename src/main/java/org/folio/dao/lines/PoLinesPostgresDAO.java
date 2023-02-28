@@ -28,7 +28,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
     Promise<List<PoLine>> promise = Promise.promise();
     client.getPgClient().get(PO_LINE_TABLE, PoLine.class, criterion, false, ar -> {
       if (ar.failed()) {
-        log.error("getPoLines failed, criterion={}", criterion.toString());
+        log.error("getPoLines failed, criterion={}", criterion.toString(), ar.cause());
         handleFailure(promise, ar);
       } else {
         log.trace("getPoLines success, criterion={}", criterion);
@@ -45,7 +45,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
     Promise<PoLine> promise = Promise.promise();
     client.getPgClient().getById(PO_LINE_TABLE, id, ar -> {
       if (ar.failed()) {
-        log.error("getPoLineById failed, id={}", id);
+        log.error("getPoLineById failed, id={}", id, ar.cause());
         handleFailure(promise, ar);
       } else {
         final JsonObject poLine = ar.result();
@@ -66,7 +66,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
     Promise<Integer> promise = Promise.promise();
     client.getPgClient().execute(sql, ar -> {
       if (ar.failed()) {
-        log.error("updatePoLines failed, sql={}", sql);
+        log.error("updatePoLines failed, sql={}", sql, ar.cause());
         handleFailure(promise, ar);
       } else {
         log.debug("updatePoLines success, sql={}", sql);
