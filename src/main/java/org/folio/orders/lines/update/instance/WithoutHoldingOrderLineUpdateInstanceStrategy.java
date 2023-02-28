@@ -20,16 +20,16 @@ import javax.ws.rs.core.Response;
 
 @RequiredArgsConstructor
 public class WithoutHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpdateInstanceStrategy {
+  private static final Logger log = LogManager.getLogger();
 
   private final TitleService titleService;
   private final PoLinesService poLinesService;
-  private final Logger logger = LogManager.getLogger(WithoutHoldingOrderLineUpdateInstanceStrategy.class);
 
   @Override
   public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
     Promise<Void> promise = Promise.promise();
     if (holder.getPatchOrderLineRequest().getReplaceInstanceRef() == null) {
-      logger.error("ReplaceInstanceRef is not present");
+      log.error("ReplaceInstanceRef is not present");
       promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef is not present"));
     } else {
       DBClient client = new DBClient(rqContext.getContext(), rqContext.getHeaders());
@@ -37,16 +37,17 @@ public class WithoutHoldingOrderLineUpdateInstanceStrategy implements OrderLineU
       String instanceId = holder.getPatchOrderLineRequest().getReplaceInstanceRef().getNewInstanceId();
 
       rqContext.getContext().runOnContext(v -> {
-        logger.info("Update Instance");
+        log.info("Without holding - Update Instance");
         tx.startTx()
           .compose(poLineTx -> titleService.updateTitle(poLineTx, instanceId, client))
           .compose(poLineTx -> poLinesService.updateInstanceIdForPoLine(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
           .compose(Tx::endTx)
-          .onComplete(result -> {
-            if (result.failed()) {
-              tx.rollbackTransaction().onComplete(res -> promise.fail(result.cause()));
+          .onComplete(ar -> {
+            if (ar.failed()) {
+              log.warn("Instance failed to update, poLine id={}", tx.getEntity().getId(), ar.cause());
+              tx.rollbackTransaction().onComplete(res -> promise.fail(ar.cause()));
             } else {
-              logger.info("Instance was updated successfully for poLine={}", tx.getEntity().getId());
+              log.info("Instance was updated successfully, poLine id={}", tx.getEntity().getId());
               promise.complete(null);
             }
           });

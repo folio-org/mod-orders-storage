@@ -28,24 +28,24 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
 public class PieceService {
-
-  private static final Logger logger = LogManager.getLogger(PieceService.class);
+  private static final Logger log = LogManager.getLogger();
   private static final String POLINE_ID_FIELD = "poLineId";
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     Promise<List<Piece>> promise = Promise.promise();
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
-    client.getPgClient().get(PIECES_TABLE, Piece.class, criterion, false, reply -> {
-      if(reply.failed()) {
-        logger.error("Retrieve pieces by poLineId={} failed : {}", poLineId, reply);
-        httpHandleFailure(promise, reply);
+    client.getPgClient().get(PIECES_TABLE, Piece.class, criterion, false, ar -> {
+      if (ar.failed()) {
+        log.error("getPiecesByPoLineId failed, poLineId={}", poLineId, ar.cause());
+        httpHandleFailure(promise, ar);
       } else {
-        List<Piece> result = reply.result().getResults();
+        List<Piece> result = ar.result().getResults();
         if (result.isEmpty()) {
-          logger.info("Pieces with poLineId={} was not found", poLineId);
+          log.info("No piece was found with poLineId={}", poLineId);
           promise.complete(null);
         } else {
+          log.trace("getPiecesByPoLineId complete, poLineId={}", poLineId);
           promise.complete(result);
         }
       }
@@ -58,19 +58,19 @@ public class PieceService {
     Promise<Tx<PoLine>> promise = Promise.promise();
     String poLineId = poLineTx.getEntity().getId();
 
-    if(CollectionUtils.isNotEmpty(pieces)) {
+    if (CollectionUtils.isNotEmpty(pieces)) {
       String query = buildUpdatePieceBatchQuery(pieces, client.getTenantId());
-      client.getPgClient().execute(poLineTx.getConnection(), query, reply -> {
-        if (reply.failed()) {
-          logger.error("Update pieces with poLineId={} failed : {}", poLineId, reply);
-          httpHandleFailure(promise, reply);
+      client.getPgClient().execute(poLineTx.getConnection(), query, ar -> {
+        if (ar.failed()) {
+          log.error("updatePieces failed, poLineId={}", poLineId, ar.cause());
+          httpHandleFailure(promise, ar);
         } else {
-          logger.info("Pieces with poLineId={} was successfully updated", poLineId);
+          log.info("updatePieces complete, poLineId={}", poLineId);
           promise.complete(poLineTx);
         }
       });
     } else {
-      logger.info(PIECE_NOT_UPDATED, poLineId);
+      log.info(PIECE_NOT_UPDATED, poLineId);
       promise.complete(poLineTx);
     }
     return promise.future();
@@ -87,13 +87,22 @@ public class PieceService {
 
   public Future<Tx<PoLine>> updatePieces(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
     return getPiecesByPoLineId(poLineTx.getEntity().getId(), client)
-      .compose(pieces -> updateHoldingForPieces(poLineTx, pieces, replaceInstanceRef, client));
+      .compose(pieces -> updateHoldingForPieces(poLineTx, pieces, replaceInstanceRef, client))
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("updatePieces(poLineTx, replaceInstanceRef, client) failed, poLineId={}",
+            poLineTx.getEntity().getId(), ar.cause());
+        } else {
+          log.debug("updatePieces(poLineTx, replaceInstanceRef, client) complete, poLineId={}",
+            poLineTx.getEntity().getId());
+        }
+      });
   }
 
   private Future<Tx<PoLine>> updateHoldingForPieces(Tx<PoLine> poLineTx, List<Piece> pieces, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
     List<Piece> updatedPieces = new ArrayList<>();
     if (CollectionUtils.isEmpty(pieces)) {
-      logger.info(PIECE_NOT_UPDATED, poLineTx.getEntity().getId());
+      log.info(PIECE_NOT_UPDATED, poLineTx.getEntity().getId());
       return Future.succeededFuture(poLineTx);
     }
     replaceInstanceRef.getHoldings().forEach(holding -> updatedPieces.addAll(pieces.stream().filter(piece -> piece.getHoldingId().equals(holding.getFromHoldingId()))

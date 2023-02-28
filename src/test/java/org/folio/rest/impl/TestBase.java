@@ -210,6 +210,15 @@ public abstract class TestBase {
       .delete(storageUrl(endpoint));
   }
 
+  Response patchData(String endpoint, String id, String input, Headers headers) throws MalformedURLException {
+    return given()
+      .pathParam("id", id)
+      .headers(headers)
+      .contentType(ContentType.JSON)
+      .body(input)
+      .patch(storageUrl(endpoint));
+  }
+
   void callAuditOutboxApi(Headers headers) throws MalformedURLException {
     given()
       .headers(headers)

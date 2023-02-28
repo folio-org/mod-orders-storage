@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 
 public class OrdersAPITest extends TestBase {
-  private final Logger logger = LogManager.getLogger(OrdersAPITest.class);
+  private static final Logger log = LogManager.getLogger();
 
   private final String poLineSample = getFile("data/po-lines/81-1_pending_fomat-other.json");
   private final String poLineSample2 = getFile("data/po-lines/52590-1_pending_pe_mix.json");
@@ -65,32 +65,32 @@ public class OrdersAPITest extends TestBase {
       String userId = UUID.randomUUID().toString();
       Headers headers = getDikuTenantHeaders(userId);
 
-      logger.info("--- mod-orders-storage orders test: Creating Purchase order 1...");
+      log.info("--- mod-orders-storage orders test: Creating Purchase order 1...");
       // assign 2 units
       purchaseOrderSample.getAcqUnitIds().add(acqUnitId1);
       purchaseOrderSample.getAcqUnitIds().add(acqUnitId2);
       purchaseOrderSampleId = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample).encode(), headers);
 
       expectedOrders.put(purchaseOrderSampleId, purchaseOrderSample);
-      logger.info("--- mod-orders-storage orders test: Creating Purchase order 2...");
+      log.info("--- mod-orders-storage orders test: Creating Purchase order 2...");
       // assign 1 unit
       purchaseOrderSample2.getAcqUnitIds().add(acqUnitId1);
       purchaseOrderSampleId2 = createEntity(PURCHASE_ORDER.getEndpoint(), JsonObject.mapFrom(purchaseOrderSample2).encode(), headers);
 
       expectedOrders.put(purchaseOrderSampleId2, purchaseOrderSample2);
-      logger.info("--- mod-orders-storage orders test: Creating Purchase order without PoLines...");
+      log.info("--- mod-orders-storage orders test: Creating Purchase order without PoLines...");
       purchaseOrderWithoutPOLinesId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, headers);
       expectedOrders.put(purchaseOrderWithoutPOLinesId, new JsonObject(purchaseOrderWithoutPOLines).mapTo(PurchaseOrder.class));
       verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), CREATED_ORDERS_QUANTITY);
 
-      logger.info("--- mod-orders-storage orders test: Creating PoLine 1...");
+      log.info("--- mod-orders-storage orders test: Creating PoLine 1...");
       poLineSampleId = createEntity(PO_LINE.getEndpoint(), poLineSample, headers);
-      logger.info("--- mod-orders-storage orders test: Creating PoLine 2 ...");
+      log.info("--- mod-orders-storage orders test: Creating PoLine 2 ...");
       poLineSampleId2 = createEntity(PO_LINE.getEndpoint(), poLineSample2, headers);
       verifyCollectionQuantity(PO_LINE.getEndpoint(), CREATED_PO_LINES_QUANTITY);
 
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities conformity... ");
+      log.info("--- mod-orders-storage Orders API test: Verifying entities conformity... ");
       List<PurchaseOrder> allActualOrders = getViewCollection(ORDERS_ENDPOINT);
       assertThat(allActualOrders, hasSize(expectedOrders.size()));
       allActualOrders.forEach(o -> {
@@ -98,17 +98,17 @@ public class OrdersAPITest extends TestBase {
         verifyOrdersConformity(o, expectedOrders.get(o.getId()));
       });
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities limitation... ");
+      log.info("--- mod-orders-storage Orders API test: Verifying entities limitation... ");
       List<PurchaseOrder> allActualOrdersWithLimit = getViewCollection(ORDERS_ENDPOINT + "?limit=1");
       assertThat(allActualOrdersWithLimit, hasSize(1));
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags... ");
+      log.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags... ");
       List<PurchaseOrder> ordersWithTag = getViewCollection(ORDERS_ENDPOINT + "?query=tags.tagList=important sortBy dateOrdered/sort.ascending");
 
       assertThat(ordersWithTag, hasSize(1));
       assertThat("important", isIn(ordersWithTag.get(0).getTags().getTagList()));
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags, sort.descending... ");
+      log.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags, sort.descending... ");
       List<PurchaseOrder> pendingOrdersWithCreatedDateDescending = getViewCollection(ORDERS_ENDPOINT + "?lang=en&limit=30&offset=0&query=workflowStatus==Pending sortBy createdDate/sort.descending");
 
       assertThat(pendingOrdersWithCreatedDateDescending, hasSize(3));
@@ -118,13 +118,13 @@ public class OrdersAPITest extends TestBase {
       assertThat(pendingOrdersWithCreatedDateAscending, hasSize(3));
       pendingOrdersWithCreatedDateAscending.forEach(order -> assertEquals("Pending", order.getWorkflowStatus().value()));
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by PO and POLine fields... ");
+      log.info("--- mod-orders-storage Orders API test: Verifying entities filtering by PO and POLine fields... ");
       List<PurchaseOrder> filteredByPoAndP0LineFields = getViewCollection(ORDERS_ENDPOINT + "?query=workflowStatus==Pending AND orderType==One-Time");
       assertThat(filteredByPoAndP0LineFields, hasSize(2));
       assertThat(filteredByPoAndP0LineFields.get(0).getWorkflowStatus(), is(WorkflowStatus.PENDING));
       assertThat(filteredByPoAndP0LineFields.get(0).getOrderType(), is(PurchaseOrder.OrderType.ONE_TIME));
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by Acquisitions unit... ");
+      log.info("--- mod-orders-storage Orders API test: Verifying entities filtering by Acquisitions unit... ");
       String acqUnitQuery = "?query=acqUnitIds=" + acqUnitId1;
       List<PurchaseOrder> filteredByUnit = getViewCollection(ORDERS_ENDPOINT + acqUnitQuery);
       // Only two PO's have assignments to acquisition unit
@@ -134,7 +134,7 @@ public class OrdersAPITest extends TestBase {
       filteredByUnit = getViewCollection(PURCHASE_ORDER.getEndpoint() + acqUnitQuery);
       verifyExpectedOrders(filteredByUnit, purchaseOrderSampleId, purchaseOrderSampleId2);
 
-      logger.info("--- mod-orders-storage Orders API test: Verifying entities filtering by empty acquisitions units... ");
+      log.info("--- mod-orders-storage Orders API test: Verifying entities filtering by empty acquisitions units... ");
       acqUnitQuery = "?query=acqUnitIds==[]";
       filteredByUnit = getViewCollection(ORDERS_ENDPOINT + acqUnitQuery);
       // Only two PO's have assignments to acquisition unit
@@ -159,10 +159,10 @@ public class OrdersAPITest extends TestBase {
       checkOrderLineEventContent(sendCreatePoLineEvents.get(0), OrderLineAuditEvent.Action.CREATE);
       checkOrderLineEventContent(sendCreatePoLineEvents.get(1), OrderLineAuditEvent.Action.CREATE);
     } catch (Exception e) {
-      logger.error("--- mod-orders-storage-test: orders API ERROR: " + e.getMessage(), e);
+      log.error("--- mod-orders-storage-test: orders API ERROR: " + e.getMessage(), e);
       fail(e.getMessage());
     } finally {
-      logger.info("--- mod-orders-storage orders test: Clean-up PO lines, orders and acq units...");
+      log.info("--- mod-orders-storage orders test: Clean-up PO lines, orders and acq units...");
       // PO lines and PO
       deleteTitles(poLineSampleId);
       deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineSampleId);
@@ -174,7 +174,7 @@ public class OrdersAPITest extends TestBase {
   }
 
   @Test
-  public void testUpdateOrder() throws MalformedURLException {
+  public void testUpdatePendingOrder() throws MalformedURLException {
     String userId = UUID.randomUUID().toString();
     Headers headers = getDikuTenantHeaders(userId);
     String orderId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, headers);
@@ -191,6 +191,41 @@ public class OrdersAPITest extends TestBase {
     deleteData(PURCHASE_ORDER.getEndpointWithId(), orderId);
   }
 
+  @Test
+  public void testOpenOrder() throws MalformedURLException {
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
+    String orderId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, headers);
+    PurchaseOrder openOrder = (new JsonObject(purchaseOrderWithoutPOLines)).mapTo(PurchaseOrder.class);
+    openOrder.setWorkflowStatus(WorkflowStatus.OPEN);
+    String orderString = JsonObject.mapFrom(openOrder).encode();
+    putData("/orders-storage/purchase-orders/{id}", orderId, orderString, headers)
+      .then()
+      .statusCode(204);
+
+    // we have 1 created order, 1 edited order so 2 events should be sent
+    List<String> sentCreateOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 2, userId);
+    Assertions.assertEquals(2, sentCreateOrderEvents.size());
+    checkOrderEventContent(sentCreateOrderEvents.get(0), OrderAuditEvent.Action.CREATE);
+    checkOrderEventContent(sentCreateOrderEvents.get(1), OrderAuditEvent.Action.EDIT);
+
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), orderId);
+  }
+
+  @Test
+  public void testFailUpdateOpenOrder() throws MalformedURLException {
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getDikuTenantHeaders(userId);
+    String orderId = UUID.randomUUID().toString();
+    PurchaseOrder openOrder = new PurchaseOrder()
+      .withId(orderId)
+      .withWorkflowStatus(WorkflowStatus.OPEN);
+    String orderString = JsonObject.mapFrom(openOrder).encode();
+    putData("/orders-storage/purchase-orders/{id}", orderId, orderString, headers)
+      .then()
+      .statusCode(404);
+  }
+
   private void verifyExpectedOrders(List<PurchaseOrder> filteredOrders, String... poIds) {
     assertThat(filteredOrders, hasSize(poIds.length));
 
@@ -203,7 +238,7 @@ public class OrdersAPITest extends TestBase {
 
   @Test
   public void testGetEntitiesWithInvalidCQLQuery() throws MalformedURLException {
-    logger.info("--- mod-orders-storage orders test: Invalid CQL query");
+    log.info("--- mod-orders-storage orders test: Invalid CQL query");
     testInvalidCQLQuery(ORDERS_ENDPOINT + "?query=invalid-query");
   }
 

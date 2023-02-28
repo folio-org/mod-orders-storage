@@ -16,8 +16,7 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public class AuditOutboxAPI implements OrdersStorageAuditOutbox {
-
-  private static final Logger logger = LogManager.getLogger(AuditOutboxAPI.class);
+  private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private AuditOutboxService auditOutboxService;
@@ -31,7 +30,7 @@ public class AuditOutboxAPI implements OrdersStorageAuditOutbox {
     auditOutboxService.processOutboxEventLogs(okapiHeaders)
       .onSuccess(res -> asyncResultHandler.handle(Future.succeededFuture(Response.status(Response.Status.OK).build())))
       .onFailure(cause -> {
-        logger.warn("Processing of outbox events table has been failed", cause);
+        log.warn("Processing of outbox events table has failed", cause);
         asyncResultHandler.handle(Future.failedFuture(cause));
       });
   }

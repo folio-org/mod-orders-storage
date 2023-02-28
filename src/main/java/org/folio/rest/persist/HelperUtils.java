@@ -35,8 +35,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 public class HelperUtils {
-  private static final Logger log = LogManager.getLogger(HelperUtils.class);
-
+  private static final Logger log = LogManager.getLogger();
   private static final Pattern orderBy = Pattern.compile("(?<=ORDER BY).*?(?=$|LIMIT.*$|OFFSET.*$)");
 
   public static final String JSONB = "jsonb";
@@ -60,10 +59,10 @@ public class HelperUtils {
       postgresClient.get(queryHolder.getTable(), entitiesMetadataHolder.getClazz(), JSONB, queryHolder.buildCQLQuery(), true, false, null, distinctOn,
         reply -> processDbReply(entitiesMetadataHolder, asyncResultHandler, respond500, respond400, reply));
     } catch (CQLQueryValidationException e) {
-      log.error(e.getMessage(), e);
+      log.error("CQLQueryValidationException in getEntitiesCollectionWithDistinctOn", e);
       asyncResultHandler.handle(response(e.getMessage(), respond400, respond500));
     } catch (Exception e) {
-      log.error(e.getMessage(), e);
+      log.error("Error in getEntitiesCollectionWithDistinctOn", e);
       asyncResultHandler.handle(response(e.getMessage(), respond500, respond500));
     }
   }
@@ -98,10 +97,11 @@ public class HelperUtils {
         setTotalRecordsMethod.invoke(collection, totalRecords);
         asyncResultHandler.handle(response(collection, respond200, respond500));
       } else {
+        log.error("processDbReply - request failed", reply.cause());
         asyncResultHandler.handle(response(reply.cause().getLocalizedMessage(), respond400, respond500));
       }
     } catch (Exception e) {
-      log.error(e.getMessage(), e);
+      log.error("Error in processDbReply", e);
       asyncResultHandler.handle(response(e.getMessage(), respond500, respond500));
     }
   }
@@ -110,7 +110,7 @@ public class HelperUtils {
     try {
       return entitiesMetadataHolder.getRespond500WithTextPlainMethod();
     } catch (Exception e) {
-      log.error(e.getMessage(), e);
+      log.error(e);
       asyncResultHandler.handle(response(e.getMessage(), null, null));
       return null;
     }
@@ -120,7 +120,7 @@ public class HelperUtils {
     try {
       return entitiesMetadataHolder.getRespond400WithTextPlainMethod();
     } catch (Exception e) {
-      log.error(e.getMessage(), e);
+      log.error(e);
       asyncResultHandler.handle(response(e.getMessage(), null, null));
       return null;
     }

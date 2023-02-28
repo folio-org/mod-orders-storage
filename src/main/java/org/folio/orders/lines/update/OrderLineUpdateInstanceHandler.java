@@ -1,5 +1,7 @@
 package org.folio.orders.lines.update;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
+  private static final Logger log = LogManager.getLogger();
 
   private final OrderLineUpdateInstanceStrategyResolver orderLineUpdateInstanceStrategyResolver;
 
@@ -18,6 +21,7 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
 
     switch (storagePoLine.getOrderFormat()) {
     case P_E_MIX:
+      log.debug("OrderLineUpdateInstanceHandler.handle P_E_MIX, poLineId={}", storagePoLine.getId());
       return orderLineUpdateInstanceStrategyResolver
         .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
         .updateInstance(holder, context)
@@ -25,15 +29,20 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
           .resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value()))
           .updateInstance(holder, context));
     case ELECTRONIC_RESOURCE:
+      log.debug("OrderLineUpdateInstanceHandler.handle ELECTRONIC_RESOURCE, poLineId={}",
+        storagePoLine.getId());
       return orderLineUpdateInstanceStrategyResolver
         .resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value()))
         .updateInstance(holder, context);
     case OTHER:
     case PHYSICAL_RESOURCE:
+      log.debug("OrderLineUpdateInstanceHandler.handle OTHER|PHYSICAL_RESOURCE, poLineId={}",
+        storagePoLine.getId());
       return orderLineUpdateInstanceStrategyResolver
         .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
         .updateInstance(holder, context);
     default:
+      log.debug("OrderLineUpdateInstanceHandler.handle - no order format, poLineId={}", storagePoLine.getId());
       return Future.succeededFuture(null);
     }
   }

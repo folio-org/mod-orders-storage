@@ -40,12 +40,11 @@ public final class TestConfig {
 
     final DeploymentOptions opt = new DeploymentOptions().setConfig(conf);
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
-    vertx.deployVerticle(RestVerticle.class.getName(), opt, res -> {
-      if(res.succeeded()) {
-        deploymentComplete.complete(res.result());
-      }
-      else {
-        deploymentComplete.completeExceptionally(res.cause());
+    vertx.deployVerticle(RestVerticle.class.getName(), opt, ar -> {
+      if (ar.succeeded()) {
+        deploymentComplete.complete(ar.result());
+      } else {
+        deploymentComplete.completeExceptionally(ar.cause());
       }
     });
     deploymentComplete.get(60, TimeUnit.SECONDS);

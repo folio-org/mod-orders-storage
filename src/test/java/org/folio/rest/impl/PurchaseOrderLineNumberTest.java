@@ -23,8 +23,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 
 public class PurchaseOrderLineNumberTest extends TestBase {
-
-  private final Logger logger = LogManager.getLogger(PurchaseOrderLineNumberTest.class);
+  private static final Logger log = LogManager.getLogger();
 
   private static final String PO_ENDPOINT = "/orders-storage/purchase-orders";
   private static final String PO_LINE_NUMBER_ENDPOINT = "/orders-storage/po-line-number";
@@ -39,37 +38,37 @@ public class PurchaseOrderLineNumberTest extends TestBase {
   public void testSequenceFlow() throws MalformedURLException {
     String sampleId = null;
     try {
-      logger.info("--- mod-orders-storage PO test: Testing of environment on Sequence support");
+      log.info("--- mod-orders-storage PO test: Testing of environment on Sequence support");
       testSequenceSupport();
 
-      logger.info("--- mod-orders-storage PO test: Creating purchase order/POL number sequence ... ");
+      log.info("--- mod-orders-storage PO test: Creating purchase order/POL number sequence ... ");
       String purchaseOrderSample = getFile(PURCHASE_ORDER.getSampleFileName());
       Response response = postData(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
 
-      logger.info("--- mod-orders-storage PO test: Testing 10 POL numbers retrieving from 1 to 10 for existed PO ... ");
+      log.info("--- mod-orders-storage PO test: Testing 10 POL numbers retrieving from 1 to 10 for existed PO ... ");
       sampleId = response.then().extract().path("id");
       testGetPoLineNumbersForExistedPO(1, sampleId, 10);
 
-      logger.info("--- mod-orders-storage PO test: Testing 20 POL numbers retrieving from 11 to 30 for existed PO ... ");
+      log.info("--- mod-orders-storage PO test: Testing 20 POL numbers retrieving from 11 to 30 for existed PO ... ");
       sampleId = response.then().extract().path("id");
       testGetPoLineNumbersForExistedPO(11, sampleId, 20);
 
-      logger.info("--- mod-orders-storage PO test: Testing POL numbers retrieving for non-existed PO ... ");
+      log.info("--- mod-orders-storage PO test: Testing POL numbers retrieving for non-existed PO ... ");
       testGetPoLineNumberForNonExistedPO("non-existed-po-id");
 
-      logger.info("--- mod-orders-storage PO test: Editing purchase order with ID: " + sampleId);
+      log.info("--- mod-orders-storage PO test: Editing purchase order with ID: " + sampleId);
       testPOEdit(purchaseOrderSample, sampleId);
 
-      logger.info("--- mod-orders-storage PO test: Verification/confirming of sequence deletion ...");
+      log.info("--- mod-orders-storage PO test: Verification/confirming of sequence deletion ...");
       testGetPoLineNumberForNonExistedPO(purchaseOrderSample);
 
-      logger.info("--- mod-orders-storage PO test: Testing update PO with already deleted POL numbers sequence ...");
+      log.info("--- mod-orders-storage PO test: Testing update PO with already deleted POL numbers sequence ...");
       testPOEdit(purchaseOrderSample, sampleId);
 
     } catch (Exception e) {
-      logger.error(String.format("--- mod-orders-storage-test: %s API ERROR: %s", PURCHASE_ORDER.name(), e.getMessage()));
+      log.error(String.format("--- mod-orders-storage-test: %s API ERROR: %s", PURCHASE_ORDER.name(), e.getMessage()));
     }  finally {
-      logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", PURCHASE_ORDER.name(), PURCHASE_ORDER.name(), sampleId));
+      log.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", PURCHASE_ORDER.name(), PURCHASE_ORDER.name(), sampleId));
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), sampleId);
     }
   }
@@ -128,12 +127,12 @@ public class PurchaseOrderLineNumberTest extends TestBase {
     CompletableFuture<RowSet<Row>> future = new CompletableFuture<>();
     RowSet<Row> rowSet = null;
     try {
-      client.select(query, result -> {
-        if(result.succeeded()) {
-          future.complete(result.result());
+      client.select(query, ar -> {
+        if (ar.succeeded()) {
+          future.complete(ar.result());
         }
         else {
-          future.completeExceptionally(result.cause());
+          future.completeExceptionally(ar.cause());
         }
       });
       rowSet = future.get(10, TimeUnit.SECONDS);
