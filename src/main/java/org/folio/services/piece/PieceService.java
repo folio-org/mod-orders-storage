@@ -93,7 +93,8 @@ public class PieceService {
           log.error("updatePieces(poLineTx, replaceInstanceRef, client) failed, poLineId={}",
             poLineTx.getEntity().getId(), ar.cause());
         } else {
-          log.debug("updatePieces(poLineTx, replaceInstanceRef, client) complete");
+          log.debug("updatePieces(poLineTx, replaceInstanceRef, client) complete, poLineId={}",
+            poLineTx.getEntity().getId());
         }
       });
   }
