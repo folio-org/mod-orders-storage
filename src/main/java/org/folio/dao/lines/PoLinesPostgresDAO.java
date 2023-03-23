@@ -34,7 +34,7 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
         promise.complete(lines);
       })
       .onFailure(t -> {
-        log.error("getPoLines failed, criterion={}", criterion.toString(), t);
+        log.error("getPoLines failed, criterion={}", criterion, t);
         handleFailure(promise, t);
       });
     return promise.future();
