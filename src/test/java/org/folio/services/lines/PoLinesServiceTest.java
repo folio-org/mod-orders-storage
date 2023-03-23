@@ -89,12 +89,12 @@ public class PoLinesServiceTest {
     PoLine poLine = new PoLine().withPurchaseOrderId(poID).withPoLineNumber("1000-" + expIndex);
     poLines.add(poLine);
 
-    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    Integer index = poLinesService.getLinesLastSequence(poID, context, okapiHeaders).result();
+    Integer index = poLinesService.getLastLineNumber(poID, conn).result();
 
     assertEquals(expIndex, index.intValue());
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test
@@ -107,12 +107,12 @@ public class PoLinesServiceTest {
     PoLine poLine4 = new PoLine().withPurchaseOrderId(poID).withPoLineNumber("1000-5");
     List<PoLine> poLines = Stream.of(poLine1, poLine2, poLine3, poLine4).collect(Collectors.toList());
 
-    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    Integer index = poLinesService.getLinesLastSequence(poID, context, okapiHeaders).result();
+    Integer index = poLinesService.getLastLineNumber(poID, conn).result();
 
     assertEquals(expIndex, index.intValue());
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test
@@ -125,12 +125,12 @@ public class PoLinesServiceTest {
     PoLine poLine4 = new PoLine().withPurchaseOrderId(poID).withPoLineNumber("1000-5");
     List<PoLine> poLines = Stream.of(poLine1, poLine2, poLine3, poLine4).collect(Collectors.toList());
 
-    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    Integer index = poLinesService.getLinesLastSequence(poID, context, okapiHeaders).result();
+    Integer index = poLinesService.getLastLineNumber(poID, conn).result();
 
     assertEquals(expIndex, index.intValue());
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test
@@ -140,12 +140,12 @@ public class PoLinesServiceTest {
     PoLine poLine1 = new PoLine().withPurchaseOrderId(poID).withPoLineNumber("1000-");
     List<PoLine> poLines = Stream.of(poLine1).collect(Collectors.toList());
 
-    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    Integer index = poLinesService.getLinesLastSequence(poID, context, okapiHeaders).result();
+    Integer index = poLinesService.getLastLineNumber(poID, conn).result();
 
     assertEquals(expIndex, index.intValue());
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test
@@ -157,26 +157,26 @@ public class PoLinesServiceTest {
     PoLine poLine4 = new PoLine().withPurchaseOrderId(poID).withPoLineNumber("1000-5");
     List<PoLine> expPoLines = Stream.of(poLine1, poLine2, poLine3, poLine4).collect(Collectors.toList());
 
-    doReturn(Future.succeededFuture(expPoLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    doReturn(Future.succeededFuture(expPoLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    List<PoLine> actLines = poLinesService.getPoLinesByOrderId(poID, context, okapiHeaders).result();
+    List<PoLine> actLines = poLinesService.getPoLinesByOrderId(poID, conn).result();
 
     assertEquals(expPoLines, actLines);
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test
   public void shouldFailedWhenRetrievePoLines() {
     String poID = UUID.randomUUID().toString();
     doReturn(failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "badRequestMessage")))
-      .when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+      .when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    Future<List<PoLine>> f = poLinesService.getPoLinesByOrderId(poID, context, okapiHeaders);
+    Future<List<PoLine>> f = poLinesService.getPoLinesByOrderId(poID, conn);
 
     assertThat(f.failed(), is(true));
     HttpException thrown = (HttpException)f.cause();
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), thrown.getCode());
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test
@@ -187,26 +187,26 @@ public class PoLinesServiceTest {
     PoLine poLine = new PoLine().withPurchaseOrderId(poID).withPoLineNumber("1000-" + expIndex);
     poLines.add(poLine);
 
-    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    List<PoLine> actPoLines = poLinesService.getPoLinesByLineIds(List.of(poID), context, okapiHeaders).result();
+    List<PoLine> actPoLines = poLinesService.getPoLinesByLineIdsByChunks(List.of(poID), conn).result();
 
     assertEquals(poLines, actPoLines);
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test
   public void shouldFailedWhenRetrievePoLinesIsFailedInTheDAOLayer() {
     String poID = UUID.randomUUID().toString();
     doReturn(failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), "notFound")))
-      .when(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+      .when(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
 
-    Future<List<PoLine>> f = poLinesService.getPoLinesByLineIds(List.of(poID), context, okapiHeaders);
+    Future<List<PoLine>> f = poLinesService.getPoLinesByLineIdsByChunks(List.of(poID), conn);
 
     assertThat(f.failed(), is(true));
     HttpException thrown = (HttpException)f.cause();
     assertEquals(Response.Status.NOT_FOUND.getStatusCode(), thrown.getCode());
-    verify(poLinesDAO).getPoLines(any(Criterion.class), any(DBClient.class));
+    verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
 
   @Test

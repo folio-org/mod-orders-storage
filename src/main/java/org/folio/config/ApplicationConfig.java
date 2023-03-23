@@ -20,7 +20,6 @@ import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 import org.folio.orders.lines.update.OrderLinePatchOperationService;
-import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.orders.lines.update.OrderLinePatchOperationHandlerResolver;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHandler;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategy;
@@ -99,13 +98,8 @@ public class ApplicationConfig {
     return new OrderLinePatchOperationService(operationHandlerResolver, poLinesService);
   }
 
-  @Bean PoLineNumbersService poLineNumbersService(OrderSequenceRequestBuilder orderSequenceBuilder, PostgresClientFactory pgClientFactory) {
-    return new PoLineNumbersService(orderSequenceBuilder, pgClientFactory);
-  }
-
-  @Bean
-  OrderSequenceRequestBuilder orderSequenceService() {
-    return new OrderSequenceRequestBuilder();
+  @Bean PoLineNumbersService poLineNumbersService(PoLinesService poLinesService) {
+    return new PoLineNumbersService(poLinesService);
   }
 
   @Bean

@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
 
@@ -23,19 +24,19 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
   private static final Logger log = LogManager.getLogger();
 
   @Override
-  public Future<List<PoLine>> getPoLines(Criterion criterion, DBClient client) {
+  public Future<List<PoLine>> getPoLines(Criterion criterion, Conn conn) {
     log.trace("getPoLines, criterion={}", criterion);
     Promise<List<PoLine>> promise = Promise.promise();
-    client.getPgClient().get(PO_LINE_TABLE, PoLine.class, criterion, false, ar -> {
-      if (ar.failed()) {
-        log.error("getPoLines failed, criterion={}", criterion.toString(), ar.cause());
-        handleFailure(promise, ar);
-      } else {
+    conn.get(PO_LINE_TABLE, PoLine.class, criterion, false)
+      .onSuccess(results -> {
         log.trace("getPoLines success, criterion={}", criterion);
-        List<PoLine> budgets = ar.result().getResults();
-        promise.complete(budgets);
-      }
-    });
+        List<PoLine> lines = results.getResults();
+        promise.complete(lines);
+      })
+      .onFailure(t -> {
+        log.error("getPoLines failed, criterion={}", criterion.toString(), t);
+        handleFailure(promise, t);
+      });
     return promise.future();
   }
 
@@ -61,18 +62,19 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
   }
 
   @Override
-  public Future<Integer> updatePoLines(String sql, DBClient client) {
+  public Future<Integer> updatePoLines(String sql, Conn conn) {
     log.debug("updatePoLines, sql={}", sql);
     Promise<Integer> promise = Promise.promise();
-    client.getPgClient().execute(sql, ar -> {
-      if (ar.failed()) {
-        log.error("updatePoLines failed, sql={}", sql, ar.cause());
-        handleFailure(promise, ar);
-      } else {
-        log.debug("updatePoLines success, sql={}", sql);
-        promise.complete(ar.result().rowCount());
-      }
-    });
+    conn.execute(sql)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("updatePoLines failed, sql={}", sql, ar.cause());
+          handleFailure(promise, ar);
+        } else {
+          log.debug("updatePoLines success, sql={}", sql);
+          promise.complete(ar.result().rowCount());
+        }
+      });
     return promise.future();
   }
 }

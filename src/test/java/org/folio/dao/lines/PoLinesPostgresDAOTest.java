@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.net.MalformedURLException;
@@ -23,6 +24,7 @@ import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.TenantJob;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Criteria.Criteria;
@@ -55,6 +57,8 @@ public class PoLinesPostgresDAOTest extends TestBase {
   private PoLinesPostgresDAO poLinesPostgresDAO = new PoLinesPostgresDAO();
   @Mock
   private DBClient client;
+  @Mock
+  private Conn conn;
   @Mock
   private PostgresClient postgresClient;
   @Mock
@@ -92,7 +96,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
     Criterion criterion = new Criterion().addCriterion(new Criteria().addField("id").setOperation("=").setVal(id).setJSONB(false));
     testContext.assertComplete(promise1.future()
       .compose(aVoid -> promise2.future())
-      .compose(o -> poLinesPostgresDAO.getPoLines(criterion, client)))
+      .compose(o -> client.getPgClient().withConn(conn -> poLinesPostgresDAO.getPoLines(criterion, conn))))
       .onComplete(ar -> {
         List<PoLine> poLines = ar.result();
         testContext.verify(() -> {
@@ -177,16 +181,12 @@ public class PoLinesPostgresDAOTest extends TestBase {
   @Test
   void getTransactionsWithGenericDatabaseExceptionWhenRetrievePoLines(VertxTestContext testContext) {
     String id = UUID.randomUUID().toString();
-    when(client.getPgClient()).thenReturn(postgresClient);
     Criterion criterion = new Criterion().addCriterion(new Criteria().addField("id").setOperation("=").setVal(id).setJSONB(false));
 
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<Results<PoLine>>> handler = invocation.getArgument(4);
-      handler.handle(Future.failedFuture(new HttpException(500, "Error")));
-      return null;
-    }).when(postgresClient).get(eq(PO_LINE_TABLE), eq(PoLine.class), eq(criterion), eq(false), any(Handler.class));
+    doReturn(Future.failedFuture(new HttpException(500, "Error")))
+      .when(conn).get(eq(PO_LINE_TABLE), eq(PoLine.class), eq(criterion), eq(false));
 
-    testContext.assertFailure(poLinesPostgresDAO.getPoLines(criterion, client))
+    testContext.assertFailure(poLinesPostgresDAO.getPoLines(criterion, conn))
       .onComplete(ar -> {
         HttpException exception = (HttpException) ar.cause();
         testContext.verify(() -> {
@@ -203,11 +203,12 @@ public class PoLinesPostgresDAOTest extends TestBase {
     PoLine poLine = new PoLine().withId(id);
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
-    client.getPgClient().save(PO_LINE_TABLE, id, poLine, event -> {
+    PostgresClient pgClient = client.getPgClient();
+    pgClient.save(PO_LINE_TABLE, id, poLine, event -> {
       promise1.complete();
     });
     Promise<Void> promise2 = Promise.promise();
-    client.getPgClient().save(PO_LINE_TABLE, poLine, event -> {
+    pgClient.save(PO_LINE_TABLE, poLine, event -> {
       promise2.complete();
     });
     String sql = "UPDATE test_tenant_mod_orders_storage.po_line AS po_line SET jsonb = b.jsonb " +
@@ -215,7 +216,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
       "WHERE b.id::uuid = po_line.id;";
     testContext.assertComplete(promise1.future()
         .compose(aVoid -> promise2.future())
-        .compose(o -> poLinesPostgresDAO.updatePoLines(sql, client)))
+        .compose(o -> pgClient.withConn(conn -> poLinesPostgresDAO.updatePoLines(sql, conn))))
       .onComplete(ar -> {
         Integer numUpdLines = ar.result();
         testContext.verify(() -> {
@@ -235,14 +236,10 @@ public class PoLinesPostgresDAOTest extends TestBase {
       "FROM (VALUES  ('" + id +"', '" + JsonObject.mapFrom(poLine).encode() + "'::json)) AS b (id, jsonb) " +
       "WHERE b.id::uuid = po_line.id;";
 
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<Results<Integer>>> handler = invocation.getArgument(1);
-      handler.handle(Future.failedFuture(new HttpException(500, "Error")));
-      return null;
-    }).when(postgresClient).execute(any(String.class), any(Handler.class));
+    doReturn(Future.failedFuture(new HttpException(500, "Error")))
+      .when(conn).execute(any(String.class));
 
-
-    testContext.assertFailure(poLinesPostgresDAO.updatePoLines(sql, client))
+    testContext.assertFailure(poLinesPostgresDAO.updatePoLines(sql, conn))
       .onComplete(ar -> {
         HttpException exception = (HttpException) ar.cause();
         testContext.verify(() -> {

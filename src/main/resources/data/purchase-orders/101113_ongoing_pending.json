@@ -2,6 +2,7 @@
   "id": "55b97a4a-6601-4488-84e1-8b0d47a3f523",
   "approved": false,
   "manualPo": false,
+  "nextPolNumber": 1,
   "orderType": "Ongoing",
   "poNumber": "101113",
   "reEncumber": false,

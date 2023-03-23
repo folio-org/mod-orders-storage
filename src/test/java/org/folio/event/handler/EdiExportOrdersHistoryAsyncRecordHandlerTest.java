@@ -1,5 +1,7 @@
 package org.folio.event.handler;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -11,14 +13,16 @@ import org.folio.TestUtils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+
+import org.folio.rest.persist.Conn;
+import org.folio.rest.persist.PostgresClient;
 import org.mockito.Mock;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
-import io.vertx.core.json.JsonObject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.apache.kafka.common.header.internals.RecordHeaders;
@@ -49,6 +53,12 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
   private ExportHistoryService exportHistoryService;
   @Mock
   private PoLinesService poLinesService;
+  @Mock
+  private DBClient dbClient;
+  @Mock
+  private PostgresClient pgClient;
+  @Mock
+  private Conn conn;
 
   @BeforeEach
   public void initMocks() {
@@ -93,26 +103,28 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       .withExportType("EDIFACT_ORDERS_EXPORT")
       .withExportedPoLineIds(List.of(lineId))
       .withExportDate(Calendar.getInstance().getTime());
-    RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes());
-    RecordHeaders recordHeaders = new RecordHeaders();
-    recordHeaders.add(header);
-    var consumerRecord = new ConsumerRecord("topic", 1, 1,
-              2, null, 1L, 1,1,
-          "key", Json.encode(exportHistory), recordHeaders);
-    var record = new KafkaConsumerRecordImpl(consumerRecord);
-    doReturn(Future.succeededFuture(exportHistory)).when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
+    doReturn(Future.succeededFuture(exportHistory))
+      .when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
     List<PoLine> poLines = List.of(new PoLine().withId(lineId));
-    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(Context.class), any(
-      Map.class));
-    doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(poLines), any(DBClient.class));
+    doReturn(Future.succeededFuture(poLines))
+      .when(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
+    doReturn(Future.succeededFuture(1))
+      .when(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());
+    doReturn(pgClient)
+      .when(dbClient).getPgClient();
+    doReturn(DIKU_TENANT)
+      .when(dbClient).getTenantId();
+    doAnswer(invocation -> {
+        Function<Conn, Future<ExportHistory>> f = invocation.getArgument(0);
+        return f.apply(conn);
+      })
+      .when(pgClient).withConn(any());
 
-    String actExpString = (String) handler.handle(record).result();
-    ExportHistory actExp = new JsonObject(actExpString).mapTo(ExportHistory.class);
+    handler.exportHistory(exportHistory, dbClient).result();
 
-    verify(poLinesService).getPoLinesByLineIds(eq(exportHistory.getExportedPoLineIds()), any(Context.class), any(Map.class));
-    verify(poLinesService).updatePoLines(eq(poLines), any(DBClient.class));
+    verify(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
+    verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());
 
-    assertEquals(exportHistory, actExp);
     assertEquals(exportHistory.getExportDate(), poLines.get(0).getLastEDIExportDate());
   }
 
