@@ -24,7 +24,7 @@ public class PoLineNumbersService {
   }
 
   /**
-   * Retrieves next po line number from sequence for order.
+   * Returns poLineNumbers new po line numbers for the order.
    */
   public Future<PoLineNumber> retrievePoLineNumber(String purchaseOrderId, int poLineNumbers, DBClient dbClient) {
     PostgresClient pgClient = dbClient.getPgClient();
