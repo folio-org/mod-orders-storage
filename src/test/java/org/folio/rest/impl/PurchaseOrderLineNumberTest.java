@@ -12,7 +12,6 @@ import java.util.Map;
 
 import org.folio.rest.jaxrs.model.PoLineNumber;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.Test;
 
 import io.restassured.response.Response;
@@ -47,7 +46,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       Response response = postData(PURCHASE_ORDER.getEndpoint(), data.encode());
       sampleId = response.then().extract().path("id");
       data.remove("nextPolNumber");
-      putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), sampleId, data.encode());
+      putData(PURCHASE_ORDER.getEndpointWithId(), sampleId, data.encode());
       testGetPoLineNumbersForExistedPO(1, sampleId, 1);
       PurchaseOrder po = getOrder(sampleId);
       assertEquals(po.getNextPolNumber().intValue(), 2);
@@ -92,7 +91,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
     catJSON.put("id", sampleId);
     catJSON.put("poNumber", "666666");
     catJSON.put("workflowStatus", "Open");
-    Response response = putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), sampleId, catJSON.toString());
+    Response response = putData(PURCHASE_ORDER.getEndpointWithId(), sampleId, catJSON.toString());
     response.then()
       .statusCode(204);
   }
@@ -127,7 +126,7 @@ public class PurchaseOrderLineNumberTest extends TestBase {
   }
 
   private PurchaseOrder getOrder(String purchaseOrderId) throws MalformedURLException {
-    Response response = getDataById(TestEntities.PURCHASE_ORDER.getEndpointWithId(), purchaseOrderId);
+    Response response = getDataById(PURCHASE_ORDER.getEndpointWithId(), purchaseOrderId);
     return response.then()
       .statusCode(200)
       .body("id", equalTo(purchaseOrderId))
