@@ -49,6 +49,7 @@ public class PoLineNumbersService {
         log.debug("retrievePoLineNumber: done, po {}", purchaseOrderId);
         return new PoLineNumber().withSequenceNumbers(sequenceNumbers);
       })
+      .onFailure(t -> log.error("retrievePoLineNumber: failed to retrieve number for po {}", purchaseOrderId, t))
     );
   }
 }

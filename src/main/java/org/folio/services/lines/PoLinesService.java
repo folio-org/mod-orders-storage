@@ -225,10 +225,10 @@ public class PoLinesService {
         .filter(Objects::nonNull)
         .map(this::defineIndex)
         .sorted()
-        .reduce((a, b) -> b).orElse(1);
+        .reduce((a, b) -> b).orElse(0);
       promise.complete(indexStr);
     } catch (Exception t) {
-      promise.complete(1);
+      promise.complete(0);
     }
     return promise.future();
   }

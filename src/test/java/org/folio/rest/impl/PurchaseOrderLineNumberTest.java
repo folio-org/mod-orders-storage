@@ -1,46 +1,65 @@
 package org.folio.rest.impl;
 
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.folio.rest.jaxrs.model.PoLineNumber;
-import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.Test;
 
 import io.restassured.response.Response;
-import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 
 public class PurchaseOrderLineNumberTest extends TestBase {
   private static final Logger log = LogManager.getLogger();
 
-  private static final String PO_ENDPOINT = "/orders-storage/purchase-orders";
   private static final String PO_LINE_NUMBER_ENDPOINT = "/orders-storage/po-line-number";
-  private static final String SEQUENCE_ID = "\"polNumber_8ad4b87b-9b47-4199-b0c3-5480745c6b41\"";
 
-  private static final String CREATE_SEQUENCE = "CREATE SEQUENCE " + SEQUENCE_ID;
-  private static final String SETVAL = "SELECT * FROM SETVAL('" + SEQUENCE_ID + "',13)";
-  private static final String NEXTVAL = "SELECT * FROM NEXTVAL('" + SEQUENCE_ID + "')";
-  private static final String DROP_SEQUENCE = "DROP SEQUENCE " + SEQUENCE_ID;
+  @Test
+  public void testCreatingNextPolNumberWhenCreatingOrder() throws MalformedURLException {
+    String sampleId = null;
+    try {
+      JsonObject data = new JsonObject(getFile(PURCHASE_ORDER.getSampleFileName()));
+      data.remove("nextPolNumber");
+      Response response = postData(PURCHASE_ORDER.getEndpoint(), data.encode());
+      sampleId = response.then().extract().path("id");
+      testGetPoLineNumbersForExistedPO(1, sampleId, 1);
+    }  finally {
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), sampleId);
+    }
+  }
+
+  @Test
+  public void testCreatingNextPolNumberWhenGettingNumber() throws MalformedURLException {
+    String sampleId = null;
+    try {
+      JsonObject data = new JsonObject(getFile(PURCHASE_ORDER.getSampleFileName()));
+      Response response = postData(PURCHASE_ORDER.getEndpoint(), data.encode());
+      sampleId = response.then().extract().path("id");
+      data.remove("nextPolNumber");
+      putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), sampleId, data.encode());
+      testGetPoLineNumbersForExistedPO(1, sampleId, 1);
+      PurchaseOrder po = getOrder(sampleId);
+      assertEquals(po.getNextPolNumber().intValue(), 2);
+    }  finally {
+      deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), sampleId);
+    }
+  }
 
   @Test
   public void testSequenceFlow() throws MalformedURLException {
     String sampleId = null;
     try {
-      log.info("--- mod-orders-storage PO test: Testing of environment on Sequence support");
-      testSequenceSupport();
-
       log.info("--- mod-orders-storage PO test: Creating purchase order/POL number sequence ... ");
       String purchaseOrderSample = getFile(PURCHASE_ORDER.getSampleFileName());
       Response response = postData(PURCHASE_ORDER.getEndpoint(), purchaseOrderSample);
@@ -59,14 +78,9 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       log.info("--- mod-orders-storage PO test: Editing purchase order with ID: " + sampleId);
       testPOEdit(purchaseOrderSample, sampleId);
 
-      log.info("--- mod-orders-storage PO test: Verification/confirming of sequence deletion ...");
-      testGetPoLineNumberForNonExistedPO(purchaseOrderSample);
-
-      log.info("--- mod-orders-storage PO test: Testing update PO with already deleted POL numbers sequence ...");
-      testPOEdit(purchaseOrderSample, sampleId);
-
     } catch (Exception e) {
       log.error(String.format("--- mod-orders-storage-test: %s API ERROR: %s", PURCHASE_ORDER.name(), e.getMessage()));
+      fail();
     }  finally {
       log.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", PURCHASE_ORDER.name(), PURCHASE_ORDER.name(), sampleId));
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), sampleId);
@@ -78,19 +92,9 @@ public class PurchaseOrderLineNumberTest extends TestBase {
     catJSON.put("id", sampleId);
     catJSON.put("poNumber", "666666");
     catJSON.put("workflowStatus", "Open");
-    Response response = putData(PO_ENDPOINT, sampleId, catJSON.toString());
+    Response response = putData(TestEntities.PURCHASE_ORDER.getEndpointWithId(), sampleId, catJSON.toString());
     response.then()
       .statusCode(204);
-  }
-
-  private void testSequenceSupport() {
-    execute(CREATE_SEQUENCE);
-    execute(SETVAL);
-    RowSet<Row> rs = execute(NEXTVAL);
-    execute(DROP_SEQUENCE);
-    long result = rs.iterator().next().getLong(0);//toJson().getJsonArray("results").getList().get(0).toString();
-    assertEquals(14, result);
-    execute(NEXTVAL);
   }
 
   private void testGetPoLineNumbersForExistedPO(int curNum, String purchaseOrderId, int poLineNumbersQuantity) throws MalformedURLException {
@@ -122,23 +126,11 @@ public class PurchaseOrderLineNumberTest extends TestBase {
       .getSequenceNumbers();
   }
 
-  private static RowSet<Row> execute(String query) {
-    PostgresClient client = PostgresClient.getInstance(Vertx.vertx());
-    CompletableFuture<RowSet<Row>> future = new CompletableFuture<>();
-    RowSet<Row> rowSet = null;
-    try {
-      client.select(query, ar -> {
-        if (ar.succeeded()) {
-          future.complete(ar.result());
-        }
-        else {
-          future.completeExceptionally(ar.cause());
-        }
-      });
-      rowSet = future.get(10, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      future.completeExceptionally(e);
-    }
-   return rowSet;
+  private PurchaseOrder getOrder(String purchaseOrderId) throws MalformedURLException {
+    Response response = getDataById(TestEntities.PURCHASE_ORDER.getEndpointWithId(), purchaseOrderId);
+    return response.then()
+      .statusCode(200)
+      .body("id", equalTo(purchaseOrderId))
+      .extract().as(PurchaseOrder.class);
   }
 }
