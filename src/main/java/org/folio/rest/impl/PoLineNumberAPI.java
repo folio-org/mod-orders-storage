@@ -5,7 +5,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.handler.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
@@ -15,7 +14,6 @@ import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.UuidUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.ws.rs.core.Response;
@@ -35,10 +33,6 @@ public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumbe
   @Override
   public void getOrdersStoragePoLineNumber(String purchaseOrderId, int poLineNumbers, String lang, Map<String, String> okapiHeaders,
      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    if (!UuidUtil.isUuid(purchaseOrderId)) {
-      asyncResultHandler.handle(buildErrorResponse(new HttpException(400, "Invalid UUID")));
-      return;
-    }
     DBClient client = new DBClient(vertxContext, okapiHeaders);
     poLineNumbersService.retrievePoLineNumber(purchaseOrderId, poLineNumbers, client)
       .onComplete(ar -> {

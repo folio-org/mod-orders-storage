@@ -66,14 +66,13 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
     log.debug("updatePoLines, sql={}", sql);
     Promise<Integer> promise = Promise.promise();
     conn.execute(sql)
-      .onComplete(ar -> {
-        if (ar.failed()) {
-          log.error("updatePoLines failed, sql={}", sql, ar.cause());
-          handleFailure(promise, ar);
-        } else {
-          log.debug("updatePoLines success, sql={}", sql);
-          promise.complete(ar.result().rowCount());
-        }
+      .onSuccess(result -> {
+        log.debug("updatePoLines success, sql={}", sql);
+        promise.complete(result.rowCount());
+      })
+      .onFailure(t -> {
+        log.error("updatePoLines failed, sql={}", sql, t);
+        handleFailure(promise, t);
       });
     return promise.future();
   }

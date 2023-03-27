@@ -11,6 +11,8 @@ import org.folio.dao.export.ExportHistoryPostgresRepository;
 import org.folio.dao.export.ExportHistoryRepository;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
+import org.folio.dao.order.OrderDAO;
+import org.folio.dao.order.OrderPostgresDAO;
 import org.folio.event.service.AuditEventProducer;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.kafka.KafkaConfig;
@@ -42,6 +44,11 @@ public class ApplicationConfig {
   @Bean
   PoLinesDAO poLinesDAO() {
     return new PoLinesPostgresDAO();
+  }
+
+  @Bean
+  OrderDAO orderDAO() {
+    return new OrderPostgresDAO();
   }
 
   @Bean
@@ -98,8 +105,8 @@ public class ApplicationConfig {
     return new OrderLinePatchOperationService(operationHandlerResolver, poLinesService);
   }
 
-  @Bean PoLineNumbersService poLineNumbersService(PoLinesService poLinesService) {
-    return new PoLineNumbersService(poLinesService);
+  @Bean PoLineNumbersService poLineNumbersService(OrderDAO orderDAO, PoLinesService poLinesService) {
+    return new PoLineNumbersService(orderDAO, poLinesService);
   }
 
   @Bean
