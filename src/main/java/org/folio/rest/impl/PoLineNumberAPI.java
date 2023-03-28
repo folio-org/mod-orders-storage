@@ -7,12 +7,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLineNumber;
+import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
-import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,8 @@ public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumbe
   @Override
   public void getOrdersStoragePoLineNumber(String purchaseOrderId, int poLineNumbers, String lang, Map<String, String> okapiHeaders,
      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    poLineNumbersService.retrievePoLineNumber(purchaseOrderId, poLineNumbers, tenantId)
+    DBClient client = new DBClient(vertxContext, okapiHeaders);
+    poLineNumbersService.retrievePoLineNumber(purchaseOrderId, poLineNumbers, client)
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("Could not retrieve po line number for orderId: {}", purchaseOrderId, ar.cause());

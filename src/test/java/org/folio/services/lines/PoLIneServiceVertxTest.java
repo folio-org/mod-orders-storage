@@ -18,6 +18,7 @@ import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.PostgresClient;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockitoAnnotations;
@@ -76,18 +77,20 @@ public class PoLIneServiceVertxTest extends TestBase {
       .withTitleOrPackage("Test ' title");
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
-    client.getPgClient().save(PO_LINE_TABLE, id, poLine, event -> {
+    PostgresClient pgClient = client.getPgClient();
+    pgClient.save(PO_LINE_TABLE, id, poLine, event -> {
       promise1.complete();
     });
     Promise<Void> promise2 = Promise.promise();
-    client.getPgClient().save(PO_LINE_TABLE, poLine, event -> {
+    pgClient.save(PO_LINE_TABLE, poLine, event -> {
       promise2.complete();
     });
     poLine.withLastEDIExportDate(new Date());
 
     testContext.assertComplete(promise1.future()
         .compose(aVoid -> promise2.future())
-        .compose(o -> poLinesService.updatePoLines(List.of(poLine), client)))
+        .compose(o -> pgClient.withConn(conn ->
+          poLinesService.updatePoLines(List.of(poLine), conn, client.getTenantId()))))
       .onComplete(ar -> {
         Integer numUpdLines = ar.result();
         testContext.verify(() -> {

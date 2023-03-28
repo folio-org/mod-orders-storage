@@ -1,6 +1,5 @@
 package org.folio.services.lines;
 
-import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
@@ -39,7 +38,6 @@ import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
 
 import io.vertx.core.CompositeFuture;
-import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -50,7 +48,7 @@ public class PoLinesService {
   private static final Logger log = LogManager.getLogger();
   private static final String POLINE_ID_FIELD = "poLineId";
 
-  private PoLinesDAO poLinesDAO;
+  private final PoLinesDAO poLinesDAO;
   private final AuditOutboxService auditOutboxService;
 
   public PoLinesService(PoLinesDAO poLinesDAO, AuditOutboxService auditOutboxService) {
@@ -58,14 +56,13 @@ public class PoLinesService {
     this.auditOutboxService = auditOutboxService;
   }
 
-  public Future<List<PoLine>> getPoLinesByOrderId(String purchaseOrderId, Context context, Map<String, String> headers) {
+  public Future<List<PoLine>> getPoLinesByOrderId(String purchaseOrderId, Conn conn) {
     Promise<List<PoLine>> promise = Promise.promise();
 
     Criterion criterion = new CriterionBuilder()
       .with("purchaseOrderId", purchaseOrderId)
       .build();
-    DBClient client = new DBClient(context, headers);
-    poLinesDAO.getPoLines(criterion, client)
+    poLinesDAO.getPoLines(criterion, conn)
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("Retrieve po lines failed, purchaseOrderId={}", purchaseOrderId, ar.cause());
@@ -165,7 +162,7 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<List<PoLine>> getPoLinesByLineIds(List<String> poLineIds, Context context, Map<String, String> headers) {
+  public Future<List<PoLine>> getPoLinesByLineIdsByChunks(List<String> poLineIds, Conn conn) {
     log.trace("getPoLinesByLineIds, poLineIds={}", poLineIds);
     if (CollectionUtils.isEmpty(poLineIds)) {
       return Future.succeededFuture(Collections.emptyList());
@@ -173,7 +170,7 @@ public class PoLinesService {
     Promise<List<PoLine>> promise = Promise.promise();
     List<String> uniqueIdList = poLineIds.stream().distinct().collect(toList());
     CompositeFuture.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ)
-                        .map(chunkIds -> getPoLinesChunkByLineIds(chunkIds, context, headers))
+                        .map(chunkIds -> getPoLinesByLineIds(chunkIds, conn))
                         .collect(toList()))
       .onComplete(ar -> {
         if (ar.succeeded()) {
@@ -191,19 +188,14 @@ public class PoLinesService {
     return promise.future();
   }
 
-  private Future<List<PoLine>> getPoLinesChunkByLineIds(List<String> lineIds, Context context, Map<String, String> headers) {
-    DBClient client = new DBClient(context, headers);
-    return getPoLinesByLineIds(lineIds, client);
-  }
-
-  private Future<List<PoLine>> getPoLinesByLineIds(List<String> lineIds, DBClient dbClient) {
+  private Future<List<PoLine>> getPoLinesByLineIds(List<String> lineIds, Conn conn) {
     Promise<List<PoLine>> promise = Promise.promise();
 
     CriterionBuilder criterionBuilder = new CriterionBuilder("OR");
     lineIds.forEach(id -> criterionBuilder.with("id", id));
 
     Criterion criterion = criterionBuilder.build();
-    poLinesDAO.getPoLines(criterion, dbClient)
+    poLinesDAO.getPoLines(criterion, conn)
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("getPoLinesByLineIds(lineIds, dbClient) failed, criterion={}", criterion, ar.cause());
@@ -215,28 +207,28 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Integer> updatePoLines(Collection<PoLine> poLines, DBClient client) {
-    String query = buildUpdatePoLineBatchQuery(poLines, client.getTenantId());
-    return poLinesDAO.updatePoLines(query, client);
+  public Future<Integer> updatePoLines(Collection<PoLine> poLines, Conn conn, String tenantId) {
+    String query = buildUpdatePoLineBatchQuery(poLines, tenantId);
+    return poLinesDAO.updatePoLines(query, conn);
   }
 
-  public Future<Integer> getLinesLastSequence(String purchaseOrderId, Context context, Map<String, String> headers) {
-    return getPoLinesByOrderId(purchaseOrderId, context, headers)
-                  .compose(this::getLinesLastSequence);
+  public Future<Integer> getLastLineNumber(String purchaseOrderId, Conn conn) {
+    return getPoLinesByOrderId(purchaseOrderId, conn)
+      .compose(this::getLastLineNumber);
   }
 
-  private Future<Integer> getLinesLastSequence(List<PoLine> poLines) {
+  private Future<Integer> getLastLineNumber(List<PoLine> poLines) {
     Promise<Integer> promise = Promise.promise();
     try {
       int indexStr = poLines.stream()
-                            .filter(poLine -> nonNull(poLine.getPoLineNumber()))
-                            .map(PoLine::getPoLineNumber)
-                            .map(this::defineIndex)
-                            .sorted()
-                            .reduce((a, b) -> b).orElse(1);
+        .map(PoLine::getPoLineNumber)
+        .filter(Objects::nonNull)
+        .map(this::defineIndex)
+        .sorted()
+        .reduce((a, b) -> b).orElse(0);
       promise.complete(indexStr);
     } catch (Exception t) {
-      promise.complete(1);
+      promise.complete(0);
     }
     return promise.future();
   }

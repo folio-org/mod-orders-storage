@@ -22,7 +22,7 @@ public abstract class BaseApi {
   }
 
   public Future<Response> buildOkResponse(Object body) {
-    return Future.succeededFuture(Response.ok(body).build());
+    return Future.succeededFuture(Response.ok(body, APPLICATION_JSON).build());
   }
 
   public Future<Response> buildErrorResponse(Throwable throwable) {
