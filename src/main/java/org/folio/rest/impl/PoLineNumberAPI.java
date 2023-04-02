@@ -31,7 +31,7 @@ public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumbe
 
   @Validate
   @Override
-  public void getOrdersStoragePoLineNumber(String purchaseOrderId, int poLineNumbers, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePoLineNumber(String purchaseOrderId, int poLineNumbers, Map<String, String> okapiHeaders,
      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     DBClient client = new DBClient(vertxContext, okapiHeaders);
     poLineNumbersService.retrievePoLineNumber(purchaseOrderId, poLineNumbers, client)

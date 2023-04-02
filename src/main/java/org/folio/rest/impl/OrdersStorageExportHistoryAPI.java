@@ -40,7 +40,7 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void getOrdersStorageExportHistory(int offset, int limit, String query, String lang,
+  public void getOrdersStorageExportHistory(String totalRecords, int offset, int limit, String query,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(EXPORT_HISTORY_TABLE, ExportHistory.class, ExportHistoryCollection.class,
                 query, offset, limit, okapiHeaders, vertxContext,
@@ -49,7 +49,7 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void postOrdersStorageExportHistory(String lang, ExportHistory entity,
+  public void postOrdersStorageExportHistory(ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     exportHistoryService.createExportHistory(entity, new DBClient(vertxContext.owner(), TenantTool.tenantId(okapiHeaders)))
       .onComplete(ar -> {
@@ -65,7 +65,7 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void getOrdersStorageExportHistoryById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageExportHistoryById(String id, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(EXPORT_HISTORY_TABLE, ExportHistory.class, id, okapiHeaders,vertxContext,
                    GetOrdersStorageExportHistoryByIdResponse.class, asyncResultHandler);
@@ -73,14 +73,14 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void deleteOrdersStorageExportHistoryById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageExportHistoryById(String id, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(EXPORT_HISTORY_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStorageExportHistoryByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void putOrdersStorageExportHistoryById(String id, String lang, ExportHistory entity,
+  public void putOrdersStorageExportHistoryById(String id, ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(EXPORT_HISTORY_TABLE, entity, id, okapiHeaders, vertxContext,
       OrdersStorageExportHistory.PutOrdersStorageExportHistoryByIdResponse.class, asyncResultHandler);

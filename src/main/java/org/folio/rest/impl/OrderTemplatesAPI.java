@@ -20,32 +20,32 @@ public class OrderTemplatesAPI implements OrdersStorageOrderTemplates {
 
   @Override
   @Validate
-  public void getOrdersStorageOrderTemplates(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getOrdersStorageOrderTemplates(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(ORDER_TEMPLATES_TABLE, OrderTemplate.class, OrderTemplateCollection.class, query, offset, limit, okapiHeaders, vertxContext,
       GetOrdersStorageOrderTemplatesResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void postOrdersStorageOrderTemplates(String lang, OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void postOrdersStorageOrderTemplates(OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.post(ORDER_TEMPLATES_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageOrderTemplatesResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void getOrdersStorageOrderTemplatesById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getOrdersStorageOrderTemplatesById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(ORDER_TEMPLATES_TABLE, OrderTemplate.class, id, okapiHeaders,vertxContext, GetOrdersStorageOrderTemplatesByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void deleteOrdersStorageOrderTemplatesById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void deleteOrdersStorageOrderTemplatesById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(ORDER_TEMPLATES_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStorageOrderTemplatesByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void putOrdersStorageOrderTemplatesById(String id, String lang, OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void putOrdersStorageOrderTemplatesById(String id, OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(ORDER_TEMPLATES_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageOrderTemplatesByIdResponse.class, asyncResultHandler);
   }
 }

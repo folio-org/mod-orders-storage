@@ -53,7 +53,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void getOrdersStoragePoLines(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePoLines(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(PO_LINE_TABLE, PoLine.class, PoLineCollection.class, query, offset, limit, okapiHeaders, vertxContext,
       OrdersStoragePoLines.GetOrdersStoragePoLinesResponse.class, asyncResultHandler);
@@ -61,7 +61,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void postOrdersStoragePoLines(String lang, PoLine poLine, Map<String, String> okapiHeaders,
+  public void postOrdersStoragePoLines(PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
@@ -109,7 +109,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void getOrdersStoragePoLinesById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePoLinesById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(PO_LINE_TABLE, PoLine.class, id, okapiHeaders, vertxContext, GetOrdersStoragePoLinesByIdResponse.class,
         asyncResultHandler);
@@ -117,7 +117,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void deleteOrdersStoragePoLinesById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStoragePoLinesById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
@@ -138,7 +138,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void putOrdersStoragePoLinesById(String id, String lang, PoLine poLine, Map<String, String> okapiHeaders,
+  public void putOrdersStoragePoLinesById(String id, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       pgClient.withTrans(conn -> poLinesService.updatePoLine(conn, poLine)
