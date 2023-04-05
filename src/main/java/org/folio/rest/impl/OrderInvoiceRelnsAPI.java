@@ -19,7 +19,7 @@ public class OrderInvoiceRelnsAPI implements OrdersStorageOrderInvoiceRelns {
 
   @Override
   @Validate
-  public void getOrdersStorageOrderInvoiceRelns(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageOrderInvoiceRelns(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(TableNames.ORDER_INVOICE_RELNS_TABLE, OrderInvoiceRelationship.class, OrderInvoiceRelationshipCollection.class, query, offset,
         limit, okapiHeaders, vertxContext, GetOrdersStorageOrderInvoiceRelnsResponse.class, asyncResultHandler);
@@ -27,26 +27,26 @@ public class OrderInvoiceRelnsAPI implements OrdersStorageOrderInvoiceRelns {
 
   @Override
   @Validate
-  public void postOrdersStorageOrderInvoiceRelns(String lang, OrderInvoiceRelationship entity,
+  public void postOrdersStorageOrderInvoiceRelns(OrderInvoiceRelationship entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.post(TableNames.ORDER_INVOICE_RELNS_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageOrderInvoiceRelnsResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void getOrdersStorageOrderInvoiceRelnsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getOrdersStorageOrderInvoiceRelnsById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(TableNames.ORDER_INVOICE_RELNS_TABLE, OrderInvoiceRelationship.class, id, okapiHeaders,vertxContext, GetOrdersStorageOrderInvoiceRelnsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void deleteOrdersStorageOrderInvoiceRelnsById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void deleteOrdersStorageOrderInvoiceRelnsById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(TableNames.ORDER_INVOICE_RELNS_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStorageOrderInvoiceRelnsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void putOrdersStorageOrderInvoiceRelnsById(String id, String lang, OrderInvoiceRelationship entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void putOrdersStorageOrderInvoiceRelnsById(String id, OrderInvoiceRelationship entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(TableNames.ORDER_INVOICE_RELNS_TABLE, entity, id, okapiHeaders,vertxContext, PutOrdersStorageOrderInvoiceRelnsByIdResponse.class, asyncResultHandler);
   }
 }

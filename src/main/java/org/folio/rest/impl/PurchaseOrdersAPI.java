@@ -55,7 +55,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
 
   @Override
   @Validate
-  public void getOrdersStoragePurchaseOrders(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePurchaseOrders(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(TableNames.PURCHASE_ORDER_TABLE, PurchaseOrder.class, PurchaseOrderCollection.class, query, offset, limit, okapiHeaders,
         vertxContext, GetOrdersStoragePurchaseOrdersResponse.class, asyncResultHandler);
@@ -63,7 +63,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
 
   @Override
   @Validate
-  public void postOrdersStoragePurchaseOrders(String lang, PurchaseOrder order, Map<String, String> okapiHeaders,
+  public void postOrdersStoragePurchaseOrders(PurchaseOrder order, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.debug("Creating a new purchase order");
     pgClient.withTrans(conn -> createPurchaseOrder(conn, order)
@@ -82,14 +82,14 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
 
   @Override
   @Validate
-  public void getOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePurchaseOrdersById(String id, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(TableNames.PURCHASE_ORDER_TABLE, PurchaseOrder.class, id, okapiHeaders,vertxContext, GetOrdersStoragePurchaseOrdersByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void deleteOrdersStoragePurchaseOrdersById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStoragePurchaseOrdersById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.debug("Deleting po, id={}", id);
     try {
@@ -124,7 +124,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
 
   @Validate
   @Override
-  public void putOrdersStoragePurchaseOrdersById(String id, String lang, PurchaseOrder order, Map<String, String> okapiHeaders,
+  public void putOrdersStoragePurchaseOrdersById(String id, PurchaseOrder order, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
       updateOrder(id, order, okapiHeaders)

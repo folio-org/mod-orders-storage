@@ -10,12 +10,8 @@ documentation:
 types:
   po-number: !include acq-models/common/schemas/sequence_number.json
 
-traits:
-    language: !include raml-util/traits/language.raml
-
 /orders-storage/po-number:
   get:
-    is: [language]
     description: Get generated purchase order number
     responses:
       200:

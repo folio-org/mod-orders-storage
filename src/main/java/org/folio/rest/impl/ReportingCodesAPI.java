@@ -20,7 +20,7 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
 
   @Override
   @Validate
-  public void getOrdersStorageReportingCodes(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageReportingCodes(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(REPORTING_CODE_TABLE, ReportingCode.class, ReportingCodeCollection.class, query, offset, limit, okapiHeaders,
         vertxContext, GetOrdersStorageReportingCodesResponse.class, asyncResultHandler);
@@ -28,28 +28,28 @@ public class ReportingCodesAPI implements OrdersStorageReportingCodes {
 
   @Override
   @Validate
-  public void postOrdersStorageReportingCodes(String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
+  public void postOrdersStorageReportingCodes(org.folio.rest.jaxrs.model.ReportingCode entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.post(REPORTING_CODE_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageReportingCodesResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void getOrdersStorageReportingCodesById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageReportingCodesById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(REPORTING_CODE_TABLE, ReportingCode.class, id, okapiHeaders,vertxContext, GetOrdersStorageReportingCodesByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void deleteOrdersStorageReportingCodesById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageReportingCodesById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(REPORTING_CODE_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStorageReportingCodesByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void putOrdersStorageReportingCodesById(String id, String lang, org.folio.rest.jaxrs.model.ReportingCode entity,
+  public void putOrdersStorageReportingCodesById(String id, org.folio.rest.jaxrs.model.ReportingCode entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(REPORTING_CODE_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageReportingCodesByIdResponse.class, asyncResultHandler);
   }

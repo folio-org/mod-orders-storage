@@ -20,32 +20,32 @@ public class TitlesAPI implements OrdersStorageTitles {
 
   @Override
   @Validate
-  public void getOrdersStorageTitles(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getOrdersStorageTitles(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(TITLES_TABLE, Title.class, TitleCollection.class, query, offset, limit, okapiHeaders, vertxContext,
       OrdersStorageTitles.GetOrdersStorageTitlesResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void postOrdersStorageTitles(String lang, Title entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void postOrdersStorageTitles(Title entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.post(TITLES_TABLE, entity, okapiHeaders, vertxContext, OrdersStorageTitles.PostOrdersStorageTitlesResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void getOrdersStorageTitlesById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getOrdersStorageTitlesById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(TITLES_TABLE, Title.class, id, okapiHeaders,vertxContext, OrdersStorageTitles.GetOrdersStorageTitlesByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void deleteOrdersStorageTitlesById(String id, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void deleteOrdersStorageTitlesById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(TITLES_TABLE, id, okapiHeaders, vertxContext, OrdersStorageTitles.DeleteOrdersStorageTitlesByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void putOrdersStorageTitlesById(String id, String lang, Title entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void putOrdersStorageTitlesById(String id, Title entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(TITLES_TABLE, entity, id, okapiHeaders, vertxContext, OrdersStorageTitles.PutOrdersStorageTitlesByIdResponse.class, asyncResultHandler);
   }
 }
