@@ -14,8 +14,6 @@ import org.glassfish.jersey.uri.UriTemplate;
 
 public class RequestEntry {
 
-  private static final Logger logger = LogManager.getLogger();
-
   private String baseEndpoint;
   private Map<String, String> pathParams = new HashMap<>();
   private Map<String, Object> queryParams = new HashMap<>();

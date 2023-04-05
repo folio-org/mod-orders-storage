@@ -27,18 +27,18 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpdateInstanceStrategy {
+  private static final Logger log = LogManager.getLogger();
 
   private final TitleService titleService;
   private final PoLinesService poLinesService;
   private final PieceService pieceService;
-  private final Logger logger = LogManager.getLogger(WithHoldingOrderLineUpdateInstanceStrategy.class);
 
   @Override
   public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
     Promise<Void> promise = Promise.promise();
     if (holder.getPatchOrderLineRequest().getReplaceInstanceRef() == null
         || holder.getPatchOrderLineRequest().getReplaceInstanceRef().getHoldings().isEmpty()) {
-      logger.error("ReplaceInstanceRef or Holdings is not present");
+      log.error("ReplaceInstanceRef or Holdings is not present");
       promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef or Holdings is not present"));
     } else {
       DBClient client = new DBClient(rqContext.getContext(), rqContext.getHeaders());
@@ -46,17 +46,18 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
       String instanceId = holder.getPatchOrderLineRequest().getReplaceInstanceRef().getNewInstanceId();
 
       rqContext.getContext().runOnContext(v -> {
-        logger.info("Update Instance");
+        log.info("With holding - Update Instance");
         tx.startTx()
           .compose(poLineTx -> titleService.updateTitle(poLineTx, instanceId, client))
           .compose(poLineTx -> updateHoldings(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
           .compose(poLineTx -> poLinesService.updateInstanceIdForPoLine(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
           .compose(Tx::endTx)
-          .onComplete(result -> {
-            if (result.failed()) {
-              tx.rollbackTransaction().onComplete(res -> promise.fail(result.cause()));
+          .onComplete(ar -> {
+            if (ar.failed()) {
+              log.warn("Instance failed to update, poLine id={}", tx.getEntity().getId(), ar.cause());
+              tx.rollbackTransaction().onComplete(res -> promise.fail(ar.cause()));
             } else {
-              logger.info("Instance was updated successfully for poLine={}", tx.getEntity().getId());
+              log.info("Instance was updated successfully, poLine id={}", tx.getEntity().getId());
               promise.complete(null);
             }
           });
@@ -70,11 +71,18 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
     List<Holding> holdings = replaceInstanceRef.getHoldings();
 
     if (!isUpdatedHolding(holdings)) {
-      logger.info("Holding does not require an update");
+      log.info("Holding does not require an update");
       return Future.succeededFuture(poLineTx);
     } else {
       return pieceService.updatePieces(poLineTx, replaceInstanceRef, client)
-        .compose(v -> updateLocation(poLineTx, replaceInstanceRef));
+        .compose(v -> updateLocation(poLineTx, replaceInstanceRef))
+        .onComplete(ar -> {
+          if (ar.failed()) {
+            log.warn("updateHoldings failed, poLine id={}", poLineTx.getEntity().getId(), ar.cause());
+          } else {
+            log.debug("updateHoldings completed, poLine id={}", poLineTx.getEntity().getId());
+          }
+        });
     }
   }
 

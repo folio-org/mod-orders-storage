@@ -3,8 +3,11 @@ package org.folio.rest.persist;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Tx<T> {
+  private static final Logger log = LogManager.getLogger();
 
   private final T entity;
   private final PostgresClient pgClient;
@@ -41,6 +44,7 @@ public class Tx<T> {
   }
 
   public Future<Void> rollbackTransaction() {
+    log.info("Rolling back transaction");
     Promise<Void> promise = Promise.promise();
     if (sqlConnection.failed()) {
       promise.fail(sqlConnection.cause());

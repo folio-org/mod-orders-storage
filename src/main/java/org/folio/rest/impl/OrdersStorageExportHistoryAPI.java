@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.folio.models.TableNames.EXPORT_HISTORY_TABLE;
 
 public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStorageExportHistory {
-  private static final Logger logger = LogManager.getLogger(OrdersStorageExportHistoryAPI.class);
+  private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private ExportHistoryService exportHistoryService;
@@ -40,7 +40,7 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void getOrdersStorageExportHistory(int offset, int limit, String query, String lang,
+  public void getOrdersStorageExportHistory(String totalRecords, int offset, int limit, String query,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(EXPORT_HISTORY_TABLE, ExportHistory.class, ExportHistoryCollection.class,
                 query, offset, limit, okapiHeaders, vertxContext,
@@ -49,14 +49,15 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void postOrdersStorageExportHistory(String lang, ExportHistory entity,
+  public void postOrdersStorageExportHistory(ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     exportHistoryService.createExportHistory(entity, new DBClient(vertxContext.owner(), TenantTool.tenantId(okapiHeaders)))
-      .onComplete(result -> {
-        if (result.succeeded()) {
-          asyncResultHandler.handle(buildResponseWithLocation(result.result(), getEndpoint(result.result())));
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          asyncResultHandler.handle(buildResponseWithLocation(ar.result(), getEndpoint(ar.result())));
         } else {
-          asyncResultHandler.handle(Future.failedFuture(result.cause()));
+          log.error("postOrdersStorageExportHistory failed, exportHistoryId={}", entity.getId(), ar.cause());
+          asyncResultHandler.handle(Future.failedFuture(ar.cause()));
         }
       });
   }
@@ -64,7 +65,7 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void getOrdersStorageExportHistoryById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageExportHistoryById(String id, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(EXPORT_HISTORY_TABLE, ExportHistory.class, id, okapiHeaders,vertxContext,
                    GetOrdersStorageExportHistoryByIdResponse.class, asyncResultHandler);
@@ -72,14 +73,14 @@ public class OrdersStorageExportHistoryAPI extends BaseApi implements OrdersStor
 
   @Override
   @Validate
-  public void deleteOrdersStorageExportHistoryById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageExportHistoryById(String id, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(EXPORT_HISTORY_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStorageExportHistoryByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
-  public void putOrdersStorageExportHistoryById(String id, String lang, ExportHistory entity,
+  public void putOrdersStorageExportHistoryById(String id, ExportHistory entity,
     Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(EXPORT_HISTORY_TABLE, entity, id, okapiHeaders, vertxContext,
       OrdersStorageExportHistory.PutOrdersStorageExportHistoryByIdResponse.class, asyncResultHandler);

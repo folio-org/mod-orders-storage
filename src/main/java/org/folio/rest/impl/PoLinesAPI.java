@@ -19,7 +19,6 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PoLineCollection;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLines;
-import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
@@ -34,7 +33,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 
 public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
-  private static final Logger log = LogManager.getLogger(PoLinesAPI.class);
+  private static final Logger log = LogManager.getLogger();
 
   private final PostgresClient pgClient;
 
@@ -54,7 +53,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void getOrdersStoragePoLines(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePoLines(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(PO_LINE_TABLE, PoLine.class, PoLineCollection.class, query, offset, limit, okapiHeaders, vertxContext,
       OrdersStoragePoLines.GetOrdersStoragePoLinesResponse.class, asyncResultHandler);
@@ -62,16 +61,20 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void postOrdersStoragePoLines(String lang, PoLine poLine, Map<String, String> okapiHeaders,
+  public void postOrdersStoragePoLines(PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
-        .compose(poLineId -> auditOutboxService.saveOrderLineOutboxLog(conn, poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders)))
-        .onComplete(reply -> {
-          if (reply.failed()) {
-            log.error("Order Line with id {} creation failed", poLine.getId(), reply.cause());
-            asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+        .compose(poLineId -> auditOutboxService.saveOrderLineOutboxLog(conn, poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders)
+          .map(b -> poLineId)))
+        .onComplete(ar -> {
+          if (ar.failed()) {
+            log.error("Package order Line creation failed, poLine={}",
+              JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
+            log.info("Package order Line creation complete, id={}, number={}",
+              ar.result(), poLine.getPoLineNumber());
             auditOutboxService.processOutboxEventLogs(okapiHeaders);
             asyncResultHandler.handle(buildResponseWithLocation(poLine, getEndpoint(poLine)));
           }
@@ -83,14 +86,18 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   private void createPoLineWithTitle(PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler, Map<String, String> okapiHeaders) {
     try {
+      log.trace("createPoLineWithTitle, poLineId={}, poLineNumber={}", poLine.getId(), poLine.getPoLineNumber());
       pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
         .compose(poLineId -> poLinesService.createTitle(conn, poLine))
         .compose(title -> auditOutboxService.saveOrderLineOutboxLog(conn, poLine, OrderLineAuditEvent.Action.CREATE, okapiHeaders)))
-        .onComplete(reply -> {
-          if (reply.failed()) {
-            log.error("Order Line with id {} and Title creation failed", poLine.getId(), reply.cause());
-            asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+        .onComplete(ar -> {
+          if (ar.failed()) {
+            log.error("Order Line and Title creation failed, poLine={}",
+              JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
+            log.info("createPoLineWithTitle complete, poLineId={}, poLineNumber={}", poLine.getId(),
+              poLine.getPoLineNumber());
             auditOutboxService.processOutboxEventLogs(okapiHeaders);
             asyncResultHandler.handle(buildResponseWithLocation(poLine, getEndpoint(poLine)));
           }
@@ -102,7 +109,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void getOrdersStoragePoLinesById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePoLinesById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(PO_LINE_TABLE, PoLine.class, id, okapiHeaders, vertxContext, GetOrdersStoragePoLinesByIdResponse.class,
         asyncResultHandler);
@@ -110,15 +117,17 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void deleteOrdersStoragePoLinesById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStoragePoLinesById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
-      poLinesService.deleteById(id, vertxContext, okapiHeaders)
-        .onComplete(result -> {
-          if (result.failed()) {
-            log.error("Delete order line with id: {} failed", id, result.cause());
-            asyncResultHandler.handle(buildErrorResponse(result.cause()));
+      RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
+      poLinesService.deleteById(id, requestContext)
+        .onComplete(ar -> {
+          if (ar.failed()) {
+            log.error("Delete order line failed, id={}", id, ar.cause());
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
+            log.info("Delete order line complete, id={}", id);
             asyncResultHandler.handle(buildNoContentResponse());
           }
         });
@@ -129,28 +138,32 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
 
   @Override
   @Validate
-  public void putOrdersStoragePoLinesById(String id, String lang, PoLine poLine, Map<String, String> okapiHeaders,
+  public void putOrdersStoragePoLinesById(String id, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       pgClient.withTrans(conn -> poLinesService.updatePoLine(conn, poLine)
         .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders)))
-        .onComplete(result -> {
-          if (result.failed()) {
-            log.error("Update order line with id: {} failed", id, result.cause());
-            asyncResultHandler.handle(buildErrorResponse(result.cause()));
+        .onComplete(ar -> {
+          if (ar.failed()) {
+            log.error("Update package order line failed, id={}, poLine={}", id,
+              JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
+            log.info("Update order line complete, id={}", id);
             auditOutboxService.processOutboxEventLogs(okapiHeaders);
             asyncResultHandler.handle(buildNoContentResponse());
           }
         });
     } else {
       try {
-        poLinesService.updatePoLineWithTitle(id, poLine, okapiHeaders)
-          .onComplete(result -> {
-            if (result.failed()) {
-              log.error("Update order line with title with id: {} failed", id, result.cause());
-              asyncResultHandler.handle(buildErrorResponse(result.cause()));
+        poLinesService.updatePoLineWithTitle(id, poLine, new RequestContext(vertxContext, okapiHeaders))
+          .onComplete(ar -> {
+            if (ar.failed()) {
+              log.error("Update order line with title failed, id={}, poLine={}", id,
+                JsonObject.mapFrom(poLine).encodePrettily(), ar.cause());
+              asyncResultHandler.handle(buildErrorResponse(ar.cause()));
             } else {
+              log.info("Update order line complete, id={}", id);
               auditOutboxService.processOutboxEventLogs(okapiHeaders);
               asyncResultHandler.handle(buildNoContentResponse());
             }
@@ -171,13 +184,14 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
         Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
 
     RequestContext requestContext = new RequestContext(vertxContext, okapiHeaders);
-    DBClient client = new DBClient(vertxContext, okapiHeaders);
-    orderLinePatchOperationService.patch(id, entity, requestContext, client)
-      .onComplete(result -> {
-        if (result.failed()) {
-          log.error("Patch order line with id: {} failed", id, result.cause());
-          asyncResultHandler.handle(buildErrorResponse(result.cause()));
+    orderLinePatchOperationService.patch(id, entity, requestContext)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("Patch order line failed, id={}, entity={}", id,
+            JsonObject.mapFrom(entity).encodePrettily(), ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
+          log.info("Patch order line complete, id={}", id);
           asyncResultHandler.handle(buildNoContentResponse());
         }
       });

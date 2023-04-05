@@ -2,6 +2,7 @@
   "id": "c27e60f9-6361-44c1-976e-0c4821a33a7d",
   "approved": false,
   "manualPo": true,
+  "nextPolNumber": 1,
   "notes": [
     "Cataloging record service"
   ],

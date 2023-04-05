@@ -68,7 +68,7 @@ import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 
 
 public class StorageTestSuite {
-  private static final Logger logger = LogManager.getLogger(StorageTestSuite.class);
+  private static final Logger log = LogManager.getLogger();
 
   private static Vertx vertx;
   private static int port = NetworkUtils.nextFreePort();
@@ -138,7 +138,7 @@ public class StorageTestSuite {
 
     vertx = Vertx.vertx();
 
-    logger.info("Start container database");
+    log.info("Start container database");
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
@@ -162,39 +162,38 @@ public class StorageTestSuite {
 
   @AfterAll
   public static void after() throws InterruptedException, ExecutionException, TimeoutException, MalformedURLException {
-    logger.info("Delete tenant");
+    log.info("Delete tenant");
     kafkaCluster.stop();
     deleteTenant(tenantJob, TENANT_HEADER);
 
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
 
-    vertx.close(res -> {
-      if(res.succeeded()) {
+    vertx.close(ar -> {
+      if (ar.succeeded()) {
         undeploymentComplete.complete(null);
       }
       else {
-        undeploymentComplete.completeExceptionally(res.cause());
+        undeploymentComplete.completeExceptionally(ar.cause());
       }
     });
 
     undeploymentComplete.get(20, TimeUnit.SECONDS);
-    logger.info("Stop database");
+    log.info("Stop database");
     PostgresClient.stopPostgresTester();
   }
 
   private static void startVerticle(DeploymentOptions options)
     throws InterruptedException, ExecutionException, TimeoutException {
 
-    logger.info("Start verticle");
+    log.info("Start verticle");
 
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
 
-    vertx.deployVerticle(RestVerticle.class.getName(), options, res -> {
-      if(res.succeeded()) {
-        deploymentComplete.complete(res.result());
-      }
-      else {
-        deploymentComplete.completeExceptionally(res.cause());
+    vertx.deployVerticle(RestVerticle.class.getName(), options, ar -> {
+      if (ar.succeeded()) {
+        deploymentComplete.complete(ar.result());
+      } else {
+        deploymentComplete.completeExceptionally(ar.cause());
       }
     });
 

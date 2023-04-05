@@ -23,9 +23,9 @@ import io.vertx.core.Vertx;
 
 
 public class AcquisitionMethodService {
-
-  private final Logger logger = LogManager.getLogger(this.getClass());
+  private static final Logger log = LogManager.getLogger();
   public static final String ACQUISITION_METHOD_TABLE = "acquisition_method";
+
   private final PostgresClient pgClient;
   private final ValueConstraintErrorBuilder valueConstraintErrorBuilder;
 
@@ -37,13 +37,13 @@ public class AcquisitionMethodService {
   public void createAcquisitionsMethod(AcquisitionMethod acquisitionMethod, Context vertxContext, Handler<AsyncResult<Response>> asyncResultHandler) {
     vertxContext.runOnContext(v -> createAcquisitionMethod(acquisitionMethod)
       .onSuccess(entity -> {
-        logger.debug("AcquisitionMethod with id {} created", acquisitionMethod.getId());
+        log.info("AcquisitionMethod with id {} created", acquisitionMethod.getId());
         asyncResultHandler.handle(Future.succeededFuture(
           OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse
             .respond201WithApplicationJson(entity, headersFor201())));
       })
       .onFailure(throwable -> {
-        logger.error("AcquisitionMethod creation with id {} failed", acquisitionMethod.getId(), throwable);
+        log.error("AcquisitionMethod creation with id {} failed", acquisitionMethod.getId(), throwable);
         asyncResultHandler.handle(buildErrorResponse(throwable));
       }));
   }
@@ -53,9 +53,9 @@ public class AcquisitionMethodService {
     if (acquisitionMethod.getId() == null) {
       acquisitionMethod.setId(UUID.randomUUID().toString());
     }
-    pgClient.save(ACQUISITION_METHOD_TABLE, acquisitionMethod.getId(), acquisitionMethod, reply -> {
-      if (reply.failed()) {
-        promise.fail(valueConstraintErrorBuilder.buildException(reply, AcquisitionMethod.class));
+    pgClient.save(ACQUISITION_METHOD_TABLE, acquisitionMethod.getId(), acquisitionMethod, ar -> {
+      if (ar.failed()) {
+        promise.fail(valueConstraintErrorBuilder.buildException(ar, AcquisitionMethod.class));
       } else {
         promise.complete(acquisitionMethod);
       }

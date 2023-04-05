@@ -35,6 +35,7 @@ import io.vertx.junit5.VertxTestContext;
 
 @ExtendWith(VertxExtension.class)
 public class TitleServiceTest extends TestBase {
+  private static final Logger log = LogManager.getLogger();
 
   static final String TEST_TENANT = "test_tenant";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
@@ -42,7 +43,6 @@ public class TitleServiceTest extends TestBase {
   TitleService titleService = new TitleService();
   private static TenantJob tenantJob;
   private final String newInstanceId = UUID.randomUUID().toString();
-  private final Logger logger = LogManager.getLogger(TitleService.class);
 
   @BeforeEach
   public void initMocks() throws MalformedURLException {
@@ -75,16 +75,16 @@ public class TitleServiceTest extends TestBase {
 
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     promise1.future().onComplete(v -> {
-      client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
-        if (event.failed()) {
-          promise2.fail(event.cause());
+      client.getPgClient().save(TITLES_TABLE, titleId, title, ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
         } else {
           promise2.complete();
-          logger.info("Title was saved");
+          log.info("Title was saved");
         }
       });
     });
@@ -96,8 +96,8 @@ public class TitleServiceTest extends TestBase {
           .compose(o -> titleService.updateTitle(poLineTx, newInstanceId, client)))
         .compose(Tx::endTx)
         .onComplete(v -> titleService.getTitleByPoLineId(poLineId, client)
-          .onComplete(event -> {
-            Title actTitle = event.result();
+          .onComplete(ar -> {
+            Title actTitle = ar.result();
             testContext.verify(() -> {
               assertThat(actTitle.getId(), is(titleId));
               assertThat(actTitle.getInstanceId(), is(newInstanceId));
@@ -123,26 +123,26 @@ public class TitleServiceTest extends TestBase {
     final DBClient client = new DBClient(vertx, TEST_TENANT);
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     Promise<Void> promise2 = Promise.promise();
 
     promise1.future().onComplete(v -> {
-      client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
-        if (event.failed()) {
-          promise2.fail(event.cause());
+      client.getPgClient().save(TITLES_TABLE, titleId, title, ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
         } else {
           promise2.complete();
-          logger.info("Title was saved");
+          log.info("Title was saved");
         }
       });
     });
 
     testContext.assertComplete(promise2.future()
         .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
-      .onComplete(event -> {
-        Title actTitle = event.result();
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
         });
@@ -168,31 +168,31 @@ public class TitleServiceTest extends TestBase {
     final DBClient client = new DBClient(vertx, TEST_TENANT);
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
-      logger.info("PoLine was saved");
+      log.info("PoLine was saved");
     });
 
     Promise<Void> promise2 = Promise.promise();
 
     promise1.future().onComplete(v -> {
-      client.getPgClient().save(TITLES_TABLE, titleId, title, event -> {
-        if (event.failed()) {
-          promise2.fail(event.cause());
+      client.getPgClient().save(TITLES_TABLE, titleId, title, ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
         } else {
           promise2.complete();
-          logger.info("Title was saved");
+          log.info("Title was saved");
         }
       });
     });
 
-    testContext.assertComplete(promise2.future()
-      .compose(o -> titleService.getTitleByPoLineId(incorrectPoLineId, client))
+    testContext.assertFailure(promise2.future()
+      .compose(o -> titleService.getTitleByPoLineId(incorrectPoLineId, client)))
       .onFailure(event -> {
         String exception = String.format("Title with poLineId=%s was not found", incorrectPoLineId);
         testContext.verify(() -> {
           assertEquals(event.getMessage(), exception);
         });
         testContext.completeNow();
-      }));
+      });
   }
 
 }

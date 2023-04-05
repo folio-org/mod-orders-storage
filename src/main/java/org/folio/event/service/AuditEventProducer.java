@@ -29,7 +29,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 public class AuditEventProducer {
-  private static final Logger logger = LogManager.getLogger(AuditEventProducer.class);
+  private static final Logger log = LogManager.getLogger();
 
   private final KafkaConfig kafkaConfig;
 
@@ -46,9 +46,10 @@ public class AuditEventProducer {
                                         OrderAuditEvent.Action eventAction,
                                         Map<String, String> okapiHeaders) {
     OrderAuditEvent event = getOrderEvent(order, eventAction);
-    logger.info("Starting to send event with id: {} for Order to Kafka for orderId: {}", event.getId(), order.getId());
+    log.info("Starting to send event with id: {} for Order to Kafka for orderId: {}", event.getId(), order.getId());
     String eventPayload = Json.encode(event);
-    return sendToKafka(AuditEventType.ACQ_ORDER_CHANGED, eventPayload, okapiHeaders, event.getOrderId(), EntityType.ORDER);
+    return sendToKafka(AuditEventType.ACQ_ORDER_CHANGED, eventPayload, okapiHeaders, event.getOrderId(), EntityType.ORDER)
+      .onFailure(t -> log.warn("sendOrderEvent failed, order id={}", order.getId(), t));
   }
 
   /**
@@ -64,9 +65,11 @@ public class AuditEventProducer {
                                             OrderLineAuditEvent.Action eventAction,
                                             Map<String, String> okapiHeaders) {
     OrderLineAuditEvent event = getOrderLineEvent(poLine, eventAction);
-    logger.info("Starting to send event wit id: {} for Order Line to Kafka for orderLineId: {}", event.getId(), poLine.getId());
+    log.info("Starting to send event wit id: {} for Order Line to Kafka for orderLineId: {}", event.getId(),
+      poLine.getId());
     String eventPayload = Json.encode(event);
-    return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, eventPayload, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE);
+    return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, eventPayload, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE)
+      .onFailure(t -> log.warn("sendOrderLineEvent failed, poLine id={}", poLine.getId(), t));
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
@@ -110,11 +113,13 @@ public class AuditEventProducer {
     producer.write(record, ar -> {
       producer.end(ear -> producer.close());
       if (ar.succeeded()) {
-        logger.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
+        log.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType,
+          key, topicName);
         promise.complete(true);
       } else {
         Throwable cause = ar.cause();
-        logger.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType, entityType, key, topicName, cause);
+        log.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType,
+          entityType, key, topicName, cause);
         promise.fail(cause);
       }
     });

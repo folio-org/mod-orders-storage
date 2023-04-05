@@ -7,12 +7,11 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.rest.RestVerticle;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.resource.OrdersStoragePoLineNumber;
+import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
-import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,7 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumber {
-  private static final Logger logger = LogManager.getLogger(PoLineNumberAPI.class);
+  private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private PoLineNumbersService poLineNumbersService;
@@ -32,16 +31,18 @@ public class PoLineNumberAPI extends BaseApi implements OrdersStoragePoLineNumbe
 
   @Validate
   @Override
-  public void getOrdersStoragePoLineNumber(String purchaseOrderId, int poLineNumbers, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStoragePoLineNumber(String purchaseOrderId, int poLineNumbers, Map<String, String> okapiHeaders,
      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    String tenantId = TenantTool.calculateTenantId(okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    poLineNumbersService.retrievePoLineNumber(purchaseOrderId, poLineNumbers, tenantId)
-      .onComplete(reply -> {
-        if (reply.failed()) {
-          logger.error("Could not retrieve po line number for orderId: {}", purchaseOrderId, reply.cause());
-          asyncResultHandler.handle(buildErrorResponse(reply.cause()));
+    DBClient client = new DBClient(vertxContext, okapiHeaders);
+    poLineNumbersService.retrievePoLineNumber(purchaseOrderId, poLineNumbers, client)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("Could not retrieve po line number for orderId: {}", purchaseOrderId, ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
-          asyncResultHandler.handle(buildOkResponse(reply.result()));
+          if (log.isDebugEnabled())
+            log.debug("Returned new po line numbers {}", JsonObject.mapFrom(ar.result()).encodePrettily());
+          asyncResultHandler.handle(buildOkResponse(ar.result()));
         }
       });
   }

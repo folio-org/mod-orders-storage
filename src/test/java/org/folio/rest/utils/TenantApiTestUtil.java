@@ -10,6 +10,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.client.TenantClient;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
@@ -17,6 +20,7 @@ import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.tools.utils.ModuleName;
 
 public class TenantApiTestUtil {
+  private static final Logger log = LogManager.getLogger();
 
   public static final String LOAD_SYNC_PARAMETER = "loadSync";
   private static final int TENANT_OP_WAITINGTIME = 60000;
@@ -53,14 +57,14 @@ public class TenantApiTestUtil {
     CompletableFuture<TenantJob> future = new CompletableFuture<>();
     TenantClient tClient =  new TenantClient(URL_TO_HEADER.getValue(), tenantHeader.getValue(), null);
     try {
-      tClient.postTenant(tenantAttributes, event -> {
-        if (event.failed()) {
-          future.completeExceptionally(event.cause());
+      tClient.postTenant(tenantAttributes, ar -> {
+        if (ar.failed()) {
+          future.completeExceptionally(ar.cause());
         } else {
-          TenantJob tenantJob = event.result().bodyAsJson(TenantJob.class);
-          tClient.getTenantByOperationId(tenantJob.getId(), TENANT_OP_WAITINGTIME, result -> {
-            if(result.failed()) {
-              future.completeExceptionally(result.cause());
+          TenantJob tenantJob = ar.result().bodyAsJson(TenantJob.class);
+          tClient.getTenantByOperationId(tenantJob.getId(), TENANT_OP_WAITINGTIME, ar2 -> {
+            if (ar2.failed()) {
+              future.completeExceptionally(ar2.cause());
             } else {
               future.complete(tenantJob);
             }
@@ -79,16 +83,19 @@ public class TenantApiTestUtil {
 
     if (tenantJob != null) {
       CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-      tenantClient.deleteTenantByOperationId(tenantJob.getId(), event -> {
-        if (event.failed()) {
-          completableFuture.completeExceptionally(event.cause());
+      tenantClient.deleteTenantByOperationId(tenantJob.getId(), ar -> {
+        if (ar.failed()) {
+          log.error("Failed to delete tenant", ar.cause());
+          completableFuture.completeExceptionally(ar.cause());
         } else {
+          log.info("Tenant has been deleted");
           completableFuture.complete(null);
         }
       });
       try {
         completableFuture.get(60, TimeUnit.SECONDS);
       } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        log.error("deleteTenant interrupted", e);
         fail(e);
       }
 
@@ -101,15 +108,18 @@ public class TenantApiTestUtil {
     TenantClient tClient =  new TenantClient(URL_TO_HEADER.getValue(), tenantHeader.getValue(), null);
     TenantAttributes tenantAttributes = prepareTenantBody(false, false).withPurge(true);
     try {
-      tClient.postTenant(tenantAttributes, event -> {
-        if (event.failed()) {
-          future.completeExceptionally(event.cause());
+      tClient.postTenant(tenantAttributes, ar -> {
+        if (ar.failed()) {
+          log.error("Failed to purge", ar.cause());
+          future.completeExceptionally(ar.cause());
         } else {
+          log.info("Purge complete");
           future.complete(null);
         }
       });
       future.get(60, TimeUnit.SECONDS);
     } catch (Exception e) {
+      log.error("Purge interrupted", e);
       fail(e);
     }
   }

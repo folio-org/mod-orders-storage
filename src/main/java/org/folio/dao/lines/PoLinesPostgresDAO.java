@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
 
@@ -20,41 +21,40 @@ import io.vertx.core.json.JsonObject;
 
 
 public class PoLinesPostgresDAO implements PoLinesDAO {
-
-  private static final Logger logger = LogManager.getLogger(PoLinesPostgresDAO.class);
+  private static final Logger log = LogManager.getLogger();
 
   @Override
-  public Future<List<PoLine>> getPoLines(Criterion criterion, DBClient client) {
+  public Future<List<PoLine>> getPoLines(Criterion criterion, Conn conn) {
+    log.trace("getPoLines, criterion={}", criterion);
     Promise<List<PoLine>> promise = Promise.promise();
-    client.getPgClient().get(PO_LINE_TABLE, PoLine.class, criterion, false, reply -> {
-        if (reply.failed()) {
-          logger.error("Retrieve POLs failed : {}", criterion.toString());
-          handleFailure(promise, reply);
-        } else {
-          List<PoLine> budgets = reply.result().getResults();
-          promise.complete(budgets);
-        }
+    conn.get(PO_LINE_TABLE, PoLine.class, criterion, false)
+      .onSuccess(results -> {
+        log.trace("getPoLines success, criterion={}", criterion);
+        List<PoLine> lines = results.getResults();
+        promise.complete(lines);
+      })
+      .onFailure(t -> {
+        log.error("getPoLines failed, criterion={}", criterion, t);
+        handleFailure(promise, t);
       });
     return promise.future();
   }
 
   @Override
   public Future<PoLine> getPoLineById(String id, DBClient client) {
+    log.trace("getPoLineById, id={}", id);
     Promise<PoLine> promise = Promise.promise();
-
-    logger.debug("Get po_line={}", id);
-
-    client.getPgClient().getById(PO_LINE_TABLE, id, reply -> {
-      if (reply.failed()) {
-        logger.error("PoLine retrieval with id={} failed", id);
-        handleFailure(promise, reply);
+    client.getPgClient().getById(PO_LINE_TABLE, id, ar -> {
+      if (ar.failed()) {
+        log.error("getPoLineById failed, id={}", id, ar.cause());
+        handleFailure(promise, ar);
       } else {
-        final JsonObject po_line = reply.result();
-        if (po_line == null) {
+        final JsonObject poLine = ar.result();
+        if (poLine == null) {
           promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         } else {
-          logger.debug("PoLine with id={} successfully extracted", id);
-          promise.complete(po_line.mapTo(PoLine.class));
+          log.trace("getPoLineById success, id={}", id);
+          promise.complete(poLine.mapTo(PoLine.class));
         }
       }
     });
@@ -62,16 +62,18 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
   }
 
   @Override
-  public Future<Integer> updatePoLines(String sql, DBClient client) {
+  public Future<Integer> updatePoLines(String sql, Conn conn) {
+    log.debug("updatePoLines, sql={}", sql);
     Promise<Integer> promise = Promise.promise();
-
-    client.getPgClient().execute(sql, reply -> {
-      if (reply.failed()) {
-        handleFailure(promise, reply);
-      } else {
-        promise.complete(reply.result().rowCount());
-      }
-    });
+    conn.execute(sql)
+      .onSuccess(result -> {
+        log.debug("updatePoLines success, sql={}", sql);
+        promise.complete(result.rowCount());
+      })
+      .onFailure(t -> {
+        log.error("updatePoLines failed, sql={}", sql, t);
+        handleFailure(promise, t);
+      });
     return promise.future();
   }
 }

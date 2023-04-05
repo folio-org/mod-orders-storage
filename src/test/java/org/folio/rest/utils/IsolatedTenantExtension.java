@@ -16,8 +16,7 @@ import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class IsolatedTenantExtension implements BeforeTestExecutionCallback, AfterTestExecutionCallback {
-
-  private final Logger logger = LogManager.getLogger(IsolatedTenantExtension.class);
+  private static final Logger log = LogManager.getLogger();
   private static final String ISOLATED_TENANT = "isolated";
   private static TenantJob tenantJob;
 
@@ -27,7 +26,7 @@ public class IsolatedTenantExtension implements BeforeTestExecutionCallback, Aft
       final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, ISOLATED_TENANT);
 
       tenantJob = prepareTenant(TENANT_HEADER, false, false);
-      logger.info("Isolated tenant has been prepared");
+      log.info("Isolated tenant has been prepared");
     }
   }
 
@@ -36,10 +35,9 @@ public class IsolatedTenantExtension implements BeforeTestExecutionCallback, Aft
     if (hasTenantAnnotationClassOrMethod(context)) {
       final Header TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, ISOLATED_TENANT);
 
-      purge(TENANT_HEADER);
       deleteTenant(tenantJob, TENANT_HEADER);
-      logger.info("Isolated tenant has been deleted");
-
+      purge(TENANT_HEADER);
+      log.info("Isolated tenant has been deleted");
     }
   }
 

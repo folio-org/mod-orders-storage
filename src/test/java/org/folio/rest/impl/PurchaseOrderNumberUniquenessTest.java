@@ -13,8 +13,7 @@ import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.junit.Assert.fail;
 
 public class PurchaseOrderNumberUniquenessTest extends TestBase {
-
-  private final Logger logger = LogManager.getLogger(PurchaseOrderNumberUniquenessTest.class);
+  private static final Logger log = LogManager.getLogger();
 
   @Test
   public void testPoNumberUniqueness() throws MalformedURLException {
@@ -27,16 +26,16 @@ public class PurchaseOrderNumberUniquenessTest extends TestBase {
 
       sampleId = response.then().statusCode(201).extract().path("id");
 
-      logger.info("--- mod-orders-storage PO test: Creating purchase order with the same po_number ... ");
+      log.info("--- mod-orders-storage PO test: Creating purchase order with the same po_number ... ");
       JsonObject object = new JsonObject(purchaseOrderSample);
       object.remove("id");
       Response samePoNumberErrorResponse = postData(PURCHASE_ORDER.getEndpoint(), object.toString());
       verifyUniqueness(samePoNumberErrorResponse);
     } catch (Exception e) {
-      logger.error(String.format("--- mod-orders-storage-test: %s API ERROR: %s", PURCHASE_ORDER.name(), e.getMessage()));
+      log.error(String.format("--- mod-orders-storage-test: %s API ERROR: %s", PURCHASE_ORDER.name(), e.getMessage()));
       fail(e.getMessage());
     } finally {
-      logger.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", PURCHASE_ORDER.name(), PURCHASE_ORDER.name(), sampleId));
+      log.info(String.format("--- mod-orders-storages %s test: Deleting %s with ID: %s", PURCHASE_ORDER.name(), PURCHASE_ORDER.name(), sampleId));
       deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), sampleId);
     }
   }

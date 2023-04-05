@@ -11,6 +11,8 @@ import org.folio.dao.export.ExportHistoryPostgresRepository;
 import org.folio.dao.export.ExportHistoryRepository;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
+import org.folio.dao.order.OrderDAO;
+import org.folio.dao.order.OrderPostgresDAO;
 import org.folio.event.service.AuditEventProducer;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.kafka.KafkaConfig;
@@ -20,7 +22,6 @@ import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 import org.folio.orders.lines.update.OrderLinePatchOperationService;
-import org.folio.services.order.OrderSequenceRequestBuilder;
 import org.folio.orders.lines.update.OrderLinePatchOperationHandlerResolver;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHandler;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategy;
@@ -46,8 +47,13 @@ public class ApplicationConfig {
   }
 
   @Bean
-  PoLinesService poLinesService(PoLinesDAO poLinesDAO, PostgresClientFactory pgClientFactory, AuditOutboxService auditOutboxService) {
-    return new PoLinesService(poLinesDAO, pgClientFactory, auditOutboxService);
+  OrderDAO orderDAO() {
+    return new OrderPostgresDAO();
+  }
+
+  @Bean
+  PoLinesService poLinesService(PoLinesDAO poLinesDAO, AuditOutboxService auditOutboxService) {
+    return new PoLinesService(poLinesDAO, auditOutboxService);
   }
 
   @Bean
@@ -99,13 +105,8 @@ public class ApplicationConfig {
     return new OrderLinePatchOperationService(operationHandlerResolver, poLinesService);
   }
 
-  @Bean PoLineNumbersService poLineNumbersService(OrderSequenceRequestBuilder orderSequenceBuilder, PostgresClientFactory pgClientFactory) {
-    return new PoLineNumbersService(orderSequenceBuilder, pgClientFactory);
-  }
-
-  @Bean
-  OrderSequenceRequestBuilder orderSequenceService() {
-    return new OrderSequenceRequestBuilder();
+  @Bean PoLineNumbersService poLineNumbersService(OrderDAO orderDAO, PoLinesService poLinesService) {
+    return new PoLineNumbersService(orderDAO, poLinesService);
   }
 
   @Bean

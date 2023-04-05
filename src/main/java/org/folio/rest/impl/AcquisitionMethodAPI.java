@@ -25,34 +25,34 @@ public class AcquisitionMethodAPI implements OrdersStorageAcquisitionMethods {
   }
 
   @Override
-  public void getOrdersStorageAcquisitionMethods(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageAcquisitionMethods(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.get(ACQUISITION_METHOD, AcquisitionMethod.class, AcquisitionMethodCollection.class, query, offset, limit, okapiHeaders,
         vertxContext, GetOrdersStorageAcquisitionMethodsResponse.class, asyncResultHandler);
   }
 
   @Override
-  public void postOrdersStorageAcquisitionMethods(String lang, AcquisitionMethod entity, Map<String, String> okapiHeaders,
+  public void postOrdersStorageAcquisitionMethods(AcquisitionMethod entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     acquisitionMethodService.createAcquisitionsMethod(entity, vertxContext, asyncResultHandler);
   }
 
   @Override
-  public void getOrdersStorageAcquisitionMethodsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void getOrdersStorageAcquisitionMethodsById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.getById(ACQUISITION_METHOD, AcquisitionMethod.class, id, okapiHeaders, vertxContext,
         OrdersStorageAcquisitionMethods.GetOrdersStorageAcquisitionMethodsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
-  public void deleteOrdersStorageAcquisitionMethodsById(String id, String lang, Map<String, String> okapiHeaders,
+  public void deleteOrdersStorageAcquisitionMethodsById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(ACQUISITION_METHOD, id, okapiHeaders, vertxContext,
         OrdersStorageAcquisitionMethods.DeleteOrdersStorageAcquisitionMethodsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
-  public void putOrdersStorageAcquisitionMethodsById(String id, String lang, AcquisitionMethod entity,
+  public void putOrdersStorageAcquisitionMethodsById(String id, AcquisitionMethod entity,
       Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(ACQUISITION_METHOD, entity, id, okapiHeaders, vertxContext,
         OrdersStorageAcquisitionMethods.PutOrdersStorageAcquisitionMethodsByIdResponse.class, asyncResultHandler);

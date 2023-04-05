@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 
 public class PoNumberTest extends TestBase {
-  private final Logger logger = LogManager.getLogger(PoNumberTest.class);
+  private static final Logger log = LogManager.getLogger();
 
   private static final String PO_NUMBER_ENDPOINT = "/orders-storage/po-number";
 
@@ -18,11 +18,11 @@ public class PoNumberTest extends TestBase {
   public void testGetPoNumberOk() throws MalformedURLException {
 
     long poNumber1 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number1: " + poNumber1);
+    log.info("--- mod-orders-storage Generated po_number1: " + poNumber1);
     long poNumber2 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number2: " + poNumber2);
+    log.info("--- mod-orders-storage Generated po_number2: " + poNumber2);
     long poNumber3 = getPoNumberAsInt();
-    logger.info("--- mod-orders-storage Generated po_number3: " + poNumber3);
+    log.info("--- mod-orders-storage Generated po_number3: " + poNumber3);
 
     //ensure that the numbers returned are in fact sequential
     assertEquals(1, poNumber3 - poNumber2);

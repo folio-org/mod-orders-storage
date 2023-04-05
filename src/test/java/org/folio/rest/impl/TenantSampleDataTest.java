@@ -37,8 +37,7 @@ import org.junit.jupiter.api.Test;
 
 
 public class TenantSampleDataTest extends TestBase {
-
-  private final Logger logger = LogManager.getLogger(TenantSampleDataTest.class);
+  private static final Logger log = LogManager.getLogger();
 
   private static final Header NONEXISTENT_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "no_tenant");
   private static final Header ANOTHER_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "new_tenant");
@@ -54,12 +53,12 @@ public class TenantSampleDataTest extends TestBase {
   @Test
   public void sampleDataTests() throws MalformedURLException {
     try {
-      logger.info("-- create a tenant with no sample data --");
+      log.info("-- create a tenant with no sample data --");
       tenantJob = prepareTenant(ANOTHER_TENANT_HEADER, false, false);
       deleteReasonsForClosure(ANOTHER_TENANT_HEADER);
-      logger.info("-- upgrade the tenant with sample data, so that it will be inserted now --");
+      log.info("-- upgrade the tenant with sample data, so that it will be inserted now --");
       tenantJob = upgradeTenantWithSampleDataLoad();
-      logger.info("-- upgrade the tenant again with no sample data, so the previously inserted data stays in tact --");
+      log.info("-- upgrade the tenant again with no sample data, so the previously inserted data stays in tact --");
       tenantJob = upgradeTenantWithNoSampleDataLoad();
     }
     finally {
@@ -69,7 +68,7 @@ public class TenantSampleDataTest extends TestBase {
 
   @Test
   public void testPartialSampleDataLoading() throws MalformedURLException {
-    logger.info("load sample data");
+    log.info("load sample data");
     try{
       TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(true, false);
       tenantJob = postTenant(PARTIAL_TENANT_HEADER, tenantAttributes);
@@ -85,7 +84,7 @@ public class TenantSampleDataTest extends TestBase {
                                                 .filter(entity -> !EXPORT_HISTORY.equals(entity))
                                                 .collect(Collectors.toList());
       for (TestEntities entity : entitySamples) {
-        logger.info("Test expected quantity for " + entity.name());
+        log.info("Test expected quantity for " + entity.name());
         verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
       }
     } finally {
@@ -143,14 +142,14 @@ public class TenantSampleDataTest extends TestBase {
 
   private TenantJob upgradeTenantWithSampleDataLoad() throws MalformedURLException {
 
-    logger.info("upgrading Module with sample");
+    log.info("upgrading Module with sample");
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(true, false);
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
     List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
       .filter(entity -> !EXPORT_HISTORY.equals(entity))
       .collect(Collectors.toList());
     for (TestEntities entity : entitySamples) {
-      logger.info("Test expected quantity for " + entity.name());
+      log.info("Test expected quantity for " + entity.name());
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() + entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
     }
     return tenantJob;
@@ -158,7 +157,7 @@ public class TenantSampleDataTest extends TestBase {
 
   private TenantJob upgradeTenantWithNoSampleDataLoad() throws MalformedURLException {
 
-    logger.info("upgrading Module without sample data");
+    log.info("upgrading Module without sample data");
 
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
@@ -174,7 +173,7 @@ public class TenantSampleDataTest extends TestBase {
 
   @Test
   public void upgradeTenantWithNonExistentDb() throws MalformedURLException {
-    logger.info("upgrading Module for non existed tenant");
+    log.info("upgrading Module for non existed tenant");
 
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
     try {
@@ -183,7 +182,7 @@ public class TenantSampleDataTest extends TestBase {
 
       // Check that no sample data loaded
       for (TestEntities entity : TestEntities.values()) {
-        logger.info("Test expected quantity for " , 0, entity.name());
+        log.info("Test expected quantity for " , 0, entity.name());
         verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() , NONEXISTENT_TENANT_HEADER);
       }
     }
