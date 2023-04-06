@@ -323,14 +323,16 @@
           "removeAccents": true,
           "arraySubfield": "refNumber",
           "arrayModifiers": ["refNumberType", "vendorDetailsSource"]
+        },
+        {
+          "fieldName": "fundDistribution",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "arraySubfield": "fundId",
+          "arrayModifiers": ["fundId"]
         }
       ],
       "ginIndex": [
-        {
-          "fieldName": "fundDistribution.code",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
         {
           "fieldName": "details.productIds",
           "caseSensitive": false,
