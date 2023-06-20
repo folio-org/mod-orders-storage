@@ -30,7 +30,7 @@ public class PoLineNumbersService {
   public Future<PoLineNumber> retrievePoLineNumber(String purchaseOrderId, int poLineNumbers, DBClient dbClient) {
     PostgresClient pgClient = dbClient.getPgClient();
     log.debug("retrievePoLineNumber: getting po {} for update", purchaseOrderId);
-    return pgClient.withConn(conn -> orderDAO.getOrderByIdForUpdate(purchaseOrderId, conn)
+    return pgClient.withTrans(conn -> orderDAO.getOrderByIdForUpdate(purchaseOrderId, conn)
       .compose(po -> {
         if (po.getNextPolNumber() != null)
           return Future.succeededFuture(po);
