@@ -334,6 +334,11 @@
       ],
       "ginIndex": [
         {
+          "fieldName": "fundDistribution",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
           "fieldName": "details.productIds",
           "caseSensitive": false,
           "removeAccents": true
