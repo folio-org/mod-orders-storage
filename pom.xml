@@ -13,6 +13,7 @@
   </licenses>
 
   <properties>
+    <!--Project properties-->
     <module_name>mod-orders-storage</module_name>
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
