@@ -178,7 +178,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
     Criterion criterion = new Criterion().addCriterion(new Criteria().addField("id").setOperation("=").setVal(id).setJSONB(false));
 
     doReturn(Future.failedFuture(new HttpException(500, "Error")))
-      .when(conn).get(PO_LINE_TABLE, eq(PoLine.class), eq(criterion), eq(false));
+      .when(conn).get(eq(PO_LINE_TABLE), eq(PoLine.class), eq(criterion), eq(false));
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLines(criterion, conn))
       .onComplete(ar -> {
