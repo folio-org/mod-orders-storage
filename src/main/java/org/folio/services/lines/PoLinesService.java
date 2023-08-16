@@ -13,14 +13,13 @@ import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
 
+import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,11 +30,14 @@ import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.impl.PiecesAPI;
-import org.folio.rest.jaxrs.model.*;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Tx;
-import org.folio.rest.persist.Criteria.Criterion;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -168,7 +170,7 @@ public class PoLinesService {
       return Future.succeededFuture(Collections.emptyList());
     }
     Promise<List<PoLine>> promise = Promise.promise();
-    List<String> uniqueIdList = poLineIds.stream().distinct().collect(toList());
+    List<String> uniqueIdList = poLineIds.stream().distinct().toList();
     CompositeFuture.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ)
                         .map(chunkIds -> getPoLinesByLineIds(chunkIds, conn))
                         .collect(toList()))
@@ -179,7 +181,7 @@ public class PoLinesService {
             .map(chunkList -> (List<PoLine>)chunkList)
             .filter(CollectionUtils::isNotEmpty)
             .flatMap(Collection::stream)
-            .collect(toList()));
+            .toList());
         } else {
           log.error("getPoLinesByLineIds failed, poLineIds={}", poLineIds, ar.cause());
           promise.fail(ar.cause());
@@ -245,7 +247,7 @@ public class PoLinesService {
   private String buildUpdatePoLineBatchQuery(Collection<PoLine> poLines, String tenantId) {
     List<JsonObject> jsonPoLines = poLines.stream()
       .map(JsonObject::mapFrom)
-      .collect(toList());
+      .toList();
     return String.format(
       "UPDATE %s AS po_line SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = po_line.id;",
       getFullTableName(tenantId, PO_LINE_TABLE), getQueryValues(jsonPoLines));

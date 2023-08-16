@@ -1,6 +1,5 @@
 package org.folio.rest.exceptions;
 
-import static java.util.stream.Collectors.toList;
 import static org.folio.rest.exceptions.ErrorCodes.GENERIC_ERROR_CODE;
 import static org.folio.rest.exceptions.ErrorCodes.POSTGRE_SQL_ERROR;
 
@@ -41,7 +40,7 @@ public class ExceptionUtil {
       errors = convertVertxHttpException(vertxHttpException);
     } else if (cause instanceof HttpException httpException) {
       errors = httpException.getErrors();
-      List<Error> errorList = errors.getErrors().stream().map(ExceptionUtil::mapToError).collect(toList());
+      List<Error> errorList = errors.getErrors().stream().map(ExceptionUtil::mapToError).toList();
       errors.setErrors(errorList);
     } else {
       errors = new Errors().withErrors(Collections.singletonList(GENERIC_ERROR_CODE.toError()

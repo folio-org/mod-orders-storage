@@ -1,6 +1,5 @@
 package org.folio.services.piece;
 
-import static java.util.stream.Collectors.toList;
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -19,9 +17,9 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Tx;
-import org.folio.rest.persist.Criteria.Criterion;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -79,7 +77,7 @@ public class PieceService {
   private String buildUpdatePieceBatchQuery(Collection<Piece> pieces, String tenantId) {
     List<JsonObject> jsonPieces = pieces.stream()
       .map(JsonObject::mapFrom)
-      .collect(toList());
+      .toList();
     return String.format(
       "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id;",
       getFullTableName(tenantId, PIECES_TABLE), getQueryValues(jsonPieces));
@@ -114,7 +112,7 @@ public class PieceService {
         }
         return piece;
       })
-      .collect(Collectors.toList())));
+      .toList()));
 
     return updatePieces(poLineTx, updatedPieces, client);
   }
