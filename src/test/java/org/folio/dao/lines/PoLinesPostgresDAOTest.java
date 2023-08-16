@@ -113,21 +113,15 @@ public class PoLinesPostgresDAOTest extends TestBase {
     PoLine poLine = new PoLine().withId(id);
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
-    client.getPgClient().save(PO_LINE_TABLE, id, poLine, event -> {
-      promise1.complete();
-    });
+    client.getPgClient().save(PO_LINE_TABLE, id, poLine, event -> promise1.complete());
     Promise<Void> promise2 = Promise.promise();
-    client.getPgClient().save(PO_LINE_TABLE, poLine, event -> {
-      promise2.complete();
-    });
+    client.getPgClient().save(PO_LINE_TABLE, poLine, event -> promise2.complete());
     testContext.assertComplete(promise1.future()
       .compose(aVoid -> promise2.future())
       .compose(o -> poLinesPostgresDAO.getPoLineById(id, client)))
       .onComplete(ar -> {
         PoLine actPoLine = ar.result();
-        testContext.verify(() -> {
-          assertThat(actPoLine.getId(), is(id));
-        });
+        testContext.verify(() -> assertThat(actPoLine.getId(), is(id)));
         testContext.completeNow();
       });
   }
@@ -184,7 +178,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
     Criterion criterion = new Criterion().addCriterion(new Criteria().addField("id").setOperation("=").setVal(id).setJSONB(false));
 
     doReturn(Future.failedFuture(new HttpException(500, "Error")))
-      .when(conn).get(eq(PO_LINE_TABLE), eq(PoLine.class), eq(criterion), eq(false));
+      .when(conn).get(PO_LINE_TABLE, eq(PoLine.class), eq(criterion), eq(false));
 
     testContext.assertFailure(poLinesPostgresDAO.getPoLines(criterion, conn))
       .onComplete(ar -> {
@@ -204,13 +198,9 @@ public class PoLinesPostgresDAOTest extends TestBase {
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
     PostgresClient pgClient = client.getPgClient();
-    pgClient.save(PO_LINE_TABLE, id, poLine, event -> {
-      promise1.complete();
-    });
+    pgClient.save(PO_LINE_TABLE, id, poLine, event -> promise1.complete());
     Promise<Void> promise2 = Promise.promise();
-    pgClient.save(PO_LINE_TABLE, poLine, event -> {
-      promise2.complete();
-    });
+    pgClient.save(PO_LINE_TABLE, poLine, event -> promise2.complete());
     String sql = "UPDATE test_tenant_mod_orders_storage.po_line AS po_line SET jsonb = b.jsonb " +
       "FROM (VALUES  ('" + id +"', '" + JsonObject.mapFrom(poLine).encode() + "'::json)) AS b (id, jsonb) " +
       "WHERE b.id::uuid = po_line.id;";
@@ -219,9 +209,7 @@ public class PoLinesPostgresDAOTest extends TestBase {
         .compose(o -> pgClient.withConn(conn -> poLinesPostgresDAO.updatePoLines(sql, conn))))
       .onComplete(ar -> {
         Integer numUpdLines = ar.result();
-        testContext.verify(() -> {
-          assertThat(1, is(numUpdLines));
-        });
+        testContext.verify(() -> assertThat(1, is(numUpdLines)));
         testContext.completeNow();
       });
   }

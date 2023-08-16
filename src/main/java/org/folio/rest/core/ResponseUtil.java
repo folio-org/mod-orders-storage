@@ -54,10 +54,10 @@ public class ResponseUtil {
   }
 
   private static int extractHttpCode(Throwable cause) {
-     if (cause instanceof io.vertx.ext.web.handler.HttpException) {
-      return ((io.vertx.ext.web.handler.HttpException) cause).getStatusCode();
-    } else if (cause instanceof HttpException){
-      return ((HttpException) cause).getCode();
+     if (cause instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
+      return vertxHttpException.getStatusCode();
+    } else if (cause instanceof HttpException httpException){
+      return httpException.getCode();
     }
     return INTERNAL_SERVER_ERROR.getStatusCode();
   }
@@ -66,9 +66,9 @@ public class ResponseUtil {
     final String message;
     final int code;
 
-    if (throwable instanceof io.vertx.ext.web.handler.HttpException) {
-      code = ((io.vertx.ext.web.handler.HttpException) throwable).getStatusCode();
-      message = ((io.vertx.ext.web.handler.HttpException) throwable).getPayload();
+    if (throwable instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
+      code = vertxHttpException.getStatusCode();
+      message = vertxHttpException.getPayload();
     } else {
       code = INTERNAL_SERVER_ERROR.getStatusCode();
       message = throwable.getMessage();

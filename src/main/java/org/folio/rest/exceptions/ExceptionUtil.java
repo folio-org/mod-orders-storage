@@ -37,10 +37,10 @@ public class ExceptionUtil {
     Map<Character,String> pgFields = PgExceptionUtil.getBadRequestFields(throwable);
     if (!MapUtils.isEmpty(pgFields)) {
       errors = convertPgExceptions(pgFields);
-    } else if (cause instanceof io.vertx.ext.web.handler.HttpException) {
-      errors = convertVertxHttpException((io.vertx.ext.web.handler.HttpException) cause);
-    } else if (cause instanceof HttpException) {
-      errors = ((HttpException) cause).getErrors();
+    } else if (cause instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
+      errors = convertVertxHttpException(vertxHttpException);
+    } else if (cause instanceof HttpException httpException) {
+      errors = httpException.getErrors();
       List<Error> errorList = errors.getErrors().stream().map(ExceptionUtil::mapToError).collect(toList());
       errors.setErrors(errorList);
     } else {

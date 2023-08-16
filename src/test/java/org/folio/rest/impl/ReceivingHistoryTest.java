@@ -5,17 +5,18 @@ import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.folio.rest.utils.TestEntities.TITLES;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
@@ -100,7 +101,7 @@ public class ReceivingHistoryTest extends TestBase {
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=" + acqUnitId1, 2);
       verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=" + acqUnitId2, 1);
       verifyCollectionQuantity(String.format(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=(%s and %s)", acqUnitId1, acqUnitId2), 1);
-      verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=" + UUID.randomUUID().toString(), 0);
+      verifyCollectionQuantity(RECEIVING_HISTORY_ENDPOINT + "?query=acqUnitIds=" + UUID.randomUUID(), 0);
     } catch (Exception e) {
       log.error("--- mod-orders-storage-test: receiving_history API ERROR: " + e.getMessage(), e);
       fail(e.getMessage());

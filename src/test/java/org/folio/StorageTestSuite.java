@@ -203,7 +203,7 @@ public class StorageTestSuite {
   @SneakyThrows
   public static List<String> checkKafkaEventSent(String tenant, String eventType, int expected, String userId) {
     String topicToObserve = formatToKafkaTopicName(tenant, eventType);
-    List<String> observedValues = kafkaCluster.observeValues(ObserveKeyValues.on(topicToObserve, expected)
+    return kafkaCluster.observeValues(ObserveKeyValues.on(topicToObserve, expected)
       .filterOnHeaders(val -> {
         var header = val.lastHeader(RestVerticle.OKAPI_USERID_HEADER.toLowerCase());
         if (Objects.nonNull(header)) {
@@ -213,7 +213,6 @@ public class StorageTestSuite {
       })
       .observeFor(30, TimeUnit.SECONDS)
       .build());
-    return observedValues;
   }
 
   private static String formatToKafkaTopicName(String tenant, String eventType) {
