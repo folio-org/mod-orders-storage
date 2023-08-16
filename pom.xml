@@ -13,22 +13,30 @@
   </licenses>
 
   <properties>
-    <aspectj.version>1.9.7</aspectj.version>
     <module_name>mod-orders-storage</module_name>
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <raml-module-builder.version>35.0.1</raml-module-builder.version>
+    <java.version>17</java.version>
+
+    <vertx.version>4.3.4</vertx.version>
+    <lombok.version>1.18.24</lombok.version>
+    <postgres.image>postgres:12-alpine</postgres.image>
+    <log4j.version>2.19.0</log4j.version>
+    <aspectj.version>1.9.19</aspectj.version>
+    <common-lang.version>2.6</common-lang.version>
+    <jackson-bom.version>2.13.4</jackson-bom.version>
+
+    <!--    Test Scope Dependencies-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.9.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
-    <vertx.version>4.3.4</vertx.version>
-    <lombok.version>1.18.24</lombok.version>
+    <testcontainers.version>1.17.4</testcontainers.version>
+
+    <!--    Sonar properties-->
     <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
-    <testcontainers.version>1.17.4</testcontainers.version>
-    <postgres.image>postgres:12-alpine</postgres.image>
-    <log4j.version>2.19.0</log4j.version>
     <argLine />
   </properties>
 
@@ -60,7 +68,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.13.4</version>
+        <version>${jackson-bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -130,7 +138,7 @@
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <version>2.6</version>
+      <version>${common-lang.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -232,7 +240,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <release>11</release>
+          <release>${java.version}</release>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -302,13 +310,13 @@
       </plugin>
 
       <plugin>
-        <groupId>com.nickwongdev</groupId>
+        <groupId>dev.aspectj</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.12.6</version>
+        <version>1.13.1</version>
         <configuration>
           <verbose>true</verbose>
           <showWeaveInfo>false</showWeaveInfo>
-          <complianceLevel>11</complianceLevel>
+          <complianceLevel>${java.version}</complianceLevel>
           <includes>
             <include>**/impl/*.java</include>
             <include>**/*.aj</include>
