@@ -22,15 +22,24 @@ public class OrderLineUpdateInstanceHandler implements PatchOperationHandler {
     return switch (storagePoLine.getOrderFormat()) {
       case P_E_MIX -> {
         log.debug("OrderLineUpdateInstanceHandler.handle P_E_MIX, poLineId={}", storagePoLine.getId());
-        yield orderLineUpdateInstanceStrategyResolver.resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value())).updateInstance(holder, context).compose(v -> orderLineUpdateInstanceStrategyResolver.resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value())).updateInstance(holder, context));
+        yield orderLineUpdateInstanceStrategyResolver
+          .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
+          .updateInstance(holder, context)
+          .compose(v -> orderLineUpdateInstanceStrategyResolver
+            .resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value()))
+            .updateInstance(holder, context));
       }
       case ELECTRONIC_RESOURCE -> {
         log.debug("OrderLineUpdateInstanceHandler.handle ELECTRONIC_RESOURCE, poLineId={}", storagePoLine.getId());
-        yield orderLineUpdateInstanceStrategyResolver.resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value())).updateInstance(holder, context);
+        yield orderLineUpdateInstanceStrategyResolver
+          .resolver(CreateInventoryType.fromValue(storagePoLine.getEresource().getCreateInventory().value()))
+          .updateInstance(holder, context);
       }
       case OTHER, PHYSICAL_RESOURCE -> {
         log.debug("OrderLineUpdateInstanceHandler.handle OTHER|PHYSICAL_RESOURCE, poLineId={}", storagePoLine.getId());
-        yield orderLineUpdateInstanceStrategyResolver.resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value())).updateInstance(holder, context);
+        yield orderLineUpdateInstanceStrategyResolver
+          .resolver(CreateInventoryType.fromValue(storagePoLine.getPhysical().getCreateInventory().value()))
+          .updateInstance(holder, context);
       }
     };
   }
