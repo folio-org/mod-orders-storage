@@ -1,33 +1,18 @@
 package org.folio.rest.impl;
 
-import io.restassured.http.Headers;
-import org.folio.StorageTestSuite;
-import org.folio.event.AuditEventType;
-import org.folio.rest.jaxrs.model.OrderAuditEvent;
-import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import static org.folio.rest.impl.HelperUtilsTest.ORDERS_ENDPOINT;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isIn;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-
-import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
-import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +20,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.StorageTestSuite;
+import org.folio.event.AuditEventType;
+import org.folio.rest.jaxrs.model.OrderAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.PurchaseOrder.WorkflowStatus;
+import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import io.restassured.http.Headers;
+import io.vertx.core.json.JsonObject;
 
 
 public class OrdersAPITest extends TestBase {
@@ -48,7 +48,7 @@ public class OrdersAPITest extends TestBase {
   private static final Integer CREATED_ORDERS_QUANTITY = 3;
   private static final Integer CREATED_PO_LINES_QUANTITY = 2;
   private static final Map<String, PurchaseOrder> expectedOrders = new HashMap<>();
-  private static final Set<String> EXCLUDED_FIELD_NAMES = new HashSet<>(Arrays.asList("metadata"));
+  private static final Set<String> EXCLUDED_FIELD_NAMES = new HashSet<>(List.of("metadata"));
 
   @Test
   public void testGetPurchaseOrders() throws MalformedURLException {
@@ -106,7 +106,7 @@ public class OrdersAPITest extends TestBase {
       List<PurchaseOrder> ordersWithTag = getViewCollection(ORDERS_ENDPOINT + "?query=tags.tagList=important sortBy dateOrdered/sort.ascending");
 
       assertThat(ordersWithTag, hasSize(1));
-      assertThat("important", isIn(ordersWithTag.get(0).getTags().getTagList()));
+      assertThat(ordersWithTag.get(0).getTags().getTagList(), hasItem("important"));
 
       log.info("--- mod-orders-storage Orders API test: Verifying entities filtering by tags, sort.descending... ");
       List<PurchaseOrder> pendingOrdersWithCreatedDateDescending = getViewCollection(ORDERS_ENDPOINT + "?lang=en&limit=30&offset=0&query=workflowStatus==Pending sortBy createdDate/sort.descending");

@@ -13,22 +13,42 @@
   </licenses>
 
   <properties>
-    <aspectj.version>1.9.7</aspectj.version>
+    <!--Project properties-->
     <module_name>mod-orders-storage</module_name>
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <raml-module-builder.version>35.0.1</raml-module-builder.version>
+    <java.version>17</java.version>
+
+    <!--Dependency Management Properties-->
+    <vertx.version>4.3.4</vertx.version>
+    <lombok.version>1.18.24</lombok.version>
+    <postgres.image>postgres:12-alpine</postgres.image>
+    <log4j.version>2.19.0</log4j.version>
+
+    <!--Dependency properties-->
+    <streamx.version>0.8.1</streamx.version>
+    <rest-assured.version>5.2.0</rest-assured.version>
+    <aspectj.version>1.9.19</aspectj.version>
+    <aspectj-maven-plugin.version>1.13.1</aspectj-maven-plugin.version>
+    <common-lang.version>2.6</common-lang.version>
+    <jackson-bom.version>2.13.4</jackson-bom.version>
+
+    <!--Maven plugin properties-->
+    <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
+    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+    <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+
+    <!--Test Scope dependencies-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.9.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
-    <vertx.version>4.3.4</vertx.version>
-    <lombok.version>1.18.24</lombok.version>
+    <testcontainers.version>1.17.4</testcontainers.version>
+
+    <!--Sonar properties-->
     <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
-    <testcontainers.version>1.17.4</testcontainers.version>
-    <postgres.image>postgres:12-alpine</postgres.image>
-    <log4j.version>2.19.0</log4j.version>
     <argLine />
   </properties>
 
@@ -60,7 +80,7 @@
       <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
-        <version>2.13.4</version>
+        <version>${jackson-bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -85,7 +105,7 @@
     <dependency>
       <groupId>one.util</groupId>
       <artifactId>streamex</artifactId>
-      <version>0.8.1</version>
+      <version>${streamx.version}</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
@@ -101,7 +121,7 @@
     <dependency>
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
-      <version>5.2.0</version>
+      <version>${rest-assured.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -130,7 +150,7 @@
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
-      <version>2.6</version>
+      <version>${common-lang.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -232,7 +252,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
         <configuration>
-          <release>11</release>
+          <release>${java.version}</release>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
@@ -302,13 +322,13 @@
       </plugin>
 
       <plugin>
-        <groupId>com.nickwongdev</groupId>
+        <groupId>dev.aspectj</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>
-        <version>1.12.6</version>
+        <version>${aspectj-maven-plugin.version}</version>
         <configuration>
           <verbose>true</verbose>
           <showWeaveInfo>false</showWeaveInfo>
-          <complianceLevel>11</complianceLevel>
+          <complianceLevel>${java.version}</complianceLevel>
           <includes>
             <include>**/impl/*.java</include>
             <include>**/*.aj</include>
@@ -458,7 +478,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
+        <version>${maven-shade-plugin.version}</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -500,7 +520,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.5.3</version>
+        <version>${maven-release-plugin.version}</version>
         <configuration>
           <preparationGoals>clean verify</preparationGoals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
@@ -511,7 +531,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
+        <version>${maven-surefire-plugin.version}</version>
         <configuration>
           <systemPropertyVariables>
             <vertx.logger-delegate-factory-class-name>io.vertx.core.logging.Log4j2LogDelegateFactory</vertx.logger-delegate-factory-class-name>
