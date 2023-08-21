@@ -103,7 +103,7 @@ public class AuditEventProducer {
                                       EntityType entityType) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
     String topicName = createTopicName(kafkaConfig.getEnvId(), tenantId, eventType.getTopicName());
-    KafkaProducerRecord<String, String> record = new KafkaProducerRecordBuilder<String, Object>("tenantId")
+    KafkaProducerRecord<String, String> record = new KafkaProducerRecordBuilder<String, Object>(tenantId)
       .key(key)
       .value(eventPayload)
       .topic(topicName)
