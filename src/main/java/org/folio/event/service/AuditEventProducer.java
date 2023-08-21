@@ -4,7 +4,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
-import io.vertx.kafka.client.producer.KafkaHeader;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +11,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.AuditEventType;
 import org.folio.kafka.KafkaConfig;
-import org.folio.kafka.KafkaHeaderUtils;
 import org.folio.kafka.KafkaTopicNameHelper;
+import org.folio.kafka.SimpleKafkaProducerManager;
+import org.folio.kafka.services.KafkaProducerRecordBuilder;
 import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -23,7 +23,6 @@ import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.tools.utils.TenantTool;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -103,13 +102,19 @@ public class AuditEventProducer {
                                       String key,
                                       EntityType entityType) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
-    List<KafkaHeader> kafkaHeaders = KafkaHeaderUtils.kafkaHeadersFromMap(okapiHeaders);
     String topicName = createTopicName(kafkaConfig.getEnvId(), tenantId, eventType.getTopicName());
-    KafkaProducerRecord<String, String> record = createProducerRecord(topicName, key, eventPayload, kafkaHeaders);
+    KafkaProducerRecord<String, String> record = new KafkaProducerRecordBuilder<String, Object>("tenantId")
+      .key(key)
+      .value(eventPayload)
+      .topic(topicName)
+      .propagateOkapiHeaders(okapiHeaders)
+      .build();
+
 
     Promise<Boolean> promise = Promise.promise();
 
-    KafkaProducer<String, String> producer = createProducer(eventType.getTopicName());
+    SimpleKafkaProducerManager producerManager = new SimpleKafkaProducerManager(Vertx.currentContext().owner(), kafkaConfig);
+    KafkaProducer<String, String> producer = producerManager.createShared(eventType.getTopicName());
     producer.write(record, ar -> {
       producer.end(ear -> producer.close());
       if (ar.succeeded()) {
@@ -125,17 +130,6 @@ public class AuditEventProducer {
     });
 
     return promise.future();
-  }
-
-  private KafkaProducer<String, String> createProducer(String eventType) {
-    String producerName = eventType + "_Producer";
-    return KafkaProducer.createShared(Vertx.currentContext().owner(), producerName, kafkaConfig.getProducerProps());
-  }
-
-  private KafkaProducerRecord<String, String> createProducerRecord(String topicName, String key, String eventPayload, List<KafkaHeader> kafkaHeaders) {
-    KafkaProducerRecord<String, String> record = KafkaProducerRecord.create(topicName, key, eventPayload);
-    record.addHeaders(kafkaHeaders);
-    return record;
   }
 
   private String createTopicName(String envId, String tenantId, String eventType) {
