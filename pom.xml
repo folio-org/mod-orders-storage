@@ -23,6 +23,7 @@
 
     <!--Dependency Management Properties-->
     <vertx.version>4.3.4</vertx.version>
+    <kafkaclients.version>3.3.2</kafkaclients.version>
     <lombok.version>1.18.24</lombok.version>
     <postgres.image>postgres:12-alpine</postgres.image>
     <log4j.version>2.19.0</log4j.version>
@@ -191,6 +192,11 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-kafka-client</artifactId>
       <version>${vertx.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>${kafkaclients.version}</version>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
