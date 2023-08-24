@@ -421,7 +421,7 @@ public class PoLinesServiceTest {
     doReturn(succeededFuture(results))
       .when(conn).get(anyString(), eq(Title.class), any(Criterion.class), anyBoolean());
 
-    Future<Void> f = poLinesService.updatePoLineWithTitle(poLineId, poLine, requestContext);
+    Future<Void> f = poLinesService.updatePoLineWithTitle(conn, poLineId, poLine, requestContext);
 
     assertThat(f.failed(), is(true));
     io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
