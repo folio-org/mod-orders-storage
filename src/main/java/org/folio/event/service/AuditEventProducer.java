@@ -1,12 +1,9 @@
 package org.folio.event.service;
 
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
-import io.vertx.kafka.client.producer.KafkaProducer;
-import io.vertx.kafka.client.producer.KafkaProducerRecord;
-import lombok.RequiredArgsConstructor;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.AuditEventType;
@@ -22,9 +19,12 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.tools.utils.TenantTool;
 
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.kafka.client.producer.KafkaProducer;
+import io.vertx.kafka.client.producer.KafkaProducerRecord;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class AuditEventProducer {
@@ -46,8 +46,7 @@ public class AuditEventProducer {
                                         Map<String, String> okapiHeaders) {
     OrderAuditEvent event = getOrderEvent(order, eventAction);
     log.info("Starting to send event with id: {} for Order to Kafka for orderId: {}", event.getId(), order.getId());
-    String eventPayload = Json.encode(event);
-    return sendToKafka(AuditEventType.ACQ_ORDER_CHANGED, eventPayload, okapiHeaders, event.getOrderId(), EntityType.ORDER)
+    return sendToKafka(AuditEventType.ACQ_ORDER_CHANGED, event, okapiHeaders, event.getOrderId(), EntityType.ORDER)
       .onFailure(t -> log.warn("sendOrderEvent failed, order id={}", order.getId(), t));
   }
 
@@ -66,8 +65,7 @@ public class AuditEventProducer {
     OrderLineAuditEvent event = getOrderLineEvent(poLine, eventAction);
     log.info("Starting to send event wit id: {} for Order Line to Kafka for orderLineId: {}", event.getId(),
       poLine.getId());
-    String eventPayload = Json.encode(event);
-    return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, eventPayload, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE)
+    return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, event, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE)
       .onFailure(t -> log.warn("sendOrderLineEvent failed, poLine id={}", poLine.getId(), t));
   }
 
@@ -97,13 +95,13 @@ public class AuditEventProducer {
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,
-                                      String eventPayload,
+                                      Object eventPayload,
                                       Map<String, String> okapiHeaders,
                                       String key,
                                       EntityType entityType) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
-    String topicName = createTopicName(kafkaConfig.getEnvId(), tenantId, eventType.getTopicName());
-    KafkaProducerRecord<String, String> record = new KafkaProducerRecordBuilder<String, Object>(tenantId)
+    String topicName = buildTopicName(kafkaConfig.getEnvId(), tenantId, eventType.getTopicName());
+    KafkaProducerRecord<String, String> kafkaProducerRecord = new KafkaProducerRecordBuilder<String, Object>(tenantId)
       .key(key)
       .value(eventPayload)
       .topic(topicName)
@@ -112,10 +110,9 @@ public class AuditEventProducer {
 
 
     Promise<Boolean> promise = Promise.promise();
-
     SimpleKafkaProducerManager producerManager = new SimpleKafkaProducerManager(Vertx.currentContext().owner(), kafkaConfig);
-    KafkaProducer<String, String> producer = producerManager.createShared(eventType.getTopicName());
-    producer.send(record)
+    KafkaProducer<String, String> producer = producerManager.createShared(topicName);
+    producer.send(kafkaProducerRecord)
       .onSuccess(event -> {
         log.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
         promise.complete(true);
@@ -127,7 +124,7 @@ public class AuditEventProducer {
     return promise.future();
   }
 
-  private String createTopicName(String envId, String tenantId, String eventType) {
+  private String buildTopicName(String envId, String tenantId, String eventType) {
     return KafkaTopicNameHelper.formatTopicName(envId, KafkaTopicNameHelper.getDefaultNameSpace(),
       tenantId, eventType);
   }
