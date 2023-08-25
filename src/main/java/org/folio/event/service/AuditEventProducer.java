@@ -111,10 +111,14 @@ public class AuditEventProducer {
     KafkaProducer<String, String> producer = producerManager.createShared(topicName);
     return producer.send(kafkaProducerRecord)
       .map(event -> {
+        producer.end(ear -> producer.close());
         log.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
         return true;
       })
-      .onFailure(error -> log.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType, entityType, key, topicName, error));
+      .onFailure(error -> {
+        producer.end(ear -> producer.close());
+        log.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType, entityType, key, topicName, error);
+      });
   }
 
   private String buildTopicName(String envId, String tenantId, String eventType) {
