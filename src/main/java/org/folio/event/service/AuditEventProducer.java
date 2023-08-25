@@ -110,14 +110,14 @@ public class AuditEventProducer {
     SimpleKafkaProducerManager producerManager = new SimpleKafkaProducerManager(Vertx.currentContext().owner(), kafkaConfig);
     KafkaProducer<String, String> producer = producerManager.createShared(topicName);
     return producer.send(kafkaProducerRecord)
-      .map(event -> {
+      .map(event -> true)
+      .onComplete(reply -> {
         producer.end(ear -> producer.close());
-        log.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
-        return true;
-      })
-      .onFailure(error -> {
-        producer.end(ear -> producer.close());
-        log.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType, entityType, key, topicName, error);
+        if (reply.succeeded()) {
+          log.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
+        } else {
+          log.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'", eventType, entityType, key, topicName, reply.cause());
+        }
       });
   }
 
