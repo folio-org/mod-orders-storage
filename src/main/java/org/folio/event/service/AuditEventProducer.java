@@ -108,20 +108,14 @@ public class AuditEventProducer {
       .propagateOkapiHeaders(okapiHeaders)
       .build();
 
-
-    Promise<Boolean> promise = Promise.promise();
     SimpleKafkaProducerManager producerManager = new SimpleKafkaProducerManager(Vertx.currentContext().owner(), kafkaConfig);
     KafkaProducer<String, String> producer = producerManager.createShared(topicName);
-    producer.send(kafkaProducerRecord)
-      .onSuccess(event -> {
+    return producer.send(kafkaProducerRecord)
+      .map(event -> {
         log.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
-        promise.complete(true);
+        return true;
       })
-      .onFailure(error -> {
-        log.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType, entityType, key, topicName, error);
-        promise.fail(error);
-      });
-    return promise.future();
+      .onFailure(error -> log.error("Producer write error for event '{}' for {} id: '{}' for kafka topic '{}'",  eventType, entityType, key, topicName, error));
   }
 
   private String buildTopicName(String envId, String tenantId, String eventType) {
