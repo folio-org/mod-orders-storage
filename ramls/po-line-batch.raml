@@ -4,8 +4,8 @@ baseUri: http://github.com/folio-org/mod-orders-storage
 version: v9.3
 
 documentation:
-  - title: PO Line
-    content: <b>This module implements the CRUD interface.  This API is intended for internal use only.  Please use the /orders/order-lines API provided by mod-orders instead.</b>
+  - title: PO Line batch
+    content: <b>This module implements the PO lines batch processing interface.  This API is intended for internal use only.
 
 types:
   po-line-collection: !include acq-models/mod-orders-storage/schemas/po_line_collection.json
@@ -20,10 +20,10 @@ traits:
 
 
 /orders-storage/po-lines-batch:
-  displayName: Finance release encumbrance
-  description: Finance release encumbrance APIs
+  displayName: Process list of PO lines in a batch
+  description: Process list of PO lines in a batch APIs
   put:
-    description: "asd"
+    description: "Update the list of PO lines in a batch"
     body:
       application/json:
         type: po-line-collection
@@ -32,12 +32,7 @@ traits:
           value: !include acq-models/mod-orders-storage/examples/po_line_collection.sample
     responses:
       204:
-        description: "Item successfully updated"
-      404:
-        description: "Item with a given ID not found"
-        body:
-          text/plain:
-            example: "Bad request"
+        description: "Collection successfully updated"
       400:
         description: "Bad request, e.g. malformed request body or query parameter. Details of the error (e.g. name of the parameter or line/character number with malformed data) provided in the response."
         body:
@@ -48,5 +43,3 @@ traits:
         body:
           text/plain:
             example: "internal server error, contact administrator"
-
-
