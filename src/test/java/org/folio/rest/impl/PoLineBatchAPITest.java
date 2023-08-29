@@ -20,7 +20,7 @@ import io.restassured.http.Headers;
 import io.vertx.core.json.Json;
 
 @IsolatedTenant
-class PoLineBatchAPITest extends TestBase {
+public class PoLineBatchAPITest extends TestBase {
 
   private static final String PO_LINES_BATCH_ENDPOINT = "/orders-storage/po-lines-batch";
   @Test

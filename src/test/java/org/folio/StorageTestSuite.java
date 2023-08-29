@@ -30,6 +30,7 @@ import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.HelperUtilsTest;
 import org.folio.rest.impl.OrdersAPITest;
+import org.folio.rest.impl.PoLineBatchAPITest;
 import org.folio.rest.impl.PoNumberTest;
 import org.folio.rest.impl.PurchaseOrderLineNumberTest;
 import org.folio.rest.impl.PurchaseOrderLinesApiTest;
@@ -263,4 +264,9 @@ public class StorageTestSuite {
   class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
   @Nested
   class PoLIneServiceVertxTestNested extends PoLIneServiceVertxTest {}
+
+  @Nested
+  class PoLineBatchAPITestNested extends PoLineBatchAPITest {}
+
+
 }
