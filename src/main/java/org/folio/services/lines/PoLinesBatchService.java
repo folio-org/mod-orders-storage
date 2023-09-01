@@ -10,13 +10,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
-import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 
@@ -25,10 +23,10 @@ public class PoLinesBatchService {
   private final AuditOutboxService auditOutboxService;
   private final PoLinesService poLinesService;
 
-
   public PoLinesBatchService(AuditOutboxService auditOutboxService, PoLinesService poLinesService) {
     this.auditOutboxService = auditOutboxService;
     this.poLinesService = poLinesService;
+
   }
 
   public Future<Void> poLinesBatchUpdate(List<PoLine> poLines, PostgresClient pgClient, Map<String, String> okapiHeaders,
@@ -41,19 +39,20 @@ public class PoLinesBatchService {
 
     return pgClient.withTrans(conn ->
       conn.updateBatch(PO_LINE_TABLE, poLines)
-        .compose(rowSet -> updatePoLinesWithTitle(conn, poLines, okapiHeaders, vertxContext))
+        .compose(rowSet -> updatePoLinesWithTitle(conn, poLines))
         .compose(rowSet -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, okapiHeaders))
         .mapEmpty()
     );
 
   }
 
-  private CompositeFuture updatePoLinesWithTitle(Conn conn, List<PoLine> poLines, Map<String, String> okapiHeaders, Context vertxContext) {
+  private Future<Void> updatePoLinesWithTitle(Conn conn, List<PoLine> poLines) {
     var futures = poLines.stream()
       .filter(poLine -> !poLine.getIsPackage())
-      .map(poLine -> poLinesService.updatePoLineWithTitle(conn, poLine.getId(), poLine, new RequestContext(vertxContext, okapiHeaders)))
+      .map(poLine -> poLinesService.updateTitle(conn, poLine))
       .toList();
-    return GenericCompositeFuture.join(futures);
+    return GenericCompositeFuture.join(futures)
+      .mapEmpty();
   }
 
 }

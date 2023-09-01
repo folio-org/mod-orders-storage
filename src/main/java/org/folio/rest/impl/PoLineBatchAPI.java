@@ -46,10 +46,10 @@ public class PoLineBatchAPI extends BaseApi implements OrdersStoragePoLinesBatch
     poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders, vertxContext)
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error(getPoLineIdsForLogMessage(poLineCollection.getPoLines()), ar.cause());
+          log.error("putOrdersStoragePoLinesBatch:: failed, PO line ids: {} ", getPoLineIdsForLogMessage(poLineCollection.getPoLines()), ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
-          log.info(getPoLineIdsForLogMessage(poLineCollection.getPoLines()));
+          log.info("putOrdersStoragePoLinesBatch:: completed, PO line ids: {} ", getPoLineIdsForLogMessage(poLineCollection.getPoLines()));
           auditOutboxService.processOutboxEventLogs(okapiHeaders);
           asyncResultHandler.handle(buildNoContentResponse());
         }
@@ -62,7 +62,7 @@ public class PoLineBatchAPI extends BaseApi implements OrdersStoragePoLinesBatch
   }
 
   private String getPoLineIdsForLogMessage(List<PoLine> polines) {
-    return "putOrdersStoragePoLinesBatch completed, PO line ids: " + polines.stream()
+    return polines.stream()
       .map(PoLine::getId)
       .collect(Collectors.joining(", "));
   }
