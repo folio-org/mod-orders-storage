@@ -1,7 +1,11 @@
 package org.folio.event.service;
 
-import io.vertx.core.Future;
-import io.vertx.core.json.Json;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,11 +23,8 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import io.vertx.core.Future;
+import io.vertx.core.json.Json;
 
 public class AuditOutboxService {
   private static final Logger log = LogManager.getLogger();
@@ -107,7 +108,8 @@ public class AuditOutboxService {
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<PoLine> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    var futures = poLines.stream().map(poLine -> {
+    var futures = poLines.stream()
+      .map(poLine -> {
         log.trace("saveOrderLineOutboxLog, po line id={}", poLine.getId());
         String orderLine = Json.encode(poLine);
         return saveOutboxLog(conn, action.value(), EntityType.ORDER_LINE, orderLine, okapiHeaders)
