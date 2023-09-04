@@ -1,7 +1,11 @@
 package org.folio.event.service;
 
-import io.vertx.core.Future;
-import io.vertx.core.json.Json;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,11 +23,8 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import io.vertx.core.Future;
+import io.vertx.core.json.Json;
 
 public class AuditOutboxService {
   private static final Logger log = LogManager.getLogger();
@@ -98,20 +99,28 @@ public class AuditOutboxService {
   }
 
   /**
-   * Saves order line outbox log.
+   * Saves order lines outbox logs.
    *
    * @param conn connection in transaction
-   * @param poLine the poLine
+   * @param poLines the poLine
    * @param action action for order line
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> saveOrderLineOutboxLog(Conn conn, PoLine poLine, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    log.trace("saveOrderLineOutboxLog, po line id={}", poLine.getId());
-    String orderLine = Json.encode(poLine);
-    return saveOutboxLog(conn, action.value(), EntityType.ORDER_LINE, orderLine, okapiHeaders)
-      .onSuccess(reply -> log.info("Outbox log has been saved for order line id: {}", poLine.getId()))
-      .onFailure(e -> log.warn("Could not save outbox audit log for order line with id {}", poLine.getId(), e));
+  public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<PoLine> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    var futures = poLines.stream()
+      .map(poLine -> {
+        log.trace("saveOrderLineOutboxLog, po line id={}", poLine.getId());
+        String orderLine = Json.encode(poLine);
+        return saveOutboxLog(conn, action.value(), EntityType.ORDER_LINE, orderLine, okapiHeaders)
+          .onSuccess(reply -> log.info("Outbox log has been saved for order line id: {}", poLine.getId()))
+          .onFailure(e -> log.warn("Could not save outbox audit log for order line with id {}", poLine.getId(), e));
+      })
+      .toList();
+
+    return GenericCompositeFuture.join(futures)
+      .map(res -> true)
+      .otherwise(t -> false);
   }
 
   private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {

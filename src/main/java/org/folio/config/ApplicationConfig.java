@@ -19,6 +19,7 @@ import org.folio.kafka.KafkaConfig;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.services.lines.PoLineNumbersService;
+import org.folio.services.lines.PoLinesBatchService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 import org.folio.orders.lines.update.OrderLinePatchOperationService;
@@ -54,6 +55,10 @@ public class ApplicationConfig {
   @Bean
   PoLinesService poLinesService(PoLinesDAO poLinesDAO, AuditOutboxService auditOutboxService) {
     return new PoLinesService(poLinesDAO, auditOutboxService);
+  }
+  @Bean
+  PoLinesBatchService poLinesBatchService(AuditOutboxService auditOutboxService, PoLinesService poLinesService) {
+    return new PoLinesBatchService(auditOutboxService, poLinesService);
   }
 
   @Bean

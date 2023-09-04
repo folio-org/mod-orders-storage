@@ -101,19 +101,17 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Void> updatePoLineWithTitle(String id, PoLine poLine, RequestContext requestContext) {
+  public Future<Void> updatePoLineWithTitle(Conn conn, String id, PoLine poLine, RequestContext requestContext) {
     Map<String, String> okapiHeaders = requestContext.getHeaders();
-    DBClient client = requestContext.toDBClient();
     Promise<Void> promise = Promise.promise();
     poLine.setId(id);
 
-    client.getPgClient().withTrans(conn -> updatePoLine(conn, poLine)
+    updatePoLine(conn, poLine)
         .compose(line -> updateTitle(conn, line))
-        .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, line, OrderLineAuditEvent.Action.EDIT, okapiHeaders)))
+        .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders))
         .onComplete(ar -> {
           if (ar.succeeded()) {
             log.info("POLine and associated data were successfully updated, id={}", id);
-            auditOutboxService.processOutboxEventLogs(okapiHeaders);
             promise.complete(null);
           } else {
             log.error("updatePoLineWithTitle failed, id={}, poLine={}", id,
@@ -467,7 +465,7 @@ public class PoLinesService {
     }
   }
 
-  private Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
+  public  Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
 
     return conn.get(TITLES_TABLE, Title.class, criterion, true)
