@@ -1,22 +1,22 @@
 package org.folio.dao.audit;
 
-import io.vertx.core.Future;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
-import io.vertx.sqlclient.SqlResult;
-import io.vertx.sqlclient.Tuple;
+import static java.lang.String.format;
+import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
 import org.folio.rest.persist.Conn;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static java.lang.String.format;
-import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
+import io.vertx.core.Future;
+import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.SqlResult;
+import io.vertx.sqlclient.Tuple;
 
 public class AuditOutboxEventsLogRepository {
   private static final Logger log = LogManager.getLogger();
@@ -70,7 +70,7 @@ public class AuditOutboxEventsLogRepository {
    */
   public Future<Integer> deleteBatch(Conn conn, List<String> eventIds, String tenantId) {
     log.debug("Deleting outbox logs by event ids in batch, eventIds={}", eventIds);
-    UUID[] uuids = eventIds.stream().map(UUID::fromString).collect(Collectors.toList()).toArray(UUID[]::new);
+    UUID[] uuids = eventIds.stream().map(UUID::fromString).toList().toArray(UUID[]::new);
     String deleteQuery = format(DELETE_SQL, convertToPsqlStandard(tenantId), OUTBOX_TABLE_NAME);
     Tuple queryParams = Tuple.of(uuids);
     return conn.execute(deleteQuery, queryParams).map(SqlResult::rowCount)

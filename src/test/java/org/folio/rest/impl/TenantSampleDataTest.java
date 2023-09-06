@@ -12,11 +12,9 @@ import static org.folio.rest.utils.TestEntities.SUFFIX;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
-import io.restassured.http.Header;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,6 +32,8 @@ import org.folio.rest.utils.TenantApiTestUtil;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+
+import io.restassured.http.Header;
 
 
 public class TenantSampleDataTest extends TestBase {
@@ -82,7 +82,7 @@ public class TenantSampleDataTest extends TestBase {
 
       List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
                                                 .filter(entity -> !EXPORT_HISTORY.equals(entity))
-                                                .collect(Collectors.toList());
+                                                .toList();
       for (TestEntities entity : entitySamples) {
         log.info("Test expected quantity for " + entity.name());
         verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
@@ -147,7 +147,7 @@ public class TenantSampleDataTest extends TestBase {
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
     List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
       .filter(entity -> !EXPORT_HISTORY.equals(entity))
-      .collect(Collectors.toList());
+      .toList();
     for (TestEntities entity : entitySamples) {
       log.info("Test expected quantity for " + entity.name());
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() + entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
@@ -163,7 +163,7 @@ public class TenantSampleDataTest extends TestBase {
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
     List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
       .filter(entity -> !EXPORT_HISTORY.equals(entity))
-      .collect(Collectors.toList());
+      .toList();
     for(TestEntities te: entitySamples) {
       verifyCollectionQuantity(te.getEndpoint(), te.getEstimatedSystemDataRecordsQuantity());
     }
@@ -182,7 +182,7 @@ public class TenantSampleDataTest extends TestBase {
 
       // Check that no sample data loaded
       for (TestEntities entity : TestEntities.values()) {
-        log.info("Test expected quantity for " , 0, entity.name());
+        log.info("Test expected quantity: {} for name: {}" , 0, entity.name());
         verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() , NONEXISTENT_TENANT_HEADER);
       }
     }

@@ -1,6 +1,8 @@
 package org.folio.services.lines;
 
-import io.vertx.core.Future;
+import java.util.List;
+import java.util.stream.IntStream;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.order.OrderDAO;
@@ -8,10 +10,7 @@ import org.folio.rest.jaxrs.model.PoLineNumber;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 
-import java.util.List;
-import java.util.stream.IntStream;
-
-import static java.util.stream.Collectors.toList;
+import io.vertx.core.Future;
 
 public class PoLineNumbersService {
   private static final Logger log = LogManager.getLogger();
@@ -30,7 +29,7 @@ public class PoLineNumbersService {
   public Future<PoLineNumber> retrievePoLineNumber(String purchaseOrderId, int poLineNumbers, DBClient dbClient) {
     PostgresClient pgClient = dbClient.getPgClient();
     log.debug("retrievePoLineNumber: getting po {} for update", purchaseOrderId);
-    return pgClient.withConn(conn -> orderDAO.getOrderByIdForUpdate(purchaseOrderId, conn)
+    return pgClient.withTrans(conn -> orderDAO.getOrderByIdForUpdate(purchaseOrderId, conn)
       .compose(po -> {
         if (po.getNextPolNumber() != null)
           return Future.succeededFuture(po);
@@ -48,7 +47,7 @@ public class PoLineNumbersService {
       .map(n -> {
         List<String> sequenceNumbers = IntStream.range(n, n+poLineNumbers)
           .mapToObj(Integer::toString)
-          .collect(toList());
+          .toList();
         log.debug("retrievePoLineNumber: done, po {}", purchaseOrderId);
         return new PoLineNumber().withSequenceNumbers(sequenceNumbers);
       })

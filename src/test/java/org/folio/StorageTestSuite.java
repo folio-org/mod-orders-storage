@@ -1,14 +1,11 @@
 package org.folio;
 
-import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.useDefaults;
+import static net.mguenther.kafka.junit.EmbeddedKafkaClusterConfig.defaultClusterConfig;
 import static org.folio.kafka.KafkaTopicNameHelper.getDefaultNameSpace;
 import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 
-import lombok.SneakyThrows;
-import net.mguenther.kafka.junit.ObserveKeyValues;
-import org.folio.kafka.KafkaTopicNameHelper;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -25,12 +22,15 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.event.KafkaEventUtilTest;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
+import org.folio.kafka.KafkaTopicNameHelper;
+import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.HelperUtilsTest;
 import org.folio.rest.impl.OrdersAPITest;
+import org.folio.rest.impl.PoLineBatchAPITest;
 import org.folio.rest.impl.PoNumberTest;
 import org.folio.rest.impl.PurchaseOrderLineNumberTest;
 import org.folio.rest.impl.PurchaseOrderLinesApiTest;
@@ -49,7 +49,6 @@ import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.piece.PieceServiceTest;
 import org.folio.services.title.TitleServiceTest;
 import org.folio.spring.SpringContextUtil;
-import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
 import org.folio.util.PomReaderUtilTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,7 +63,9 @@ import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
 import io.vertx.core.json.JsonObject;
+import lombok.SneakyThrows;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
+import net.mguenther.kafka.junit.ObserveKeyValues;
 
 
 public class StorageTestSuite {
@@ -142,7 +143,7 @@ public class StorageTestSuite {
 
     PostgresClient.setPostgresTester(new PostgresTesterContainer());
 
-    kafkaCluster = EmbeddedKafkaCluster.provisionWith(useDefaults());
+    kafkaCluster = EmbeddedKafkaCluster.provisionWith(defaultClusterConfig());
     kafkaCluster.start();
     String[] hostAndPort = kafkaCluster.getBrokerList().split(":");
     System.setProperty(KAFKA_HOST, hostAndPort[0]);
@@ -203,7 +204,7 @@ public class StorageTestSuite {
   @SneakyThrows
   public static List<String> checkKafkaEventSent(String tenant, String eventType, int expected, String userId) {
     String topicToObserve = formatToKafkaTopicName(tenant, eventType);
-    List<String> observedValues = kafkaCluster.observeValues(ObserveKeyValues.on(topicToObserve, expected)
+    return kafkaCluster.observeValues(ObserveKeyValues.on(topicToObserve, expected)
       .filterOnHeaders(val -> {
         var header = val.lastHeader(RestVerticle.OKAPI_USERID_HEADER.toLowerCase());
         if (Objects.nonNull(header)) {
@@ -213,7 +214,6 @@ public class StorageTestSuite {
       })
       .observeFor(30, TimeUnit.SECONDS)
       .build());
-    return observedValues;
   }
 
   private static String formatToKafkaTopicName(String tenant, String eventType) {
@@ -264,4 +264,9 @@ public class StorageTestSuite {
   class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
   @Nested
   class PoLIneServiceVertxTestNested extends PoLIneServiceVertxTest {}
+
+  @Nested
+  class PoLineBatchAPITestNested extends PoLineBatchAPITest {}
+
+
 }

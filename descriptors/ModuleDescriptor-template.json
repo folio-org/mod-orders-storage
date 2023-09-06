@@ -97,7 +97,7 @@
     },
     {
       "id": "orders-storage.po-lines",
-      "version": "12.1",
+      "version": "12.2",
       "handlers": [
         {
           "methods": ["GET"],
@@ -128,6 +128,11 @@
           "methods": ["PATCH"],
           "pathPattern": "/orders-storage/po-lines/{id}",
           "permissionsRequired": ["orders-storage.po-lines.item.patch"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/po-lines-batch",
+          "permissionsRequired": ["orders-storage.po-lines-batch.collection.put"]
         }
       ]
     },
@@ -696,8 +701,13 @@
     },
     {
       "permissionName" : "orders-storage.po-lines.item.patch",
-      "displayName" : "po-line-item parch",
-      "description" : "Parch a po line"
+      "displayName" : "po-line-item patch",
+      "description" : "Patch a po line"
+    },
+    {
+      "permissionName" : "orders-storage.po-lines-batch.collection.put",
+      "displayName" : "PO Lines batch update",
+      "description" : "Update a set of PO lines in a batch"
     },
     {
       "permissionName" : "orders-storage.po-lines.all",
@@ -709,7 +719,8 @@
         "orders-storage.po-lines.item.get",
         "orders-storage.po-lines.item.put",
         "orders-storage.po-lines.item.delete",
-        "orders-storage.po-lines.item.patch"
+        "orders-storage.po-lines.item.patch",
+        "orders-storage.po-lines-batch.collection.put"
       ]
     },
     {
