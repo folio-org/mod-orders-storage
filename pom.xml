@@ -18,34 +18,37 @@
     <http.port>8081</http.port>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>35.0.6</raml-module-builder.version>
+    <raml-module-builder.version>35.1.0</raml-module-builder.version>
     <java.version>17</java.version>
 
     <!--Dependency Management Properties-->
-    <vertx.version>4.3.4</vertx.version>
+    <vertx.version>4.4.5</vertx.version>
     <kafkaclients.version>3.3.2</kafkaclients.version>
     <lombok.version>1.18.24</lombok.version>
     <postgres.image>postgres:12-alpine</postgres.image>
-    <log4j.version>2.19.0</log4j.version>
+    <log4j.version>2.20.0</log4j.version>
 
     <!--Dependency properties-->
     <streamx.version>0.8.1</streamx.version>
-    <rest-assured.version>5.2.0</rest-assured.version>
-    <aspectj.version>1.9.19</aspectj.version>
+    <rest-assured.version>5.3.2</rest-assured.version>
+    <aspectj.version>1.9.20.1</aspectj.version>
     <aspectj-maven-plugin.version>1.13.1</aspectj-maven-plugin.version>
     <common-lang.version>2.6</common-lang.version>
     <jackson-bom.version>2.15.2</jackson-bom.version>
+    <folio-di-support.version>2.0.1</folio-di-support.version>
 
     <!--Maven plugin properties-->
     <maven-shade-plugin.version>3.4.0</maven-shade-plugin.version>
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
 
     <!--Test Scope dependencies-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.9.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
-    <testcontainers.version>1.17.4</testcontainers.version>
+    <testcontainers.version>1.19.0</testcontainers.version>
+    <kafka-junit.version>3.3.0</kafka-junit.version>
 
     <!--Sonar properties-->
     <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
@@ -72,13 +75,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.vertx</groupId>
-        <artifactId>vertx-stack-depchain</artifactId>
-        <version>${vertx.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>${jackson-bom.version}</version>
@@ -98,6 +94,13 @@
         <version>${log4j.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-stack-depchain</artifactId>
+        <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -145,8 +148,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-di-support</artifactId>
-      <!-- add spring core and context dependencies starting from version 1.7.0 -->
-      <version>1.6.0</version>
+      <version>${folio-di-support.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
@@ -208,7 +210,7 @@
     <dependency>
       <groupId>net.mguenther.kafka</groupId>
       <artifactId>kafka-junit</artifactId>
-      <version>3.3.0</version>
+      <version>${kafka-junit.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -261,7 +263,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <release>${java.version}</release>
           <encoding>UTF-8</encoding>
@@ -523,6 +525,7 @@
               </filters>
               <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
             </configuration>
           </execution>
         </executions>
