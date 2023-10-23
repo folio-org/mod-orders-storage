@@ -138,6 +138,10 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "donorOrganizationIds",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "metadata.createdDate",
           "caseSensitive": false
         },
@@ -190,6 +194,13 @@
           "caseSensitive": false
         }
       ],
+      "ginIndex": [
+        {
+          "fieldName": "donorOrganizationIds",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
+      ],
       "fullTextIndex": [
         {
           "fieldName": "closeReason.reason"
@@ -199,6 +210,9 @@
         },
         {
           "fieldName": "acqUnitIds"
+        },
+        {
+          "fieldName": "donorOrganizationIds"
         }
       ]
     },
@@ -241,6 +255,10 @@
         },
         {
           "fieldName": "details.subscriptionTo",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "donorOrganizationIds",
           "caseSensitive": false
         },
         {
@@ -385,6 +403,11 @@
         },
         {
           "fieldName": "donor",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "donorOrganizationIds",
           "caseSensitive": false,
           "removeAccents": true
         },
