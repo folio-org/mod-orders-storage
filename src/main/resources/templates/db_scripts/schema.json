@@ -203,9 +203,6 @@
         },
         {
           "fieldName": "acqUnitIds"
-        },
-        {
-          "fieldName": "donorOrganizationIds"
         }
       ]
     },
@@ -228,6 +225,10 @@
         },
         {
           "fieldName": "eresource.activated",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "donorOrganizationIds",
           "caseSensitive": false
         },
         {
