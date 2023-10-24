@@ -138,6 +138,10 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "donorOrganizationIds",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "metadata.createdDate",
           "caseSensitive": false
         },
