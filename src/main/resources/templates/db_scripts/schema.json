@@ -194,13 +194,6 @@
           "caseSensitive": false
         }
       ],
-      "ginIndex": [
-        {
-          "fieldName": "donorOrganizationIds",
-          "caseSensitive": false,
-          "removeAccents": true
-        }
-      ],
       "fullTextIndex": [
         {
           "fieldName": "closeReason.reason"
