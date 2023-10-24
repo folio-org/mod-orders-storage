@@ -228,10 +228,6 @@
           "caseSensitive": false
         },
         {
-          "fieldName": "donorOrganizationIds",
-          "caseSensitive": false
-        },
-        {
           "fieldName": "eresource.expectedActivation",
           "caseSensitive": false
         },
