@@ -138,10 +138,6 @@
           "caseSensitive": false
         },
         {
-          "fieldName": "donorOrganizationIds",
-          "caseSensitive": false
-        },
-        {
           "fieldName": "metadata.createdDate",
           "caseSensitive": false
         },
@@ -344,6 +340,11 @@
         },
         {
           "fieldName": "details.productIds",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "donorOrganizationIds",
           "caseSensitive": false,
           "removeAccents": true
         },
