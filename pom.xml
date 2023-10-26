@@ -20,13 +20,14 @@
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <raml-module-builder.version>35.1.0</raml-module-builder.version>
     <java.version>17</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!--Dependency Management Properties-->
     <vertx.version>4.4.5</vertx.version>
     <kafkaclients.version>3.3.2</kafkaclients.version>
     <lombok.version>1.18.24</lombok.version>
     <postgres.image>postgres:12-alpine</postgres.image>
-    <log4j.version>2.19.0</log4j.version>
+    <log4j.version>2.20.0</log4j.version>
 
     <!--Dependency properties-->
     <streamx.version>0.8.1</streamx.version>
@@ -49,7 +50,6 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
 
     <!--Test Scope dependencies-->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.10.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
     <testcontainers.version>1.19.0</testcontainers.version>
@@ -562,6 +562,23 @@
             <include>org/folio/StorageTestSuite.java</include>
           </includes>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-surefire-provider</artifactId>
+            <version>1.3.2</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit-jupiter-version}</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit-jupiter-version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
       <plugin>
