@@ -52,7 +52,7 @@
     <!--Test Scope dependencies-->
     <junit-jupiter-version>5.10.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
-    <testcontainers.version>1.19.0</testcontainers.version>
+    <testcontainers.version>1.19.1</testcontainers.version>
 
     <!--Sonar properties-->
     <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
