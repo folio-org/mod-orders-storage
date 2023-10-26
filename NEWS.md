@@ -1,4 +1,22 @@
+## 13.7.0 - Unreleased
+
 ## 13.6.0 - Unreleased
+The primary focus of this release was to implement endpoint to update order lines in batch
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.5.0...v13.6.0)
+
+### Stories
+* [MODORDSTOR-346](https://issues.folio.org/browse/MODORDSTOR-346) - Upgrade folio-kafka-wrapper to 3.0.0 version
+* [MODORDSTOR-344](https://issues.folio.org/browse/MODORDSTOR-344) - Implement endpoint to update order lines in batch
+* [MODORDSTOR-342](https://issues.folio.org/browse/MODORDSTOR-342) - Update to Java 17 mod-orders-storage
+* [MODORDSTOR-330](https://issues.folio.org/browse/MODORDSTOR-330) - Update dependent raml-util
+* [MODORDSTOR-281](https://issues.folio.org/browse/MODORDSTOR-281) - Logging improvement
+
+### Bug Fixes
+* [MODORDSTOR-343](https://issues.folio.org/browse/MODORDSTOR-343) - Duplicated PO lines have the same numbers related to newly created duplicated order
+
+### Dependencies
+* Bump `java version` from `11` to `17`
 
 ## 13.5.0 - Released (Orchid R1 2023)
 The focus of this release is to replace PGUtil to use PostgresClient and 

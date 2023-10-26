@@ -344,6 +344,11 @@
           "removeAccents": true
         },
         {
+          "fieldName": "donorOrganizationIds",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
           "fieldName": "title",
           "tOps": "DELETE"
         },
