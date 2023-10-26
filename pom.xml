@@ -50,7 +50,7 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
 
     <!--Test Scope dependencies-->
-    <junit-jupiter-version>5.10.0</junit-jupiter-version>
+    <junit-jupiter-version>5.9.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
     <testcontainers.version>1.19.0</testcontainers.version>
     <kafka-junit.version>3.3.0</kafka-junit.version>
