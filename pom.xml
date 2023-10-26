@@ -20,6 +20,7 @@
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <raml-module-builder.version>35.1.0</raml-module-builder.version>
     <java.version>17</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!--Dependency Management Properties-->
     <vertx.version>4.4.5</vertx.version>
@@ -49,7 +50,6 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
 
     <!--Test Scope dependencies-->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.9.0</junit-jupiter-version>
     <jmockit.version>1.49</jmockit.version>
     <testcontainers.version>1.19.0</testcontainers.version>
