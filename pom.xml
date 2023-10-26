@@ -560,7 +560,7 @@
             -Duser.language=en -Duser.region=US
           </argLine>
           <includes>
-            <include>org/folio/rest/impl/StorageTestSuite.java</include>
+            <include>org/folio/StorageTestSuite.java</include>
           </includes>
         </configuration>
         <dependencies>
