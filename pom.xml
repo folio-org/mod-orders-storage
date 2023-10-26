@@ -562,6 +562,7 @@
           <includes>
             <include>org/folio/StorageTestSuite.java</include>
           </includes>
+          <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
         <dependencies>
           <dependency>
