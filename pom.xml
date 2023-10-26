@@ -530,7 +530,6 @@
               </filters>
               <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
             </configuration>
           </execution>
         </executions>
