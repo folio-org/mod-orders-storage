@@ -51,7 +51,6 @@
     <!--Test Scope dependencies-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit-jupiter-version>5.10.0</junit-jupiter-version>
-    <junit-vintage-engine.version>5.9.0</junit-vintage-engine.version>
     <jmockit.version>1.49</jmockit.version>
     <testcontainers.version>1.19.0</testcontainers.version>
 
