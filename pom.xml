@@ -16,36 +16,43 @@
     <!--Project properties-->
     <module_name>mod-orders-storage</module_name>
     <http.port>8081</http.port>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>35.0.6</raml-module-builder.version>
+    <raml-module-builder.version>35.1.0</raml-module-builder.version>
     <java.version>17</java.version>
 
     <!--Dependency Management Properties-->
-    <vertx.version>4.3.4</vertx.version>
+    <vertx.version>4.4.5</vertx.version>
     <kafkaclients.version>3.3.2</kafkaclients.version>
     <lombok.version>1.18.24</lombok.version>
     <postgres.image>postgres:12-alpine</postgres.image>
-    <log4j.version>2.19.0</log4j.version>
+    <log4j.version>2.20.0</log4j.version>
 
     <!--Dependency properties-->
     <streamx.version>0.8.1</streamx.version>
-    <rest-assured.version>5.2.0</rest-assured.version>
-    <aspectj.version>1.9.19</aspectj.version>
+    <rest-assured.version>5.3.2</rest-assured.version>
+    <aspectj.version>1.9.20.1</aspectj.version>
     <aspectj-maven-plugin.version>1.13.1</aspectj-maven-plugin.version>
     <common-lang.version>2.6</common-lang.version>
     <jackson-bom.version>2.15.2</jackson-bom.version>
+    <folio-di-support.version>2.0.1</folio-di-support.version>
 
     <!--Maven plugin properties-->
-    <maven-shade-plugin.version>3.4.0</maven-shade-plugin.version>
-    <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+    <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+    <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+    <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
+    <maven-shade-plugin.version>3.5.1</maven-shade-plugin.version>
+    <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
     <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+    <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
+    <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
 
     <!--Test Scope dependencies-->
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit-jupiter-version>5.9.0</junit-jupiter-version>
+    <junit-jupiter.version>5.10.0</junit-jupiter.version>
     <jmockit.version>1.49</jmockit.version>
-    <testcontainers.version>1.17.4</testcontainers.version>
+    <testcontainers.version>1.19.1</testcontainers.version>
 
     <!--Sonar properties-->
     <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
@@ -72,13 +79,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.vertx</groupId>
-        <artifactId>vertx-stack-depchain</artifactId>
-        <version>${vertx.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-      <dependency>
         <groupId>com.fasterxml.jackson</groupId>
         <artifactId>jackson-bom</artifactId>
         <version>${jackson-bom.version}</version>
@@ -88,7 +88,7 @@
       <dependency>
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
-        <version>${junit-jupiter-version}</version>
+        <version>${junit-jupiter.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -98,6 +98,13 @@
         <version>${log4j.version}</version>
         <scope>import</scope>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.vertx</groupId>
+        <artifactId>vertx-stack-depchain</artifactId>
+        <version>${vertx.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -131,6 +138,18 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId>
+      <version>${junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jmockit</groupId>
       <artifactId>jmockit</artifactId>
       <version>${jmockit.version}</version>
@@ -145,8 +164,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-di-support</artifactId>
-      <!-- add spring core and context dependencies starting from version 1.7.0 -->
-      <version>1.6.0</version>
+      <version>${folio-di-support.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
@@ -261,7 +279,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.11.0</version>
+        <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <release>${java.version}</release>
           <encoding>UTF-8</encoding>
@@ -271,7 +289,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.4.0</version>
+        <version>${build-helper-maven-plugin.version}</version>
         <executions>
           <execution>
             <id>addGeneratedSourceFolder</id>
@@ -310,7 +328,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>${exec-maven-plugin.version}</version>
         <executions>
 
           <execution>
@@ -378,7 +396,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-resources-plugin</artifactId>
-        <version>3.3.1</version>
+        <version>${maven-resources-plugin.version}</version>
         <executions>
           <execution>
             <id>copy-resources</id>
@@ -436,7 +454,7 @@
       <plugin>
         <groupId>com.coderplus.maven.plugins</groupId>
         <artifactId>copy-rename-maven-plugin</artifactId>
-        <version>1.0.1</version>
+        <version>${copy-rename-maven-plugin.version}</version>
         <executions>
           <execution>
             <id>rename-descriptor-outputs</id>
@@ -465,7 +483,7 @@
         api console on IE -->
       <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-        <version>3.1.0</version>
+        <version>${maven-antrun-plugin.version}</version>
         <executions>
           <execution>
             <phase>prepare-package</phase>
@@ -523,6 +541,7 @@
               </filters>
               <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
             </configuration>
           </execution>
         </executions>
@@ -555,18 +574,6 @@
             <include>org/folio/StorageTestSuite.java</include>
           </includes>
         </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit-jupiter-version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.vintage</groupId>
-            <artifactId>junit-vintage-engine</artifactId>
-            <version>${junit-jupiter-version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
 
       <plugin>
