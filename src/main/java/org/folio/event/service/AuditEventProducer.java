@@ -15,6 +15,8 @@ import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog.EntityType;
+import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.tools.utils.TenantTool;
@@ -54,7 +56,7 @@ public class AuditEventProducer {
    * OrderLineId is used as partition key to send all events for particular order to the same partition.
    *
    * @param poLine       the event payload
-   * @param  eventAction the event action
+   * @param eventAction  the event action
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future otherwise
    */
@@ -62,10 +64,29 @@ public class AuditEventProducer {
                                             OrderLineAuditEvent.Action eventAction,
                                             Map<String, String> okapiHeaders) {
     OrderLineAuditEvent event = getOrderLineEvent(poLine, eventAction);
-    log.info("Starting to send event wit id: {} for Order Line to Kafka for orderLineId: {}", event.getId(),
+    log.info("Starting to send event with id: {} for Order Line to Kafka for orderLineId: {}", event.getId(),
       poLine.getId());
     return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, event, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE)
       .onFailure(t -> log.warn("sendOrderLineEvent failed, poLine id={}", poLine.getId(), t));
+  }
+
+  /**
+   * Sends change event for piece to kafka.
+   * PieceId is used as partition key to send all events for particular piece to the same partition.
+   *
+   * @param piece        the event payload
+   * @param eventAction  the event action
+   * @param okapiHeaders the okapi headers
+   * @return future with true if sending was success or failed future otherwise
+   */
+  public Future<Boolean> sendPieceEvent(Piece piece,
+                                        PieceAuditEvent.Action eventAction,
+                                        Map<String, String> okapiHeaders) {
+    PieceAuditEvent event = getPieceEvent(piece, eventAction);
+    log.info("Starting to send event with id: {} for Piece to Kafka for pieceId: {}", event.getId(),
+      piece.getId());
+    return sendToKafka(AuditEventType.ACQ_PIECE_CHANGED, event, okapiHeaders, event.getPieceId(), EntityType.PIECE)
+      .onFailure(t -> log.warn("sendPieceEvent failed, piece id={}", piece.getId(), t));
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
@@ -91,6 +112,18 @@ public class AuditEventProducer {
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
       .withOrderLineSnapshot(poLine.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
+  }
+
+  private PieceAuditEvent getPieceEvent(Piece piece, PieceAuditEvent.Action eventAction) {
+    Metadata metadata = piece.getMetadata();
+    return new PieceAuditEvent()
+      .withId(UUID.randomUUID().toString())
+      .withAction(eventAction)
+      .withPieceId(piece.getId())
+      .withEventDate(new Date())
+      .withActionDate(metadata.getUpdatedDate())
+      .withUserId(metadata.getUpdatedByUserId())
+      .withPieceSnapshot(piece.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,

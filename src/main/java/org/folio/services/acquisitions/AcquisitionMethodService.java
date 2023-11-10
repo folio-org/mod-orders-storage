@@ -1,7 +1,6 @@
 package org.folio.services.acquisitions;
 
-import static org.folio.rest.core.ResponseUtil.buildErrorResponse;
-import static org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse.headersFor201;
+import static org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse;
 
 import java.util.UUID;
 
@@ -11,8 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.builders.error.ValueConstraintErrorBuilder;
 import org.folio.rest.jaxrs.model.AcquisitionMethod;
-import org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.util.ResponseUtils;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -20,7 +19,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-
 
 public class AcquisitionMethodService {
   private static final Logger log = LogManager.getLogger();
@@ -39,12 +37,12 @@ public class AcquisitionMethodService {
       .onSuccess(entity -> {
         log.info("AcquisitionMethod with id {} created", acquisitionMethod.getId());
         asyncResultHandler.handle(Future.succeededFuture(
-          OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse
-            .respond201WithApplicationJson(entity, headersFor201())));
+          PostOrdersStorageAcquisitionMethodsResponse.respond201WithApplicationJson(
+            entity, PostOrdersStorageAcquisitionMethodsResponse.headersFor201())));
       })
       .onFailure(throwable -> {
         log.error("AcquisitionMethod creation with id {} failed", acquisitionMethod.getId(), throwable);
-        asyncResultHandler.handle(buildErrorResponse(throwable));
+        asyncResultHandler.handle(ResponseUtils.buildErrorResponse(throwable));
       }));
   }
 

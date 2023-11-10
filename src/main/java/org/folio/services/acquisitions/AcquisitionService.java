@@ -9,8 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.builders.error.NameCodeConstraintErrorBuilder;
 import org.folio.rest.jaxrs.model.AcquisitionsUnit;
-import org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.util.ResponseUtils;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -18,8 +18,7 @@ import io.vertx.core.Vertx;
 
 import javax.ws.rs.core.Response;
 
-import static org.folio.rest.core.ResponseUtil.buildErrorResponse;
-import static org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.headersFor201;
+import static org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse;
 
 public class AcquisitionService {
   private static final Logger log = LogManager.getLogger();
@@ -38,11 +37,12 @@ public class AcquisitionService {
       .onSuccess(entity -> {
         log.info("AcquisitionService with id {} created", acquisitionsUnit.getId());
         asyncResultHandler.handle(Future.succeededFuture(
-          AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.respond201WithApplicationJson(entity, headersFor201())));
+          PostAcquisitionsUnitsStorageUnitsResponse.respond201WithApplicationJson(
+            entity, PostAcquisitionsUnitsStorageUnitsResponse.headersFor201())));
       })
       .onFailure(throwable -> {
         log.error("AcquisitionService creation with id {} failed", acquisitionsUnit.getId(), throwable);
-        asyncResultHandler.handle(buildErrorResponse(throwable));
+        asyncResultHandler.handle(ResponseUtils.buildErrorResponse(throwable));
       }));
   }
 

@@ -1,13 +1,9 @@
 package org.folio.rest.core;
 
-import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import java.util.Optional;
 
-import io.vertx.core.Future;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,26 +58,4 @@ public class ResponseUtil {
     return INTERNAL_SERVER_ERROR.getStatusCode();
   }
 
-  public static Future<Response> buildErrorResponse(Throwable throwable) {
-    final String message;
-    final int code;
-
-    if (throwable instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
-      code = vertxHttpException.getStatusCode();
-      message = vertxHttpException.getPayload();
-    } else {
-      code = INTERNAL_SERVER_ERROR.getStatusCode();
-      message = throwable.getMessage();
-    }
-
-    return Future.succeededFuture(buildErrorResponse(code, message));
-  }
-
-  private static Response buildErrorResponse(int code, String message) {
-    return Response.status(code)
-      .header(CONTENT_TYPE, code == 422 ? APPLICATION_JSON: TEXT_PLAIN)
-      .entity(message)
-      .build();
-  }
 }
-

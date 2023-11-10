@@ -1,6 +1,5 @@
 package org.folio.event.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -17,6 +16,8 @@ import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
 import org.folio.rest.jaxrs.model.OutboxEventLog.EntityType;
+import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.persist.Conn;
@@ -81,41 +82,54 @@ public class AuditOutboxService {
     );
   }
 
+  private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {
+    return eventLogs.stream().map(eventLog -> {
+      switch (eventLog.getEntityType()) {
+        case ORDER -> {
+          PurchaseOrder entity = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);
+          OrderAuditEvent.Action action = OrderAuditEvent.Action.fromValue(eventLog.getAction());
+          return producer.sendOrderEvent(entity, action, okapiHeaders);
+        }
+        case ORDER_LINE -> {
+          PoLine entity = Json.decodeValue(eventLog.getPayload(), PoLine.class);
+          OrderLineAuditEvent.Action action = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
+          return producer.sendOrderLineEvent(entity, action, okapiHeaders);
+        }
+        case PIECE -> {
+          Piece entity = Json.decodeValue(eventLog.getPayload(), Piece.class);
+          PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
+          return producer.sendPieceEvent(entity, action, okapiHeaders);
+        }
+        default -> throw new IllegalArgumentException();
+      }
+    }).collect(Collectors.toList());
+  }
+
   /**
    * Saves order outbox log.
    *
-   * @param conn connection in transaction
-   * @param entity the purchase order
-   * @param action the event action
+   * @param conn         connection in transaction
+   * @param entity       the purchase order
+   * @param action       the event action
    * @param okapiHeaders okapi headers
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> saveOrderOutboxLog(Conn conn, PurchaseOrder entity, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    log.trace("saveOrderOutboxLog, order id={}", entity.getId());
-    String order = Json.encode(entity);
-    return saveOutboxLog(conn, action.value(), EntityType.ORDER, order, okapiHeaders)
-      .onSuccess(reply -> log.info("Outbox log has been saved for order id: {}", entity.getId()))
-      .onFailure(e -> log.warn("Could not save outbox audit log for order with id {}", entity.getId(), e));
+    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER, entity.getId(), entity);
   }
 
   /**
    * Saves order lines outbox logs.
    *
-   * @param conn connection in transaction
-   * @param poLines the poLine
-   * @param action action for order line
+   * @param conn         connection in transaction
+   * @param poLines      the poLine
+   * @param action       action for order line
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<PoLine> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
     var futures = poLines.stream()
-      .map(poLine -> {
-        log.trace("saveOrderLineOutboxLog, po line id={}", poLine.getId());
-        String orderLine = Json.encode(poLine);
-        return saveOutboxLog(conn, action.value(), EntityType.ORDER_LINE, orderLine, okapiHeaders)
-          .onSuccess(reply -> log.info("Outbox log has been saved for order line id: {}", poLine.getId()))
-          .onFailure(e -> log.warn("Could not save outbox audit log for order line with id {}", poLine.getId(), e));
-      })
+      .map(poLine -> saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, poLine.getId(), poLine))
       .toList();
 
     return GenericCompositeFuture.join(futures)
@@ -123,35 +137,42 @@ public class AuditOutboxService {
       .otherwise(t -> false);
   }
 
-  private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {
-    List<Future<Boolean>> futures = new ArrayList<>();
-    for (OutboxEventLog eventLog : eventLogs) {
-      if (EntityType.ORDER == eventLog.getEntityType()) {
-        PurchaseOrder purchaseOrder = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);
-        OrderAuditEvent.Action orderAction = OrderAuditEvent.Action.fromValue(eventLog.getAction());
-        futures.add(producer.sendOrderEvent(purchaseOrder, orderAction, okapiHeaders));
-      } else if (EntityType.ORDER_LINE == eventLog.getEntityType()) {
-        PoLine poLine = Json.decodeValue(eventLog.getPayload(), PoLine.class);
-        OrderLineAuditEvent.Action orderLineAction = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
-        futures.add(producer.sendOrderLineEvent(poLine, orderLineAction, okapiHeaders));
-      }
-    }
-    return futures;
+  /**
+   * Saves piece outbox log.
+   *
+   * @param conn         connection in transaction
+   * @param piece        the audited piece
+   * @param action       action for piece
+   * @param okapiHeaders the okapi headers
+   * @return future with saved outbox log in the same transaction
+   */
+  public Future<Boolean> savePieceOutboxLog(Conn conn,
+                                            Piece piece,
+                                            PieceAuditEvent.Action action,
+                                            Map<String, String> okapiHeaders) {
+    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.PIECE, piece.getId(), piece);
   }
 
   private Future<Boolean> saveOutboxLog(Conn conn,
+                                        Map<String, String> okapiHeaders,
                                         String action,
                                         EntityType entityType,
-                                        String entity,
-                                        Map<String, String> okapiHeaders) {
+                                        String entityId,
+                                        Object entity) {
+    String logMessagePart = "for " + entityType + " with id: " + entityId;
+    log.trace("saveOutboxLog {}", logMessagePart);
+
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
     OutboxEventLog eventLog = new OutboxEventLog()
       .withEventId(UUID.randomUUID().toString())
       .withAction(action)
       .withEntityType(entityType)
-      .withPayload(entity);
+      .withPayload(Json.encode(entity));
 
-    return outboxRepository.saveEventLog(conn, eventLog, tenantId);
+    return outboxRepository.saveEventLog(conn, eventLog, tenantId)
+      .onSuccess(reply -> log.info("Outbox log has been saved {}", logMessagePart))
+      .onFailure(e -> log.warn("Could not save outbox audit log {}", logMessagePart, e));
   }
+
 }
