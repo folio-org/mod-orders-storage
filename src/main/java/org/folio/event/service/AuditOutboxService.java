@@ -100,7 +100,7 @@ public class AuditOutboxService {
           PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
           return producer.sendPieceEvent(entity, action, okapiHeaders);
         }
-        default -> throw new IllegalArgumentException();
+        default -> throw new IllegalStateException("Missing handler for events with entityType: " + eventLog.getEntityType());
       }
     }).collect(Collectors.toList());
   }
@@ -159,8 +159,7 @@ public class AuditOutboxService {
                                         EntityType entityType,
                                         String entityId,
                                         Object entity) {
-    String logMessagePart = "for " + entityType + " with id: " + entityId;
-    log.trace("saveOutboxLog {}", logMessagePart);
+    log.debug("saveOutboxLog:: for {} with id: {}", entityType, entityId);
 
     String tenantId = TenantTool.tenantId(okapiHeaders);
 
@@ -171,8 +170,8 @@ public class AuditOutboxService {
       .withPayload(Json.encode(entity));
 
     return outboxRepository.saveEventLog(conn, eventLog, tenantId)
-      .onSuccess(reply -> log.info("Outbox log has been saved {}", logMessagePart))
-      .onFailure(e -> log.warn("Could not save outbox audit log {}", logMessagePart, e));
+      .onSuccess(reply -> log.info("Outbox log has been saved for {} with id: {}", entityType, entityId))
+      .onFailure(e -> log.warn("Could not save outbox audit log for {} with id: {}", entityType, entityId, e));
   }
 
 }

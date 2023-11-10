@@ -11,7 +11,7 @@ import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.TableNames;
 import org.folio.rest.annotations.Validate;
-import org.folio.util.ResponseUtils;
+import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PieceCollection;
@@ -33,7 +33,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 
-public class PiecesAPI implements OrdersStoragePieces {
+public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
   private static final Logger log = LogManager.getLogger();
 
   public static final String PIECES_TABLE = "pieces";
@@ -71,10 +71,10 @@ public class PiecesAPI implements OrdersStoragePieces {
           log.info("Create piece complete, id={}", entity.getId());
           auditOutboxService.processOutboxEventLogs(okapiHeaders);
           String endpoint = HelperUtils.getEndpoint(OrdersStoragePieces.class) + entity.getId();
-          asyncResultHandler.handle(ResponseUtils.buildResponseWithLocation(endpoint, entity));
+          asyncResultHandler.handle(buildResponseWithLocation(entity, endpoint));
         } else {
           log.error("Piece creation failed, piece={}", JsonObject.mapFrom(entity).encodePrettily(), ar.cause());
-          asyncResultHandler.handle(ResponseUtils.buildErrorResponse(ar.cause()));
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         }
       });
   }
@@ -115,10 +115,10 @@ public class PiecesAPI implements OrdersStoragePieces {
         if (ar.succeeded()) {
           log.info("Update piece complete, id={}", id);
           auditOutboxService.processOutboxEventLogs(okapiHeaders);
-          asyncResultHandler.handle(ResponseUtils.buildNoContentResponse());
+          asyncResultHandler.handle(buildNoContentResponse());
         } else {
           log.error("Update piece failed, id={}", id, ar.cause());
-          asyncResultHandler.handle(ResponseUtils.buildErrorResponse(ar.cause()));
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         }
       });
   }
@@ -130,6 +130,11 @@ public class PiecesAPI implements OrdersStoragePieces {
       .compose(DbUtils::failOnNoUpdateOrDelete)
       .onSuccess(rowSet -> log.info("Piece successfully updated, id={}", id))
       .onFailure(e -> log.error("Update piece failed, id={}", id, e));
+  }
+
+  @Override
+  protected String getEndpoint(Object entity) {
+    return null;
   }
 
 }

@@ -9,9 +9,9 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.builders.error.ValueConstraintErrorBuilder;
+import org.folio.rest.core.ResponseUtil;
 import org.folio.rest.jaxrs.model.AcquisitionMethod;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.util.ResponseUtils;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -42,7 +42,7 @@ public class AcquisitionMethodService {
       })
       .onFailure(throwable -> {
         log.error("AcquisitionMethod creation with id {} failed", acquisitionMethod.getId(), throwable);
-        asyncResultHandler.handle(ResponseUtils.buildErrorResponse(throwable));
+        asyncResultHandler.handle(ResponseUtil.buildErrorResponse(throwable));
       }));
   }
 
