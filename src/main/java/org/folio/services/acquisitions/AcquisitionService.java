@@ -1,6 +1,7 @@
 package org.folio.services.acquisitions;
 
-import static org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse;
+import static org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.headersFor201;
+import static org.folio.rest.jaxrs.resource.AcquisitionsUnitsStorage.PostAcquisitionsUnitsStorageUnitsResponse.respond201WithApplicationJson;
 
 import java.util.UUID;
 
@@ -37,8 +38,7 @@ public class AcquisitionService {
       .onSuccess(entity -> {
         log.info("AcquisitionService with id {} created", acquisitionsUnit.getId());
         asyncResultHandler.handle(Future.succeededFuture(
-          PostAcquisitionsUnitsStorageUnitsResponse.respond201WithApplicationJson(
-            entity, PostAcquisitionsUnitsStorageUnitsResponse.headersFor201())));
+          respond201WithApplicationJson(entity, headersFor201())));
       })
       .onFailure(throwable -> {
         log.error("AcquisitionService creation with id {} failed", acquisitionsUnit.getId(), throwable);

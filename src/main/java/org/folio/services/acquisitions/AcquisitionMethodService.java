@@ -1,6 +1,7 @@
 package org.folio.services.acquisitions;
 
-import static org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse;
+import static org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse.headersFor201;
+import static org.folio.rest.jaxrs.resource.OrdersStorageAcquisitionMethods.PostOrdersStorageAcquisitionMethodsResponse.respond201WithApplicationJson;
 
 import java.util.UUID;
 
@@ -37,8 +38,7 @@ public class AcquisitionMethodService {
       .onSuccess(entity -> {
         log.info("AcquisitionMethod with id {} created", acquisitionMethod.getId());
         asyncResultHandler.handle(Future.succeededFuture(
-          PostOrdersStorageAcquisitionMethodsResponse.respond201WithApplicationJson(
-            entity, PostOrdersStorageAcquisitionMethodsResponse.headersFor201())));
+          respond201WithApplicationJson(entity, headersFor201())));
       })
       .onFailure(throwable -> {
         log.error("AcquisitionMethod creation with id {} failed", acquisitionMethod.getId(), throwable);

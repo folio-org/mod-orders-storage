@@ -71,8 +71,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
         if (ar.succeeded()) {
           log.info("Create piece complete, id={}", entity.getId());
           auditOutboxService.processOutboxEventLogs(okapiHeaders);
-          String endpoint = HelperUtils.getEndpoint(OrdersStoragePieces.class) + entity.getId();
-          asyncResultHandler.handle(buildResponseWithLocation(entity, endpoint));
+          asyncResultHandler.handle(buildResponseWithLocation(entity, getEndpoint(entity)));
         } else {
           log.error("Piece creation failed, piece={}", JsonObject.mapFrom(entity).encodePrettily(), ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
@@ -135,7 +134,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
 
   @Override
   protected String getEndpoint(Object entity) {
-    return null;
+    return HelperUtils.getEndpoint(OrdersStoragePieces.class) + JsonObject.mapFrom(entity).getString("id");
   }
 
 }
