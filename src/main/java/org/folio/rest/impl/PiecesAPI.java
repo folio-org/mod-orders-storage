@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
@@ -65,7 +66,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
   public void postOrdersStoragePieces(Piece entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     pgClient.withTrans(conn -> createPiece(conn, entity)
-        .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.CREATE, okapiHeaders)))
+      .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.CREATE, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
           log.info("Create piece complete, id={}", entity.getId());
@@ -81,7 +82,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
 
   private Future<String> createPiece(Conn conn, Piece piece) {
     String id = piece.getId();
-    if (id == null) {
+    if (StringUtils.isBlank(id)) {
       piece.setId(UUID.randomUUID().toString());
     }
     log.debug("Creating new piece with id={}", id);
