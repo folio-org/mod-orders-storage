@@ -55,7 +55,7 @@
     <testcontainers.version>1.19.1</testcontainers.version>
 
     <!--Sonar properties-->
-    <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java, **/completablefuture/FolioVertxCompletableFuture.java</sonar.exclusions>
+    <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <argLine />
   </properties>
