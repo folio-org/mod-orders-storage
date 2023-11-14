@@ -42,7 +42,7 @@ import org.springframework.context.annotation.Import;
 
 @Configuration
 @ComponentScan({ "org.folio.verticles", "org.folio.event.listener" })
-@Import({ KafkaConfiguration.class })
+@Import({ KafkaConfiguration.class, org.folio.spring.ApplicationConfig.class })
 public class ApplicationConfig {
 
   @Bean
