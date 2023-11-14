@@ -93,7 +93,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.debug("Deleting po, id={}", id);
     try {
-      Tx<String> tx = new Tx<>(id, getPgClient());
+      Tx<String> tx = new Tx<>(id, pgClient);
       DBClient client = new DBClient(vertxContext, okapiHeaders);
       tx.startTx()
         .compose(e -> deleteOrderInvoicesRelation(e, client))
@@ -202,7 +202,4 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
     return HelperUtils.getEndpoint(OrdersStoragePurchaseOrders.class) + JsonObject.mapFrom(entity).getString("id");
   }
 
-  public PostgresClient getPgClient() {
-    return pgClient;
-  }
 }

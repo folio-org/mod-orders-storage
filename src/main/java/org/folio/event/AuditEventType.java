@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum AuditEventType {
   ACQ_ORDER_CHANGED("ACQ_ORDER_CHANGED"),
-  ACQ_ORDER_LINE_CHANGED("ACQ_ORDER_LINE_CHANGED");
+  ACQ_ORDER_LINE_CHANGED("ACQ_ORDER_LINE_CHANGED"),
+  ACQ_PIECE_CHANGED("ACQ_PIECE_CHANGED");
 
   private final String topicName;
 }
