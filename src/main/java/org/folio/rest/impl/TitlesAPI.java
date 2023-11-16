@@ -4,19 +4,46 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.dao.PostgresClientFactory;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageTitles;
+import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.services.title.TitleService;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public class TitlesAPI implements OrdersStorageTitles {
+public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
+
+  private static final Logger log = LogManager.getLogger();
 
   public static final String TITLES_TABLE = "titles";
+
+  private final PostgresClient pgClient;
+
+  @Autowired
+  private TitleService titleService;
+  @Autowired
+  private PostgresClientFactory pgClientFactory;
+
+  @Autowired
+  public TitlesAPI(Vertx vertx, String tenantId) {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+    log.trace("Init PiecesAPI creating PostgresClient");
+    pgClient = pgClientFactory.createInstance(tenantId);
+  }
 
   @Override
   @Validate
@@ -27,8 +54,17 @@ public class TitlesAPI implements OrdersStorageTitles {
 
   @Override
   @Validate
-  public void postOrdersStorageTitles(Title entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.post(TITLES_TABLE, entity, okapiHeaders, vertxContext, OrdersStorageTitles.PostOrdersStorageTitlesResponse.class, asyncResultHandler);
+  public void postOrdersStorageTitles(Title title, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    pgClient.withTrans(conn -> titleService.saveTitle(title, conn)
+        .onComplete(ar -> {
+          if (ar.failed()) {
+            log.error("Title creation failed, title={}", JsonObject.mapFrom(title).encodePrettily(), ar.cause());
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+          } else {
+            log.info("Title creation complete, id={}", title.getId());
+            asyncResultHandler.handle(buildResponseWithLocation(title, getEndpoint(title)));
+          }
+        }));
   }
 
   @Override
@@ -47,5 +83,10 @@ public class TitlesAPI implements OrdersStorageTitles {
   @Validate
   public void putOrdersStorageTitlesById(String id, Title entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.put(TITLES_TABLE, entity, id, okapiHeaders, vertxContext, OrdersStorageTitles.PutOrdersStorageTitlesByIdResponse.class, asyncResultHandler);
+  }
+
+  @Override
+  protected String getEndpoint(Object entity) {
+    return HelperUtils.getEndpoint(OrdersStorageTitles.class) + JsonObject.mapFrom(entity).getString("id");
   }
 }

@@ -80,15 +80,14 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
   }
 
   private Future<String> createPiece(Conn conn, Piece piece) {
-    String id = piece.getId();
-    if (StringUtils.isBlank(id)) {
+    if (StringUtils.isBlank(piece.getId())) {
       piece.setId(UUID.randomUUID().toString());
     }
-    log.debug("Creating new piece with id={}", id);
+    log.debug("Creating new piece with id={}", piece.getId());
 
-    return conn.save(TableNames.PIECES_TABLE, id, piece)
-      .onSuccess(rowSet -> log.info("Piece successfully created, id={}", id))
-      .onFailure(e -> log.error("Create piece failed, id={}", id, e));
+    return conn.save(TableNames.PIECES_TABLE, piece.getId(), piece)
+      .onSuccess(rowSet -> log.info("Piece successfully created, id={}", piece.getId()))
+      .onFailure(e -> log.error("Create piece failed, id={}", piece.getId(), e));
   }
 
   @Override
