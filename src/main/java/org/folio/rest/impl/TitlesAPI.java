@@ -55,16 +55,17 @@ public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
   @Override
   @Validate
   public void postOrdersStorageTitles(Title title, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    pgClient.withTrans(conn -> titleService.saveTitle(title, conn)
-        .onComplete(ar -> {
-          if (ar.failed()) {
-            log.error("Title creation failed, title={}", JsonObject.mapFrom(title).encodePrettily(), ar.cause());
-            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
-          } else {
-            log.info("Title creation complete, id={}", title.getId());
-            asyncResultHandler.handle(buildResponseWithLocation(title, getEndpoint(title)));
-          }
-        }));
+    pgClient.withConn(conn -> titleService.saveTitle(title, conn)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("Title creation failed, title={}", JsonObject.mapFrom(title).encodePrettily(), ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+        } else {
+          log.info("Title creation complete, id={}", title.getId());
+          asyncResultHandler.handle(buildResponseWithLocation(title, getEndpoint(title)));
+        }
+      })
+    );
   }
 
   @Override

@@ -127,7 +127,9 @@ public class PoLinesService {
   public Future<PoLine> createTitle(Conn conn, PoLine poLine) {
     return conn.getById(PURCHASE_ORDER_TABLE, poLine.getPurchaseOrderId(), PurchaseOrder.class)
       .compose(purchaseOrder -> {
-        if (poLine.getPackagePoLineId() != null) {
+        if (StringUtils.isBlank(poLine.getPackagePoLineId())) {
+          return createTitleAndSave(conn, poLine, purchaseOrder.getAcqUnitIds());
+        } else {
           Promise<PoLine> promise = Promise.promise();
           getPoLineById(conn, poLine.getPackagePoLineId())
             .onComplete(ar -> {
@@ -140,7 +142,6 @@ public class PoLinesService {
             });
           return promise.future();
         }
-        return createTitleAndSave(conn, poLine, purchaseOrder.getAcqUnitIds());
       });
   }
 
@@ -473,7 +474,7 @@ public class PoLinesService {
     }
   }
 
-  public  Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
+  public Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
 
     return conn.get(TITLES_TABLE, Title.class, criterion, true)

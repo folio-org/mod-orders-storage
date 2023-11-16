@@ -6,6 +6,7 @@ public enum ErrorCodes {
 
   GENERIC_ERROR_CODE("genericError", "Generic error"),
   POSTGRE_SQL_ERROR("pgException", "PostgreSQL exception"),
+  TITLE_EXIST("titleExist", "The title for poLine already exist"),
   UNIQUE_FIELD_CONSTRAINT_ERROR("uniqueField{0}{1}Error", "Field {0} must be unique");
 
   private final String code;
