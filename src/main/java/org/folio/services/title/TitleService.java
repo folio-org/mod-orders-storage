@@ -111,29 +111,28 @@ public class TitleService {
   }
 
   private Future<Void> populateTitle(Title title, PoLine poLine, Conn conn) {
-    if(Boolean.TRUE.equals(poLine.getIsPackage())) {
+    if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       populateTitleByPoLine(title, poLine);
       return Future.succeededFuture();
-    } else {
-      Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
-      return conn.get(TITLES_TABLE, Title.class, criterion, true)
-        .compose(result -> {
-          List<Title> titles = result.getResults();
-          if (titles.isEmpty()) {
-            populateTitleByPoLine(title, poLine);
-            return Future.succeededFuture();
-          } else {
-            return Future.failedFuture(new HttpException(422, ErrorCodes.TITLE_EXIST));
-          }
-        });
     }
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
+    return conn.get(TITLES_TABLE, Title.class, criterion, true)
+      .compose(result -> {
+        List<Title> titles = result.getResults();
+        if (titles.isEmpty()) {
+          populateTitleByPoLine(title, poLine);
+          return Future.succeededFuture();
+        } else {
+          return Future.failedFuture(new HttpException(422, ErrorCodes.TITLE_EXIST));
+        }
+      });
   }
 
   private void populateTitleByPoLine(Title title, PoLine poLine) {
     title.setPackageName(poLine.getTitleOrPackage());
     title.setExpectedReceiptDate(Objects.nonNull(poLine.getPhysical()) ? poLine.getPhysical().getExpectedReceiptDate() : null);
     title.setPoLineNumber(poLine.getPoLineNumber());
-    if(poLine.getDetails() != null) {
+    if (poLine.getDetails() != null) {
       title.setReceivingNote(poLine.getDetails().getReceivingNote());
     }
   }

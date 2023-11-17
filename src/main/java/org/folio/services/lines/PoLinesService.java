@@ -129,19 +129,18 @@ public class PoLinesService {
       .compose(purchaseOrder -> {
         if (StringUtils.isBlank(poLine.getPackagePoLineId())) {
           return createTitleAndSave(conn, poLine, purchaseOrder.getAcqUnitIds());
-        } else {
-          Promise<PoLine> promise = Promise.promise();
-          getPoLineById(conn, poLine.getPackagePoLineId())
-            .onComplete(ar -> {
-              if (ar.failed() || ar.result() == null) {
-                log.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
-                promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
-              } else {
-                populateTitleForPackagePoLineAndSave(conn, promise, poLine, ar.result(), purchaseOrder.getAcqUnitIds());
-              }
-            });
-          return promise.future();
         }
+        Promise<PoLine> promise = Promise.promise();
+        getPoLineById(conn, poLine.getPackagePoLineId())
+          .onComplete(ar -> {
+            if (ar.failed() || ar.result() == null) {
+              log.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
+              promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
+            } else {
+              populateTitleForPackagePoLineAndSave(conn, promise, poLine, ar.result(), purchaseOrder.getAcqUnitIds());
+            }
+          });
+        return promise.future();
       });
   }
 
