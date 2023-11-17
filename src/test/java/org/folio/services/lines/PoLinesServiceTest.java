@@ -2,6 +2,7 @@ package org.folio.services.lines;
 
 import static io.vertx.core.Future.failedFuture;
 import static io.vertx.core.Future.succeededFuture;
+import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +34,7 @@ import org.folio.dao.lines.PoLinesDAO;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -245,10 +247,22 @@ public class PoLinesServiceTest {
   @Test
   public void shouldFailCreateTitleWhenPopulating() {
     String poLineId = UUID.randomUUID().toString();
+    String purchaseOrderId = UUID.randomUUID().toString();
+
     PoLine poLine = new PoLine()
-      .withPackagePoLineId(poLineId);
+      .withPackagePoLineId(poLineId)
+      .withPurchaseOrderId(purchaseOrderId);
+
     PoLine packagePoLine = new PoLine()
-      .withPackagePoLineId(poLineId);
+      .withPackagePoLineId(poLineId)
+      .withPurchaseOrderId(purchaseOrderId);
+
+    PurchaseOrder purchaseOrder = new PurchaseOrder()
+      .withId(purchaseOrderId)
+      .withAcqUnitIds(List.of("First", "Second"));
+
+    doReturn(Future.succeededFuture(purchaseOrder))
+      .when(conn).getById(eq(PURCHASE_ORDER_TABLE), eq(purchaseOrderId), eq(PurchaseOrder.class));
 
     doReturn(succeededFuture(packagePoLine))
       .when(conn).getById(anyString(), eq(poLineId), eq(PoLine.class));
@@ -266,8 +280,19 @@ public class PoLinesServiceTest {
 
   @Test
   public void shouldFailCreateTitleWithNonPackagePoLine() {
+    String poLineId = UUID.randomUUID().toString();
+    String purchaseOrderId = UUID.randomUUID().toString();
+
     PoLine poLine = new PoLine()
-      .withId(UUID.randomUUID().toString());
+      .withId(poLineId)
+      .withPurchaseOrderId(purchaseOrderId);
+
+    PurchaseOrder purchaseOrder = new PurchaseOrder()
+      .withId(purchaseOrderId)
+      .withAcqUnitIds(List.of("First", "Second"));
+
+    doReturn(Future.succeededFuture(purchaseOrder))
+      .when(conn).getById(eq(PURCHASE_ORDER_TABLE), eq(purchaseOrderId), eq(PurchaseOrder.class));
 
     doReturn(failedFuture(new Exception("unknown")))
       .when(conn).save(anyString(), anyString(), any(Title.class));

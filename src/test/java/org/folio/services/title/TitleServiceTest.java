@@ -1,6 +1,7 @@
 package org.folio.services.title;
 
 import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
@@ -10,12 +11,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.DBClient;
@@ -146,6 +149,61 @@ public class TitleServiceTest extends TestBase {
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
         });
+        testContext.completeNow();
+      });
+  }
+
+  @Test
+  void shouldSaveTitleForNotPackagePoLine(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+    String purchaseOrderId = UUID.randomUUID().toString();
+
+    PurchaseOrder purchaseOrder = new PurchaseOrder()
+      .withId(purchaseOrderId)
+      .withAcqUnitIds(List.of("First", "Second"));
+
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withIsPackage(false)
+      .withPurchaseOrderId(purchaseOrderId)
+      .withTitleOrPackage("Title name");
+
+    Title title = new Title()
+      .withPoLineId(poLineId)
+      .withInstanceId(instanceId);
+
+    Promise<Void> promise1 = Promise.promise();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    client.getPgClient().save(PURCHASE_ORDER_TABLE, purchaseOrderId, purchaseOrder, event -> {
+      promise1.complete();
+      log.info("PurchaseOrder was saved");
+    });
+
+    Promise<Void> promise2 = Promise.promise();
+    promise1.future().onComplete(v -> client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      promise2.complete();
+      log.info("PoLine was saved");
+    }));
+
+    Promise<Void> promise3 = Promise.promise();
+
+    promise2.future().onComplete(v -> client.getPgClient().withConn(conn -> titleService.saveTitle(title, conn)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          promise3.fail(ar.cause());
+        } else {
+          promise3.complete();
+          log.info("Title was saved");
+        }
+      })));
+
+    testContext.assertComplete(promise3.future()
+        .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
+        testContext.verify(() -> assertEquals(actTitle.getPackageName(), poLine.getTitleOrPackage()));
+        testContext.verify(() -> assertEquals(actTitle.getAcqUnitIds(), purchaseOrder.getAcqUnitIds()));
         testContext.completeNow();
       });
   }

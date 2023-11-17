@@ -1,16 +1,26 @@
 package org.folio.services.title;
 
+import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.rest.exceptions.ErrorCodes;
+import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -76,5 +86,54 @@ public class TitleService {
           log.debug("updateTitle(poLineTx, instanceId, client) complete");
         }
       });
+  }
+
+  public Future<String> saveTitle(Title title, Conn conn) {
+    if (StringUtils.isBlank(title.getId())) {
+      title.setId(UUID.randomUUID().toString());
+    }
+
+    return conn.getById(PO_LINE_TABLE, title.getPoLineId(), PoLine.class)
+      .compose(poLine -> {
+        log.debug("saveTitle:: A poLine with an id={} was found", poLine.getId());
+        return populateTitle(title, poLine, conn)
+          .compose(aVoid -> conn.getById(PURCHASE_ORDER_TABLE, poLine.getPurchaseOrderId(), PurchaseOrder.class));
+      })
+      .compose(purchaseOrder -> {
+        log.debug("saveTitle:: A purchaseOrder with an id={} was found", purchaseOrder.getId());
+        title.withAcqUnitIds(purchaseOrder.getAcqUnitIds());
+
+        log.debug("saveTitle:: Creating new title record with id={}", title.getId());
+        return conn.save(TITLES_TABLE, title.getId(), title)
+          .onSuccess(rowSet -> log.info("Title successfully created, id={}", title.getId()))
+          .onFailure(e -> log.error("Create title failed, id={}", title.getId(), e));
+      });
+  }
+
+  private Future<Void> populateTitle(Title title, PoLine poLine, Conn conn) {
+    if (Boolean.TRUE.equals(poLine.getIsPackage())) {
+      populateTitleByPoLine(title, poLine);
+      return Future.succeededFuture();
+    }
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
+    return conn.get(TITLES_TABLE, Title.class, criterion, true)
+      .compose(result -> {
+        List<Title> titles = result.getResults();
+        if (titles.isEmpty()) {
+          populateTitleByPoLine(title, poLine);
+          return Future.succeededFuture();
+        } else {
+          return Future.failedFuture(new HttpException(422, ErrorCodes.TITLE_EXIST));
+        }
+      });
+  }
+
+  private void populateTitleByPoLine(Title title, PoLine poLine) {
+    title.setPackageName(poLine.getTitleOrPackage());
+    title.setExpectedReceiptDate(Objects.nonNull(poLine.getPhysical()) ? poLine.getPhysical().getExpectedReceiptDate() : null);
+    title.setPoLineNumber(poLine.getPoLineNumber());
+    if (poLine.getDetails() != null) {
+      title.setReceivingNote(poLine.getDetails().getReceivingNote());
+    }
   }
 }

@@ -3,6 +3,7 @@ package org.folio.services.lines;
 import static java.util.stream.Collectors.toList;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 import static org.folio.rest.core.ResponseUtil.handleFailure;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
@@ -32,6 +33,7 @@ import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
@@ -123,20 +125,23 @@ public class PoLinesService {
   }
 
   public Future<PoLine> createTitle(Conn conn, PoLine poLine) {
-    if (poLine.getPackagePoLineId() != null) {
-      Promise<PoLine> promise = Promise.promise();
-      getPoLineById(conn, poLine.getPackagePoLineId())
-        .onComplete(ar -> {
-          if (ar.failed() || ar.result() == null) {
-            log.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
-            promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
-          } else {
-            populateTitleForPackagePoLineAndSave(conn, promise, poLine, ar.result());
-          }
-        });
-      return promise.future();
-    }
-    return createTitleAndSave(conn, poLine);
+    return conn.getById(PURCHASE_ORDER_TABLE, poLine.getPurchaseOrderId(), PurchaseOrder.class)
+      .compose(purchaseOrder -> {
+        if (StringUtils.isBlank(poLine.getPackagePoLineId())) {
+          return createTitleAndSave(conn, poLine, purchaseOrder.getAcqUnitIds());
+        }
+        Promise<PoLine> promise = Promise.promise();
+        getPoLineById(conn, poLine.getPackagePoLineId())
+          .onComplete(ar -> {
+            if (ar.failed() || ar.result() == null) {
+              log.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
+              promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
+            } else {
+              populateTitleForPackagePoLineAndSave(conn, promise, poLine, ar.result(), purchaseOrder.getAcqUnitIds());
+            }
+          });
+        return promise.future();
+      });
   }
 
   public Future<String> createPoLine(Conn conn, PoLine poLine) {
@@ -288,8 +293,8 @@ public class PoLinesService {
   }
 
   private void populateTitleForPackagePoLineAndSave(Conn conn, Promise<PoLine> promise, PoLine poLine,
-                                                    PoLine packagePoLine) {
-    Title title = createTitleObject(poLine);
+                                                    PoLine packagePoLine, List<String> acqUnitIds) {
+    Title title = createTitleObject(poLine, acqUnitIds);
     populateTitleBasedOnPackagePoLine(title, packagePoLine);
     log.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), poLine.getPackagePoLineId());
 
@@ -368,9 +373,9 @@ public class PoLinesService {
     return promise.future();
   }
 
-  private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine) {
+  private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine, List<String> acqUnitIds) {
     Promise<PoLine> promise = Promise.promise();
-    Title title = createTitleObject(poLine);
+    Title title = createTitleObject(poLine, acqUnitIds);
     log.debug("Creating new title record with id={}", title.getId());
 
     conn.save(TITLES_TABLE, title.getId(), title)
@@ -391,7 +396,9 @@ public class PoLinesService {
     Promise<PoLine> promise = Promise.promise();
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
-    Title newTitle = createTitleObject(poLine).withIsAcknowledged(title.getIsAcknowledged()).withId(title.getId());
+    Title newTitle = createTitleObject(poLine, title.getAcqUnitIds())
+      .withIsAcknowledged(title.getIsAcknowledged())
+      .withId(title.getId());
 
     conn.update(TITLES_TABLE, newTitle, JSONB, criterion.toString(), false)
       .onComplete(ar -> {
@@ -430,7 +437,7 @@ public class PoLinesService {
     return client.deleteById(tx, PO_LINE_TABLE);
   }
 
-  private Title createTitleObject(PoLine poLine) {
+  private Title createTitleObject(PoLine poLine, List<String> acqUnitIds) {
     Title title = new Title().withId(UUID.randomUUID()
         .toString())
       .withPoLineId(poLine.getId())
@@ -441,6 +448,7 @@ public class PoLinesService {
       .withEdition(poLine.getEdition())
       .withPublisher(poLine.getPublisher())
       .withPublishedDate(poLine.getPublicationDate())
+      .withAcqUnitIds(acqUnitIds)
       .withExpectedReceiptDate(Objects.nonNull(poLine.getPhysical()) ? poLine.getPhysical().getExpectedReceiptDate() : null);
     if (Objects.nonNull(poLine.getDetails())) {
       title.withProductIds(poLine.getDetails()
@@ -465,7 +473,7 @@ public class PoLinesService {
     }
   }
 
-  public  Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
+  public Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
 
     return conn.get(TITLES_TABLE, Title.class, criterion, true)
@@ -490,7 +498,7 @@ public class PoLinesService {
 
 
   private boolean titleUpdateRequired(Title title, PoLine poLine) {
-    return !title.equals(createTitleObject(poLine)
+    return !title.equals(createTitleObject(poLine, title.getAcqUnitIds())
       .withId(title.getId())
       .withMetadata(title.getMetadata()));
   }
