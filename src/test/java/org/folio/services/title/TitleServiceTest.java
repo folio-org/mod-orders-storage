@@ -156,7 +156,6 @@ public class TitleServiceTest extends TestBase {
   @Test
   void shouldSaveTitleForNotPackagePoLine(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
-    String titleId = UUID.randomUUID().toString();
     String instanceId = UUID.randomUUID().toString();
     String purchaseOrderId = UUID.randomUUID().toString();
 
@@ -203,7 +202,7 @@ public class TitleServiceTest extends TestBase {
         .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
       .onComplete(ar -> {
         Title actTitle = ar.result();
-        testContext.verify(() -> assertThat(actTitle.getId(), is(titleId)));
+        testContext.verify(() -> assertEquals(actTitle.getPackageName(), poLine.getTitleOrPackage()));
         testContext.verify(() -> assertEquals(actTitle.getAcqUnitIds(), purchaseOrder.getAcqUnitIds()));
         testContext.completeNow();
       });
