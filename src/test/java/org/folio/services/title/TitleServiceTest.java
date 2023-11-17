@@ -151,6 +151,48 @@ public class TitleServiceTest extends TestBase {
   }
 
   @Test
+  void shouldSaveTitleForNotPackagePoLine(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String titleId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withIsPackage(false);
+    Title title = new Title()
+      .withPoLineId(poLineId)
+      .withInstanceId(instanceId);
+
+
+    Promise<Void> promise1 = Promise.promise();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      promise1.complete();
+      log.info("PoLine was saved");
+    });
+
+    Promise<Void> promise2 = Promise.promise();
+
+    promise1.future().onComplete(v -> client.getPgClient().withConn(conn -> titleService.saveTitle(title, conn)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          promise2.fail(ar.cause());
+        } else {
+          promise2.complete();
+          log.info("Title was saved");
+        }
+      })));
+
+    testContext.assertComplete(promise2.future()
+        .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
+        testContext.verify(() -> assertThat(actTitle.getId(), is(titleId)));
+        testContext.completeNow();
+      });
+  }
+
+  @Test
   void shouldFailedGetTitleByPoLineId(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String titleId = UUID.randomUUID().toString();
