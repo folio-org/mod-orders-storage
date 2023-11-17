@@ -30,6 +30,7 @@ import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategyResolver;
 import org.folio.orders.lines.update.PatchOperationHandler;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.services.piece.PieceClaimingService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.title.TitleService;
 import org.springframework.context.annotation.Bean;
@@ -150,5 +151,10 @@ public class ApplicationConfig {
                                         AuditEventProducer producer,
                                         PostgresClientFactory pgClientFactory) {
     return new AuditOutboxService(outboxRepository, lockRepository, producer, pgClientFactory);
+  }
+
+  @Bean
+  PieceClaimingService pieceClaimingService() {
+    return new PieceClaimingService();
   }
 }
