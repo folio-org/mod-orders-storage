@@ -449,6 +449,8 @@ public class PoLinesService {
       .withPublisher(poLine.getPublisher())
       .withPublishedDate(poLine.getPublicationDate())
       .withAcqUnitIds(acqUnitIds)
+      .withClaimingActive(poLine.getClaimingActive())
+      .withClaimingInterval(poLine.getClaimingInterval())
       .withExpectedReceiptDate(Objects.nonNull(poLine.getPhysical()) ? poLine.getPhysical().getExpectedReceiptDate() : null);
     if (Objects.nonNull(poLine.getDetails())) {
       title.withProductIds(poLine.getDetails()
@@ -500,6 +502,8 @@ public class PoLinesService {
   private boolean titleUpdateRequired(Title title, PoLine poLine) {
     return !title.equals(createTitleObject(poLine, title.getAcqUnitIds())
       .withId(title.getId())
+      .withClaimingActive(poLine.getClaimingActive())
+      .withClaimingInterval(poLine.getClaimingInterval())
       .withMetadata(title.getMetadata()));
   }
 

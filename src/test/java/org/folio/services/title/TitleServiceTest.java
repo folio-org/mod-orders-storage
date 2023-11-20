@@ -167,7 +167,9 @@ public class TitleServiceTest extends TestBase {
       .withId(poLineId)
       .withIsPackage(false)
       .withPurchaseOrderId(purchaseOrderId)
-      .withTitleOrPackage("Title name");
+      .withTitleOrPackage("Title name")
+      .withClaimingActive(true)
+      .withClaimingInterval(1);
 
     Title title = new Title()
       .withPoLineId(poLineId)
@@ -204,6 +206,8 @@ public class TitleServiceTest extends TestBase {
         Title actTitle = ar.result();
         testContext.verify(() -> assertEquals(actTitle.getPackageName(), poLine.getTitleOrPackage()));
         testContext.verify(() -> assertEquals(actTitle.getAcqUnitIds(), purchaseOrder.getAcqUnitIds()));
+        testContext.verify(() -> assertEquals(actTitle.getClaimingActive(), poLine.getClaimingActive()));
+        testContext.verify(() -> assertEquals(actTitle.getClaimingInterval(), poLine.getClaimingInterval()));
         testContext.completeNow();
       });
   }

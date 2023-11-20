@@ -132,6 +132,8 @@ public class TitleService {
     title.setPackageName(poLine.getTitleOrPackage());
     title.setExpectedReceiptDate(Objects.nonNull(poLine.getPhysical()) ? poLine.getPhysical().getExpectedReceiptDate() : null);
     title.setPoLineNumber(poLine.getPoLineNumber());
+    title.setClaimingActive(poLine.getClaimingActive());
+    title.setClaimingInterval(poLine.getClaimingInterval());
     if (poLine.getDetails() != null) {
       title.setReceivingNote(poLine.getDetails().getReceivingNote());
     }
