@@ -166,6 +166,8 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     log.info("--- mod-orders-storage orders test: post non-package PoLine associated title must be created or updated with poLine");
     JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
     JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
+    jsonLine.put("claimingActive", true);
+    jsonLine.put("claimingInterval", 1);
 
     String userId = UUID.randomUUID().toString();
     Headers headers = getDikuTenantHeaders(userId);
@@ -189,6 +191,8 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     assertThat(titleBefore.getPoLineId(), is(poLine.getId()));
     assertThat(titleBefore.getProductIds(), is(poLine.getDetails().getProductIds()));
     assertThat(titleBefore.getTitle(), is(poLine.getTitleOrPackage()));
+    assertEquals(titleBefore.getClaimingActive(), poLine.getClaimingActive());
+    assertEquals(titleBefore.getClaimingInterval(), poLine.getClaimingInterval());
 
     String newTitle = "new Title";
     poLine.setDetails(null);
