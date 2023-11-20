@@ -502,8 +502,6 @@ public class PoLinesService {
   private boolean titleUpdateRequired(Title title, PoLine poLine) {
     return !title.equals(createTitleObject(poLine, title.getAcqUnitIds())
       .withId(title.getId())
-      .withClaimingActive(poLine.getClaimingActive())
-      .withClaimingInterval(poLine.getClaimingInterval())
       .withMetadata(title.getMetadata()));
   }
 
