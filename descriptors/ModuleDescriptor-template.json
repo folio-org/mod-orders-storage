@@ -528,6 +528,23 @@
       ]
     },
     {
+      "id": "orders-storage.claiming",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/orders-storage/claiming/process",
+          "permissionsRequired": [
+            "orders-storage.claiming.process"
+          ],
+          "modulePermissions": [
+          ]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -558,6 +575,16 @@
           "modulePermissions": [],
           "unit": "minute",
           "delay": "30"
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/orders-storage/claiming/process",
+          "modulePermissions": [],
+          "schedule": {
+            "cron": "0 0 * * *"
+          }
         }
       ]
     }

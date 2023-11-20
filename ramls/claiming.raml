@@ -1,0 +1,14 @@
+#%RAML 1.0
+title: "mod-orders-storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1.0
+
+documentation:
+  - title: Pieces claiming batch job API
+    content: <b>Pieces claiming batch job API. This API is intended for internal use only by the Timer interface.</b>
+
+
+/orders-storage/claiming:
+  /process:
+    post:
+      description: Traverse the list of claimed pieces and modify their status information as needed
