@@ -110,6 +110,11 @@
       "run": "after",
       "snippetPath": "data-migration/13.6.0/replace_po_sequences.ftl",
       "fromModuleVersion": "mod-orders-storage-13.6.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/13.7.0/copy_acq_unit_ids_from_order_to_title.sql",
+      "fromModuleVersion": "mod-orders-storage-13.7.0"
     }
   ],
   "tables": [
