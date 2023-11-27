@@ -7,6 +7,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.AsyncResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.resource.OrdersStorageClaiming;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.piece.PieceClaimingService;
@@ -20,6 +21,8 @@ public class ClaimingAPI implements OrdersStorageClaiming {
   private static final Logger log = LogManager.getLogger();
 
   @Autowired
+  private AuditOutboxService auditOutboxService;
+  @Autowired
   private PieceClaimingService pieceClaimingService;
 
   public ClaimingAPI() {
@@ -29,8 +32,11 @@ public class ClaimingAPI implements OrdersStorageClaiming {
   @Override
   public void postOrdersStorageClaimingProcess(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
-    pieceClaimingService.processClaimedPieces()
-      .onSuccess(piecesCount -> log.info("Successfully processed {} claimed pieces, tenantId {}", piecesCount, tenantId))
+    pieceClaimingService.processClaimedPieces(tenantId)
+      .onSuccess(piecesCount -> {
+        log.info("Successfully processed {} claimed pieces, tenantId {}", piecesCount, tenantId);
+        auditOutboxService.processOutboxEventLogs(okapiHeaders);
+      })
       .onFailure(cause -> log.error("Failed to process claimed pieces, tenantId {}", tenantId, cause));
 
     asyncResultHandler.handle(Future.succeededFuture(Response.status(Response.Status.OK).build()));
