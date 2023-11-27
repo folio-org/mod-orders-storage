@@ -192,9 +192,6 @@
       ],
       "fullTextIndex": [
         {
-          "fieldName": "poNumber"
-        },
-        {
           "fieldName": "closeReason.reason"
         },
         {
@@ -202,6 +199,13 @@
         },
         {
           "fieldName": "acqUnitIds"
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "poNumber",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
