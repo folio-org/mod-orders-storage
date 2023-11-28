@@ -8,6 +8,8 @@ import static org.folio.StorageTestSuite.initSpringContext;
 import static org.folio.StorageTestSuite.storageUrl;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+
+import static org.folio.rest.impl.ClaimingAPITest.CLAIMING_ENDPOINT;
 import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_USERID_HEADER;
@@ -31,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.StorageTestSuite;
 import org.folio.config.ApplicationConfig;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.TitleCollection;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.AfterAll;
@@ -231,6 +234,18 @@ public abstract class TestBase {
       .statusCode(Status.OK.getStatusCode());
   }
 
+  void callClaimingApi(Headers headers) throws MalformedURLException {
+    given()
+      .headers(headers)
+      .accept(ContentType.JSON)
+      .contentType(ContentType.JSON)
+      .post(storageUrl(CLAIMING_ENDPOINT))
+      .then()
+      .log()
+      .all()
+      .statusCode(Status.OK.getStatusCode());
+  }
+
   void deleteTitles(String poLineId) throws MalformedURLException {
     Map<String, Object> params = new HashMap<>();
     params.put("query", "poLineId==" + poLineId);
@@ -329,5 +344,15 @@ public abstract class TestBase {
     assertNotNull(event.getActionDate());
     assertNotNull(event.getEventDate());
     assertNotNull(event.getPoLine());
+  }
+
+  protected void checkPieceEventContent(String eventPayload, PieceAuditEvent.Action action) {
+    PieceAuditEvent event = Json.decodeValue(eventPayload, PieceAuditEvent.class);
+    Assertions.assertEquals(action, event.getAction());
+    assertNotNull(event.getId());
+    assertNotNull(event.getPieceId());
+    assertNotNull(event.getActionDate());
+    assertNotNull(event.getEventDate());
+    assertNotNull(event.getPiece());
   }
 }
