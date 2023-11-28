@@ -25,8 +25,8 @@ public class PieceClaimingRepository {
                 'updatedDate', to_char(clock_timestamp(),'YYYY-MM-DD"T"HH24:MI:SS.MSTZH:TZM')::text,
                 'updatedByUserId', $1))
         FROM %1$s.%3$s as titles
-        WHERE pieces.titleid = titles.id
-        AND (titles.jsonb ->> 'claimingActive')::boolean = TRUE
+        WHERE (titles.jsonb ->> 'claimingActive')::boolean = TRUE
+        AND pieces.titleid = titles.id
         AND (
           (pieces.jsonb ->> 'receivingStatus' = 'Expected'
               AND current_date >= ((pieces.jsonb ->> 'receiptDate')::date + INTERVAL '1 day' * (titles.jsonb ->> 'claimingInterval')::int))

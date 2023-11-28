@@ -430,6 +430,12 @@
           "targetTableAlias": "purchaseOrder",
           "tableAlias": "titles"
         }
+      ],
+      "index": [
+        {
+          "fieldName": "claimingActive",
+          "caseSensitive": false
+        }
       ]
     },
     {

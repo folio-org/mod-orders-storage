@@ -22,7 +22,6 @@ public class PieceClaimingService {
     this.pieceClaimingRepository = pieceClaimingRepository;
   }
 
-
   public Future<Integer> processClaimedPieces(String tenantId) {
     log.trace("processClaimedPieces, tenantId={}", tenantId);
     PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
