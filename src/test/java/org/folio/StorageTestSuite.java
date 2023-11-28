@@ -6,6 +6,7 @@ import static org.folio.rest.impl.TestBase.TENANT_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 
+import io.restassured.RestAssured;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,10 +24,12 @@ import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.event.KafkaEventUtilTest;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.kafka.KafkaTopicNameHelper;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
+import org.folio.rest.impl.CustomFieldsAPITest;
 import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.HelperUtilsTest;
 import org.folio.rest.impl.OrdersAPITest;
@@ -75,6 +78,7 @@ public class StorageTestSuite {
   private static Vertx vertx;
   private static int port = NetworkUtils.nextFreePort();
   public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
+  private static final Header URL_HEADER = new Header(XOkapiHeaders.URL, "http://localhost:" + port);
   private static TenantJob tenantJob;
   private static PostgreSQLContainer<?> postgresSQLContainer;
   public static final String POSTGRES_DOCKER_IMAGE = "postgres:12-alpine";
@@ -151,6 +155,9 @@ public class StorageTestSuite {
     System.setProperty(KAFKA_PORT, hostAndPort[1]);
     System.setProperty(KAFKA_ENV, KAFKA_ENV_VALUE);
     System.setProperty(OKAPI_URL_KEY, "http://localhost:" + mockPort);
+
+    // Set X-Okapi-Url header for all requests
+    RestAssured.requestSpecification = RestAssured.given().header(URL_HEADER);
 
     DeploymentOptions options = new DeploymentOptions();
 
@@ -271,6 +278,7 @@ public class StorageTestSuite {
 
   @Nested
   class ClaimingAPITestNested extends ClaimingAPITest {}
-
+  @Nested
+  class CustomFieldsAPITestNested extends CustomFieldsAPITest {}
 
 }

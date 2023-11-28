@@ -1,0 +1,15 @@
+{
+  "id": "fd725b6f-8723-4003-878e-69ffe255ade7",
+  "name": "External order number",
+  "refId": "externalOrderNumber",
+  "type": "TEXTBOX_SHORT",
+  "entityType": "purchase_order",
+  "visible": true,
+  "required": false,
+  "isRepeatable": false,
+  "order": 1,
+  "helpText": "",
+  "textField": {
+    "fieldFormat": "TEXT"
+  }
+}

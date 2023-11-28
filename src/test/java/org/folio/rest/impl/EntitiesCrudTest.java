@@ -43,7 +43,8 @@ public class EntitiesCrudTest extends TestBase {
       TestEntities.REASON_FOR_CLOSURE,
       TestEntities.PREFIX,
       TestEntities.SUFFIX,
-      TestEntities.EXPORT_HISTORY);
+      TestEntities.EXPORT_HISTORY,
+      TestEntities.CUSTOM_FIELDS);
   }
 
   @ParameterizedTest

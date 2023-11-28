@@ -18,7 +18,8 @@ public enum TestEntities {
   REASON_FOR_CLOSURE("/orders-storage/configuration/reasons-for-closure", ReasonForClosure.class, TestData.ReasonForClosure.DEFAULT, "reason", "New reason for closure", 1),
   PREFIX("/orders-storage/configuration/prefixes", Prefix.class, TestData.Prefix.DEFAULT , "description", "New description", 1),
   SUFFIX("/orders-storage/configuration/suffixes", Suffix.class, TestData.Suffix.DEFAULT, "description", "New description", 1),
-  EXPORT_HISTORY("/orders-storage/export-history", ExportHistory.class, TestData.ExportHistory.EXPORT_HISTORY_1, "exportType", "BURSAR_FEES_FINES", 1);
+  EXPORT_HISTORY("/orders-storage/export-history", ExportHistory.class, TestData.ExportHistory.EXPORT_HISTORY_1, "exportType", "BURSAR_FEES_FINES", 1),
+  CUSTOM_FIELDS("/custom-fields", CustomField.class, TestData.CustomFields.PO, "helpText", "New help text", 2);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;
