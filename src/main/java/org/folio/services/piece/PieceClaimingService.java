@@ -23,7 +23,7 @@ public class PieceClaimingService {
   }
 
   public Future<Integer> processClaimedPieces(String tenantId) {
-    log.trace("processClaimedPieces, tenantId={}", tenantId);
+    log.info("processClaimedPieces, tenantId={}", tenantId);
     PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
     return pgClient.withConn(conn -> extensionRepository.createUUIDExtension(conn)
       .compose(aVoid -> pieceClaimingRepository.updatePieceStatusBasedOnIntervals(conn, tenantId)));
