@@ -205,6 +205,13 @@
         {
           "fieldName": "acqUnitIds"
         }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "poNumber",
+          "caseSensitive": false,
+          "removeAccents": true
+        }
       ]
     },
     {
@@ -435,6 +442,17 @@
           "targetTableAlias": "purchaseOrder",
           "tableAlias": "titles"
         }
+      ],
+      "index": [
+        {
+          "fieldName": "acqUnitIds",
+          "caseSensitive": false
+        }
+      ],
+      "fullTextIndex": [
+        {
+          "fieldName": "acqUnitIds"
+        }
       ]
     },
     {
@@ -531,6 +549,10 @@
         {
           "fieldName": "protectRead",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "protectCreate",
+          "caseSensitive": false
         }
       ]
     },
@@ -616,6 +638,13 @@
         {
           "fieldName": "exportJobId",
           "caseSensitive": false
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "exportedPoLineIds",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     }
