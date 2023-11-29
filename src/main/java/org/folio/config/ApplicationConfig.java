@@ -20,6 +20,7 @@ import org.folio.event.service.AuditOutboxService;
 import org.folio.kafka.KafkaConfig;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
+import org.folio.service.UserService;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesBatchService;
 import org.folio.services.lines.PoLinesService;
@@ -35,6 +36,7 @@ import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInsta
 import org.folio.services.piece.PieceClaimingService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.title.TitleService;
+import org.folio.services.user.NoOpUserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -44,6 +46,12 @@ import org.springframework.context.annotation.Import;
 @ComponentScan({ "org.folio.verticles", "org.folio.event.listener" })
 @Import({ KafkaConfiguration.class, org.folio.spring.ApplicationConfig.class })
 public class ApplicationConfig {
+
+  // Override UserService from folio-custom-fields
+  @Bean
+  public UserService userService(Vertx vertx) {
+    return new NoOpUserService(vertx);
+  }
 
   @Bean
   PoLinesDAO poLinesDAO() {
