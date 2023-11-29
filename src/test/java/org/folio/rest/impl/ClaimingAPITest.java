@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.StorageTestSuite;
 import org.folio.event.AuditEventType;
 import org.folio.rest.jaxrs.model.*;
+import org.folio.rest.utils.IsolatedTenant;
 import org.folio.rest.utils.TestData;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import static org.folio.rest.utils.TestEntities.*;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@IsolatedTenant
 public class ClaimingAPITest extends TestBase {
 
   private static final Logger log = LogManager.getLogger();
@@ -33,7 +35,7 @@ public class ClaimingAPITest extends TestBase {
   void testPieceCreateUpdateEvents() throws MalformedURLException {
     log.info("--- mod-orders-storage claiming batch job test: start job");
     String userId = UUID.randomUUID().toString();
-    Headers headers = getDikuTenantHeaders(userId);
+    Headers headers = getIsolatedTenantHeaders(userId);
 
     PurchaseOrder purchaseOrder = getFileAsObject(TestData.PurchaseOrder.DEFAULT, PurchaseOrder.class).withId(UUID.randomUUID().toString());
 
@@ -75,7 +77,7 @@ public class ClaimingAPITest extends TestBase {
 
     callClaimingApi(headers);
 
-    List<String> events = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_PIECE_CHANGED.getTopicName(), 7, userId);
+    List<String> events = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_PIECE_CHANGED.getTopicName(), 7, userId);
     assertEquals(7, events.size());
     checkPieceEventContent(events.get(0), PieceAuditEvent.Action.CREATE);
     checkPieceEventContent(events.get(1), PieceAuditEvent.Action.CREATE);
@@ -91,7 +93,7 @@ public class ClaimingAPITest extends TestBase {
       .map(Piece::getId)
       .forEach(updatePieceId -> {
         try {
-          getDataById(PIECE.getEndpointWithId(), updatePieceId, TENANT_HEADER)
+          getDataById(PIECE.getEndpointWithId(), updatePieceId, ISOLATED_TENANT_HEADER)
             .then()
             .assertThat()
             .body("receivingStatus", Matchers.equalTo(Piece.ReceivingStatus.LATE.toString()))
