@@ -442,6 +442,10 @@
         {
           "fieldName": "acqUnitIds",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "claimingActive",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
