@@ -35,11 +35,12 @@ public class ClaimingAPITest extends TestBase {
     String userId = UUID.randomUUID().toString();
     Headers headers = getDikuTenantHeaders(userId);
 
-    PurchaseOrder purchaseOrder = getFileAsObject(TestData.PurchaseOrder.DEFAULT, PurchaseOrder.class);
+    PurchaseOrder purchaseOrder = getFileAsObject(TestData.PurchaseOrder.DEFAULT, PurchaseOrder.class).withId(UUID.randomUUID().toString());
 
     createEntity(PURCHASE_ORDER.getEndpoint(), mapFrom(purchaseOrder).encode(), headers);
 
-    PoLine poLine = getFileAsObject(TestData.PoLine.DEFAULT, PoLine.class).withIsPackage(true).withClaimingActive(true);
+    PoLine poLine = getFileAsObject(TestData.PoLine.DEFAULT, PoLine.class).withId(UUID.randomUUID().toString()).withIsPackage(true)
+      .withClaimingActive(true).withClaimingInterval(1).withPurchaseOrderId(purchaseOrder.getId());
 
     createEntity(PO_LINE.getEndpoint(), mapFrom(poLine).encode(), headers);
 
@@ -56,16 +57,16 @@ public class ClaimingAPITest extends TestBase {
 
     Piece pieceExpectedUnclaimed = getFileAsObject(TestData.Piece.DEFAULT, Piece.class)
       .withId(UUID.randomUUID().toString()).withReceivingStatus(Piece.ReceivingStatus.EXPECTED)
-      .withTitleId(titleWithoutClaimingActive.getId());
+      .withTitleId(titleWithoutClaimingActive.getId()).withPoLineId(poLine.getId());
     Piece pieceExpectedOutdated = getFileAsObject(TestData.Piece.DEFAULT, Piece.class)
       .withId(UUID.randomUUID().toString()).withReceivingStatus(Piece.ReceivingStatus.EXPECTED)
-      .withStatusUpdatedDate(eligibleDate).withTitleId(titleWithClaimingActive.getId()).withReceiptDate(eligibleDate);
+      .withStatusUpdatedDate(eligibleDate).withTitleId(titleWithClaimingActive.getId()).withReceiptDate(eligibleDate).withPoLineId(poLine.getId());
     Piece pieceClaimSentOutdated = getFileAsObject(TestData.Piece.DEFAULT, Piece.class)
       .withId(UUID.randomUUID().toString()).withReceivingStatus(Piece.ReceivingStatus.CLAIM_SENT).withClaimingInterval(1)
-      .withStatusUpdatedDate(eligibleDate).withTitleId(titleWithClaimingActive.getId()).withReceiptDate(eligibleDate);
+      .withStatusUpdatedDate(eligibleDate).withTitleId(titleWithClaimingActive.getId()).withReceiptDate(eligibleDate).withPoLineId(poLine.getId());
     Piece pieceClaimDelayedOutdated = getFileAsObject(TestData.Piece.DEFAULT, Piece.class)
       .withId(UUID.randomUUID().toString()).withReceivingStatus(Piece.ReceivingStatus.CLAIM_DELAYED).withClaimingInterval(1)
-      .withStatusUpdatedDate(eligibleDate).withTitleId(titleWithClaimingActive.getId()).withReceiptDate(eligibleDate);
+      .withStatusUpdatedDate(eligibleDate).withTitleId(titleWithClaimingActive.getId()).withReceiptDate(eligibleDate).withPoLineId(poLine.getId());
 
     createEntity(PIECE.getEndpoint(), mapFrom(pieceExpectedUnclaimed).encode(), headers);
     createEntity(PIECE.getEndpoint(), mapFrom(pieceExpectedOutdated).encode(), headers);
