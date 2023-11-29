@@ -4,7 +4,9 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import io.vertx.core.Vertx;
+import org.folio.dao.ExtensionRepository;
 import org.folio.dao.InternalLockRepository;
+import org.folio.dao.PieceClaimingRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.dao.export.ExportHistoryPostgresRepository;
@@ -154,7 +156,19 @@ public class ApplicationConfig {
   }
 
   @Bean
-  PieceClaimingService pieceClaimingService() {
-    return new PieceClaimingService();
+  ExtensionRepository extensionRepository() {
+    return new ExtensionRepository();
+  }
+
+  @Bean
+  PieceClaimingRepository pieceClaimingRepository() {
+    return new PieceClaimingRepository();
+  }
+
+  @Bean
+  PieceClaimingService pieceClaimingService(PostgresClientFactory pgClientFactory,
+                                            ExtensionRepository extensionRepository,
+                                            PieceClaimingRepository pieceClaimingRepository) {
+    return new PieceClaimingService(pgClientFactory, extensionRepository, pieceClaimingRepository);
   }
 }

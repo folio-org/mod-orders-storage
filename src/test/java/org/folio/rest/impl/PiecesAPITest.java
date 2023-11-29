@@ -1,7 +1,6 @@
 package org.folio.rest.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -55,16 +54,6 @@ public class PiecesAPITest extends TestBase {
     assertEquals(2, events.size());
     checkPieceEventContent(events.get(0), PieceAuditEvent.Action.CREATE);
     checkPieceEventContent(events.get(1), PieceAuditEvent.Action.EDIT);
-  }
-
-  protected void checkPieceEventContent(String eventPayload, PieceAuditEvent.Action action) {
-    PieceAuditEvent event = Json.decodeValue(eventPayload, PieceAuditEvent.class);
-    Assertions.assertEquals(action, event.getAction());
-    assertNotNull(event.getId());
-    assertNotNull(event.getPieceId());
-    assertNotNull(event.getActionDate());
-    assertNotNull(event.getEventDate());
-    assertNotNull(event.getPiece());
   }
 
 }

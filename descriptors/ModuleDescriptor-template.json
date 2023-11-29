@@ -1202,6 +1202,19 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.claiming.process",
+      "displayName" : "orders-storage-claiming-process",
+      "description" : "Iterate through claimed pieces and modify their status as needed"
+    },
+    {
+      "permissionName" : "orders-storage.claiming.all",
+      "displayName" : "All orders-storage claiming perms",
+      "description" : "All permissions for the orders-storage - claiming",
+      "subPermissions" : [
+        "orders-storage.claiming.process"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.audit-outbox.process",
       "displayName" : "orders-storage-audit-outbox-process",
       "description" : "Fetch audit events and send them to kafka"
@@ -1237,7 +1250,8 @@
         "orders-storage.configuration.prefixes.all",
         "orders-storage.configuration.suffixes.all",
         "orders-storage.export-history.all",
-        "orders-storage.audit-outbox.all"
+        "orders-storage.audit-outbox.all",
+        "orders-storage.claiming.all"
       ]
     }
   ],
