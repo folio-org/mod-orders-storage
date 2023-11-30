@@ -4,5 +4,4 @@ FROM ${myuniversity}_${mymodule}.po_line as po_line, ${myuniversity}_${mymodule}
 WHERE title.poLineId = po_line.id
   AND po_line.purchaseOrderId = purchase_order.id
   AND left(lower(f_unaccent(purchase_order.jsonb->>'acqUnitIds')), 600) NOT LIKE f_unaccent('[]')
-  AND (left(lower(f_unaccent(title.jsonb->>'acqUnitIds')), 600) IS NULL OR
-       left(lower(f_unaccent(title.jsonb->>'acqUnitIds')), 600) LIKE lower(f_unaccent('[]')));
+  AND left(lower(f_unaccent(title.jsonb->>'acqUnitIds')), 600) LIKE lower(f_unaccent('[]'));
