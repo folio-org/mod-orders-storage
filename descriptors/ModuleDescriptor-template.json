@@ -97,7 +97,7 @@
     },
     {
       "id": "orders-storage.po-lines",
-      "version": "12.2",
+      "version": "12.3",
       "handlers": [
         {
           "methods": ["GET"],
@@ -169,7 +169,7 @@
     },
     {
       "id": "orders-storage.purchase-orders",
-      "version": "8.0",
+      "version": "8.1",
       "handlers": [
         {
           "methods": ["GET"],
@@ -541,6 +541,53 @@
           ],
           "modulePermissions": [
           ]
+        }
+      ]
+    },
+    {
+      "id": "custom-fields",
+      "version": "3.0",
+      "interfaceType" : "multiple",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/custom-fields",
+          "permissionsRequired": ["orders-storage.custom-fields.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/custom-fields",
+          "permissionsRequired": ["orders-storage.custom-fields.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/custom-fields/{id}",
+          "permissionsRequired": ["orders-storage.custom-fields.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/custom-fields/{id}",
+          "permissionsRequired": ["orders-storage.custom-fields.item.put"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/custom-fields",
+          "permissionsRequired": ["orders-storage.custom-fields.collection.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/custom-fields/{id}",
+          "permissionsRequired": ["orders-storage.custom-fields.item.delete"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/custom-fields/{id}/stats",
+          "permissionsRequired": ["orders-storage.custom-fields.item.stats.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/custom-fields/{id}/options/{optId}/stats",
+          "permissionsRequired": ["orders-storage.custom-fields.item.option.stats.get"]
         }
       ]
     },
@@ -1228,6 +1275,62 @@
       ]
     },
     {
+      "permissionName": "orders-storage.custom-fields.collection.get",
+      "displayName": "Custom Fields - get collection",
+      "description": "Get Custom Fields collection"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.collection.put",
+      "displayName": "Custom Fields - put collection",
+      "description": "Put Custom Fields collection"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.item.post",
+      "displayName": "Custom Fields - create field",
+      "description": "Create Custom Field"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.item.get",
+      "displayName": "Custom Fields - get field",
+      "description": "Get Custom Field"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.item.put",
+      "displayName": "Custom Fields - modify field",
+      "description": "Modify Custom Field"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.item.delete",
+      "displayName": "Custom Fields - delete field",
+      "description": "Delete Custom Field"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.item.stats.get",
+      "displayName": "Custom Fields - get item usage statistic",
+      "description": "Get Custom Field Statistic"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.item.option.stats.get",
+      "displayName": "Custom Fields - get item option usage statistic",
+      "description": "Get Custom Field Option Statistic"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.all",
+      "displayName": "Custom Fields module - all permissions",
+      "description": "Entire set of permissions needed to use the custom fields module",
+      "subPermissions": [
+        "orders-storage.custom-fields.collection.get",
+        "orders-storage.custom-fields.collection.put",
+        "orders-storage.custom-fields.item.post",
+        "orders-storage.custom-fields.item.get",
+        "orders-storage.custom-fields.item.put",
+        "orders-storage.custom-fields.item.delete",
+        "orders-storage.custom-fields.item.stats.get",
+        "orders-storage.custom-fields.item.option.stats.get"
+      ],
+      "visible": false
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -1251,7 +1354,8 @@
         "orders-storage.configuration.suffixes.all",
         "orders-storage.export-history.all",
         "orders-storage.audit-outbox.all",
-        "orders-storage.claiming.all"
+        "orders-storage.claiming.all",
+        "orders-storage.custom-fields.all"
       ]
     }
   ],

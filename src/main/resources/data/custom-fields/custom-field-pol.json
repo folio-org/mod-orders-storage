@@ -1,0 +1,30 @@
+{
+  "id": "2970f8fc-3ace-441e-b994-879db86e1d52",
+  "name": "Membership",
+  "refId": "membership",
+  "type": "SINGLE_SELECT_DROPDOWN",
+  "entityType": "po_line",
+  "visible": true,
+  "required": false,
+  "isRepeatable": false,
+  "order": 1,
+  "helpText": "",
+  "selectField": {
+    "multiSelect": false,
+    "options": {
+      "values": [
+        {
+          "id": "opt_1",
+          "value": "No",
+          "default": false
+        },
+        {
+          "id": "opt_0",
+          "value": "Yes",
+          "default": false
+        }
+      ],
+      "sortingOrder": "CUSTOM"
+    }
+  }
+}

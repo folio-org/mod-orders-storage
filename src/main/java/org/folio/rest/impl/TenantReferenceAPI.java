@@ -77,7 +77,8 @@ public class TenantReferenceAPI extends TenantAPI {
         .add("acquisitions-units-memberships", "acquisitions-units-storage/memberships")
         .add("configuration/reasons-for-closure", "orders-storage/configuration/reasons-for-closure")
         .add("configuration/prefixes", "orders-storage/configuration/prefixes")
-        .add("configuration/suffixes", "orders-storage/configuration/suffixes");
+        .add("configuration/suffixes", "orders-storage/configuration/suffixes")
+        .add("custom-fields", "custom-fields");
     }
     return true;
   }
