@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -101,7 +102,11 @@ public class TitleService {
       })
       .compose(purchaseOrder -> {
         log.debug("saveTitle:: A purchaseOrder with an id={} was found", purchaseOrder.getId());
-        title.withAcqUnitIds(purchaseOrder.getAcqUnitIds());
+        if (CollectionUtils.isEmpty(title.getAcqUnitIds())) {
+          log.info("saveTitle:: Inherit acq units from related PO with id: {} because title acq units for title id {} are empty",
+            purchaseOrder.getId(), title.getId());
+          title.withAcqUnitIds(purchaseOrder.getAcqUnitIds());
+        }
 
         log.debug("saveTitle:: Creating new title record with id={}", title.getId());
         return conn.save(TITLES_TABLE, title.getId(), title)

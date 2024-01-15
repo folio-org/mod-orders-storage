@@ -154,7 +154,65 @@ public class TitleServiceTest extends TestBase {
   }
 
   @Test
-  void shouldSaveTitleForNotPackagePoLine(Vertx vertx, VertxTestContext testContext) {
+  void shouldSaveTitleWithAcqUnits(Vertx vertx, VertxTestContext testContext) {
+    String poLineId = UUID.randomUUID().toString();
+    String instanceId = UUID.randomUUID().toString();
+    String purchaseOrderId = UUID.randomUUID().toString();
+
+    PurchaseOrder purchaseOrder = new PurchaseOrder()
+      .withId(purchaseOrderId)
+      .withAcqUnitIds(List.of("First", "Second"));
+    PoLine poLine = new PoLine()
+      .withId(poLineId)
+      .withIsPackage(false)
+      .withPurchaseOrderId(purchaseOrderId)
+      .withTitleOrPackage("Title name")
+      .withClaimingActive(true)
+      .withClaimingInterval(1);
+
+    Title title = new Title()
+      .withPoLineId(poLineId)
+      .withInstanceId(instanceId)
+      .withAcqUnitIds(List.of("Third"));
+
+    Promise<Void> saveOrderPromise = Promise.promise();
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    client.getPgClient().save(PURCHASE_ORDER_TABLE, purchaseOrderId, purchaseOrder, event -> {
+      saveOrderPromise.complete();
+      log.info("PurchaseOrder was saved");
+    });
+
+    Promise<Void> saveOrderLinePromise = Promise.promise();
+    saveOrderPromise.future().onComplete(v -> client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      saveOrderLinePromise.complete();
+      log.info("PoLine was saved");
+    }));
+
+    Promise<Void> saveTitlePromise = Promise.promise();
+    saveOrderLinePromise.future().onComplete(v -> client.getPgClient().withConn(conn -> titleService.saveTitle(title, conn)
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          saveTitlePromise.fail(ar.cause());
+        } else {
+          saveTitlePromise.complete();
+          log.info("Title was saved");
+        }
+      })));
+
+    testContext.assertComplete(saveTitlePromise.future()
+        .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
+      .onComplete(ar -> {
+        Title actTitle = ar.result();
+        testContext.verify(() -> assertEquals(actTitle.getPackageName(), poLine.getTitleOrPackage()));
+        testContext.verify(() -> assertEquals(actTitle.getAcqUnitIds(), title.getAcqUnitIds()));
+        testContext.verify(() -> assertEquals(actTitle.getClaimingActive(), poLine.getClaimingActive()));
+        testContext.verify(() -> assertEquals(actTitle.getClaimingInterval(), poLine.getClaimingInterval()));
+        testContext.completeNow();
+      });
+  }
+
+  @Test
+  void shouldSaveTitleWithAcqUnitsInheritedFromOrder(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String instanceId = UUID.randomUUID().toString();
     String purchaseOrderId = UUID.randomUUID().toString();
@@ -175,32 +233,31 @@ public class TitleServiceTest extends TestBase {
       .withPoLineId(poLineId)
       .withInstanceId(instanceId);
 
-    Promise<Void> promise1 = Promise.promise();
+    Promise<Void> saveOrderPromise = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
     client.getPgClient().save(PURCHASE_ORDER_TABLE, purchaseOrderId, purchaseOrder, event -> {
-      promise1.complete();
+      saveOrderPromise.complete();
       log.info("PurchaseOrder was saved");
     });
 
-    Promise<Void> promise2 = Promise.promise();
-    promise1.future().onComplete(v -> client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
-      promise2.complete();
+    Promise<Void> saveOrderLinePromise = Promise.promise();
+    saveOrderPromise.future().onComplete(v -> client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
+      saveOrderLinePromise.complete();
       log.info("PoLine was saved");
     }));
 
-    Promise<Void> promise3 = Promise.promise();
-
-    promise2.future().onComplete(v -> client.getPgClient().withConn(conn -> titleService.saveTitle(title, conn)
+    Promise<Void> saveTitlePromise = Promise.promise();
+    saveOrderLinePromise.future().onComplete(v -> client.getPgClient().withConn(conn -> titleService.saveTitle(title, conn)
       .onComplete(ar -> {
         if (ar.failed()) {
-          promise3.fail(ar.cause());
+          saveTitlePromise.fail(ar.cause());
         } else {
-          promise3.complete();
+          saveTitlePromise.complete();
           log.info("Title was saved");
         }
       })));
 
-    testContext.assertComplete(promise3.future()
+    testContext.assertComplete(saveTitlePromise.future()
         .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
       .onComplete(ar -> {
         Title actTitle = ar.result();
