@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import io.vertx.core.Future;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,7 +44,11 @@ public class PoLineBatchAPI extends BaseApi implements OrdersStoragePoLinesBatch
   @Override
   public void putOrdersStoragePoLinesBatch(PoLineCollection poLineCollection, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders, vertxContext)
+    Future.all(poLineCollection.getPoLines().stream()
+        .map(poLine -> validateCustomFields(vertxContext, okapiHeaders, poLine))
+        .toList())
+      .compose(cf ->
+        poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders, vertxContext))
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("putOrdersStoragePoLinesBatch:: failed, PO line ids: {} ", getPoLineIdsForLogMessage(poLineCollection.getPoLines()), ar.cause());

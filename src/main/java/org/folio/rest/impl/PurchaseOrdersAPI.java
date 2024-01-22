@@ -66,8 +66,10 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
   public void postOrdersStoragePurchaseOrders(PurchaseOrder order, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.debug("Creating a new purchase order");
-    pgClient.withTrans(conn -> createPurchaseOrder(conn, order)
-      .compose(v -> auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.CREATE, okapiHeaders)))
+    validateCustomFields(vertxContext, okapiHeaders, order)
+      .compose(v ->
+        pgClient.withTrans(conn -> createPurchaseOrder(conn, order)
+          .compose(v2 -> auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.CREATE, okapiHeaders))))
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("Order creation failed, order={}", JsonObject.mapFrom(order).encodePrettily(), ar.cause());
@@ -127,7 +129,8 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
   public void putOrdersStoragePurchaseOrdersById(String id, PurchaseOrder order, Map<String, String> okapiHeaders,
     Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     try {
-      updateOrder(id, order, okapiHeaders)
+      validateCustomFields(vertxContext, okapiHeaders, order)
+        .compose(v -> updateOrder(id, order, okapiHeaders))
         .onComplete(ar -> {
           if (ar.succeeded()) {
             log.info("Update order complete, id={}", id);

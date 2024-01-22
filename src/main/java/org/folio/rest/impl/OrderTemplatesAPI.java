@@ -1,20 +1,23 @@
 package org.folio.rest.impl;
 
+import io.vertx.core.Context;
+import io.vertx.core.json.JsonObject;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.OrderTemplate;
 import org.folio.rest.jaxrs.model.OrderTemplateCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageOrderTemplates;
+import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 
 import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
 import io.vertx.core.Handler;
 
-public class OrderTemplatesAPI implements OrdersStorageOrderTemplates {
+public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemplates {
 
   private static final String ORDER_TEMPLATES_TABLE = "order_templates";
 
@@ -28,7 +31,17 @@ public class OrderTemplatesAPI implements OrdersStorageOrderTemplates {
   @Override
   @Validate
   public void postOrdersStorageOrderTemplates(OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.post(ORDER_TEMPLATES_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageOrderTemplatesResponse.class, asyncResultHandler);
+    validateCustomFields(vertxContext, okapiHeaders, entity)
+        .compose(
+            v ->
+                PgUtil.post(
+                    ORDER_TEMPLATES_TABLE,
+                    entity,
+                    okapiHeaders,
+                    vertxContext,
+                    PostOrdersStorageOrderTemplatesResponse.class))
+        .onComplete(
+          ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
   }
 
   @Override
@@ -46,6 +59,22 @@ public class OrderTemplatesAPI implements OrdersStorageOrderTemplates {
   @Override
   @Validate
   public void putOrdersStorageOrderTemplatesById(String id, OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(ORDER_TEMPLATES_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageOrderTemplatesByIdResponse.class, asyncResultHandler);
+    validateCustomFields(vertxContext, okapiHeaders, entity)
+        .compose(
+            v ->
+                PgUtil.put(
+                    ORDER_TEMPLATES_TABLE,
+                    entity,
+                    id,
+                    okapiHeaders,
+                    vertxContext,
+                    PutOrdersStorageOrderTemplatesByIdResponse.class))
+        .onComplete(
+            ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
+  }
+
+  @Override
+  protected String getEndpoint(Object entity) {
+    return HelperUtils.getEndpoint(OrdersStorageOrderTemplates.class) + JsonObject.mapFrom(entity).getString("id");
   }
 }
