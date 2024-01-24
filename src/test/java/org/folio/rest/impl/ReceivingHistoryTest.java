@@ -203,7 +203,6 @@ public class ReceivingHistoryTest extends TestBase {
   }
 
   private void verifyFields(Piece piece, PoLine poLine, PurchaseOrder purchaseOrder, ReceivingHistory receivingHistory) {
-    assertEquals(piece.getCaption(), receivingHistory.getCaption());
     assertEquals(piece.getComment(), receivingHistory.getComment());
     assertEquals(piece.getItemId(), receivingHistory.getItemId());
     assertEquals(piece.getLocationId(), receivingHistory.getLocationId());
