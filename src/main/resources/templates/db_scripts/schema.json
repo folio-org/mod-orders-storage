@@ -519,7 +519,7 @@
       ],
       "ginIndex": [
         {
-          "fieldName": "caption",
+          "fieldName": "displaySummary",
           "caseSensitive": false,
           "removeAccents": true
         }

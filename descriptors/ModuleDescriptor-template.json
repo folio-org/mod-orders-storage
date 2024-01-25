@@ -200,7 +200,7 @@
     },
     {
       "id": "orders-storage.receiving-history",
-      "version": "3.2",
+      "version": "4.2",
       "handlers": [
         {
           "methods": ["GET"],
