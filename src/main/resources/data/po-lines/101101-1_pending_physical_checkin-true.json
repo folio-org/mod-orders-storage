@@ -87,5 +87,8 @@
     "instructions": "",
     "noteFromVendor": "",
     "vendorAccount": ""
+  },
+  "customFields": {
+    "membership": "opt_0"
   }
 }

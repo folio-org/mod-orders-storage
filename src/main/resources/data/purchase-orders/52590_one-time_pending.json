@@ -10,8 +10,5 @@
   "poNumber": "52590",
   "reEncumber": false,
   "vendor": "f0fb6130-cdf1-11e8-a8d5-f2801f1b9fd1",
-  "workflowStatus": "Pending",
-  "customFields": {
-    "membership": "opt_0"
-  }
+  "workflowStatus": "Pending"
 }
