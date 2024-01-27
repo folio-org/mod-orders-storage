@@ -69,6 +69,7 @@ public class TenantReferenceAPI extends TenantAPI {
         .withLead("data")
         .add("alerts", "orders-storage/alerts")
         .add("reporting-codes", "orders-storage/reporting-codes")
+        .add("custom-fields", "custom-fields")
         .add("purchase-orders", "orders-storage/purchase-orders")
         .add("po-lines", "orders-storage/po-lines")
         .add("titles", "orders-storage/titles")
@@ -77,8 +78,7 @@ public class TenantReferenceAPI extends TenantAPI {
         .add("acquisitions-units-memberships", "acquisitions-units-storage/memberships")
         .add("configuration/reasons-for-closure", "orders-storage/configuration/reasons-for-closure")
         .add("configuration/prefixes", "orders-storage/configuration/prefixes")
-        .add("configuration/suffixes", "orders-storage/configuration/suffixes")
-        .add("custom-fields", "custom-fields");
+        .add("configuration/suffixes", "orders-storage/configuration/suffixes");
     }
     return true;
   }

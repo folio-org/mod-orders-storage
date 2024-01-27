@@ -6,6 +6,7 @@ public enum TestEntities {
   // the below order is important to satisfy the foreign key constraints
   ALERT("/orders-storage/alerts", Alert.class, TestData.Alert.DEFAULT,  "alert", "Receipt overdue updated", 1),
   REPORTING_CODE("/orders-storage/reporting-codes", ReportingCode.class, TestData.ReportingCode.DEFAULT, "code", "CODEV", 1),
+  CUSTOM_FIELDS("/custom-fields", CustomField.class, TestData.CustomFields.PO, "helpText", "New help text", 2),
   PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, TestData.PurchaseOrder.DEFAULT, "poNumber", "666666", 6),
   PO_LINE("/orders-storage/po-lines", PoLine.class, TestData.PoLine.DEFAULT, "description", "Gift", 5),
   TITLES("/orders-storage/titles", Title.class, TestData.Title.DEFAULT, "title", "New title", 5),
@@ -18,8 +19,7 @@ public enum TestEntities {
   REASON_FOR_CLOSURE("/orders-storage/configuration/reasons-for-closure", ReasonForClosure.class, TestData.ReasonForClosure.DEFAULT, "reason", "New reason for closure", 1),
   PREFIX("/orders-storage/configuration/prefixes", Prefix.class, TestData.Prefix.DEFAULT , "description", "New description", 1),
   SUFFIX("/orders-storage/configuration/suffixes", Suffix.class, TestData.Suffix.DEFAULT, "description", "New description", 1),
-  EXPORT_HISTORY("/orders-storage/export-history", ExportHistory.class, TestData.ExportHistory.EXPORT_HISTORY_1, "exportType", "BURSAR_FEES_FINES", 1),
-  CUSTOM_FIELDS("/custom-fields", CustomField.class, TestData.CustomFields.PO, "helpText", "New help text", 2);
+  EXPORT_HISTORY("/orders-storage/export-history", ExportHistory.class, TestData.ExportHistory.EXPORT_HISTORY_1, "exportType", "BURSAR_FEES_FINES", 1);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;
