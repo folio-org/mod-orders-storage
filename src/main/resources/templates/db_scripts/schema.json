@@ -9,7 +9,7 @@
     {
       "run": "after",
       "snippetPath": "views/receiving_history_view.sql",
-      "fromModuleVersion": "mod-orders-storage-13.1.0"
+      "fromModuleVersion": "mod-orders-storage-13.7.0"
     },
     {
       "run": "after",
@@ -519,7 +519,7 @@
       ],
       "ginIndex": [
         {
-          "fieldName": "caption",
+          "fieldName": "displaySummary",
           "caseSensitive": false,
           "removeAccents": true
         }

@@ -3,7 +3,7 @@ OR REPLACE VIEW receiving_history_view AS
 SELECT pieces.id AS id,
        json_build_object(
            'id', pieces.jsonb ->>'id',
-           'caption', pieces.jsonb ->>'caption',
+           'displaySummary', pieces.jsonb ->>'displaySummary',
            'checkin', po_line.jsonb ->>'checkinItems',
            'chronology', pieces.jsonb ->>'chronology',
            'comment', pieces.jsonb ->>'comment',
@@ -29,7 +29,7 @@ SELECT pieces.id AS id,
        json_build_object(
            'id', pieces.jsonb ->>'id',
            'acqUnitIds', purchase_order.jsonb ->>'acqUnitIds',
-           'caption', pieces.jsonb ->>'caption',
+           'displaySummary', pieces.jsonb ->>'displaySummary',
            'checkin', po_line.jsonb ->>'checkinItems',
            'chronology', pieces.jsonb ->>'chronology',
            'comment', pieces.jsonb ->>'comment',

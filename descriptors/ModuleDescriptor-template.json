@@ -35,7 +35,7 @@
     },
     {
       "id": "orders-storage.pieces",
-      "version": "4.0",
+      "version": "5.0",
       "handlers": [
         {
           "methods": ["GET"],
@@ -200,7 +200,7 @@
     },
     {
       "id": "orders-storage.receiving-history",
-      "version": "3.2",
+      "version": "4.0",
       "handlers": [
         {
           "methods": ["GET"],
