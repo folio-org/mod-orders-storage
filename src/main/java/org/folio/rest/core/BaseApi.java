@@ -44,7 +44,7 @@ public abstract class BaseApi {
     }
     if (throwable instanceof CustomFieldValidationException customFieldValidationException) {
       return buildErrorResponse(
-          422, Json.encode(customFieldValidationException.getErrors()), APPLICATION_JSON);
+        422, Json.encode(customFieldValidationException.getErrors()), APPLICATION_JSON);
     }
     if (StringUtils.isNotBlank(PgExceptionUtil.badRequestMessage(throwable))) {
       return buildErrorResponse(Response.Status.BAD_REQUEST.getStatusCode(), PgExceptionUtil.badRequestMessage(throwable));

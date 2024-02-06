@@ -32,16 +32,16 @@ public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemp
   @Validate
   public void postOrdersStorageOrderTemplates(OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     validateCustomFields(vertxContext, okapiHeaders, entity)
-        .compose(
-            v ->
-                PgUtil.post(
-                    ORDER_TEMPLATES_TABLE,
-                    entity,
-                    okapiHeaders,
-                    vertxContext,
-                    PostOrdersStorageOrderTemplatesResponse.class))
-        .onComplete(
-          ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
+      .compose(
+        v ->
+          PgUtil.post(
+            ORDER_TEMPLATES_TABLE,
+            entity,
+            okapiHeaders,
+            vertxContext,
+            PostOrdersStorageOrderTemplatesResponse.class))
+      .onComplete(
+        ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
   }
 
   @Override
@@ -60,17 +60,17 @@ public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemp
   @Validate
   public void putOrdersStorageOrderTemplatesById(String id, OrderTemplate entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     validateCustomFields(vertxContext, okapiHeaders, entity)
-        .compose(
-            v ->
-                PgUtil.put(
-                    ORDER_TEMPLATES_TABLE,
-                    entity,
-                    id,
-                    okapiHeaders,
-                    vertxContext,
-                    PutOrdersStorageOrderTemplatesByIdResponse.class))
-        .onComplete(
-            ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
+      .compose(
+        v ->
+          PgUtil.put(
+            ORDER_TEMPLATES_TABLE,
+            entity,
+            id,
+            okapiHeaders,
+            vertxContext,
+            PutOrdersStorageOrderTemplatesByIdResponse.class))
+      .onComplete(
+        ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
   }
 
   @Override

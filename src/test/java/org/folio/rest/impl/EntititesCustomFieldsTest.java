@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 
 @IsolatedTenant
 public class EntititesCustomFieldsTest extends TestBase {
+
   private static final Header header = ISOLATED_TENANT_HEADER;
   private static final Headers headers = new Headers(header);
 
@@ -41,17 +42,17 @@ public class EntititesCustomFieldsTest extends TestBase {
 
   void setupOrder() throws MalformedURLException {
     postData(
-            PURCHASE_ORDER.getEndpoint(),
-            PURCHASE_ORDER.getSampleEntity().encode(),
-            headers)
-        .then()
-        .statusCode(201);
+      PURCHASE_ORDER.getEndpoint(),
+      PURCHASE_ORDER.getSampleEntity().encode(),
+      headers)
+      .then()
+      .statusCode(201);
   }
 
   void setupOrderLine() throws MalformedURLException {
     postData(PO_LINE.getEndpoint(), PO_LINE.getSampleEntity().encode(), headers)
-        .then()
-        .statusCode(201);
+      .then()
+      .statusCode(201);
   }
 
   void setupOrderTemplate() throws MalformedURLException {
@@ -61,17 +62,17 @@ public class EntititesCustomFieldsTest extends TestBase {
   }
 
   private void assertThatResponseContainsErrorWithMessage(
-      Response response, String containsMessage) {
+    Response response, String containsMessage) {
     List<Error> errors =
-        response
-            .then()
-            .log()
-            .all()
-            .statusCode(422)
-            .contentType(APPLICATION_JSON)
-            .extract()
-            .as(Errors.class)
-            .getErrors();
+      response
+        .then()
+        .log()
+        .all()
+        .statusCode(422)
+        .contentType(APPLICATION_JSON)
+        .extract()
+        .as(Errors.class)
+        .getErrors();
     assertEquals(1, errors.size());
     assertTrue(errors.get(0).getMessage().contains(containsMessage));
   }
@@ -80,11 +81,11 @@ public class EntititesCustomFieldsTest extends TestBase {
   void testPostOrderWithValidCustomFields() throws MalformedURLException {
     setupCustomFields();
     postData(
-            PURCHASE_ORDER.getEndpoint(),
-            PURCHASE_ORDER.getSampleEntityWithValidCustomFields().encode(),
-            headers)
-        .then()
-        .statusCode(201);
+      PURCHASE_ORDER.getEndpoint(),
+      PURCHASE_ORDER.getSampleEntityWithValidCustomFields().encode(),
+      headers)
+      .then()
+      .statusCode(201);
     verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), 1, header);
   }
 
@@ -92,10 +93,10 @@ public class EntititesCustomFieldsTest extends TestBase {
   void testPostOrderWithInvalidCustomFields() throws MalformedURLException {
     setupCustomFields();
     Response response =
-        postData(
-            PURCHASE_ORDER.getEndpoint(),
-            PURCHASE_ORDER.getSampleEntityWithInvalidCustomFields().encode(),
-            headers);
+      postData(
+        PURCHASE_ORDER.getEndpoint(),
+        PURCHASE_ORDER.getSampleEntityWithInvalidCustomFields().encode(),
+        headers);
     assertThatResponseContainsErrorWithMessage(response, PURCHASE_ORDER.getErrorContainsMessage());
     verifyCollectionQuantity(PURCHASE_ORDER.getEndpoint(), 0, header);
   }
@@ -105,12 +106,12 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupCustomFields();
     setupOrder();
     putData(
-            PURCHASE_ORDER.getEndpointWithId(),
-            PURCHASE_ORDER.getId(),
-            PURCHASE_ORDER.getSampleEntityWithValidCustomFields().encode(),
-            headers)
-        .then()
-        .statusCode(204);
+      PURCHASE_ORDER.getEndpointWithId(),
+      PURCHASE_ORDER.getId(),
+      PURCHASE_ORDER.getSampleEntityWithValidCustomFields().encode(),
+      headers)
+      .then()
+      .statusCode(204);
   }
 
   @Test
@@ -118,11 +119,11 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupCustomFields();
     setupOrder();
     Response response =
-        putData(
-            PURCHASE_ORDER.getEndpointWithId(),
-            PURCHASE_ORDER.getId(),
-            PURCHASE_ORDER.getSampleEntityWithInvalidCustomFields().encode(),
-            headers);
+      putData(
+        PURCHASE_ORDER.getEndpointWithId(),
+        PURCHASE_ORDER.getId(),
+        PURCHASE_ORDER.getSampleEntityWithInvalidCustomFields().encode(),
+        headers);
     assertThatResponseContainsErrorWithMessage(response, PURCHASE_ORDER.getErrorContainsMessage());
   }
 
@@ -131,11 +132,11 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupCustomFields();
     setupOrder();
     postData(
-            PO_LINE.getEndpoint(),
-            PO_LINE.getSampleEntityWithValidCustomFields().encode(),
-            headers)
-        .then()
-        .statusCode(201);
+      PO_LINE.getEndpoint(),
+      PO_LINE.getSampleEntityWithValidCustomFields().encode(),
+      headers)
+      .then()
+      .statusCode(201);
     verifyCollectionQuantity(PO_LINE.getEndpoint(), 1, header);
   }
 
@@ -143,10 +144,10 @@ public class EntititesCustomFieldsTest extends TestBase {
   void testPostOrderLineWithInvalidCustomFields() throws MalformedURLException {
     setupCustomFields();
     Response response =
-        postData(
-            PO_LINE.getEndpoint(),
-            PO_LINE.getSampleEntityWithInvalidCustomFields().encode(),
-            headers);
+      postData(
+        PO_LINE.getEndpoint(),
+        PO_LINE.getSampleEntityWithInvalidCustomFields().encode(),
+        headers);
     assertThatResponseContainsErrorWithMessage(response, PO_LINE.getErrorContainsMessage());
     verifyCollectionQuantity(PO_LINE.getEndpoint(), 0, header);
   }
@@ -157,12 +158,12 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupOrder();
     setupOrderLine();
     putData(
-            PO_LINE.getEndpointWithId(),
-            PO_LINE.getId(),
-            PO_LINE.getSampleEntityWithValidCustomFields().encode(),
-            headers)
-        .then()
-        .statusCode(204);
+      PO_LINE.getEndpointWithId(),
+      PO_LINE.getId(),
+      PO_LINE.getSampleEntityWithValidCustomFields().encode(),
+      headers)
+      .then()
+      .statusCode(204);
   }
 
   @Test
@@ -170,11 +171,11 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupCustomFields();
     setupOrder();
     Response response =
-        putData(
-            PO_LINE.getEndpointWithId(),
-            PO_LINE.getId(),
-            PO_LINE.getSampleEntityWithInvalidCustomFields().encode(),
-            headers);
+      putData(
+        PO_LINE.getEndpointWithId(),
+        PO_LINE.getId(),
+        PO_LINE.getSampleEntityWithInvalidCustomFields().encode(),
+        headers);
     assertThatResponseContainsErrorWithMessage(response, PO_LINE.getErrorContainsMessage());
   }
 
@@ -183,11 +184,11 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupCustomFields();
     setupOrder();
     postData(
-            PO_LINE_PACKAGE.getEndpoint(),
-            PO_LINE_PACKAGE.getSampleEntityWithValidCustomFields().encode(),
-            headers)
-        .then()
-        .statusCode(201);
+      PO_LINE_PACKAGE.getEndpoint(),
+      PO_LINE_PACKAGE.getSampleEntityWithValidCustomFields().encode(),
+      headers)
+      .then()
+      .statusCode(201);
     verifyCollectionQuantity(PO_LINE_PACKAGE.getEndpoint(), 1, header);
   }
 
@@ -195,10 +196,10 @@ public class EntititesCustomFieldsTest extends TestBase {
   void testPostOrderLinePackageWithInvalidCustomFields() throws MalformedURLException {
     setupCustomFields();
     Response response =
-        postData(
-            PO_LINE_PACKAGE.getEndpoint(),
-            PO_LINE_PACKAGE.getSampleEntityWithInvalidCustomFields().encode(),
-            headers);
+      postData(
+        PO_LINE_PACKAGE.getEndpoint(),
+        PO_LINE_PACKAGE.getSampleEntityWithInvalidCustomFields().encode(),
+        headers);
     assertThatResponseContainsErrorWithMessage(response, PO_LINE_PACKAGE.getErrorContainsMessage());
     verifyCollectionQuantity(PO_LINE_PACKAGE.getEndpoint(), 0, header);
   }
@@ -209,12 +210,12 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupOrder();
     setupOrderLine();
     putData(
-            PO_LINE_PACKAGE.getEndpointWithId(),
-            PO_LINE_PACKAGE.getId(),
-            PO_LINE_PACKAGE.getSampleEntityWithValidCustomFields().encode(),
-            headers)
-        .then()
-        .statusCode(204);
+      PO_LINE_PACKAGE.getEndpointWithId(),
+      PO_LINE_PACKAGE.getId(),
+      PO_LINE_PACKAGE.getSampleEntityWithValidCustomFields().encode(),
+      headers)
+      .then()
+      .statusCode(204);
   }
 
   @Test
@@ -223,11 +224,11 @@ public class EntititesCustomFieldsTest extends TestBase {
     setupOrder();
     setupOrderLine();
     Response response =
-        putData(
-            PO_LINE_PACKAGE.getEndpointWithId(),
-            PO_LINE_PACKAGE.getId(),
-            PO_LINE_PACKAGE.getSampleEntityWithInvalidCustomFields().encode(),
-            headers);
+      putData(
+        PO_LINE_PACKAGE.getEndpointWithId(),
+        PO_LINE_PACKAGE.getId(),
+        PO_LINE_PACKAGE.getSampleEntityWithInvalidCustomFields().encode(),
+        headers);
     assertThatResponseContainsErrorWithMessage(response, PO_LINE_PACKAGE.getErrorContainsMessage());
   }
 
@@ -235,18 +236,18 @@ public class EntititesCustomFieldsTest extends TestBase {
   void testPutOrderLineBatchWithInvalidCustomFields() throws MalformedURLException {
     setupCustomFields();
     PoLineCollection poLineCollection =
-        new PoLineCollection()
-            .withPoLines(
-                List.of(
-                    getFileAsObject(TestData.PoLine.DEFAULT_81, PoLine.class),
-                    PO_LINE.getSampleEntityWithInvalidCustomFields().mapTo(PoLine.class)))
-            .withTotalRecords(1);
+      new PoLineCollection()
+        .withPoLines(
+          List.of(
+            getFileAsObject(TestData.PoLine.DEFAULT_81, PoLine.class),
+            PO_LINE.getSampleEntityWithInvalidCustomFields().mapTo(PoLine.class)))
+        .withTotalRecords(1);
     Response response =
-        given()
-            .headers(headers)
-            .contentType(ContentType.JSON)
-            .body(poLineCollection)
-            .put(storageUrl("/orders-storage/po-lines-batch"));
+      given()
+        .headers(headers)
+        .contentType(ContentType.JSON)
+        .body(poLineCollection)
+        .put(storageUrl("/orders-storage/po-lines-batch"));
     assertThatResponseContainsErrorWithMessage(response, PO_LINE.getErrorContainsMessage());
   }
 
