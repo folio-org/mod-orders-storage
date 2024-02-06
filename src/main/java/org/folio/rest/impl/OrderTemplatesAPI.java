@@ -1,11 +1,14 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.json.JsonObject.mapFrom;
+
+import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.Handler;
 import java.util.Map;
-
 import javax.ws.rs.core.Response;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.OrderTemplate;
@@ -14,11 +17,8 @@ import org.folio.rest.jaxrs.resource.OrdersStorageOrderTemplates;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Handler;
-
 public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemplates {
-
+  private static final Logger log = LogManager.getLogger();
   private static final String ORDER_TEMPLATES_TABLE = "order_templates";
 
   @Override
@@ -41,7 +41,15 @@ public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemp
             vertxContext,
             PostOrdersStorageOrderTemplatesResponse.class))
       .onComplete(
-        ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
+        ar -> {
+          if (ar.failed()) {
+            log.error("Failed to create order template, template={}", mapFrom(entity).encode(), ar.cause());
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+          } else {
+            log.info("Order template created successfully, id={}", mapFrom(ar.result().getEntity()).getString("id"));
+            asyncResultHandler.handle(ar);
+          }
+        });
   }
 
   @Override
@@ -70,11 +78,20 @@ public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemp
             vertxContext,
             PutOrdersStorageOrderTemplatesByIdResponse.class))
       .onComplete(
-        ar -> asyncResultHandler.handle(ar.failed() ? buildErrorResponse(ar.cause()) : ar));
+        ar -> {
+          if (ar.failed()) {
+            log.error("Failed to update order template, template={}", mapFrom(entity).encode(), ar.cause());
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+          } else {
+            log.info("Order template updated successfully, id={}", id);
+            asyncResultHandler.handle(ar);
+          }
+        }
+      );
   }
 
   @Override
   protected String getEndpoint(Object entity) {
-    return HelperUtils.getEndpoint(OrdersStorageOrderTemplates.class) + JsonObject.mapFrom(entity).getString("id");
+    return HelperUtils.getEndpoint(OrdersStorageOrderTemplates.class) + mapFrom(entity).getString("id");
   }
 }
