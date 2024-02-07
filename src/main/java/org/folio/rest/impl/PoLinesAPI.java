@@ -1,9 +1,5 @@
 package org.folio.rest.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.dao.PostgresClientFactory;
-import org.folio.event.service.AuditOutboxService;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 
 import java.util.List;
@@ -11,6 +7,10 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.dao.PostgresClientFactory;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;

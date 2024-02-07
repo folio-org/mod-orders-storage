@@ -3,12 +3,14 @@ package org.folio.rest.utils;
 import static io.vertx.core.json.JsonObject.mapFrom;
 import static java.util.Objects.requireNonNull;
 
-import io.vertx.core.json.JsonObject;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import lombok.Getter;
+
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.jaxrs.model.CustomFields;
+
+import io.vertx.core.json.JsonObject;
+import lombok.Getter;
 
 @Getter
 public enum TestEntitiesCustomFields {

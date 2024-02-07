@@ -6,23 +6,23 @@ import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.folio.rest.tools.utils.TenantTool.tenantId;
 
-import io.vertx.core.Context;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonObject;
 import java.net.URI;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.persist.PgExceptionUtil;
-
-import io.vertx.core.Future;
-import io.vertx.ext.web.handler.HttpException;
 import org.folio.validate.CustomFieldValidationException;
 import org.folio.validate.ValidationServiceImpl;
+
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.handler.HttpException;
 
 public abstract class BaseApi {
   public Future<Response> buildResponseWithLocation(Object body, String endpoint) {

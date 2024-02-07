@@ -11,12 +11,9 @@ import static org.folio.rest.utils.TestEntitiesCustomFields.PURCHASE_ORDER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.http.ContentType;
-import io.restassured.http.Header;
-import io.restassured.http.Headers;
-import io.restassured.response.Response;
 import java.net.MalformedURLException;
 import java.util.List;
+
 import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.jaxrs.model.Errors;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -25,6 +22,11 @@ import org.folio.rest.utils.IsolatedTenant;
 import org.folio.rest.utils.TestData;
 import org.folio.rest.utils.TestData.CustomFields;
 import org.junit.jupiter.api.Test;
+
+import io.restassured.http.ContentType;
+import io.restassured.http.Header;
+import io.restassured.http.Headers;
+import io.restassured.response.Response;
 
 @IsolatedTenant
 public class EntititesCustomFieldsTest extends TestBase {

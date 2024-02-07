@@ -2,11 +2,10 @@ package org.folio.rest.impl;
 
 import static io.vertx.core.json.JsonObject.mapFrom;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
 import java.util.Map;
+
 import javax.ws.rs.core.Response;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.annotations.Validate;
@@ -16,6 +15,10 @@ import org.folio.rest.jaxrs.model.OrderTemplateCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageOrderTemplates;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
 
 public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemplates {
   private static final Logger log = LogManager.getLogger();

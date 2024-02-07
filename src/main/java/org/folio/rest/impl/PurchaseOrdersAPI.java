@@ -1,20 +1,23 @@
 package org.folio.rest.impl;
 
+import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
+
 import java.util.Map;
 import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
+import org.folio.models.TableNames;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
-import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.PurchaseOrderCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePurchaseOrders;
-import org.folio.models.TableNames;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
@@ -32,8 +35,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import io.vertx.ext.web.handler.HttpException;
 
 public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseOrders {

@@ -4,6 +4,7 @@ import static org.folio.rest.RestVerticle.MODULE_SPECIFIC_ARGS;
 
 import java.util.List;
 import java.util.Map;
+
 import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +15,7 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.spring.SpringContextUtil;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
