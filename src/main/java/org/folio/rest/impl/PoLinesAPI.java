@@ -1,9 +1,5 @@
 package org.folio.rest.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.dao.PostgresClientFactory;
-import org.folio.event.service.AuditOutboxService;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 
 import java.util.List;
@@ -11,6 +7,10 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.folio.dao.PostgresClientFactory;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.orders.lines.update.OrderLinePatchOperationService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
@@ -65,9 +65,11 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
   public void postOrdersStoragePoLines(PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
-        .compose(poLineId -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(poLine), OrderLineAuditEvent.Action.CREATE, okapiHeaders)
-          .map(b -> poLineId)))
+      validateCustomFields(vertxContext, okapiHeaders, poLine)
+        .compose(v ->
+          pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
+            .compose(poLineId -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(poLine), OrderLineAuditEvent.Action.CREATE, okapiHeaders)
+              .map(b -> poLineId))))
         .onComplete(ar -> {
           if (ar.failed()) {
             log.error("Package order Line creation failed, poLine={}",
@@ -81,16 +83,18 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
           }
         });
     } else {
-      createPoLineWithTitle(poLine, asyncResultHandler, okapiHeaders);
+      createPoLineWithTitle(poLine, asyncResultHandler, vertxContext, okapiHeaders);
     }
   }
 
-  private void createPoLineWithTitle(PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler, Map<String, String> okapiHeaders) {
+  private void createPoLineWithTitle(PoLine poLine, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
     try {
       log.trace("createPoLineWithTitle, poLineId={}, poLineNumber={}", poLine.getId(), poLine.getPoLineNumber());
-      pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
-        .compose(poLineId -> poLinesService.createTitle(conn, poLine))
-        .compose(title -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(poLine), OrderLineAuditEvent.Action.CREATE, okapiHeaders)))
+      validateCustomFields(vertxContext, okapiHeaders, poLine)
+        .compose(v ->
+          pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
+            .compose(poLineId -> poLinesService.createTitle(conn, poLine))
+            .compose(title -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(poLine), OrderLineAuditEvent.Action.CREATE, okapiHeaders))))
         .onComplete(ar -> {
           if (ar.failed()) {
             log.error("Order Line and Title creation failed, poLine={}",
@@ -142,8 +146,10 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
   public void putOrdersStoragePoLinesById(String id, PoLine poLine, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
-      pgClient.withTrans(conn -> poLinesService.updatePoLine(conn, poLine)
-        .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders)))
+      validateCustomFields(vertxContext, okapiHeaders, poLine)
+        .compose(v ->
+          pgClient.withTrans(conn -> poLinesService.updatePoLine(conn, poLine)
+            .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders))))
         .onComplete(ar -> {
           if (ar.failed()) {
             log.error("Update package order line failed, id={}, poLine={}", id,
@@ -157,7 +163,9 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
         });
     } else {
       try {
-        pgClient.withTrans(conn -> poLinesService.updatePoLineWithTitle(conn, id, poLine, new RequestContext(vertxContext, okapiHeaders)))
+        validateCustomFields(vertxContext, okapiHeaders, poLine)
+          .compose(v ->
+            pgClient.withTrans(conn -> poLinesService.updatePoLineWithTitle(conn, id, poLine, new RequestContext(vertxContext, okapiHeaders))))
           .onComplete(ar -> {
             if (ar.failed()) {
               log.error("Update order line with title failed, id={}, poLine={}", id,
