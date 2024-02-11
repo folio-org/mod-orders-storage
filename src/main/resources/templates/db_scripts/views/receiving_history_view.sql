@@ -28,7 +28,7 @@ SELECT pieces.id AS id,
 
        json_build_object(
            'id', pieces.jsonb ->>'id',
-           'acqUnitIds', purchase_order.jsonb ->>'acqUnitIds',
+           'acqUnitIds', titles.jsonb ->>'acqUnitIds',
            'displaySummary', pieces.jsonb ->>'displaySummary',
            'checkin', po_line.jsonb ->>'checkinItems',
            'chronology', pieces.jsonb ->>'chronology',
@@ -51,5 +51,10 @@ SELECT pieces.id AS id,
            'receivingStatus', pieces.jsonb ->>'receivingStatus',
            'supplement', pieces.jsonb ->>'supplement',
            'title', po_line.jsonb ->>'titleOrPackage')::jsonb AS metadata
-FROM pieces LEFT OUTER JOIN po_line ON pieces.jsonb ->>'poLineId' = po_line.jsonb->>'id' LEFT OUTER JOIN purchase_order
-    ON po_line.jsonb->>'purchaseOrderId' = purchase_order.jsonb->>'id';
+FROM pieces
+  LEFT OUTER JOIN po_line
+    ON pieces.jsonb ->>'poLineId' = po_line.jsonb->>'id'
+  LEFT OUTER JOIN purchase_order
+    ON po_line.jsonb->>'purchaseOrderId' = purchase_order.jsonb->>'id'
+  LEFT OUTER JOIN titles
+    ON pieces.jsonb->>'titleId' = titles.jsonb->>'id';
