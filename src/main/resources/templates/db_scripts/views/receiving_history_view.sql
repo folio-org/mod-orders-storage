@@ -53,8 +53,8 @@ SELECT pieces.id AS id,
            'title', po_line.jsonb ->>'titleOrPackage')::jsonb AS metadata
 FROM pieces
   LEFT OUTER JOIN po_line
-    ON pieces.jsonb ->>'poLineId' = po_line.jsonb->>'id'
+    ON pieces.poLineId = po_line.id
   LEFT OUTER JOIN purchase_order
-    ON po_line.jsonb->>'purchaseOrderId' = purchase_order.jsonb->>'id'
+    ON po_line.purchaseOrderId = purchase_order.id
   LEFT OUTER JOIN titles
-    ON pieces.jsonb->>'titleId' = titles.jsonb->>'id';
+    ON pieces.titleId = titles.id;
