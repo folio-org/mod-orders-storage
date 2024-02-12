@@ -28,7 +28,7 @@ SELECT pieces.id AS id,
 
        json_build_object(
            'id', pieces.jsonb ->>'id',
-           'acqUnitIds', titles.jsonb ->>'acqUnitIds',
+           'acqUnitIds', titles.jsonb ->'acqUnitIds',
            'displaySummary', pieces.jsonb ->>'displaySummary',
            'checkin', po_line.jsonb ->>'checkinItems',
            'chronology', pieces.jsonb ->>'chronology',
