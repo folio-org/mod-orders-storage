@@ -32,7 +32,7 @@ public class ClaimingAPI implements OrdersStorageClaiming {
   @Override
   public void postOrdersStorageClaimingProcess(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     String tenantId = TenantTool.tenantId(okapiHeaders);
-    pieceClaimingService.processClaimedPieces(tenantId)
+    pieceClaimingService.processClaimedPieces(okapiHeaders, vertxContext)
       .onSuccess(piecesCount -> {
         log.info("Successfully processed {} claimed pieces, tenantId {}", piecesCount, tenantId);
         auditOutboxService.processOutboxEventLogs(okapiHeaders);

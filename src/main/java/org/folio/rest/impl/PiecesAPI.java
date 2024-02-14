@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -80,6 +81,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
   }
 
   private Future<String> createPiece(Conn conn, Piece piece) {
+    piece.setStatusUpdatedDate(new Date());
     if (StringUtils.isBlank(piece.getId())) {
       piece.setId(UUID.randomUUID().toString());
     }
