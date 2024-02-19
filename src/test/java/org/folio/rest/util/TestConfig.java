@@ -16,7 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import org.folio.rest.RestVerticle;
+import org.folio.rest.impl.MockServer;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.spring.SpringContextUtil;
 
@@ -26,6 +28,8 @@ public final class TestConfig {
   public static final Header X_OKAPI_URL = new Header(TestConstants.OKAPI_URL, "http://localhost:" + mockPort);
 
   private static final Vertx vertx = Vertx.vertx();
+
+  private static MockServer mockServer;
 
   private TestConfig() {}
 
@@ -92,5 +96,14 @@ public final class TestConfig {
     } catch (NoSuchFieldException | IllegalAccessException var2) {
       return null;
     }
+  }
+
+  public static void startMockServer() throws InterruptedException, ExecutionException, TimeoutException {
+    mockServer = new MockServer(mockPort);
+    mockServer.start();
+  }
+
+  public static void closeMockServer() {
+    mockServer.close();
   }
 }

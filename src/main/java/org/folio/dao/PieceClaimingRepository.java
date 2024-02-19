@@ -7,6 +7,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.persist.Conn;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import static org.folio.dao.audit.AuditOutboxEventsLogRepository.OUTBOX_TABLE_NAME;
 import static org.folio.rest.impl.PiecesAPI.PIECES_TABLE;
 import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
@@ -29,9 +32,9 @@ public class PieceClaimingRepository {
         AND pieces.titleid = titles.id
         AND (
           (pieces.jsonb ->> 'receivingStatus' = 'Expected'
-              AND current_date >= ((pieces.jsonb ->> 'receiptDate')::date + INTERVAL '1 day' * (titles.jsonb ->> 'claimingInterval')::int))
+              AND $2::date >= (((pieces.jsonb ->> 'receiptDate')::timestamptz AT TIME ZONE $3)::date + INTERVAL '1 day' * (titles.jsonb ->> 'claimingInterval')::int))
           OR (pieces.jsonb ->> 'receivingStatus' IN ('Claim delayed', 'Claim sent')
-              AND current_date >= ((pieces.jsonb ->> 'statusUpdatedDate')::date + INTERVAL '1 day' * (pieces.jsonb->>'claimingInterval')::int))
+              AND $2::date >= (((pieces.jsonb ->> 'statusUpdatedDate')::timestamptz  AT TIME ZONE $3)::date + INTERVAL '1 day' * (pieces.jsonb->>'claimingInterval')::int))
         )
         RETURNING pieces.*
     )
@@ -40,11 +43,11 @@ public class PieceClaimingRepository {
     FROM updated;
     """;
 
-  public Future<Integer> updatePieceStatusBasedOnIntervals(Conn conn, String tenantId) {
+  public Future<Integer> updatePieceStatusBasedOnIntervals(Conn conn, String tenantId, ZoneId tenantTimeZone) {
     String query = String.format(UPDATE_STATEMENT, convertToPsqlStandard(tenantId), PIECES_TABLE, TITLES_TABLE, OUTBOX_TABLE_NAME);
-    Tuple queryParams = Tuple.of(SYNTHETIC_USER_ID);
+    Tuple queryParams = Tuple.of(SYNTHETIC_USER_ID, LocalDate.now(tenantTimeZone), tenantTimeZone.getId());
     return conn.execute(query, queryParams).map(SqlResult::rowCount)
-      .onFailure(t -> log.warn("updatePieceStatusBasedOnIntervals failed, tenantId={}", tenantId, t));
+      .onFailure(t -> log.warn("updatePieceStatusBasedOnIntervals failed, tenantId={}, zoneId={}", tenantId, tenantTimeZone, t));
   }
 
 }

@@ -21,6 +21,7 @@ import org.folio.kafka.KafkaConfig;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
+import org.folio.services.configuration.TenantLocaleSettingsService;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesBatchService;
 import org.folio.services.lines.PoLinesService;
@@ -174,9 +175,15 @@ public class ApplicationConfig {
   }
 
   @Bean
+  TenantLocaleSettingsService tenantLocaleSettingsService() {
+    return new TenantLocaleSettingsService();
+  }
+
+  @Bean
   PieceClaimingService pieceClaimingService(PostgresClientFactory pgClientFactory,
                                             ExtensionRepository extensionRepository,
-                                            PieceClaimingRepository pieceClaimingRepository) {
-    return new PieceClaimingService(pgClientFactory, extensionRepository, pieceClaimingRepository);
+                                            PieceClaimingRepository pieceClaimingRepository,
+                                            TenantLocaleSettingsService tenantLocaleSettingsService) {
+    return new PieceClaimingService(pgClientFactory, extensionRepository, pieceClaimingRepository, tenantLocaleSettingsService);
   }
 }

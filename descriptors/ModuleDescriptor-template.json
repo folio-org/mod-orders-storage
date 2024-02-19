@@ -540,6 +540,7 @@
             "orders-storage.claiming.process"
           ],
           "modulePermissions": [
+            "configuration.entries.collection.get"
           ]
         }
       ]
@@ -629,9 +630,8 @@
           ],
           "pathPattern": "/orders-storage/claiming/process",
           "modulePermissions": [],
-          "schedule": {
-            "cron": "0 0 * * *"
-          }
+          "unit": "hour",
+          "delay": "1"
         }
       ]
     }
