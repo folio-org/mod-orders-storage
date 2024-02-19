@@ -39,7 +39,7 @@ public class MockServer {
   public static final String BASE_MOCK_DATA_PATH = "mockdata/";
   public static final String CONFIG_MOCK_PATH = BASE_MOCK_DATA_PATH + "configurations.entries/%s.json";
 
-  public static final String EMPTY_CONFIG_NAME = "config_empty";
+  public static final String DEFAULT_CONFIG_NAME = "config_default";
 
   public static final String CONFIGS = "configs";
 
@@ -121,7 +121,7 @@ public class MockServer {
       try {
         serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(CONFIG_MOCK_PATH, tenant)));
       } catch(Exception exc){
-        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(CONFIG_MOCK_PATH, EMPTY_CONFIG_NAME)));
+        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(CONFIG_MOCK_PATH, DEFAULT_CONFIG_NAME)));
       }
     } catch (IOException e) {
       serverResponse(ctx, 500, APPLICATION_JSON, INTERNAL_SERVER_ERROR.getReasonPhrase());
