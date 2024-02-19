@@ -10,6 +10,7 @@ import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 
 import static org.folio.rest.impl.ClaimingAPITest.CLAIMING_ENDPOINT;
+import static org.folio.rest.util.TestConfig.X_OKAPI_URL;
 import static org.folio.rest.utils.TestEntities.TITLES;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_USERID_HEADER;
@@ -57,7 +58,7 @@ public abstract class TestBase {
   private static boolean invokeStorageTestSuiteAfter = false;
 
   @BeforeAll
-  public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+  public static void testBaseBeforeClass() throws InterruptedException, ExecutionException, TimeoutException {
     Vertx vertx = StorageTestSuite.getVertx();
     if (vertx == null) {
       invokeStorageTestSuiteAfter = true;
@@ -322,7 +323,7 @@ public abstract class TestBase {
 
   protected Headers getIsolatedTenantHeaders(String userId) {
     Header userIdHeader = new Header(OKAPI_USERID_HEADER, userId);
-    return new Headers(ISOLATED_TENANT_HEADER, userIdHeader);
+    return new Headers(ISOLATED_TENANT_HEADER, userIdHeader, X_OKAPI_URL);
   }
 
   protected void checkOrderEventContent(String eventPayload, OrderAuditEvent.Action action) {
