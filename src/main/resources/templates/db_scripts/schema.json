@@ -181,6 +181,10 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "vendor",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "renewal.manualRenewal",
           "tOps": "DELETE"
         },
@@ -500,6 +504,10 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "holdingId",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "receivingStatus",
           "caseSensitive": false
         },
@@ -534,6 +542,12 @@
           "fieldName": "purchaseOrderId_invoiceId",
           "multiFieldNames": "purchaseOrderId,invoiceId",
           "tOps": "ADD"
+        }
+      ],
+      "index": [
+        {
+          "fieldName" : "invoiceId",
+          "caseSensitive": false
         }
       ],
       "foreignKeys": [
