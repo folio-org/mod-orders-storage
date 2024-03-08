@@ -140,7 +140,7 @@
     },
     {
       "tableName": "purchase_order",
-      "fromModuleVersion": "mod-orders-storage-10.0.0",
+      "fromModuleVersion": "mod-orders-storage-13.7.0",
       "withMetadata": true,
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
@@ -230,8 +230,9 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": "mod-orders-storage-12.0.0",
+      "fromModuleVersion": "mod-orders-storage-13.7.0",
       "withMetadata": true,
+      "customSnippetPath": "po_line_table.sql",
       "foreignKeys": [
         {
           "fieldName": "purchaseOrderId",
@@ -608,8 +609,9 @@
      },
      {
       "tableName": "order_templates",
-      "fromModuleVersion": "mod-orders-storage-8.0.0",
+      "fromModuleVersion": "mod-orders-storage-13.7.0",
       "withMetadata": false,
+      "customSnippetPath": "order_templates_table.sql",
       "uniqueIndex": [
          {
            "fieldName" : "templateName"
