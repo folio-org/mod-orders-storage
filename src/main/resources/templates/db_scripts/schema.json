@@ -225,6 +225,16 @@
           "fieldName": "poNumber",
           "caseSensitive": false,
           "removeAccents": true
+        },
+        {
+          "fieldName": "dateOrdered",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "metadata.createdDate",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
