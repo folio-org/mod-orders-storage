@@ -37,7 +37,7 @@
     <common-lang.version>2.6</common-lang.version>
     <jackson-bom.version>2.15.2</jackson-bom.version>
     <folio-di-support.version>2.0.1</folio-di-support.version>
-    <mod-configuration-client.version>5.9.2</mod-configuration-client.version>
+    <mod-configuration-client.version>5.10.0</mod-configuration-client.version>
 
     <!--Maven plugin properties-->
     <exec-maven-plugin.version>3.2.0</exec-maven-plugin.version>
