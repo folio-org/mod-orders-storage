@@ -36,7 +36,7 @@
     <aspectj-maven-plugin.version>1.14</aspectj-maven-plugin.version>
     <common-lang.version>2.6</common-lang.version>
     <jackson-bom.version>2.15.2</jackson-bom.version>
-    <folio-di-support.version>2.0.1</folio-di-support.version>
+    <folio-di-support.version>2.1.0</folio-di-support.version>
     <mod-configuration-client.version>5.10.0</mod-configuration-client.version>
 
     <!--Maven plugin properties-->
@@ -134,7 +134,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-custom-fields</artifactId>
-      <version>2.0.0-SNAPSHOT</version>
+      <version>2.0.0</version>
     </dependency>
     <!-- test dependencies -->
     <dependency>
@@ -294,6 +294,7 @@
         <configuration>
           <release>${java.version}</release>
           <encoding>UTF-8</encoding>
+          <parameters>true</parameters>
         </configuration>
       </plugin>
 
