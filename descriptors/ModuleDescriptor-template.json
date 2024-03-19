@@ -634,6 +634,37 @@
           "delay": "1"
         }
       ]
+    },
+    {
+      "id": "orders-storage.routing-lists",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/routing-lists",
+          "permissionsRequired": ["orders-storage.routing-lists.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/routing-lists",
+          "permissionsRequired": ["orders-storage.routing-lists.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/routing-lists/{id}",
+          "permissionsRequired": ["orders-storage.routing-lists.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/routing-lists/{id}",
+          "permissionsRequired": ["orders-storage.routing-lists.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/routing-lists/{id}",
+          "permissionsRequired": ["orders-storage.routing-lists.item.delete"]
+        }
+      ]
     }
   ],
   "permissionSets" : [
@@ -1356,6 +1387,43 @@
         "orders-storage.audit-outbox.all",
         "orders-storage.claiming.all",
         "orders-storage.custom-fields.all"
+      ]
+    },
+    {
+      "permissionName" : "orders-storage.routing-lists.collection.get",
+      "displayName" : "routing-lists-collection get",
+      "description" : "Get a collection of routing lists"
+    },
+    {
+      "permissionName" : "orders-storage.routing-lists.item.post",
+      "displayName" : "routing-lists-item post",
+      "description" : "Create a new routing list"
+    },
+    {
+      "permissionName" : "orders-storage.routing-lists.item.get",
+      "displayName" : "routing-lists-item get",
+      "description" : "Fetch a routing list"
+    },
+    {
+      "permissionName" : "orders-storage.routing-lists.item.put",
+      "displayName" : "routing-lists-item put",
+      "description" : "Update a outing list"
+    },
+    {
+      "permissionName" : "orders-storage.routing-lists.item.delete",
+      "displayName" : "routing-lists-item delete",
+      "description" : "Delete a routing list"
+    },
+    {
+      "permissionName" : "orders-storage.routing-lists.all",
+      "displayName" : "All routing list perms",
+      "description" : "All permissions for the routing list",
+      "subPermissions" : [
+        "orders-storage.routing-lists.collection.get",
+        "orders-storage.routing-lists.item.post",
+        "orders-storage.routing-lists.item.get",
+        "orders-storage.routing-lists.item.put",
+        "orders-storage.routing-lists.item.delete"
       ]
     }
   ],
