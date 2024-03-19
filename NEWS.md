@@ -1,6 +1,6 @@
 ## 13.8.0 - Unreleased
 
-## 13.7.0 - Unreleased
+## 13.7.0 - Released (Quesnelia R1 2024)
 The primary focus of this release was to implement claiming batch status job and improve title functionality
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.6.0...v13.7.0)
@@ -29,7 +29,7 @@ The primary focus of this release was to implement claiming batch status job and
 * Bump `rmb` from `35.0.1` to `35.2.0`
 * Bump `vertex` from `4.3.4` to `4.5.4`
 
-## 13.6.0 - Unreleased
+## 13.6.0 - Released (Poppy R2 2023)
 The primary focus of this release was to implement endpoint to update order lines in batch
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.5.0...v13.6.0)
