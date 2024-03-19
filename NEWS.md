@@ -6,13 +6,16 @@ The primary focus of this release was to implement claiming batch status job and
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.6.0...v13.7.0)
 
 ### Stories
+* [MODORDSTOR-389](https://folio-org.atlassian.net/browse/MODORDSTOR-389) - Address index warnings for table purchase_order
 * [MODORDSTOR-387](https://folio-org.atlassian.net/browse/MODORDSTOR-387) - Add missed indexes for common operations with orders
 * [MODORDSTOR-385](https://folio-org.atlassian.net/browse/MODORDSTOR-385) - Upgrade RAML Module Builder
+* [MODORDSTOR-379](https://folio-org.atlassian.net/browse/MODORDSTOR-379) - Custom fields - Implement RecordService to manage updates of custom fields
 * [MODORDSTOR-378](https://folio-org.atlassian.net/browse/MODORDSTOR-378) - Adjust processing of scheduled claiming job to use user's timezone
+* [MODORDSTOR-373](https://folio-org.atlassian.net/browse/MODORDSTOR-373) - Add validation for custom field values
 * [MODORDSTOR-369](https://folio-org.atlassian.net/browse/MODORDSTOR-369) - Create migration script to change "caption" to "Display summary" for pieces
 * [MODORDSTOR-363](https://folio-org.atlassian.net/browse/MODORDSTOR-363) - Add indexes to improve performance of Get Order/Get Po Line/Open Order/Receive order flow
 * [MODORDSTOR-362](https://folio-org.atlassian.net/browse/MODORDSTOR-362) - Inherit claimingActive, claimingInterval from Purchase Order Line to the Receiving Title
-* [MODORDSTOR-362](https://folio-org.atlassian.net/browse/MODORDSTOR-360) - Inherit acqUnitIds from Purchase Order when creating new Title
+* [MODORDSTOR-360](https://folio-org.atlassian.net/browse/MODORDSTOR-360) - Inherit acqUnitIds from Purchase Order when creating new Title
 * [MODORDSTOR-359](https://folio-org.atlassian.net/browse/MODORDSTOR-359) - Create migration script to copy exisitng acqUnitIds from Order to Title
 * [MODORDSTOR-357](https://folio-org.atlassian.net/browse/MODORDSTOR-357) - Implement the capability to send the modified state using a transactional outbox for Piece
 * [MODORDSTOR-356](https://folio-org.atlassian.net/browse/MODORDSTOR-356) - Initial setup of claiming batch job
