@@ -1,4 +1,30 @@
+## 13.8.0 - Unreleased
+
 ## 13.7.0 - Unreleased
+The primary focus of this release was to implement claiming batch status job and improve title functionality
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.6.0...v13.7.0)
+
+### Stories
+* [MODORDSTOR-387](https://folio-org.atlassian.net/browse/MODORDSTOR-387) - Add missed indexes for common operations with orders
+* [MODORDSTOR-385](https://folio-org.atlassian.net/browse/MODORDSTOR-385) - Upgrade RAML Module Builder
+* [MODORDSTOR-378](https://folio-org.atlassian.net/browse/MODORDSTOR-378) - Adjust processing of scheduled claiming job to use user's timezone
+* [MODORDSTOR-369](https://folio-org.atlassian.net/browse/MODORDSTOR-369) - Create migration script to change "caption" to "Display summary" for pieces
+* [MODORDSTOR-363](https://folio-org.atlassian.net/browse/MODORDSTOR-363) - Add indexes to improve performance of Get Order/Get Po Line/Open Order/Receive order flow
+* [MODORDSTOR-362](https://folio-org.atlassian.net/browse/MODORDSTOR-362) - Inherit claimingActive, claimingInterval from Purchase Order Line to the Receiving Title
+* [MODORDSTOR-362](https://folio-org.atlassian.net/browse/MODORDSTOR-360) - Inherit acqUnitIds from Purchase Order when creating new Title
+* [MODORDSTOR-359](https://folio-org.atlassian.net/browse/MODORDSTOR-359) - Create migration script to copy exisitng acqUnitIds from Order to Title
+* [MODORDSTOR-357](https://folio-org.atlassian.net/browse/MODORDSTOR-357) - Implement the capability to send the modified state using a transactional outbox for Piece
+* [MODORDSTOR-356](https://folio-org.atlassian.net/browse/MODORDSTOR-356) - Initial setup of claiming batch job
+* [MODORDSTOR-354](https://folio-org.atlassian.net/browse/MODORDSTOR-354) - Implement business rules to update piece statues in batch job
+* [MODORDSTOR-353](https://folio-org.atlassian.net/browse/MODORDSTOR-353) - Update RMB and vertx to the latest version
+
+### Bug Fixes
+* [MODORDSTOR-374](https://folio-org.atlassian.net/browse/MODORDSTOR-374) - Piece status is not changed to "Late" from "Claim delayed" and "Claim sent"
+
+### Dependencies
+* Bump `rmb` from `35.0.1` to `35.2.0`
+* Bump `vertex` from `4.3.4` to `4.5.4`
 
 ## 13.6.0 - Unreleased
 The primary focus of this release was to implement endpoint to update order lines in batch
