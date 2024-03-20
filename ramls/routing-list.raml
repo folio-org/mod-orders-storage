@@ -1,7 +1,7 @@
 #%RAML 1.0
 title: "mod-orders-storage"
 baseUri: http://github.com/folio-org/mod-orders-storage
-version: v9.3
+version: v1.0
 
 documentation:
   - title: Routing List
@@ -38,6 +38,35 @@ resourceTypes:
       searchable: { description: "CQL query", example: "name=MyRoutingList" },
       pageable
     ]
+  post:
+    description: Create a new routing list record
+    body:
+      application/json:
+        type: routing-list
+        example:
+          strict: false
+          value: !include acq-models/mod-orders-storage/examples/routing_list_get.sample
+    responses:
+      201:
+        description: "Returns a newly created item, with server-controlled fields like 'id' populated"
+        body:
+          application/json:
+            example: !include acq-models/mod-orders-storage/examples/routing_list_get.sample
+      400:
+        description: "Bad request, e.g. malformed request body or query parameter. Details of the error (e.g. name of the parameter or line/character number with malformed data) provided in the response."
+        body:
+          text/plain:
+            example: "Unable to add routing list -- malformed JSON at 13:3"
+      401:
+        description: "Not authorized to perform requested action"
+        body:
+          text/plain:
+            example: "Unable to add routing-list -- unauthorized"
+      500:
+        description: "Internal server error, e.g. due to misconfiguration"
+        body:
+          text/plain:
+            example: "Internal server error, contact administrator"
   /{id}:
     uriParameters:
       id:

@@ -8,7 +8,8 @@ public final class TableNames {
   public static final String TITLES_TABLE = "titles";
   public static final String RECEIVING_HISTORY_VIEW_TABLE = "receiving_history_view";
   public static final String EXPORT_HISTORY_TABLE = "export_history";
+  public static final String ROUTING_LIST_TABLE = "routing_list";
 
-  private TableNames() {
-  }
+  private TableNames() { }
+
 }
