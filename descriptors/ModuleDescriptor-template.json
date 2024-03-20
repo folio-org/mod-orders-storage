@@ -1362,34 +1362,6 @@
       "visible": false
     },
     {
-      "permissionName" : "orders-storage.module.all",
-      "displayName" : "All orders-storage-module perms",
-      "description" : "All permissions for the orders-storage module",
-      "subPermissions" : [
-        "orders-storage.alerts.all",
-        "orders-storage.pieces.all",
-        "orders-storage.titles.all",
-        "orders-storage.po-lines.all",
-        "orders-storage.acquisition-methods.all",
-        "orders-storage.po-number.all",
-        "orders-storage.po-line-number.all",
-        "orders-storage.purchase-orders.all",
-        "orders-storage.receiving-history.all",
-        "orders-storage.reporting-codes.all",
-        "orders-storage.order-invoice-relationships.all",
-        "orders-storage.order-templates.all",
-        "acquisitions-units-storage.units.all",
-        "acquisitions-units-storage.memberships.all",
-        "orders-storage.configuration.reasons-for-closure.all",
-        "orders-storage.configuration.prefixes.all",
-        "orders-storage.configuration.suffixes.all",
-        "orders-storage.export-history.all",
-        "orders-storage.audit-outbox.all",
-        "orders-storage.claiming.all",
-        "orders-storage.custom-fields.all"
-      ]
-    },
-    {
       "permissionName" : "orders-storage.routing-lists.collection.get",
       "displayName" : "routing-lists-collection get",
       "description" : "Get a collection of routing lists"
@@ -1424,6 +1396,35 @@
         "orders-storage.routing-lists.item.get",
         "orders-storage.routing-lists.item.put",
         "orders-storage.routing-lists.item.delete"
+      ]
+    },
+    {
+      "permissionName" : "orders-storage.module.all",
+      "displayName" : "All orders-storage-module perms",
+      "description" : "All permissions for the orders-storage module",
+      "subPermissions" : [
+        "orders-storage.alerts.all",
+        "orders-storage.pieces.all",
+        "orders-storage.titles.all",
+        "orders-storage.po-lines.all",
+        "orders-storage.acquisition-methods.all",
+        "orders-storage.po-number.all",
+        "orders-storage.po-line-number.all",
+        "orders-storage.purchase-orders.all",
+        "orders-storage.receiving-history.all",
+        "orders-storage.reporting-codes.all",
+        "orders-storage.order-invoice-relationships.all",
+        "orders-storage.order-templates.all",
+        "acquisitions-units-storage.units.all",
+        "acquisitions-units-storage.memberships.all",
+        "orders-storage.configuration.reasons-for-closure.all",
+        "orders-storage.configuration.prefixes.all",
+        "orders-storage.configuration.suffixes.all",
+        "orders-storage.export-history.all",
+        "orders-storage.audit-outbox.all",
+        "orders-storage.claiming.all",
+        "orders-storage.custom-fields.all",
+        "orders-storage.routing-lists.all"
       ]
     }
   ],
