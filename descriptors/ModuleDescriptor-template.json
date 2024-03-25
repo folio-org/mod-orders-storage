@@ -593,6 +593,37 @@
       ]
     },
     {
+      "id": "orders-storage.routing-lists",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/routing-lists",
+          "permissionsRequired": ["orders-storage.routing-lists.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/routing-lists",
+          "permissionsRequired": ["orders-storage.routing-lists.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/routing-lists/{id}",
+          "permissionsRequired": ["orders-storage.routing-lists.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/routing-lists/{id}",
+          "permissionsRequired": ["orders-storage.routing-lists.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/routing-lists/{id}",
+          "permissionsRequired": ["orders-storage.routing-lists.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -632,37 +663,6 @@
           "modulePermissions": [],
           "unit": "hour",
           "delay": "1"
-        }
-      ]
-    },
-    {
-      "id": "orders-storage.routing-lists",
-      "version": "1.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/routing-lists",
-          "permissionsRequired": ["orders-storage.routing-lists.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/orders-storage/routing-lists",
-          "permissionsRequired": ["orders-storage.routing-lists.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/routing-lists/{id}",
-          "permissionsRequired": ["orders-storage.routing-lists.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/orders-storage/routing-lists/{id}",
-          "permissionsRequired": ["orders-storage.routing-lists.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/orders-storage/routing-lists/{id}",
-          "permissionsRequired": ["orders-storage.routing-lists.item.delete"]
         }
       ]
     }

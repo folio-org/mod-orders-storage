@@ -700,7 +700,7 @@
       "foreignKeys": [
         {
           "fieldName": "poLineId",
-          "targetTable":      "po_line",
+          "targetTable": "po_line",
           "targetTableAlias": "poLine",
           "tableAlias": "routing_list"
         }
