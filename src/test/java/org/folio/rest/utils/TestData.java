@@ -71,7 +71,7 @@ public class TestData {
   }
 
   public interface RoutingList {
-    String DEFAULT = "mockdata/routing-lists/";
+    String DEFAULT = "mockdata/routing-lists/c0d13648-347b-4ac9-8c2f-5bc47248b871.json";
   }
 
   public interface CustomFields {
