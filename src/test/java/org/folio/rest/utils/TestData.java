@@ -70,6 +70,10 @@ public class TestData {
     String EXPORT_HISTORY_2 = "mockdata/export-history/99fb699a-cdf1-11e9-a9d9-f2801f1b9aa2.json";
   }
 
+  public interface RoutingList {
+    String DEFAULT = "mockdata/routing-lists/c0d13648-347b-4ac9-8c2f-5bc47248b871.json";
+  }
+
   public interface CustomFields {
     String PO = "data/custom-fields/custom-field-po.json";
     String POL = "data/custom-fields/custom-field-pol.json";

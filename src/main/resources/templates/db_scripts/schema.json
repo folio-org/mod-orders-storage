@@ -687,6 +687,26 @@
           "removeAccents": true
         }
       ]
+    },
+    {
+      "tableName": "routing_list",
+      "fromModuleVersion": "mod-orders-storage-13.8.0",
+      "withOptimisticLocking": "failOnConflict",
+      "withMetadata": true,
+      "foreignKeys": [
+        {
+          "fieldName": "poLineId",
+          "targetTable": "po_line",
+          "targetTableAlias": "poLine",
+          "tableAlias": "routing_list"
+        }
+      ],
+      "uniqueIndex": [
+        {
+          "fieldName": "name",
+          "caseSensitive": false
+        }
+      ]
     }
   ]
 }
