@@ -691,6 +691,7 @@
     {
       "tableName": "routing_list",
       "fromModuleVersion": "mod-orders-storage-13.8.0",
+      "withOptimisticLocking": "failOnConflict",
       "withMetadata": true,
       "foreignKeys": [
         {
