@@ -5,11 +5,12 @@ version: v1.0
 
 documentation:
   - title: Routing List
-    content: <b>This module implements the CRUD interface. This API is intended for internal use only. </b>
+    content: <b>This module implements the CRUD interface for Routing Lists. </b>
 
 types:
     routing-list: !include acq-models/mod-orders-storage/schemas/routing_list.json
     routing-list-collection: !include acq-models/mod-orders-storage/schemas/routing_list_collection.json
+    error: !include raml-util/schemas/error.schema
     errors: !include raml-util/schemas/errors.schema
     UUID:
      type: string
@@ -55,18 +56,18 @@ resourceTypes:
       400:
         description: "Bad request, e.g. malformed request body or query parameter. Details of the error (e.g. name of the parameter or line/character number with malformed data) provided in the response."
         body:
-          text/plain:
-            example: "Unable to add routing list -- malformed JSON at 13:3"
+          application/json:
+            type: error
       401:
         description: "Not authorized to perform requested action"
         body:
-          text/plain:
-            example: "Unable to add routing-list -- unauthorized"
+          application/json:
+            type: error
       500:
         description: "Internal server error, e.g. due to misconfiguration"
         body:
-          text/plain:
-            example: "Internal server error, contact administrator"
+          application/json:
+            type: error
   /{id}:
     uriParameters:
       id:
