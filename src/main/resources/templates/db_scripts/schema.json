@@ -687,6 +687,25 @@
           "removeAccents": true
         }
       ]
+    },
+    {
+      "tableName": "routing_list_config",
+      "fromModuleVersion": "mod-orders-storage-13.8.0",
+      "withMetadata": true,
+      "foreignKeys": [
+        {
+          "fieldName": "templateId",
+          "targetTable": "template",
+          "targetTableAlias": "template",
+          "tableAlias": "routing_list_config"
+        }
+      ],
+      "uniqueIndex": [
+        {
+          "fieldName": "name",
+          "caseSensitive": false
+        }
+      ]
     }
   ]
 }
