@@ -1,0 +1,79 @@
+#%RAML 1.0
+title: "Settings"
+baseUri: https://github.com/folio-org/mod-orders-storage
+version: v1.0
+
+documentation:
+  - title: Settings
+    content: <b>CRUD APIs used to manage settings for mod-orders.</b>
+
+types:
+  setting: !include acq-models/common/schemas/setting.json
+  setting_collection: !include acq-models/common/schemas/setting_collection.json
+  errors: !include raml-util/schemas/errors.schema
+  UUID:
+    type: string
+    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+traits:
+  orderable: !include raml-util/traits/orderable.raml
+  pageable: !include raml-util/traits/pageable.raml
+  searchable: !include raml-util/traits/searchable.raml
+  validate: !include raml-util/traits/validation.raml
+
+resourceTypes:
+  collection-get: !include raml-util/rtypes/collection-get.raml
+  collection-item-get: !include raml-util/rtypes/item-collection-get.raml
+
+
+/orders-storage/settings:
+  type:
+    collection-get:
+      exampleCollection: !include acq-models/common/examples/setting_collection.sample
+      exampleItem: !include acq-models/common/examples/setting_post.sample
+      schemaCollection: setting_collection
+      schemaItem: setting
+  get:
+    description: Get a list of settings
+    is: [
+      searchable: { description: "CQL query", example: "key=BANKING_INFORMATION_ENABLED" },
+      pageable
+    ]
+  /{id}:
+    uriParameters:
+      id:
+        description: The UUID of a setting
+        type: UUID
+    type:
+      collection-item-get:
+        exampleItem: !include acq-models/common/examples/setting_get.sample
+        schema: setting
+    put:
+      description: Update a setting by id
+      is: [ validate ]
+      body:
+        application/json:
+          example:
+            strict: false
+            value: !include acq-models/common/examples/setting_post.sample
+          type: setting
+      responses:
+        204:
+          description: Setting updated ok
+        400:
+          description: Bad Request
+          body:
+            text/plain:
+        404:
+          description: Not found
+          body:
+            text/plain:
+        409:
+          description: "Optimistic locking version conflict"
+          body:
+            text/plain:
+              example: "version conflict"
+        500:
+          description: Internal error
+          body:
+            text/plain:
