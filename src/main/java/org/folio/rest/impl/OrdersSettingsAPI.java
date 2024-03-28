@@ -27,18 +27,27 @@ public class OrdersSettingsAPI implements OrdersStorageSettings {
   }
 
   @Override
+  public void postOrdersStorageSettings(Setting entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.post(SETTINGS_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageSettingsResponse.class, asyncResultHandler);
+  }
+
+  @Override
   @Validate
   public void getOrdersStorageSettingsById(String id, Map<String, String> okapiHeaders,
                                            Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.getById(SETTINGS_TABLE, Setting.class, id, okapiHeaders, vertxContext,
-      GetOrdersStorageSettingsByIdResponse.class, asyncResultHandler);
+    PgUtil.getById(SETTINGS_TABLE, Setting.class, id, okapiHeaders, vertxContext, GetOrdersStorageSettingsByIdResponse.class, asyncResultHandler);
   }
 
   @Override
   @Validate
   public void putOrdersStorageSettingsById(String id, Setting entity, Map<String, String> okapiHeaders,
                                            Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(SETTINGS_TABLE, entity, id, okapiHeaders, vertxContext,
+    PgUtil.put(SETTINGS_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageSettingsByIdResponse.class, asyncResultHandler);
+  }
+
+  @Override
+  public void deleteOrdersStorageSettingsById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    PgUtil.deleteById(SETTINGS_TABLE, id, okapiHeaders, vertxContext,
       PutOrdersStorageSettingsByIdResponse.class, asyncResultHandler);
   }
 

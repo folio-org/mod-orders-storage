@@ -74,6 +74,10 @@ public class TestData {
     String DEFAULT = "mockdata/routing-lists/c0d13648-347b-4ac9-8c2f-5bc47248b871.json";
   }
 
+  public interface Setting {
+    String DEFAULT = "mockdata/setting/9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d.json";
+  }
+
   public interface CustomFields {
     String PO = "data/custom-fields/custom-field-po.json";
     String POL = "data/custom-fields/custom-field-pol.json";

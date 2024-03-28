@@ -638,9 +638,19 @@
           "permissionsRequired": ["orders-storage.settings.item.get"]
         },
         {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/settings",
+          "permissionsRequired": ["orders-storage.settings.item.post"]
+        },
+        {
           "methods": ["PUT"],
           "pathPattern": "/orders-storage/settings/{id}",
           "permissionsRequired": ["orders-storage.settings.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/settings/{id}",
+          "permissionsRequired": ["orders-storage.settings.item.delete"]
         }
       ]
     },
@@ -1433,6 +1443,16 @@
       "permissionName" : "orders-storage.settings.item.put",
       "displayName" : "setting put",
       "description" : "Update a setting"
+    },
+    {
+      "permissionName" : "orders-storage.settings.item.post",
+      "displayName" : "setting post",
+      "description" : "Add a setting"
+    },
+    {
+      "permissionName" : "orders-storage.settings.item.delete",
+      "displayName" : "setting delete",
+      "description" : "Delete a setting"
     },
     {
       "permissionName" : "orders-storage.settings.all",

@@ -11,6 +11,7 @@ types:
   setting: !include acq-models/common/schemas/setting.json
   setting_collection: !include acq-models/common/schemas/setting_collection.json
   errors: !include raml-util/schemas/errors.schema
+  error: !include raml-util/schemas/error.schema
   UUID:
     type: string
     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
@@ -22,13 +23,13 @@ traits:
   validate: !include raml-util/traits/validation.raml
 
 resourceTypes:
-  collection-get: !include raml-util/rtypes/collection-get.raml
-  collection-item-get: !include raml-util/rtypes/item-collection-get.raml
+  collection: !include raml-util/rtypes/collection.raml
+  collection-item: !include raml-util/rtypes/item-collection.raml
 
 
 /orders-storage/settings:
   type:
-    collection-get:
+    collection:
       exampleCollection: !include acq-models/common/examples/setting_collection.sample
       exampleItem: !include acq-models/common/examples/setting_post.sample
       schemaCollection: setting_collection
@@ -39,41 +40,43 @@ resourceTypes:
       searchable: { description: "CQL query", example: "key=BANKING_INFORMATION_ENABLED" },
       pageable
     ]
+  post:
+    description: Add a new setting
+    body:
+      application/json:
+        type: setting
+        example:
+          strict: false
+          value: !include acq-models/common/examples/setting_post.sample
+    responses:
+      201:
+        description: Setting added
+        body:
+          application/json:
+            example: !include acq-models/common/examples/setting_get.sample
+      400:
+        description: Bad Request
+        body:
+          application/json:
+            type: error
+      401:
+        description: Not found
+        body:
+          application/json:
+            type: error
+      500:
+        description: Internal error
+        body:
+          application/json:
+            type: error
   /{id}:
     uriParameters:
       id:
         description: The UUID of a setting
         type: UUID
+    displayName: Settings
+    description: Get, Delete or Update a specific setting
     type:
-      collection-item-get:
+      collection-item:
         exampleItem: !include acq-models/common/examples/setting_get.sample
         schema: setting
-    put:
-      description: Update a setting by id
-      is: [ validate ]
-      body:
-        application/json:
-          example:
-            strict: false
-            value: !include acq-models/common/examples/setting_post.sample
-          type: setting
-      responses:
-        204:
-          description: Setting updated ok
-        400:
-          description: Bad Request
-          body:
-            text/plain:
-        404:
-          description: Not found
-          body:
-            text/plain:
-        409:
-          description: "Optimistic locking version conflict"
-          body:
-            text/plain:
-              example: "version conflict"
-        500:
-          description: Internal error
-          body:
-            text/plain:
