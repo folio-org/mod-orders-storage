@@ -707,6 +707,18 @@
           "caseSensitive": false
         }
       ]
+    },
+    {
+      "tableName": "settings",
+      "fromModuleVersion": "mod-orders-storage-13.8.0",
+      "withMetadata": true,
+      "withOptimisticLocking": "failOnConflict",
+      "uniqueIndex": [
+        {
+          "fieldName": "key",
+          "caseSensitive": false
+        }
+      ]
     }
   ]
 }

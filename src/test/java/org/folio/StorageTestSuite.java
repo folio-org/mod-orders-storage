@@ -34,6 +34,7 @@ import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.EntititesCustomFieldsTest;
 import org.folio.rest.impl.HelperUtilsTest;
 import org.folio.rest.impl.OrdersAPITest;
+import org.folio.rest.impl.OrdersSettingsTest;
 import org.folio.rest.impl.PoLineBatchAPITest;
 import org.folio.rest.impl.PoNumberTest;
 import org.folio.rest.impl.PurchaseOrderLineNumberTest;
@@ -283,4 +284,7 @@ public class StorageTestSuite {
   class CustomFieldsAPITestNested extends CustomFieldsAPITest {}
   @Nested
   class EntititesCustomFieldsTestNested extends EntititesCustomFieldsTest {}
+  @Nested
+  class OrdersSettingsNested extends OrdersSettingsTest {}
+
 }
