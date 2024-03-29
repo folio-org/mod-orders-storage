@@ -624,6 +624,37 @@
       ]
     },
     {
+      "id": "orders-storage.settings",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/settings",
+          "permissionsRequired": ["orders-storage.settings.collection.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/settings/{id}",
+          "permissionsRequired": ["orders-storage.settings.item.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/settings",
+          "permissionsRequired": ["orders-storage.settings.item.post"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/settings/{id}",
+          "permissionsRequired": ["orders-storage.settings.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/settings/{id}",
+          "permissionsRequired": ["orders-storage.settings.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -1399,6 +1430,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.settings.collection.get",
+      "displayName" : "setting collection get",
+      "description" : "Get a collection of settings"
+    },
+    {
+      "permissionName" : "orders-storage.settings.item.get",
+      "displayName" : "setting get",
+      "description" : "Fetch a setting"
+    },
+    {
+      "permissionName" : "orders-storage.settings.item.put",
+      "displayName" : "setting put",
+      "description" : "Update a setting"
+    },
+    {
+      "permissionName" : "orders-storage.settings.item.post",
+      "displayName" : "setting post",
+      "description" : "Add a setting"
+    },
+    {
+      "permissionName" : "orders-storage.settings.item.delete",
+      "displayName" : "setting delete",
+      "description" : "Delete a setting"
+    },
+    {
+      "permissionName" : "orders-storage.settings.all",
+      "displayName" : "setting all",
+      "description" : "All permissions for setting",
+      "subPermissions" : [
+        "orders-storage.settings.collection.get",
+        "orders-storage.settings.item.get",
+        "orders-storage.settings.item.post",
+        "orders-storage.settings.item.put",
+        "orders-storage.settings.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -1424,7 +1492,8 @@
         "orders-storage.audit-outbox.all",
         "orders-storage.claiming.all",
         "orders-storage.custom-fields.all",
-        "orders-storage.routing-lists.all"
+        "orders-storage.routing-lists.all",
+        "orders-storage.settings.all"
       ]
     }
   ],

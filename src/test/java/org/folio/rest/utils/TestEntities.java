@@ -20,7 +20,8 @@ public enum TestEntities {
   PREFIX("/orders-storage/configuration/prefixes", Prefix.class, TestData.Prefix.DEFAULT , "description", "New description", 1),
   SUFFIX("/orders-storage/configuration/suffixes", Suffix.class, TestData.Suffix.DEFAULT, "description", "New description", 1),
   EXPORT_HISTORY("/orders-storage/export-history", ExportHistory.class, TestData.ExportHistory.EXPORT_HISTORY_1, "exportType", "BURSAR_FEES_FINES", 1),
-  ROUTING_LIST("/orders-storage/routing-lists", RoutingList.class, TestData.RoutingList.DEFAULT, "notes", "Updated notes", 0);
+  ROUTING_LIST("/orders-storage/routing-lists", RoutingList.class, TestData.RoutingList.DEFAULT, "notes", "Updated notes", 0),
+  SETTING("/orders-storage/settings", Setting.class, TestData.Setting.DEFAULT, "value", "46ff3f08-8f41-485c-98d8-701ba8404f4f", 0);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;

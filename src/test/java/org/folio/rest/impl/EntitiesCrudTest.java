@@ -45,6 +45,7 @@ public class EntitiesCrudTest extends TestBase {
       TestEntities.PREFIX,
       TestEntities.SUFFIX,
       TestEntities.EXPORT_HISTORY,
+      TestEntities.SETTING,
       TestEntities.CUSTOM_FIELDS);
   }
 
