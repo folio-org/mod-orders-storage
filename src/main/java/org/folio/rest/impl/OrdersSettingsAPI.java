@@ -27,6 +27,7 @@ public class OrdersSettingsAPI implements OrdersStorageSettings {
   }
 
   @Override
+  @Validate
   public void postOrdersStorageSettings(Setting entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.post(SETTINGS_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageSettingsResponse.class, asyncResultHandler);
   }
@@ -46,6 +47,7 @@ public class OrdersSettingsAPI implements OrdersStorageSettings {
   }
 
   @Override
+  @Validate
   public void deleteOrdersStorageSettingsById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     PgUtil.deleteById(SETTINGS_TABLE, id, okapiHeaders, vertxContext,
       PutOrdersStorageSettingsByIdResponse.class, asyncResultHandler);

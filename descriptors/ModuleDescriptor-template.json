@@ -1461,7 +1461,9 @@
       "subPermissions" : [
         "orders-storage.settings.collection.get",
         "orders-storage.settings.item.get",
-        "orders-storage.settings.item.put"
+        "orders-storage.settings.item.post",
+        "orders-storage.settings.item.put",
+        "orders-storage.settings.item.delete"
       ]
     },
     {
