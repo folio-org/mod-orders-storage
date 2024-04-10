@@ -39,17 +39,17 @@ public class PoLinesBatchService {
 
     return pgClient.withTrans(conn ->
       conn.updateBatch(PO_LINE_TABLE, poLines)
-        .compose(rowSet -> updateTitles(conn, poLines))
+        .compose(rowSet -> updateTitles(conn, poLines, okapiHeaders))
         .compose(rowSet -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, okapiHeaders))
         .mapEmpty()
     );
 
   }
 
-  private Future<Void> updateTitles(Conn conn, List<PoLine> poLines) {
+  private Future<Void> updateTitles(Conn conn, List<PoLine> poLines, Map<String, String> headers) {
     var futures = poLines.stream()
       .filter(poLine -> !poLine.getIsPackage())
-      .map(poLine -> poLinesService.updateTitle(conn, poLine))
+      .map(poLine -> poLinesService.updateTitle(conn, poLine, headers))
       .toList();
     return GenericCompositeFuture.join(futures)
       .mapEmpty();

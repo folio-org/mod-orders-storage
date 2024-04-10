@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -47,6 +48,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 import one.util.streamex.StreamEx;
+import org.folio.rest.tools.utils.MetadataUtil;
 
 public class PoLinesService {
   private static final Logger log = LogManager.getLogger();
@@ -109,7 +111,7 @@ public class PoLinesService {
     poLine.setId(id);
 
     updatePoLine(conn, poLine)
-        .compose(line -> updateTitle(conn, line))
+        .compose(line -> updateTitle(conn, line, requestContext.getHeaders()))
         .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders))
         .onComplete(ar -> {
           if (ar.succeeded()) {
@@ -124,11 +126,11 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<PoLine> createTitle(Conn conn, PoLine poLine) {
+  public Future<PoLine> createTitle(Conn conn, PoLine poLine, Map<String, String> headers) {
     return conn.getById(PURCHASE_ORDER_TABLE, poLine.getPurchaseOrderId(), PurchaseOrder.class)
       .compose(purchaseOrder -> {
         if (StringUtils.isBlank(poLine.getPackagePoLineId())) {
-          return createTitleAndSave(conn, poLine, purchaseOrder.getAcqUnitIds());
+          return createTitleAndSave(conn, poLine, purchaseOrder.getAcqUnitIds(), headers);
         }
         Promise<PoLine> promise = Promise.promise();
         getPoLineById(conn, poLine.getPackagePoLineId())
@@ -137,7 +139,7 @@ public class PoLinesService {
               log.error("Can't find poLine with id={}", poLine.getPackagePoLineId());
               promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode()));
             } else {
-              populateTitleForPackagePoLineAndSave(conn, promise, poLine, ar.result(), purchaseOrder.getAcqUnitIds());
+              populateTitleForPackagePoLineAndSave(conn, promise, poLine, ar.result(), purchaseOrder.getAcqUnitIds(), headers);
             }
           });
         return promise.future();
@@ -293,8 +295,8 @@ public class PoLinesService {
   }
 
   private void populateTitleForPackagePoLineAndSave(Conn conn, Promise<PoLine> promise, PoLine poLine,
-                                                    PoLine packagePoLine, List<String> acqUnitIds) {
-    Title title = createTitleObject(poLine, acqUnitIds);
+                                                    PoLine packagePoLine, List<String> acqUnitIds, Map<String, String> headers) {
+    Title title = createTitleObject(poLine, acqUnitIds, headers);
     populateTitleBasedOnPackagePoLine(title, packagePoLine);
     log.debug("Creating new title record with id={} based on packagePoLineId={}", title.getId(), poLine.getPackagePoLineId());
 
@@ -373,9 +375,9 @@ public class PoLinesService {
     return promise.future();
   }
 
-  private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine, List<String> acqUnitIds) {
+  private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine, List<String> acqUnitIds, Map<String, String> headers) {
     Promise<PoLine> promise = Promise.promise();
-    Title title = createTitleObject(poLine, acqUnitIds);
+    Title title = createTitleObject(poLine, acqUnitIds, headers);
     log.debug("Creating new title record with id={}", title.getId());
 
     conn.save(TITLES_TABLE, title.getId(), title)
@@ -392,11 +394,11 @@ public class PoLinesService {
     return promise.future();
   }
 
-  private Future<PoLine> updateTitle(Conn conn, Title title, PoLine poLine) {
+  private Future<PoLine> updateTitle(Conn conn, Title title, PoLine poLine, Map<String, String> headers) {
     Promise<PoLine> promise = Promise.promise();
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
-    Title newTitle = createTitleObject(poLine, title.getAcqUnitIds())
+    Title newTitle = createTitleObject(poLine, title.getAcqUnitIds(), headers)
       .withIsAcknowledged(title.getIsAcknowledged())
       .withId(title.getId());
 
@@ -437,7 +439,8 @@ public class PoLinesService {
     return client.deleteById(tx, PO_LINE_TABLE);
   }
 
-  private Title createTitleObject(PoLine poLine, List<String> acqUnitIds) {
+  @SneakyThrows
+  private Title createTitleObject(PoLine poLine, List<String> acqUnitIds, Map<String, String> headers) {
     Title title = new Title().withId(UUID.randomUUID()
         .toString())
       .withPoLineId(poLine.getId())
@@ -461,6 +464,7 @@ public class PoLinesService {
         .withReceivingNote(poLine.getDetails().getReceivingNote())
         .withIsAcknowledged(poLine.getDetails().getIsAcknowledged());
     }
+    MetadataUtil.populateMetadata(title, headers);
     return title;
   }
 
@@ -475,16 +479,16 @@ public class PoLinesService {
     }
   }
 
-  public Future<PoLine> updateTitle(Conn conn, PoLine poLine) {
+  public Future<PoLine> updateTitle(Conn conn, PoLine poLine, Map<String, String> headers) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
 
     return conn.get(TITLES_TABLE, Title.class, criterion, true)
       .compose(result -> {
         List<Title> titles = result.getResults();
         if (titles.isEmpty()) {
-          return createTitle(conn, poLine);
-        } else if (titleUpdateRequired(titles.get(0), poLine)) {
-          return updateTitle(conn, titles.get(0), poLine);
+          return createTitle(conn, poLine, headers);
+        } else if (titleUpdateRequired(titles.get(0), poLine, headers)) {
+          return updateTitle(conn, titles.get(0), poLine, headers);
         }
         return Future.succeededFuture(poLine);
       })
@@ -499,8 +503,8 @@ public class PoLinesService {
   }
 
 
-  private boolean titleUpdateRequired(Title title, PoLine poLine) {
-    return !title.equals(createTitleObject(poLine, title.getAcqUnitIds())
+  private boolean titleUpdateRequired(Title title, PoLine poLine, Map<String, String> headers) {
+    return !title.equals(createTitleObject(poLine, title.getAcqUnitIds(), headers)
       .withId(title.getId())
       .withClaimingActive(title.getClaimingActive())
       .withClaimingInterval(title.getClaimingInterval())

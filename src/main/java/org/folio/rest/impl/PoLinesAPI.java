@@ -93,7 +93,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
       validateCustomFields(vertxContext, okapiHeaders, poLine)
         .compose(v ->
           pgClient.withTrans(conn -> poLinesService.createPoLine(conn, poLine)
-            .compose(poLineId -> poLinesService.createTitle(conn, poLine))
+            .compose(poLineId -> poLinesService.createTitle(conn, poLine, okapiHeaders))
             .compose(title -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(poLine), OrderLineAuditEvent.Action.CREATE, okapiHeaders))))
         .onComplete(ar -> {
           if (ar.failed()) {
