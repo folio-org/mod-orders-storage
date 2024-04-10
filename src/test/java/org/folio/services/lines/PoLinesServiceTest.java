@@ -269,7 +269,7 @@ public class PoLinesServiceTest {
     doReturn(failedFuture(new Exception("unknown")))
       .when(conn).save(anyString(), anyString(), any(Title.class));
 
-    Future<PoLine> f = poLinesService.createTitle(conn, poLine);
+    Future<PoLine> f = poLinesService.createTitle(conn, poLine, new HashMap<>());
 
     assertThat(f.failed(), is(true));
     io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
@@ -297,7 +297,7 @@ public class PoLinesServiceTest {
     doReturn(failedFuture(new Exception("unknown")))
       .when(conn).save(anyString(), anyString(), any(Title.class));
 
-    Future<PoLine> f = poLinesService.createTitle(conn, poLine);
+    Future<PoLine> f = poLinesService.createTitle(conn, poLine, new HashMap<>());
 
     assertThat(f.failed(), is(true));
     io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
