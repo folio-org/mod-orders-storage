@@ -1,7 +1,7 @@
 package org.folio.dao.order;
 
 import io.vertx.core.Future;
-import io.vertx.ext.web.handler.HttpException;
+import org.folio.rest.exceptions.HttpException;
 import io.vertx.sqlclient.Row;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
