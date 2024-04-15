@@ -1,11 +1,14 @@
 package org.folio.dao.order;
 
 import io.vertx.core.Future;
+import io.vertx.ext.web.handler.HttpException;
+import io.vertx.sqlclient.Row;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.persist.Conn;
 
+import static org.folio.models.TableNames.ORDER_NUMBER_TABLE;
 import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 
 public class OrderPostgresDAO implements OrderDAO {
@@ -22,5 +25,19 @@ public class OrderPostgresDAO implements OrderDAO {
     return conn.update(PURCHASE_ORDER_TABLE, po, po.getId())
       .onFailure(t -> log.error("updateOrder failed for order with id {}", po.getId(), t))
       .mapEmpty();
+  }
+
+  @Override
+  public Future<Long> getNextPoNumber(Conn conn) {
+    String sql = String.format("UPDATE %s SET last_number = last_number + 1 RETURNING last_number", ORDER_NUMBER_TABLE);
+    return conn.execute(sql)
+      .map(rowSet -> {
+        if (rowSet.rowCount() == 0) {
+          log.error("Could not get a new purchase order number (rowCount is 0)");
+          throw new HttpException(500, "Could not get a new purchase order number (rowCount is 0)");
+        }
+        Row row = rowSet.iterator().next();
+        return row.get(Long.class, 0);
+      });
   }
 }
