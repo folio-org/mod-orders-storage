@@ -38,15 +38,13 @@ public class PoNumberAPI extends BaseApi implements OrdersStoragePoNumber {
 
   @Override
   public void getOrdersStoragePoNumber(Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    vertxContext.runOnContext((Void v) -> {
-      pgClient.withConn(conn -> orderDAO.getNextPoNumber(conn)
-        .onSuccess(poNumber -> asyncResultHandler.handle(buildOkResponse(new PoNumber().withSequenceNumber(poNumber.toString()))))
-        .onFailure(t -> {
-          log.error("Error getting a new po number", t);
-          asyncResultHandler.handle(buildErrorResponse(t));
-        })
-      );
-    });
+    vertxContext.runOnContext((Void v) -> pgClient.withConn(conn -> orderDAO.getNextPoNumber(conn)
+      .onSuccess(poNumber -> asyncResultHandler.handle(buildOkResponse(new PoNumber().withSequenceNumber(poNumber.toString()))))
+      .onFailure(t -> {
+        log.error("Error getting a new po number", t);
+        asyncResultHandler.handle(buildErrorResponse(t));
+      })
+    ));
   }
 
   @Override
