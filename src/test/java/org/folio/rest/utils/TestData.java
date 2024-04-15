@@ -67,7 +67,6 @@ public class TestData {
 
   public interface ExportHistory {
     String EXPORT_HISTORY_1 = "mockdata/export-history/99fb699a-cdf1-11e9-a9d9-f2801f1b9aa1.json";
-    String EXPORT_HISTORY_2 = "mockdata/export-history/99fb699a-cdf1-11e9-a9d9-f2801f1b9aa2.json";
   }
 
   public interface RoutingList {
@@ -81,5 +80,9 @@ public class TestData {
   public interface CustomFields {
     String PO = "data/custom-fields/custom-field-po.json";
     String POL = "data/custom-fields/custom-field-pol.json";
+  }
+
+  public interface BindingPieceItem {
+    String DEFAULT = "mockdata/binding-piece-item/b1ff6911-9690-46bc-a64e-6284482c9971.json";
   }
 }

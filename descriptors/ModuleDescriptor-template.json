@@ -655,6 +655,39 @@
       ]
     },
     {
+      "id": "orders-storage.binding-piece-items",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/binding-piece-items",
+          "permissionsRequired": ["orders-storage.binding-piece-items.collection.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/binding-piece-items/{id}",
+          "permissionsRequired": ["orders-storage.binding-piece-items.item.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/binding-piece-items",
+          "permissionsRequired": ["orders-storage.binding-piece-items.item.post"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/binding-piece-items/{id}",
+          "permissionsRequired": ["orders-storage.binding-piece-items.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/binding-piece-items/{id}",
+          "permissionsRequired": ["orders-storage.binding-piece-items.item.delete"]
+        }
+      ]
+    },
+
+
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -1467,6 +1500,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.binding-piece-items.collection.get",
+      "displayName" : "binding-piece-items-collection get",
+      "description" : "Get a collection of binding piece items"
+    },
+    {
+      "permissionName" : "orders-storage.binding-piece-items.item.post",
+      "displayName" : "binding-piece-items-item post",
+      "description" : "Create a new binding piece item"
+    },
+    {
+      "permissionName" : "orders-storage.binding-piece-items.item.get",
+      "displayName" : "binding-piece-items-item get",
+      "description" : "Fetch a binding piece item"
+    },
+    {
+      "permissionName" : "orders-storage.binding-piece-items.item.put",
+      "displayName" : "binding-piece-items-item put",
+      "description" : "Update a binding piece item"
+    },
+    {
+      "permissionName" : "orders-storage.binding-piece-items.item.delete",
+      "displayName" : "binding-piece-items-item delete",
+      "description" : "Delete a binding piece item"
+    },
+    {
+      "permissionName" : "orders-storage.binding-piece-items.all",
+      "displayName" : "All routing list perms",
+      "description" : "All permissions for the routing list",
+      "subPermissions" : [
+        "orders-storage.binding-piece-items.collection.get",
+        "orders-storage.binding-piece-items.item.post",
+        "orders-storage.binding-piece-items.item.get",
+        "orders-storage.binding-piece-items.item.put",
+        "orders-storage.binding-piece-items.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.module.all",
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
@@ -1493,7 +1563,8 @@
         "orders-storage.claiming.all",
         "orders-storage.custom-fields.all",
         "orders-storage.routing-lists.all",
-        "orders-storage.settings.all"
+        "orders-storage.settings.all",
+        "orders-storage.binding-piece-items.all"
       ]
     }
   ],
