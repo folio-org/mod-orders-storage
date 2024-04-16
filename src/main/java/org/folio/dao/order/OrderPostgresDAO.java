@@ -12,6 +12,7 @@ import static org.folio.models.TableNames.ORDER_NUMBER_TABLE;
 import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 
 public class OrderPostgresDAO implements OrderDAO {
+  private static final String UPDATE_NUMBER_QUERY = "UPDATE %s SET last_number = last_number + 1 RETURNING last_number";
   private static final Logger log = LogManager.getLogger();
 
   @Override
@@ -29,11 +30,11 @@ public class OrderPostgresDAO implements OrderDAO {
 
   @Override
   public Future<Long> getNextPoNumber(Conn conn) {
-    String sql = String.format("UPDATE %s SET last_number = last_number + 1 RETURNING last_number", ORDER_NUMBER_TABLE);
+    String sql = String.format(UPDATE_NUMBER_QUERY, ORDER_NUMBER_TABLE);
     return conn.execute(sql)
       .map(rowSet -> {
         if (rowSet.rowCount() == 0) {
-          log.error("Could not get a new purchase order number (rowCount is 0)");
+          log.error("getNextPoNumber:: Could not get a new purchase order number (rowCount is 0); sql: {}",sql);
           throw new HttpException(500, "Could not get a new purchase order number (rowCount is 0)");
         }
         Row row = rowSet.iterator().next();

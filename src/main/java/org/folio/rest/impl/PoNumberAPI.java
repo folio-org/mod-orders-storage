@@ -41,7 +41,7 @@ public class PoNumberAPI extends BaseApi implements OrdersStoragePoNumber {
     vertxContext.runOnContext((Void v) -> pgClient.withConn(conn -> orderDAO.getNextPoNumber(conn))
       .onSuccess(poNumber -> asyncResultHandler.handle(buildOkResponse(new PoNumber().withSequenceNumber(poNumber.toString()))))
       .onFailure(t -> {
-        log.error("Error getting a new po number", t);
+        log.error("getOrdersStoragePoNumber:: Error getting a new po number", t);
         asyncResultHandler.handle(buildErrorResponse(t));
       })
     );

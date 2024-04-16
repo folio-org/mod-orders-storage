@@ -50,13 +50,17 @@ public class PoNumberTest extends TestBase {
   @Test
   public void testError() throws Exception {
     AutoCloseable mockitoMocks = MockitoAnnotations.openMocks(this);
+
     OrderPostgresDAO orderPostgresDAO = new OrderPostgresDAO();
     doReturn(0).when(rowSet).rowCount();
     doReturn(Future.succeededFuture(rowSet)).when(conn).execute(anyString());
+
     Future<Long> f = orderPostgresDAO.getNextPoNumber(conn);
+
     assertThat(f.failed(), is(true));
     HttpException thrown = (HttpException)f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getCode());
+
     mockitoMocks.close();
   }
 
