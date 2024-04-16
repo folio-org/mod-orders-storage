@@ -83,6 +83,6 @@ public class TestData {
   }
 
   public interface BindingPieceItem {
-    String DEFAULT = "mockdata/binding-piece-item/b1ff6911-9690-46bc-a64e-6284482c9971.json";
+    String DEFAULT = "mockdata/binding-piece-items/b1ff6911-9690-46bc-a64e-6284482c9971.json";
   }
 }
