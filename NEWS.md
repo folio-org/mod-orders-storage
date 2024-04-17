@@ -1,5 +1,13 @@
 ## 13.8.0 - Unreleased
 
+## 13.7.1 - Released (Quesnelia R1 2024)
+This release focused on adding ability to search by location and holding in POL  
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.0...v13.7.1)
+
+### Bug Fixes
+* [MODORDERS-1085](https://folio-org.atlassian.net/browse/MODORDERS-1085) - Add ability to search by location and holding in POL
+
+
 ## 13.7.0 - Released (Quesnelia R1 2024)
 The primary focus of this release was to implement claiming batch status job and improve title functionality
 
