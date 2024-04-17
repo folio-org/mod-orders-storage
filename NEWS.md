@@ -9,6 +9,7 @@ This release focused on adding ability to search by location and holding in POL
 
 ### Bug Fixes
 * [MODORDERS-1085](https://folio-org.atlassian.net/browse/MODORDERS-1085) - Add ability to search by location and holding in POL
+* [MODORDERS-395](https://folio-org.atlassian.net/browse/MODORDSTOR-395) - Metadata for Create Title is not populated
 
 
 ## 13.7.0 - Released (Quesnelia R1 2024)
