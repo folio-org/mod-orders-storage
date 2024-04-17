@@ -9,6 +9,7 @@ public final class TableNames {
   public static final String RECEIVING_HISTORY_VIEW_TABLE = "receiving_history_view";
   public static final String EXPORT_HISTORY_TABLE = "export_history";
   public static final String ROUTING_LIST_TABLE = "routing_list";
+  public static final String ORDER_NUMBER_TABLE = "order_number";
 
   private TableNames() { }
 

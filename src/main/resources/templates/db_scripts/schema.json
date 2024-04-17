@@ -125,6 +125,16 @@
       "run": "after",
       "snippetPath": "data-migration/13.7.0/piece_caption_migration.sql",
       "fromModuleVersion": "mod-orders-storage-13.7.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "tables/create_order_number_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.8.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/13.8.0/replace_po_number_sequence.ftl",
+      "fromModuleVersion": "mod-orders-storage-13.8.0"
     }
   ],
   "tables": [
