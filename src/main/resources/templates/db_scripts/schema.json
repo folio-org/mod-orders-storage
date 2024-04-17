@@ -456,6 +456,11 @@
           "fieldName": "physical.volumes",
           "caseSensitive": false,
           "removeAccents": true
+        },
+        {
+          "fieldName": "searchLocationIds",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
