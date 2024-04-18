@@ -1524,8 +1524,8 @@
     },
     {
       "permissionName" : "orders-storage.binding-piece-items.all",
-      "displayName" : "All routing list perms",
-      "description" : "All permissions for the routing list",
+      "displayName" : "All binding piece item perms",
+      "description" : "All permissions for the binding piece items",
       "subPermissions" : [
         "orders-storage.binding-piece-items.collection.get",
         "orders-storage.binding-piece-items.item.post",
