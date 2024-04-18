@@ -5,7 +5,7 @@ This release focused on adding ability to search by location and holding in POL
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.0...v13.7.1)
 
 ### Stories
-* [MODORDSTOR-396](https://folio-org.atlassian.net/browse/MODORDSTOR-396) - Add indexes to satisfy filtering by metadata fields
+* [MODORDSTOR-396](https://folio-org.atlassian.net/browse/MODORDSTOR-396) - Add index to satisfy filtering by searchLocationIds 
 
 ### Bug Fixes
 * [MODORDERS-1085](https://folio-org.atlassian.net/browse/MODORDERS-1085) - Add ability to search by location and holding in POL
