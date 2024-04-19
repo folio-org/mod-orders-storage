@@ -4,8 +4,8 @@ baseUri: http://github.com/folio-org/mod-orders-storage
 version: v1.0
 
 documentation:
-  - title: Bind Item Piece
-    content: <b>This module implements the CRUD interface for Bind Item Piece records. </b>
+  - title: Bind Piece Item
+    content: <b>This module implements the CRUD interface for Bind Piece Item records. </b>
 
 types:
   bind-piece-item: !include acq-models/mod-orders-storage/schemas/bind_piece_item.json
@@ -34,7 +34,7 @@ resourceTypes:
       schemaCollection: bind-piece-item-collection
       schemaItem: bind-piece-item
   get:
-    description: Get collection of BindItemPiece objects
+    description: Get collection of BindPieceItem objects
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"itemId\", \"ae863930-5e50-4d5d-ba3d-61609248d617\", \"=\"]"},
       pageable
