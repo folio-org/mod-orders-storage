@@ -29,7 +29,7 @@ public class EntitiesCrudTest extends TestBase {
 
   public static Stream<TestEntities> deleteOrder() {
     return Stream.of(
-      TestEntities.BINDING_PIECE_ITEM,
+      TestEntities.BIND_PIECE_ITEM,
       TestEntities.ROUTING_LIST,
       TestEntities.PIECE,
       TestEntities.TITLES,

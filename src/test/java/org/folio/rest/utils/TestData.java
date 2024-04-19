@@ -82,7 +82,7 @@ public class TestData {
     String POL = "data/custom-fields/custom-field-pol.json";
   }
 
-  public interface BindingPieceItem {
-    String DEFAULT = "mockdata/binding-piece-items/b1ff6911-9690-46bc-a64e-6284482c9971.json";
+  public interface BindPieceItem {
+    String DEFAULT = "mockdata/bind-piece-items/b1ff6911-9690-46bc-a64e-6284482c9971.json";
   }
 }

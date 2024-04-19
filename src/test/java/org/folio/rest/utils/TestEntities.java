@@ -22,7 +22,7 @@ public enum TestEntities {
   EXPORT_HISTORY("/orders-storage/export-history", ExportHistory.class, TestData.ExportHistory.EXPORT_HISTORY_1, "exportType", "BURSAR_FEES_FINES", 1),
   ROUTING_LIST("/orders-storage/routing-lists", RoutingList.class, TestData.RoutingList.DEFAULT, "notes", "Updated notes", 0),
   SETTING("/orders-storage/settings", Setting.class, TestData.Setting.DEFAULT, "value", "46ff3f08-8f41-485c-98d8-701ba8404f4f", 0),
-  BINDING_PIECE_ITEM("/orders-storage/binding-piece-items", BindingPieceItem.class, TestData.BindingPieceItem.DEFAULT, "itemId", "d43d8887-48b2-4123-8a8c-a9f6957ff854", 0);
+  BIND_PIECE_ITEM("/orders-storage/bind-piece-items", TestData.BindPieceItem.class, TestData.BindPieceItem.DEFAULT, "itemId", "d43d8887-48b2-4123-8a8c-a9f6957ff854", 0);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {
     this.endpoint = endpoint;
