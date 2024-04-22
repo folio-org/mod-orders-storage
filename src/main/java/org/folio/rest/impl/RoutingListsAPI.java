@@ -3,6 +3,8 @@ package org.folio.rest.impl;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.RoutingList;
 import org.folio.rest.jaxrs.model.RoutingListCollection;
@@ -11,6 +13,7 @@ import org.folio.rest.persist.PgUtil;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.folio.models.TableNames.ROUTING_LIST_TABLE;
 
@@ -28,6 +31,9 @@ public class RoutingListsAPI implements OrdersStorageRoutingLists {
   @Validate
   public void postOrdersStorageRoutingLists(RoutingList entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    if (StringUtils.isBlank(entity.getId())) {
+      entity.setId(UUID.randomUUID().toString());
+    }
     PgUtil.post(ROUTING_LIST_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageRoutingListsResponse.class, asyncResultHandler);
   }
 
