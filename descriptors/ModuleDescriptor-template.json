@@ -698,6 +698,12 @@
       ]
     }
   ],
+  "requires": [
+    {
+      "id": "configuration",
+      "version": "2.0"
+    }
+  ],
   "permissionSets" : [
     {
       "permissionName" : "orders-storage.alerts.collection.get",
