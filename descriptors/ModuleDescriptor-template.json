@@ -661,10 +661,7 @@
       "handlers": [
         {
           "methods": ["POST"],
-          "pathPattern": "/_/tenant",
-          "modulePermissions": [
-            "finance-storage.funds.collection.get"
-          ]
+          "pathPattern": "/_/tenant"
         },
         {
           "methods": ["GET", "DELETE"],
