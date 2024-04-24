@@ -6,7 +6,6 @@ This software is distributed under the terms of the Apache License,
 Version 2.0. See the file "[LICENSE](LICENSE)" for more information.
 
 ## Introduction
-
 This is the Orders storage module.
 
 *NOTE*: This module is intended for internal use only.  Please use the APIs provided by mod-orders instead.  There is a lot of business logic in mod-orders that will be bypassed if talking directly to the storage layer. While this is mainly important for create/update/delete operations, it also includes get operations as well. For instance, summary information is calculated in the business logic module (mod-orders).
