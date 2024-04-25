@@ -45,27 +45,6 @@ public class PiecesAPIBatch extends BaseApi implements OrdersStoragePiecesBatch 
     pgClient = pgClientFactory.createInstance(tenantId);
   }
 
-
-  @Override
-  @Validate
-  public void deleteOrdersStoragePiecesByBatch(PieceCollection pieceCollection, Map<String, String> okapiHeaders,
-                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    Future.all(pieceCollection.getPieces().stream()
-        .map(piece -> PgUtil.deleteById(PIECES_TABLE, piece.getId(), okapiHeaders, vertxContext, OrdersStoragePieces.DeleteOrdersStoragePiecesByIdResponse.class)
-          .onFailure(t -> log.error("Failed to delete piece with ID: {}", piece.getId()))
-          .mapEmpty())
-        .collect(Collectors.toList()))
-      .onComplete(ar -> {
-        if (ar.failed()) {
-          log.error("deleteOrdersStoragePiecesBatch:: failed, piece ids: {}", getPieceIdsForLogMessage(pieceCollection.getPieces()), ar.cause());
-          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
-        } else {
-          log.info("deleteOrdersStoragePiecesBatch:: completed, piece ids: {}", getPieceIdsForLogMessage(pieceCollection.getPieces()));
-          asyncResultHandler.handle(buildNoContentResponse());
-        }
-      });
-  }
-
   private String getPieceIdsForLogMessage(List<Piece> pieces) {
     return pieces.stream()
       .map(Piece::getId)
@@ -77,5 +56,22 @@ public class PiecesAPIBatch extends BaseApi implements OrdersStoragePiecesBatch 
   }
 
 
-
+  @Override
+  @Validate
+  public void deleteOrdersStoragePiecesBatch(PieceCollection entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    Future.all(entity.getPieces().stream()
+        .map(piece -> PgUtil.deleteById(PIECES_TABLE, piece.getId(), okapiHeaders, vertxContext, OrdersStoragePieces.DeleteOrdersStoragePiecesByIdResponse.class)
+          .onFailure(t -> log.error("Failed to delete piece with ID: {}", piece.getId()))
+          .mapEmpty())
+        .collect(Collectors.toList()))
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.error("deleteOrdersStoragePiecesBatch:: failed, piece ids: {}", getPieceIdsForLogMessage(entity.getPieces()), ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+        } else {
+          log.info("deleteOrdersStoragePiecesBatch:: completed, piece ids: {}", getPieceIdsForLogMessage(entity.getPieces()));
+          asyncResultHandler.handle(buildNoContentResponse());
+        }
+      });
+  }
 }

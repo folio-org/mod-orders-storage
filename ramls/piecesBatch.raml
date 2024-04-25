@@ -3,49 +3,39 @@ title: "Orders Storage"
 baseUri: http://github.com/org/folio/mod-orders-storage
 version: v3.2
 
-
 documentation:
- - title: Pieces Batch
-   content:  <b>This module implements the pieces batch processing interface. This API is intended for internal use only. </b>
-
+  - title: Pieces Batch
+    content: <b>API to manage batch operations for Pieces. This batch API allows for creating, updating, and deleting multiple pieces in one request.</b>
 
 types:
-   piece_collection: !include acq-models/mod-orders-storage/schemas/piece_collection.json
-   UUID:
-    type: string
-    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
-
+    piece: !include acq-models/mod-orders-storage/schemas/piece.json
+    piece_collection: !include acq-models/mod-orders-storage/schemas/piece_collection.json
+    UUID:
+     type: string
+     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-f]{3}-[0-9a-fA-F]{12}$
 
 traits:
-   orderable: !include raml-util/traits/orderable.raml
-   pageable:  !include raml-util/traits/pageable.raml
-   searchable: !include raml-util/traits/searchable.raml
-
+    orderable: !include raml-util/traits/orderable.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
 
 resourceTypes:
-   collection: !include raml-util/rtypes/collection.raml
-   collection-item: !include raml-util/rtypes/item-collection.raml
-
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
 
 /orders-storage/pieces-batch:
- type:
-   collection:
-     exampleCollection: !include acq-models/mod-orders-storage/examples/piece_collection.sample
-     exampleItem: !include acq-models/mod-orders-storage/examples/piece_post.sample
-     schemaCollection: piece_collection
- delete:
-   description: delete collection of pieces
-   is: [
-     searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
-     pageable
-   ]
- /piecesCollection:
-   uriParameters:
-     pieceCollection:
-       description: A Collection of Pieces
-       type: collection
-   type:
-     collection-item:
-       exampleItem: !include acq-models/mod-orders-storage/examples/piece_get.sample
-       schema: piece
-
+  delete:
+    description: Delete multiple pieces in a batch.
+    body:
+      application/json:
+        type: piece_collection
+        example: !include acq-models/mod-orders-storage/examples/piece_collection.sample
+    responses:
+      204:
+        description: Successfully deleted pieces.
+      400:
+        description: Bad request, e.g., malformed JSON.
+      404:
+        description: Not found, one or more pieces do not exist.
+      500:
+        description: Internal server error, e.g., database error.
