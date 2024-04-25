@@ -612,9 +612,7 @@
     },
     {
       "tableName": "acquisitions_unit_assignments",
-      "fromModuleVersion": "mod-orders-storage-7.0.0",
-      "mode": "delete",
-      "auditingTableName": "NOT_EXISTING_AUDITING_TABLE"
+      "mode": "delete"
     },
     {
     "tableName": "acquisitions_unit_membership",
