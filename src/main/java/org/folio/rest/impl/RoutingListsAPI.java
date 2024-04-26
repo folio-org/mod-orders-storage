@@ -31,9 +31,6 @@ public class RoutingListsAPI implements OrdersStorageRoutingLists {
   @Validate
   public void postOrdersStorageRoutingLists(RoutingList entity, Map<String, String> okapiHeaders,
                                             Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    if (StringUtils.isBlank(entity.getId())) {
-      entity.setId(UUID.randomUUID().toString());
-    }
     PgUtil.post(ROUTING_LIST_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageRoutingListsResponse.class, asyncResultHandler);
   }
 
