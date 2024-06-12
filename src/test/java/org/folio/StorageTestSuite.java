@@ -30,6 +30,7 @@ import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.impl.ClaimingAPITest;
 import org.folio.rest.impl.CustomFieldsAPITest;
+import org.folio.rest.impl.CustomFieldsIndexesTest;
 import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.EntititesCustomFieldsTest;
 import org.folio.rest.impl.HelperUtilsTest;
@@ -281,6 +282,8 @@ public class StorageTestSuite {
   class ClaimingAPITestNested extends ClaimingAPITest {}
   @Nested
   class CustomFieldsAPITestNested extends CustomFieldsAPITest {}
+  @Nested
+  class CustomFieldsIndexesTestNested extends CustomFieldsIndexesTest {}
   @Nested
   class EntititesCustomFieldsTestNested extends EntititesCustomFieldsTest {}
 
