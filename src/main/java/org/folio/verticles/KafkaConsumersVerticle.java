@@ -12,7 +12,7 @@ import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaConsumerWrapper;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.kafka.SubscriptionDefinition;
-import org.folio.util.PomReaderUtil;
+import org.folio.rest.tools.utils.ModuleName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -29,6 +29,8 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
 
   private static final Logger log = LogManager.getLogger();
   private static final GlobalLoadSensor GLOBAL_LOAD_SENSOR = new GlobalLoadSensor();
+  private static final String MODULE = ModuleName.getModuleName().replace("_", "-")
+      + "-" + ModuleName.getModuleVersion();
 
   @Value("${kafka.export.orders.loadLimit:5}")
   private int loadLimit;
@@ -70,7 +72,7 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
       .subscriptionDefinition(subscriptionDefinition)
       .build();
 
-    consumerWrapper.start(ediExportOrdersHistoryKafkaHandler, PomReaderUtil.INSTANCE.constructModuleVersionAndVersion(PomReaderUtil.INSTANCE.getModuleName(), PomReaderUtil.INSTANCE.getVersion()))
+    consumerWrapper.start(ediExportOrdersHistoryKafkaHandler, MODULE)
       .onComplete(ar -> startPromise.handle(ar));
   }
 
