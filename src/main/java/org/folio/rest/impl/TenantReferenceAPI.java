@@ -9,6 +9,7 @@ import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.dbschema.Versioned;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
@@ -60,13 +61,19 @@ public class TenantReferenceAPI extends TenantAPI {
       .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
   }
 
+  private void buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
+    if (isNew(tenantAttributes, "13.5.0")) {
+      tl.withKey(PARAMETER_LOAD_SYSTEM)
+        .withLead("data/system")
+        .add("reasons-for-closure", "orders-storage/configuration/reasons-for-closure")
+        .add("acquisition-methods", "orders-storage/acquisition-methods");
+    }
 
-  private boolean buildDataLoadingParameters(TenantAttributes tenantAttributes, TenantLoading tl) {
-    tl.withKey(PARAMETER_LOAD_SYSTEM)
-      .withLead("data/system")
-      .add("reasons-for-closure", "orders-storage/configuration/reasons-for-closure")
-      .add("acquisition-methods", "orders-storage/acquisition-methods");
-    if (isLoadSample(tenantAttributes)) {
+    if (!isLoadSample(tenantAttributes)) {
+      return;
+    }
+
+    if (isNew(tenantAttributes, "13.7.0")) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
         .add("alerts", "orders-storage/alerts")
@@ -82,7 +89,20 @@ public class TenantReferenceAPI extends TenantAPI {
         .add("configuration/prefixes", "orders-storage/configuration/prefixes")
         .add("configuration/suffixes", "orders-storage/configuration/suffixes");
     }
-    return true;
+  }
+
+  /**
+   * Returns attributes.getModuleFrom() < featureVersion or
+   * attributes.getModuleFrom() is null.
+   */
+  static boolean isNew(TenantAttributes attributes, String featureVersion) {
+    if (attributes.getModuleFrom() == null) {
+      return true;
+    }
+    var since = new Versioned() {
+    };
+    since.setFromModuleVersion(featureVersion);
+    return since.isNewForThisInstall(attributes.getModuleFrom());
   }
 
   private boolean isLoadSample(TenantAttributes tenantAttributes) {
