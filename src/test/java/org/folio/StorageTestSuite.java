@@ -53,7 +53,6 @@ import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.piece.PieceServiceTest;
 import org.folio.services.title.TitleServiceTest;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.PomReaderUtilTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -261,8 +260,6 @@ public class StorageTestSuite {
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
   class EdiExportOrdersHistoryAsyncRecordHandlerTestNested extends EdiExportOrdersHistoryAsyncRecordHandlerTest {}
-  @Nested
-  class PomReaderUtilTestNested extends PomReaderUtilTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
   @Nested
