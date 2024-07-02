@@ -571,6 +571,11 @@
           "fieldName": "displaySummary",
           "caseSensitive": false,
           "removeAccents": true
+        },
+        {
+          "fieldName": "receivingStatus",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
