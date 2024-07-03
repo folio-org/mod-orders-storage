@@ -494,7 +494,6 @@
       "tableName": "titles",
       "fromModuleVersion": "mod-orders-storage-11.0.0",
       "withMetadata": true,
-      "customSnippetPath": "title_table.sql",
       "foreignKeys": [
         {
           "fieldName": "poLineId",
