@@ -561,15 +561,15 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "receivingStatus",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "receivedDate",
           "caseSensitive": false
         },
         {
           "fieldName": "supplement",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "receivingStatus",
           "caseSensitive": false
         }
       ],
