@@ -1,5 +1,17 @@
 ## 13.8.0 - Unreleased
 
+## 13.7.3 - Released (Quesnelia R1 2024)
+This release focused on adding indexes to speed up Orders and Receiving filtering  
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.2...v13.7.3)
+
+### Bug Fixes
+* [MODORDSTOR-406](https://folio-org.atlassian.net/browse/MODORDSTOR-406) - Improve performance of Orders filtering
+* [MODORDSTOR-409](https://folio-org.atlassian.net/browse/MODORDSTOR-409) - Improve performance of Receiving filtering
+
+### Tech Debt
+* [MODORDSTOR-408](https://folio-org.atlassian.net/browse/MODORDSTOR-408) - Upgrading tenant resets reference and sample records
+
+
 ## 13.7.2 - Released (Quesnelia R1 2024)
 This release focused on adding missed required interfaces in module descriptor  
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.1...v13.7.2)
