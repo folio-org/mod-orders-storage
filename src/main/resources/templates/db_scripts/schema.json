@@ -243,6 +243,12 @@
         },
         {
           "fieldName": "acqUnitIds"
+        },
+        {
+          "fieldName": "orderType"
+        },
+        {
+          "fieldName": "workflowStatus"
         }
       ],
       "ginIndex": [
@@ -392,6 +398,11 @@
           "removeAccents": false,
           "arraySubfield": "fundId",
           "arrayModifiers": ["fundId"]
+        },
+        {
+          "fieldName": "orderFormat",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ],
       "ginIndex": [
@@ -483,6 +494,7 @@
       "tableName": "titles",
       "fromModuleVersion": "mod-orders-storage-11.0.0",
       "withMetadata": true,
+      "customSnippetPath": "title_table.sql",
       "foreignKeys": [
         {
           "fieldName": "poLineId",
@@ -549,31 +561,29 @@
           "caseSensitive": false
         },
         {
-          "fieldName": "receivingStatus",
-          "caseSensitive": false
-        },
-        {
           "fieldName": "receivedDate",
           "caseSensitive": false
         },
         {
           "fieldName": "supplement",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "receivingStatus",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
         {
           "fieldName": "comment"
+        },
+        {
+          "fieldName": "receivingStatus"
         }
       ],
       "ginIndex": [
         {
           "fieldName": "displaySummary",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "receivingStatus",
           "caseSensitive": false,
           "removeAccents": true
         }
