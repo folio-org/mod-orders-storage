@@ -125,6 +125,21 @@
       "run": "after",
       "snippetPath": "data-migration/13.7.0/piece_caption_migration.sql",
       "fromModuleVersion": "mod-orders-storage-13.7.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "po_line_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.7.3"
+    },
+    {
+      "run": "after",
+      "snippetPath": "purchase_order_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.7.3"
+    },
+    {
+      "run": "after",
+      "snippetPath": "title_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.7.3"
     }
   ],
   "tables": [
@@ -218,6 +233,12 @@
         },
         {
           "fieldName": "acqUnitIds"
+        },
+        {
+          "fieldName": "orderType"
+        },
+        {
+          "fieldName": "workflowStatus"
         }
       ],
       "ginIndex": [
@@ -367,6 +388,11 @@
           "removeAccents": false,
           "arraySubfield": "fundId",
           "arrayModifiers": ["fundId"]
+        },
+        {
+          "fieldName": "orderFormat",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ],
       "ginIndex": [
@@ -539,6 +565,9 @@
       "fullTextIndex": [
         {
           "fieldName": "comment"
+        },
+        {
+          "fieldName": "receivingStatus"
         }
       ],
       "ginIndex": [
