@@ -19,3 +19,14 @@ CREATE TABLE IF NOT EXISTS test_tenant_mod_inventory_storage.holdings_record (
   permanentlocationid UUID NOT NULL,
   jsonb JSONB NOT NULL
 );
+
+CREATE ROLE partial_tenant_mod_inventory_storage PASSWORD 'partial_tenant' NOSUPERUSER NOCREATEDB INHERIT LOGIN;
+GRANT partial_tenant_mod_inventory_storage TO CURRENT_USER;
+CREATE SCHEMA partial_tenant_mod_inventory_storage AUTHORIZATION partial_tenant_mod_inventory_storage;
+
+
+CREATE TABLE IF NOT EXISTS partial_tenant_mod_inventory_storage.holdings_record (
+  id UUID PRIMARY KEY,
+  permanentlocationid UUID NOT NULL,
+  jsonb JSONB NOT NULL
+);
