@@ -575,6 +575,10 @@
         {
           "fieldName": "supplement",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "bindItemId",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
