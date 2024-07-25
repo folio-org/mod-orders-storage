@@ -1,5 +1,5 @@
 {
-  "exactCount" : 100000,
+  "exactCount" : 50000,
   "scripts": [
     {
       "run": "after",
