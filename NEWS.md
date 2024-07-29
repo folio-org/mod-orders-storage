@@ -1,11 +1,11 @@
 ## 13.8.0 - Unreleased
 
 ## 13.7.4 - Released (Quesnelia R1 2024)
-This release focused on remove faulty particular field index
+This release focused on remove faulty particular field index that breaks installation in older versions of PG DB (v12)
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.3...v13.7.4)
 
 ### Bug Fixes
-* [MODORDSTOR-406](https://folio-org.atlassian.net/browse/MODORDSTOR-406) -  Remove faulty purchase_order_no_acq_unit index
+* [MODORDSTOR-406](https://folio-org.atlassian.net/browse/MODORDSTOR-406) -  Remove faulty purchase_order_no_acq_unit index that breaks installation in older versions of PG DB (v12)
 
 
 ## 13.7.3 - Released (Quesnelia R1 2024)
