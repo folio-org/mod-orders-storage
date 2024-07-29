@@ -5,7 +5,7 @@ This release focused on remove faulty particular field index
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.3...v13.7.4)
 
 ### Bug Fixes
-* [MODORDSTOR_IDX_FIX] - Remove faulty purchase_order_no_acq_unit index
+* [MODORDSTOR-406](https://folio-org.atlassian.net/browse/MODORDSTOR-406) -  Remove faulty purchase_order_no_acq_unit index
 
 
 ## 13.7.3 - Released (Quesnelia R1 2024)
