@@ -28,27 +28,35 @@ import io.vertx.core.json.JsonObject;
 public class PieceService {
   private static final Logger log = LogManager.getLogger();
   private static final String POLINE_ID_FIELD = "poLineId";
+  private static final String ITEM_ID_FIELD = "itemId";
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
+    return getPiecesByField(POLINE_ID_FIELD, poLineId, client);
+  }
+
+  public Future<List<Piece>> getPiecesByItemId(String itemId, DBClient client) {
+    return getPiecesByField(ITEM_ID_FIELD, itemId, client);
+  }
+
+  public Future<List<Piece>> getPiecesByField(String field, String value, DBClient client) {
     Promise<List<Piece>> promise = Promise.promise();
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(field, value);
     client.getPgClient().get(PIECES_TABLE, Piece.class, criterion, false, ar -> {
       if (ar.failed()) {
-        log.error("getPiecesByPoLineId failed, poLineId={}", poLineId, ar.cause());
+        log.error("getPiecesByPoLineId failed, {}={}", field, value, ar.cause());
         httpHandleFailure(promise, ar);
       } else {
         List<Piece> result = ar.result().getResults();
         if (result.isEmpty()) {
-          log.info("No piece was found with poLineId={}", poLineId);
+          log.info("No piece was found with {}={}", field, value);
           promise.complete(null);
         } else {
-          log.trace("getPiecesByPoLineId complete, poLineId={}", poLineId);
+          log.trace("getPiecesByPoLineId complete, {}={}", field, value);
           promise.complete(result);
         }
       }
     });
-
     return promise.future();
   }
 
@@ -74,6 +82,19 @@ public class PieceService {
     return promise.future();
   }
 
+  public Future<Void> updatePieces(List<Piece> pieces, DBClient client) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.info("No pieces to update");
+      return Future.succeededFuture();
+    }
+
+    String query = buildUpdatePieceBatchQuery(pieces, client.getTenantId());
+    return client.getPgClient().execute(query)
+      .onSuccess(ar -> log.info("updatePieces:: completed, query={}", query))
+      .onFailure(t -> log.error("updatePieces:: failed, query={}", query, t))
+      .mapEmpty();
+  }
+
   private String buildUpdatePieceBatchQuery(Collection<Piece> pieces, String tenantId) {
     List<JsonObject> jsonPieces = pieces.stream()
       .map(JsonObject::mapFrom)
@@ -97,7 +118,8 @@ public class PieceService {
       });
   }
 
-  private Future<Tx<PoLine>> updateHoldingForPieces(Tx<PoLine> poLineTx, List<Piece> pieces, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
+  private Future<Tx<PoLine>> updateHoldingForPieces(Tx<PoLine> poLineTx, List<Piece> pieces,
+                                                    ReplaceInstanceRef replaceInstanceRef, DBClient client) {
     List<Piece> updatedPieces = new ArrayList<>();
     if (CollectionUtils.isEmpty(pieces)) {
       log.info(PIECE_NOT_UPDATED, poLineTx.getEntity().getId());
