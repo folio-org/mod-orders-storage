@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.event.KafkaEventUtilTest;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
+import org.folio.event.handler.ItemCreateAsyncRecordHandlerTest;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
@@ -263,6 +264,8 @@ public class StorageTestSuite {
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
   class EdiExportOrdersHistoryAsyncRecordHandlerTestNested extends EdiExportOrdersHistoryAsyncRecordHandlerTest {}
+  @Nested
+  class ItemCreateAsyncRecordHandlerTestNested extends ItemCreateAsyncRecordHandlerTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
   @Nested
