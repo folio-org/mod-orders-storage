@@ -9,6 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Vertx;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.folio.TestUtils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,7 +97,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
   }
 
   @Test
-  void shouldCreateExportHistoryIfRecordIsRecord() {
+  void shouldCreateExportHistoryIfRecordIsRecord()
+    throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     String id = UUID.randomUUID().toString();
     String jobId = UUID.randomUUID().toString();
     String lineId = UUID.randomUUID().toString();
@@ -120,7 +123,11 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       })
       .when(pgClient).withConn(any());
 
-    handler.exportHistory(exportHistory, dbClient).result();
+    Method exportHistoryMethod = EdiExportOrdersHistoryAsyncRecordHandler.class
+      .getDeclaredMethod("exportHistory", ExportHistory.class, DBClient.class);
+    exportHistoryMethod.setAccessible(true);
+
+    exportHistoryMethod.invoke(handler, exportHistory, dbClient);
 
     verify(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());

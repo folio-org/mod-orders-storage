@@ -9,7 +9,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,14 +49,16 @@ public class PieceServiceTest extends TestBase {
   private final String newInstanceId = UUID.randomUUID().toString();
 
   @BeforeEach
-  public void initMocks() throws MalformedURLException {
-    MockitoAnnotations.openMocks(this);
-    pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
-    tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
+  public void initMocks() throws Exception {
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
+      tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
+    }
   }
 
   @AfterEach
-  void cleanupData() throws MalformedURLException {
+  void cleanupData() {
+
     deleteTenant(tenantJob, TEST_TENANT_HEADER);
   }
 
@@ -146,6 +147,50 @@ public class PieceServiceTest extends TestBase {
           });
           testContext.completeNow();
         }));
+  }
+
+  @Test
+  void shouldReturnPiecesByItemId(Vertx vertx, VertxTestContext testContext) {
+    String itemId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withItemId(itemId);
+
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+
+    var savePieceFuture = client.getPgClient().save(PIECES_TABLE, pieceId, piece);
+    var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(itemId, client));
+
+    testContext.assertComplete(getPiecesFuture).onComplete(ar -> {
+      List<Piece> actPieces = ar.result();
+      testContext.verify(() -> assertThat(actPieces.get(0).getId(), is(pieceId)));
+      testContext.completeNow();
+    });
+  }
+
+  @Test
+  void shouldFailedGetPiecesByItemId(Vertx vertx, VertxTestContext testContext) {
+    String itemId = UUID.randomUUID().toString();
+    String incorrectItemId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withItemId(itemId);
+
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+
+    var savePieceFuture = client.getPgClient().save(PIECES_TABLE, pieceId, piece);
+    var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(incorrectItemId, client));
+
+    testContext.assertComplete(getPiecesFuture)
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
+        testContext.verify(() -> assertNull(actPieces));
+        testContext.completeNow();
+      });
   }
 
   @Test

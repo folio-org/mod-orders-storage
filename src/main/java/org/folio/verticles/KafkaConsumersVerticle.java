@@ -2,15 +2,17 @@ package org.folio.verticles;
 
 import static java.util.stream.Collectors.toList;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandler;
 import org.folio.event.KafkaEventType;
+import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandler;
 import org.folio.event.handler.ItemCreateAsyncRecordHandler;
 import org.folio.kafka.AsyncRecordHandler;
 import org.folio.kafka.GlobalLoadSensor;
@@ -26,15 +28,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.stereotype.Component;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
-
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class KafkaConsumersVerticle extends AbstractVerticle {
 
   private static final Logger log = LogManager.getLogger();
   private static final String MODULE_ID = getModuleId();
+  private static final String TENANT_ID_PATTERN = "\\w{1,}";
 
   @Value("${kafka.export.orders.loadLimit:5}")
   private int loadLimit;
@@ -60,11 +60,11 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
 
   @Override
   public void start(Promise<Void> startPromise) {
-    log.info("start:: starting verticle. kafka config: {}", kafkaConfig);
+    log.info("start:: starting kafka consumer verticle. kafka config: {}", kafkaConfig);
 
     createConsumers()
-      .onSuccess(v -> log.info("start:: verticle started successfully"))
-      .onFailure(t -> log.error("start:: failed to start verticle", t))
+      .onSuccess(v -> log.info("start:: kafka consumer verticle started successfully"))
+      .onFailure(t -> log.error("start:: failed to start kafka consumer verticle", t))
       .onComplete(startPromise);
   }
 
@@ -73,8 +73,8 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
     log.info("stop:: stopping verticle");
 
     stopConsumers()
-      .onSuccess(v -> log.info("stop:: verticle stopped successfully"))
-      .onFailure(t -> log.error("stop:: failed to stop verticle", t))
+      .onSuccess(v -> log.info("stop:: kafka consumer verticle stopped successfully"))
+      .onFailure(t -> log.error("stop:: failed to stop kafka consumer verticle", t))
       .onComplete(stopPromise);
   }
 
@@ -82,24 +82,62 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
     log.info("createConsumers:: creating consumers");
     return Future.all(
       List.of(
-        createConsumer(KafkaEventType.EXPORT_HISTORY_CREATE,
+        createEdiExportConsumer(KafkaEventType.EXPORT_HISTORY_CREATE,
           new EdiExportOrdersHistoryAsyncRecordHandler(context, vertx)),
-        createConsumer(KafkaEventType.INVENTORY_ITEM_CREATE,
+        createInventoryConsumer(KafkaEventType.INVENTORY_ITEM_CREATE,
           new ItemCreateAsyncRecordHandler(context, vertx))
       )
     ).mapEmpty();
   }
 
+  /**
+   * This method creates a consumer for the given event type.
+   * Note: The inventory topics are created using the following pattern:
+   * {envId}.{tenant}.inventory.{eventType} -> e.g. 'folio.diku.inventory.item'
+   * @param eventType - the event type
+   * @param handler - the handler to process the records
+   * @return future with the created consumer
+   */
+  private Future<KafkaConsumerWrapper<String, String>> createInventoryConsumer(KafkaEventType eventType,
+                                                                               AsyncRecordHandler<String, String> handler) {
+    var subscriptionPattern = KafkaTopicNameHelper.formatTopicName(
+      kafkaConfig.getEnvId(), TENANT_ID_PATTERN, eventType.getTopicName());
+
+    var subscriptionDefinition = SubscriptionDefinition.builder()
+      .eventType(eventType.name())
+      .subscriptionPattern(subscriptionPattern)
+      .build();
+
+    return createConsumer(eventType, subscriptionDefinition, handler);
+  }
+
+  /**
+   * This method creates a consumer for the given event type.
+   * Note: The EdiExportOrderHistory topics are created using the following pattern:
+   * {envId}.Default.{tenant}.inventory.{eventType} -> e.g. 'folio.Default.diku.edi-export-history.create'
+   * @param eventType - the event type
+   * @param handler - the handler to process the records
+   * @return future with the created consumer
+   */
+  private Future<KafkaConsumerWrapper<String, String>> createEdiExportConsumer(KafkaEventType eventType,
+                                                                               AsyncRecordHandler<String, String> handler) {
+    var subscriptionDefinition = KafkaTopicNameHelper.createSubscriptionDefinition(
+      kafkaConfig.getEnvId(), KafkaTopicNameHelper.getDefaultNameSpace(), eventType.getTopicName());
+
+    return createConsumer(eventType, subscriptionDefinition, handler);
+  }
+
   private Future<KafkaConsumerWrapper<String, String>> createConsumer(KafkaEventType eventType,
+                                                                      SubscriptionDefinition subscriptionDefinition,
                                                                       AsyncRecordHandler<String, String> handler) {
-    log.info("createConsumer:: creating consumer for event type {}", eventType);
-    KafkaConsumerWrapper<String, String> consumerWrapper = KafkaConsumerWrapper.<String, String>builder()
+    log.info("createConsumer:: creating consumer for event type: {}", eventType.getTopicName());
+    var consumerWrapper = KafkaConsumerWrapper.<String, String>builder()
       .context(context)
       .vertx(vertx)
       .kafkaConfig(kafkaConfig)
       .loadLimit(loadLimit)
       .globalLoadSensor(new GlobalLoadSensor())
-      .subscriptionDefinition(buildSubscriptionDefinition(eventType))
+      .subscriptionDefinition(subscriptionDefinition)
       .processRecordErrorHandler((t, r) -> log.error("Failed to process event: {}", r, t))
       .build();
 
@@ -107,11 +145,6 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
     return consumerWrapper.start(handler, MODULE_ID)
       .map(consumerWrapper)
       .onSuccess(consumers::add);
-  }
-
-  private SubscriptionDefinition buildSubscriptionDefinition(KafkaEventType eventType) {
-    return KafkaTopicNameHelper.createSubscriptionDefinition(kafkaConfig.getEnvId(),
-      KafkaTopicNameHelper.getDefaultNameSpace(), KafkaEventType.EXPORT_HISTORY_CREATE.getTopicName());
   }
 
   private Future<Void> stopConsumers() {
@@ -126,7 +159,6 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
   }
 
   private static String getModuleId() {
-    return ModuleName.getModuleName().replace("_", "-")
-      + "-" + ModuleName.getModuleVersion();
+    return ModuleName.getModuleName().replace("_", "-") + "-" + ModuleName.getModuleVersion();
   }
 }

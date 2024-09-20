@@ -33,22 +33,12 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
-    if (log.isDebugEnabled())
-      log.debug("ItemCreateAsyncRecordHandler.handle, kafkaRecord={}", kafkaConsumerRecord.value());
-
-    try {
-      var jsonPayload = new JsonObject(kafkaConsumerRecord.value());
-      var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
-      var dbClient = new DBClient(getVertx(), tenantId);
-      return processEvent(jsonPayload, dbClient)
-        .map(v -> kafkaConsumerRecord.value());
-    } catch (Exception e) {
-      log.error("Failed to process item event kafka record, kafkaRecord={}", kafkaConsumerRecord, e);
-      return Future.failedFuture(e);
+    if (log.isDebugEnabled()) {
+      log.debug("ItemCreateAsyncRecordHandler::handle, kafkaRecord={}", kafkaConsumerRecord.value());
     }
-  }
 
-  private Future<Void> processEvent(JsonObject payload, DBClient dbClient) {
+    var payload = new JsonObject(kafkaConsumerRecord.value());
+
     String eventType = payload.getString("type");
     if (!Objects.equals(eventType, DomainEventPayloadType.CREATE.name())) {
       log.info("processItemCreateEvent:: unsupported event type: {}", eventType);
@@ -60,7 +50,12 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
       return Future.succeededFuture();
     }
 
-    return processItemCreationEvent(payload, dbClient);
+    var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
+    var dbClient = new DBClient(getVertx(), tenantId);
+    return processItemCreationEvent(payload, dbClient)
+      .onSuccess(v -> log.info("ItemCreateAsyncRecordHandler::handle, event processed successfully"))
+      .onFailure(t -> log.error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
+      .map(kafkaConsumerRecord.key());
   }
 
   private Future<Void> processItemCreationEvent(JsonObject payload, DBClient dbClient) {
@@ -77,24 +72,20 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
       return Future.succeededFuture();
     }
 
-    var holdingId = itemObject.getString("holdingId");
+    var holdingId = itemObject.getString("holdingsRecordId");
     updatePieceFields(pieces, holdingId, client.getTenantId());
     return pieceService.updatePieces(pieces, client);
   }
 
   private void updatePieceFields(List<Piece> pieces, String holdingId, String tenantId) {
-
     pieces.forEach(piece -> {
       piece.setReceivingTenantId(tenantId);
-      if (Objects.nonNull(piece.getHoldingId())) {
-        piece.setHoldingId(holdingId);
-      }
+      piece.setHoldingId(holdingId);
     });
   }
 
   private boolean validatePayload(JsonObject payload) {
     var newObject = payload.getJsonObject("new");
-
     if (newObject == null) {
       log.warn("validatePayload:: failed to find new version");
       return false;

@@ -3,6 +3,7 @@ package org.folio.services.piece;
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
+import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
 
@@ -32,27 +33,28 @@ public class PieceService {
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
-    return getPiecesByField(POLINE_ID_FIELD, poLineId, client);
+    var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
+    return getPiecesByField(criterion, client);
   }
 
   public Future<List<Piece>> getPiecesByItemId(String itemId, DBClient client) {
-    return getPiecesByField(ITEM_ID_FIELD, itemId, client);
+    var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
+    return getPiecesByField(criterion, client);
   }
 
-  public Future<List<Piece>> getPiecesByField(String field, String value, DBClient client) {
+  public Future<List<Piece>> getPiecesByField(Criterion criterion, DBClient client) {
     Promise<List<Piece>> promise = Promise.promise();
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(field, value);
     client.getPgClient().get(PIECES_TABLE, Piece.class, criterion, false, ar -> {
       if (ar.failed()) {
-        log.error("getPiecesByPoLineId failed, {}={}", field, value, ar.cause());
+        log.error("getPiecesByPoLineId failed, criterion={}", criterion, ar.cause());
         httpHandleFailure(promise, ar);
       } else {
         List<Piece> result = ar.result().getResults();
         if (result.isEmpty()) {
-          log.info("No piece was found with {}={}", field, value);
+          log.info("No piece was found with criterion={}", criterion);
           promise.complete(null);
         } else {
-          log.trace("getPiecesByPoLineId complete, {}={}", field, value);
+          log.trace("getPiecesByPoLineId complete, criterion={}", criterion);
           promise.complete(result);
         }
       }
@@ -126,13 +128,12 @@ public class PieceService {
       return Future.succeededFuture(poLineTx);
     }
     replaceInstanceRef.getHoldings().forEach(holding -> updatedPieces.addAll(pieces.stream().filter(piece -> piece.getHoldingId().equals(holding.getFromHoldingId()))
-      .map(piece -> {
+      .peek(piece -> {
         if (Objects.nonNull(holding.getToHoldingId())) {
           piece.setHoldingId(holding.getToHoldingId());
         } else {
           piece.setLocationId(holding.getToLocationId());
         }
-        return piece;
       })
       .toList()));
 

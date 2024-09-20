@@ -49,7 +49,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
     }
   }
 
-  Future<Void> exportHistory(ExportHistory exportHistory, DBClient client) {
+  private Future<Void> exportHistory(ExportHistory exportHistory, DBClient client) {
     return exportHistoryService.createExportHistory(exportHistory, client)
       .compose(createdExportHistory -> client.getPgClient().withConn(conn ->
         poLinesService.getPoLinesByLineIdsByChunks(exportHistory.getExportedPoLineIds(), conn)
