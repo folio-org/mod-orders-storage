@@ -92,8 +92,9 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
 
   /**
    * This method creates a consumer for the given event type.
-   * Note: The inventory topics are created using the following pattern:
-   * {envId}.{tenant}.inventory.{eventType} -> e.g. 'folio.diku.inventory.item'
+   * Note: The method is using specific subscription pattern for inventory topics:
+   * {envId}.{tenant}.{eventType} -> e.g. 'folio.diku.inventory.item'
+   *
    * @param eventType - the event type
    * @param handler - the handler to process the records
    * @return future with the created consumer
@@ -113,8 +114,9 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
 
   /**
    * This method creates a consumer for the given event type.
-   * Note: The EdiExportOrderHistory topics are created using the following pattern:
-   * {envId}.Default.{tenant}.inventory.{eventType} -> e.g. 'folio.Default.diku.edi-export-history.create'
+   * Note: The method is using specific subscription pattern for edifact export topics:
+   * {envId}.Default.{tenant}.{eventType} -> e.g. 'folio.Default.diku.edi-export-history.create'
+   *
    * @param eventType - the event type
    * @param handler - the handler to process the records
    * @return future with the created consumer
