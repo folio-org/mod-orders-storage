@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Context;
@@ -45,6 +46,8 @@ public class ItemCreateAsyncRecordHandlerTest {
 
   private static final String TENANT_KEY_LOWER_CASE = "x-okapi-tenant";
   private static final String DIKU_TENANT = "diku";
+  private static final String CREATE = "CREATE";
+  private static final String UPDATE = "UPDATE";
 
   private ItemCreateAsyncRecordHandler handler;
   @Mock
@@ -73,36 +76,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void shouldThrowExceptionIfKafkaRecordIsNotValid() {
-    String itemId = UUID.randomUUID().toString();
-    String holdingRecordId = UUID.randomUUID().toString();
-    var itemEventObject = createItemResourceEvent(itemId, holdingRecordId, DIKU_TENANT);
-
-    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key",
-      Json.encode(itemEventObject));
-    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
-
-    Throwable actExp = handler.handle(record).cause();
-    assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
-    assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
-  }
-
-  @Test
-  void shouldThrowExceptionIfTenantIdHeaderIsNotProvided() {
-    String itemId = UUID.randomUUID().toString();
-    String holdingRecordId = UUID.randomUUID().toString();
-    var itemEventObject = createItemResourceEvent(itemId, holdingRecordId, DIKU_TENANT);
-
-    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key",
-      Json.encode(itemEventObject));
-    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
-
-    Throwable actExp = handler.handle(record).cause();
-    assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
-  }
-
-  @Test
-  void shouldProcessItemCreateEvent() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  void positive_shouldProcessItemCreateEvent()
+    throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     String pieceId1 = UUID.randomUUID().toString();
     String pieceId2 = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
@@ -110,7 +85,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     String locationId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
-    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId);
+    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
     var actualPiece = createPiece(pieceId1, itemId);
     // alreadyUpdatedPiece should be skipped since it has already the same tenantId and existing locationId
     var alreadyUpdatedPiece = createPiece(pieceId2, itemId)
@@ -150,13 +125,87 @@ public class ItemCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void shouldReturnFailedFutureIfSavePieceInDBIsFailed() {
+  void positive_shouldSkipProcessItemUpdateEvent()
+    throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    String pieceId1 = UUID.randomUUID().toString();
+    String pieceId2 = UUID.randomUUID().toString();
+    String itemId = UUID.randomUUID().toString();
+    String holdingId = UUID.randomUUID().toString();
+    String locationId = UUID.randomUUID().toString();
+    String tenantId = DIKU_TENANT;
+
+    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, UPDATE);
+    var actualPiece = createPiece(pieceId1, itemId);
+    // alreadyUpdatedPiece should be skipped since it has already the same tenantId and existing locationId
+    var alreadyUpdatedPiece = createPiece(pieceId2, itemId)
+      .withLocationId(locationId)
+      .withReceivingTenantId(tenantId);
+
+    var pieces = List.of(actualPiece, alreadyUpdatedPiece);
+
+    var expectedPieces = List.of(createPiece(pieceId1, itemId)
+      .withHoldingId(holdingId)
+      .withReceivingTenantId(tenantId));
+
+    doReturn(Future.succeededFuture(pieces))
+      .when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
+    doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
+    doReturn(pgClient).when(dbClient).getPgClient();
+    doReturn(tenantId).when(dbClient).getTenantId();
+    doAnswer(invocation -> {
+      Function<Conn, Future<ExportHistory>> f = invocation.getArgument(0);
+      return f.apply(conn);
+    }).when(pgClient).withConn(any());
+
+    var consumerRecord = new ConsumerRecord<>("topic", 1, 1L,
+      "key", Json.encode(itemEventObject));
+    RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes());
+    consumerRecord.headers().add(header);
+    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
+
+    var res = handler.handle(record);
+    assertTrue(res.succeeded());
+
+    verifyNoInteractions(pieceService);
+  }
+
+  @Test
+  void negative_shouldThrowExceptionIfKafkaRecordIsNotValid() {
+    String itemId = UUID.randomUUID().toString();
+    String holdingRecordId = UUID.randomUUID().toString();
+    var itemEventObject = createItemResourceEvent(itemId, holdingRecordId, DIKU_TENANT, CREATE);
+
+    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key",
+      Json.encode(itemEventObject));
+    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
+
+    Throwable actExp = handler.handle(record).cause();
+    assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
+    assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
+  }
+
+  @Test
+  void negative_shouldThrowExceptionIfTenantIdHeaderIsNotProvided() {
+    String itemId = UUID.randomUUID().toString();
+    String holdingRecordId = UUID.randomUUID().toString();
+    var itemEventObject = createItemResourceEvent(itemId, holdingRecordId, DIKU_TENANT, CREATE);
+
+    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key",
+      Json.encode(itemEventObject));
+    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
+
+    Throwable actExp = handler.handle(record).cause();
+    assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
+  }
+
+  @Test
+  void negative_shouldReturnFailedFutureIfSavePieceInDBIsFailed() {
     String pieceId = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
-    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId);
+    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
     var actualPiece = createPiece(pieceId, itemId);
     var expectedPieces = List.of(createPiece(pieceId, itemId)
       .withHoldingId(holdingId)
@@ -180,13 +229,13 @@ public class ItemCreateAsyncRecordHandlerTest {
     assertEquals(RuntimeException.class, actExp.getClass());
   }
 
-  private JsonObject createItemResourceEvent(String itemId, String holdingRecordId, String tenantId) {
+  private JsonObject createItemResourceEvent(String itemId, String holdingRecordId, String tenantId, String type) {
     var itemObject = new JsonObject()
       .put("id", itemId)
       .put("holdingsRecordId", holdingRecordId);
 
     return new JsonObject()
-      .put("type", "CREATE")
+      .put("type", type)
       .put("new", itemObject)
       .put("tenantId", tenantId);
   }
