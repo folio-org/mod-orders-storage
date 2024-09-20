@@ -128,12 +128,13 @@ public class PieceService {
       return Future.succeededFuture(poLineTx);
     }
     replaceInstanceRef.getHoldings().forEach(holding -> updatedPieces.addAll(pieces.stream().filter(piece -> piece.getHoldingId().equals(holding.getFromHoldingId()))
-      .peek(piece -> {
+      .map(piece -> {
         if (Objects.nonNull(holding.getToHoldingId())) {
           piece.setHoldingId(holding.getToHoldingId());
         } else {
           piece.setLocationId(holding.getToLocationId());
         }
+        return piece;
       })
       .toList()));
 
