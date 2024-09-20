@@ -51,12 +51,17 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
       return Future.succeededFuture();
     }
 
-    var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
-    var dbClient = new DBClient(getVertx(), tenantId);
-    return processItemCreationEvent(payload, dbClient)
-      .onSuccess(v -> log.info("ItemCreateAsyncRecordHandler::handle, event processed successfully"))
-      .onFailure(t -> log.error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
-      .map(kafkaConsumerRecord.key());
+    try {
+      var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
+      var dbClient = new DBClient(getVertx(), tenantId);
+      return processItemCreationEvent(payload, dbClient)
+        .onSuccess(v -> log.info("ItemCreateAsyncRecordHandler::handle, event processed successfully"))
+        .onFailure(t -> log.error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
+        .map(kafkaConsumerRecord.key());
+    } catch (Exception e) {
+      log.error("Failed to process export history kafka record, kafkaRecord={}", kafkaConsumerRecord, e);
+      return Future.failedFuture(e);
+    }
   }
 
   private Future<Void> processItemCreationEvent(JsonObject payload, DBClient dbClient) {
@@ -74,21 +79,27 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
     }
 
     var holdingId = itemObject.getString("holdingsRecordId");
-    updatePieceFields(pieces, holdingId, client.getTenantId());
-    return pieceService.updatePieces(pieces, client);
+    var tenantId = client.getTenantId();
+    var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
+    updatePieceFields(updateRequiredPieces, holdingId, tenantId);
+    return pieceService.updatePieces(updateRequiredPieces, client);
   }
 
-  private void updatePieceFields(List<Piece> pieces, String holdingId, String tenantId) {
-    pieces.stream()
+  private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantId) {
+    return pieces.stream()
       .filter(piece ->
         !StringUtils.equals(piece.getReceivingTenantId(), tenantId)
           && (Objects.isNull(piece.getLocationId()) || !StringUtils.equals(piece.getLocationId(), holdingId)))
-      .forEach(piece -> {
-        piece.setReceivingTenantId(tenantId);
-        if (Objects.isNull(piece.getLocationId())) {
-          piece.setHoldingId(holdingId);
-        }
-      });
+      .toList();
+  }
+
+  private void updatePieceFields(List<Piece> pieces, String holdingId, String tenantId) {
+    pieces.forEach(piece -> {
+      piece.setReceivingTenantId(tenantId);
+      if (Objects.isNull(piece.getLocationId())) {
+        piece.setHoldingId(holdingId);
+      }
+    });
   }
 
   private boolean validatePayload(JsonObject payload) {
