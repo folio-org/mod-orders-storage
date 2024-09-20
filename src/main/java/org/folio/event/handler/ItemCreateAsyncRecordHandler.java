@@ -10,6 +10,7 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.DomainEventPayloadType;
@@ -78,10 +79,16 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
   }
 
   private void updatePieceFields(List<Piece> pieces, String holdingId, String tenantId) {
-    pieces.forEach(piece -> {
-      piece.setReceivingTenantId(tenantId);
-      piece.setHoldingId(holdingId);
-    });
+    pieces.stream()
+      .filter(piece ->
+        !StringUtils.equals(piece.getReceivingTenantId(), tenantId)
+          && (Objects.isNull(piece.getLocationId()) || !StringUtils.equals(piece.getLocationId(), holdingId)))
+      .forEach(piece -> {
+        piece.setReceivingTenantId(tenantId);
+        if (Objects.isNull(piece.getLocationId())) {
+          piece.setHoldingId(holdingId);
+        }
+      });
   }
 
   private boolean validatePayload(JsonObject payload) {
