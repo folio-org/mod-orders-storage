@@ -80,21 +80,29 @@ public class ItemCreateAsyncRecordHandlerTest {
     throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     String pieceId1 = UUID.randomUUID().toString();
     String pieceId2 = UUID.randomUUID().toString();
+    String pieceId3 = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
+    String locationId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
     var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
     var actualPiece1 = createPiece(pieceId1, itemId)
-      .withHoldingId(UUID.randomUUID().toString())
+      .withHoldingId(holdingId)
       .withReceivingTenantId("college");
-    var actualPiece2 = createPiece(pieceId2, itemId);
+    var actualPiece2 = createPiece(pieceId2, itemId)
+      .withLocationId(locationId)
+      .withReceivingTenantId("college");
+    var actualPiece3 = createPiece(pieceId3, itemId)
+      .withHoldingId(UUID.randomUUID().toString())
+      .withReceivingTenantId(DIKU_TENANT);
 
-    var pieces = List.of(actualPiece1, actualPiece2);
+    var pieces = List.of(actualPiece1, actualPiece2, actualPiece3);
 
     var expectedPieces = List.of(
       createPiece(pieceId1, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId),
-      createPiece(pieceId2, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId)
+      createPiece(pieceId2, itemId).withLocationId(locationId).withReceivingTenantId(tenantId),
+      createPiece(pieceId3, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId)
     );
 
     doReturn(Future.succeededFuture(pieces))
@@ -118,9 +126,9 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     assertEquals(holdingId, actualPiece1.getHoldingId());
     assertEquals(tenantId, actualPiece1.getReceivingTenantId());
-    assertEquals(holdingId, actualPiece2.getHoldingId());
+    assertNull(actualPiece2.getHoldingId());
+    assertEquals(locationId, actualPiece2.getLocationId());
     assertEquals(tenantId, actualPiece2.getReceivingTenantId());
-
   }
 
   @Test

@@ -35,19 +35,19 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     if (log.isDebugEnabled()) {
-      log.debug("ItemCreateAsyncRecordHandler::handle, kafkaRecord={}", kafkaConsumerRecord.value());
+      log.debug("handle:: Trying to process kafkaRecord={}", kafkaConsumerRecord.value());
     }
 
     var payload = new JsonObject(kafkaConsumerRecord.value());
 
     String eventType = payload.getString("type");
     if (!Objects.equals(eventType, DomainEventPayloadType.CREATE.name())) {
-      log.info("processItemCreateEvent:: unsupported event type: {}", eventType);
+      log.info("handle:: unsupported event type: {}", eventType);
       return Future.succeededFuture();
     }
 
     if (!validatePayload(payload)) {
-      log.warn("processItemCreateEvent:: payload validation failed");
+      log.warn("handle:: payload validation failed. payload={}", payload);
       return Future.succeededFuture();
     }
 
@@ -55,11 +55,11 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
       var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
       var dbClient = new DBClient(getVertx(), tenantId);
       return processItemCreationEvent(payload, dbClient)
-        .onSuccess(v -> log.info("ItemCreateAsyncRecordHandler::handle, event processed successfully"))
+        .onSuccess(v -> log.info("handle:: item '{}' event processed successfully", eventType))
         .onFailure(t -> log.error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
         .map(kafkaConsumerRecord.key());
     } catch (Exception e) {
-      log.error("Failed to process export history kafka record, kafkaRecord={}", kafkaConsumerRecord, e);
+      log.error("Failed to process item event kafka record, kafkaRecord={}", kafkaConsumerRecord, e);
       return Future.failedFuture(e);
     }
   }
@@ -84,16 +84,20 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
     var holdingId = itemObject.getString("holdingsRecordId");
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     updatePieceFields(updateRequiredPieces, holdingId, tenantId);
+
+    log.info("updatePieces:: updating '{}' piece(s) out of all '{}' piece(s)",
+      updateRequiredPieces.size(), pieces.size());
     return pieceService.updatePieces(updateRequiredPieces, client);
   }
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantId) {
     return pieces.stream()
       .filter(piece ->
-        // filter out pieces that already have the same tenantId and (same holdingId or existing locationId)
         ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantId)
-          && Objects.isNull(piece.getLocationId())
-          && ObjectUtils.notEqual(piece.getHoldingId(), holdingId))
+        || ObjectUtils.notEqual(piece.getHoldingId(), holdingId))
+      .filter(piece ->
+        ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantId)
+        || Objects.isNull(piece.getLocationId()))
       .toList();
   }
 
