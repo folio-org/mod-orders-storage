@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -123,7 +124,7 @@ public class ItemCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void positive_shouldSkipProcessItemCreateEventWhenNotNeed() {
+  void positive_shouldSkipProcessItemCreateEventWhenNotPieceHasSameTenantIdOrHoldingId() {
     String pieceId1 = UUID.randomUUID().toString();
     String pieceId2 = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
@@ -131,7 +132,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     String locationId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
-    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, UPDATE);
+    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
     // These pieces should be skipped
     // alreadyUpdatedPiece1 have the same tenantId and holdingId
     var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId)
@@ -141,12 +142,9 @@ public class ItemCreateAsyncRecordHandlerTest {
     var alreadyUpdatedPiece2 = createPiece(pieceId2, itemId)
       .withLocationId(locationId)
       .withReceivingTenantId(tenantId);
-
     var pieces = List.of(alreadyUpdatedPiece1, alreadyUpdatedPiece2);
 
-    var expectedPieces = List.of(createPiece(pieceId1, itemId)
-      .withHoldingId(holdingId)
-      .withReceivingTenantId(tenantId));
+    List<Piece> expectedPieces = List.of();
 
     doReturn(Future.succeededFuture(pieces))
       .when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
@@ -169,6 +167,27 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     assertNull(alreadyUpdatedPiece2.getHoldingId());
     assertEquals(locationId, alreadyUpdatedPiece2.getLocationId());
+
+    verify(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
+    // skip update pieces in db, in case of no pieces to update
+    verify(dbClient.getPgClient(), times(0)).execute(any());
+  }
+
+  @Test
+  void positive_shouldSkipProcessItemUpdateEvent() {
+    String itemId = UUID.randomUUID().toString();
+    String holdingId = UUID.randomUUID().toString();
+
+    var itemEventObject = createItemResourceEvent(itemId, holdingId, DIKU_TENANT, UPDATE);
+
+    var consumerRecord = new ConsumerRecord<>("topic", 1, 1L,
+      "key", Json.encode(itemEventObject));
+    RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes());
+    consumerRecord.headers().add(header);
+    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
+
+    var res = handler.handle(record);
+    assertTrue(res.succeeded());
 
     verifyNoInteractions(pieceService);
   }
