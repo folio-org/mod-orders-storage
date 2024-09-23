@@ -1,7 +1,5 @@
 package org.folio.verticles;
 
-import static java.util.stream.Collectors.toList;
-
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -152,7 +150,7 @@ public class KafkaConsumersVerticle extends AbstractVerticle {
   private Future<Void> stopConsumers() {
     var stopFutures = consumers.stream()
       .map(KafkaConsumerWrapper::stop)
-      .collect(toList());
+      .toList();
 
     return Future.all(stopFutures)
       .onSuccess(v -> log.info("stop:: event consumers stopped successfully"))
