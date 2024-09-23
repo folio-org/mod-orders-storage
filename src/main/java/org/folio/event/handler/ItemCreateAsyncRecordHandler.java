@@ -75,8 +75,9 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
 
   private Future<Void> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, DBClient client) {
     if (CollectionUtils.isEmpty(pieces)) {
-      log.info("updatePieces:: no pieces to update found, nothing to update for item: {}",
-        itemObject.getString("id"));
+      String itemId = itemObject.getString("id");
+      log.info("updatePieces:: no pieces to update found, nothing to update for item={}, tenant={}",
+        itemId, tenantId);
       return Future.succeededFuture();
     }
 

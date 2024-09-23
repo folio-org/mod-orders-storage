@@ -194,7 +194,7 @@ public class PieceServiceTest extends TestBase {
   }
 
   @Test
-  void shouldUpdatePieces(Vertx vertx, VertxTestContext testContext) {
+  void shouldUpdatePiecesByPoLineAndInstanceRef(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
@@ -246,6 +246,44 @@ public class PieceServiceTest extends TestBase {
             });
             testContext.completeNow();
           })));
+  }
+
+  @Test
+  void shouldUpdatePieces(Vertx vertx, VertxTestContext testContext) {
+    var itemId = UUID.randomUUID().toString();
+    var pieceId = UUID.randomUUID().toString();
+    var oldHoldingId = UUID.randomUUID().toString();
+
+    var piece = new Piece()
+      .withId(pieceId)
+      .withHoldingId(oldHoldingId)
+      .withItemId(itemId)
+      .withReceivingTenantId("test_college");
+
+    var pieceToUpdate = new Piece()
+      .withId(pieceId)
+      .withItemId(itemId)
+      .withHoldingId(newHoldingId)
+      .withReceivingTenantId(TEST_TENANT);
+
+    var piecesToUpdate = List.of(pieceToUpdate);
+
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    var savePieceFuture = client.getPgClient().save(PIECES_TABLE, pieceId, piece);
+    var updatePiecesFuture = savePieceFuture.compose(saved -> pieceService.updatePieces(piecesToUpdate, client));
+
+    testContext.assertComplete(updatePiecesFuture)
+      .onComplete(v -> pieceService.getPiecesByItemId(itemId, client)
+        .onComplete(ar -> {
+          List<Piece> actPieces = ar.result();
+          testContext.verify(() -> {
+            assertThat(actPieces.get(0).getId(), is(pieceId));
+            assertThat(actPieces.get(0).getItemId(), is(itemId));
+            assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
+            assertThat(actPieces.get(0).getReceivingTenantId(), is(TEST_TENANT));
+          });
+          testContext.completeNow();
+        }));
   }
 
 }
