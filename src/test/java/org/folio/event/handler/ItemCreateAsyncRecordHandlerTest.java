@@ -1,7 +1,6 @@
 package org.folio.event.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -82,21 +81,20 @@ public class ItemCreateAsyncRecordHandlerTest {
     String pieceId2 = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
-    String locationId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
     var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
-    var actualPiece = createPiece(pieceId1, itemId);
-    // alreadyUpdatedPiece should be skipped since it has already the same tenantId and existing locationId
-    var alreadyUpdatedPiece = createPiece(pieceId2, itemId)
-      .withLocationId(locationId)
-      .withReceivingTenantId(tenantId);
+    var actualPiece1 = createPiece(pieceId1, itemId)
+      .withHoldingId(UUID.randomUUID().toString())
+      .withReceivingTenantId("college");
+    var actualPiece2 = createPiece(pieceId2, itemId);
 
-    var pieces = List.of(actualPiece, alreadyUpdatedPiece);
+    var pieces = List.of(actualPiece1, actualPiece2);
 
-    var expectedPieces = List.of(createPiece(pieceId1, itemId)
-      .withHoldingId(holdingId)
-      .withReceivingTenantId(tenantId));
+    var expectedPieces = List.of(
+      createPiece(pieceId1, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId),
+      createPiece(pieceId2, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId)
+    );
 
     doReturn(Future.succeededFuture(pieces))
       .when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
@@ -117,16 +115,15 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
 
-    assertEquals(tenantId, actualPiece.getReceivingTenantId());
-    assertEquals(holdingId, actualPiece.getHoldingId());
+    assertEquals(holdingId, actualPiece1.getHoldingId());
+    assertEquals(tenantId, actualPiece1.getReceivingTenantId());
+    assertEquals(holdingId, actualPiece2.getHoldingId());
+    assertEquals(tenantId, actualPiece2.getReceivingTenantId());
 
-    assertNotEquals(holdingId, alreadyUpdatedPiece.getHoldingId());
-    assertNull(alreadyUpdatedPiece.getHoldingId());
   }
 
   @Test
-  void positive_shouldSkipProcessItemUpdateEvent()
-    throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  void positive_shouldSkipProcessItemCreateEventWhenNotNeed() {
     String pieceId1 = UUID.randomUUID().toString();
     String pieceId2 = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
@@ -135,13 +132,17 @@ public class ItemCreateAsyncRecordHandlerTest {
     String tenantId = DIKU_TENANT;
 
     var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, UPDATE);
-    var actualPiece = createPiece(pieceId1, itemId);
-    // alreadyUpdatedPiece should be skipped since it has already the same tenantId and existing locationId
-    var alreadyUpdatedPiece = createPiece(pieceId2, itemId)
+    // These pieces should be skipped
+    // alreadyUpdatedPiece1 have the same tenantId and holdingId
+    var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId)
+      .withHoldingId(holdingId)
+      .withReceivingTenantId(tenantId);
+    // alreadyUpdatedPiece2 have the same tenantId and existing locationId
+    var alreadyUpdatedPiece2 = createPiece(pieceId2, itemId)
       .withLocationId(locationId)
       .withReceivingTenantId(tenantId);
 
-    var pieces = List.of(actualPiece, alreadyUpdatedPiece);
+    var pieces = List.of(alreadyUpdatedPiece1, alreadyUpdatedPiece2);
 
     var expectedPieces = List.of(createPiece(pieceId1, itemId)
       .withHoldingId(holdingId)
@@ -165,6 +166,9 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     var res = handler.handle(record);
     assertTrue(res.succeeded());
+
+    assertNull(alreadyUpdatedPiece2.getHoldingId());
+    assertEquals(locationId, alreadyUpdatedPiece2.getLocationId());
 
     verifyNoInteractions(pieceService);
   }
@@ -237,7 +241,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     return new JsonObject()
       .put("type", type)
       .put("new", itemObject)
-      .put("tenantId", tenantId);
+      .put("tenant", tenantId);
   }
 
   private Piece createPiece(String pieceId, String itemId) {

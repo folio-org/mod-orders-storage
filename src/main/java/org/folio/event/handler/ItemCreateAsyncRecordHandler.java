@@ -10,7 +10,7 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.DomainEventPayloadType;
@@ -65,21 +65,22 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
   }
 
   private Future<Void> processItemCreationEvent(JsonObject payload, DBClient dbClient) {
+    var tenantId = payload.getString("tenant");
     var itemObject = payload.getJsonObject("new");
     var itemId = itemObject.getString("id");
 
     return pieceService.getPiecesByItemId(itemId, dbClient)
-      .compose(pieces -> updatePieces(pieces, itemObject, dbClient));
+      .compose(pieces -> updatePieces(pieces, itemObject, tenantId, dbClient));
   }
 
-  private Future<Void> updatePieces(List<Piece> pieces, JsonObject itemObject, DBClient client) {
+  private Future<Void> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, DBClient client) {
     if (CollectionUtils.isEmpty(pieces)) {
-      log.info("updatePieces:: no pieces to update found, nothing to update");
+      log.info("updatePieces:: no pieces to update found, nothing to update for item: {}",
+        itemObject.getString("id"));
       return Future.succeededFuture();
     }
 
     var holdingId = itemObject.getString("holdingsRecordId");
-    var tenantId = client.getTenantId();
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     updatePieceFields(updateRequiredPieces, holdingId, tenantId);
     return pieceService.updatePieces(updateRequiredPieces, client);
@@ -88,8 +89,10 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantId) {
     return pieces.stream()
       .filter(piece ->
-        !StringUtils.equals(piece.getReceivingTenantId(), tenantId)
-          && (Objects.isNull(piece.getLocationId()) || !StringUtils.equals(piece.getLocationId(), holdingId)))
+        // filter out pieces that already have the same tenantId and (same holdingId or existing locationId)
+        ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantId)
+          && Objects.isNull(piece.getLocationId())
+          && ObjectUtils.notEqual(piece.getHoldingId(), holdingId))
       .toList();
   }
 
