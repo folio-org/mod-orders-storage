@@ -23,6 +23,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.jackson.DatabindCodec;
+import org.springframework.context.support.AbstractApplicationContext;
 
 public class InitAPIs implements InitAPI {
   private static final Logger log = LogManager.getLogger();
@@ -48,7 +49,7 @@ public class InitAPIs implements InitAPI {
         SpringContextUtil.init(vertx, context, ApplicationConfig.class);
         SpringContextUtil.autowireDependencies(this, context);
 
-        deployKafkaConsumersVerticle(vertx).onComplete(ar -> {
+        deployKafkaConsumersVerticles(vertx).onComplete(ar -> {
           if (ar.failed() && isConsumersVerticleMandatory) {
             handler.fail(ar.cause());
           } else {
@@ -66,23 +67,24 @@ public class InitAPIs implements InitAPI {
       });
   }
 
-  private Future<?> deployKafkaConsumersVerticle(Vertx vertx) {
-    Promise<String> inventoryItemConsumer = Promise.promise();
-    Promise<String> ediExportOrdersHistoryConsumer = Promise.promise();
+  private Future<?> deployKafkaConsumersVerticles(Vertx vertx) {
+    Promise<String> inventoryItemConsumerPromise = Promise.promise();
+    Promise<String> ediExportOrdersHistoryConsumerPromise = Promise.promise();
+    AbstractApplicationContext springContext = vertx.getOrCreateContext().get("springContext");
 
-    vertx.deployVerticle((InventoryItemConsumersVerticle.class.getName()),
+    vertx.deployVerticle(() -> springContext.getBean(InventoryItemConsumersVerticle.class),
       new DeploymentOptions()
         .setWorkerPoolName("inventory-item-consumers")
-        .setInstances(kafkaConsumersVerticleNumber), inventoryItemConsumer);
+        .setInstances(kafkaConsumersVerticleNumber), inventoryItemConsumerPromise);
 
-    vertx.deployVerticle((EdiExportOrdersHistoryConsumersVerticle.class.getName()),
+    vertx.deployVerticle(() -> springContext.getBean(EdiExportOrdersHistoryConsumersVerticle.class),
       new DeploymentOptions()
         .setWorkerPoolName("edi-export-orders-history-consumers")
-        .setInstances(kafkaConsumersVerticleNumber), ediExportOrdersHistoryConsumer);
+        .setInstances(kafkaConsumersVerticleNumber), ediExportOrdersHistoryConsumerPromise);
 
-    return GenericCompositeFuture.all(Arrays.asList(
-      inventoryItemConsumer.future(),
-      ediExportOrdersHistoryConsumer.future()
-    ));
+    return GenericCompositeFuture.all(
+      Arrays.asList(inventoryItemConsumerPromise.future(), ediExportOrdersHistoryConsumerPromise.future()))
+      .onSuccess(ar -> log.info("All consumers was successfully started"))
+      .onFailure(e -> log.error("Failed to start consumers", e));
   }
 }

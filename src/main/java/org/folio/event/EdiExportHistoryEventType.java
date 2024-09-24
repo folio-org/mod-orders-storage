@@ -6,8 +6,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum EdiExportHistoryEventType {
-  EXPORT_HISTORY_CREATE("edi-export-history.create"),
-  INVENTORY_ITEM_CREATE("inventory.item");
+  EXPORT_HISTORY_CREATE("edi-export-history.create");
 
   private final String topicName;
 }

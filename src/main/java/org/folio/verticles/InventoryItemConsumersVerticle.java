@@ -10,8 +10,13 @@ import org.folio.kafka.KafkaConsumerWrapper;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.kafka.SubscriptionDefinition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.stereotype.Component;
 
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class InventoryItemConsumersVerticle extends AbstractConsumersVerticle<InventoryEventType> {
 
   @Autowired
