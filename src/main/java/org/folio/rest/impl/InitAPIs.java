@@ -34,6 +34,7 @@ public class InitAPIs implements InitAPI {
   @Value("${consumer.verticle.mandatory:false}")
   private boolean isConsumersVerticleMandatory;
 
+  // TODO: Refactor the InitAPI interface to git rid of deprecated methods
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> resultHandler) {
     vertx.executeBlocking(
