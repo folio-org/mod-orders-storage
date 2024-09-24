@@ -1,5 +1,6 @@
 package org.folio.event.handler;
 
+import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
 import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
 
 import io.vertx.core.Context;
@@ -13,7 +14,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.event.DomainEventPayloadType;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.piece.PieceService;
@@ -41,7 +41,7 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
     var payload = new JsonObject(kafkaConsumerRecord.value());
 
     String eventType = payload.getString("type");
-    if (!Objects.equals(eventType, DomainEventPayloadType.CREATE.name())) {
+    if (!Objects.equals(eventType, INVENTORY_ITEM_CREATE.getPayloadType().name())) {
       log.info("handle:: unsupported event type: {}", eventType);
       return Future.succeededFuture();
     }
@@ -92,10 +92,10 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantId) {
     return pieces.stream()
-      .filter(piece ->
+      .filter(piece -> // filter out pieces that already have the same tenantId and holdingId
         ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantId)
         || ObjectUtils.notEqual(piece.getHoldingId(), holdingId))
-      .filter(piece ->
+      .filter(piece -> // filter out pieces that already have the same tenantId and existing locationId
         ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantId)
         || Objects.isNull(piece.getLocationId()))
       .toList();

@@ -1,14 +1,16 @@
 package org.folio.rest.impl;
 
+import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.config.ApplicationConfig;
 import org.folio.dbschema.ObjectMapperTool;
+import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
-import org.folio.verticles.KafkaConsumersVerticle;
+import org.folio.verticles.EdiExportOrdersHistoryConsumersVerticle;
+import org.folio.verticles.InventoryItemConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.support.AbstractApplicationContext;
 
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.SerializationConfig;
@@ -64,17 +66,23 @@ public class InitAPIs implements InitAPI {
       });
   }
 
-  private Future<String> deployKafkaConsumersVerticle(Vertx vertx) {
-    Promise<String> promise = Promise.promise();
-    AbstractApplicationContext springContext = vertx.getOrCreateContext().get("springContext");
+  private Future<?> deployKafkaConsumersVerticle(Vertx vertx) {
+    Promise<String> inventoryItemConsumer = Promise.promise();
+    Promise<String> ediExportOrdersHistoryConsumer = Promise.promise();
 
-    DeploymentOptions deploymentOptions = new DeploymentOptions()
-      .setInstances(kafkaConsumersVerticleNumber)
-      .setWorker(true);
-    vertx.deployVerticle(() -> springContext.getBean(KafkaConsumersVerticle.class), deploymentOptions, promise);
+    vertx.deployVerticle((InventoryItemConsumersVerticle.class.getName()),
+      new DeploymentOptions()
+        .setWorkerPoolName("inventory-item-consumers")
+        .setInstances(kafkaConsumersVerticleNumber), inventoryItemConsumer);
 
-    return promise.future()
-      .onSuccess(ar -> log.info("KafkaConsumersVerticle was successfully started"))
-      .onFailure(e -> log.error("KafkaConsumersVerticle was not successfully started", e));
+    vertx.deployVerticle((EdiExportOrdersHistoryConsumersVerticle.class.getName()),
+      new DeploymentOptions()
+        .setWorkerPoolName("edi-export-orders-history-consumers")
+        .setInstances(kafkaConsumersVerticleNumber), ediExportOrdersHistoryConsumer);
+
+    return GenericCompositeFuture.all(Arrays.asList(
+      inventoryItemConsumer.future(),
+      ediExportOrdersHistoryConsumer.future()
+    ));
   }
 }
