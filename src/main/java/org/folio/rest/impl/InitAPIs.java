@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import io.vertx.core.ThreadingModel;
 import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,8 +29,11 @@ import org.springframework.context.support.AbstractApplicationContext;
 public class InitAPIs implements InitAPI {
   private static final Logger log = LogManager.getLogger();
 
-  @Value("${kafka.consumer.verticle.instancesNumber:1}")
-  private int kafkaConsumersVerticleNumber;
+  @Value("${edi-export.consumer.verticle.instancesNumber:1}")
+  private int ediExportConsumersVerticleNumber;
+
+  @Value("${item.consumer.verticle.instancesNumber:1}")
+  private int itemConsumersVerticleNumber;
 
   @Value("${consumer.verticle.mandatory:false}")
   private boolean isConsumersVerticleMandatory;
@@ -75,16 +79,18 @@ public class InitAPIs implements InitAPI {
 
     vertx.deployVerticle(() -> springContext.getBean(InventoryItemConsumersVerticle.class),
       new DeploymentOptions()
+        .setThreadingModel(ThreadingModel.WORKER)
         .setWorkerPoolName("inventory-item-consumers")
-        .setInstances(kafkaConsumersVerticleNumber), inventoryItemConsumerPromise);
+        .setInstances(itemConsumersVerticleNumber), inventoryItemConsumerPromise);
 
     vertx.deployVerticle(() -> springContext.getBean(EdiExportOrdersHistoryConsumersVerticle.class),
       new DeploymentOptions()
+        .setThreadingModel(ThreadingModel.WORKER)
         .setWorkerPoolName("edi-export-orders-history-consumers")
-        .setInstances(kafkaConsumersVerticleNumber), ediExportOrdersHistoryConsumerPromise);
+        .setInstances(ediExportConsumersVerticleNumber), ediExportOrdersHistoryConsumerPromise);
 
     return GenericCompositeFuture.all(
-      Arrays.asList(inventoryItemConsumerPromise.future(), ediExportOrdersHistoryConsumerPromise.future()))
+        Arrays.asList(inventoryItemConsumerPromise.future(), ediExportOrdersHistoryConsumerPromise.future()))
       .onSuccess(ar -> log.info("All consumers was successfully started"))
       .onFailure(e -> log.error("Failed to start consumers", e));
   }
