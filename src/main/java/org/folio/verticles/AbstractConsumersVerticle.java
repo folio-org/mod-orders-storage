@@ -31,7 +31,7 @@ public abstract class AbstractConsumersVerticle<T> extends AbstractVerticle {
   protected final AbstractApplicationContext springContext;
   protected final KafkaConfig kafkaConfig;
 
-  public AbstractConsumersVerticle(KafkaConfig kafkaConfig,
+  protected AbstractConsumersVerticle(KafkaConfig kafkaConfig,
                                    AbstractApplicationContext springContext) {
     this.springContext = springContext;
     this.kafkaConfig = kafkaConfig;
