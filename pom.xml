@@ -56,7 +56,7 @@
     <testcontainers.version>1.19.6</testcontainers.version>
 
     <!--Sonar properties-->
-    <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java</sonar.exclusions>
+    <sonar.exclusions>**/models/**.java, **/event/dto/**.java, **/HttpException.java, **/ErrorCodes.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <argLine />
   </properties>
