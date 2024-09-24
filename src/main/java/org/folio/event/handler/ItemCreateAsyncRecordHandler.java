@@ -10,19 +10,19 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
 import java.util.Objects;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.folio.event.dto.ItemField;
+import org.folio.event.dto.ResourceEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Log4j2
 public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
-
-  private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private PieceService pieceService;
@@ -34,27 +34,25 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
-    if (log.isDebugEnabled()) {
-      log.debug("handle:: Trying to process kafkaRecord={}", kafkaConsumerRecord.value());
-    }
-
-    var payload = new JsonObject(kafkaConsumerRecord.value());
-
-    String eventType = payload.getString("type");
-    if (!Objects.equals(eventType, INVENTORY_ITEM_CREATE.getPayloadType().name())) {
-      log.info("handle:: unsupported event type: {}", eventType);
-      return Future.succeededFuture();
-    }
-
-    if (!validatePayload(payload)) {
-      log.warn("handle:: payload validation failed. payload={}", payload);
-      return Future.succeededFuture();
-    }
+    log.debug("handle:: Trying to process kafkaRecord={}", kafkaConsumerRecord.value());
 
     try {
+      var resourceEvent = new JsonObject(kafkaConsumerRecord.value()).mapTo(ResourceEvent.class);
+
+      var eventType = resourceEvent.getType();
+      if (!Objects.equals(eventType, INVENTORY_ITEM_CREATE.getEventType())) {
+        log.info("handle:: unsupported event type: {}", eventType);
+        return Future.succeededFuture();
+      }
+
+      if (Objects.isNull(resourceEvent.getNewValue())) {
+        log.warn("handle:: Failed to find new version. 'new' is null: {}", resourceEvent);
+        return Future.succeededFuture();
+      }
+
       var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
       var dbClient = new DBClient(getVertx(), tenantId);
-      return processItemCreationEvent(payload, dbClient)
+      return processItemCreationEvent(resourceEvent, dbClient)
         .onSuccess(v -> log.info("handle:: item '{}' event processed successfully", eventType))
         .onFailure(t -> log.error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
         .map(kafkaConsumerRecord.key());
@@ -64,10 +62,10 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
     }
   }
 
-  private Future<Void> processItemCreationEvent(JsonObject payload, DBClient dbClient) {
-    var tenantId = payload.getString("tenant");
-    var itemObject = payload.getJsonObject("new");
-    var itemId = itemObject.getString("id");
+  private Future<Void> processItemCreationEvent(ResourceEvent resourceEvent, DBClient dbClient) {
+    var tenantId = resourceEvent.getTenant();
+    var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
+    var itemId = itemObject.getString(ItemField.ID.getValue());
 
     return pieceService.getPiecesByItemId(itemId, dbClient)
       .compose(pieces -> updatePieces(pieces, itemObject, tenantId, dbClient));
@@ -75,13 +73,12 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
 
   private Future<Void> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, DBClient client) {
     if (CollectionUtils.isEmpty(pieces)) {
-      String itemId = itemObject.getString("id");
       log.info("updatePieces:: no pieces to update found, nothing to update for item={}, tenant={}",
-        itemId, tenantId);
+        itemObject.getString(ItemField.ID.getValue()), tenantId);
       return Future.succeededFuture();
     }
 
-    var holdingId = itemObject.getString("holdingsRecordId");
+    var holdingId = itemObject.getString(ItemField.HOLDINGS_RECORD_ID.getValue());
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     updatePieceFields(updateRequiredPieces, holdingId, tenantId);
 
@@ -110,12 +107,4 @@ public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String,
     });
   }
 
-  private boolean validatePayload(JsonObject payload) {
-    var newObject = payload.getJsonObject("new");
-    if (newObject == null) {
-      log.warn("validatePayload:: failed to find new version");
-      return false;
-    }
-    return true;
-  }
 }

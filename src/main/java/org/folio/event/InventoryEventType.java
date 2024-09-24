@@ -8,12 +8,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public enum InventoryEventType {
-  INVENTORY_ITEM_CREATE("inventory.item", PayloadType.CREATE);
+  INVENTORY_ITEM_CREATE("inventory.item", EventType.CREATE);
 
   private String topicName;
-  private PayloadType payloadType;
-
-  public enum PayloadType {
-    UPDATE, DELETE, CREATE, DELETE_ALL
-  }
+  private EventType eventType;
 }

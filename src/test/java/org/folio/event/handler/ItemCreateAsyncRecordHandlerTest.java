@@ -28,6 +28,7 @@ import java.util.function.Function;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.TestUtils;
+import org.folio.event.dto.ResourceEvent;
 import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.persist.Conn;
@@ -87,6 +88,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     String tenantId = DIKU_TENANT;
 
     var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
+    var resourceEvent = itemEventObject.mapTo(ResourceEvent.class);
     var actualPiece1 = createPiece(pieceId1, itemId)
       .withHoldingId(holdingId)
       .withReceivingTenantId("college");
@@ -116,10 +118,10 @@ public class ItemCreateAsyncRecordHandlerTest {
     }).when(pgClient).withConn(any());
 
     Method processItemCreateMethod = ItemCreateAsyncRecordHandler.class
-      .getDeclaredMethod("processItemCreationEvent", JsonObject.class, DBClient.class);
+      .getDeclaredMethod("processItemCreationEvent", ResourceEvent.class, DBClient.class);
     processItemCreateMethod.setAccessible(true);
 
-    processItemCreateMethod.invoke(handler, itemEventObject, dbClient);
+    processItemCreateMethod.invoke(handler, resourceEvent, dbClient);
 
     verify(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));

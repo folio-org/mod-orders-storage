@@ -9,9 +9,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
@@ -20,8 +19,8 @@ import org.folio.services.order.ExportHistoryService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Log4j2
 public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
-  private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private ExportHistoryService exportHistoryService;
