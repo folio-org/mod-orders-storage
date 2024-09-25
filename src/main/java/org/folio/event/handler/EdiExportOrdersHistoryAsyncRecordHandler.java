@@ -1,15 +1,16 @@
 package org.folio.event.handler;
 
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
 
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
-
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.event.util.KafkaEventUtil;
 import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
@@ -18,15 +19,8 @@ import org.folio.services.order.ExportHistoryService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
-
+@Log4j2
 public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
-  private static final Logger log = LogManager.getLogger();
-  private static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
 
   @Autowired
   private ExportHistoryService exportHistoryService;
@@ -44,8 +38,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
       log.debug("EdiExportOrdersHistoryAsyncRecordHandler.handle, kafkaRecord={}", kafkaRecord.value());
     try {
       ExportHistory exportHistory = new JsonObject(kafkaRecord.value()).mapTo(ExportHistory.class);
-      String tenantId = Optional.ofNullable(KafkaEventUtil.extractValueFromHeaders(kafkaRecord.headers(), OKAPI_HEADER_TENANT))
-        .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
+      String tenantId = extractTenantFromHeaders(kafkaRecord.headers());
       DBClient client = new DBClient(getVertx(), tenantId);
       return exportHistory(exportHistory, client)
         .map(v -> kafkaRecord.value());
@@ -55,7 +48,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
     }
   }
 
-  Future<Void> exportHistory(ExportHistory exportHistory, DBClient client) {
+  private Future<Void> exportHistory(ExportHistory exportHistory, DBClient client) {
     return exportHistoryService.createExportHistory(exportHistory, client)
       .compose(createdExportHistory -> client.getPgClient().withConn(conn ->
         poLinesService.getPoLinesByLineIdsByChunks(exportHistory.getExportedPoLineIds(), conn)

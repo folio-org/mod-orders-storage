@@ -1,5 +1,6 @@
 package org.folio.event.handler;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -9,6 +10,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.vertx.core.Vertx;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.folio.TestUtils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +40,6 @@ import org.mockito.MockitoAnnotations;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
@@ -72,11 +74,19 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
 
   @Test
   void shouldThrowExceptionIfKafkaRecordIsNotValid() {
-    var consumerRecord = new ConsumerRecord("topic", 1, 1, "key", "value");
-    var record = new KafkaConsumerRecordImpl(consumerRecord) ;
+    String id = UUID.randomUUID().toString();
+    String jobId = UUID.randomUUID().toString();
+    String lineId = UUID.randomUUID().toString();
+    var exportHistory = new ExportHistory().withId(id).withExportJobId(jobId)
+      .withExportType("EDIFACT_ORDERS_EXPORT")
+      .withExportedPoLineIds(List.of(lineId));
+    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key",
+      Json.encode(exportHistory));
+    var record = new KafkaConsumerRecordImpl<>(consumerRecord) ;
 
     Throwable actExp = handler.handle(record).cause();
-    assertEquals(DecodeException.class, actExp.getClass());
+    assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
+    assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
   }
 
   @Test
@@ -95,7 +105,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
   }
 
   @Test
-  void shouldCreateExportHistoryIfRecordIsRecord() {
+  void shouldCreateExportHistoryIfRecordIsRecord()
+    throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     String id = UUID.randomUUID().toString();
     String jobId = UUID.randomUUID().toString();
     String lineId = UUID.randomUUID().toString();
@@ -120,7 +131,11 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       })
       .when(pgClient).withConn(any());
 
-    handler.exportHistory(exportHistory, dbClient).result();
+    Method exportHistoryMethod = EdiExportOrdersHistoryAsyncRecordHandler.class
+      .getDeclaredMethod("exportHistory", ExportHistory.class, DBClient.class);
+    exportHistoryMethod.setAccessible(true);
+
+    exportHistoryMethod.invoke(handler, exportHistory, dbClient);
 
     verify(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());

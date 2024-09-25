@@ -1,14 +1,17 @@
 package org.folio.rest.impl;
 
+import io.vertx.core.ThreadingModel;
+import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.config.ApplicationConfig;
 import org.folio.dbschema.ObjectMapperTool;
+import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
-import org.folio.verticles.KafkaConsumersVerticle;
+import org.folio.verticles.EdiExportOrdersHistoryConsumersVerticle;
+import org.folio.verticles.InventoryItemConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.support.AbstractApplicationContext;
 
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.SerializationConfig;
@@ -21,16 +24,21 @@ import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.jackson.DatabindCodec;
+import org.springframework.context.support.AbstractApplicationContext;
 
 public class InitAPIs implements InitAPI {
   private static final Logger log = LogManager.getLogger();
 
-  @Value("${kafka.consumer.verticle.instancesNumber:1}")
-  private int kafkaConsumersVerticleNumber;
+  @Value("${edi-export.consumer.verticle.instancesNumber:1}")
+  private int ediExportConsumersVerticleNumber;
+
+  @Value("${item.consumer.verticle.instancesNumber:1}")
+  private int itemConsumersVerticleNumber;
 
   @Value("${consumer.verticle.mandatory:false}")
   private boolean isConsumersVerticleMandatory;
 
+  // TODO: Refactor the InitAPI interface to git rid of deprecated methods
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> resultHandler) {
     vertx.executeBlocking(
@@ -46,7 +54,7 @@ public class InitAPIs implements InitAPI {
         SpringContextUtil.init(vertx, context, ApplicationConfig.class);
         SpringContextUtil.autowireDependencies(this, context);
 
-        deployKafkaConsumersVerticle(vertx).onComplete(ar -> {
+        deployKafkaConsumersVerticles(vertx).onComplete(ar -> {
           if (ar.failed() && isConsumersVerticleMandatory) {
             handler.fail(ar.cause());
           } else {
@@ -64,17 +72,26 @@ public class InitAPIs implements InitAPI {
       });
   }
 
-  private Future<String> deployKafkaConsumersVerticle(Vertx vertx) {
-    Promise<String> promise = Promise.promise();
+  private Future<?> deployKafkaConsumersVerticles(Vertx vertx) {
+    Promise<String> inventoryItemConsumerPromise = Promise.promise();
+    Promise<String> ediExportOrdersHistoryConsumerPromise = Promise.promise();
     AbstractApplicationContext springContext = vertx.getOrCreateContext().get("springContext");
 
-    DeploymentOptions deploymentOptions = new DeploymentOptions()
-      .setInstances(kafkaConsumersVerticleNumber)
-      .setWorker(true);
-    vertx.deployVerticle(() -> springContext.getBean(KafkaConsumersVerticle.class), deploymentOptions, promise);
+    vertx.deployVerticle(() -> springContext.getBean(InventoryItemConsumersVerticle.class),
+      new DeploymentOptions()
+        .setThreadingModel(ThreadingModel.WORKER)
+        .setWorkerPoolName("inventory-item-consumers")
+        .setInstances(itemConsumersVerticleNumber), inventoryItemConsumerPromise);
 
-    return promise.future()
-      .onSuccess(ar -> log.info("KafkaConsumersVerticle was successfully started"))
-      .onFailure(e -> log.error("KafkaConsumersVerticle was not successfully started", e));
+    vertx.deployVerticle(() -> springContext.getBean(EdiExportOrdersHistoryConsumersVerticle.class),
+      new DeploymentOptions()
+        .setThreadingModel(ThreadingModel.WORKER)
+        .setWorkerPoolName("edi-export-orders-history-consumers")
+        .setInstances(ediExportConsumersVerticleNumber), ediExportOrdersHistoryConsumerPromise);
+
+    return GenericCompositeFuture.all(
+        Arrays.asList(inventoryItemConsumerPromise.future(), ediExportOrdersHistoryConsumerPromise.future()))
+      .onSuccess(ar -> log.info("All consumers was successfully started"))
+      .onFailure(e -> log.error("Failed to start consumers", e));
   }
 }
