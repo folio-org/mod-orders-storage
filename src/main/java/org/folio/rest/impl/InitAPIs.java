@@ -1,7 +1,9 @@
 package org.folio.rest.impl;
 
 import io.vertx.core.ThreadingModel;
-import java.util.Arrays;
+
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.config.ApplicationConfig;
@@ -10,6 +12,7 @@ import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticles.EdiExportOrdersHistoryConsumersVerticle;
+import org.folio.verticles.InventoryHoldingConsumersVerticle;
 import org.folio.verticles.InventoryItemConsumersVerticle;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -21,7 +24,7 @@ import io.vertx.core.Context;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Promise;
+import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.jackson.DatabindCodec;
 import org.springframework.context.support.AbstractApplicationContext;
@@ -34,6 +37,9 @@ public class InitAPIs implements InitAPI {
 
   @Value("${item.consumer.verticle.instancesNumber:1}")
   private int itemConsumersVerticleNumber;
+
+  @Value("${holding.consumer.verticle.instancesNumber:1}")
+  private int holdingConsumersVerticleNumber;
 
   @Value("${consumer.verticle.mandatory:false}")
   private boolean isConsumersVerticleMandatory;
@@ -73,25 +79,20 @@ public class InitAPIs implements InitAPI {
   }
 
   private Future<?> deployKafkaConsumersVerticles(Vertx vertx) {
-    Promise<String> inventoryItemConsumerPromise = Promise.promise();
-    Promise<String> ediExportOrdersHistoryConsumerPromise = Promise.promise();
     AbstractApplicationContext springContext = vertx.getOrCreateContext().get("springContext");
-
-    vertx.deployVerticle(() -> springContext.getBean(InventoryItemConsumersVerticle.class),
-      new DeploymentOptions()
-        .setThreadingModel(ThreadingModel.WORKER)
-        .setWorkerPoolName("inventory-item-consumers")
-        .setInstances(itemConsumersVerticleNumber), inventoryItemConsumerPromise);
-
-    vertx.deployVerticle(() -> springContext.getBean(EdiExportOrdersHistoryConsumersVerticle.class),
-      new DeploymentOptions()
-        .setThreadingModel(ThreadingModel.WORKER)
-        .setWorkerPoolName("edi-export-orders-history-consumers")
-        .setInstances(ediExportConsumersVerticleNumber), ediExportOrdersHistoryConsumerPromise);
-
-    return GenericCompositeFuture.all(
-        Arrays.asList(inventoryItemConsumerPromise.future(), ediExportOrdersHistoryConsumerPromise.future()))
-      .onSuccess(ar -> log.info("All consumers was successfully started"))
-      .onFailure(e -> log.error("Failed to start consumers", e));
+    var consumers = List.of(
+      deployVerticle("inventory-item-consumers", itemConsumersVerticleNumber, InventoryItemConsumersVerticle.class, vertx, springContext),
+      deployVerticle("inventory-holding-consumers", holdingConsumersVerticleNumber, InventoryHoldingConsumersVerticle.class, vertx, springContext),
+      deployVerticle("edi-export-orders-history-consumers", ediExportConsumersVerticleNumber, EdiExportOrdersHistoryConsumersVerticle.class, vertx, springContext)
+    );
+    return GenericCompositeFuture.all(consumers)
+      .onSuccess(future -> log.info("deployKafkaConsumersVerticles:: All {} consumer(s) was successfully started", consumers.size()))
+      .onFailure(exception -> log.error("Failed to start consumers", exception));
   }
+
+  private <V extends Verticle> Future<String> deployVerticle(String poolName, int instancesNumber, Class<V> consumerClass, Vertx vertx, AbstractApplicationContext springContext) {
+    return vertx.deployVerticle(() -> springContext.getBean(consumerClass),
+      new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER).setWorkerPoolName(poolName).setInstances(instancesNumber));
+  }
+
 }
