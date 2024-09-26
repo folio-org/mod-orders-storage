@@ -7,6 +7,7 @@ import java.util.Objects;
 
 import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
+import org.folio.event.dto.ResourceEvent;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.Piece;
@@ -38,7 +39,8 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(JsonObject holdingObject, String tenantId) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId) {
+    var holdingObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var holdingId = holdingObject.getString(InventoryFields.ID.getValue());
     var dbClient = new DBClient(getVertx(), tenantId);
     var tenantIdUpdates = List.of(

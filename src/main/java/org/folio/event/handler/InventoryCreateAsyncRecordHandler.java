@@ -50,9 +50,8 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
         return Future.succeededFuture();
       }
 
-      var inventoryObject = JsonObject.mapFrom(resourceEvent.getNewValue());
       var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
-      return processInventoryCreationEvent(inventoryObject, tenantId)
+      return processInventoryCreationEvent(resourceEvent, tenantId)
         .onSuccess(v -> getLogger().info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> getLogger().error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
         .map(kafkaConsumerRecord.key());
@@ -62,7 +61,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
-  protected abstract Future<Void> processInventoryCreationEvent(JsonObject inventoryObject, String tenantId);
+  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId);
 
   protected abstract Logger getLogger();
 

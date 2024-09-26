@@ -107,8 +107,7 @@ public class ItemCreateAsyncRecordHandlerTest {
       createPiece(pieceId3, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId)
     );
 
-    doReturn(Future.succeededFuture(pieces))
-      .when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
     doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
     doReturn(pgClient).when(dbClient).getPgClient();
     doReturn(tenantId).when(dbClient).getTenantId();
@@ -118,10 +117,10 @@ public class ItemCreateAsyncRecordHandlerTest {
     }).when(pgClient).withConn(any());
 
     Method processItemCreateMethod = ItemCreateAsyncRecordHandler.class
-      .getDeclaredMethod("processItemCreationEvent", ResourceEvent.class, DBClient.class);
+      .getDeclaredMethod("processInventoryCreationEvent", ResourceEvent.class, String.class);
     processItemCreateMethod.setAccessible(true);
 
-    processItemCreateMethod.invoke(handler, resourceEvent, dbClient);
+    processItemCreateMethod.invoke(handler, resourceEvent, tenantId);
 
     verify(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));

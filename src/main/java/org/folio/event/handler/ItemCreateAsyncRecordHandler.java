@@ -13,6 +13,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
+import org.folio.event.dto.ResourceEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.piece.PieceService;
@@ -31,7 +32,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(JsonObject itemObject, String tenantId) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId) {
+    var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var itemId = itemObject.getString(InventoryFields.ID.getValue());
     var dbClient = new DBClient(getVertx(), tenantId);
     return pieceService.getPiecesByItemId(itemId, dbClient)
