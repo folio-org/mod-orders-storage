@@ -76,11 +76,6 @@ public class PieceService {
   }
 
   public Future<Void> updatePieces(List<Piece> pieces, DBClient client) {
-    if (CollectionUtils.isEmpty(pieces)) {
-      log.info("updatePieces:: No pieces to update");
-      return Future.succeededFuture();
-    }
-
     String query = buildUpdatePieceBatchQuery(pieces, client.getTenantId());
     return client.getPgClient().execute(query)
       .onSuccess(ar -> log.info("updatePieces:: completed, query={}", query))

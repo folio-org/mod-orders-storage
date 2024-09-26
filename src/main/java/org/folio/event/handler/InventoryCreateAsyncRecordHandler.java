@@ -37,9 +37,12 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     getLogger().debug("handle:: Trying to process kafkaConsumerRecord: {}", kafkaConsumerRecord.value());
-
     try {
-      var resourceEvent = new JsonObject(kafkaConsumerRecord.value()).mapTo(ResourceEvent.class);
+      var eventValue = kafkaConsumerRecord.value();
+      if (eventValue == null) {
+        throw new IllegalArgumentException("Cannot process kafkaConsumerRecord: value is null");
+      }
+      var resourceEvent = new JsonObject(eventValue).mapTo(ResourceEvent.class);
       var eventType = resourceEvent.getType();
       if (!Objects.equals(eventType, inventoryEventType.getEventType())) {
         getLogger().info("handle:: Unsupported event type: {}", eventType);

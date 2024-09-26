@@ -230,6 +230,11 @@ public class PoLinesService {
     return poLinesDAO.updatePoLines(query, conn);
   }
 
+  public Future<Integer> updatePoLines(Collection<PoLine> poLines, String tenantId, DBClient dbClient) {
+    String query = buildUpdatePoLineBatchQuery(poLines, tenantId);
+    return poLinesDAO.updatePoLines(query, dbClient);
+  }
+
   public Future<Integer> getLastLineNumber(String purchaseOrderId, Conn conn) {
     return getPoLinesByOrderId(purchaseOrderId, conn)
       .compose(this::getLastLineNumber);

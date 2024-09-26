@@ -50,7 +50,7 @@ public class ItemCreateAsyncRecordHandlerTest {
   @Mock
   private PostgresClient pgClient;
 
-  private InventoryCreateAsyncRecordHandler handler;
+  private ItemCreateAsyncRecordHandler handler;
 
   @BeforeEach
   public void initMocks() throws Exception {

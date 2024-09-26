@@ -18,6 +18,7 @@ import org.folio.rest.persist.Criteria.Criterion;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.SqlResult;
 
 
 public class PoLinesPostgresDAO implements PoLinesDAO {
@@ -75,5 +76,19 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
         handleFailure(promise, t);
       });
     return promise.future();
+  }
+
+  @Override
+  public Future<Integer> updatePoLines(String sql, DBClient dbClient) {
+    log.debug("updatePoLines, sql={}", sql);
+    return dbClient.getPgClient().execute(sql)
+      .map(SqlResult::rowCount)
+      .onSuccess(result -> {
+        log.debug("updatePoLines success, sql={}", sql);
+      })
+      .onFailure(t -> {
+        log.error("updatePoLines failed, sql={}", sql, t);
+      });
+
   }
 }

@@ -14,4 +14,5 @@ public interface PoLinesDAO {
   Future<List<PoLine>> getPoLines(Criterion criterion, Conn conn);
   Future<PoLine> getPoLineById(String id, DBClient client);
   Future<Integer> updatePoLines(String sql, Conn conn);
+  Future<Integer> updatePoLines(String sql, DBClient client);
 }

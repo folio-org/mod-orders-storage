@@ -9,7 +9,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
@@ -41,18 +41,16 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   }
 
   private Future<Void> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, DBClient client) {
-    if (CollectionUtils.isEmpty(pieces)) {
-      log.info("updatePieces:: no pieces to update found, nothing to update for item={}, tenant={}",
-        itemObject.getString(InventoryFields.ID.getValue()), tenantId);
+    var holdingId = itemObject.getString(InventoryFields.HOLDINGS_RECORD_ID.getValue());
+    var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
+    if (CollectionUtils.isEmpty(updateRequiredPieces)) {
+      log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}'", itemObject.getString(InventoryFields.ID.getValue()), tenantId);
       return Future.succeededFuture();
     }
 
-    var holdingId = itemObject.getString(InventoryFields.HOLDINGS_RECORD_ID.getValue());
-    var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     updatePieceFields(updateRequiredPieces, holdingId, tenantId);
-
-    log.info("updatePieces:: updating '{}' piece(s) out of all '{}' piece(s)",
-      updateRequiredPieces.size(), pieces.size());
+    log.info("updatePieces:: Updating '{}' piece(s) out of all '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}'",
+      updateRequiredPieces.size(), pieces.size(), tenantId, holdingId);
     return pieceService.updatePieces(updateRequiredPieces, client);
   }
 

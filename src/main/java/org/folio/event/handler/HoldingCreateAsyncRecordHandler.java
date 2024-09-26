@@ -5,6 +5,7 @@ import static org.folio.event.InventoryEventType.INVENTORY_HOLDING_CREATE;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
@@ -61,17 +62,27 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   private Future<Void> updatePoLines(List<PoLine> poLines, String holdingId, String tenantId, DBClient dbClient) {
+    if (CollectionUtils.isEmpty(poLines)) {
+      log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
+      return Future.succeededFuture();
+    }
     log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}'", poLines.size(), holdingId, tenantId);
     poLines.forEach(poLine -> updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantId));
-    return dbClient.getPgClient()
-      .withConn(conn -> poLinesService.updatePoLines(poLines, conn, tenantId))
+    return poLinesService.updatePoLines(poLines, tenantId, dbClient)
       .mapEmpty();
   }
 
   private Future<Void> updatePieces(List<Piece> pieces, String holdingId, String tenantId, DBClient client) {
+    var piecesToUpdate = pieces.stream()
+      .filter(piece -> !Objects.equals(piece.getReceivingTenantId(), tenantId))
+      .map(piece -> piece.withReceivingTenantId(tenantId))
+      .toList();
+    if (CollectionUtils.isEmpty(piecesToUpdate)) {
+      log.info("updatePieces:: No pieces to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
+      return Future.succeededFuture();
+    }
     log.info("updatePieces:: Updating {} piece(s) with holdingId '{}', setting receivingTenantId to '{}'", pieces.size(), holdingId, tenantId);
-    pieces.forEach(piece -> piece.setReceivingTenantId(tenantId));
-    return pieceService.updatePieces(pieces, client);
+    return pieceService.updatePieces(piecesToUpdate, client);
   }
 
   private void updateLocationTenantIdIfNeeded(List<Location> locations, String holdingId, String tenantId) {
