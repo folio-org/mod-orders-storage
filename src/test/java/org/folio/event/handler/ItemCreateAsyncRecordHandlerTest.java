@@ -1,18 +1,21 @@
 package org.folio.event.handler;
 
+import static org.folio.TestUtils.mockContext;
+import static org.folio.event.EventType.CREATE;
+import static org.folio.event.dto.InventoryFields.HOLDINGS_RECORD_ID;
+import static org.folio.event.dto.InventoryFields.ID;
+import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.DIKU_TENANT;
+import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.TENANT_KEY_LOWER_CASE;
+import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -24,56 +27,39 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.TestUtils;
+import org.folio.event.EventType;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.Piece;
-import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.piece.PieceService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.context.support.AbstractApplicationContext;
 
 public class ItemCreateAsyncRecordHandlerTest {
 
-  private static final String TENANT_KEY_LOWER_CASE = "x-okapi-tenant";
-  private static final String DIKU_TENANT = "diku";
-  private static final String CREATE = "CREATE";
-  private static final String UPDATE = "UPDATE";
-
-  private ItemCreateAsyncRecordHandler handler;
   @Mock
   private PieceService pieceService;
   @Mock
   private DBClient dbClient;
   @Mock
   private PostgresClient pgClient;
-  @Mock
-  private Conn conn;
 
-  private AutoCloseable mockClosable;
+  private InventoryCreateAsyncRecordHandler handler;
 
   @BeforeEach
-  public void initMocks() {
-    mockClosable = MockitoAnnotations.openMocks(this);
-    Vertx vertx = Vertx.vertx();
-    Context context = mockContext(vertx);
-    handler = new ItemCreateAsyncRecordHandler(context, vertx);
-    TestUtils.setInternalState(handler, "pieceService", pieceService);
-  }
-
-  @AfterEach
-  public void releaseMocks() throws Exception {
-    mockClosable.close();
+  public void initMocks() throws Exception {
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      var vertx = Vertx.vertx();
+      handler = new ItemCreateAsyncRecordHandler(mockContext(vertx), vertx);
+      TestUtils.setInternalState(handler, "pieceService", pieceService);
+      doReturn(pgClient).when(dbClient).getPgClient();
+    }
   }
 
   @Test
@@ -87,8 +73,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     String locationId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
-    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
-    var resourceEvent = itemEventObject.mapTo(ResourceEvent.class);
+    var resourceEvent = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
     var actualPiece1 = createPiece(pieceId1, itemId)
       .withHoldingId(holdingId)
       .withReceivingTenantId("college");
@@ -109,14 +94,8 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
     doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
-    doReturn(pgClient).when(dbClient).getPgClient();
-    doReturn(tenantId).when(dbClient).getTenantId();
-    doAnswer(invocation -> {
-      Function<Conn, Future<ExportHistory>> f = invocation.getArgument(0);
-      return f.apply(conn);
-    }).when(pgClient).withConn(any());
 
-    Method processItemCreateMethod = ItemCreateAsyncRecordHandler.class
+    Method processItemCreateMethod = InventoryCreateAsyncRecordHandler.class
       .getDeclaredMethod("processInventoryCreationEvent", ResourceEvent.class, String.class);
     processItemCreateMethod.setAccessible(true);
 
@@ -141,7 +120,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     String locationId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
-    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
+    var resourceEvent = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
     // These pieces should be skipped
     // alreadyUpdatedPiece1 have the same tenantId and holdingId
     var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId)
@@ -155,18 +134,11 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     List<Piece> expectedPieces = List.of();
 
-    doReturn(Future.succeededFuture(pieces))
-      .when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
     doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
-    doReturn(pgClient).when(dbClient).getPgClient();
-    doReturn(tenantId).when(dbClient).getTenantId();
-    doAnswer(invocation -> {
-      Function<Conn, Future<ExportHistory>> f = invocation.getArgument(0);
-      return f.apply(conn);
-    }).when(pgClient).withConn(any());
 
     var consumerRecord = new ConsumerRecord<>("topic", 1, 1L,
-      "key", Json.encode(itemEventObject));
+      "key", Json.encode(resourceEvent));
     RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes());
     consumerRecord.headers().add(header);
     var record = new KafkaConsumerRecordImpl<>(consumerRecord);
@@ -183,61 +155,13 @@ public class ItemCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void positive_shouldSkipProcessItemUpdateEvent() {
-    String itemId = UUID.randomUUID().toString();
-    String holdingId = UUID.randomUUID().toString();
-
-    var itemEventObject = createItemResourceEvent(itemId, holdingId, DIKU_TENANT, UPDATE);
-
-    var consumerRecord = new ConsumerRecord<>("topic", 1, 1L,
-      "key", Json.encode(itemEventObject));
-    RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes());
-    consumerRecord.headers().add(header);
-    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
-
-    var res = handler.handle(record);
-    assertTrue(res.succeeded());
-
-    verifyNoInteractions(pieceService);
-  }
-
-  @Test
-  void negative_shouldThrowExceptionIfKafkaRecordIsNotValid() {
-    String itemId = UUID.randomUUID().toString();
-    String holdingRecordId = UUID.randomUUID().toString();
-    var itemEventObject = createItemResourceEvent(itemId, holdingRecordId, DIKU_TENANT, CREATE);
-
-    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key",
-      Json.encode(itemEventObject));
-    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
-
-    Throwable actExp = handler.handle(record).cause();
-    assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
-    assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
-  }
-
-  @Test
-  void negative_shouldThrowExceptionIfTenantIdHeaderIsNotProvided() {
-    String itemId = UUID.randomUUID().toString();
-    String holdingRecordId = UUID.randomUUID().toString();
-    var itemEventObject = createItemResourceEvent(itemId, holdingRecordId, DIKU_TENANT, CREATE);
-
-    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key",
-      Json.encode(itemEventObject));
-    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
-
-    Throwable actExp = handler.handle(record).cause();
-    assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
-  }
-
-  @Test
   void negative_shouldReturnFailedFutureIfSavePieceInDBIsFailed() {
     String pieceId = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
     String tenantId = DIKU_TENANT;
 
-    var itemEventObject = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
+    var resourceEvent = createItemResourceEvent(itemId, holdingId, tenantId, CREATE);
     var actualPiece = createPiece(pieceId, itemId);
     var expectedPieces = List.of(createPiece(pieceId, itemId)
       .withHoldingId(holdingId)
@@ -245,44 +169,27 @@ public class ItemCreateAsyncRecordHandlerTest {
     );
 
     var consumerRecord = new ConsumerRecord<>("topic", 1, 1L,
-      "key", Json.encode(itemEventObject));
+      "key", Json.encode(resourceEvent));
     RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes());
     consumerRecord.headers().add(header);
     var record = new KafkaConsumerRecordImpl<>(consumerRecord);
 
-    doReturn(pgClient).when(dbClient).getPgClient();
-    doReturn(Future.succeededFuture(List.of(actualPiece)))
-      .when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
-    doThrow(new RuntimeException("Save failed")).when(pieceService)
-      .updatePieces(eq(expectedPieces), any(DBClient.class));
+    doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId), any(DBClient.class));
+    doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
 
     var actExp = handler.handle(record).cause();
-
     assertEquals(RuntimeException.class, actExp.getClass());
   }
 
-  private JsonObject createItemResourceEvent(String itemId, String holdingRecordId, String tenantId, String type) {
-    var itemObject = new JsonObject()
-      .put("id", itemId)
-      .put("holdingsRecordId", holdingRecordId);
-
-    return new JsonObject()
-      .put("type", type)
-      .put("new", itemObject)
-      .put("tenant", tenantId);
+  private static Piece createPiece(String pieceId, String itemId) {
+    return new Piece().withId(pieceId).withItemId(itemId);
   }
 
-  private Piece createPiece(String pieceId, String itemId) {
-    return new Piece()
-      .withId(pieceId)
-      .withItemId(itemId);
+  private static ResourceEvent createItemResourceEvent(String itemId, String holdingRecordId, String tenantId, EventType type) {
+    var resourceEvent = createResourceEvent(tenantId, type);
+    var itemObject = JsonObject.of(ID.getValue(), itemId, HOLDINGS_RECORD_ID.getValue(), holdingRecordId);
+    resourceEvent.setNewValue(itemObject);
+    return resourceEvent;
   }
 
-  private Context mockContext(Vertx vertx) {
-    AbstractApplicationContext springContextMock = mock(AbstractApplicationContext.class);
-    when(springContextMock.getAutowireCapableBeanFactory()).thenReturn(mock(AutowireCapableBeanFactory.class));
-    Context context = vertx.getOrCreateContext();
-    context.put("springContext", springContextMock);
-    return context;
-  }
 }
