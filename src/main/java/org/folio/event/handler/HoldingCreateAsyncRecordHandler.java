@@ -62,9 +62,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
           processPoLinesUpdate(holdingId, tenantId, headers, conn),
           processPiecesUpdate(holdingId, tenantId, headers, conn)
         );
-        return GenericCompositeFuture.all(tenantIdUpdates)
-          .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
-          .mapEmpty();
+        return GenericCompositeFuture.all(tenantIdUpdates).mapEmpty();
       });
   }
 
@@ -72,6 +70,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     return poLinesService.getPoLinesByHoldingId(holdingId, conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, tenantId, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
+      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
@@ -79,6 +78,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantId, conn))
       .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers))
+      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 

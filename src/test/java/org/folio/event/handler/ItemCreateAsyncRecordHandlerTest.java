@@ -70,6 +70,7 @@ public class ItemCreateAsyncRecordHandlerTest {
       doReturn(pgClient).when(dbClient).getPgClient();
       doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
     }
   }
 
