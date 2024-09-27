@@ -53,7 +53,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> updatePieces(pieces, itemObject, tenantId, conn))
         .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers))
-        .mapEmpty());
+        .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers)))
+      .mapEmpty();
   }
 
   private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, Conn conn) {

@@ -54,7 +54,7 @@ import org.folio.rest.tools.utils.MetadataUtil;
 public class PoLinesService {
 
   private static final String POLINE_ID_FIELD = "poLineId";
-  private static final String LOCATIONS_HOLDING_ID_FIELD = "locations[].holdingId";
+  private static final String LOCATIONS_HOLDING_ID_FIELD = "location.holdingId";
 
   private final PoLinesDAO poLinesDAO;
   private final AuditOutboxService auditOutboxService;

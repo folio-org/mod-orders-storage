@@ -62,7 +62,9 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
           processPoLinesUpdate(holdingId, tenantId, headers, conn),
           processPiecesUpdate(holdingId, tenantId, headers, conn)
         );
-        return GenericCompositeFuture.all(tenantIdUpdates).mapEmpty();
+        return GenericCompositeFuture.all(tenantIdUpdates)
+          .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
+          .mapEmpty();
       });
   }
 
