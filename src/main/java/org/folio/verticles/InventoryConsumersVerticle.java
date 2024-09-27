@@ -20,10 +20,10 @@ public abstract class InventoryConsumersVerticle extends AbstractConsumersVertic
   private final InventoryCreateAsyncRecordHandler asyncRecordHandler;
 
   @Autowired
-  public InventoryConsumersVerticle(InventoryEventType eventType,
-                                    BiFunction<Context, Vertx, InventoryCreateAsyncRecordHandler> asyncRecordHandlerSupplier,
-                                    KafkaConfig kafkaConfig,
-                                    AbstractApplicationContext springContext) {
+  protected InventoryConsumersVerticle(InventoryEventType eventType,
+                                       BiFunction<Context, Vertx, InventoryCreateAsyncRecordHandler> asyncRecordHandlerSupplier,
+                                       KafkaConfig kafkaConfig,
+                                       AbstractApplicationContext springContext) {
     super(kafkaConfig, springContext);
     this.eventType = eventType;
     this.asyncRecordHandler = asyncRecordHandlerSupplier.apply(context, vertx);

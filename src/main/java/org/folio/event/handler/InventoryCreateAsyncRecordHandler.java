@@ -28,7 +28,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
 
   private final InventoryEventType inventoryEventType;
 
-  public InventoryCreateAsyncRecordHandler(InventoryEventType inventoryEventType, Vertx vertx, Context context) {
+  protected InventoryCreateAsyncRecordHandler(InventoryEventType inventoryEventType, Vertx vertx, Context context) {
     super(vertx, context);
     SpringContextUtil.autowireDependencies(this, context);
     this.inventoryEventType = inventoryEventType;
@@ -36,13 +36,13 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
-    getLogger().debug("handle:: Trying to process kafkaConsumerRecord: {}", kafkaConsumerRecord.value());
+    final var recordValue = kafkaConsumerRecord.value();
+    getLogger().debug("handle:: Trying to process kafkaConsumerRecord: {}", recordValue);
     try {
-      var eventValue = kafkaConsumerRecord.value();
-      if (eventValue == null) {
+      if (recordValue == null) {
         throw new IllegalArgumentException("Cannot process kafkaConsumerRecord: value is null");
       }
-      var resourceEvent = new JsonObject(eventValue).mapTo(ResourceEvent.class);
+      var resourceEvent = new JsonObject(recordValue).mapTo(ResourceEvent.class);
       var eventType = resourceEvent.getType();
       if (!Objects.equals(eventType, inventoryEventType.getEventType())) {
         getLogger().info("handle:: Unsupported event type: {}", eventType);
@@ -56,7 +56,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
       return processInventoryCreationEvent(resourceEvent, tenantId)
         .onSuccess(v -> getLogger().info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
-        .onFailure(t -> getLogger().error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
+        .onFailure(t -> getLogger().error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
     } catch (Exception e) {
       getLogger().error("Failed to process kafkaConsumerRecord: {}", kafkaConsumerRecord, e);

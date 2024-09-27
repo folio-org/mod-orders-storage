@@ -83,12 +83,8 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
     log.debug("updatePoLines, sql={}", sql);
     return dbClient.getPgClient().execute(sql)
       .map(SqlResult::rowCount)
-      .onSuccess(result -> {
-        log.debug("updatePoLines success, sql={}", sql);
-      })
-      .onFailure(t -> {
-        log.error("updatePoLines failed, sql={}", sql, t);
-      });
+      .onSuccess(result -> log.debug("updatePoLines success, sql={}", sql))
+      .onFailure(t -> log.error("updatePoLines failed, sql={}", sql, t));
 
   }
 }
