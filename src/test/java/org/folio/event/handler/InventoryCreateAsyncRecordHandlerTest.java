@@ -20,6 +20,7 @@ import org.mockito.MockitoAnnotations;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
+import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
 public class InventoryCreateAsyncRecordHandlerTest {
@@ -85,14 +86,18 @@ public class InventoryCreateAsyncRecordHandlerTest {
       .build();
   }
 
-  static KafkaConsumerRecordImpl<String, String> createKafkaRecord(ResourceEvent resourceEvent, String tenantId) {
+  static ResourceEvent extractResourceEvent(KafkaConsumerRecord<String, String> record) {
+    return Json.decodeValue(record.value(), ResourceEvent.class);
+  }
+
+  static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent, String tenantId) {
     var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", Json.encode(resourceEvent));
     Optional.ofNullable(tenantId)
       .ifPresent(id -> consumerRecord.headers().add(new RecordHeader(TENANT_KEY_LOWER_CASE, id.getBytes())));
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
 
-  private static KafkaConsumerRecordImpl<String, String> createKafkaRecord(ResourceEvent resourceEvent) {
+  private static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent) {
     return createKafkaRecord(resourceEvent, null);
   }
 

@@ -6,6 +6,7 @@ import static org.folio.event.dto.InventoryFields.ID;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.DIKU_TENANT;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
+import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.extractResourceEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,10 +14,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ import org.mockito.MockitoAnnotations;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
+import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 
 public class HoldingCreateAsyncRecordHandlerTest {
 
@@ -50,21 +51,22 @@ public class HoldingCreateAsyncRecordHandlerTest {
   @Mock
   private PostgresClient pgClient;
 
-  private HoldingCreateAsyncRecordHandler handler;
+  private InventoryCreateAsyncRecordHandler handler;
 
   @BeforeEach
   public void initMocks() throws Exception {
     try (var ignored = MockitoAnnotations.openMocks(this)) {
       var vertx = Vertx.vertx();
-      handler = new HoldingCreateAsyncRecordHandler(mockContext(vertx), vertx);
-      TestUtils.setInternalState(handler, "pieceService", pieceService);
-      TestUtils.setInternalState(handler, "poLinesService", poLinesService);
+      var holdingHandler = new HoldingCreateAsyncRecordHandler(mockContext(vertx), vertx);
+      TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
+      TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
+      handler = spy(holdingHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
     }
   }
 
   @Test
-  void positive_shouldProcessHoldingCreateEvent() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  void positive_shouldProcessHoldingCreateEvent() {
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
     var poLineId1 = UUID.randomUUID().toString();
@@ -97,6 +99,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
 
     handler.handle(kafkaRecord);
 
+    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
     verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
@@ -117,7 +120,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void positive_shouldProcessHoldingCreateEventWhenNoPoLineIsFound() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  void positive_shouldProcessHoldingCreateEventWhenNoPoLineIsFound() {
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
@@ -137,6 +140,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
 
     handler.handle(kafkaRecord);
 
+    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
     verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
@@ -147,7 +151,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void positive_shouldProcessHoldingCreateEventWhenNoPieceIsFound() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  void positive_shouldProcessHoldingCreateEventWhenNoPieceIsFound() {
     var poLineId1 = UUID.randomUUID().toString();
     var poLineId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
@@ -169,6 +173,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
 
     handler.handle(kafkaRecord);
 
+    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
     verify(pieceService, times(0)).updatePieces(anyList(), any(DBClient.class));
     verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
@@ -186,7 +191,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void positive_shouldSkipHoldingCreateEventWhenNoPoLineOrPieceIsFound() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+  void positive_shouldSkipHoldingCreateEventWhenNoPoLineOrPieceIsFound() {
     var holdingId1 = UUID.randomUUID().toString();
     var kafkaRecord = createHoldingEventKafkaRecord(holdingId1, DIKU_TENANT, CREATE);
 
@@ -195,6 +200,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
 
     handler.handle(kafkaRecord);
 
+    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
     verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
     verify(pieceService, times(0)).updatePieces(anyList(), any(DBClient.class));
@@ -237,7 +243,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     return new Location().withHoldingId(holdingId).withTenantId(tenantId);
   }
 
-  private static KafkaConsumerRecordImpl<String, String> createHoldingEventKafkaRecord(String id, String tenantId, EventType type) {
+  private static KafkaConsumerRecord<String, String> createHoldingEventKafkaRecord(String id, String tenantId, EventType type) {
     var resourceEvent = createResourceEvent(tenantId, type);
     var holdingObject = JsonObject.of(ID.getValue(), id);
     resourceEvent.setNewValue(holdingObject);
