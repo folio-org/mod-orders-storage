@@ -57,7 +57,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
   public void initMocks() throws Exception {
     try (var ignored = MockitoAnnotations.openMocks(this)) {
       var vertx = Vertx.vertx();
-      var holdingHandler = new HoldingCreateAsyncRecordHandler(mockContext(vertx), vertx);
+      var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
       TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
       handler = spy(holdingHandler);

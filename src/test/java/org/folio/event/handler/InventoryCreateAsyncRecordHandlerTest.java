@@ -41,8 +41,8 @@ public class InventoryCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var context = mockContext(vertx);
       handlers = List.of(
-        spy(new ItemCreateAsyncRecordHandler(context, vertx)),
-        spy(new HoldingCreateAsyncRecordHandler(context, vertx))
+        spy(new ItemCreateAsyncRecordHandler(vertx, context)),
+        spy(new HoldingCreateAsyncRecordHandler(vertx, context))
       );
     }
   }

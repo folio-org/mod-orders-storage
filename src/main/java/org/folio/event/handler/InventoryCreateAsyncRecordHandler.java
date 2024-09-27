@@ -7,10 +7,6 @@ import java.util.Objects;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.services.lines.PoLinesService;
-import org.folio.services.piece.PieceService;
-import org.folio.spring.SpringContextUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -20,17 +16,10 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 
 public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
 
-  @Autowired
-  private PieceService pieceService;
-
-  @Autowired
-  private PoLinesService poLinesService;
-
   private final InventoryEventType inventoryEventType;
 
   protected InventoryCreateAsyncRecordHandler(InventoryEventType inventoryEventType, Vertx vertx, Context context) {
     super(vertx, context);
-    SpringContextUtil.autowireDependencies(this, context);
     this.inventoryEventType = inventoryEventType;
   }
 

@@ -26,7 +26,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   @Autowired
   private PieceService pieceService;
 
-  public ItemCreateAsyncRecordHandler(Context context, Vertx vertx) {
+  public ItemCreateAsyncRecordHandler(Vertx vertx, Context context) {
     super(INVENTORY_ITEM_CREATE, vertx, context);
     SpringContextUtil.autowireDependencies(this, context);
   }

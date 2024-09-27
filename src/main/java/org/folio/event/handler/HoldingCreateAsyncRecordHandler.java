@@ -34,7 +34,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   @Autowired
   private PoLinesService poLinesService;
 
-  public HoldingCreateAsyncRecordHandler(Context context, Vertx vertx) {
+  public HoldingCreateAsyncRecordHandler(Vertx vertx, Context context) {
     super(INVENTORY_HOLDING_CREATE, vertx, context);
     SpringContextUtil.autowireDependencies(this, context);
   }

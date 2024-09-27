@@ -51,7 +51,7 @@ public class ItemCreateAsyncRecordHandlerTest {
   public void initMocks() throws Exception {
     try (var ignored = MockitoAnnotations.openMocks(this)) {
       var vertx = Vertx.vertx();
-      var holdingHandler = new ItemCreateAsyncRecordHandler(mockContext(vertx), vertx);
+      var holdingHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
       handler = spy(holdingHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
