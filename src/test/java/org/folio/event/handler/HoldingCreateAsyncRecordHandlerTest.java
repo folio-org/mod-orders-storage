@@ -19,6 +19,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.TestUtils;
@@ -28,6 +29,7 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +49,8 @@ public class HoldingCreateAsyncRecordHandlerTest {
   @Mock
   private PoLinesService poLinesService;
   @Mock
+  private ConsortiumConfigurationService consortiumConfigurationService;
+  @Mock
   private DBClient dbClient;
   @Mock
   private PostgresClient pgClient;
@@ -60,8 +64,10 @@ public class HoldingCreateAsyncRecordHandlerTest {
       var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
       TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
+      TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       handler = spy(holdingHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
+      doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
     }
   }
 

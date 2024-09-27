@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,12 +17,16 @@ import java.util.Optional;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
+import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -33,6 +38,9 @@ public class InventoryCreateAsyncRecordHandlerTest {
   static final String TENANT_KEY_LOWER_CASE = "x-okapi-tenant";
   static final String DIKU_TENANT = "diku";
 
+  @Mock
+  private ConsortiumConfigurationService consortiumConfigurationService;
+
   private List<InventoryCreateAsyncRecordHandler> handlers;
 
   @BeforeEach
@@ -40,10 +48,12 @@ public class InventoryCreateAsyncRecordHandlerTest {
     try (var ignored = MockitoAnnotations.openMocks(this)) {
       var vertx = Vertx.vertx();
       var context = mockContext(vertx);
-      handlers = List.of(
-        spy(new ItemCreateAsyncRecordHandler(vertx, context)),
-        spy(new HoldingCreateAsyncRecordHandler(vertx, context))
-      );
+      var itemHandler = new ItemCreateAsyncRecordHandler(vertx, context);
+      var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, context);
+      TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      handlers = List.of(spy(itemHandler), spy(holdingHandler));
+      doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
     }
   }
 

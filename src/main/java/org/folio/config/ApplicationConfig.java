@@ -22,6 +22,7 @@ import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
 import org.folio.services.configuration.TenantLocaleSettingsService;
+import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesBatchService;
 import org.folio.services.lines.PoLinesService;
@@ -186,4 +187,10 @@ public class ApplicationConfig {
                                             TenantLocaleSettingsService tenantLocaleSettingsService) {
     return new PieceClaimingService(pgClientFactory, extensionRepository, pieceClaimingRepository, tenantLocaleSettingsService);
   }
+
+  @Bean
+  ConsortiumConfigurationService consortiumConfigurationService(Vertx vertx) {
+    return new ConsortiumConfigurationService(vertx);
+  }
+
 }

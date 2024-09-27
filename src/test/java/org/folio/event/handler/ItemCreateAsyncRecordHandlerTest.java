@@ -24,12 +24,14 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.piece.PieceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +43,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   @Mock
   private PieceService pieceService;
   @Mock
+  private ConsortiumConfigurationService consortiumConfigurationService;
+  @Mock
   private DBClient dbClient;
   @Mock
   private PostgresClient pgClient;
@@ -51,10 +55,12 @@ public class ItemCreateAsyncRecordHandlerTest {
   public void initMocks() throws Exception {
     try (var ignored = MockitoAnnotations.openMocks(this)) {
       var vertx = Vertx.vertx();
-      var holdingHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
-      TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
-      handler = spy(holdingHandler);
+      var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
+      TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
+      TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      handler = spy(itemHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
+      doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
     }
   }
 

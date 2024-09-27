@@ -3,17 +3,21 @@ package org.folio.event.handler;
 import static org.folio.event.InventoryEventType.INVENTORY_HOLDING_CREATE;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.models.ConsortiumConfiguration;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
+import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
@@ -33,6 +37,9 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
 
   @Autowired
   private PoLinesService poLinesService;
+
+  @Autowired
+  private ConsortiumConfigurationService consortiumConfigurationService;
 
   public HoldingCreateAsyncRecordHandler(Vertx vertx, Context context) {
     super(INVENTORY_HOLDING_CREATE, vertx, context);
@@ -89,6 +96,11 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     locations.stream()
       .filter(location -> Objects.equals(location.getHoldingId(), holdingId))
       .forEach(location -> location.setTenantId(tenantId));
+  }
+
+  @Override
+  protected Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers) {
+    return consortiumConfigurationService.getConsortiumConfiguration(headers);
   }
 
   @Override

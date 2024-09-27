@@ -1,12 +1,16 @@
 package org.folio.event.handler;
 
 import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
+import static org.folio.event.util.KafkaEventUtil.getHeaderMap;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.logging.log4j.Logger;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.models.ConsortiumConfiguration;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -42,8 +46,8 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
         return Future.succeededFuture();
       }
 
-      var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
-      return processInventoryCreationEvent(resourceEvent, tenantId)
+      return getTenantId(kafkaConsumerRecord)
+        .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId))
         .onSuccess(v -> getLogger().info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> getLogger().error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
@@ -53,7 +57,17 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
+  private Future<String> getTenantId(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
+    var headers = getHeaderMap(kafkaConsumerRecord.headers());
+    return getConsortiumConfiguration(headers)
+      .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
+        .map(ConsortiumConfiguration::centralTenantId)
+        .orElse(extractTenantFromHeaders(kafkaConsumerRecord.headers())));
+  }
+
   protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId);
+
+  protected abstract Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers);
 
   protected abstract Logger getLogger();
 
