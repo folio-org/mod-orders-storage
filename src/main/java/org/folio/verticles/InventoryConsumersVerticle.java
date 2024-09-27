@@ -17,16 +17,16 @@ import org.springframework.context.support.AbstractApplicationContext;
 public abstract class InventoryConsumersVerticle extends AbstractConsumersVerticle<InventoryEventType> {
 
   private final InventoryEventType eventType;
-  private final InventoryCreateAsyncRecordHandler asyncRecordHandler;
+  private final BiFunction<Vertx, Context, InventoryCreateAsyncRecordHandler> recordHandlerSupplier;
 
   @Autowired
   protected InventoryConsumersVerticle(InventoryEventType eventType,
-                                       BiFunction<Vertx, Context, InventoryCreateAsyncRecordHandler> asyncRecordHandlerSupplier,
+                                       BiFunction<Vertx, Context, InventoryCreateAsyncRecordHandler>  recordHandlerSupplier,
                                        KafkaConfig kafkaConfig,
                                        AbstractApplicationContext springContext) {
     super(kafkaConfig, springContext);
     this.eventType = eventType;
-    this.asyncRecordHandler = asyncRecordHandlerSupplier.apply(vertx, context);
+    this.recordHandlerSupplier = recordHandlerSupplier;
   }
 
 
@@ -45,7 +45,8 @@ public abstract class InventoryConsumersVerticle extends AbstractConsumersVertic
       .eventType(eventType.name())
       .subscriptionPattern(subscriptionPattern)
       .build();
-    return createConsumer(eventType, subscriptionDefinition, asyncRecordHandler)
+    var recordHandler = recordHandlerSupplier.apply(vertx, context);
+    return createConsumer(eventType, subscriptionDefinition, recordHandler)
       .mapEmpty();
   }
 }
