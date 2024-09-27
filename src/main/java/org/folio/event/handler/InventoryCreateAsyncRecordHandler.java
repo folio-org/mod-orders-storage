@@ -9,6 +9,7 @@ import java.util.Objects;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
+import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,10 +53,8 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       }
 
       var headers = getHeaderMap(kafkaConsumerRecord.headers());
-      var headersTenantId = extractTenantFromHeaders(headers);
-      return getTenantId(headers, headersTenantId)
-        .map(tenantId -> logTenantId(tenantId, headersTenantId))
-        .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId, headers))
+      return getTenantId(headers)
+        .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId, headers, createDBClient(tenantId)))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
@@ -65,20 +64,24 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
-  private Future<String> getTenantId(Map<String, String> headers, String tenantId) {
+  private Future<String> getTenantId(Map<String, String> headers) {
+    var headersTenantId = extractTenantFromHeaders(headers);
     return consortiumConfigurationService.getConsortiumConfiguration(headers)
       .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
         .map(ConsortiumConfiguration::centralTenantId)
-        .orElse(tenantId));
+        .orElse(headersTenantId))
+      .map(tenantId -> {
+        if (!tenantId.equals(headersTenantId)) {
+          log.info("logTenantId:: TenantId from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
+        }
+        return tenantId;
+      });
   }
 
-  private String logTenantId(String tenantId, String headersTenantId) {
-    if (!tenantId.equals(headersTenantId)) {
-      log.info("logTenantId:: TenantId from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
-    }
-    return tenantId;
+  protected DBClient createDBClient(String tenantId) {
+    return new DBClient(getVertx(), tenantId);
   }
 
-  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers);
+  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient);
 
 }

@@ -39,10 +39,10 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient) {
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var itemId = itemObject.getString(InventoryFields.ID.getValue());
-    return new DBClient(getVertx(), tenantId).getPgClient()
+    return dbClient.getPgClient()
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> updatePieces(pieces, itemObject, tenantId, conn))
         .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers)))
@@ -55,7 +55,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     if (CollectionUtils.isEmpty(updateRequiredPieces)) {
       log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}'", itemObject.getString(InventoryFields.ID.getValue()), tenantId);
-      return Future.succeededFuture();
+      return Future.succeededFuture(List.of());
     }
 
     updatePieceFields(updateRequiredPieces, holdingId, tenantId);

@@ -22,6 +22,7 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,7 +68,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
     handlers.forEach(handler -> {
       var res = handler.handle(record);
       assertTrue(res.succeeded());
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });
   }
 
@@ -80,7 +81,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
     handlers.forEach(handler -> {
       var res = handler.handle(record);
       assertTrue(res.succeeded());
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });
   }
 
@@ -94,7 +95,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
       Throwable actExp = handler.handle(record).cause();
       assertEquals(java.lang.IllegalArgumentException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Cannot process kafkaConsumerRecord: value is null"));
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });
   }
 
@@ -107,7 +108,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
       Throwable actExp = handler.handle(record).cause();
       assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });
   }
 

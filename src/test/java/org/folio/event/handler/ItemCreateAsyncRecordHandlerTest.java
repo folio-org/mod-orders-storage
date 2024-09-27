@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -25,9 +26,12 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+
 import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.service.AuditOutboxService;
@@ -41,7 +45,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class ItemCreateAsyncRecordHandlerTest {
 
@@ -55,6 +58,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   private DBClient dbClient;
   @Mock
   private PostgresClient pgClient;
+  @Mock
+  private Conn conn;
 
   private InventoryCreateAsyncRecordHandler handler;
 
@@ -67,10 +72,12 @@ public class ItemCreateAsyncRecordHandlerTest {
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);
-      doReturn(pgClient).when(dbClient).getPgClient();
       doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
-      doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
-      doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
+      doReturn(Future.succeededFuture(0)).when(auditOutboxService).processOutboxEventLogs(anyMap());
+      doReturn(dbClient).when(handler).createDBClient(any());
+      doReturn(pgClient).when(dbClient).getPgClient();
+      doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
     }
   }
 
@@ -103,14 +110,15 @@ public class ItemCreateAsyncRecordHandlerTest {
       createPiece(pieceId3, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId)
     );
 
-    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
+    doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
 
-    handler.handle(kafkaRecord);
+    var result = handler.handle(kafkaRecord);
+    assertTrue(result.succeeded());
 
-    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
-    verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
+    verify(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
 
     assertEquals(holdingId, actualPiece1.getHoldingId());
     assertEquals(tenantId, actualPiece1.getReceivingTenantId());
@@ -141,17 +149,17 @@ public class ItemCreateAsyncRecordHandlerTest {
     var pieces = List.of(alreadyUpdatedPiece1, alreadyUpdatedPiece2);
     List<Piece> expectedPieces = List.of();
 
-    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
+    doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
 
-    var res = handler.handle(kafkaRecord);
+    var result = handler.handle(kafkaRecord);
+    assertTrue(result.succeeded());
 
-    assertTrue(res.succeeded());
     assertNull(alreadyUpdatedPiece2.getHoldingId());
     assertEquals(locationId, alreadyUpdatedPiece2.getLocationId());
 
-    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
-    verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
     // skip update pieces in db, in case of no pieces to update
     verify(dbClient.getPgClient(), times(0)).execute(any());
   }
@@ -170,12 +178,15 @@ public class ItemCreateAsyncRecordHandlerTest {
       .withReceivingTenantId(tenantId)
     );
 
-    doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
+    doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
 
-    var actExp = handler.handle(kafkaRecord).cause();
-    assertEquals(RuntimeException.class, actExp.getClass());
-    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
+    var result = handler.handle(kafkaRecord);
+
+    assertTrue(result.failed());
+    assertEquals(RuntimeException.class, result.cause().getClass());
+
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
   }
 
   private static Piece createPiece(String pieceId, String itemId) {

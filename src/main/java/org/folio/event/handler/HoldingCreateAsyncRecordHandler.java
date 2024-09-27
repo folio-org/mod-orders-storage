@@ -47,10 +47,10 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient) {
     var holdingObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var holdingId = holdingObject.getString(InventoryFields.ID.getValue());
-    return new DBClient(getVertx(), tenantId).getPgClient()
+    return dbClient.getPgClient()
       .withTrans(conn -> {
         var tenantIdUpdates = List.of(
           processPoLinesUpdate(holdingId, tenantId, headers, conn),
@@ -79,7 +79,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String tenantId, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
-      return Future.succeededFuture();
+      return Future.succeededFuture(List.of());
     }
     log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}'", poLines.size(), holdingId, tenantId);
     poLines.forEach(poLine -> updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantId));
@@ -94,7 +94,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .toList();
     if (CollectionUtils.isEmpty(piecesToUpdate)) {
       log.info("updatePieces:: No pieces to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
-      return Future.succeededFuture();
+      return Future.succeededFuture(List.of());
     }
     log.info("updatePieces:: Updating {} piece(s) with holdingId '{}', setting receivingTenantId to '{}'", pieces.size(), holdingId, tenantId);
     return pieceService.updatePieces(piecesToUpdate, conn, tenantId);
