@@ -9,21 +9,17 @@ import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
-import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
-import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +29,6 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
 
   @Autowired
   private PieceService pieceService;
-
-  @Autowired
-  private ConsortiumConfigurationService consortiumConfigurationService;
 
   @Autowired
   private AuditOutboxService auditOutboxService;
@@ -52,8 +45,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     return new DBClient(getVertx(), tenantId).getPgClient()
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> updatePieces(pieces, itemObject, tenantId, conn))
-        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers))
-        .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers)))
+        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers)))
+      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
@@ -89,11 +82,6 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
         piece.setHoldingId(holdingId);
       }
     });
-  }
-
-  @Override
-  protected Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers) {
-    return consortiumConfigurationService.getConsortiumConfiguration(headers);
   }
 
 }

@@ -5,13 +5,11 @@ import static org.folio.event.InventoryEventType.INVENTORY_HOLDING_CREATE;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
-import org.folio.models.ConsortiumConfiguration;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -20,7 +18,6 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
-import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
@@ -42,9 +39,6 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   private PoLinesService poLinesService;
 
   @Autowired
-  private ConsortiumConfigurationService consortiumConfigurationService;
-
-  @Autowired
   private AuditOutboxService auditOutboxService;
 
   public HoldingCreateAsyncRecordHandler(Vertx vertx, Context context) {
@@ -63,14 +57,15 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
           processPiecesUpdate(holdingId, tenantId, headers, conn)
         );
         return GenericCompositeFuture.all(tenantIdUpdates).mapEmpty();
-      });
+      })
+      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
+      .mapEmpty();
   }
 
   private Future<Void> processPoLinesUpdate(String holdingId, String tenantId, Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByHoldingId(holdingId, conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, tenantId, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
-      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
@@ -78,7 +73,6 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantId, conn))
       .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers))
-      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
@@ -110,11 +104,6 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     locations.stream()
       .filter(location -> Objects.equals(location.getHoldingId(), holdingId))
       .forEach(location -> location.setTenantId(tenantId));
-  }
-
-  @Override
-  protected Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers) {
-    return consortiumConfigurationService.getConsortiumConfiguration(headers);
   }
 
 }

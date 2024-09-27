@@ -5,11 +5,12 @@ import static org.folio.event.util.KafkaEventUtil.getHeaderMap;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
+import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -20,6 +21,9 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
+
+  @Autowired
+  protected ConsortiumConfigurationService consortiumConfigurationService;
 
   private final InventoryEventType inventoryEventType;
 
@@ -48,7 +52,9 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       }
 
       var headers = getHeaderMap(kafkaConsumerRecord.headers());
-      return getTenantId(headers)
+      var headersTenantId = extractTenantFromHeaders(headers);
+      return getTenantId(headers, headersTenantId)
+        .map(tenantId -> logTenantId(tenantId, headersTenantId))
         .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId, headers))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
@@ -59,15 +65,20 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
-  private Future<String> getTenantId(Map<String, String> headers) {
-    return getConsortiumConfiguration(headers)
+  private Future<String> getTenantId(Map<String, String> headers, String tenantId) {
+    return consortiumConfigurationService.getConsortiumConfiguration(headers)
       .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
         .map(ConsortiumConfiguration::centralTenantId)
-        .orElse(extractTenantFromHeaders(headers)));
+        .orElse(tenantId));
+  }
+
+  private String logTenantId(String tenantId, String headersTenantId) {
+    if (!tenantId.equals(headersTenantId)) {
+      log.info("logTenantId:: TenantId from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
+    }
+    return tenantId;
   }
 
   protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers);
-
-  protected abstract Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers);
 
 }
