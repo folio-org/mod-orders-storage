@@ -216,23 +216,18 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<List<PoLine>> getPoLinesByHoldingId(String holdingId, DBClient dbClient) {
+  public Future<List<PoLine>> getPoLinesByHoldingId(String holdingId, Conn conn) {
     var criterion = getCriterionByFieldNameAndValue(LOCATIONS_HOLDING_ID_FIELD, holdingId);
-    return getPoLinesByField(criterion, dbClient);
+    return getPoLinesByField(criterion, conn);
   }
 
-  public Future<List<PoLine>> getPoLinesByField(Criterion criterion, DBClient client) {
-    return getEntitiesByField(PO_LINE_TABLE, PoLine.class, criterion, client);
+  public Future<List<PoLine>> getPoLinesByField(Criterion criterion, Conn conn) {
+    return getEntitiesByField(PO_LINE_TABLE, PoLine.class, criterion, conn);
   }
 
   public Future<Integer> updatePoLines(Collection<PoLine> poLines, Conn conn, String tenantId) {
     String query = buildUpdatePoLineBatchQuery(poLines, tenantId);
     return poLinesDAO.updatePoLines(query, conn);
-  }
-
-  public Future<Integer> updatePoLines(Collection<PoLine> poLines, String tenantId, DBClient dbClient) {
-    String query = buildUpdatePoLineBatchQuery(poLines, tenantId);
-    return poLinesDAO.updatePoLines(query, dbClient);
   }
 
   public Future<Integer> getLastLineNumber(String purchaseOrderId, Conn conn) {

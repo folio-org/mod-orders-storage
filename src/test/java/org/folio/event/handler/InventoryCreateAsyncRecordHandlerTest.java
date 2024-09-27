@@ -3,9 +3,11 @@ package org.folio.event.handler;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.EventType.UPDATE;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -65,7 +67,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
     handlers.forEach(handler -> {
       var res = handler.handle(record);
       assertTrue(res.succeeded());
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
     });
   }
 
@@ -78,7 +80,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
     handlers.forEach(handler -> {
       var res = handler.handle(record);
       assertTrue(res.succeeded());
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
     });
   }
 
@@ -92,7 +94,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
       Throwable actExp = handler.handle(record).cause();
       assertEquals(java.lang.IllegalArgumentException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Cannot process kafkaConsumerRecord: value is null"));
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
     });
   }
 
@@ -105,7 +107,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
       Throwable actExp = handler.handle(record).cause();
       assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
-      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap());
     });
   }
 
@@ -124,7 +126,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
   static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent, String tenantId) {
     var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", Json.encode(resourceEvent));
     Optional.ofNullable(tenantId)
-      .ifPresent(id -> consumerRecord.headers().add(new RecordHeader(TENANT_KEY_LOWER_CASE, id.getBytes())));
+      .ifPresent(id -> consumerRecord.headers().add(new RecordHeader(OKAPI_HEADER_TENANT, id.getBytes())));
     return new KafkaConsumerRecordImpl<>(consumerRecord);
   }
 

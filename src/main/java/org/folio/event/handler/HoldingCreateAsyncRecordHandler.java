@@ -8,14 +8,17 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.lines.PoLinesService;
@@ -41,45 +44,54 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   @Autowired
   private ConsortiumConfigurationService consortiumConfigurationService;
 
+  @Autowired
+  private AuditOutboxService auditOutboxService;
+
   public HoldingCreateAsyncRecordHandler(Vertx vertx, Context context) {
     super(INVENTORY_HOLDING_CREATE, vertx, context);
     SpringContextUtil.autowireDependencies(this, context);
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers) {
     var holdingObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var holdingId = holdingObject.getString(InventoryFields.ID.getValue());
-    var dbClient = new DBClient(getVertx(), tenantId);
-    var tenantIdUpdates = List.of(
-      processPoLinesUpdate(holdingId, tenantId, dbClient),
-      processPiecesUpdate(holdingId, tenantId, dbClient)
-    );
-    return GenericCompositeFuture.all(tenantIdUpdates).mapEmpty();
+    return new DBClient(getVertx(), tenantId).getPgClient()
+      .withTrans(conn -> {
+        var tenantIdUpdates = List.of(
+          processPoLinesUpdate(holdingId, tenantId, headers, conn),
+          processPiecesUpdate(holdingId, tenantId, headers, conn)
+        );
+        return GenericCompositeFuture.all(tenantIdUpdates).mapEmpty();
+      });
   }
 
-  private Future<Void> processPoLinesUpdate(String holdingId, String tenantId, DBClient dbClient) {
-    return poLinesService.getPoLinesByHoldingId(holdingId, dbClient)
-      .compose(poLines -> updatePoLines(poLines, holdingId, tenantId, dbClient));
+  private Future<Void> processPoLinesUpdate(String holdingId, String tenantId, Map<String, String> headers, Conn conn) {
+    return poLinesService.getPoLinesByHoldingId(holdingId, conn)
+      .compose(poLines -> updatePoLines(poLines, holdingId, tenantId, conn))
+      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
+      .mapEmpty();
   }
 
-  private Future<Void> processPiecesUpdate(String holdingId, String tenantId, DBClient dbClient) {
-    return pieceService.getPiecesByHoldingId(holdingId, dbClient)
-      .compose(pieces -> updatePieces(pieces, holdingId, tenantId, dbClient));
+  private Future<Void> processPiecesUpdate(String holdingId, String tenantId, Map<String, String> headers, Conn conn) {
+    return pieceService.getPiecesByHoldingId(holdingId, conn)
+      .compose(pieces -> updatePieces(pieces, holdingId, tenantId, conn))
+      .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers))
+      .mapEmpty();
   }
 
-  private Future<Void> updatePoLines(List<PoLine> poLines, String holdingId, String tenantId, DBClient dbClient) {
+  private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String tenantId, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
       return Future.succeededFuture();
     }
     log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}'", poLines.size(), holdingId, tenantId);
     poLines.forEach(poLine -> updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantId));
-    return poLinesService.updatePoLines(poLines, tenantId, dbClient)
-      .mapEmpty();
+    return poLinesService.updatePoLines(poLines, conn, tenantId)
+      .map(v -> poLines);
   }
 
-  private Future<Void> updatePieces(List<Piece> pieces, String holdingId, String tenantId, DBClient client) {
+  private Future<List<Piece>> updatePieces(List<Piece> pieces, String holdingId, String tenantId, Conn conn) {
     var piecesToUpdate = pieces.stream()
       .filter(piece -> !Objects.equals(piece.getReceivingTenantId(), tenantId))
       .map(piece -> piece.withReceivingTenantId(tenantId))
@@ -89,7 +101,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       return Future.succeededFuture();
     }
     log.info("updatePieces:: Updating {} piece(s) with holdingId '{}', setting receivingTenantId to '{}'", pieces.size(), holdingId, tenantId);
-    return pieceService.updatePieces(piecesToUpdate, client);
+    return pieceService.updatePieces(piecesToUpdate, conn, tenantId);
   }
 
   private void updateLocationTenantIdIfNeeded(List<Location> locations, String holdingId, String tenantId) {
@@ -101,11 +113,6 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   @Override
   protected Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers) {
     return consortiumConfigurationService.getConsortiumConfiguration(headers);
-  }
-
-  @Override
-  protected Logger getLogger() {
-    return log;
   }
 
 }

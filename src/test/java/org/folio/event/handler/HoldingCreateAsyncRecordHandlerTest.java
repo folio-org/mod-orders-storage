@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -24,9 +25,11 @@ import java.util.UUID;
 
 import org.folio.TestUtils;
 import org.folio.event.EventType;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
@@ -36,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -51,6 +55,8 @@ public class HoldingCreateAsyncRecordHandlerTest {
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
+  private AuditOutboxService auditOutboxService;
+  @Mock
   private DBClient dbClient;
   @Mock
   private PostgresClient pgClient;
@@ -65,9 +71,12 @@ public class HoldingCreateAsyncRecordHandlerTest {
       TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
       TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
       doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
     }
   }
 
@@ -98,18 +107,18 @@ public class HoldingCreateAsyncRecordHandlerTest {
       createPoLine(poLineId2, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId1, DIKU_TENANT)))
     );
 
-    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
-    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
-    doReturn(Future.succeededFuture()).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(DIKU_TENANT), any(DBClient.class));
+    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture()).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
     handler.handle(kafkaRecord);
 
-    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
-    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(poLinesService).updatePoLines(eq(expectedPoLines), eq(DIKU_TENANT), any(DBClient.class));
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
+    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
     assertEquals(2, actualPieces.stream().filter(piece -> piece.getReceivingTenantId().equals(DIKU_TENANT)).count());
     assertTrue(actualPieces.containsAll(expectedPieces));
@@ -140,17 +149,17 @@ public class HoldingCreateAsyncRecordHandlerTest {
       createPiece(pieceId1, holdingId1).withReceivingTenantId(DIKU_TENANT)
     );
 
-    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
-    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
+    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture()).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
 
     handler.handle(kafkaRecord);
 
-    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
-    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(DIKU_TENANT), any(DBClient.class));
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
+    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
 
     assertEquals(2, actualPieces.stream().filter(piece -> piece.getReceivingTenantId().equals(DIKU_TENANT)).count());
     assertTrue(actualPieces.containsAll(expectedPieces));
@@ -173,17 +182,17 @@ public class HoldingCreateAsyncRecordHandlerTest {
       createPoLine(poLineId2, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId1, DIKU_TENANT)))
     );
 
-    doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
-    doReturn(Future.succeededFuture()).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(DIKU_TENANT), any(DBClient.class));
+    doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture()).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
     handler.handle(kafkaRecord);
 
-    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
-    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(pieceService, times(0)).updatePieces(anyList(), any(DBClient.class));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(poLinesService).updatePoLines(eq(expectedPoLines), eq(DIKU_TENANT), any(DBClient.class));
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
+    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(pieceService, times(0)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
+    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
     assertEquals(2, actualPoLines.stream()
       .filter(poLine -> poLine.getLocations().stream()
@@ -201,16 +210,16 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var holdingId1 = UUID.randomUUID().toString();
     var kafkaRecord = createHoldingEventKafkaRecord(holdingId1, DIKU_TENANT, CREATE);
 
-    doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
+    doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
 
     handler.handle(kafkaRecord);
 
-    verify(handler).processInventoryCreationEvent(extractResourceEvent(kafkaRecord), DIKU_TENANT);
-    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(DBClient.class));
-    verify(pieceService, times(0)).updatePieces(anyList(), any(DBClient.class));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(DIKU_TENANT), any(DBClient.class));
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
+    verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(pieceService, times(0)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
 
   @Test
@@ -226,15 +235,16 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var actualPoLines = List.of(createPoLine(poLineId, List.of(createLocation(holdingId, "college"), createLocation(holdingId, DIKU_TENANT))));
     var expectedPoLines = List.of(createPoLine(poLineId, List.of(createLocation(holdingId, DIKU_TENANT), createLocation(holdingId, DIKU_TENANT))));
 
-    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId), any(DBClient.class));
-    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId), any(DBClient.class));
-    doThrow(new RuntimeException("Piece save failed")).when(pieceService).updatePieces(eq(expectedPieces), any(DBClient.class));
-    doThrow(new RuntimeException("PoLine save failed")).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(DIKU_TENANT), any(DBClient.class));
+    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId), any(Conn.class));
+    doThrow(new RuntimeException("Piece save failed")).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doThrow(new RuntimeException("PoLine save failed")).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();
 
 
     var actExp = handler.handle(kafkaRecord).cause();
     assertEquals(RuntimeException.class, actExp.getClass());
+    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap());
   }
 
   private static Piece createPiece(String pieceId, String holdingId) {

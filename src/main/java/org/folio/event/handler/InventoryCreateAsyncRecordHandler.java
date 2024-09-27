@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.apache.logging.log4j.Logger;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
@@ -17,7 +16,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
 
   private final InventoryEventType inventoryEventType;
@@ -30,7 +31,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     final var recordValue = kafkaConsumerRecord.value();
-    getLogger().debug("handle:: Trying to process kafkaConsumerRecord: {}", recordValue);
+    log.debug("handle:: Trying to process kafkaConsumerRecord: {}", recordValue);
     try {
       if (recordValue == null) {
         throw new IllegalArgumentException("Cannot process kafkaConsumerRecord: value is null");
@@ -38,37 +39,35 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       var resourceEvent = new JsonObject(recordValue).mapTo(ResourceEvent.class);
       var eventType = resourceEvent.getType();
       if (!Objects.equals(eventType, inventoryEventType.getEventType())) {
-        getLogger().info("handle:: Unsupported event type: {}", eventType);
+        log.info("handle:: Unsupported event type: {}", eventType);
         return Future.succeededFuture();
       }
       if (Objects.isNull(resourceEvent.getNewValue())) {
-        getLogger().warn("handle:: Failed to find new version. 'new' is null: {}", resourceEvent);
+        log.warn("handle:: Failed to find new version. 'new' is null: {}", resourceEvent);
         return Future.succeededFuture();
       }
 
-      return getTenantId(kafkaConsumerRecord)
-        .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId))
-        .onSuccess(v -> getLogger().info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
-        .onFailure(t -> getLogger().error("Failed to process event: {}", recordValue, t))
+      var headers = getHeaderMap(kafkaConsumerRecord.headers());
+      return getTenantId(headers)
+        .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId, headers))
+        .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
+        .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
     } catch (Exception e) {
-      getLogger().error("Failed to process kafkaConsumerRecord: {}", kafkaConsumerRecord, e);
+      log.error("Failed to process kafkaConsumerRecord: {}", kafkaConsumerRecord, e);
       return Future.failedFuture(e);
     }
   }
 
-  private Future<String> getTenantId(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
-    var headers = getHeaderMap(kafkaConsumerRecord.headers());
+  private Future<String> getTenantId(Map<String, String> headers) {
     return getConsortiumConfiguration(headers)
       .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
         .map(ConsortiumConfiguration::centralTenantId)
-        .orElse(extractTenantFromHeaders(kafkaConsumerRecord.headers())));
+        .orElse(extractTenantFromHeaders(headers)));
   }
 
-  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId);
+  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers);
 
   protected abstract Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers);
-
-  protected abstract Logger getLogger();
 
 }

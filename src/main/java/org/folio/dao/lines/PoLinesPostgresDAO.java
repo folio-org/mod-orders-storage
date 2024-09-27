@@ -64,27 +64,11 @@ public class PoLinesPostgresDAO implements PoLinesDAO {
 
   @Override
   public Future<Integer> updatePoLines(String sql, Conn conn) {
-    log.debug("updatePoLines, sql={}", sql);
-    Promise<Integer> promise = Promise.promise();
-    conn.execute(sql)
-      .onSuccess(result -> {
-        log.debug("updatePoLines success, sql={}", sql);
-        promise.complete(result.rowCount());
-      })
-      .onFailure(t -> {
-        log.error("updatePoLines failed, sql={}", sql, t);
-        handleFailure(promise, t);
-      });
-    return promise.future();
-  }
-
-  @Override
-  public Future<Integer> updatePoLines(String sql, DBClient dbClient) {
-    log.debug("updatePoLines, sql={}", sql);
-    return dbClient.getPgClient().execute(sql)
+    log.debug("updatePoLines:: sql={}", sql);
+    return conn.execute(sql)
       .map(SqlResult::rowCount)
-      .onSuccess(result -> log.debug("updatePoLines success, sql={}", sql))
-      .onFailure(t -> log.error("updatePoLines failed, sql={}", sql, t));
-
+      .onSuccess(result -> log.debug("updatePoLines:: success, sql={}", sql))
+      .onFailure(t -> log.error("updatePoLines:: failed, sql={}", sql, t));
   }
+
 }

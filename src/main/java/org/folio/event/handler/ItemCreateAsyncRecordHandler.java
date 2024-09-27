@@ -17,8 +17,11 @@ import org.apache.commons.lang.ObjectUtils;
 import org.apache.logging.log4j.Logger;
 import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.piece.PieceService;
@@ -34,21 +37,26 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   @Autowired
   private ConsortiumConfigurationService consortiumConfigurationService;
 
+  @Autowired
+  private AuditOutboxService auditOutboxService;
+
   public ItemCreateAsyncRecordHandler(Vertx vertx, Context context) {
     super(INVENTORY_ITEM_CREATE, vertx, context);
     SpringContextUtil.autowireDependencies(this, context);
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers) {
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var itemId = itemObject.getString(InventoryFields.ID.getValue());
-    var dbClient = new DBClient(getVertx(), tenantId);
-    return pieceService.getPiecesByItemId(itemId, dbClient)
-      .compose(pieces -> updatePieces(pieces, itemObject, tenantId, dbClient));
+    return new DBClient(getVertx(), tenantId).getPgClient()
+      .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
+        .compose(pieces -> updatePieces(pieces, itemObject, tenantId, conn))
+        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers))
+        .mapEmpty());
   }
 
-  private Future<Void> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, DBClient client) {
+  private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, Conn conn) {
     var holdingId = itemObject.getString(InventoryFields.HOLDINGS_RECORD_ID.getValue());
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     if (CollectionUtils.isEmpty(updateRequiredPieces)) {
@@ -59,7 +67,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     updatePieceFields(updateRequiredPieces, holdingId, tenantId);
     log.info("updatePieces:: Updating '{}' piece(s) out of all '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}'",
       updateRequiredPieces.size(), pieces.size(), tenantId, holdingId);
-    return pieceService.updatePieces(updateRequiredPieces, client);
+    return pieceService.updatePieces(updateRequiredPieces, conn, tenantId);
   }
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantId) {
@@ -85,11 +93,6 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   @Override
   protected Future<Optional<ConsortiumConfiguration>> getConsortiumConfiguration(Map<String, String> headers) {
     return consortiumConfigurationService.getConsortiumConfiguration(headers);
-  }
-
-  @Override
-  protected Logger getLogger() {
-    return log;
   }
 
 }

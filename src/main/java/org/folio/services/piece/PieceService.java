@@ -17,9 +17,11 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Tx;
+import org.folio.util.DbUtils;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -36,21 +38,21 @@ public class PieceService {
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
-    return getPiecesByField(criterion, client);
-  }
-
-  public Future<List<Piece>> getPiecesByItemId(String itemId, DBClient client) {
-    var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
-    return getPiecesByField(criterion, client);
-  }
-
-  public Future<List<Piece>> getPiecesByHoldingId(String itemId, DBClient client) {
-    var criterion = getCriterionByFieldNameAndValue(HOLDING_ID_FIELD, itemId);
-    return getPiecesByField(criterion, client);
-  }
-
-  public Future<List<Piece>> getPiecesByField(Criterion criterion, DBClient client) {
     return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, client);
+  }
+
+  public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
+    var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
+    return getPiecesByField(criterion, conn);
+  }
+
+  public Future<List<Piece>> getPiecesByHoldingId(String itemId, Conn conn) {
+    var criterion = getCriterionByFieldNameAndValue(HOLDING_ID_FIELD, itemId);
+    return getPiecesByField(criterion, conn);
+  }
+
+  public Future<List<Piece>> getPiecesByField(Criterion criterion, Conn conn) {
+    return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, conn);
   }
 
   private Future<Tx<PoLine>> updatePieces(Tx<PoLine> poLineTx, List<Piece> pieces, DBClient client) {
@@ -75,12 +77,12 @@ public class PieceService {
     return promise.future();
   }
 
-  public Future<Void> updatePieces(List<Piece> pieces, DBClient client) {
-    String query = buildUpdatePieceBatchQuery(pieces, client.getTenantId());
-    return client.getPgClient().execute(query)
+  public Future<List<Piece>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
+    String query = buildUpdatePieceBatchQuery(pieces, tenantId);
+    return conn.execute(query)
+      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
       .onSuccess(ar -> log.info("updatePieces:: completed, query={}", query))
-      .onFailure(t -> log.error("updatePieces:: failed, query={}", query, t))
-      .mapEmpty();
+      .onFailure(t -> log.error("updatePieces:: failed, query={}", query, t));
   }
 
   private String buildUpdatePieceBatchQuery(Collection<Piece> pieces, String tenantId) {

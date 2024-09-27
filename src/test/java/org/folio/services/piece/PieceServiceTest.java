@@ -139,14 +139,14 @@ public class PieceServiceTest extends TestBase {
     });
 
     testContext.assertComplete(promise2.future()
-        .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
-        .onComplete(ar -> {
-          List<Piece> actPieces = ar.result();
-          testContext.verify(() -> {
-            assertNull(actPieces);
-          });
-          testContext.completeNow();
-        }));
+      .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
+        testContext.verify(() -> {
+          assertNull(actPieces);
+        });
+        testContext.completeNow();
+      }));
   }
 
   @Test
@@ -158,16 +158,17 @@ public class PieceServiceTest extends TestBase {
       .withId(pieceId)
       .withItemId(itemId);
 
-    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    new DBClient(vertx, TEST_TENANT).getPgClient()
+      .withConn(conn -> {
+        var savePieceFuture = conn.save(PIECES_TABLE, pieceId, piece);
+        var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(itemId, conn));
 
-    var savePieceFuture = client.getPgClient().save(PIECES_TABLE, pieceId, piece);
-    var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(itemId, client));
-
-    testContext.assertComplete(getPiecesFuture).onComplete(ar -> {
-      List<Piece> actPieces = ar.result();
-      testContext.verify(() -> assertThat(actPieces.get(0).getId(), is(pieceId)));
-      testContext.completeNow();
-    });
+        return testContext.assertComplete(getPiecesFuture).onComplete(ar -> {
+          List<Piece> actPieces = ar.result();
+          testContext.verify(() -> assertThat(actPieces.get(0).getId(), is(pieceId)));
+          testContext.completeNow();
+        });
+      });
   }
 
   @Test
@@ -180,16 +181,17 @@ public class PieceServiceTest extends TestBase {
       .withId(pieceId)
       .withItemId(itemId);
 
-    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    new DBClient(vertx, TEST_TENANT).getPgClient()
+      .withConn(conn -> {
+        var savePieceFuture = conn.save(PIECES_TABLE, pieceId, piece);
+        var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(incorrectItemId, conn));
 
-    var savePieceFuture = client.getPgClient().save(PIECES_TABLE, pieceId, piece);
-    var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(incorrectItemId, client));
-
-    testContext.assertComplete(getPiecesFuture)
-      .onComplete(ar -> {
-        List<Piece> actPieces = ar.result();
-        testContext.verify(() -> assertNull(actPieces));
-        testContext.completeNow();
+        return testContext.assertComplete(getPiecesFuture)
+          .onComplete(ar -> {
+            List<Piece> actPieces = ar.result();
+            testContext.verify(() -> assertNull(actPieces));
+            testContext.completeNow();
+          });
       });
   }
 
@@ -268,22 +270,23 @@ public class PieceServiceTest extends TestBase {
 
     var piecesToUpdate = List.of(pieceToUpdate);
 
-    final DBClient client = new DBClient(vertx, TEST_TENANT);
-    var savePieceFuture = client.getPgClient().save(PIECES_TABLE, pieceId, piece);
-    var updatePiecesFuture = savePieceFuture.compose(saved -> pieceService.updatePieces(piecesToUpdate, client));
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn -> {
+      var savePieceFuture = conn.save(PIECES_TABLE, pieceId, piece);
+      var updatePiecesFuture = savePieceFuture.compose(saved -> pieceService.updatePieces(piecesToUpdate, conn, TEST_TENANT));
 
-    testContext.assertComplete(updatePiecesFuture)
-      .onComplete(v -> pieceService.getPiecesByItemId(itemId, client)
-        .onComplete(ar -> {
-          List<Piece> actPieces = ar.result();
-          testContext.verify(() -> {
-            assertThat(actPieces.get(0).getId(), is(pieceId));
-            assertThat(actPieces.get(0).getItemId(), is(itemId));
-            assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
-            assertThat(actPieces.get(0).getReceivingTenantId(), is(TEST_TENANT));
-          });
-          testContext.completeNow();
-        }));
+      return testContext.assertComplete(updatePiecesFuture)
+        .onComplete(v -> pieceService.getPiecesByItemId(itemId, conn)
+          .onComplete(ar -> {
+            List<Piece> actPieces = ar.result();
+            testContext.verify(() -> {
+              assertThat(actPieces.get(0).getId(), is(pieceId));
+              assertThat(actPieces.get(0).getItemId(), is(itemId));
+              assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
+              assertThat(actPieces.get(0).getReceivingTenantId(), is(TEST_TENANT));
+            });
+            testContext.completeNow();
+          }));
+    });
   }
 
 }

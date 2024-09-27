@@ -21,6 +21,11 @@ public final class KafkaEventUtil {
       .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
   }
 
+  public static String extractTenantFromHeaders(Map<String, String> headers) {
+    return Optional.ofNullable(headers.get(OKAPI_HEADER_TENANT))
+      .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
+  }
+
   public static String extractValueFromHeaders(List<KafkaHeader> headers, String key) {
     return headers.stream()
       .filter(header -> header.key().equalsIgnoreCase(key))
