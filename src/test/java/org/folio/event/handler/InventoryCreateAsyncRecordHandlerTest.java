@@ -5,6 +5,11 @@ import static org.folio.event.EventType.CREATE;
 import static org.folio.event.EventType.UPDATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,20 +41,34 @@ public class InventoryCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var context = mockContext(vertx);
       handlers = List.of(
-        new ItemCreateAsyncRecordHandler(context, vertx),
-        new HoldingCreateAsyncRecordHandler(context, vertx)
+        spy(new ItemCreateAsyncRecordHandler(context, vertx)),
+        spy(new HoldingCreateAsyncRecordHandler(context, vertx))
       );
     }
   }
 
   @Test
-  void positive_shouldSkipProcessItemUpdateEvent() {
+  void positive_shouldSkipItemUpdateEvent() {
     var eventObject = createResourceEvent(DIKU_TENANT, UPDATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
 
     handlers.forEach(handler -> {
       var res = handler.handle(record);
       assertTrue(res.succeeded());
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
+    });
+  }
+
+  @Test
+  void negative_shouldSkipItemCreateEventIfResourceEventNewValueIsNull() {
+    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", new JsonObject().encode());
+    consumerRecord.headers().add(new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes()));
+    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
+
+    handlers.forEach(handler -> {
+      var res = handler.handle(record);
+      assertTrue(res.succeeded());
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
     });
   }
 
@@ -63,6 +82,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
       Throwable actExp = handler.handle(record).cause();
       assertEquals(java.lang.IllegalArgumentException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Cannot process kafkaConsumerRecord: value is null"));
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
     });
   }
 
@@ -75,6 +95,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
       Throwable actExp = handler.handle(record).cause();
       assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT));
     });
   }
 
