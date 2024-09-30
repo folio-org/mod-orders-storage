@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.dto.InventoryFields.ID;
+import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.CONSORTIUM_ID;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.DIKU_TENANT;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
@@ -28,6 +29,7 @@ import java.util.function.Function;
 import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.service.AuditOutboxService;
+import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Location;
@@ -76,7 +78,8 @@ public class HoldingCreateAsyncRecordHandlerTest {
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
-      doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());

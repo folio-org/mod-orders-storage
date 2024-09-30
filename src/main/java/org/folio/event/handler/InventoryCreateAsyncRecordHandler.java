@@ -23,6 +23,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
 
+  static final String CONSORTIUM_CONFIG_NOT_FOUND = "Consortium is not set up, skipping record";
+
   @Autowired
   protected ConsortiumConfigurationService consortiumConfigurationService;
 
@@ -56,7 +58,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       return getTenantId(headers)
         .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId, headers, createDBClient(tenantId)))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
-        .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
+        .onFailure(t -> logProcessingException(t, recordValue))
         .map(kafkaConsumerRecord.key());
     } catch (Exception e) {
       log.error("Failed to process kafkaConsumerRecord: {}", kafkaConsumerRecord, e);
@@ -69,10 +71,10 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     return consortiumConfigurationService.getConsortiumConfiguration(headers)
       .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
         .map(ConsortiumConfiguration::centralTenantId)
-        .orElse(headersTenantId))
+        .orElseThrow(() -> new IllegalStateException(CONSORTIUM_CONFIG_NOT_FOUND)))
       .map(tenantId -> {
         if (!tenantId.equals(headersTenantId)) {
-          log.info("logTenantId:: TenantId from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
+          log.info("getTenantId:: TenantId from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
         }
         return tenantId;
       });
@@ -83,5 +85,13 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   }
 
   protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient);
+
+  private static void logProcessingException(Throwable t, String recordValue) {
+    if (Objects.equals(t.getMessage(), CONSORTIUM_CONFIG_NOT_FOUND)) {
+      log.error("Failed to process event: {}, reason: {}", recordValue, t.getMessage());
+    } else {
+      log.error("Failed to process event: {}", recordValue, t);
+    }
+  }
 
 }

@@ -3,8 +3,10 @@ package org.folio.event.handler;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.EventType.UPDATE;
+import static org.folio.event.handler.InventoryCreateAsyncRecordHandler.CONSORTIUM_CONFIG_NOT_FOUND;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -22,10 +24,13 @@ import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -40,6 +45,8 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
   static final String TENANT_KEY_LOWER_CASE = "x-okapi-tenant";
   static final String DIKU_TENANT = "diku";
+  static final String CENTRAL_TENANT = "central";
+  static final String CONSORTIUM_ID = "consortiumId";
 
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
@@ -56,12 +63,65 @@ public class InventoryCreateAsyncRecordHandlerTest {
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       handlers = List.of(spy(itemHandler), spy(holdingHandler));
-      doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
     }
   }
 
+  @ParameterizedTest
+  @ValueSource(strings = {DIKU_TENANT, CENTRAL_TENANT})
+  void negative_shouldProcessInventoryCreate(String tenantId) {
+    var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
+    var record = createKafkaRecord(eventObject, DIKU_TENANT);
+    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(tenantId, CONSORTIUM_ID))))
+      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+
+    handlers.forEach(handler -> {
+      doReturn(Future.succeededFuture()).when(handler).processInventoryCreationEvent(any(ResourceEvent.class), eq(tenantId), anyMap(), any(DBClient.class));
+
+      var res = handler.handle(record);
+      assertTrue(res.succeeded());
+      verify(handler, times(1)).processInventoryCreationEvent(any(ResourceEvent.class), eq(tenantId), anyMap(), any(DBClient.class));
+    });
+  }
+
   @Test
-  void positive_shouldSkipItemUpdateEvent() {
+  void positive_shouldSkipInventoryCreateEventIfConsortiumIsNotSetUp() {
+    var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
+    var record = createKafkaRecord(eventObject, DIKU_TENANT);
+    doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
+
+    handlers.forEach(handler -> {
+      var res = handler.handle(record);
+      assertTrue(res.failed());
+
+      var cause = res.cause();
+      assertInstanceOf(IllegalStateException.class, cause);
+      assertEquals(cause.getMessage(), CONSORTIUM_CONFIG_NOT_FOUND);
+
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
+    });
+  }
+
+  @Test
+  void negative_shouldSkipInventoryCreateEventIfFailedToFetchConsortiumConfig() {
+    var errorMessage = "Failed to fetch config";
+    var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
+    var record = createKafkaRecord(eventObject, DIKU_TENANT);
+    doReturn(Future.failedFuture(new RuntimeException(errorMessage))).when(consortiumConfigurationService).getConsortiumConfiguration(any());
+
+    handlers.forEach(handler -> {
+      var res = handler.handle(record);
+      assertTrue(res.failed());
+
+      var cause = res.cause();
+      assertInstanceOf(RuntimeException.class, cause);
+      assertEquals(cause.getMessage(), errorMessage);
+
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
+    });
+  }
+
+  @Test
+  void positive_shouldSkipInventoryUpdateEvent() {
     var eventObject = createResourceEvent(DIKU_TENANT, UPDATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
 
@@ -73,7 +133,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void negative_shouldSkipItemCreateEventIfResourceEventNewValueIsNull() {
+  void negative_shouldSkipInventoryCreateEventIfResourceEventNewValueIsNull() {
     var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", new JsonObject().encode());
     consumerRecord.headers().add(new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes()));
     var record = new KafkaConsumerRecordImpl<>(consumerRecord);
