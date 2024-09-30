@@ -3,7 +3,6 @@ package org.folio.event.handler;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.EventType.UPDATE;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandler.CONSORTIUM_CONFIG_NOT_FOUND;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -68,7 +67,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
   @ParameterizedTest
   @ValueSource(strings = {DIKU_TENANT, CENTRAL_TENANT})
-  void negative_shouldProcessInventoryCreate(String tenantId) {
+  void positive_shouldProcessInventoryCreate(String tenantId) {
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(tenantId, CONSORTIUM_ID))))
@@ -91,12 +90,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
     handlers.forEach(handler -> {
       var res = handler.handle(record);
-      assertTrue(res.failed());
-
-      var cause = res.cause();
-      assertInstanceOf(IllegalStateException.class, cause);
-      assertEquals(cause.getMessage(), CONSORTIUM_CONFIG_NOT_FOUND);
-
+      assertTrue(res.succeeded());
       verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });
   }
@@ -153,7 +147,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
     handlers.forEach(handler -> {
       Throwable actExp = handler.handle(record).cause();
-      assertEquals(java.lang.IllegalArgumentException.class, actExp.getClass());
+      assertEquals(IllegalArgumentException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Cannot process kafkaConsumerRecord: value is null"));
       verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });
@@ -166,7 +160,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
     handlers.forEach(handler -> {
       Throwable actExp = handler.handle(record).cause();
-      assertEquals(java.lang.IllegalStateException.class, actExp.getClass());
+      assertEquals(IllegalStateException.class, actExp.getClass());
       assertTrue(actExp.getMessage().contains("Tenant must be specified in the kafka record X-Okapi-Tenant"));
       verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });

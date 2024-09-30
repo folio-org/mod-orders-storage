@@ -23,8 +23,6 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
 
-  static final String CONSORTIUM_CONFIG_NOT_FOUND = "Consortium is not set up, skipping record";
-
   @Autowired
   protected ConsortiumConfigurationService consortiumConfigurationService;
 
@@ -55,10 +53,11 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       }
 
       var headers = getHeaderMap(kafkaConsumerRecord.headers());
+      var headersTenantId = extractTenantFromHeaders(headers);
       return getTenantId(headers)
-        .compose(tenantId -> processInventoryCreationEvent(resourceEvent, tenantId, headers, createDBClient(tenantId)))
+        .compose(tenantId -> processInventoryCreationEventIfNeeded(resourceEvent, tenantId, headersTenantId, headers, createDBClient(tenantId)))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
-        .onFailure(t -> logProcessingException(t, recordValue))
+        .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
     } catch (Exception e) {
       log.error("Failed to process kafkaConsumerRecord: {}", kafkaConsumerRecord, e);
@@ -67,31 +66,27 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   }
 
   private Future<String> getTenantId(Map<String, String> headers) {
-    var headersTenantId = extractTenantFromHeaders(headers);
     return consortiumConfigurationService.getConsortiumConfiguration(headers)
       .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
         .map(ConsortiumConfiguration::centralTenantId)
-        .orElseThrow(() -> new IllegalStateException(CONSORTIUM_CONFIG_NOT_FOUND)))
-      .map(tenantId -> {
-        if (!tenantId.equals(headersTenantId)) {
-          log.info("getTenantId:: TenantId from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
-        }
-        return tenantId;
-      });
+        .orElse(null));
   }
 
   protected DBClient createDBClient(String tenantId) {
     return new DBClient(getVertx(), tenantId);
   }
 
-  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient);
-
-  private static void logProcessingException(Throwable t, String recordValue) {
-    if (Objects.equals(t.getMessage(), CONSORTIUM_CONFIG_NOT_FOUND)) {
-      log.error("Failed to process event: {}, reason: {}", recordValue, t.getMessage());
-    } else {
-      log.error("Failed to process event: {}", recordValue, t);
+  private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String tenantId, String headersTenantId, Map<String, String> headers, DBClient dbClient) {
+    if (tenantId == null) {
+      log.debug("processInventoryCreationEventIfNeeded:: Consortium is not set up, skipping record: {}", resourceEvent);
+      return Future.succeededFuture();
     }
+    if (!tenantId.equals(headersTenantId)) {
+      log.info("processInventoryCreationEventIfNeeded:: Tenant id from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
+    }
+    return processInventoryCreationEvent(resourceEvent, tenantId, headers, dbClient);
   }
+
+  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient);
 
 }
