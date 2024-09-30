@@ -47,7 +47,8 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId,
+                                                       Map<String, String> headers, DBClient dbClient) {
     var holdingObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var holdingId = holdingObject.getString(InventoryFields.ID.getValue());
     return dbClient.getPgClient()
@@ -72,7 +73,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   private Future<Void> processPiecesUpdate(String holdingId, String tenantId, Map<String, String> headers, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantId, conn))
-      .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers))
+      .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
@@ -81,7 +82,8 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
       return Future.succeededFuture(List.of());
     }
-    log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}'", poLines.size(), holdingId, tenantId);
+    log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}'",
+      poLines.size(), holdingId, tenantId);
     poLines.forEach(poLine -> updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantId));
     return poLinesService.updatePoLines(poLines, conn, tenantId)
       .map(v -> poLines);
@@ -96,7 +98,8 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       log.info("updatePieces:: No pieces to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
       return Future.succeededFuture(List.of());
     }
-    log.info("updatePieces:: Updating {} piece(s) with holdingId '{}', setting receivingTenantId to '{}'", pieces.size(), holdingId, tenantId);
+    log.info("updatePieces:: Updating {} piece(s) with holdingId '{}', setting receivingTenantId to '{}'",
+      pieces.size(), holdingId, tenantId);
     return pieceService.updatePieces(piecesToUpdate, conn, tenantId);
   }
 

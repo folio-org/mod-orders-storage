@@ -54,7 +54,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
 
       var headers = getHeaderMap(kafkaConsumerRecord.headers());
       var headersTenantId = extractTenantFromHeaders(headers);
-      return getTenantId(headers)
+      return getCentralTenantId(headers)
         .compose(tenantId -> processInventoryCreationEventIfNeeded(resourceEvent, tenantId, headersTenantId, headers, createDBClient(tenantId)))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
@@ -65,7 +65,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
-  private Future<String> getTenantId(Map<String, String> headers) {
+  private Future<String> getCentralTenantId(Map<String, String> headers) {
     return consortiumConfigurationService.getConsortiumConfiguration(headers)
       .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
         .map(ConsortiumConfiguration::centralTenantId)
@@ -76,17 +76,20 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     return new DBClient(getVertx(), tenantId);
   }
 
-  private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String tenantId, String headersTenantId, Map<String, String> headers, DBClient dbClient) {
+  private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String tenantId, String headersTenantId,
+                                                             Map<String, String> headers, DBClient dbClient) {
     if (tenantId == null) {
       log.debug("processInventoryCreationEventIfNeeded:: Consortium is not set up, skipping record: {}", resourceEvent);
       return Future.succeededFuture();
     }
     if (!tenantId.equals(headersTenantId)) {
-      log.info("processInventoryCreationEventIfNeeded:: Tenant id from headers: '{}' is overridden with central tenant id: '{}'", headersTenantId, tenantId);
+      log.info("processInventoryCreationEventIfNeeded:: Tenant id from headers: '{}' is overridden with central tenant id: '{}'",
+        headersTenantId, tenantId);
     }
     return processInventoryCreationEvent(resourceEvent, tenantId, headers, dbClient);
   }
 
-  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient);
+  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId,
+                                                                Map<String, String> headers, DBClient dbClient);
 
 }

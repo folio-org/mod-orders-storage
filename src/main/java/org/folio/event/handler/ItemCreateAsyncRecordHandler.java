@@ -1,6 +1,8 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
+import static org.folio.event.dto.InventoryFields.HOLDINGS_RECORD_ID;
+import static org.folio.event.dto.InventoryFields.ID;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -13,7 +15,6 @@ import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.Piece;
@@ -39,22 +40,23 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId, Map<String, String> headers, DBClient dbClient) {
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId,
+                                                       Map<String, String> headers, DBClient dbClient) {
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
-    var itemId = itemObject.getString(InventoryFields.ID.getValue());
+    var itemId = itemObject.getString(ID.getValue());
     return dbClient.getPgClient()
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> updatePieces(pieces, itemObject, tenantId, conn))
-        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, headers)))
+        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers)))
       .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
-  private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, Conn conn) {
-    var holdingId = itemObject.getString(InventoryFields.HOLDINGS_RECORD_ID.getValue());
+  private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject item, String tenantId, Conn conn) {
+    var holdingId = item.getString(HOLDINGS_RECORD_ID.getValue());
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     if (CollectionUtils.isEmpty(updateRequiredPieces)) {
-      log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}'", itemObject.getString(InventoryFields.ID.getValue()), tenantId);
+      log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}'", item.getString(ID.getValue()), tenantId);
       return Future.succeededFuture(List.of());
     }
 

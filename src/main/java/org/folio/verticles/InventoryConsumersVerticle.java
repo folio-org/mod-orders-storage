@@ -40,7 +40,8 @@ public abstract class InventoryConsumersVerticle extends AbstractConsumersVertic
   @Override
   protected Future<Void> createConsumers() {
     var subscriptionPattern = KafkaTopicNameHelper.formatTopicName(kafkaConfig.getEnvId(), TENANT_ID_PATTERN, eventType.getTopicName());
-    log.info("createConsumers:: Creating Inventory Event consumers with subscriptionPattern: {} for evenType: {}", subscriptionPattern, eventType.name());
+    log.info("createConsumers:: Creating Inventory Event consumers with subscriptionPattern: {} for evenType: {}",
+      subscriptionPattern, eventType.name());
     var subscriptionDefinition = SubscriptionDefinition.builder()
       .eventType(eventType.getTopicName())
       .subscriptionPattern(subscriptionPattern)
