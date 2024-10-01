@@ -13,6 +13,7 @@ import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueN
 import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
+import static org.folio.util.DbUtils.getEntitiesByField;
 
 import javax.ws.rs.core.Response;
 import java.util.Collection;
@@ -25,8 +26,6 @@ import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
@@ -47,12 +46,15 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
+import lombok.extern.log4j.Log4j2;
 import one.util.streamex.StreamEx;
 import org.folio.rest.tools.utils.MetadataUtil;
 
+@Log4j2
 public class PoLinesService {
-  private static final Logger log = LogManager.getLogger();
+
   private static final String POLINE_ID_FIELD = "poLineId";
+  private static final String LOCATIONS_HOLDING_ID_FIELD = "location.holdingId";
 
   private final PoLinesDAO poLinesDAO;
   private final AuditOutboxService auditOutboxService;
@@ -212,6 +214,15 @@ public class PoLinesService {
         }
       });
     return promise.future();
+  }
+
+  public Future<List<PoLine>> getPoLinesByHoldingId(String holdingId, Conn conn) {
+    var criterion = getCriterionByFieldNameAndValue(LOCATIONS_HOLDING_ID_FIELD, holdingId);
+    return getPoLinesByField(criterion, conn);
+  }
+
+  public Future<List<PoLine>> getPoLinesByField(Criterion criterion, Conn conn) {
+    return getEntitiesByField(PO_LINE_TABLE, PoLine.class, criterion, conn);
   }
 
   public Future<Integer> updatePoLines(Collection<PoLine> poLines, Conn conn, String tenantId) {
@@ -501,7 +512,6 @@ public class PoLinesService {
         }
       });
   }
-
 
   private boolean titleUpdateRequired(Title title, PoLine poLine, Map<String, String> headers) {
     return !title.equals(createTitleObject(poLine, title.getAcqUnitIds(), headers)

@@ -1,90 +1,69 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
-import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
+import static org.folio.event.dto.InventoryFields.HOLDINGS_RECORD_ID;
+import static org.folio.event.dto.InventoryFields.ID;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.folio.event.dto.ItemField;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Log4j2
-public class ItemCreateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
+public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHandler {
 
   @Autowired
   private PieceService pieceService;
 
-  public ItemCreateAsyncRecordHandler(Context context, Vertx vertx) {
-    super(vertx, context);
+  @Autowired
+  private AuditOutboxService auditOutboxService;
+
+  public ItemCreateAsyncRecordHandler(Vertx vertx, Context context) {
+    super(INVENTORY_ITEM_CREATE, vertx, context);
     SpringContextUtil.autowireDependencies(this, context);
   }
 
   @Override
-  public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
-    log.debug("handle:: Trying to process kafkaRecord={}", kafkaConsumerRecord.value());
-
-    try {
-      var resourceEvent = new JsonObject(kafkaConsumerRecord.value()).mapTo(ResourceEvent.class);
-
-      var eventType = resourceEvent.getType();
-      if (!Objects.equals(eventType, INVENTORY_ITEM_CREATE.getEventType())) {
-        log.info("handle:: unsupported event type: {}", eventType);
-        return Future.succeededFuture();
-      }
-
-      if (Objects.isNull(resourceEvent.getNewValue())) {
-        log.warn("handle:: Failed to find new version. 'new' is null: {}", resourceEvent);
-        return Future.succeededFuture();
-      }
-
-      var tenantId = extractTenantFromHeaders(kafkaConsumerRecord.headers());
-      var dbClient = new DBClient(getVertx(), tenantId);
-      return processItemCreationEvent(resourceEvent, dbClient)
-        .onSuccess(v -> log.info("handle:: item '{}' event processed successfully", eventType))
-        .onFailure(t -> log.error("Failed to process event: {}", kafkaConsumerRecord.value(), t))
-        .map(kafkaConsumerRecord.key());
-    } catch (Exception e) {
-      log.error("Failed to process item event kafka record, kafkaRecord={}", kafkaConsumerRecord, e);
-      return Future.failedFuture(e);
-    }
-  }
-
-  private Future<Void> processItemCreationEvent(ResourceEvent resourceEvent, DBClient dbClient) {
-    var tenantId = resourceEvent.getTenant();
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId,
+                                                       Map<String, String> headers, DBClient dbClient) {
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
-    var itemId = itemObject.getString(ItemField.ID.getValue());
-
-    return pieceService.getPiecesByItemId(itemId, dbClient)
-      .compose(pieces -> updatePieces(pieces, itemObject, tenantId, dbClient));
+    var itemId = itemObject.getString(ID.getValue());
+    return dbClient.getPgClient()
+      .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
+        .compose(pieces -> updatePieces(pieces, itemObject, tenantId, conn))
+        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers)))
+      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
+      .mapEmpty();
   }
 
-  private Future<Void> updatePieces(List<Piece> pieces, JsonObject itemObject, String tenantId, DBClient client) {
-    if (CollectionUtils.isEmpty(pieces)) {
-      log.info("updatePieces:: no pieces to update found, nothing to update for item={}, tenant={}",
-        itemObject.getString(ItemField.ID.getValue()), tenantId);
-      return Future.succeededFuture();
+  private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject item, String tenantId, Conn conn) {
+    var holdingId = item.getString(HOLDINGS_RECORD_ID.getValue());
+    var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
+    if (CollectionUtils.isEmpty(updateRequiredPieces)) {
+      log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}'", item.getString(ID.getValue()), tenantId);
+      return Future.succeededFuture(List.of());
     }
 
-    var holdingId = itemObject.getString(ItemField.HOLDINGS_RECORD_ID.getValue());
-    var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantId);
     updatePieceFields(updateRequiredPieces, holdingId, tenantId);
-
-    log.info("updatePieces:: updating '{}' piece(s) out of all '{}' piece(s)",
-      updateRequiredPieces.size(), pieces.size());
-    return pieceService.updatePieces(updateRequiredPieces, client);
+    log.info("updatePieces:: Updating '{}' piece(s) out of all '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}'",
+      updateRequiredPieces.size(), pieces.size(), tenantId, holdingId);
+    return pieceService.updatePieces(updateRequiredPieces, conn, tenantId);
   }
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantId) {

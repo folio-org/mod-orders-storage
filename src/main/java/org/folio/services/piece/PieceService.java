@@ -6,6 +6,7 @@ import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueN
 import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
+import static org.folio.util.DbUtils.getEntitiesByField;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,53 +14,45 @@ import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Tx;
+import org.folio.util.DbUtils;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class PieceService {
-  private static final Logger log = LogManager.getLogger();
+
   private static final String POLINE_ID_FIELD = "poLineId";
   private static final String ITEM_ID_FIELD = "itemId";
+  private static final String HOLDING_ID_FIELD = "holdingId";
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
-    return getPiecesByField(criterion, client);
+    return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, client);
   }
 
-  public Future<List<Piece>> getPiecesByItemId(String itemId, DBClient client) {
+  public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
     var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
-    return getPiecesByField(criterion, client);
+    return getPiecesByField(criterion, conn);
   }
 
-  public Future<List<Piece>> getPiecesByField(Criterion criterion, DBClient client) {
-    Promise<List<Piece>> promise = Promise.promise();
-    client.getPgClient().get(PIECES_TABLE, Piece.class, criterion, false, ar -> {
-      if (ar.failed()) {
-        log.error("getPiecesByPoLineId failed, criterion={}", criterion, ar.cause());
-        httpHandleFailure(promise, ar);
-      } else {
-        List<Piece> result = ar.result().getResults();
-        if (result.isEmpty()) {
-          log.info("No piece was found with criterion={}", criterion);
-          promise.complete(null);
-        } else {
-          log.trace("getPiecesByPoLineId complete, criterion={}", criterion);
-          promise.complete(result);
-        }
-      }
-    });
-    return promise.future();
+  public Future<List<Piece>> getPiecesByHoldingId(String itemId, Conn conn) {
+    var criterion = getCriterionByFieldNameAndValue(HOLDING_ID_FIELD, itemId);
+    return getPiecesByField(criterion, conn);
+  }
+
+  public Future<List<Piece>> getPiecesByField(Criterion criterion, Conn conn) {
+    return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, conn);
   }
 
   private Future<Tx<PoLine>> updatePieces(Tx<PoLine> poLineTx, List<Piece> pieces, DBClient client) {
@@ -84,17 +77,12 @@ public class PieceService {
     return promise.future();
   }
 
-  public Future<Void> updatePieces(List<Piece> pieces, DBClient client) {
-    if (CollectionUtils.isEmpty(pieces)) {
-      log.info("No pieces to update");
-      return Future.succeededFuture();
-    }
-
-    String query = buildUpdatePieceBatchQuery(pieces, client.getTenantId());
-    return client.getPgClient().execute(query)
+  public Future<List<Piece>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
+    String query = buildUpdatePieceBatchQuery(pieces, tenantId);
+    return conn.execute(query)
+      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
       .onSuccess(ar -> log.info("updatePieces:: completed, query={}", query))
-      .onFailure(t -> log.error("updatePieces:: failed, query={}", query, t))
-      .mapEmpty();
+      .onFailure(t -> log.error("updatePieces:: failed, query={}", query, t));
   }
 
   private String buildUpdatePieceBatchQuery(Collection<Piece> pieces, String tenantId) {

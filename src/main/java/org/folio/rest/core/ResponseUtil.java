@@ -9,23 +9,20 @@ import java.util.Optional;
 
 import io.vertx.core.Future;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.rest.exceptions.ExceptionUtil;
-import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.Errors;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
+import io.vertx.ext.web.handler.HttpException;
+import lombok.extern.log4j.Log4j2;
+
 import org.folio.rest.persist.PgExceptionUtil;
 
 import javax.ws.rs.core.Response;
 
+@Log4j2
 public class ResponseUtil {
-  private static final Logger log = LogManager.getLogger();
-
-  private ResponseUtil() {
-  }
 
   public static void handleFailure(Promise<?> promise, Throwable throwable) {
     Throwable cause = Optional.ofNullable(throwable.getCause()).orElse(throwable);
@@ -34,19 +31,23 @@ public class ResponseUtil {
     if (log.isErrorEnabled()) {
       log.error("Failure : {}", ExceptionUtil.errorAsString(errors));
     }
-    promise.fail(new HttpException(httpCode, errors));
+    promise.fail(new org.folio.rest.exceptions.HttpException(httpCode, errors));
   }
 
   public static void httpHandleFailure(Promise<?> promise, AsyncResult<?> reply) {
-    Throwable cause = reply.cause();
+    var cause = reply.cause();
     log.error(cause);
-    if (cause instanceof io.vertx.ext.web.handler.HttpException) {
-      promise.fail(cause);
+    promise.fail(httpHandleFailure(cause));
+  }
+
+  public static Throwable httpHandleFailure(Throwable cause) {
+    log.error(cause);
+    if (cause instanceof HttpException) {
+      return cause;
     } else if (StringUtils.isNotBlank(PgExceptionUtil.badRequestMessage(cause))) {
-      promise.fail(new io.vertx.ext.web.handler.HttpException(Response.Status.BAD_REQUEST.getStatusCode(), PgExceptionUtil.badRequestMessage(cause)));
-    } else {
-      promise.fail(new io.vertx.ext.web.handler.HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage()));
+      return new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), PgExceptionUtil.badRequestMessage(cause));
     }
+    return new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), cause.getMessage());
   }
 
   public static void handleFailure(Promise<?> promise, AsyncResult<?> reply) {
@@ -54,9 +55,9 @@ public class ResponseUtil {
   }
 
   private static int extractHttpCode(Throwable cause) {
-     if (cause instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
+     if (cause instanceof HttpException vertxHttpException) {
       return vertxHttpException.getStatusCode();
-    } else if (cause instanceof HttpException httpException){
+    } else if (cause instanceof org.folio.rest.exceptions.HttpException httpException){
       return httpException.getCode();
     }
     return INTERNAL_SERVER_ERROR.getStatusCode();
@@ -66,7 +67,7 @@ public class ResponseUtil {
     final String message;
     final int code;
 
-    if (throwable instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
+    if (throwable instanceof HttpException vertxHttpException) {
       code = vertxHttpException.getStatusCode();
       message = vertxHttpException.getPayload();
     } else {
@@ -83,5 +84,8 @@ public class ResponseUtil {
       .entity(message)
       .build();
   }
+
+  private ResponseUtil() {}
+
 }
 

@@ -321,6 +321,10 @@
           "caseSensitive": false
         },
         {
+          "fieldName": "location.holdingId",
+          "caseSensitive": false
+        },
+        {
           "fieldName": "physical.receiptDue",
           "caseSensitive": false
         },
