@@ -56,7 +56,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .withTrans(conn -> {
         var tenantIdUpdatesFuture = List.of(
           processPoLinesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn),
-          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn)
+          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn) // order of tenants are important
         );
         return GenericCompositeFuture.all(tenantIdUpdatesFuture).mapEmpty();
       })

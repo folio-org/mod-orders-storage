@@ -47,7 +47,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
-        .compose(pieces -> updatePieces(pieces, itemObject, tenantIdFromEvent, centralTenantId, conn))
+        .compose(pieces -> updatePieces(pieces, itemObject, tenantIdFromEvent, centralTenantId, conn)) // order of tenants are important
         .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers)))
       .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
