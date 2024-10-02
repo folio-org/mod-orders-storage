@@ -1,11 +1,11 @@
 package org.folio.event.handler;
 
-import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
-import static org.folio.event.util.KafkaEventUtil.getHeaderMap;
+import static org.folio.kafka.KafkaHeaderUtils.kafkaHeadersToMap;
 
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
@@ -52,10 +52,10 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
         return Future.succeededFuture();
       }
 
-      var headers = getHeaderMap(kafkaConsumerRecord.headers());
-      var headersTenantId = extractTenantFromHeaders(headers);
+      CaseInsensitiveMap<String, String> headers = new CaseInsensitiveMap<>(kafkaHeadersToMap(kafkaConsumerRecord.headers()));
+//      var tenantIdFromHeader = TenantTool.tenantId(headers);
       return getCentralTenantId(headers)
-        .compose(tenantId -> processInventoryCreationEventIfNeeded(resourceEvent, tenantId, headersTenantId, headers, createDBClient(tenantId)))
+        .compose(tenantId -> processInventoryCreationEventIfNeeded(resourceEvent, tenantId, headers, createDBClient(tenantId)))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
@@ -76,20 +76,16 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     return new DBClient(getVertx(), tenantId);
   }
 
-  private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String tenantId, String headersTenantId,
+  private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String centralTenantId,
                                                              Map<String, String> headers, DBClient dbClient) {
-    if (tenantId == null) {
+    if (centralTenantId == null) {
       log.debug("processInventoryCreationEventIfNeeded:: Consortium is not set up, skipping record: {}", resourceEvent);
       return Future.succeededFuture();
     }
-    if (!tenantId.equals(headersTenantId)) {
-      log.info("processInventoryCreationEventIfNeeded:: Tenant id from headers: '{}' is overridden with central tenant id: '{}'",
-        headersTenantId, tenantId);
-    }
-    return processInventoryCreationEvent(resourceEvent, tenantId, headers, dbClient);
+    return processInventoryCreationEvent(resourceEvent, centralTenantId, headers, dbClient);
   }
 
-  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId,
+  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String centralTenantId,
                                                                 Map<String, String> headers, DBClient dbClient);
 
 }
