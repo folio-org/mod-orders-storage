@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
@@ -45,6 +46,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       }
       var resourceEvent = new JsonObject(recordValue).mapTo(ResourceEvent.class);
       var eventType = resourceEvent.getType();
+
       if (!Objects.equals(eventType, inventoryEventType.getEventType())) {
         log.info("handle:: Unsupported event type: {}", eventType);
         return Future.succeededFuture();
@@ -56,8 +58,8 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
 
       CaseInsensitiveMap<String, String> headers = new CaseInsensitiveMap<>(kafkaHeadersToMap(kafkaConsumerRecord.headers()));
 
-      if (Objects.isNull(resourceEvent.getTenant()) && Objects.isNull(headers.get(OKAPI_HEADER_TENANT))){
-        throw new IllegalArgumentException(TENANT_NOT_SPECIFIED_MSG);
+      if (StringUtils.isEmpty(resourceEvent.getTenant()) && Objects.isNull(headers.get(OKAPI_HEADER_TENANT))){
+        throw new IllegalStateException(TENANT_NOT_SPECIFIED_MSG);
       }
 
       return getCentralTenantId(headers)

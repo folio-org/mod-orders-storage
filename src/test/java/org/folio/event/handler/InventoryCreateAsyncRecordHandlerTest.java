@@ -155,7 +155,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
   @Test
   void negative_shouldThrowExceptionIfTenantIdHeaderIsNotProvided() {
-    var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
+    var eventObject = createResourceEvent("", CREATE);
     var record = createKafkaRecord(eventObject);
 
     handlers.forEach(handler -> {
