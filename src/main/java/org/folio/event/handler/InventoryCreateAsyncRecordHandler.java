@@ -55,6 +55,11 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
         return Future.succeededFuture();
       }
 
+      if (Objects.isNull(resourceEvent.getTenant())) {
+        log.warn("handle:: Failed to find tenant. 'tenant' is null: {}", resourceEvent);
+        return Future.succeededFuture();
+      }
+
       var headers = new CaseInsensitiveMap<>(kafkaHeadersToMap(kafkaConsumerRecord.headers()));
       return getCentralTenantId(headers)
         .compose(centralTenantId ->
