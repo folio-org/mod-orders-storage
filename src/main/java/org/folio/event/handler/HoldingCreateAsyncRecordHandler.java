@@ -47,66 +47,76 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId,
+  protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String centralTenantId,
                                                        Map<String, String> headers, DBClient dbClient) {
     var holdingObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var holdingId = holdingObject.getString(InventoryFields.ID.getValue());
+    var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> {
-        var tenantIdUpdates = List.of(
-          processPoLinesUpdate(holdingId, tenantId, headers, conn),
-          processPiecesUpdate(holdingId, tenantId, headers, conn)
+        var tenantIdUpdatesFuture = List.of(
+          processPoLinesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn),
+          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn)
         );
-        return GenericCompositeFuture.all(tenantIdUpdates).mapEmpty();
+        return GenericCompositeFuture.all(tenantIdUpdatesFuture).mapEmpty();
       })
       .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
-  private Future<Void> processPoLinesUpdate(String holdingId, String tenantId, Map<String, String> headers, Conn conn) {
+  private Future<Void> processPoLinesUpdate(String holdingId, String centralTenantId, String tenantIdFromEvent,
+                                            Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByHoldingId(holdingId, conn)
-      .compose(poLines -> updatePoLines(poLines, holdingId, tenantId, conn))
+      .compose(poLines -> updatePoLines(poLines, holdingId, tenantIdFromEvent, centralTenantId, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
-  private Future<Void> processPiecesUpdate(String holdingId, String tenantId, Map<String, String> headers, Conn conn) {
+  private Future<Void> processPiecesUpdate(String holdingId, String tenantIdFromEvent, String centralTenantId,
+                                           Map<String, String> headers, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
-      .compose(pieces -> updatePieces(pieces, holdingId, tenantId, conn))
+      .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
       .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String tenantId, Conn conn) {
+  private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String tenantIdFromEvent,
+                                             String centralTenantId, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
-      log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
+      log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}' in centralTenant: '{}'",
+        holdingId, tenantIdFromEvent, centralTenantId);
       return Future.succeededFuture(List.of());
     }
-    log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}'",
-      poLines.size(), holdingId, tenantId);
-    poLines.forEach(poLine -> updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantId));
-    return poLinesService.updatePoLines(poLines, conn, tenantId)
+
+    log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}' in centralTenant: '{}'",
+      poLines.size(), holdingId, tenantIdFromEvent, centralTenantId);
+    poLines.forEach(poLine -> updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantIdFromEvent));
+
+    return poLinesService.updatePoLines(poLines, conn, centralTenantId)
       .map(v -> poLines);
   }
 
-  private Future<List<Piece>> updatePieces(List<Piece> pieces, String holdingId, String tenantId, Conn conn) {
+  private Future<List<Piece>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent,
+                                           String centralTenantId, Conn conn) {
     var piecesToUpdate = pieces.stream()
-      .filter(piece -> !Objects.equals(piece.getReceivingTenantId(), tenantId))
-      .map(piece -> piece.withReceivingTenantId(tenantId))
+      .filter(piece -> !Objects.equals(piece.getReceivingTenantId(), tenantIdFromEvent))
+      .map(piece -> piece.withReceivingTenantId(tenantIdFromEvent))
       .toList();
     if (CollectionUtils.isEmpty(piecesToUpdate)) {
-      log.info("updatePieces:: No pieces to update for holding: '{}' and tenant: '{}'", holdingId, tenantId);
+      log.info("updatePieces:: No pieces to update for holding: '{}' and tenant: '{}' in centralTenant: '{}",
+        holdingId, tenantIdFromEvent, centralTenantId);
       return Future.succeededFuture(List.of());
     }
-    log.info("updatePieces:: Updating {} piece(s) with holdingId '{}', setting receivingTenantId to '{}'",
-      pieces.size(), holdingId, tenantId);
-    return pieceService.updatePieces(piecesToUpdate, conn, tenantId);
+    log.info("updatePieces:: Updating {} piece(s) with holdingId '{}', setting receivingTenantId to '{}' in centralTenant: '{}'",
+      pieces.size(), holdingId, tenantIdFromEvent, centralTenantId);
+
+    return pieceService.updatePieces(piecesToUpdate, conn, centralTenantId);
   }
 
-  private void updateLocationTenantIdIfNeeded(List<Location> locations, String holdingId, String tenantId) {
+  private void updateLocationTenantIdIfNeeded(List<Location> locations, String holdingId, String tenantIdFromEvent) {
     locations.stream()
       .filter(location -> Objects.equals(location.getHoldingId(), holdingId))
-      .forEach(location -> location.setTenantId(tenantId));
+      .forEach(location -> location.setTenantId(tenantIdFromEvent));
   }
 
 }

@@ -44,45 +44,47 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
                                                        Map<String, String> headers, DBClient dbClient) {
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var itemId = itemObject.getString(ID.getValue());
-    var tenantIdFromHeader = resourceEvent.getTenant();
+    var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
-        .compose(pieces -> updatePieces(pieces, itemObject, centralTenantId, tenantIdFromHeader, conn))
+        .compose(pieces -> updatePieces(pieces, itemObject, tenantIdFromEvent, centralTenantId, conn))
         .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers)))
       .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
-  private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject item, String centralTenantId,
-                                           String tenantIdFromHeader, Conn conn) {
+  private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject item, String tenantIdFromEvent,
+                                           String centralTenantId, Conn conn) {
     var holdingId = item.getString(HOLDINGS_RECORD_ID.getValue());
-    var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantIdFromHeader);
+    var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantIdFromEvent);
+
     if (CollectionUtils.isEmpty(updateRequiredPieces)) {
       log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}' in centralTenant: {}",
-        item.getString(ID.getValue()), tenantIdFromHeader, centralTenantId);
+        item.getString(ID.getValue()), tenantIdFromEvent, centralTenantId);
       return Future.succeededFuture(List.of());
     }
 
-    updatePieceFields(updateRequiredPieces, holdingId, tenantIdFromHeader);
-    log.info("updatePieces:: Updating '{}' piece(s) out of all '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}'",
-      updateRequiredPieces.size(), pieces.size(), tenantIdFromHeader, holdingId);
+    updatePieceFields(updateRequiredPieces, holdingId, tenantIdFromEvent);
+    log.info("updatePieces:: Updating '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}' " +
+        "in centralTenant: '{}'", updateRequiredPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
+
     return pieceService.updatePieces(updateRequiredPieces, conn, centralTenantId);
   }
 
-  private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantId) {
+  private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantIdFromEvent) {
     return pieces.stream()
       .filter(piece -> // filter out pieces that already have the same tenantId and holdingId
-        ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantId)
+        ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantIdFromEvent)
         || ObjectUtils.notEqual(piece.getHoldingId(), holdingId))
       .filter(piece -> // filter out pieces that already have the same tenantId and existing locationId
-        ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantId)
+        ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantIdFromEvent)
         || Objects.isNull(piece.getLocationId()))
       .toList();
   }
 
-  private void updatePieceFields(List<Piece> pieces, String holdingId, String tenantId) {
+  private void updatePieceFields(List<Piece> pieces, String holdingId, String tenantIdFromEvent) {
     pieces.forEach(piece -> {
-      piece.setReceivingTenantId(tenantId);
+      piece.setReceivingTenantId(tenantIdFromEvent);
       if (Objects.isNull(piece.getLocationId())) {
         piece.setHoldingId(holdingId);
       }
