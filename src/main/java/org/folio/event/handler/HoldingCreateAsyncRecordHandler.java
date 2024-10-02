@@ -55,8 +55,9 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     return dbClient.getPgClient()
       .withTrans(conn -> {
         var tenantIdUpdatesFuture = List.of(
-          processPoLinesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn), // order of tenants are important
-          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn) // order of tenants are important
+          // order of tenants is important
+          processPoLinesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn),
+          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn)
         );
         return GenericCompositeFuture.all(tenantIdUpdatesFuture).mapEmpty();
       })
