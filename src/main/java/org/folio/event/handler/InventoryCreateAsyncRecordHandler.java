@@ -1,6 +1,8 @@
 package org.folio.event.handler;
 
+import static org.folio.event.util.KafkaEventUtil.TENANT_NOT_SPECIFIED_MSG;
 import static org.folio.kafka.KafkaHeaderUtils.kafkaHeadersToMap;
+import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 import java.util.Map;
 import java.util.Objects;
@@ -53,7 +55,11 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       }
 
       CaseInsensitiveMap<String, String> headers = new CaseInsensitiveMap<>(kafkaHeadersToMap(kafkaConsumerRecord.headers()));
-//      var tenantIdFromHeader = TenantTool.tenantId(headers);
+
+      if (Objects.isNull(resourceEvent.getTenant()) && Objects.isNull(headers.get(OKAPI_HEADER_TENANT))){
+        throw new IllegalArgumentException(TENANT_NOT_SPECIFIED_MSG);
+      }
+
       return getCentralTenantId(headers)
         .compose(tenantId -> processInventoryCreationEventIfNeeded(resourceEvent, tenantId, headers, createDBClient(tenantId)))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))

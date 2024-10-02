@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public final class KafkaEventUtil {
-  private static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
+  public static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
 
   private KafkaEventUtil() {
 
