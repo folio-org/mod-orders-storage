@@ -92,9 +92,9 @@ public class ItemCreateAsyncRecordHandlerTest {
     String itemId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
     String locationId = UUID.randomUUID().toString();
-    String tenantId = DIKU_TENANT;
+    String eventTenantId = "university";
 
-    var kafkaRecord = createItemEventKafkaRecord(itemId, holdingId, tenantId, CREATE);
+    var kafkaRecord = createItemEventKafkaRecord(itemId, holdingId, eventTenantId, CREATE);
     var actualPiece1 = createPiece(pieceId1, itemId)
       .withHoldingId(holdingId)
       .withReceivingTenantId("college");
@@ -108,9 +108,9 @@ public class ItemCreateAsyncRecordHandlerTest {
     var pieces = List.of(actualPiece1, actualPiece2, actualPiece3);
 
     var expectedPieces = List.of(
-      createPiece(pieceId1, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId),
-      createPiece(pieceId2, itemId).withLocationId(locationId).withReceivingTenantId(tenantId),
-      createPiece(pieceId3, itemId).withHoldingId(holdingId).withReceivingTenantId(tenantId)
+      createPiece(pieceId1, itemId).withHoldingId(holdingId).withReceivingTenantId(eventTenantId),
+      createPiece(pieceId2, itemId).withLocationId(locationId).withReceivingTenantId(eventTenantId),
+      createPiece(pieceId3, itemId).withHoldingId(holdingId).withReceivingTenantId(eventTenantId)
     );
 
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
@@ -124,10 +124,10 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
 
     assertEquals(holdingId, actualPiece1.getHoldingId());
-    assertEquals(tenantId, actualPiece1.getReceivingTenantId());
+    assertEquals(eventTenantId, actualPiece1.getReceivingTenantId());
     assertNull(actualPiece2.getHoldingId());
     assertEquals(locationId, actualPiece2.getLocationId());
-    assertEquals(tenantId, actualPiece2.getReceivingTenantId());
+    assertEquals(eventTenantId, actualPiece2.getReceivingTenantId());
   }
 
   @Test
