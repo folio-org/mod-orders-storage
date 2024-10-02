@@ -64,7 +64,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .mapEmpty();
   }
 
-  private Future<Void> processPoLinesUpdate(String holdingId, String centralTenantId, String tenantIdFromEvent,
+  private Future<Void> processPoLinesUpdate(String holdingId, String tenantIdFromEvent, String centralTenantId,
                                             Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByHoldingId(holdingId, conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, tenantIdFromEvent, centralTenantId, conn))
