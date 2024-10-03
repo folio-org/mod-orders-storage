@@ -21,7 +21,7 @@ public class OrdersSettingsAPI implements OrdersStorageSettings {
   @Autowired
   private SettingService settingService;
 
-  public OrdersSettingsAPI(Vertx vertx, String tenantId) {
+  public OrdersSettingsAPI() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
