@@ -699,6 +699,16 @@
     {
       "id": "configuration",
       "version": "2.0"
+    },
+    {
+      "id": "user-tenants",
+      "version": "1.0"
+    }
+  ],
+  "optional": [
+    {
+      "id": "consortia",
+      "version": "1.0"
     }
   ],
   "permissionSets" : [
