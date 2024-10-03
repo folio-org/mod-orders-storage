@@ -10,10 +10,12 @@ import java.util.Objects;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.models.ConsortiumConfiguration;
+import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.settings.SettingsService;
+import org.folio.services.settings.util.SettingKey;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
@@ -28,6 +30,9 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
 
   @Autowired
   protected ConsortiumConfigurationService consortiumConfigurationService;
+
+  @Autowired
+  protected SettingsService settingsService;
 
   private final InventoryEventType inventoryEventType;
 
@@ -86,9 +91,17 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   private Future<String> getCentralTenantId(Map<String, String> headers) {
     var requestContext = new RequestContext(getContext(), headers);
     return consortiumConfigurationService.getConsortiumConfiguration(requestContext)
-      .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
-        .map(ConsortiumConfiguration::centralTenantId)
-        .orElse(null));
+      .compose(consortiumConfiguration -> {
+        if (consortiumConfiguration.isEmpty()) {
+          return Future.succeededFuture();
+        }
+        var configuration = consortiumConfiguration.get();
+        return settingsService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, headers, getContext())
+          .map(centralOrderingSetting -> centralOrderingSetting.map(Setting::getValue).orElse(null))
+          .map(orderingEnabled -> Boolean.parseBoolean(orderingEnabled)
+            ? configuration.centralTenantId()
+            : null);
+      });
   }
 
   protected DBClient createDBClient(String tenantId) {
@@ -98,7 +111,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String centralTenantId,
                                                              Map<String, String> headers) {
     if (centralTenantId == null) {
-      log.info("processInventoryCreationEventIfNeeded:: Consortium is not set up, skipping event for tenant: {}",
+      log.info("processInventoryCreationEventIfNeeded:: Consortium is not set up with central ordering, skipping event for tenant: {}",
         resourceEvent.getTenant());
       return Future.succeededFuture();
     }
