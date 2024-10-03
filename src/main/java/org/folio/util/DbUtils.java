@@ -3,6 +3,7 @@ package org.folio.util;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 
+import javax.ws.rs.core.Response;
 import java.util.List;
 
 import org.apache.commons.collections4.IteratorUtils;
@@ -12,6 +13,7 @@ import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.interfaces.Results;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
@@ -55,6 +57,10 @@ public final class DbUtils {
     return IteratorUtils.toList(rowSet.iterator()).stream()
       .map(row -> row.toJson().mapTo(entityClass))
       .toList();
+  }
+
+  public static <T> T convertResponseToEntity(Response response, Class<T> entityClass) {
+    return JsonObject.mapFrom(response.getEntity()).mapTo(entityClass);
   }
 
   private DbUtils() {}
