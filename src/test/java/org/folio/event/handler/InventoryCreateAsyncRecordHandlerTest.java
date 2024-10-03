@@ -66,7 +66,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
       var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, context);
       handlers = List.of(spy(itemHandler), spy(holdingHandler));
       handlers.forEach(handler -> {
-        TestUtils.setInternalState(handler, "settingsService", settingService);
+        TestUtils.setInternalState(handler, "settingService", settingService);
         TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService);
       });
     }

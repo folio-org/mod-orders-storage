@@ -76,7 +76,7 @@ public class ItemCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
-      TestUtils.setInternalState(itemHandler, "settingsService", settingService);
+      TestUtils.setInternalState(itemHandler, "settingService", settingService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);

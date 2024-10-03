@@ -79,7 +79,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
       var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
       TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
-      TestUtils.setInternalState(holdingHandler, "settingsService", settingService);
+      TestUtils.setInternalState(holdingHandler, "settingService", settingService);
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
