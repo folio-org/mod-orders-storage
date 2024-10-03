@@ -38,6 +38,7 @@ import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstance
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.services.piece.PieceClaimingService;
 import org.folio.services.piece.PieceService;
+import org.folio.services.setting.SettingService;
 import org.folio.services.title.TitleService;
 import org.folio.services.user.NoOpUserService;
 import org.springframework.context.annotation.Bean;
@@ -192,6 +193,11 @@ public class ApplicationConfig {
   @Bean
   ConsortiumConfigurationService consortiumConfigurationService(RestClient restClient) {
     return new ConsortiumConfigurationService(restClient);
+  }
+
+  @Bean
+  SettingService settingService() {
+    return new SettingService();
   }
 
   @Bean
