@@ -31,6 +31,7 @@ import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
+import org.folio.rest.core.RestClientTest;
 import org.folio.rest.impl.ClaimingAPITest;
 import org.folio.rest.impl.CustomFieldsAPITest;
 import org.folio.rest.impl.EntitiesCrudTest;
@@ -52,6 +53,7 @@ import org.folio.rest.persist.ExceptionUtilTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.services.consortium.ConsortiumConfigurationServiceTest;
 import org.folio.services.lines.PoLIneServiceVertxTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.piece.PieceServiceTest;
@@ -292,5 +294,8 @@ public class StorageTestSuite {
   class CustomFieldsAPITestNested extends CustomFieldsAPITest {}
   @Nested
   class EntititesCustomFieldsTestNested extends EntititesCustomFieldsTest {}
-
+  @Nested
+  class ConsortiumConfigurationServiceTestNested extends ConsortiumConfigurationServiceTest {}
+  @Nested
+  class RestClientTestNested extends RestClientTest {}
 }
