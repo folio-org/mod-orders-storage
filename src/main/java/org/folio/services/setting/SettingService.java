@@ -15,6 +15,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -36,7 +37,7 @@ public class SettingService {
 
   public Future<Optional<Setting>> getSettingByKey(SettingKey settingKey, Map<String, String> okapiHeaders, Context vertxContext) {
     return getSettings(String.format(SETTINGS_BY_KEY_QUERY, settingKey.getName()), 0, 1, okapiHeaders, vertxContext)
-      .map(response -> response.readEntity(SettingCollection.class))
+      .map(response -> JsonObject.mapFrom(response.getEntity()).mapTo(SettingCollection.class))
       .map(settings -> settings.getTotalRecords() == null || settings.getTotalRecords() != 1 || CollectionUtils.isEmpty(settings.getSettings())
         ? Optional.<Setting>empty()
         : Optional.of(settings.getSettings().get(0)));
