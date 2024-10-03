@@ -116,7 +116,8 @@ public class InventoryCreateAsyncRecordHandlerTest {
   void positive_shouldSkipInventoryCreateEventIfCentralOrderingIsDisabled() {
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
-    doReturn(Future.succeededFuture(Response.ok(new SettingCollection()).build()))
+    var emptySettings = new SettingCollection().withTotalRecords(0);
+    doReturn(Future.succeededFuture(Response.ok(emptySettings).build()))
       .when(settingService).getSettings(anyString(), anyInt(), anyInt(), any(Map.class), any(Context.class));
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
