@@ -2,7 +2,6 @@ package org.folio.rest.core;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TOKEN;
-import static org.folio.rest.RestVerticle.OKAPI_USERID_HEADER;
 import static org.folio.rest.util.TestConstants.OKAPI_URL;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,7 +9,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.Map;
 import java.util.UUID;
 
-import io.restassured.http.Header;
 import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
