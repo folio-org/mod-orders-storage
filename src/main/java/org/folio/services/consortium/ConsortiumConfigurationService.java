@@ -1,5 +1,9 @@
 package org.folio.services.consortium;
 
+import static org.folio.services.consortium.util.ConsortiumConfigurationFields.CENTRAL_TENANT_ID;
+import static org.folio.services.consortium.util.ConsortiumConfigurationFields.CONSORTIUM_ID;
+import static org.folio.services.consortium.util.ConsortiumConfigurationFields.USER_TENANTS;
+
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -15,15 +19,11 @@ import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.core.models.RequestEntry;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.util.ResourcePath;
 import org.springframework.beans.factory.annotation.Value;
 
 @Log4j2
 public class ConsortiumConfigurationService {
-
-  private static final String CONSORTIUM_ID_FIELD = "consortiumId";
-  private static final String CENTRAL_TENANT_ID_FIELD = "centralTenantId";
-  private static final String USER_TENANTS_ARRAY_IDENTIFIER = "userTenants";
-  private static final String USER_TENANTS_ENDPOINT = "/user-tenants";
 
   private final RestClient restClient;
   private final AsyncCache<String, Optional<ConsortiumConfiguration>> asyncCache;
@@ -52,16 +52,16 @@ public class ConsortiumConfigurationService {
   }
 
   private CompletableFuture<Optional<ConsortiumConfiguration>> getConsortiumConfigurationFromRemote(RequestContext requestContext) {
-    RequestEntry requestEntry = new RequestEntry(USER_TENANTS_ENDPOINT).withLimit(1);
+    RequestEntry requestEntry = new RequestEntry(ResourcePath.USER_TENANTS_ENDPOINT.getPath()).withLimit(1);
     return restClient.get(requestEntry, requestContext)
-      .map(jsonObject -> jsonObject.getJsonArray(USER_TENANTS_ARRAY_IDENTIFIER))
+      .map(jsonObject -> jsonObject.getJsonArray(USER_TENANTS.getValue()))
       .map(userTenants -> {
         if (userTenants.isEmpty()) {
           log.debug("Central tenant and consortium id not found");
           return Optional.<ConsortiumConfiguration>empty();
         }
-        String consortiumId = userTenants.getJsonObject(0).getString(CONSORTIUM_ID_FIELD);
-        String centralTenantId = userTenants.getJsonObject(0).getString(CENTRAL_TENANT_ID_FIELD);
+        String consortiumId = userTenants.getJsonObject(0).getString(CONSORTIUM_ID.getValue());
+        String centralTenantId = userTenants.getJsonObject(0).getString(CENTRAL_TENANT_ID.getValue());
         log.debug("Found centralTenantId: {} and consortiumId: {}", centralTenantId, consortiumId);
         return Optional.of(new ConsortiumConfiguration(centralTenantId, consortiumId));
       }).toCompletionStage().toCompletableFuture();
