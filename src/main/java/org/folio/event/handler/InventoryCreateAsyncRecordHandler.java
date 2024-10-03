@@ -11,6 +11,7 @@ import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
+import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,8 +63,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
 
       var headers = new CaseInsensitiveMap<>(kafkaHeadersToMap(kafkaConsumerRecord.headers()));
       return getCentralTenantId(headers)
-        .compose(centralTenantId ->
-          processInventoryCreationEventIfNeeded(resourceEvent, centralTenantId, headers, createDBClient(centralTenantId)))
+        .compose(centralTenantId -> processInventoryCreationEventIfNeeded(resourceEvent, centralTenantId, headers))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
@@ -84,7 +84,8 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   }
 
   private Future<String> getCentralTenantId(Map<String, String> headers) {
-    return consortiumConfigurationService.getConsortiumConfiguration(headers)
+    var requestContext = new RequestContext(getContext(), headers);
+    return consortiumConfigurationService.getConsortiumConfiguration(requestContext)
       .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
         .map(ConsortiumConfiguration::centralTenantId)
         .orElse(null));
@@ -95,13 +96,14 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   }
 
   private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String centralTenantId,
-                                                             Map<String, String> headers, DBClient dbClient) {
+                                                             Map<String, String> headers) {
     if (centralTenantId == null) {
       log.info("processInventoryCreationEventIfNeeded:: Consortium is not set up, skipping event for tenant: {}",
         resourceEvent.getTenant());
       return Future.succeededFuture();
     }
 
+    var dbClient = createDBClient(centralTenantId);
     return processInventoryCreationEvent(resourceEvent, centralTenantId, headers, dbClient);
   }
 

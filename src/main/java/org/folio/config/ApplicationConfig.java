@@ -18,6 +18,7 @@ import org.folio.dao.order.OrderPostgresDAO;
 import org.folio.event.service.AuditEventProducer;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.kafka.KafkaConfig;
+import org.folio.rest.core.RestClient;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
@@ -189,8 +190,13 @@ public class ApplicationConfig {
   }
 
   @Bean
-  ConsortiumConfigurationService consortiumConfigurationService(Vertx vertx) {
-    return new ConsortiumConfigurationService(vertx);
+  ConsortiumConfigurationService consortiumConfigurationService(RestClient restClient) {
+    return new ConsortiumConfigurationService(restClient);
+  }
+
+  @Bean
+  RestClient restClient() {
+    return new RestClient();
   }
 
 }
