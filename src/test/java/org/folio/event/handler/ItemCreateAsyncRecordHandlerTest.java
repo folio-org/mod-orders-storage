@@ -38,11 +38,14 @@ import org.folio.event.EventType;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.piece.PieceService;
+import org.folio.services.setting.SettingService;
+import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -52,6 +55,8 @@ public class ItemCreateAsyncRecordHandlerTest {
 
   @Mock
   private PieceService pieceService;
+  @Mock
+  private SettingService settingService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
@@ -71,9 +76,12 @@ public class ItemCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
+      TestUtils.setInternalState(itemHandler, "settingService", settingService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);
+      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
       doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());

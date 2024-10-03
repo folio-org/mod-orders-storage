@@ -6,51 +6,58 @@ import javax.ws.rs.core.Response;
 
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Setting;
-import org.folio.rest.jaxrs.model.SettingCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageSettings;
-import org.folio.rest.persist.PgUtil;
+import org.folio.services.setting.SettingService;
+import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 
 public class OrdersSettingsAPI implements OrdersStorageSettings {
 
-  private static final String SETTINGS_TABLE = "settings";
+  @Autowired
+  private SettingService settingService;
+
+  public OrdersSettingsAPI() {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+  }
 
   @Override
   @Validate
   public void getOrdersStorageSettings(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
                                        Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.get(SETTINGS_TABLE, Setting.class, SettingCollection.class, query, offset, limit,
-      okapiHeaders, vertxContext, GetOrdersStorageSettingsResponse.class, asyncResultHandler);
+    settingService.getSettings(query, offset, limit, okapiHeaders, asyncResultHandler, vertxContext);
   }
 
   @Override
   @Validate
-  public void postOrdersStorageSettings(Setting entity, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.post(SETTINGS_TABLE, entity, okapiHeaders, vertxContext, PostOrdersStorageSettingsResponse.class, asyncResultHandler);
+  public void postOrdersStorageSettings(Setting entity, Map<String, String> okapiHeaders,
+                                        Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    settingService.createSetting(entity, okapiHeaders, asyncResultHandler, vertxContext);
   }
 
   @Override
   @Validate
   public void getOrdersStorageSettingsById(String id, Map<String, String> okapiHeaders,
                                            Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.getById(SETTINGS_TABLE, Setting.class, id, okapiHeaders, vertxContext, GetOrdersStorageSettingsByIdResponse.class, asyncResultHandler);
+    settingService.getSettingById(id, okapiHeaders, asyncResultHandler, vertxContext);
   }
 
   @Override
   @Validate
   public void putOrdersStorageSettingsById(String id, Setting entity, Map<String, String> okapiHeaders,
                                            Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.put(SETTINGS_TABLE, entity, id, okapiHeaders, vertxContext, PutOrdersStorageSettingsByIdResponse.class, asyncResultHandler);
+    settingService.updateSetting(id, entity, okapiHeaders, asyncResultHandler, vertxContext);
   }
 
   @Override
   @Validate
-  public void deleteOrdersStorageSettingsById(String id, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.deleteById(SETTINGS_TABLE, id, okapiHeaders, vertxContext,
-      PutOrdersStorageSettingsByIdResponse.class, asyncResultHandler);
+  public void deleteOrdersStorageSettingsById(String id, Map<String, String> okapiHeaders,
+                                              Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    settingService.deleteSetting(id, okapiHeaders, asyncResultHandler, vertxContext);
   }
 
 }
