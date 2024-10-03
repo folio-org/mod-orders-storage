@@ -14,8 +14,8 @@ import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
-import org.folio.services.settings.SettingsService;
-import org.folio.services.settings.util.SettingKey;
+import org.folio.services.setting.SettingService;
+import org.folio.services.setting.util.SettingKey;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
@@ -32,7 +32,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   protected ConsortiumConfigurationService consortiumConfigurationService;
 
   @Autowired
-  protected SettingsService settingsService;
+  protected SettingService settingService;
 
   private final InventoryEventType inventoryEventType;
 
@@ -96,7 +96,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
           return Future.succeededFuture();
         }
         var configuration = consortiumConfiguration.get();
-        return settingsService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, headers, getContext())
+        return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, headers, getContext())
           .map(centralOrderingSetting -> centralOrderingSetting.map(Setting::getValue).orElse(null))
           .map(orderingEnabled -> Boolean.parseBoolean(orderingEnabled)
             ? configuration.centralTenantId()

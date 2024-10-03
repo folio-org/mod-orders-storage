@@ -24,8 +24,11 @@ import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
+import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.setting.SettingService;
+import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,6 +51,8 @@ public class InventoryCreateAsyncRecordHandlerTest {
   static final String CONSORTIUM_ID = "consortiumId";
 
   @Mock
+  private SettingService settingService;
+  @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
 
   private List<InventoryCreateAsyncRecordHandler> handlers;
@@ -59,9 +64,11 @@ public class InventoryCreateAsyncRecordHandlerTest {
       var context = mockContext(vertx);
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, context);
       var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, context);
-      TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
-      TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       handlers = List.of(spy(itemHandler), spy(holdingHandler));
+      handlers.forEach(handler -> {
+        TestUtils.setInternalState(handler, "settingsService", settingService);
+        TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService);
+      });
     }
   }
 
@@ -70,6 +77,8 @@ public class InventoryCreateAsyncRecordHandlerTest {
   void positive_shouldProcessInventoryCreate(String tenantId) {
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
+    doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+      .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(tenantId, CONSORTIUM_ID))))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
 
@@ -96,11 +105,48 @@ public class InventoryCreateAsyncRecordHandlerTest {
   }
 
   @Test
+  void positive_shouldSkipInventoryCreateEventIfCentralOrderingIsDisabled() {
+    var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
+    var record = createKafkaRecord(eventObject, DIKU_TENANT);
+    doReturn(Future.succeededFuture(Optional.empty()))
+      .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+
+    handlers.forEach(handler -> {
+      var res = handler.handle(record);
+      assertTrue(res.succeeded());
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
+    });
+  }
+
+  @Test
   void negative_shouldSkipInventoryCreateEventIfFailedToFetchConsortiumConfig() {
     var errorMessage = "Failed to fetch config";
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
     doReturn(Future.failedFuture(new RuntimeException(errorMessage))).when(consortiumConfigurationService).getConsortiumConfiguration(any());
+
+    handlers.forEach(handler -> {
+      var res = handler.handle(record);
+      assertTrue(res.failed());
+
+      var cause = res.cause();
+      assertInstanceOf(RuntimeException.class, cause);
+      assertEquals(cause.getMessage(), errorMessage);
+
+      verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
+    });
+  }
+
+  @Test
+  void negative_shouldSkipInventoryCreateEventIfFailedToFetchCentralOrderingSetting() {
+    var errorMessage = "Failed to fetch config";
+    var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
+    var record = createKafkaRecord(eventObject, DIKU_TENANT);
+    doReturn(Future.failedFuture(new RuntimeException(errorMessage))).when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
 
     handlers.forEach(handler -> {
       var res = handler.handle(record);

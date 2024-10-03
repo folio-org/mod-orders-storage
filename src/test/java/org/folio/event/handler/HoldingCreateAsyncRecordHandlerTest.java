@@ -33,12 +33,15 @@ import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
+import org.folio.services.setting.SettingService;
+import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -55,6 +58,8 @@ public class HoldingCreateAsyncRecordHandlerTest {
   private PieceService pieceService;
   @Mock
   private PoLinesService poLinesService;
+  @Mock
+  private SettingService settingService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
@@ -74,10 +79,13 @@ public class HoldingCreateAsyncRecordHandlerTest {
       var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
       TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
+      TestUtils.setInternalState(holdingHandler, "settingsService", settingService);
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
+      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
       doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());

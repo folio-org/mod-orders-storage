@@ -1,4 +1,4 @@
-package org.folio.services.settings.util;
+package org.folio.services.setting.util;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package org.folio.services.settings;
+package org.folio.services.setting;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -9,7 +9,7 @@ import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.model.SettingCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageSettings;
 import org.folio.rest.persist.PgUtil;
-import org.folio.services.settings.util.SettingKey;
+import org.folio.services.setting.util.SettingKey;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -18,7 +18,7 @@ import io.vertx.core.Handler;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
-public class SettingsService {
+public class SettingService {
 
   private static final String SETTINGS_TABLE = "settings";
   private static final String SETTINGS_BY_KEY_QUERY = "key==%s";
