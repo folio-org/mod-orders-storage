@@ -9,6 +9,7 @@ import org.apache.commons.collections4.IteratorUtils;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.rest.persist.interfaces.Results;
 
 import io.vertx.core.Future;
@@ -28,6 +29,10 @@ public final class DbUtils {
 
   public static <T> Future<List<T>> getEntitiesByField(String tableName, Class<T> entityClass, Criterion criterion, Conn conn) {
     return handleEntities(conn.get(tableName, entityClass, criterion, false), tableName, criterion);
+  }
+
+  public static <T> Future<List<T>> getEntitiesByField(String tableName, Class<T> entityClass, CQLWrapper cqlWrapper, Conn conn) {
+    return handleEntities(conn.get(tableName, entityClass, cqlWrapper, false), tableName, null);
   }
 
   public static <T> Future<List<T>> getEntitiesByField(String tableName, Class<T> entityClass, Criterion criterion, DBClient client) {

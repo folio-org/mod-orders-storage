@@ -17,5 +17,4 @@ public class InventoryItemConsumersVerticle extends InventoryConsumersVerticle {
   public InventoryItemConsumersVerticle(KafkaConfig kafkaConfig, AbstractApplicationContext springContext) {
     super(InventoryEventType.INVENTORY_ITEM_CREATE, ItemCreateAsyncRecordHandler::new, kafkaConfig, springContext);
   }
-
 }

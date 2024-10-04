@@ -6,8 +6,9 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 
+import lombok.Getter;
 import org.folio.event.InventoryEventType;
-import org.folio.event.handler.InventoryCreateAsyncRecordHandler;
+import org.folio.kafka.AsyncRecordHandler;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.kafka.SubscriptionDefinition;
@@ -17,18 +18,19 @@ import org.springframework.context.support.AbstractApplicationContext;
 public abstract class InventoryConsumersVerticle extends AbstractConsumersVerticle<InventoryEventType> {
 
   private final InventoryEventType eventType;
-  private final BiFunction<Vertx, Context, InventoryCreateAsyncRecordHandler> recordHandlerSupplier;
+
+  @Getter
+  private final BiFunction<Vertx, Context, AsyncRecordHandler<String, String>> recordHandlerSupplier;
 
   @Autowired
   protected InventoryConsumersVerticle(InventoryEventType eventType,
-                                       BiFunction<Vertx, Context, InventoryCreateAsyncRecordHandler>  recordHandlerSupplier,
+                                       BiFunction<Vertx, Context, AsyncRecordHandler<String, String>>  recordHandlerSupplier,
                                        KafkaConfig kafkaConfig,
                                        AbstractApplicationContext springContext) {
     super(kafkaConfig, springContext);
     this.eventType = eventType;
     this.recordHandlerSupplier = recordHandlerSupplier;
   }
-
 
   /**
    * This method creates a consumer for the given event type.
