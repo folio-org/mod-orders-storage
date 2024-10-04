@@ -5,6 +5,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import io.vertx.kafka.client.producer.KafkaHeader;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
