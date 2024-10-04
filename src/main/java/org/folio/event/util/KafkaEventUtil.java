@@ -5,23 +5,17 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import io.vertx.kafka.client.producer.KafkaHeader;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
 public final class KafkaEventUtil {
-  private static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
+  public static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
 
   private KafkaEventUtil() {
   }
 
   public static String extractTenantFromHeaders(List<KafkaHeader> headers) {
     return Optional.ofNullable(KafkaEventUtil.extractValueFromHeaders(headers, OKAPI_HEADER_TENANT))
-      .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
-  }
-
-  public static String extractTenantFromHeaders(Map<String, String> headers) {
-    return Optional.ofNullable(headers.get(OKAPI_HEADER_TENANT))
       .orElseThrow(() -> new IllegalStateException(TENANT_NOT_SPECIFIED_MSG));
   }
 

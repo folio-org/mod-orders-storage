@@ -1,16 +1,21 @@
 package org.folio.event.handler;
 
+import static org.folio.event.util.KafkaEventUtil.TENANT_NOT_SPECIFIED_MSG;
 import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
-import static org.folio.event.util.KafkaEventUtil.getHeaderMap;
+import static org.folio.kafka.KafkaHeaderUtils.kafkaHeadersToMap;
 
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.models.ConsortiumConfiguration;
+import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.setting.SettingService;
+import org.folio.services.setting.util.SettingKey;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
@@ -26,6 +31,9 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   @Autowired
   protected ConsortiumConfigurationService consortiumConfigurationService;
 
+  @Autowired
+  protected SettingService settingService;
+
   private final InventoryEventType inventoryEventType;
 
   protected InventoryCreateAsyncRecordHandler(InventoryEventType inventoryEventType, Vertx vertx, Context context) {
@@ -38,24 +46,29 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     final var recordValue = kafkaConsumerRecord.value();
     log.debug("handle:: Trying to process kafkaConsumerRecord: {}", recordValue);
     try {
-      if (recordValue == null) {
-        throw new IllegalArgumentException("Cannot process kafkaConsumerRecord: value is null");
-      }
+      verifyKafkaRecord(kafkaConsumerRecord);
+
       var resourceEvent = new JsonObject(recordValue).mapTo(ResourceEvent.class);
       var eventType = resourceEvent.getType();
+
       if (!Objects.equals(eventType, inventoryEventType.getEventType())) {
         log.info("handle:: Unsupported event type: {}", eventType);
         return Future.succeededFuture();
       }
+
       if (Objects.isNull(resourceEvent.getNewValue())) {
         log.warn("handle:: Failed to find new version. 'new' is null: {}", resourceEvent);
         return Future.succeededFuture();
       }
 
-      var headers = getHeaderMap(kafkaConsumerRecord.headers());
-      var headersTenantId = extractTenantFromHeaders(headers);
+      if (Objects.isNull(resourceEvent.getTenant())) {
+        log.warn("handle:: Failed to find tenant. 'tenant' is null: {}", resourceEvent);
+        return Future.succeededFuture();
+      }
+
+      var headers = new CaseInsensitiveMap<>(kafkaHeadersToMap(kafkaConsumerRecord.headers()));
       return getCentralTenantId(headers)
-        .compose(tenantId -> processInventoryCreationEventIfNeeded(resourceEvent, tenantId, headersTenantId, headers, createDBClient(tenantId)))
+        .compose(centralTenantId -> processInventoryCreationEventIfNeeded(resourceEvent, centralTenantId, headers))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
         .map(kafkaConsumerRecord.key());
@@ -65,31 +78,58 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
+  private void verifyKafkaRecord(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
+    if (Objects.isNull(kafkaConsumerRecord.value())) {
+      throw new IllegalArgumentException("Cannot process kafkaConsumerRecord: value is null");
+    }
+
+    if (extractTenantFromHeaders(kafkaConsumerRecord.headers()).isEmpty()) {
+      throw new IllegalStateException(TENANT_NOT_SPECIFIED_MSG);
+    }
+  }
+
   private Future<String> getCentralTenantId(Map<String, String> headers) {
-    return consortiumConfigurationService.getConsortiumConfiguration(headers)
-      .map(optionalConsortiumConfiguration -> optionalConsortiumConfiguration
-        .map(ConsortiumConfiguration::centralTenantId)
-        .orElse(null));
+    var requestContext = new RequestContext(getContext(), headers);
+    return consortiumConfigurationService.getConsortiumConfiguration(requestContext)
+      .compose(consortiumConfiguration -> {
+        if (consortiumConfiguration.isEmpty()) {
+          return Future.succeededFuture();
+        }
+        var configuration = consortiumConfiguration.get();
+        return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, headers, getContext())
+          .map(centralOrderingSetting -> centralOrderingSetting.map(Setting::getValue).orElse(null))
+          .map(orderingEnabled -> Boolean.parseBoolean(orderingEnabled)
+            ? configuration.centralTenantId()
+            : null);
+      });
   }
 
   protected DBClient createDBClient(String tenantId) {
     return new DBClient(getVertx(), tenantId);
   }
 
-  private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String tenantId, String headersTenantId,
-                                                             Map<String, String> headers, DBClient dbClient) {
-    if (tenantId == null) {
-      log.debug("processInventoryCreationEventIfNeeded:: Consortium is not set up, skipping record: {}", resourceEvent);
+  private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String centralTenantId,
+                                                             Map<String, String> headers) {
+    if (centralTenantId == null) {
+      log.info("processInventoryCreationEventIfNeeded:: Consortium is not set up with central ordering, skipping event for tenant: {}",
+        resourceEvent.getTenant());
       return Future.succeededFuture();
     }
-    if (!tenantId.equals(headersTenantId)) {
-      log.info("processInventoryCreationEventIfNeeded:: Tenant id from headers: '{}' is overridden with central tenant id: '{}'",
-        headersTenantId, tenantId);
-    }
-    return processInventoryCreationEvent(resourceEvent, tenantId, headers, dbClient);
+
+    var dbClient = createDBClient(centralTenantId);
+    return processInventoryCreationEvent(resourceEvent, centralTenantId, headers, dbClient);
   }
 
-  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String tenantId,
+  /**
+   * Method process inventory creation event. Should be implemented in the child classes.
+   *
+   * @param resourceEvent   - resource event
+   * @param centralTenantId - central tenant id
+   * @param headers         - headers
+   * @param dbClient        - db client
+   * @return future
+   */
+  protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String centralTenantId,
                                                                 Map<String, String> headers, DBClient dbClient);
 
 }
