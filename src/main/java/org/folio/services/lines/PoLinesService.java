@@ -26,7 +26,6 @@ import java.util.UUID;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.folio.cql2pgjson.exception.FieldException;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
@@ -223,7 +222,8 @@ public class PoLinesService {
     return getPoLinesByField(criterion, conn);
   }
 
-  public Future<List<PoLine>> getPoLinesByCqlQuery(String query, Conn conn) throws FieldException {
+  @SneakyThrows
+  public Future<List<PoLine>> getPoLinesByCqlQuery(String query, Conn conn) {
     var cqlWrapper = new QueryHolder(PO_LINE_TABLE,  query, 0, Integer.MAX_VALUE).buildCQLQuery();
     log.info("getPoLinesByCqlQuery:: Created a CQL query: {}", cqlWrapper.getWhereClause());
     return getEntitiesByField(PO_LINE_TABLE, PoLine.class, cqlWrapper, conn);

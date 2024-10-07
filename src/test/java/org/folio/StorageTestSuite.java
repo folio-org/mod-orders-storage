@@ -56,6 +56,7 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.consortium.ConsortiumConfigurationServiceTest;
+import org.folio.services.inventory.InventoryUpdateServiceTest;
 import org.folio.services.lines.PoLIneServiceVertxTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.piece.PieceServiceTest;
@@ -300,6 +301,8 @@ public class StorageTestSuite {
   class EntititesCustomFieldsTestNested extends EntititesCustomFieldsTest {}
   @Nested
   class ConsortiumConfigurationServiceTestNested extends ConsortiumConfigurationServiceTest {}
+  @Nested
+  class InventoryUpdateServiceTestNested extends InventoryUpdateServiceTest {}
   @Nested
   class RestClientTestNested extends RestClientTest {}
 }
