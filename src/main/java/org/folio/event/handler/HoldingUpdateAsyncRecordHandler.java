@@ -41,7 +41,6 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   public static final String PERMANENT_LOCATION_ID = "permanentLocationId";
   public static final String PO_LINE_LOCATIONS_HOLDING_ID_CQL = "locations==*%s*";
   public static final String STORAGE_HOLDING_URL = "%s/holdings-storage/holdings/%s";
-  public static final boolean DISABLE_AUDIT_OUTBOX_LOGGING = true;
 
   @Autowired
   private PoLinesService poLinesService;
@@ -83,13 +82,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
                                                     String tenantId, String holdingId, Conn conn) throws FieldException {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
       .compose(poLines -> updatePoLines(resourceEvent, tenantId, holdingId, poLines, conn))
-      .compose(poLines -> {
-        // TODO Remove once schema creation is verified
-        if (DISABLE_AUDIT_OUTBOX_LOGGING) {
-          return Future.succeededFuture(poLines);
-        }
-        return auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers).map(poLines);
-      });
+      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers).map(poLines));
   }
 
   private Future<List<PoLine>> updatePoLines(ResourceEvent resourceEvent, String tenantId,

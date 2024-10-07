@@ -6,6 +6,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.okapi.common.XOkapiHeaders;
@@ -21,8 +22,7 @@ import static org.folio.event.util.KafkaEventUtil.getHeaderMap;
 public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
 
   public static final String KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG = "Cannot process kafkaConsumerRecord, value is null";
-
-  private static final String EMPTY_JSON_OBJECT = "{}";
+  public static final String EMPTY_JSON_OBJECT = "{}";
 
   private final InventoryEventType inventoryEventType;
 
@@ -62,7 +62,7 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
   }
 
   private void verifyKafkaRecord(String recordValue, String tenantId) {
-    if (Objects.isNull(recordValue) || recordValue.isBlank() || recordValue.equals(EMPTY_JSON_OBJECT)) {
+    if (StringUtils.isEmpty(recordValue) || recordValue.equals(EMPTY_JSON_OBJECT)) {
       throw new IllegalArgumentException(KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG);
     }
     if (Objects.isNull(tenantId)) {
@@ -77,10 +77,10 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
   /**
    * Method process inventory update event. Should be implemented in the child classes.
    *
-   * @param resourceEvent   - resource event
-   * @param headers         - headers
-   * @param tenantId        - tenantId
-   * @param dbClient        - db client
+   * @param resourceEvent - resource event
+   * @param headers       - headers
+   * @param tenantId      - tenantId
+   * @param dbClient      - db client
    * @return future
    */
   protected abstract Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,

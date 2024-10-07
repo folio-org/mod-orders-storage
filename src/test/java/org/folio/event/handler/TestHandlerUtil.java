@@ -49,7 +49,7 @@ public class TestHandlerUtil {
       .build();
   }
 
-  static ResourceEvent extractResourceEvent(KafkaConsumerRecord<String, String> record) {
-    return Json.decodeValue(record.value(), ResourceEvent.class);
+  static ResourceEvent extractResourceEvent(KafkaConsumerRecord<String, String> kafkaRecord) {
+    return Json.decodeValue(kafkaRecord.value(), ResourceEvent.class);
   }
 }
