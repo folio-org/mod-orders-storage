@@ -23,7 +23,9 @@ import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.event.KafkaEventUtilTest;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.event.handler.HoldingCreateAsyncRecordHandlerTest;
+import org.folio.event.handler.HoldingUpdateAsyncRecordHandlerTest;
 import org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest;
+import org.folio.event.handler.InventoryUpdateAsyncRecordHandlerTest;
 import org.folio.event.handler.ItemCreateAsyncRecordHandlerTest;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.okapi.common.XOkapiHeaders;
@@ -271,9 +273,13 @@ public class StorageTestSuite {
   @Nested
   class InventoryCreateAsyncRecordHandlerTestNested extends InventoryCreateAsyncRecordHandlerTest {}
   @Nested
+  class InventoryUpdateAsyncRecordHandlerTestNested extends InventoryUpdateAsyncRecordHandlerTest {}
+  @Nested
   class ItemCreateAsyncRecordHandlerTestNested extends ItemCreateAsyncRecordHandlerTest {}
   @Nested
   class HoldingCreateAsyncRecordHandlerTestNested extends HoldingCreateAsyncRecordHandlerTest {}
+  @Nested
+  class HoldingUpdateAsyncRecordHandlerTestNested extends HoldingUpdateAsyncRecordHandlerTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
   @Nested
@@ -284,10 +290,8 @@ public class StorageTestSuite {
   class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
   @Nested
   class PoLIneServiceVertxTestNested extends PoLIneServiceVertxTest {}
-
   @Nested
   class PoLineBatchAPITestNested extends PoLineBatchAPITest {}
-
   @Nested
   class ClaimingAPITestNested extends ClaimingAPITest {}
   @Nested
