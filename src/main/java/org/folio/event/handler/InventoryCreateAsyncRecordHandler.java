@@ -10,6 +10,7 @@ import java.util.Objects;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.persist.DBClient;
@@ -96,12 +97,19 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
           return Future.succeededFuture();
         }
         var configuration = consortiumConfiguration.get();
-        return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, headers, getContext())
+        var centralHeadings = prepareHeadingForTenant(configuration.centralTenantId(), headers);
+        return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, centralHeadings, getContext())
           .map(centralOrderingSetting -> centralOrderingSetting.map(Setting::getValue).orElse(null))
           .map(orderingEnabled -> Boolean.parseBoolean(orderingEnabled)
             ? configuration.centralTenantId()
             : null);
       });
+  }
+
+  private Map<String, String> prepareHeadingForTenant(String tenantId, Map<String, String> headers) {
+    var headersCopy = new CaseInsensitiveMap<>(headers);
+    headersCopy.put(XOkapiHeaders.TENANT, tenantId);
+    return headersCopy;
   }
 
   protected DBClient createDBClient(String tenantId) {
