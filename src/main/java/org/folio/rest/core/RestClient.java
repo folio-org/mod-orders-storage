@@ -1,11 +1,8 @@
 package org.folio.rest.core;
 
 import static java.util.Objects.nonNull;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.folio.rest.core.RestConstants.OKAPI_URL;
-
-import java.util.Map;
+import static org.folio.util.HeaderUtils.convertToCaseInsensitiveMultiMap;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -39,7 +36,7 @@ public class RestClient {
   private Future<JsonObject> get(String endpoint, RequestContext requestContext) {
     try {
       logger.debug("Calling GET {}", endpoint);
-      var caseInsensitiveHeader = convertToCaseInsensitiveMap(requestContext.getHeaders());
+      var caseInsensitiveHeader = convertToCaseInsensitiveMultiMap(requestContext.getHeaders());
       return webClient.getAbs(buildAbsEndpoint(endpoint, caseInsensitiveHeader))
         .putHeaders(caseInsensitiveHeader)
         .expect(ResponsePredicate.SC_OK)
@@ -55,12 +52,6 @@ public class RestClient {
       logger.error(EXCEPTION_CALLING_ENDPOINT_MSG, HttpMethod.GET, endpoint, e.getMessage(), e);
       return Future.failedFuture(e);
     }
-  }
-
-  private MultiMap convertToCaseInsensitiveMap(Map<String, String> okapiHeaders) {
-    return MultiMap.caseInsensitiveMultiMap()
-      .addAll(okapiHeaders)
-      .add("Accept", APPLICATION_JSON + ", " + TEXT_PLAIN); // set default Accept header
   }
 
   private String buildAbsEndpoint(String endpoint, MultiMap okapiHeaders) {
