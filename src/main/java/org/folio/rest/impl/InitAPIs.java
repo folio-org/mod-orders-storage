@@ -34,16 +34,24 @@ public class InitAPIs implements InitAPI {
   private static final String SPRING_CONTEXT_KEY = "springContext";
 
   @Value("${edi-export.consumer.verticle.instancesNumber:1}")
-  private int ediExportConsumersVerticleNumber;
+  private int ediExportConsumerVerticleNumber;
+  @Value("${edi-export.consumer.pool.size:10}")
+  private int ediExportConsumerPoolSize;
 
   @Value("${item.consumer.verticle.instancesNumber:1}")
-  private int itemConsumersVerticleNumber;
+  private int itemConsumerVerticleNumber;
+  @Value("${item.consumer.pool.size:10}")
+  private int itemConsumerPoolSize;
 
   @Value("${holding.create.consumer.verticle.instancesNumber:1}")
-  private int holdingCreateConsumersVerticleNumber;
+  private int holdingCreateConsumerVerticleNumber;
+  @Value("${holding.create.consumer.pool.size:10}")
+  private int holdingCreateConsumerPoolSize;
 
   @Value("${holding.update.consumer.verticle.instancesNumber:1}")
-  private int holdingUpdateConsumersVerticleNumber;
+  private int holdingUpdateConsumerVerticleNumber;
+  @Value("${holding.update.consumer.pool.size:10}")
+  private int holdingUpdateConsumerPoolSize;
 
   @Value("${consumer.verticle.mandatory:false}")
   private boolean isConsumersVerticleMandatory;
@@ -96,18 +104,18 @@ public class InitAPIs implements InitAPI {
   private Future<?> deployKafkaConsumersVerticles(Vertx vertx) {
     var springContext = (AbstractApplicationContext) vertx.getOrCreateContext().get(SPRING_CONTEXT_KEY);
     var consumers = List.of(
-      deployVerticle("inventory-item-consumers", itemConsumersVerticleNumber, InventoryItemConsumersVerticle.class, vertx, springContext),
-      deployVerticle("inventory-holding-create-consumers", holdingCreateConsumersVerticleNumber, InventoryHoldingCreateConsumersVerticle.class, vertx, springContext),
-      deployVerticle("inventory-holding-update-consumers", holdingUpdateConsumersVerticleNumber, InventoryHoldingUpdateConsumersVerticle.class, vertx, springContext),
-      deployVerticle("edi-export-orders-history-consumers", ediExportConsumersVerticleNumber, EdiExportOrdersHistoryConsumersVerticle.class, vertx, springContext)
+      deployVerticle("inventory-item-consumers", itemConsumerVerticleNumber, itemConsumerPoolSize, InventoryItemConsumersVerticle.class, vertx, springContext),
+      deployVerticle("inventory-holding-create-consumers", holdingCreateConsumerVerticleNumber, holdingCreateConsumerPoolSize, InventoryHoldingCreateConsumersVerticle.class, vertx, springContext),
+      deployVerticle("inventory-holding-update-consumers", holdingUpdateConsumerVerticleNumber, holdingUpdateConsumerPoolSize, InventoryHoldingUpdateConsumersVerticle.class, vertx, springContext),
+      deployVerticle("edi-export-orders-history-consumers", ediExportConsumerVerticleNumber, ediExportConsumerPoolSize, EdiExportOrdersHistoryConsumersVerticle.class, vertx, springContext)
     );
     return GenericCompositeFuture.all(consumers)
       .onSuccess(future -> log.info("deployKafkaConsumersVerticles:: All {} consumer(s) was successfully started", consumers.size()))
       .onFailure(exception -> log.error("Failed to start consumers", exception));
   }
 
-  private <V extends Verticle> Future<String> deployVerticle(String poolName, int instancesNumber, Class<V> consumerClass, Vertx vertx, AbstractApplicationContext springContext) {
-    var deploymentOptions = new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER).setWorkerPoolName(poolName).setInstances(instancesNumber);
+  private <V extends Verticle> Future<String> deployVerticle(String poolName, int instancesNumber, int poolSize, Class<V> consumerClass, Vertx vertx, AbstractApplicationContext springContext) {
+    var deploymentOptions = new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER).setWorkerPoolName(poolName).setInstances(instancesNumber).setWorkerPoolSize(poolSize);
     return vertx.deployVerticle(() -> springContext.getBean(consumerClass), deploymentOptions);
   }
 }
