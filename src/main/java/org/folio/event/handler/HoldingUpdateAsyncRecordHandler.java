@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.service.AuditOutboxService;
@@ -115,7 +116,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     // recursive invocation of the same consumer on holding instance id batch update
     var updatedPoLines = new ArrayList<PoLine>(poLines.size());
     for (var poline : poLines) {
-      if (!poline.getInstanceId().equals(newInstanceId)) {
+      if (!StringUtils.equals(poline.getInstanceId(), newInstanceId)) {
         updatedPoLines.add(poline.withInstanceId(newInstanceId));
         log.info("updatePoLinesInstanceId:: Added new instance id to POL, poLineId: {}, old instanceId: {}, new instanceId: {}",
           poline.getId(), oldInstanceId, newInstanceId);

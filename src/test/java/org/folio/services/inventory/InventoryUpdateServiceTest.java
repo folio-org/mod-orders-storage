@@ -2,6 +2,7 @@ package org.folio.services.inventory;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import org.folio.CopilotGenerated;
 import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.rest.core.RestClient;
@@ -21,6 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@CopilotGenerated(partiallyGenerated = true)
 public class InventoryUpdateServiceTest {
 
   @InjectMocks
