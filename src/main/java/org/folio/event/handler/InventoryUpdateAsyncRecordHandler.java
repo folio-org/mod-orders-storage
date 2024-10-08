@@ -43,7 +43,8 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
       if (Objects.isNull(tenantId)) {
         throw new IllegalStateException(TENANT_NOT_SPECIFIED_MSG);
       }
-      var holder = createInventoryUpdateHolder(new JsonObject(kafkaRecord.value()).mapTo(ResourceEvent.class), headers, tenantId);
+      var resourceEvent = new JsonObject(kafkaRecord.value()).mapTo(ResourceEvent.class);
+      var holder = createInventoryUpdateHolder(resourceEvent, headers, tenantId);
       if (!Objects.equals(holder.getResourceEvent().getType(), inventoryEventType.getEventType())) {
         log.warn("handle:: Unsupported event type: {}, ignoring record processing", holder.getResourceEvent().getType());
         return Future.succeededFuture(kafkaRecord.key());

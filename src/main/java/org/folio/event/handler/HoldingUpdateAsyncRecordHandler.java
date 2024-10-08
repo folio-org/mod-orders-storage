@@ -55,11 +55,8 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     }
     var requestContext = new RequestContext(getContext(), holder.getHeaders());
     return dbClient.getPgClient()
-      .withTrans(conn -> processPoLinesUpdate(holder, conn)
-        .compose(poLines -> {
-          var adjacentHoldingIds = extractDistinctAdjacentHoldingsToUpdate(holder, poLines);
-          return inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext);
-        }))
+      .withTrans(conn -> processPoLinesUpdate(holder, conn).map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines)))
+      .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
       .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }

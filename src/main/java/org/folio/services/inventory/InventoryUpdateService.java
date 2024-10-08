@@ -15,7 +15,6 @@ import org.folio.rest.core.models.RequestEntry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
 import static org.folio.util.ResourcePath.STORAGE_BATCH_HOLDING_URL;
@@ -36,7 +35,7 @@ public class InventoryUpdateService {
 
   public Future<Void> batchUpdateAdjacentHoldingsWithNewInstanceId(InventoryUpdateHolder holder, List<String> holdingIds,
                                                                    RequestContext requestContext) {
-    if (Objects.isNull(holdingIds) || CollectionUtils.isEmpty(holdingIds)) {
+    if (CollectionUtils.isEmpty(holdingIds)) {
       log.info("batchUpdateAdjacentHoldingsWithNewInstanceId:: No adjacent holdings were found to update, ignoring update");
       return Future.succeededFuture();
     }

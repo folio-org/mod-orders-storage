@@ -1,13 +1,14 @@
 package org.folio.event.util;
 
+import static org.folio.kafka.KafkaHeaderUtils.kafkaHeadersToMap;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 
 import io.vertx.kafka.client.producer.KafkaHeader;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 public final class KafkaEventUtil {
   public static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
@@ -29,8 +30,6 @@ public final class KafkaEventUtil {
   }
 
   public static Map<String, String> getHeaderMap(List<KafkaHeader> headers) {
-    var caseInsensitiveMap = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-    headers.forEach(header -> caseInsensitiveMap.put(header.key(), header.value().toString()));
-    return caseInsensitiveMap;
+    return new CaseInsensitiveMap<>(kafkaHeadersToMap(headers));
   }
 }
