@@ -39,22 +39,22 @@ public class InitAPIs implements InitAPI {
 
   @Value("${edi-export.consumer.verticle.instancesNumber:1}")
   private int ediExportConsumerVerticleNumber;
-  @Value("${edi-export.consumer.pool.size:10}")
+  @Value("${edi-export.consumer.pool.size:5}")
   private int ediExportConsumerPoolSize;
 
   @Value("${item.consumer.verticle.instancesNumber:1}")
   private int itemConsumerVerticleNumber;
-  @Value("${item.consumer.pool.size:10}")
+  @Value("${item.consumer.pool.size:5}")
   private int itemConsumerPoolSize;
 
   @Value("${holding.create.consumer.verticle.instancesNumber:1}")
   private int holdingCreateConsumerVerticleNumber;
-  @Value("${holding.create.consumer.pool.size:10}")
+  @Value("${holding.create.consumer.pool.size:5}")
   private int holdingCreateConsumerPoolSize;
 
   @Value("${holding.update.consumer.verticle.instancesNumber:1}")
   private int holdingUpdateConsumerVerticleNumber;
-  @Value("${holding.update.consumer.pool.size:10}")
+  @Value("${holding.update.consumer.pool.size:5}")
   private int holdingUpdateConsumerPoolSize;
 
   @Value("${consumer.verticle.mandatory:false}")

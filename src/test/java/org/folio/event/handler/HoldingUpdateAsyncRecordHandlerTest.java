@@ -5,6 +5,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.folio.TestUtils;
 import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.service.AuditOutboxService;
@@ -104,8 +105,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate))
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate)),
-      createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate))
+      createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1)),
+      createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1))
     );
 
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
@@ -125,7 +126,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       .filter(poLine -> poLine.getLocations().stream()
         .anyMatch(location -> location.getHoldingId().equals(holdingId1)))
       .count());
-    assertEquals(0, actualPoLines.stream()
+    assertEquals(2, actualPoLines.stream()
       .filter(poLine -> poLine.getSearchLocationIds().stream()
         .anyMatch(searchLocationId -> searchLocationId.equals(permanentSearchLocationId1)))
       .count());
@@ -206,8 +207,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate))
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate)),
-      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate))
+      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1)),
+      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1))
     );
 
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
@@ -230,7 +231,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       .filter(poLine -> poLine.getLocations().stream()
         .anyMatch(location -> location.getHoldingId().equals(holdingId1)))
       .count());
-    assertEquals(0, actualPoLines.stream()
+    assertEquals(2, actualPoLines.stream()
       .filter(poLine -> poLine.getSearchLocationIds().stream()
         .anyMatch(searchLocationId -> searchLocationId.equals(permanentSearchLocationId1)))
       .count());
@@ -302,7 +303,16 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   }
 
   private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings) {
+    return createPoLine(poLineId, instanceId, holdings, null);
+  }
+
+  private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings, List<String> oldPermanentSearchLocationIds) {
+    // The order of searchLocationIds is very important for test mocking
+    // add old ids first, then add new expected ids
     var searchLocationIds = new ArrayList<String>();
+    if (!CollectionUtils.isEmpty(oldPermanentSearchLocationIds)) {
+      searchLocationIds.addAll(oldPermanentSearchLocationIds);
+    }
     holdings.forEach(holding -> searchLocationIds.add(holding.getString(PERMANENT_LOCATION_ID)));
     var locations = new ArrayList<Location>();
     holdings.forEach(holding -> locations.add(new Location().withHoldingId(holding.getString(ID))));

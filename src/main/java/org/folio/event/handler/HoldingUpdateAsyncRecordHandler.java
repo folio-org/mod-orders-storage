@@ -58,7 +58,8 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     var requestContext = new RequestContext(getContext(), holder.getHeaders());
     return dbClient.getPgClient()
       // batchUpdateAdjacentHoldingsWithNewInstanceId must not run in the same transaction as processPoLinesUpdate
-      .withTrans(conn -> processPoLinesUpdate(holder, conn).map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines)))
+      .withTrans(conn -> processPoLinesUpdate(holder, conn))
+      .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
       .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
       .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
@@ -75,18 +76,18 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLines:: No POLs were found for holding to update, holdingId: {}", holder.getHoldingId());
       return Future.succeededFuture(List.of());
     }
-    var updateInstanceId = updatePoLinesInstanceId(holder, poLines);
-    var searchLocationIds = updatePoLinesSearchLocationIds(holder, poLines);
-    if (!updateInstanceId.getLeft() && !searchLocationIds) {
+    var instanceIdUpdated = updatePoLinesInstanceId(holder, poLines);
+    var searchLocationIdsUpdated = updatePoLinesSearchLocationIds(holder, poLines);
+    if (Boolean.FALSE.equals(instanceIdUpdated.getLeft()) && !searchLocationIdsUpdated) {
       log.info("updatePoLines:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(List.of());
     }
     return poLinesService.updatePoLines(poLines, conn, holder.getTenantId())
       .map(v -> {
         log.info("updatePoLines:: Successfully updated POLs for holdingId: {}, POLs updated: {}", holder.getHoldingId(), poLines.size());
-        // Very important to return a null poLine array in case no instanceId update
-        // took place to avoid a recursive invocation of the same consumer
-        return updateInstanceId.getLeft() ? updateInstanceId.getRight() : List.of();
+        // Very important to return an empty poLine array in cases where no
+        // instanceId update took place to avoid a recursive invocation of the same consumer
+        return Boolean.TRUE.equals(instanceIdUpdated.getLeft()) ? instanceIdUpdated.getRight() : List.of();
       });
   }
 
@@ -128,14 +129,9 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLinesSearchLocationIds:: No search location id was changed (ids are the same), ignoring update");
       return false;
     }
-    var oldSearchLocationId = holder.getSearchLocationIdPair().getLeft();
     var newSearchLocationId = holder.getSearchLocationIdPair().getRight();
     for (var poline : poLines) {
       var searchLocationIds = poline.getSearchLocationIds();
-      if (searchLocationIds.remove(oldSearchLocationId)) {
-        log.info("updatePoLinesSearchLocationIds:: Removed old search location from POL, poLineId: {}, searchLocationId: {}",
-          poline.getId(), oldSearchLocationId);
-      }
       if (!searchLocationIds.contains(newSearchLocationId)) {
         searchLocationIds.add(newSearchLocationId);
         log.info("updatePoLinesSearchLocationIds:: Added new search location, poLineId: {}, searchLocationId: {}",

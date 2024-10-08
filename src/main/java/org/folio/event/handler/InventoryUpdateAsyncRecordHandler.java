@@ -79,7 +79,7 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
   }
 
   /**
-   * Method process inventory update event. Should be implemented in the child classes.
+   * Method to process inventory update event. Should be implemented by the child classes.
    *
    * @param holder   - inventory update holder
    * @param dbClient - db client
