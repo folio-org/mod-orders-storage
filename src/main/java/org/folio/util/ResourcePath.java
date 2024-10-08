@@ -4,18 +4,13 @@ package org.folio.util;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
+@AllArgsConstructor
 public enum ResourcePath {
 
-  USER_TENANTS_ENDPOINT("/user-tenants");
-
-  private static final String PATH_BY_ID = "%s/%s";
+  USER_TENANTS_ENDPOINT("/user-tenants"),
+  STORAGE_HOLDING_URL("/holdings-storage/holdings/%s"),
+  STORAGE_BATCH_HOLDING_URL("/holdings-storage/batch/synchronous");
 
   private final String path;
-
-  public String getPathById(String id) {
-    return String.format(PATH_BY_ID, path, id);
-  }
-
 }

@@ -24,6 +24,7 @@ import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
 import org.folio.services.configuration.TenantLocaleSettingsService;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesBatchService;
 import org.folio.services.lines.PoLinesService;
@@ -193,6 +194,11 @@ public class ApplicationConfig {
   @Bean
   ConsortiumConfigurationService consortiumConfigurationService(RestClient restClient) {
     return new ConsortiumConfigurationService(restClient);
+  }
+
+  @Bean
+  InventoryUpdateService inventoryUpdateService(RestClient restClient) {
+    return new InventoryUpdateService(restClient);
   }
 
   @Bean
