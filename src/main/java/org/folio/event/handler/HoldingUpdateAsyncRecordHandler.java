@@ -5,6 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.core.models.RequestContext;
@@ -18,6 +19,7 @@ import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -55,6 +57,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     }
     var requestContext = new RequestContext(getContext(), holder.getHeaders());
     return dbClient.getPgClient()
+      // batchUpdateAdjacentHoldingsWithNewInstanceId must not run in the same transaction as processPoLinesUpdate
       .withTrans(conn -> processPoLinesUpdate(holder, conn).map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines)))
       .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
       .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
@@ -74,7 +77,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     }
     var updateInstanceId = updatePoLinesInstanceId(holder, poLines);
     var searchLocationIds = updatePoLinesSearchLocationIds(holder, poLines);
-    if (!updateInstanceId && !searchLocationIds) {
+    if (!updateInstanceId.getLeft() && !searchLocationIds) {
       log.info("updatePoLines:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(List.of());
     }
@@ -83,10 +86,12 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
         log.info("updatePoLines:: Successfully updated POLs for holdingId: {}, POLs updated: {}", holder.getHoldingId(), poLines.size());
         // Very important to return a null poLine array in case no instanceId update
         // took place to avoid a recursive invocation of the same consumer
-        return updateInstanceId ? poLines : List.of();
+        return updateInstanceId.getLeft() ? updateInstanceId.getRight() : List.of();
       });
   }
 
+  // Create a list of distinct holding ids to update
+  // will exclude the current holdingId coming from the kafka event
   private List<String> extractDistinctAdjacentHoldingsToUpdate(InventoryUpdateHolder holder, List<PoLine> poLines) {
     return poLines.stream()
       .map(PoLine::getLocations)
@@ -98,19 +103,24 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .toList();
   }
 
-  private boolean updatePoLinesInstanceId(InventoryUpdateHolder holder, List<PoLine> poLines) {
+  private Pair<Boolean, List<PoLine>> updatePoLinesInstanceId(InventoryUpdateHolder holder, List<PoLine> poLines) {
     if (holder.instanceIdEqual()) {
       log.info("updatePoLinesInstanceId:: No instance id was changed (ids are the same), ignoring update");
-      return false;
+      return Pair.of(false, List.of());
     }
     var oldInstanceId = holder.getInstanceIdPair().getLeft();
     var newInstanceId = holder.getInstanceIdPair().getRight();
+    // Creating a new list of altered poLines is needed to avoid
+    // recursive invocation of the same consumer on holding instance id batch update
+    var updatedPoLines = new ArrayList<PoLine>(poLines.size());
     for (var poline : poLines) {
-      poline.setInstanceId(newInstanceId);
-      log.info("updatePoLinesInstanceId:: Added new instance id to POL, poLineId: {}, old instanceId: {}, new instanceId: {}",
-        poline.getId(), oldInstanceId, newInstanceId);
+      if (!poline.getInstanceId().equals(newInstanceId)) {
+        updatedPoLines.add(poline.withInstanceId(newInstanceId));
+        log.info("updatePoLinesInstanceId:: Added new instance id to POL, poLineId: {}, old instanceId: {}, new instanceId: {}",
+          poline.getId(), oldInstanceId, newInstanceId);
+      }
     }
-    return true;
+    return Pair.of(true, updatedPoLines);
   }
 
   private boolean updatePoLinesSearchLocationIds(InventoryUpdateHolder holder, List<PoLine> poLines) {
