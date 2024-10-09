@@ -13,7 +13,6 @@ import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.PostgresClient;
 
-import io.vertx.core.Context;
 import io.vertx.core.Future;
 
 public class PoLinesBatchService {
@@ -28,12 +27,11 @@ public class PoLinesBatchService {
   }
 
   public Future<Void> poLinesBatchUpdate(List<PoLine> poLines, PostgresClient pgClient,
-                                         Map<String, String> okapiHeaders, Context vertxContext) {
+                                         Map<String, String> okapiHeaders) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.warn("poLinesBatchUpdate:: po line list is empty");
       return Future.succeededFuture();
     }
-
     return pgClient.withTrans(conn ->
       conn.updateBatch(PO_LINE_TABLE, poLines)
         .compose(rowSet -> poLinesService.updateTitles(conn, poLines, okapiHeaders))
