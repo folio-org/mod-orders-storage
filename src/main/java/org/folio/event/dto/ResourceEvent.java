@@ -9,10 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.folio.event.EventType;
 
 @Data
-@RequiredArgsConstructor
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class ResourceEvent {
+
   private String id;
   private EventType type;
   private String tenant;
@@ -22,5 +23,4 @@ public class ResourceEvent {
   private Object newValue;
   @JsonProperty("old")
   private Object oldValue;
-
 }

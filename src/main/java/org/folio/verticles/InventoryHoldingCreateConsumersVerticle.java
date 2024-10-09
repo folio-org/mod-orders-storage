@@ -11,11 +11,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class InventoryHoldingConsumersVerticle extends InventoryConsumersVerticle {
+public class InventoryHoldingCreateConsumersVerticle extends InventoryConsumersVerticle {
 
   @Autowired
-  public InventoryHoldingConsumersVerticle(KafkaConfig kafkaConfig, AbstractApplicationContext springContext) {
+  public InventoryHoldingCreateConsumersVerticle(KafkaConfig kafkaConfig, AbstractApplicationContext springContext) {
     super(InventoryEventType.INVENTORY_HOLDING_CREATE, HoldingCreateAsyncRecordHandler::new, kafkaConfig, springContext);
   }
-
 }
