@@ -1,6 +1,6 @@
 package org.folio.event.handler;
 
-import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
+import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
