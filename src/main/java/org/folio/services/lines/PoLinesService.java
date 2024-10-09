@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
+import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -411,6 +412,15 @@ public class PoLinesService {
         }
       });
     return promise.future();
+  }
+
+  public Future<Void> updateTitles(Conn conn, List<PoLine> poLines, Map<String, String> headers) {
+    var futures = poLines.stream()
+      .filter(poLine -> !poLine.getIsPackage())
+      .map(poLine -> updateTitle(conn, poLine, headers))
+      .toList();
+    return GenericCompositeFuture.join(futures)
+      .mapEmpty();
   }
 
   private Future<PoLine> updateTitle(Conn conn, Title title, PoLine poLine, Map<String, String> headers) {
