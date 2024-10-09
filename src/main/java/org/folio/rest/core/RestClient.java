@@ -1,12 +1,8 @@
 package org.folio.rest.core;
 
 import static java.util.Objects.nonNull;
-import static javax.ws.rs.core.HttpHeaders.ACCEPT;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
 import static org.folio.rest.core.RestConstants.OKAPI_URL;
-
-import java.util.Map;
+import static org.folio.util.HeaderUtils.convertToCaseInsensitiveMultiMap;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -40,7 +36,7 @@ public class RestClient {
   private Future<JsonObject> get(String endpoint, RequestContext requestContext) {
     var httpMethod = HttpMethod.GET;
     try {
-      var caseInsensitiveHeader = convertToCaseInsensitiveMap(requestContext.getHeaders());
+      var caseInsensitiveHeader = convertToCaseInsensitiveMultiMap(requestContext.getHeaders());
       return webClient.getAbs(buildAbsEndpoint(endpoint, caseInsensitiveHeader))
         .putHeaders(caseInsensitiveHeader)
         .expect(ResponsePredicate.SC_OK)
@@ -61,7 +57,7 @@ public class RestClient {
   private Future<JsonObject> post(String endpoint, JsonObject payload, ResponsePredicate expect, RequestContext requestContext) {
     var httpMethod = HttpMethod.POST;
     try {
-      var caseInsensitiveHeader = convertToCaseInsensitiveMap(requestContext.getHeaders());
+      var caseInsensitiveHeader = convertToCaseInsensitiveMultiMap(requestContext.getHeaders());
       return webClient.postAbs(buildAbsEndpoint(endpoint, caseInsensitiveHeader))
         .putHeaders(caseInsensitiveHeader)
         .expect(expect)
@@ -83,12 +79,6 @@ public class RestClient {
 
   private static void logResponseOnFailure(HttpMethod httpMethod, String endpoint, Throwable e) {
     logger.error(EXCEPTION_CALLING_ENDPOINT_MSG, httpMethod, endpoint, e.getMessage());
-  }
-
-  private MultiMap convertToCaseInsensitiveMap(Map<String, String> okapiHeaders) {
-    return MultiMap.caseInsensitiveMultiMap()
-      .addAll(okapiHeaders)
-      .add(ACCEPT, APPLICATION_JSON + ", " + TEXT_PLAIN); // set default Accept header
   }
 
   private String buildAbsEndpoint(String endpoint, MultiMap okapiHeaders) {

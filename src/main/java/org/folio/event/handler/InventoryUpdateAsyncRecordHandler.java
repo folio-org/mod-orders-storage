@@ -1,5 +1,8 @@
 package org.folio.event.handler;
 
+import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
+import static org.folio.util.HeaderUtils.getHeaderMap;
+
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -15,9 +18,6 @@ import org.folio.rest.persist.DBClient;
 
 import java.util.Map;
 import java.util.Objects;
-
-import static org.folio.event.util.KafkaEventUtil.TENANT_NOT_SPECIFIED_MSG;
-import static org.folio.event.util.KafkaEventUtil.getHeaderMap;
 
 @Log4j2
 public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {

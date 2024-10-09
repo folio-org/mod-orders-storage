@@ -17,7 +17,7 @@ import static org.folio.event.handler.InventoryUpdateAsyncRecordHandler.KAFKA_CO
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
-import static org.folio.event.util.KafkaEventUtil.TENANT_NOT_SPECIFIED_MSG;
+import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
