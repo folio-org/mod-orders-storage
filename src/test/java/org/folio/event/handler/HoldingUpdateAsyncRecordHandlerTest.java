@@ -111,6 +111,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(List.of()), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -162,6 +163,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(expectedPoLines), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -213,6 +215,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(expectedPoLines), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());

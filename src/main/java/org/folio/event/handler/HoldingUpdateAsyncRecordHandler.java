@@ -69,6 +69,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   private Future<List<PoLine>> processPoLinesUpdate(InventoryUpdateHolder holder, Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn)
       .compose(poLines -> updatePoLines(holder, poLines, conn))
+      .compose(poLines -> updateTitles(holder, poLines, conn).map(poLines))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(poLines));
   }
 
@@ -90,6 +91,14 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
         // instanceId update took place to avoid a recursive invocation of the same consumer
         return Boolean.TRUE.equals(instanceIdUpdated.getLeft()) ? instanceIdUpdated.getRight() : List.of();
       });
+  }
+
+  private Future<Void> updateTitles(InventoryUpdateHolder holder, List<PoLine> poLines, Conn conn) {
+    if (CollectionUtils.isEmpty(poLines)) {
+      log.info("updateTitles:: No POL titles were found for holding to update, holdingId: {}", holder.getHoldingId());
+      return Future.succeededFuture();
+    }
+    return poLinesService.updateTitles(conn, poLines, holder.getHeaders());
   }
 
   // Create a list of distinct holding ids to update
