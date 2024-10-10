@@ -138,6 +138,28 @@ public class AuditOutboxService {
   }
 
   /**
+   * Saves pieces outbox log.
+   *
+   * @param conn         connection in transaction
+   * @param pieces       the audited pieces
+   * @param action       action for piece
+   * @param okapiHeaders the okapi headers
+   * @return future with saved outbox log in the same transaction
+   */
+  public Future<Boolean> savePiecesOutboxLog(Conn conn,
+                                            List<Piece> pieces,
+                                            PieceAuditEvent.Action action,
+                                            Map<String, String> okapiHeaders) {
+    var futures = pieces.stream()
+      .map(piece -> savePieceOutboxLog(conn, piece, action, okapiHeaders))
+      .toList();
+
+    return GenericCompositeFuture.join(futures)
+      .map(res -> true)
+      .otherwise(t -> false);
+  }
+
+  /**
    * Saves piece outbox log.
    *
    * @param conn         connection in transaction

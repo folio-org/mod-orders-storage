@@ -1,5 +1,5 @@
 {
-  "exactCount" : 40000,
+  "exactCount" : 50000,
   "scripts": [
     {
       "run": "after",
@@ -140,6 +140,26 @@
       "run": "after",
       "snippetPath": "data-migration/13.8.0/replace_po_number_sequence.ftl",
       "fromModuleVersion": "mod-orders-storage-13.8.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "po_line_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.8.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "purchase_order_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.8.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "title_table.sql",
+      "fromModuleVersion": "mod-orders-storage-13.8.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/13.8.0/populate_search_locations_ids.ftl",
+      "fromModuleVersion": "mod-orders-storage-13.8.0"
     }
   ],
   "tables": [
@@ -233,6 +253,12 @@
         },
         {
           "fieldName": "acqUnitIds"
+        },
+        {
+          "fieldName": "orderType"
+        },
+        {
+          "fieldName": "workflowStatus"
         }
       ],
       "ginIndex": [
@@ -297,6 +323,10 @@
         },
         {
           "fieldName": "location.locationId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "location.holdingId",
           "caseSensitive": false
         },
         {
@@ -382,6 +412,11 @@
           "removeAccents": false,
           "arraySubfield": "fundId",
           "arrayModifiers": ["fundId"]
+        },
+        {
+          "fieldName": "orderFormat",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ],
       "ginIndex": [
@@ -549,11 +584,18 @@
         {
           "fieldName": "supplement",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "bindItemId",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
         {
           "fieldName": "comment"
+        },
+        {
+          "fieldName": "receivingStatus"
         }
       ],
       "ginIndex": [

@@ -22,12 +22,18 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.event.KafkaEventUtilTest;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
+import org.folio.event.handler.HoldingCreateAsyncRecordHandlerTest;
+import org.folio.event.handler.HoldingUpdateAsyncRecordHandlerTest;
+import org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest;
+import org.folio.event.handler.InventoryUpdateAsyncRecordHandlerTest;
+import org.folio.event.handler.ItemCreateAsyncRecordHandlerTest;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
 import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
+import org.folio.rest.core.RestClientTest;
 import org.folio.rest.impl.ClaimingAPITest;
 import org.folio.rest.impl.CustomFieldsAPITest;
 import org.folio.rest.impl.CustomFieldsIndexesTest;
@@ -42,6 +48,7 @@ import org.folio.rest.impl.PurchaseOrderLinesApiTest;
 import org.folio.rest.impl.PurchaseOrderNumberUniquenessTest;
 import org.folio.rest.impl.ReceivingHistoryTest;
 import org.folio.rest.impl.SearchOrderLinesTest;
+import org.folio.rest.impl.TenantReferenceDataTest;
 import org.folio.rest.impl.TenantSampleDataTest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
@@ -49,12 +56,13 @@ import org.folio.rest.persist.ExceptionUtilTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
+import org.folio.services.consortium.ConsortiumConfigurationServiceTest;
+import org.folio.services.inventory.InventoryUpdateServiceTest;
 import org.folio.services.lines.PoLIneServiceVertxTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.piece.PieceServiceTest;
 import org.folio.services.title.TitleServiceTest;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.PomReaderUtilTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
@@ -247,6 +255,8 @@ public class StorageTestSuite {
   @Nested
   class SearchOrderLinesTestNested extends SearchOrderLinesTest {}
   @Nested
+  class TenantRefereceDataTestNested extends TenantReferenceDataTest {}
+  @Nested
   class TenantSampleDataTestNested extends TenantSampleDataTest {}
   @Nested
   class HelperUtilsTestNested extends HelperUtilsTest {}
@@ -263,7 +273,15 @@ public class StorageTestSuite {
   @Nested
   class EdiExportOrdersHistoryAsyncRecordHandlerTestNested extends EdiExportOrdersHistoryAsyncRecordHandlerTest {}
   @Nested
-  class PomReaderUtilTestNested extends PomReaderUtilTest {}
+  class InventoryCreateAsyncRecordHandlerTestNested extends InventoryCreateAsyncRecordHandlerTest {}
+  @Nested
+  class InventoryUpdateAsyncRecordHandlerTestNested extends InventoryUpdateAsyncRecordHandlerTest {}
+  @Nested
+  class ItemCreateAsyncRecordHandlerTestNested extends ItemCreateAsyncRecordHandlerTest {}
+  @Nested
+  class HoldingCreateAsyncRecordHandlerTestNested extends HoldingCreateAsyncRecordHandlerTest {}
+  @Nested
+  class HoldingUpdateAsyncRecordHandlerTestNested extends HoldingUpdateAsyncRecordHandlerTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
   @Nested
@@ -274,10 +292,8 @@ public class StorageTestSuite {
   class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
   @Nested
   class PoLIneServiceVertxTestNested extends PoLIneServiceVertxTest {}
-
   @Nested
   class PoLineBatchAPITestNested extends PoLineBatchAPITest {}
-
   @Nested
   class ClaimingAPITestNested extends ClaimingAPITest {}
   @Nested
@@ -286,5 +302,10 @@ public class StorageTestSuite {
   class CustomFieldsIndexesTestNested extends CustomFieldsIndexesTest {}
   @Nested
   class EntititesCustomFieldsTestNested extends EntititesCustomFieldsTest {}
-
+  @Nested
+  class ConsortiumConfigurationServiceTestNested extends ConsortiumConfigurationServiceTest {}
+  @Nested
+  class InventoryUpdateServiceTestNested extends InventoryUpdateServiceTest {}
+  @Nested
+  class RestClientTestNested extends RestClientTest {}
 }

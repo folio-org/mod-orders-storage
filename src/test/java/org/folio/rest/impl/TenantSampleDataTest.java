@@ -12,10 +12,17 @@ import static org.folio.rest.utils.TestEntities.SUFFIX;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 
+import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
+import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.StorageTestSuite;
@@ -31,6 +38,7 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.utils.TenantApiTestUtil;
 import org.folio.rest.utils.TestEntities;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import io.restassured.http.Header;
@@ -44,6 +52,21 @@ public class TenantSampleDataTest extends TestBase {
   private static final Header PARTIAL_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "partial_tenant");
 
   private static TenantJob tenantJob;
+
+  @BeforeAll
+  static void createRequiredTables() {
+    createTable("inventory_schema.sql");
+  }
+
+  @SneakyThrows
+  private static void createTable(String schemaName) {
+    InputStream tableInput = TenantSampleDataTest.class.getClassLoader().getResourceAsStream(schemaName);
+    String sqlFile = IOUtils.toString(Objects.requireNonNull(tableInput), StandardCharsets.UTF_8);
+    CompletableFuture<Void> schemaCreated = new CompletableFuture<>();
+    PostgresClient.getInstance(StorageTestSuite.getVertx()).runSQLFile(sqlFile, false)
+      .onComplete(listAsyncResult -> schemaCreated.complete(null));
+    schemaCreated.get(60, TimeUnit.SECONDS);
+  }
 
   @AfterAll
   public static void after() {

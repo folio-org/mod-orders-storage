@@ -56,7 +56,7 @@
     <testcontainers.version>1.19.6</testcontainers.version>
 
     <!--Sonar properties-->
-    <sonar.exclusions>**/models/**.java, **/HttpException.java, **/ErrorCodes.java</sonar.exclusions>
+    <sonar.exclusions>**/models/**.java, **/event/dto/**.java, **/HttpException.java, **/ErrorCodes.java</sonar.exclusions>
     <sonar.test.exclusions>**/*Test.java</sonar.test.exclusions>
     <argLine />
   </properties>
@@ -233,6 +233,11 @@
       <version>${lombok.version}</version>
       <optional>true</optional>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>3.1.3</version>
     </dependency>
     <dependency>
       <groupId>net.mguenther.kafka</groupId>

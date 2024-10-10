@@ -9,7 +9,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.UUID;
 
@@ -50,14 +49,16 @@ public class PieceServiceTest extends TestBase {
   private final String newInstanceId = UUID.randomUUID().toString();
 
   @BeforeEach
-  public void initMocks() throws MalformedURLException {
-    MockitoAnnotations.openMocks(this);
-    pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
-    tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
+  public void initMocks() throws Exception {
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
+      tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
+    }
   }
 
   @AfterEach
-  void cleanupData() throws MalformedURLException {
+  void cleanupData() {
+
     deleteTenant(tenantJob, TEST_TENANT_HEADER);
   }
 
@@ -138,18 +139,64 @@ public class PieceServiceTest extends TestBase {
     });
 
     testContext.assertComplete(promise2.future()
-        .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
-        .onComplete(ar -> {
-          List<Piece> actPieces = ar.result();
-          testContext.verify(() -> {
-            assertNull(actPieces);
-          });
-          testContext.completeNow();
-        }));
+      .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
+        testContext.verify(() -> {
+          assertNull(actPieces);
+        });
+        testContext.completeNow();
+      }));
   }
 
   @Test
-  void shouldUpdatePieces(Vertx vertx, VertxTestContext testContext) {
+  void shouldReturnPiecesByItemId(Vertx vertx, VertxTestContext testContext) {
+    String itemId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withItemId(itemId);
+
+    new DBClient(vertx, TEST_TENANT).getPgClient()
+      .withConn(conn -> {
+        var savePieceFuture = conn.save(PIECES_TABLE, pieceId, piece);
+        var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(itemId, conn));
+
+        return testContext.assertComplete(getPiecesFuture).onComplete(ar -> {
+          List<Piece> actPieces = ar.result();
+          testContext.verify(() -> assertThat(actPieces.get(0).getId(), is(pieceId)));
+          testContext.completeNow();
+        });
+      });
+  }
+
+  @Test
+  void shouldFailedGetPiecesByItemId(Vertx vertx, VertxTestContext testContext) {
+    String itemId = UUID.randomUUID().toString();
+    String incorrectItemId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withItemId(itemId);
+
+    new DBClient(vertx, TEST_TENANT).getPgClient()
+      .withConn(conn -> {
+        var savePieceFuture = conn.save(PIECES_TABLE, pieceId, piece);
+        var getPiecesFuture = savePieceFuture.compose(saved -> pieceService.getPiecesByItemId(incorrectItemId, conn));
+
+        return testContext.assertComplete(getPiecesFuture)
+          .onComplete(ar -> {
+            List<Piece> actPieces = ar.result();
+            testContext.verify(() -> assertNull(actPieces));
+            testContext.completeNow();
+          });
+      });
+  }
+
+  @Test
+  void shouldUpdatePiecesByPoLineAndInstanceRef(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
@@ -201,6 +248,45 @@ public class PieceServiceTest extends TestBase {
             });
             testContext.completeNow();
           })));
+  }
+
+  @Test
+  void shouldUpdatePieces(Vertx vertx, VertxTestContext testContext) {
+    var itemId = UUID.randomUUID().toString();
+    var pieceId = UUID.randomUUID().toString();
+    var oldHoldingId = UUID.randomUUID().toString();
+
+    var piece = new Piece()
+      .withId(pieceId)
+      .withHoldingId(oldHoldingId)
+      .withItemId(itemId)
+      .withReceivingTenantId("test_college");
+
+    var pieceToUpdate = new Piece()
+      .withId(pieceId)
+      .withItemId(itemId)
+      .withHoldingId(newHoldingId)
+      .withReceivingTenantId(TEST_TENANT);
+
+    var piecesToUpdate = List.of(pieceToUpdate);
+
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn -> {
+      var savePieceFuture = conn.save(PIECES_TABLE, pieceId, piece);
+      var updatePiecesFuture = savePieceFuture.compose(saved -> pieceService.updatePieces(piecesToUpdate, conn, TEST_TENANT));
+
+      return testContext.assertComplete(updatePiecesFuture)
+        .onComplete(v -> pieceService.getPiecesByItemId(itemId, conn)
+          .onComplete(ar -> {
+            List<Piece> actPieces = ar.result();
+            testContext.verify(() -> {
+              assertThat(actPieces.get(0).getId(), is(pieceId));
+              assertThat(actPieces.get(0).getItemId(), is(itemId));
+              assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
+              assertThat(actPieces.get(0).getReceivingTenantId(), is(TEST_TENANT));
+            });
+            testContext.completeNow();
+          }));
+    });
   }
 
 }
