@@ -520,7 +520,7 @@
           ],
           "pathPattern": "/orders-storage/audit-outbox/process",
           "permissionsRequired": [
-            "orders-storage.audit-outbox.process"
+            "orders-storage.audit-outbox.process.execute"
           ],
           "modulePermissions": [
           ]
@@ -537,7 +537,7 @@
           ],
           "pathPattern": "/orders-storage/claiming/process",
           "permissionsRequired": [
-            "orders-storage.claiming.process"
+            "orders-storage.claiming.process.execute"
           ],
           "modulePermissions": [
             "configuration.entries.collection.get"
@@ -1318,29 +1318,31 @@
       ]
     },
     {
-      "permissionName" : "orders-storage.claiming.process",
+      "permissionName" : "orders-storage.claiming.process.execute",
       "displayName" : "orders-storage-claiming-process",
-      "description" : "Iterate through claimed pieces and modify their status as needed"
+      "description" : "Iterate through claimed pieces and modify their status as needed",
+      "replaces": ["orders-storage.claiming.process"]
     },
     {
       "permissionName" : "orders-storage.claiming.all",
       "displayName" : "All orders-storage claiming perms",
       "description" : "All permissions for the orders-storage - claiming",
       "subPermissions" : [
-        "orders-storage.claiming.process"
+        "orders-storage.claiming.process.execute"
       ]
     },
     {
-      "permissionName" : "orders-storage.audit-outbox.process",
+      "permissionName" : "orders-storage.audit-outbox.process.execute",
       "displayName" : "orders-storage-audit-outbox-process",
-      "description" : "Fetch audit events and send them to kafka"
+      "description" : "Fetch audit events and send them to kafka",
+      "replaces": ["orders-storage.audit-outbox.process"]
     },
     {
       "permissionName" : "orders-storage.audit-outbox.all",
       "displayName" : "All orders-storage audit outbox perms",
       "description" : "All permissions for the orders-storage - audit outbox",
       "subPermissions" : [
-        "orders-storage.audit-outbox.process"
+        "orders-storage.audit-outbox.process.execute"
       ]
     },
     {
