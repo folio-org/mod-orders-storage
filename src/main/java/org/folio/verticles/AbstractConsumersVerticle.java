@@ -7,6 +7,8 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.kafka.AsyncRecordHandler;
@@ -70,7 +72,15 @@ public abstract class AbstractConsumersVerticle<T> extends AbstractVerticle {
    */
   protected abstract Future<Void> createConsumers();
 
+
   protected Future<KafkaConsumerWrapper<String, String>> createConsumer(T eventType,
+                                                                        SubscriptionDefinition subscriptionDefinition,
+                                                                        AsyncRecordHandler<String, String> handler) {
+    return createConsumer(eventType, null, subscriptionDefinition, handler);
+  }
+
+  protected Future<KafkaConsumerWrapper<String, String>> createConsumer(T eventType,
+                                                                        String methodName,
                                                                         SubscriptionDefinition subscriptionDefinition,
                                                                         AsyncRecordHandler<String, String> handler) {
     log.info("createConsumer:: creating consumer for event type: {}", eventType);
@@ -84,12 +94,18 @@ public abstract class AbstractConsumersVerticle<T> extends AbstractVerticle {
       .processRecordErrorHandler((t, r) -> log.error("Failed to process event: {}", r, t))
       .build();
 
-    log.info("createConsumer:: moduleId={}", MODULE_ID);
-    return consumerWrapper.start(handler, MODULE_ID)
+    String consumerName;
+    if (Objects.nonNull(methodName)) {
+      consumerName = String.format("%s_%s", MODULE_ID, methodName);
+    } else {
+      consumerName = MODULE_ID;
+    }
+
+    log.info("createConsumer:: moduleId={}", consumerName);
+    return consumerWrapper.start(handler, consumerName)
       .map(consumerWrapper)
       .onSuccess(consumers::add);
   }
-
   private Future<Void> stopConsumers() {
     var stopFutures = consumers.stream()
       .map(KafkaConsumerWrapper::stop)

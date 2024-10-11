@@ -1,8 +1,9 @@
 package org.folio.event.handler;
 
-import static org.folio.event.util.KafkaEventUtil.TENANT_NOT_SPECIFIED_MSG;
-import static org.folio.event.util.KafkaEventUtil.extractTenantFromHeaders;
-import static org.folio.kafka.KafkaHeaderUtils.kafkaHeadersToMap;
+import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
+import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
+import static org.folio.util.HeaderUtils.getHeaderMap;
+import static org.folio.util.HeaderUtils.prepareHeaderForTenant;
 
 import java.util.Map;
 import java.util.Objects;
@@ -66,7 +67,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
         return Future.succeededFuture();
       }
 
-      var headers = new CaseInsensitiveMap<>(kafkaHeadersToMap(kafkaConsumerRecord.headers()));
+      var headers = getHeaderMap(kafkaConsumerRecord.headers());
       return getCentralTenantId(headers)
         .compose(centralTenantId -> processInventoryCreationEventIfNeeded(resourceEvent, centralTenantId, headers))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
@@ -96,7 +97,8 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
           return Future.succeededFuture();
         }
         var configuration = consortiumConfiguration.get();
-        return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, headers, getContext())
+        CaseInsensitiveMap<String, String> centralHeadings = prepareHeaderForTenant(configuration.centralTenantId(), headers);
+        return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, centralHeadings, getContext())
           .map(centralOrderingSetting -> centralOrderingSetting.map(Setting::getValue).orElse(null))
           .map(orderingEnabled -> Boolean.parseBoolean(orderingEnabled)
             ? configuration.centralTenantId()

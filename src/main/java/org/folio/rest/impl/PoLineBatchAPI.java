@@ -48,7 +48,7 @@ public class PoLineBatchAPI extends BaseApi implements OrdersStoragePoLinesBatch
         .map(poLine -> validateCustomFields(vertxContext, okapiHeaders, poLine))
         .toList())
       .compose(cf ->
-        poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders, vertxContext))
+        poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders))
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("putOrdersStoragePoLinesBatch:: failed, PO line ids: {} ", getPoLineIdsForLogMessage(poLineCollection.getPoLines()), ar.cause());

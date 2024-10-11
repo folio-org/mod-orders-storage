@@ -29,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
+import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -39,6 +40,7 @@ import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.QueryHolder;
 import org.folio.rest.persist.Tx;
 
 import io.vertx.core.CompositeFuture;
@@ -53,7 +55,7 @@ import org.folio.rest.tools.utils.MetadataUtil;
 @Log4j2
 public class PoLinesService {
 
-  private static final String POLINE_ID_FIELD = "poLineId";
+  private static final String PO_LINE_ID = "poLineId";
   private static final String LOCATIONS_HOLDING_ID_FIELD = "location.holdingId";
 
   private final PoLinesDAO poLinesDAO;
@@ -221,6 +223,13 @@ public class PoLinesService {
     return getPoLinesByField(criterion, conn);
   }
 
+  @SneakyThrows
+  public Future<List<PoLine>> getPoLinesByCqlQuery(String query, Conn conn) {
+    var cqlWrapper = new QueryHolder(PO_LINE_TABLE,  query, 0, Integer.MAX_VALUE).buildCQLQuery();
+    log.info("getPoLinesByCqlQuery:: Created a CQL query: {}", cqlWrapper.getWhereClause());
+    return getEntitiesByField(PO_LINE_TABLE, PoLine.class, cqlWrapper, conn);
+  }
+
   public Future<List<PoLine>> getPoLinesByField(Criterion criterion, Conn conn) {
     return getEntitiesByField(PO_LINE_TABLE, PoLine.class, criterion, conn);
   }
@@ -327,7 +336,7 @@ public class PoLinesService {
     log.info("Delete title by POLine id={}", tx.getEntity());
 
     Promise<Tx<String>> promise = Promise.promise();
-    Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
+    Criterion criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, tx.getEntity());
     client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, ar -> {
       if (ar.failed()) {
         log.error("Delete title failed, criterion={}", criterion, ar.cause());
@@ -405,6 +414,15 @@ public class PoLinesService {
     return promise.future();
   }
 
+  public Future<Void> updateTitles(Conn conn, List<PoLine> poLines, Map<String, String> headers) {
+    var futures = poLines.stream()
+      .filter(poLine -> !poLine.getIsPackage())
+      .map(poLine -> updateTitle(conn, poLine, headers))
+      .toList();
+    return GenericCompositeFuture.join(futures)
+      .mapEmpty();
+  }
+
   private Future<PoLine> updateTitle(Conn conn, Title title, PoLine poLine, Map<String, String> headers) {
     Promise<PoLine> promise = Promise.promise();
 
@@ -431,7 +449,7 @@ public class PoLinesService {
     log.info("Delete pieces by POLine id={}", tx.getEntity());
 
     Promise<Tx<String>> promise = Promise.promise();
-    Criterion criterion = getCriterionByFieldNameAndValue(POLINE_ID_FIELD, tx.getEntity());
+    Criterion criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, tx.getEntity());
 
     client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, ar -> {
       if (ar.failed()) {
@@ -491,7 +509,7 @@ public class PoLinesService {
   }
 
   public Future<PoLine> updateTitle(Conn conn, PoLine poLine, Map<String, String> headers) {
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID, poLine.getId());
 
     return conn.get(TITLES_TABLE, Title.class, criterion, true)
       .compose(result -> {

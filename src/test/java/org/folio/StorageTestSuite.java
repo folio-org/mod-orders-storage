@@ -23,7 +23,9 @@ import org.folio.dao.lines.PoLinesPostgresDAOTest;
 import org.folio.event.KafkaEventUtilTest;
 import org.folio.event.handler.EdiExportOrdersHistoryAsyncRecordHandlerTest;
 import org.folio.event.handler.HoldingCreateAsyncRecordHandlerTest;
+import org.folio.event.handler.HoldingUpdateAsyncRecordHandlerTest;
 import org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest;
+import org.folio.event.handler.InventoryUpdateAsyncRecordHandlerTest;
 import org.folio.event.handler.ItemCreateAsyncRecordHandlerTest;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.okapi.common.XOkapiHeaders;
@@ -34,6 +36,7 @@ import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.core.RestClientTest;
 import org.folio.rest.impl.ClaimingAPITest;
 import org.folio.rest.impl.CustomFieldsAPITest;
+import org.folio.rest.impl.CustomFieldsIndexesTest;
 import org.folio.rest.impl.EntitiesCrudTest;
 import org.folio.rest.impl.EntititesCustomFieldsTest;
 import org.folio.rest.impl.HelperUtilsTest;
@@ -54,6 +57,7 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
 import org.folio.services.consortium.ConsortiumConfigurationServiceTest;
+import org.folio.services.inventory.InventoryUpdateServiceTest;
 import org.folio.services.lines.PoLIneServiceVertxTest;
 import org.folio.services.lines.PoLinesServiceTest;
 import org.folio.services.piece.PieceServiceTest;
@@ -271,9 +275,13 @@ public class StorageTestSuite {
   @Nested
   class InventoryCreateAsyncRecordHandlerTestNested extends InventoryCreateAsyncRecordHandlerTest {}
   @Nested
+  class InventoryUpdateAsyncRecordHandlerTestNested extends InventoryUpdateAsyncRecordHandlerTest {}
+  @Nested
   class ItemCreateAsyncRecordHandlerTestNested extends ItemCreateAsyncRecordHandlerTest {}
   @Nested
   class HoldingCreateAsyncRecordHandlerTestNested extends HoldingCreateAsyncRecordHandlerTest {}
+  @Nested
+  class HoldingUpdateAsyncRecordHandlerTestNested extends HoldingUpdateAsyncRecordHandlerTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
   @Nested
@@ -284,18 +292,20 @@ public class StorageTestSuite {
   class OrderLineUpdateInstanceHandlerTestNested extends OrderLineUpdateInstanceHandlerTest {}
   @Nested
   class PoLIneServiceVertxTestNested extends PoLIneServiceVertxTest {}
-
   @Nested
   class PoLineBatchAPITestNested extends PoLineBatchAPITest {}
-
   @Nested
   class ClaimingAPITestNested extends ClaimingAPITest {}
   @Nested
   class CustomFieldsAPITestNested extends CustomFieldsAPITest {}
   @Nested
+  class CustomFieldsIndexesTestNested extends CustomFieldsIndexesTest {}
+  @Nested
   class EntititesCustomFieldsTestNested extends EntititesCustomFieldsTest {}
   @Nested
   class ConsortiumConfigurationServiceTestNested extends ConsortiumConfigurationServiceTest {}
+  @Nested
+  class InventoryUpdateServiceTestNested extends InventoryUpdateServiceTest {}
   @Nested
   class RestClientTestNested extends RestClientTest {}
 }
