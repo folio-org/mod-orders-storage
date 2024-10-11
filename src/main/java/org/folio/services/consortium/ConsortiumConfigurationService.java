@@ -53,7 +53,7 @@ public class ConsortiumConfigurationService {
     return getConsortiumConfiguration(requestContext)
       .compose(consortiumConfiguration -> {
         if (consortiumConfiguration.isEmpty()) {
-          log.info("getCentralTenantId:: No settings were found");
+          log.debug("getCentralTenantId:: No settings were found");
           return Future.succeededFuture();
         }
         var configuration = consortiumConfiguration.get();

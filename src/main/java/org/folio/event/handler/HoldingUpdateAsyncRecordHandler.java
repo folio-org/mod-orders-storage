@@ -86,7 +86,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     }
     // Must pass the correct active tenantId to resolve which schema name is to be used in the poLine update
     // in a non-ecs environment the active tenantId is the same as the event tenantId
-    // in an ecs environment the active tenantId is the central tenantId
+    // in an ecs environment with central ordering being enabled the active tenantId is the central tenantId
     return poLinesService.updatePoLines(poLines, conn, holder.getActiveTenantId())
       .map(v -> {
         log.info("updatePoLines:: Successfully updated POLs for holdingId: {}, POLs updated: {}", holder.getHoldingId(), poLines.size());
