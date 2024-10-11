@@ -27,6 +27,7 @@ import org.folio.event.handler.HoldingUpdateAsyncRecordHandlerTest;
 import org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest;
 import org.folio.event.handler.InventoryUpdateAsyncRecordHandlerTest;
 import org.folio.event.handler.ItemCreateAsyncRecordHandlerTest;
+import org.folio.event.handler.ItemUpdateAsyncRecordHandlerTest;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest;
@@ -282,6 +283,8 @@ public class StorageTestSuite {
   class HoldingCreateAsyncRecordHandlerTestNested extends HoldingCreateAsyncRecordHandlerTest {}
   @Nested
   class HoldingUpdateAsyncRecordHandlerTestNested extends HoldingUpdateAsyncRecordHandlerTest {}
+  @Nested
+  class ItemUpdateAsyncRecordHandlerTestNested extends ItemUpdateAsyncRecordHandlerTest {}
   @Nested
   class KafkaEventUtilTestNested extends KafkaEventUtilTest {}
   @Nested
