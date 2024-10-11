@@ -9,7 +9,6 @@ import lombok.With;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Map;
-import java.util.Objects;
 
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
@@ -20,7 +19,7 @@ import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PERMANENT_
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryUpdateHolder {
+public class HoldingEventHolder {
 
   private ResourceEvent resourceEvent;
   private Map<String, String> headers;
@@ -38,10 +37,6 @@ public class InventoryUpdateHolder {
     setInstanceId(newValue.getString(INSTANCE_ID));
     setInstanceIdPair(Pair.of(oldValue.getString(INSTANCE_ID), newValue.getString(INSTANCE_ID)));
     setSearchLocationIdPair(Pair.of(oldValue.getString(PERMANENT_LOCATION_ID), newValue.getString(PERMANENT_LOCATION_ID)));
-  }
-
-  public boolean valuesNonNull() {
-    return Objects.isNull(resourceEvent.getOldValue()) || Objects.isNull(resourceEvent.getNewValue());
   }
 
   public boolean instanceIdEqual() {

@@ -1,7 +1,10 @@
 package org.folio.event.handler;
 
-import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
+import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 import static org.folio.util.HeaderUtils.getHeaderMap;
+
+import java.util.Map;
+import java.util.Objects;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -11,13 +14,8 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.event.InventoryEventType;
-import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.persist.DBClient;
-
-import java.util.Map;
-import java.util.Objects;
 
 @Log4j2
 public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
@@ -36,42 +34,30 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaRecord) {
     try {
       var headers = getHeaderMap(kafkaRecord.headers());
-      var tenantId = headers.get(XOkapiHeaders.TENANT);
+      var tenantId = extractTenantFromHeaders(headers);
       if (StringUtils.isEmpty(kafkaRecord.value()) || kafkaRecord.value().equals(EMPTY_JSON_OBJECT)) {
         throw new IllegalArgumentException(KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG);
       }
-      if (Objects.isNull(tenantId)) {
-        throw new IllegalStateException(TENANT_NOT_SPECIFIED_MSG);
-      }
       var resourceEvent = new JsonObject(kafkaRecord.value()).mapTo(ResourceEvent.class);
-      var holder = createInventoryUpdateHolder(resourceEvent, headers, tenantId);
-      if (!Objects.equals(holder.getResourceEvent().getType(), inventoryEventType.getEventType())) {
-        log.warn("handle:: Unsupported event type: {}, ignoring record processing", holder.getResourceEvent().getType());
+      if (!Objects.equals(resourceEvent.getType(), inventoryEventType.getEventType())) {
+        log.warn("handle:: Unsupported event type: {}, ignoring record processing", resourceEvent.getType());
         return Future.succeededFuture(kafkaRecord.key());
       }
-      if (holder.valuesNonNull()) {
+      if (Objects.isNull(resourceEvent.getOldValue()) || Objects.isNull(resourceEvent.getNewValue())) {
         log.warn("handle:: Failed to find new or old value, ignoring record processing");
         return Future.succeededFuture();
       }
       log.info("handle:: Processing new kafkaRecord, topic: {}, key: {}, eventType: {}",
-        kafkaRecord.topic(), kafkaRecord.key(), holder.getResourceEvent().getType());
-      return processInventoryUpdateEvent(holder, createDBClient(holder.getTenantId()))
+        kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType());
+      return processInventoryUpdateEvent(resourceEvent, headers, tenantId, createDBClient(tenantId))
         .onSuccess(v -> log.info("handle:: Processing successful, topic: {}, key: {}, eventType: {}",
-          kafkaRecord.topic(), kafkaRecord.key(), holder.getResourceEvent().getType()))
+          kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType()))
         .onFailure(t -> log.error("Failed to process event: {}", kafkaRecord.value(), t))
         .map(kafkaRecord.key());
     } catch (Exception e) {
       log.error("handle:: Failed to process kafka record from topic {}", kafkaRecord.topic(), e);
       return Future.failedFuture(e);
     }
-  }
-
-  private static InventoryUpdateHolder createInventoryUpdateHolder(ResourceEvent resourceEvent, Map<String, String> headers, String tenantId) {
-    return InventoryUpdateHolder.builder()
-      .resourceEvent(resourceEvent)
-      .headers(headers)
-      .tenantId(tenantId)
-      .build();
   }
 
   protected DBClient createDBClient(String tenantId) {
@@ -81,9 +67,9 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
   /**
    * Method to process inventory update event. Should be implemented by the child classes.
    *
-   * @param holder   - inventory update holder
    * @param dbClient - db client
    * @return future
    */
-  protected abstract Future<Void> processInventoryUpdateEvent(InventoryUpdateHolder holder, DBClient dbClient);
+  protected abstract Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> header,
+                                                              String tenantId, DBClient dbClient);
 }

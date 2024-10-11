@@ -3,7 +3,6 @@ package org.folio.event.handler;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.rest.persist.DBClient;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +20,8 @@ import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -45,11 +46,13 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     var resourceEvent = createDefaultUpdateResourceEvent();
     var kafkaRecord = createKafkaRecord(resourceEvent, DIKU_TENANT);
 
-    doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), any(DBClient.class));
+    doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
+      any(DBClient.class));
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(1)).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), any(DBClient.class));
+    verify(handler, times(1)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
+      any(DBClient.class));
   }
 
   @Test
@@ -60,7 +63,8 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalStateException.class, expectedException.getClass());
     assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
-    verify(handler, times(0)).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
+      any(DBClient.class));
   }
 
   @Test
@@ -74,7 +78,8 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
+      any(DBClient.class));
   }
 
   @Test
@@ -89,7 +94,8 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
+      any(DBClient.class));
   }
 
   @Test
@@ -104,7 +110,8 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
+      any(DBClient.class));
   }
 
   @Test
@@ -114,6 +121,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalArgumentException.class, expectedException.getClass());
     assertTrue(expectedException.getMessage().contains(KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG));
-    verify(handler, times(0)).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
+      any(DBClient.class));
   }
 }

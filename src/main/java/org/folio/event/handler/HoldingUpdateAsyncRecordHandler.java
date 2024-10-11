@@ -7,7 +7,8 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.folio.event.dto.InventoryUpdateHolder;
+import org.folio.event.dto.HoldingEventHolder;
+import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.Location;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.folio.event.InventoryEventType.INVENTORY_HOLDING_UPDATE;
@@ -50,7 +52,9 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryUpdateEvent(InventoryUpdateHolder holder, DBClient dbClient) {
+  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
+                                                     String tenantId, DBClient dbClient) {
+    var holder = createInventoryUpdateHolder(resourceEvent, headers, tenantId);
     holder.prepareAllIds();
     if (holder.instanceIdEqual() && holder.searchLocationIdEqual()) {
       log.info("processInventoryUpdateEvent:: No instance id or search location ids to update, ignoring update");
@@ -66,14 +70,14 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> processPoLinesUpdate(InventoryUpdateHolder holder, Conn conn) {
+  private Future<List<PoLine>> processPoLinesUpdate(HoldingEventHolder holder, Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn)
       .compose(poLines -> updatePoLines(holder, poLines, conn))
       .compose(poLines -> updateTitles(holder, poLines, conn).map(poLines))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(poLines));
   }
 
-  private Future<List<PoLine>> updatePoLines(InventoryUpdateHolder holder, List<PoLine> poLines, Conn conn) {
+  private Future<List<PoLine>> updatePoLines(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLines:: No POLs were found for holding to update, holdingId: {}", holder.getHoldingId());
       return Future.succeededFuture(List.of());
@@ -93,7 +97,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       });
   }
 
-  private Future<Void> updateTitles(InventoryUpdateHolder holder, List<PoLine> poLines, Conn conn) {
+  private Future<Void> updateTitles(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updateTitles:: No POL titles were found for holding to update, holdingId: {}", holder.getHoldingId());
       return Future.succeededFuture();
@@ -103,7 +107,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
 
   // Create a list of distinct holding ids to update
   // will exclude the current holdingId coming from the kafka event
-  private List<String> extractDistinctAdjacentHoldingsToUpdate(InventoryUpdateHolder holder, List<PoLine> poLines) {
+  private List<String> extractDistinctAdjacentHoldingsToUpdate(HoldingEventHolder holder, List<PoLine> poLines) {
     return poLines.stream()
       .map(PoLine::getLocations)
       .flatMap(Collection::stream)
@@ -114,7 +118,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .toList();
   }
 
-  private Pair<Boolean, List<PoLine>> updatePoLinesInstanceId(InventoryUpdateHolder holder, List<PoLine> poLines) {
+  private Pair<Boolean, List<PoLine>> updatePoLinesInstanceId(HoldingEventHolder holder, List<PoLine> poLines) {
     if (holder.instanceIdEqual()) {
       log.info("updatePoLinesInstanceId:: No instance id was changed (ids are the same), ignoring update");
       return Pair.of(false, List.of());
@@ -134,7 +138,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     return Pair.of(true, updatedPoLines);
   }
 
-  private boolean updatePoLinesSearchLocationIds(InventoryUpdateHolder holder, List<PoLine> poLines) {
+  private boolean updatePoLinesSearchLocationIds(HoldingEventHolder holder, List<PoLine> poLines) {
     if (holder.searchLocationIdEqual()) {
       log.info("updatePoLinesSearchLocationIds:: No search location id was changed (ids are the same), ignoring update");
       return false;
@@ -150,5 +154,13 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       poline.setSearchLocationIds(searchLocationIds);
     }
     return true;
+  }
+
+  public HoldingEventHolder createInventoryUpdateHolder(ResourceEvent resourceEvent, Map<String, String> headers, String tenantId) {
+    return HoldingEventHolder.builder()
+      .resourceEvent(resourceEvent)
+      .headers(headers)
+      .tenantId(tenantId)
+      .build();
   }
 }

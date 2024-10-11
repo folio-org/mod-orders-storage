@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.event.dto.InventoryUpdateHolder;
+import org.folio.event.dto.HoldingEventHolder;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
@@ -33,7 +33,7 @@ public class InventoryUpdateService {
     this.restClient = restClient;
   }
 
-  public Future<Void> batchUpdateAdjacentHoldingsWithNewInstanceId(InventoryUpdateHolder holder, List<String> holdingIds,
+  public Future<Void> batchUpdateAdjacentHoldingsWithNewInstanceId(HoldingEventHolder holder, List<String> holdingIds,
                                                                    RequestContext requestContext) {
     if (CollectionUtils.isEmpty(holdingIds)) {
       log.info("batchUpdateAdjacentHoldingsWithNewInstanceId:: No adjacent holdings were found to update, ignoring update");

@@ -52,4 +52,11 @@ public class TestHandlerUtil {
   static ResourceEvent extractResourceEvent(KafkaConsumerRecord<String, String> kafkaRecord) {
     return Json.decodeValue(kafkaRecord.value(), ResourceEvent.class);
   }
+
+  public static KafkaConsumerRecord<String, String> createKafkaRecordWithValues(JsonObject oldItemValue, JsonObject newItemValue) {
+    var resourceEvent = createDefaultUpdateResourceEvent();
+    resourceEvent.setOldValue(oldItemValue);
+    resourceEvent.setNewValue(newItemValue);
+    return createKafkaRecord(resourceEvent, DIKU_TENANT);
+  }
 }
