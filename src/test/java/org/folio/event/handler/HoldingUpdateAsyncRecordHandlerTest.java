@@ -1,5 +1,31 @@
 package org.folio.event.handler;
 
+import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.folio.TestUtils;
+import org.folio.event.dto.ResourceEvent;
+import org.folio.event.service.AuditOutboxService;
+import org.folio.rest.core.models.RequestContext;
+import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.persist.Conn;
+import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.PostgresClient;
+import org.folio.services.inventory.InventoryUpdateService;
+import org.folio.services.lines.PoLinesService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
+
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
@@ -22,32 +48,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Function;
-
-import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
-import org.folio.TestUtils;
-import org.folio.event.dto.ResourceEvent;
-import org.folio.event.service.AuditOutboxService;
-import org.folio.rest.core.models.RequestContext;
-import org.folio.rest.jaxrs.model.Location;
-import org.folio.rest.jaxrs.model.PoLine;
-import org.folio.rest.persist.Conn;
-import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.PostgresClient;
-import org.folio.services.inventory.InventoryUpdateService;
-import org.folio.services.lines.PoLinesService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 @Slf4j
 public class HoldingUpdateAsyncRecordHandlerTest {
