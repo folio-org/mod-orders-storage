@@ -9,21 +9,28 @@ import org.apache.commons.collections.CollectionUtils;
 import org.folio.TestUtils;
 import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.service.AuditOutboxService;
+import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
+import org.folio.services.setting.SettingService;
+import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -32,6 +39,7 @@ import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PERMANENT_LOCATION_ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PO_LINE_LOCATIONS_HOLDING_ID_CQL;
+import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
@@ -53,10 +61,14 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
   private static final String PO_LINE_SAVE_FAILED_MSG = "PoLine save failed";
 
+  @Spy
+  private SettingService settingService;
   @Mock
   private PoLinesService poLinesService;
   @Mock
   private InventoryUpdateService inventoryUpdateService;
+  @Mock
+  private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
   private AuditOutboxService auditOutboxService;
   @Mock
@@ -75,9 +87,16 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       var holdingHandler = new HoldingUpdateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
       TestUtils.setInternalState(holdingHandler, "inventoryUpdateService", inventoryUpdateService);
+      TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
       doReturn(pgClient).when(dbClient).getPgClient();
+      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(DIKU_TENANT))
+        .when(consortiumConfigurationService).getCentralTenantId(any(), any());
       doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any(RequestContext.class));
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());

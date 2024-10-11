@@ -3,20 +3,14 @@ package org.folio.event.handler;
 import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 import static org.folio.util.HeaderUtils.getHeaderMap;
-import static org.folio.util.HeaderUtils.prepareHeaderForTenant;
 
 import java.util.Map;
 import java.util.Objects;
 
-import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.rest.jaxrs.model.Setting;
-import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
-import org.folio.services.setting.SettingService;
-import org.folio.services.setting.util.SettingKey;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
@@ -31,9 +25,6 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
 
   @Autowired
   protected ConsortiumConfigurationService consortiumConfigurationService;
-
-  @Autowired
-  protected SettingService settingService;
 
   private final InventoryEventType inventoryEventType;
 
@@ -68,7 +59,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       }
 
       var headers = getHeaderMap(kafkaConsumerRecord.headers());
-      return getCentralTenantId(headers)
+      return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
         .compose(centralTenantId -> processInventoryCreationEventIfNeeded(resourceEvent, centralTenantId, headers))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
         .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
@@ -87,23 +78,6 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     if (extractTenantFromHeaders(kafkaConsumerRecord.headers()).isEmpty()) {
       throw new IllegalStateException(TENANT_NOT_SPECIFIED_MSG);
     }
-  }
-
-  private Future<String> getCentralTenantId(Map<String, String> headers) {
-    var requestContext = new RequestContext(getContext(), headers);
-    return consortiumConfigurationService.getConsortiumConfiguration(requestContext)
-      .compose(consortiumConfiguration -> {
-        if (consortiumConfiguration.isEmpty()) {
-          return Future.succeededFuture();
-        }
-        var configuration = consortiumConfiguration.get();
-        CaseInsensitiveMap<String, String> centralHeadings = prepareHeaderForTenant(configuration.centralTenantId(), headers);
-        return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, centralHeadings, getContext())
-          .map(centralOrderingSetting -> centralOrderingSetting.map(Setting::getValue).orElse(null))
-          .map(orderingEnabled -> Boolean.parseBoolean(orderingEnabled)
-            ? configuration.centralTenantId()
-            : null);
-      });
   }
 
   protected DBClient createDBClient(String tenantId) {
