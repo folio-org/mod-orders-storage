@@ -63,7 +63,7 @@ public class InventoryUpdateServiceTest {
     var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds, requestContext);
 
     assertDoesNotThrow(result::result);
-    verify(restClient, times(1)).get(any(), any());
+    verify(restClient, times(2)).get(any(), any());
     verify(restClient, times(1)).post(any(), any(), any(), any());
   }
 }
