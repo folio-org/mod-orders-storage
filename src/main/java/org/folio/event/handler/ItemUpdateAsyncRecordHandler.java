@@ -74,6 +74,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
 
   private List<Piece> filterPiecesToUpdate(ItemEventHolder holder, List<Piece> pieces) {
     return pieces.stream()
+      .filter(Objects::nonNull)
       .filter(piece ->
         ObjectUtils.notEqual(piece.getHoldingId(), holder.getHoldingId())
           && Objects.isNull(piece.getLocationId()))

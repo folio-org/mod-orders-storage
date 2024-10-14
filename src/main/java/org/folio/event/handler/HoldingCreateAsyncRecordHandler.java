@@ -100,6 +100,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   private Future<List<Piece>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent,
                                            String centralTenantId, Conn conn) {
     var piecesToUpdate = pieces.stream()
+      .filter(Objects::nonNull)
       .filter(piece -> !Objects.equals(piece.getReceivingTenantId(), tenantIdFromEvent))
       .map(piece -> piece.withReceivingTenantId(tenantIdFromEvent))
       .toList();
