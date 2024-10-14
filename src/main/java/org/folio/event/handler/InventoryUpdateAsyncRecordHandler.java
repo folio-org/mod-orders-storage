@@ -15,6 +15,8 @@ import org.folio.event.dto.InventoryUpdateHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.persist.DBClient;
+import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.Objects;
@@ -24,6 +26,9 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
 
   public static final String KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG = "Cannot process kafkaConsumerRecord, value is null";
   public static final String EMPTY_JSON_OBJECT = "{}";
+
+  @Autowired
+  protected ConsortiumConfigurationService consortiumConfigurationService;
 
   private final InventoryEventType inventoryEventType;
 
@@ -55,7 +60,8 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
       }
       log.info("handle:: Processing new kafkaRecord, topic: {}, key: {}, eventType: {}",
         kafkaRecord.topic(), kafkaRecord.key(), holder.getResourceEvent().getType());
-      return processInventoryUpdateEvent(holder, createDBClient(holder.getTenantId()))
+      return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
+        .compose(centralTenantId -> prepareProcessInventoryUpdateEvent(holder, centralTenantId))
         .onSuccess(v -> log.info("handle:: Processing successful, topic: {}, key: {}, eventType: {}",
           kafkaRecord.topic(), kafkaRecord.key(), holder.getResourceEvent().getType()))
         .onFailure(t -> log.error("Failed to process event: {}", kafkaRecord.value(), t))
@@ -72,6 +78,12 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
       .headers(headers)
       .tenantId(tenantId)
       .build();
+  }
+
+  // Prepare a DB client for particular tenant
+  private Future<Void> prepareProcessInventoryUpdateEvent(InventoryUpdateHolder holder, String centralTenantId) {
+    holder.setCentralTenantId(centralTenantId);
+    return processInventoryUpdateEvent(holder, createDBClient(holder.getActiveTenantId()));
   }
 
   protected DBClient createDBClient(String tenantId) {

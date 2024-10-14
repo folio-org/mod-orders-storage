@@ -192,8 +192,8 @@ public class ApplicationConfig {
   }
 
   @Bean
-  ConsortiumConfigurationService consortiumConfigurationService(RestClient restClient) {
-    return new ConsortiumConfigurationService(restClient);
+  ConsortiumConfigurationService consortiumConfigurationService(RestClient restClient, SettingService settingService) {
+    return new ConsortiumConfigurationService(restClient, settingService);
   }
 
   @Bean

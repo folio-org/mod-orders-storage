@@ -4,11 +4,12 @@ import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.dto.InventoryFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.InventoryFields.ID;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.CONSORTIUM_ID;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.DIKU_TENANT;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.extractResourceEvent;
+import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
+import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.extractResourceEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,6 +30,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -37,6 +39,7 @@ import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
@@ -50,13 +53,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class ItemCreateAsyncRecordHandlerTest {
 
+  @Spy
+  private SettingService settingService;
   @Mock
   private PieceService pieceService;
-  @Mock
-  private SettingService settingService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
@@ -76,7 +80,6 @@ public class ItemCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
-      TestUtils.setInternalState(itemHandler, "settingService", settingService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);
@@ -84,6 +87,12 @@ public class ItemCreateAsyncRecordHandlerTest {
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
       doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(DIKU_TENANT))
+        .when(consortiumConfigurationService)
+        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, DIKU_TENANT)));
+      doReturn(Future.succeededFuture(CENTRAL_TENANT))
+        .when(consortiumConfigurationService)
+        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, DIKU_TENANT, CONSORTIUM_ID, CENTRAL_TENANT)));
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(0)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(any());
@@ -139,7 +148,7 @@ public class ItemCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void positive_shouldSkipProcessItemCreateEventWhenNotPieceHasSameTenantIdOrHoldingId() {
+  void positive_shouldSkipProcessItemCreateEventWhenNoPieceHasSameTenantIdOrHoldingId() {
     String pieceId1 = UUID.randomUUID().toString();
     String pieceId2 = UUID.randomUUID().toString();
     String itemId = UUID.randomUUID().toString();
