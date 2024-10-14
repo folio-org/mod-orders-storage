@@ -1,6 +1,5 @@
 package org.folio.event.handler;
 
-import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 import static org.folio.util.HeaderUtils.getHeaderMap;
 
 import java.util.Map;
@@ -15,7 +14,6 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -39,7 +37,6 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaRecord) {
     try {
       var headers = getHeaderMap(kafkaRecord.headers());
-      var tenantId = extractTenantFromHeaders(headers);
       if (StringUtils.isEmpty(kafkaRecord.value()) || kafkaRecord.value().equals(EMPTY_JSON_OBJECT)) {
         throw new IllegalArgumentException(KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG);
       }
@@ -53,11 +50,11 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
         return Future.succeededFuture();
       }
       log.info("handle:: Processing new kafkaRecord, topic: {}, key: {}, eventType: {}",
-        kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType());;
+        kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType());
       return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
-        .compose(centralTenantId -> prepareProcessInventoryUpdateEvent(holder, centralTenantId))
+        .compose(centralTenantId -> processInventoryUpdateEvent(resourceEvent, headers, centralTenantId))
         .onSuccess(v -> log.info("handle:: Processing successful, topic: {}, key: {}, eventType: {}",
-          kafkaRecord.topic(), kafkaRecord.key(), holder.getResourceEvent().getType()))
+          kafkaRecord.topic(), kafkaRecord.key(),resourceEvent.getType()))
         .onFailure(t -> log.error("Failed to process event: {}", kafkaRecord.value(), t))
         .map(kafkaRecord.key());
     } catch (Exception e) {
@@ -66,22 +63,11 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
-  // Prepare a DB client for particular tenant
-  private Future<Void> prepareProcessInventoryUpdateEvent(InventoryUpdateHolder holder, String centralTenantId) {
-    holder.setCentralTenantId(centralTenantId);
-    return processInventoryUpdateEvent(holder, createDBClient(holder.getActiveTenantId()));
-  }
-
-  protected DBClient createDBClient(String tenantId) {
-    return new DBClient(getVertx(), tenantId);
-  }
-
   /**
    * Method to process inventory update event. Should be implemented by the child classes.
    *
-   * @param dbClient - db client
    * @return future
    */
   protected abstract Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> header,
-                                                              String tenantId, DBClient dbClient);
+                                                              String centralTenantId);
 }

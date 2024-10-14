@@ -104,7 +104,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
   }
@@ -120,7 +120,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verifyNoInteractions(pieceService);
     verifyNoInteractions(pieceService);
   }
@@ -143,7 +143,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService, times(0)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
@@ -174,7 +174,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(RuntimeException.class, expectedException.getClass());
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService, times(1)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }

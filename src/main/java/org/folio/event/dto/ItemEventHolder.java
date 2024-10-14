@@ -1,6 +1,7 @@
 package org.folio.event.dto;
 
 import java.util.Map;
+import java.util.Objects;
 
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
@@ -24,6 +25,7 @@ public class ItemEventHolder {
   private String itemId;
   private String holdingId;
   private Pair<String, String> holdingIdPair;
+  private String centralTenantId;
 
   public void prepareAllIds() {
     var oldValue = JsonObject.mapFrom(resourceEvent.getOldValue());
@@ -39,4 +41,7 @@ public class ItemEventHolder {
     return holdingIdPair.getLeft().equals(holdingIdPair.getRight());
   }
 
+  public String getActiveTenantId() {
+    return Objects.nonNull(centralTenantId) ? centralTenantId : tenantId;
+  }
 }

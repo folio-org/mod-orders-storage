@@ -106,6 +106,7 @@ public abstract class AbstractConsumersVerticle<T> extends AbstractVerticle {
       .map(consumerWrapper)
       .onSuccess(consumers::add);
   }
+
   private Future<Void> stopConsumers() {
     var stopFutures = consumers.stream()
       .map(KafkaConsumerWrapper::stop)

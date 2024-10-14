@@ -1,6 +1,7 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_UPDATE;
+import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.persist.Conn;
-import org.folio.rest.persist.DBClient;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,9 +38,9 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   }
 
   @Override
-  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers, String tenantId,
-                                                     DBClient dbClient) {
-    var holder = createItemEventHolder(resourceEvent, headers, tenantId);
+  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers, String centralTenantId) {
+    var holder = createItemEventHolder(resourceEvent, headers, centralTenantId);
+    var dbClient = createDBClient(holder.getActiveTenantId());
     holder.prepareAllIds();
     if (holder.holdingIdEqual()) {
       log.info("processInventoryUpdateEvent:: No holding id to update, ignoring update");
@@ -80,11 +80,13 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .toList();
   }
 
-  private ItemEventHolder createItemEventHolder(ResourceEvent resourceEvent, Map<String, String> headers, String tenantId) {
+  private ItemEventHolder createItemEventHolder(ResourceEvent resourceEvent, Map<String, String> headers,
+                                                String centralTenantId) {
     return ItemEventHolder.builder()
       .resourceEvent(resourceEvent)
       .headers(headers)
-      .tenantId(tenantId)
+      .tenantId(extractTenantFromHeaders(headers))
+      .centralTenantId(centralTenantId)
       .build();
   }
 }

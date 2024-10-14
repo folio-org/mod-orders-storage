@@ -7,7 +7,6 @@ import io.vertx.core.json.JsonObject;
 import org.folio.TestUtils;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
-import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.setting.SettingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,10 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -79,13 +74,11 @@ public class InventoryUpdateAsyncRecordHandlerTest {
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
     doReturn(Future.succeededFuture(tenantId))
       .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-    doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
-      any(DBClient.class));
+    doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(1)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
-      any(DBClient.class));
+    verify(handler, times(1)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
   }
 
   @Test
@@ -96,8 +89,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalStateException.class, expectedException.getClass());
     assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
-      any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
   }
 
   @Test
@@ -111,8 +103,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
-      any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
   }
 
   @Test
@@ -127,8 +118,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
-      any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
   }
 
   @Test
@@ -143,8 +133,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
-      any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
   }
 
   @Test
@@ -154,7 +143,6 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalArgumentException.class, expectedException.getClass());
     assertTrue(expectedException.getMessage().contains(KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG));
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString(),
-      any(DBClient.class));
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
   }
 }
