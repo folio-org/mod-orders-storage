@@ -80,10 +80,6 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
     }
   }
 
-  protected DBClient createDBClient(String tenantId) {
-    return new DBClient(getVertx(), tenantId);
-  }
-
   private Future<Void> processInventoryCreationEventIfNeeded(ResourceEvent resourceEvent, String centralTenantId,
                                                              Map<String, String> headers) {
     if (centralTenantId == null) {

@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 public enum InventoryEventType {
 
   INVENTORY_ITEM_CREATE("inventory.item", EventType.CREATE),
+  INVENTORY_ITEM_UPDATE("inventory.item", EventType.UPDATE),
   INVENTORY_HOLDING_CREATE("inventory.holdings-record", EventType.CREATE),
   INVENTORY_HOLDING_UPDATE("inventory.holdings-record", EventType.UPDATE);
 

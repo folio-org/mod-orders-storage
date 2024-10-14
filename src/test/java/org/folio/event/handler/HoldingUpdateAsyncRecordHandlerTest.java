@@ -3,11 +3,10 @@ package org.folio.event.handler;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.folio.TestUtils;
-import org.folio.event.dto.InventoryUpdateHolder;
+import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.core.models.RequestContext;
@@ -43,11 +42,14 @@ import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
+import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
+import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -90,7 +92,6 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
-      doReturn(pgClient).when(dbClient).getPgClient();
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
       doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
@@ -116,7 +117,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var permanentSearchLocationId2 = UUID.randomUUID().toString();
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId2);
-    var kafkaRecord = createKafkaRecordWithHoldingValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
+    var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
@@ -135,7 +136,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
@@ -168,7 +169,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var permanentSearchLocationId1 = UUID.randomUUID().toString();
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId2, permanentSearchLocationId1);
-    var kafkaRecord = createKafkaRecordWithHoldingValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
+    var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
@@ -187,7 +188,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
@@ -220,7 +221,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var permanentSearchLocationId2 = UUID.randomUUID().toString();
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId2, permanentSearchLocationId2);
-    var kafkaRecord = createKafkaRecordWithHoldingValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
+    var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
@@ -239,7 +240,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
@@ -286,7 +287,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
@@ -301,7 +302,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var permanentSearchLocationId1 = UUID.randomUUID().toString();
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId2, permanentSearchLocationId1);
-    var kafkaRecord = createKafkaRecordWithHoldingValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
+    var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
@@ -319,9 +320,20 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(RuntimeException.class, expectedException.getClass());
-    verify(handler).processInventoryUpdateEvent(any(InventoryUpdateHolder.class), eq(dbClient));
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService, times(1)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
+  }
+
+  @Test
+  void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
+    var resourceEvent = createDefaultUpdateResourceEvent();
+    var kafkaRecord = createKafkaRecord(resourceEvent, null);
+
+    var expectedException = handler.handle(kafkaRecord).cause();
+    assertEquals(IllegalStateException.class, expectedException.getClass());
+    assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
 
   private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings) {
@@ -348,12 +360,5 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     return new JsonObject().put(ID, holdingId)
       .put(INSTANCE_ID, instanceId)
       .put(PERMANENT_LOCATION_ID, permanentLocationId);
-  }
-
-  private static KafkaConsumerRecord<String, String> createKafkaRecordWithHoldingValues(JsonObject oldHoldingValue, JsonObject newHoldingValue) {
-    var resourceEvent = createDefaultUpdateResourceEvent();
-    resourceEvent.setOldValue(oldHoldingValue);
-    resourceEvent.setNewValue(newHoldingValue);
-    return createKafkaRecord(resourceEvent, DIKU_TENANT);
   }
 }
