@@ -31,7 +31,6 @@ import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourc
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createSetting;
 import static org.folio.event.handler.TestHandlerUtil.createSettingCollection;
-import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -79,17 +78,6 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
     verify(handler, times(1)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
-  }
-
-  @Test
-  void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
-    var resourceEvent = createDefaultUpdateResourceEvent();
-    var kafkaRecord = createKafkaRecord(resourceEvent, null);
-
-    var expectedException = handler.handle(kafkaRecord).cause();
-    assertEquals(IllegalStateException.class, expectedException.getClass());
-    assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
   }
 
   @Test

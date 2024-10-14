@@ -2,10 +2,12 @@ package org.folio.event.handler;
 
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.ID;
+import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
+import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -33,11 +36,16 @@ import org.folio.TestUtils;
 import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
+import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.piece.PieceService;
+import org.folio.services.setting.SettingService;
+import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -58,6 +66,10 @@ public class ItemUpdateAsyncRecordHandlerTest {
   private PostgresClient pgClient;
   @Mock
   private Conn conn;
+  @Mock
+  private ConsortiumConfigurationService consortiumConfigurationService;
+  @Mock
+  private SettingService settingService;
 
   private InventoryUpdateAsyncRecordHandler handler;
 
@@ -68,8 +80,14 @@ public class ItemUpdateAsyncRecordHandlerTest {
       var itemHandler = new ItemUpdateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
+      TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       handler = spy(itemHandler);
-      doReturn(pgClient).when(dbClient).getPgClient();
+      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(DIKU_TENANT))
+        .when(consortiumConfigurationService).getCentralTenantId(any(), any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(any());
@@ -177,6 +195,17 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService, times(1)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
+  }
+
+  @Test
+  void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
+    var resourceEvent = createDefaultUpdateResourceEvent();
+    var kafkaRecord = createKafkaRecord(resourceEvent, null);
+
+    var expectedException = handler.handle(kafkaRecord).cause();
+    assertEquals(IllegalStateException.class, expectedException.getClass());
+    assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
+    verifyNoInteractions(pieceService);
   }
 
   private static Piece createPiece(String pieceId, String itemId, String holdingId, String locationId) {

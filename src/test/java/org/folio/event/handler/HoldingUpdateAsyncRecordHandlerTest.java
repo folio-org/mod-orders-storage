@@ -43,6 +43,7 @@ import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
+import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -91,7 +92,6 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
-      doReturn(pgClient).when(dbClient).getPgClient();
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
       doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
@@ -323,6 +323,17 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService, times(1)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
+  }
+
+  @Test
+  void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
+    var resourceEvent = createDefaultUpdateResourceEvent();
+    var kafkaRecord = createKafkaRecord(resourceEvent, null);
+
+    var expectedException = handler.handle(kafkaRecord).cause();
+    assertEquals(IllegalStateException.class, expectedException.getClass());
+    assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
 
   private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings) {
