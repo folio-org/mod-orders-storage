@@ -1,7 +1,7 @@
 package org.folio.services.lines;
 
 import static java.util.stream.Collectors.toList;
-import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ;
+import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ_15;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 import static org.folio.rest.core.ResponseUtil.handleFailure;
@@ -180,7 +180,7 @@ public class PoLinesService {
     }
     Promise<List<PoLine>> promise = Promise.promise();
     List<String> uniqueIdList = poLineIds.stream().distinct().toList();
-    CompositeFuture.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ)
+    CompositeFuture.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ_15)
                         .map(chunkIds -> getPoLinesByLineIds(chunkIds, conn))
                         .collect(toList()))
       .onComplete(ar -> {
