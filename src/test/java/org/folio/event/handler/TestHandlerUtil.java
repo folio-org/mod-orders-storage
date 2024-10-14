@@ -8,10 +8,14 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.okapi.common.XOkapiHeaders;
+import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.jaxrs.model.SettingCollection;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import static org.folio.event.EventType.UPDATE;
+
 
 public class TestHandlerUtil {
 
@@ -21,6 +25,8 @@ public class TestHandlerUtil {
   static final String RECORD_KEY = "dummy_key";
   static final int PARTITION = 1;
   static final int OFFSET = 1;
+  static final String CENTRAL_TENANT = "central";
+  static final String CONSORTIUM_ID = "consortiumId";
 
   private TestHandlerUtil() {
   }
@@ -51,6 +57,16 @@ public class TestHandlerUtil {
 
   static ResourceEvent extractResourceEvent(KafkaConsumerRecord<String, String> kafkaRecord) {
     return Json.decodeValue(kafkaRecord.value(), ResourceEvent.class);
+  }
+
+  static Setting createSetting(String value) {
+    return new Setting().withValue(value);
+  }
+
+  static SettingCollection createSettingCollection(Setting... settings) {
+    return new SettingCollection()
+      .withSettings(Arrays.stream(settings).toList())
+      .withTotalRecords(1);
   }
 
   public static KafkaConsumerRecord<String, String> createKafkaRecordWithValues(JsonObject oldItemValue, JsonObject newItemValue) {

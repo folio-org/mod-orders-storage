@@ -5,17 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.With;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PERMANENT_LOCATION_ID;
 
 @Data
-@With
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,6 +23,7 @@ public class HoldingEventHolder {
   private ResourceEvent resourceEvent;
   private Map<String, String> headers;
   private String tenantId;
+  private String centralTenantId;
 
   private String holdingId;
   private String instanceId;
@@ -37,6 +37,10 @@ public class HoldingEventHolder {
     setInstanceId(newValue.getString(INSTANCE_ID));
     setInstanceIdPair(Pair.of(oldValue.getString(INSTANCE_ID), newValue.getString(INSTANCE_ID)));
     setSearchLocationIdPair(Pair.of(oldValue.getString(PERMANENT_LOCATION_ID), newValue.getString(PERMANENT_LOCATION_ID)));
+  }
+
+  public String getActiveTenantId() {
+    return Objects.nonNull(centralTenantId) ? centralTenantId : tenantId;
   }
 
   public boolean instanceIdEqual() {

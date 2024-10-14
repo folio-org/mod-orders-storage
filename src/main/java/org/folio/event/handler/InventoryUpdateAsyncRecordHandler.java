@@ -16,12 +16,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.event.InventoryEventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.rest.persist.DBClient;
+import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Log4j2
 public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordHandler<String, String> {
 
   public static final String KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG = "Cannot process kafkaConsumerRecord, value is null";
   public static final String EMPTY_JSON_OBJECT = "{}";
+
+  @Autowired
+  protected ConsortiumConfigurationService consortiumConfigurationService;
 
   private final InventoryEventType inventoryEventType;
 
@@ -48,16 +53,23 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
         return Future.succeededFuture();
       }
       log.info("handle:: Processing new kafkaRecord, topic: {}, key: {}, eventType: {}",
-        kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType());
-      return processInventoryUpdateEvent(resourceEvent, headers, tenantId, createDBClient(tenantId))
+        kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType());;
+      return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
+        .compose(centralTenantId -> prepareProcessInventoryUpdateEvent(holder, centralTenantId))
         .onSuccess(v -> log.info("handle:: Processing successful, topic: {}, key: {}, eventType: {}",
-          kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType()))
+          kafkaRecord.topic(), kafkaRecord.key(), holder.getResourceEvent().getType()))
         .onFailure(t -> log.error("Failed to process event: {}", kafkaRecord.value(), t))
         .map(kafkaRecord.key());
     } catch (Exception e) {
       log.error("handle:: Failed to process kafka record from topic {}", kafkaRecord.topic(), e);
       return Future.failedFuture(e);
     }
+  }
+
+  // Prepare a DB client for particular tenant
+  private Future<Void> prepareProcessInventoryUpdateEvent(InventoryUpdateHolder holder, String centralTenantId) {
+    holder.setCentralTenantId(centralTenantId);
+    return processInventoryUpdateEvent(holder, createDBClient(holder.getActiveTenantId()));
   }
 
   protected DBClient createDBClient(String tenantId) {

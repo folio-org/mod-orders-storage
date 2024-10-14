@@ -3,11 +3,11 @@ package org.folio.event.handler;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.dto.InventoryFields.ID;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.CONSORTIUM_ID;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.DIKU_TENANT;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.extractResourceEvent;
+import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
+import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.extractResourceEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,15 +51,16 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
+import org.mockito.Spy;
 
 public class HoldingCreateAsyncRecordHandlerTest {
 
+  @Spy
+  private SettingService settingService;
   @Mock
   private PieceService pieceService;
   @Mock
   private PoLinesService poLinesService;
-  @Mock
-  private SettingService settingService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
@@ -68,7 +69,8 @@ public class HoldingCreateAsyncRecordHandlerTest {
   private DBClient dbClient;
   @Mock
   private PostgresClient pgClient;
-  @Mock Conn conn;
+  @Mock
+  private Conn conn;
 
   private InventoryCreateAsyncRecordHandler handler;
 
@@ -79,7 +81,6 @@ public class HoldingCreateAsyncRecordHandlerTest {
       var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
       TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
-      TestUtils.setInternalState(holdingHandler, "settingService", settingService);
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
@@ -88,6 +89,8 @@ public class HoldingCreateAsyncRecordHandlerTest {
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
       doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(DIKU_TENANT))
+        .when(consortiumConfigurationService).getCentralTenantId(any(), any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
@@ -286,5 +289,4 @@ public class HoldingCreateAsyncRecordHandlerTest {
     resourceEvent.setNewValue(holdingObject);
     return createKafkaRecord(resourceEvent, DIKU_TENANT);
   }
-
 }

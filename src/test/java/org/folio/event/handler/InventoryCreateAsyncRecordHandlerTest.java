@@ -3,6 +3,11 @@ package org.folio.event.handler;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.EventType.UPDATE;
+import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
+import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.createSetting;
+import static org.folio.event.handler.TestHandlerUtil.createSettingCollection;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -18,9 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import javax.ws.rs.core.Response;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -29,7 +32,7 @@ import org.folio.TestUtils;
 import org.folio.event.EventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
-import org.folio.rest.jaxrs.model.Setting;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.jaxrs.model.SettingCollection;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
@@ -53,11 +56,6 @@ import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
 public class InventoryCreateAsyncRecordHandlerTest {
 
-  static final String TENANT_KEY_LOWER_CASE = "x-okapi-tenant";
-  static final String DIKU_TENANT = "diku";
-  static final String CENTRAL_TENANT = "central";
-  static final String CONSORTIUM_ID = "consortiumId";
-
   @Spy
   private SettingService settingService;
   @Mock
@@ -73,10 +71,8 @@ public class InventoryCreateAsyncRecordHandlerTest {
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, context);
       var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, context);
       handlers = List.of(spy(itemHandler), spy(holdingHandler));
-      handlers.forEach(handler -> {
-        TestUtils.setInternalState(handler, "settingService", settingService);
-        TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService);
-      });
+      handlers.forEach(handler ->
+        TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService));
     }
   }
 
@@ -86,9 +82,11 @@ public class InventoryCreateAsyncRecordHandlerTest {
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
     doReturn(Future.succeededFuture(Response.ok(createSettingCollection(createSetting("true"))).build()))
-      .when(settingService).getSettings(anyString(), anyInt(), anyInt(), any(Map.class), any(Context.class));
+      .when(settingService).getSettings(anyString(), anyInt(), anyInt(), anyMap(), any(Context.class));
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(tenantId, CONSORTIUM_ID))))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.succeededFuture(tenantId))
+      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
 
     handlers.forEach(handler -> {
       doReturn(Future.succeededFuture()).when(handler).processInventoryCreationEvent(any(ResourceEvent.class), eq(tenantId), anyMap(), any(DBClient.class));
@@ -103,7 +101,10 @@ public class InventoryCreateAsyncRecordHandlerTest {
   void positive_shouldSkipInventoryCreateEventIfConsortiumIsNotSetUp() {
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
-    doReturn(Future.succeededFuture(Optional.empty())).when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.succeededFuture(Optional.empty()))
+      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.succeededFuture())
+      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
 
     handlers.forEach(handler -> {
       var res = handler.handle(record);
@@ -118,9 +119,11 @@ public class InventoryCreateAsyncRecordHandlerTest {
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
     var emptySettings = new SettingCollection().withTotalRecords(0);
     doReturn(Future.succeededFuture(Response.ok(emptySettings).build()))
-      .when(settingService).getSettings(anyString(), anyInt(), anyInt(), any(Map.class), any(Context.class));
+      .when(settingService).getSettings(anyString(), anyInt(), anyInt(), anyMap(), any(Context.class));
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.succeededFuture())
+      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
 
     handlers.forEach(handler -> {
       var res = handler.handle(record);
@@ -136,6 +139,8 @@ public class InventoryCreateAsyncRecordHandlerTest {
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
     doReturn(Future.failedFuture(new RuntimeException(errorMessage)))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.failedFuture(new RuntimeException(errorMessage)))
+      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
 
     handlers.forEach(handler -> {
       var res = handler.handle(record);
@@ -151,13 +156,15 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
   @Test
   void negative_shouldSkipInventoryCreateEventIfFailedToFetchCentralOrderingSetting() {
-    var errorMessage = "Failed to setting";
+    var errorMessage = "Failed at setting";
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
     doReturn(Future.failedFuture(new RuntimeException(errorMessage)))
       .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.failedFuture(new RuntimeException(errorMessage)))
+      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
 
     handlers.forEach(handler -> {
       var res = handler.handle(record);
@@ -186,7 +193,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
   @Test
   void negative_shouldSkipInventoryCreateEventIfResourceEventNewValueIsNull() {
     var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", new JsonObject().encode());
-    consumerRecord.headers().add(new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes()));
+    consumerRecord.headers().add(new RecordHeader(XOkapiHeaders.TENANT, DIKU_TENANT.getBytes()));
     var record = new KafkaConsumerRecordImpl<>(consumerRecord);
 
     handlers.forEach(handler -> {
@@ -199,7 +206,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
   @Test
   void negative_shouldThrowExceptionIfKafkaRecordIsNotValid() {
     var consumerRecord = new ConsumerRecord<String, String>("topic", 1, 1, "key", null);
-    consumerRecord.headers().add(new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes()));
+    consumerRecord.headers().add(new RecordHeader(XOkapiHeaders.TENANT, DIKU_TENANT.getBytes()));
     var record = new KafkaConsumerRecordImpl<>(consumerRecord);
 
     handlers.forEach(handler -> {
@@ -231,10 +238,6 @@ public class InventoryCreateAsyncRecordHandlerTest {
       .build();
   }
 
-  static ResourceEvent extractResourceEvent(KafkaConsumerRecord<String, String> record) {
-    return Json.decodeValue(record.value(), ResourceEvent.class);
-  }
-
   static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent, String tenantId) {
     var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", Json.encode(resourceEvent));
     Optional.ofNullable(tenantId)
@@ -245,15 +248,4 @@ public class InventoryCreateAsyncRecordHandlerTest {
   private static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent) {
     return createKafkaRecord(resourceEvent, null);
   }
-
-  private static Setting createSetting(String value) {
-    return new Setting().withValue(value);
-  }
-
-  private static SettingCollection createSettingCollection(Setting... settings) {
-    return new SettingCollection()
-      .withSettings(Arrays.stream(settings).toList())
-      .withTotalRecords(1);
-  }
-
 }
