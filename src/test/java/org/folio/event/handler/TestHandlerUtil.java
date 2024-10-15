@@ -68,4 +68,11 @@ public class TestHandlerUtil {
       .withSettings(Arrays.stream(settings).toList())
       .withTotalRecords(1);
   }
+
+  public static KafkaConsumerRecord<String, String> createKafkaRecordWithValues(JsonObject oldItemValue, JsonObject newItemValue) {
+    var resourceEvent = createDefaultUpdateResourceEvent();
+    resourceEvent.setOldValue(oldItemValue);
+    resourceEvent.setNewValue(newItemValue);
+    return createKafkaRecord(resourceEvent, DIKU_TENANT);
+  }
 }

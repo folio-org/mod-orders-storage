@@ -18,7 +18,7 @@ import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PERMANENT_
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InventoryUpdateHolder {
+public class HoldingEventHolder {
 
   private ResourceEvent resourceEvent;
   private Map<String, String> headers;
@@ -41,10 +41,6 @@ public class InventoryUpdateHolder {
 
   public String getActiveTenantId() {
     return Objects.nonNull(centralTenantId) ? centralTenantId : tenantId;
-  }
-
-  public boolean valuesNonNull() {
-    return Objects.isNull(resourceEvent.getOldValue()) || Objects.isNull(resourceEvent.getNewValue());
   }
 
   public boolean instanceIdEqual() {

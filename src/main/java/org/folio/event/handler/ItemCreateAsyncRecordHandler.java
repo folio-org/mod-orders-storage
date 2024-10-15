@@ -73,6 +73,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantIdFromEvent) {
     return pieces.stream()
+      .filter(Objects::nonNull)
       .filter(piece -> // filter out pieces that already have the same tenantId and holdingId
         ObjectUtils.notEqual(piece.getReceivingTenantId(), tenantIdFromEvent)
         || ObjectUtils.notEqual(piece.getHoldingId(), holdingId))
