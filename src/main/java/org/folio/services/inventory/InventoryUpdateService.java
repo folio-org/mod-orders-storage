@@ -4,6 +4,7 @@ import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
+import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.event.dto.HoldingEventHolder;
@@ -50,6 +51,10 @@ public class InventoryUpdateService {
       .map(ids -> getHoldingsChunk(ids, requestContext)).toList());
 
     return holdingFutures.compose(getResults -> {
+      if (getResults.isEmpty()) {
+        log.info("batchUpdateAdjacentHoldings:: No holdings were found with ids '{}', ignoring update", holdingIds);
+        return Future.succeededFuture();
+      }
       updateResultNewInstanceId(getResults, newInstanceId);
       var batchPostRequestEntry = new RequestEntry(STORAGE_BATCH_HOLDING_URL.getPath()).withQueryParameter(UPSERT, TRUE);
       var payload = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray(getResults));
@@ -70,6 +75,7 @@ public class InventoryUpdateService {
   private void updateResultNewInstanceId(List<JsonObject> results, String newInstanceId) {
     results.forEach(result ->
       result.getJsonArray(HOLDINGS_RECORDS).stream()
+        .filter(Objects::nonNull)
         .map(JsonObject.class::cast)
         .forEach(holding -> holding.put(INSTANCE_ID, newInstanceId)));
   }
