@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum ResourcePath {
 
   USER_TENANTS_ENDPOINT("/user-tenants"),
-  STORAGE_HOLDING_URL("/holdings-storage/holdings/%s"),
+  STORAGE_HOLDING_URL("/holdings-storage/holdings"),
   STORAGE_BATCH_HOLDING_URL("/holdings-storage/batch/synchronous");
 
   private final String path;

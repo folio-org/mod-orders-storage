@@ -1,6 +1,7 @@
 package org.folio.services.inventory;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.folio.CopilotGenerated;
 import org.folio.event.dto.HoldingEventHolder;
@@ -54,16 +55,18 @@ public class InventoryUpdateServiceTest {
   void testBatchUpdateAdjacentHoldingsWithNewInstanceId_WithHoldings() {
     var resourceEvent = new ResourceEvent();
     resourceEvent.setNewValue(new JsonObject().put(INSTANCE_ID, UUID.randomUUID().toString()));
+    var holdingObject = new JsonObject().put("id", UUID.randomUUID().toString());
+    var holdingRecordsJsonObject = new JsonObject().put("holdingsRecords", new JsonArray().add(holdingObject));
     var holder = HoldingEventHolder.builder().resourceEvent(resourceEvent).build();
     var holdingIds = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
-    when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(new JsonObject()));
+    when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(holdingRecordsJsonObject));
     when(restClient.post(any(), any(), any(), any())).thenReturn(Future.succeededFuture());
 
     var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds, requestContext);
 
     assertDoesNotThrow(result::result);
-    verify(restClient, times(2)).get(any(), any());
+    verify(restClient, times(1)).get(any(), any());
     verify(restClient, times(1)).post(any(), any(), any(), any());
   }
 }
