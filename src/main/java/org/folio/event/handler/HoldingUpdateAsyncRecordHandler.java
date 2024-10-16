@@ -18,6 +18,7 @@ import org.folio.rest.persist.Conn;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.InventoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -32,9 +33,6 @@ import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 @Log4j2
 public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHandler {
 
-  public static final String ID = "id";
-  public static final String INSTANCE_ID = "instanceId";
-  public static final String PERMANENT_LOCATION_ID = "permanentLocationId";
   public static final String PO_LINE_LOCATIONS_HOLDING_ID_CQL = "locations==*%s*";
 
   @Autowired
@@ -55,24 +53,27 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
                                                      String centralTenantId) {
     var holder = createInventoryUpdateHolder(resourceEvent, headers, centralTenantId);
-    var dbClient = createDBClient(holder.getActiveTenantId());
     holder.prepareAllIds();
     if (holder.instanceIdEqual() && holder.searchLocationIdEqual()) {
       log.info("processInventoryUpdateEvent:: No instance id or search location ids to update, ignoring update");
       return Future.succeededFuture();
     }
     var requestContext = new RequestContext(getContext(), holder.getHeaders());
-    return dbClient.getPgClient()
+    return createDBClient(holder.getActiveTenantId()).getPgClient()
       // batchUpdateAdjacentHoldingsWithNewInstanceId must not run in the same transaction as processPoLinesUpdate
-      .withTrans(conn -> processPoLinesUpdate(holder, conn))
+      .withTrans(conn -> processPoLinesUpdate(holder, conn, requestContext))
       .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
       .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
       .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> processPoLinesUpdate(HoldingEventHolder holder, Conn conn) {
-    return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn)
+  private Future<List<PoLine>> processPoLinesUpdate(HoldingEventHolder holder, Conn conn, RequestContext requestContext) {
+    return inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext)
+      .compose(instance -> {
+        holder.setInstance(instance);
+        return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn);
+      })
       .compose(poLines -> updatePoLines(holder, poLines, conn))
       .compose(poLines -> updateTitles(holder, poLines, conn).map(poLines))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(poLines));
@@ -83,7 +84,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLines:: No POLs were found for holding to update, holdingId: {}", holder.getHoldingId());
       return Future.succeededFuture(List.of());
     }
-    var instanceIdUpdated = updatePoLinesInstanceId(holder, poLines);
+    var instanceIdUpdated = updatePoLinesInstance(holder, poLines);
     var searchLocationIdsUpdated = updatePoLinesSearchLocationIds(holder, poLines);
     if (Boolean.FALSE.equals(instanceIdUpdated.getLeft()) && !searchLocationIdsUpdated) {
       log.info("updatePoLines:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
@@ -122,21 +123,27 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .toList();
   }
 
-  private Pair<Boolean, List<PoLine>> updatePoLinesInstanceId(HoldingEventHolder holder, List<PoLine> poLines) {
+  private Pair<Boolean, List<PoLine>> updatePoLinesInstance(HoldingEventHolder holder, List<PoLine> poLines) {
     if (holder.instanceIdEqual()) {
-      log.info("updatePoLinesInstanceId:: No instance id was changed (ids are the same), ignoring update");
+      log.info("updatePoLinesInstance:: No instance id was changed (ids are the same), ignoring update");
       return Pair.of(false, List.of());
     }
-    var oldInstanceId = holder.getInstanceIdPair().getLeft();
-    var newInstanceId = holder.getInstanceIdPair().getRight();
+    if (Objects.isNull(holder.getInstance())) {
+      log.warn("updatePoLinesInstance:: Instance is null, instanceId: {}, ignoring update", holder.getInstanceId());
+      return Pair.of(false, List.of());
+    }
     // Creating a new list of altered poLines is needed to avoid
     // recursive invocation of the same consumer on holding instance id batch update
     var updatedPoLines = new ArrayList<PoLine>(poLines.size());
-    for (var poline : poLines) {
-      if (!StringUtils.equals(poline.getInstanceId(), newInstanceId)) {
-        updatedPoLines.add(poline.withInstanceId(newInstanceId));
-        log.info("updatePoLinesInstanceId:: Added new instance id to POL, poLineId: {}, old instanceId: {}, new instanceId: {}",
-          poline.getId(), oldInstanceId, newInstanceId);
+    for (var poLine : poLines) {
+      if (!StringUtils.equals(poLine.getInstanceId(), holder.getInstanceId())) {
+        poLine.withInstanceId(holder.getInstanceId())
+          .withTitleOrPackage(InventoryUtils.getInstanceTitle(holder.getInstance()))
+          .withPublisher(InventoryUtils.getPublisher(holder.getInstance()))
+          .withPublicationDate(InventoryUtils.getPublicationDate(holder.getInstance()))
+          .withContributors(InventoryUtils.getContributors(holder.getInstance()));
+        updatedPoLines.add(poLine);
+        log.info("updatePoLinesInstance:: Added new instance data to POL, poLineId: {}", poLine.getId());
       }
     }
     return Pair.of(true, updatedPoLines);

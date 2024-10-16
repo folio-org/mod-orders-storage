@@ -16,11 +16,12 @@ import java.util.List;
 
 import static one.util.streamex.StreamEx.ofSubLists;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ_15;
-import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
 import static org.folio.util.HelperUtils.collectResultsOnSuccess;
 import static org.folio.util.HelperUtils.convertIdsToCqlQuery;
+import static org.folio.util.InventoryUtils.HOLDING_INSTANCE_ID;
 import static org.folio.util.ResourcePath.STORAGE_BATCH_HOLDING_URL;
 import static org.folio.util.ResourcePath.STORAGE_HOLDING_URL;
+import static org.folio.util.ResourcePath.STORAGE_INSTANCE_URL;
 
 @Log4j2
 public class InventoryUpdateService {
@@ -49,7 +50,6 @@ public class InventoryUpdateService {
   private Future<Void> batchUpdateAdjacentHoldings(List<String> holdingIds, String newInstanceId, RequestContext requestContext) {
     var holdingFutures = collectResultsOnSuccess(ofSubLists(holdingIds, MAX_IDS_FOR_GET_RQ_15)
       .map(ids -> getHoldingsChunk(ids, requestContext)).toList());
-
     return holdingFutures.compose(getResults -> {
       if (getResults.isEmpty()) {
         log.info("batchUpdateAdjacentHoldings:: No holdings were found with ids '{}', ignoring update", holdingIds);
@@ -64,8 +64,8 @@ public class InventoryUpdateService {
   }
 
   private Future<JsonObject> getHoldingsChunk(List<String> holdingIds, RequestContext requestContext) {
-    String query = convertIdsToCqlQuery(holdingIds);
-    RequestEntry requestEntry = new RequestEntry(STORAGE_HOLDING_URL.getPath())
+    var query = convertIdsToCqlQuery(holdingIds);
+    var requestEntry = new RequestEntry(STORAGE_HOLDING_URL.getPath())
       .withQuery(query)
       .withOffset(0)
       .withLimit(MAX_IDS_FOR_GET_RQ_15);
@@ -77,6 +77,15 @@ public class InventoryUpdateService {
       result.getJsonArray(HOLDINGS_RECORDS).stream()
         .filter(Objects::nonNull)
         .map(JsonObject.class::cast)
-        .forEach(holding -> holding.put(INSTANCE_ID, newInstanceId)));
+        .forEach(holding -> holding.put(HOLDING_INSTANCE_ID, newInstanceId)));
+  }
+
+  public Future<JsonObject> getAndSetHolderInstanceByIdIfRequired(HoldingEventHolder holder, RequestContext requestContext) {
+    if (holder.instanceIdEqual()) {
+      log.info("getAndSetHolderInstanceByIdIfRequired:: Populating holder instance is not required, ignoring GET request");
+      return Future.succeededFuture();
+    }
+    var requestEntry = new RequestEntry(String.format(STORAGE_INSTANCE_URL.getPath(), holder.getInstanceId()));
+    return restClient.get(requestEntry, requestContext);
   }
 }

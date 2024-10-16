@@ -2,6 +2,7 @@ package org.folio.event.handler;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -9,7 +10,7 @@ import org.folio.TestUtils;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
-import org.folio.rest.core.models.RequestContext;
+import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Setting;
@@ -34,9 +35,6 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import static org.folio.TestUtils.mockContext;
-import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.ID;
-import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
-import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PERMANENT_LOCATION_ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PO_LINE_LOCATIONS_HOLDING_ID_CQL;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
@@ -44,6 +42,21 @@ import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourc
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
 import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
+import static org.folio.util.InventoryUtils.CONTRIBUTOR_NAME;
+import static org.folio.util.InventoryUtils.CONTRIBUTOR_NAME_TYPE_ID;
+import static org.folio.util.InventoryUtils.HOLDING_ID;
+import static org.folio.util.InventoryUtils.HOLDING_INSTANCE_ID;
+import static org.folio.util.InventoryUtils.HOLDING_PERMANENT_LOCATION_ID;
+import static org.folio.util.InventoryUtils.INSTANCE_CONTRIBUTORS;
+import static org.folio.util.InventoryUtils.INSTANCE_DATE_OF_PUBLICATION;
+import static org.folio.util.InventoryUtils.INSTANCE_ID;
+import static org.folio.util.InventoryUtils.INSTANCE_PUBLICATION;
+import static org.folio.util.InventoryUtils.INSTANCE_PUBLISHER;
+import static org.folio.util.InventoryUtils.INSTANCE_TITLE;
+import static org.folio.util.InventoryUtils.getContributors;
+import static org.folio.util.InventoryUtils.getInstanceTitle;
+import static org.folio.util.InventoryUtils.getPublicationDate;
+import static org.folio.util.InventoryUtils.getPublisher;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,6 +75,18 @@ import static org.mockito.Mockito.verify;
 public class HoldingUpdateAsyncRecordHandlerTest {
 
   private static final String PO_LINE_SAVE_FAILED_MSG = "PoLine save failed";
+
+  private static final String TITLE_1 = "Title1";
+  private static final String PUBLISHER_1 = "Publisher1";
+  private static final String DATE_OF_PUBLICATION_1 = "2022-01-01";
+  private static final String CONTRIBUTOR_1 = "Contributor1";
+  private static final String CONTRIBUTOR_NAME_TYPE_ID_1 = "1";
+
+  private static final String TITLE_2 = "Title2";
+  private static final String PUBLISHER_2 = "Publisher2";
+  private static final String DATE_OF_PUBLICATION_2 = "2023-01-01";
+  private static final String CONTRIBUTOR_2 = "Contributor2";
+  private static final String CONTRIBUTOR_NAME_TYPE_ID_2 = "2";
 
   @Spy
   private SettingService settingService;
@@ -98,7 +123,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(DIKU_TENANT))
         .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-      doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any(RequestContext.class));
+      doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(any());
@@ -115,20 +140,22 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var holdingId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId2 = UUID.randomUUID().toString();
+
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId2);
     var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate)),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate))
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1)),
-      createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1))
+      createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
     );
 
+    doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(List.of()), anyMap());
@@ -167,20 +194,23 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var instanceId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId1 = UUID.randomUUID().toString();
+
+    var newInstance = createInstance(instanceId2);
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId2, permanentSearchLocationId1);
     var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate)),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate))
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate)),
-      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate))
+      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2),
+      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
     );
 
+    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(expectedPoLines), anyMap());
@@ -196,7 +226,12 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       .filter(poLine -> poLine.getInstanceId().equals(instanceId1))
       .count());
     assertEquals(2, actualPoLines.stream()
-      .filter(poLine -> poLine.getInstanceId().equals(instanceId2))
+      .filter(poLine -> poLine.getInstanceId().equals(instanceId2)
+        && poLine.getTitleOrPackage().equals(getInstanceTitle(newInstance))
+        && poLine.getPublisher().equals(getPublisher(newInstance))
+        && poLine.getPublicationDate().equals(getPublicationDate(newInstance))
+        && poLine.getContributors().equals(getContributors(newInstance))
+      )
       .count());
     assertEquals(2, actualPoLines.stream()
       .filter(poLine -> poLine.getLocations().stream()
@@ -219,20 +254,23 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var holdingId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId2 = UUID.randomUUID().toString();
+
+    var newInstance = createInstance(instanceId2);
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId2, permanentSearchLocationId2);
     var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate)),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate))
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1)),
-      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1))
+      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2),
+      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
     );
 
+    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(expectedPoLines), anyMap());
@@ -248,7 +286,12 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       .filter(poLine -> poLine.getInstanceId().equals(instanceId1))
       .count());
     assertEquals(2, actualPoLines.stream()
-      .filter(poLine -> poLine.getInstanceId().equals(instanceId2))
+      .filter(poLine -> poLine.getInstanceId().equals(instanceId2)
+        && poLine.getTitleOrPackage().equals(getInstanceTitle(newInstance))
+        && poLine.getPublisher().equals(getPublisher(newInstance))
+        && poLine.getPublicationDate().equals(getPublicationDate(newInstance))
+        && poLine.getContributors().equals(getContributors(newInstance))
+      )
       .count());
     assertEquals(2, actualPoLines.stream()
       .filter(poLine -> poLine.getLocations().stream()
@@ -266,13 +309,13 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     assertTrue(actualPoLines.containsAll(expectedPoLines));
   }
 
-
   @Test
   void positive_shouldProcessInventoryUpdateEventWithNoPoLinesFound() {
     var instanceId1 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId2 = UUID.randomUUID().toString();
+
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId2);
 
@@ -282,6 +325,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var kafkaRecord =  createKafkaRecord(resourceEvent, DIKU_TENANT);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
+    doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
 
     var result = handler.handle(kafkaRecord);
@@ -300,20 +344,23 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var instanceId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var permanentSearchLocationId1 = UUID.randomUUID().toString();
+
+    var newInstance = createInstance(instanceId2);
     var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
     var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId2, permanentSearchLocationId1);
     var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate)),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate))
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate)),
-      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate))
+      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2),
+      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
     );
 
+    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();
@@ -336,29 +383,46 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
 
-  private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings) {
-    return createPoLine(poLineId, instanceId, holdings, null);
+  private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
+                                     String titleOrPackage, String publisher, String publicationDate, String contributor, String contributorNameTypeId) {
+    return createPoLine(poLineId, instanceId, holdings, null, titleOrPackage, publisher, publicationDate, contributor, contributorNameTypeId);
   }
 
-  private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings, List<String> oldPermanentSearchLocationIds) {
+  private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings, List<String> oldPermanentSearchLocationIds,
+                                     String titleOrPackage, String publisher, String publicationDate, String contributor, String contributorNameTypeId) {
     // The order of searchLocationIds is very important for test mocking
     // add old ids first, then add new expected ids
     var searchLocationIds = new ArrayList<String>();
     if (!CollectionUtils.isEmpty(oldPermanentSearchLocationIds)) {
       searchLocationIds.addAll(oldPermanentSearchLocationIds);
     }
-    holdings.forEach(holding -> searchLocationIds.add(holding.getString(PERMANENT_LOCATION_ID)));
+    holdings.forEach(holding -> searchLocationIds.add(holding.getString(HOLDING_PERMANENT_LOCATION_ID)));
     var locations = new ArrayList<Location>();
-    holdings.forEach(holding -> locations.add(new Location().withHoldingId(holding.getString(ID))));
+    holdings.forEach(holding -> locations.add(new Location().withHoldingId(holding.getString(HOLDING_ID))));
     return new PoLine().withId(poLineId)
       .withInstanceId(instanceId)
+      .withTitleOrPackage(titleOrPackage)
+      .withPublisher(publisher)
+      .withPublicationDate(publicationDate)
+      .withContributors(List.of(new Contributor().withContributor(contributor).withContributorNameTypeId(contributorNameTypeId)))
       .withSearchLocationIds(searchLocationIds)
       .withLocations(locations);
   }
 
-  private static JsonObject createHoldings(String holdingId, String instanceId, String permanentLocationId) {
-    return new JsonObject().put(ID, holdingId)
-      .put(INSTANCE_ID, instanceId)
-      .put(PERMANENT_LOCATION_ID, permanentLocationId);
+  private JsonObject createHoldings(String holdingId, String instanceId, String permanentLocationId) {
+    return new JsonObject().put(HOLDING_ID, holdingId)
+      .put(HOLDING_INSTANCE_ID, instanceId)
+      .put(HOLDING_PERMANENT_LOCATION_ID, permanentLocationId);
+  }
+
+  private JsonObject createInstance(String instanceId) {
+    return new JsonObject().put(INSTANCE_ID, instanceId)
+      .put(INSTANCE_TITLE, TITLE_2)
+      .put(INSTANCE_PUBLICATION, new JsonArray().add(new JsonObject()
+        .put(INSTANCE_PUBLISHER, PUBLISHER_2)
+        .put(INSTANCE_DATE_OF_PUBLICATION, DATE_OF_PUBLICATION_2)))
+      .put(INSTANCE_CONTRIBUTORS, new JsonArray().add(new JsonObject()
+        .put(CONTRIBUTOR_NAME, CONTRIBUTOR_2)
+        .put(CONTRIBUTOR_NAME_TYPE_ID, CONTRIBUTOR_NAME_TYPE_ID_2)));
   }
 }

@@ -68,6 +68,6 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
    *
    * @return future
    */
-  protected abstract Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> header,
+  protected abstract Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
                                                               String centralTenantId);
 }
