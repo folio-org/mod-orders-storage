@@ -1,13 +1,13 @@
 package org.folio.event.handler;
 
 import static org.folio.TestUtils.mockContext;
-import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.ID;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
 import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
+import static org.folio.util.InventoryUtils.HOLDING_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -216,7 +216,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
   }
 
   private static JsonObject createItem(String itemId, String holdingId) {
-    return new JsonObject().put(ID, itemId)
+    return new JsonObject().put(HOLDING_ID, itemId)
       .put(InventoryFields.HOLDINGS_RECORD_ID.getValue(), holdingId);
   }
 }

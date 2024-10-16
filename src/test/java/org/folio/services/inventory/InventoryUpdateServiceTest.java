@@ -17,7 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
-import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.INSTANCE_ID;
+import static org.folio.util.InventoryUtils.HOLDING_INSTANCE_ID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -30,13 +30,11 @@ public class InventoryUpdateServiceTest {
   private InventoryUpdateService inventoryUpdateService;
   @Mock
   private RestClient restClient;
-  @Mock
-  private RequestContext requestContext;
 
   @Test
   void testBatchUpdateAdjacentHoldingsWithNewInstanceId_NullHoldings() {
     var holder = HoldingEventHolder.builder().build();
-    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, null, requestContext);
+    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, null);
 
     assertDoesNotThrow(result::result);
     verify(restClient, never()).get(any(), any());
@@ -45,7 +43,7 @@ public class InventoryUpdateServiceTest {
   @Test
   void testBatchUpdateAdjacentHoldingsWithNewInstanceId_NoHoldings() {
     var holder = HoldingEventHolder.builder().build();
-    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, List.of(), requestContext);
+    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, List.of());
 
     assertDoesNotThrow(result::result);
     verify(restClient, never()).get(any(), any());
@@ -54,7 +52,7 @@ public class InventoryUpdateServiceTest {
   @Test
   void testBatchUpdateAdjacentHoldingsWithNewInstanceId_WithHoldings() {
     var resourceEvent = new ResourceEvent();
-    resourceEvent.setNewValue(new JsonObject().put(INSTANCE_ID, UUID.randomUUID().toString()));
+    resourceEvent.setNewValue(new JsonObject().put(HOLDING_INSTANCE_ID, UUID.randomUUID().toString()));
     var holdingObject = new JsonObject().put("id", UUID.randomUUID().toString());
     var holdingRecordsJsonObject = new JsonObject().put("holdingsRecords", new JsonArray().add(holdingObject));
     var holder = HoldingEventHolder.builder().resourceEvent(resourceEvent).build();
@@ -63,10 +61,35 @@ public class InventoryUpdateServiceTest {
     when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(holdingRecordsJsonObject));
     when(restClient.post(any(), any(), any(), any())).thenReturn(Future.succeededFuture());
 
-    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds, requestContext);
+    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds);
 
     assertDoesNotThrow(result::result);
     verify(restClient, times(1)).get(any(), any());
     verify(restClient, times(1)).post(any(), any(), any(), any());
+  }
+
+  @Test
+  void testGetAndSetHolderInstanceByIdIfRequired_InstanceIdEqual() {
+    var holder = mock(HoldingEventHolder.class);
+    when(holder.instanceIdEqual()).thenReturn(true);
+
+    var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder);
+
+    assertDoesNotThrow(result::result);
+    verify(restClient, never()).get(any(), any());
+  }
+
+  @Test
+  void testGetAndSetHolderInstanceByIdIfRequired_InstanceIdNotEqual() {
+    var holder = mock(HoldingEventHolder.class);
+    when(holder.instanceIdEqual()).thenReturn(false);
+    when(holder.getInstanceId()).thenReturn(UUID.randomUUID().toString());
+    when(holder.getRequestContext()).thenReturn(mock(RequestContext.class));
+    when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(new JsonObject()));
+
+    var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder);
+
+    assertDoesNotThrow(result::result);
+    verify(restClient, times(1)).get(any(), any());
   }
 }

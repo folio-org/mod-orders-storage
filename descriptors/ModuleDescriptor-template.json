@@ -703,6 +703,10 @@
     {
       "id": "user-tenants",
       "version": "1.0"
+    },
+    {
+      "id": "holdings-storage",
+      "version": "8.0"
     }
   ],
   "permissionSets" : [
