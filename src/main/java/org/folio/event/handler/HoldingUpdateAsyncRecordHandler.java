@@ -132,7 +132,6 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.warn("updatePoLinesInstance:: Instance is null, instanceId: {}, ignoring update", holder.getInstanceId());
       return Pair.of(false, List.of());
     }
-    log.info("updatePoLinesInstance:: Using new instance data for POL update: {}", holder.getInstance().encodePrettily());
     // Creating a new list of altered poLines is needed to avoid
     // recursive invocation of the same consumer on holding instance id batch update
     var updatedPoLines = new ArrayList<PoLine>(poLines.size());
