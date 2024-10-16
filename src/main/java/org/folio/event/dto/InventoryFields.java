@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum InventoryFields {
 
   ID("id"),
-  HOLDINGS_RECORD_ID("holdingsRecordId");
+  HOLDINGS_RECORD_ID("holdingsRecordId"),
+  PERMANENT_LOCATION_ID("permanentLocationId");
 
   private final String value;
 }

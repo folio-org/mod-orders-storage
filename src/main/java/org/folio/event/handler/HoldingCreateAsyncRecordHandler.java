@@ -51,12 +51,13 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                                        Map<String, String> headers, DBClient dbClient) {
     var holdingObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var holdingId = holdingObject.getString(InventoryFields.ID.getValue());
+    var permanentLocationId = holdingObject.getString(InventoryFields.PERMANENT_LOCATION_ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> {
         var tenantIdUpdatesFuture = List.of(
           // order of tenants is important
-          processPoLinesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn),
+          processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, headers, conn),
           processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn)
         );
         return GenericCompositeFuture.all(tenantIdUpdatesFuture).mapEmpty();
@@ -65,10 +66,11 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .mapEmpty();
   }
 
-  private Future<Void> processPoLinesUpdate(String holdingId, String tenantIdFromEvent, String centralTenantId,
+  private Future<Void> processPoLinesUpdate(String holdingId, String permanentLocationId,
+                                            String tenantIdFromEvent, String centralTenantId,
                                             Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByHoldingId(holdingId, conn)
-      .compose(poLines -> updatePoLines(poLines, holdingId, tenantIdFromEvent, centralTenantId, conn))
+      .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
@@ -81,8 +83,8 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String tenantIdFromEvent,
-                                             String centralTenantId, Conn conn) {
+  private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,
+                                             String tenantIdFromEvent, String centralTenantId, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}' in centralTenant: '{}'",
         holdingId, tenantIdFromEvent, centralTenantId);
@@ -91,7 +93,15 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
 
     log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}' in centralTenant: '{}'",
       poLines.size(), holdingId, tenantIdFromEvent, centralTenantId);
-    poLines.forEach(poLine -> updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantIdFromEvent));
+    poLines.forEach(poLine -> {
+      updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantIdFromEvent);
+      var searchLocationIds = poLine.getSearchLocationIds();
+      if (!searchLocationIds.contains(permanentLocationId)) {
+        searchLocationIds.add(permanentLocationId);
+        log.info("updatePoLines:: Added new search location, poLineId: {}, searchLocationId: {}",
+          poLine.getId(), permanentLocationId);
+      }
+    });
 
     return poLinesService.updatePoLines(poLines, conn, centralTenantId)
       .map(v -> poLines);
