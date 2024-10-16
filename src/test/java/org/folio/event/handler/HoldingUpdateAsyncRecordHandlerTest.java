@@ -123,7 +123,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(DIKU_TENANT))
         .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-      doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any());
+      doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(any());
@@ -155,7 +155,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
     );
 
-    doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any());
+    doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(List.of()), anyMap());
@@ -210,7 +210,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
     );
 
-    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any());
+    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(expectedPoLines), anyMap());
@@ -270,7 +270,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
     );
 
-    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any());
+    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(any(Conn.class), eq(expectedPoLines), anyMap());
@@ -325,7 +325,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var kafkaRecord =  createKafkaRecord(resourceEvent, DIKU_TENANT);
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
-    doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any());
+    doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
 
     var result = handler.handle(kafkaRecord);
@@ -360,7 +360,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
     );
 
-    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any());
+    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();
@@ -383,12 +383,12 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
 
-  private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
+  private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
                                      String titleOrPackage, String publisher, String publicationDate, String contributor, String contributorNameTypeId) {
     return createPoLine(poLineId, instanceId, holdings, null, titleOrPackage, publisher, publicationDate, contributor, contributorNameTypeId);
   }
 
-  private static PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings, List<String> oldPermanentSearchLocationIds,
+  private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings, List<String> oldPermanentSearchLocationIds,
                                      String titleOrPackage, String publisher, String publicationDate, String contributor, String contributorNameTypeId) {
     // The order of searchLocationIds is very important for test mocking
     // add old ids first, then add new expected ids
@@ -409,13 +409,13 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       .withLocations(locations);
   }
 
-  private static JsonObject createHoldings(String holdingId, String instanceId, String permanentLocationId) {
+  private JsonObject createHoldings(String holdingId, String instanceId, String permanentLocationId) {
     return new JsonObject().put(HOLDING_ID, holdingId)
       .put(HOLDING_INSTANCE_ID, instanceId)
       .put(HOLDING_PERMANENT_LOCATION_ID, permanentLocationId);
   }
 
-  private static JsonObject createInstance(String instanceId) {
+  private JsonObject createInstance(String instanceId) {
     return new JsonObject().put(INSTANCE_ID, instanceId)
       .put(INSTANCE_TITLE, TITLE_2)
       .put(INSTANCE_PUBLICATION, new JsonArray().add(new JsonObject()

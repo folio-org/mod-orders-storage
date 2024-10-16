@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
-import org.folio.rest.core.models.RequestContext;
 
 import java.util.Map;
 import java.util.Objects;
@@ -25,7 +24,6 @@ public class HoldingEventHolder {
   private Map<String, String> headers;
   private String tenantId;
   private String centralTenantId;
-  private RequestContext requestContext;
 
   private String holdingId;
   private String instanceId;

@@ -30,11 +30,13 @@ public class InventoryUpdateServiceTest {
   private InventoryUpdateService inventoryUpdateService;
   @Mock
   private RestClient restClient;
+  @Mock
+  private RequestContext requestContext;
 
   @Test
   void testBatchUpdateAdjacentHoldingsWithNewInstanceId_NullHoldings() {
     var holder = HoldingEventHolder.builder().build();
-    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, null);
+    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, null, requestContext);
 
     assertDoesNotThrow(result::result);
     verify(restClient, never()).get(any(), any());
@@ -43,7 +45,7 @@ public class InventoryUpdateServiceTest {
   @Test
   void testBatchUpdateAdjacentHoldingsWithNewInstanceId_NoHoldings() {
     var holder = HoldingEventHolder.builder().build();
-    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, List.of());
+    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, List.of(), requestContext);
 
     assertDoesNotThrow(result::result);
     verify(restClient, never()).get(any(), any());
@@ -61,7 +63,7 @@ public class InventoryUpdateServiceTest {
     when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(holdingRecordsJsonObject));
     when(restClient.post(any(), any(), any(), any())).thenReturn(Future.succeededFuture());
 
-    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds);
+    var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds, requestContext);
 
     assertDoesNotThrow(result::result);
     verify(restClient, times(1)).get(any(), any());
@@ -73,7 +75,7 @@ public class InventoryUpdateServiceTest {
     var holder = mock(HoldingEventHolder.class);
     when(holder.instanceIdEqual()).thenReturn(true);
 
-    var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder);
+    var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext);
 
     assertDoesNotThrow(result::result);
     verify(restClient, never()).get(any(), any());
@@ -84,10 +86,9 @@ public class InventoryUpdateServiceTest {
     var holder = mock(HoldingEventHolder.class);
     when(holder.instanceIdEqual()).thenReturn(false);
     when(holder.getInstanceId()).thenReturn(UUID.randomUUID().toString());
-    when(holder.getRequestContext()).thenReturn(mock(RequestContext.class));
     when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(new JsonObject()));
 
-    var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder);
+    var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext);
 
     assertDoesNotThrow(result::result);
     verify(restClient, times(1)).get(any(), any());

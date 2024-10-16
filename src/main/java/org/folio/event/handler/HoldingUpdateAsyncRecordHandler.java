@@ -58,17 +58,18 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("processInventoryUpdateEvent:: No instance id or search location ids to update, ignoring update");
       return Future.succeededFuture();
     }
+    var requestContext = new RequestContext(getContext(), holder.getHeaders());
     return createDBClient(holder.getActiveTenantId()).getPgClient()
       // batchUpdateAdjacentHoldingsWithNewInstanceId must not run in the same transaction as processPoLinesUpdate
-      .withTrans(conn -> processPoLinesUpdate(holder, conn))
+      .withTrans(conn -> processPoLinesUpdate(holder, conn, requestContext))
       .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
-      .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds))
+      .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
       .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> processPoLinesUpdate(HoldingEventHolder holder, Conn conn) {
-    return inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder)
+  private Future<List<PoLine>> processPoLinesUpdate(HoldingEventHolder holder, Conn conn, RequestContext requestContext) {
+    return inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext)
       .compose(instance -> {
         holder.setInstance(instance);
         return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn);
@@ -128,7 +129,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       return Pair.of(false, List.of());
     }
     if (Objects.isNull(holder.getInstance())) {
-      log.error("updatePoLinesInstance:: Instance is null, instanceId: {}, ignoring update", holder.getInstanceId());
+      log.warn("updatePoLinesInstance:: Instance is null, instanceId: {}, ignoring update", holder.getInstanceId());
       return Pair.of(false, List.of());
     }
     log.info("updatePoLinesInstance:: Using new instance data for POL update: {}", holder.getInstance().encodePrettily());
@@ -174,7 +175,6 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .headers(headers)
       .tenantId(extractTenantFromHeaders(headers))
       .centralTenantId(centralTenantId)
-      .requestContext(new RequestContext(getContext(), headers))
       .build();
   }
 }

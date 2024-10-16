@@ -36,12 +36,13 @@ public class InventoryUpdateService {
     this.restClient = restClient;
   }
 
-  public Future<Void> batchUpdateAdjacentHoldingsWithNewInstanceId(HoldingEventHolder holder, List<String> holdingIds) {
+  public Future<Void> batchUpdateAdjacentHoldingsWithNewInstanceId(HoldingEventHolder holder, List<String> holdingIds,
+                                                                   RequestContext requestContext) {
     if (CollectionUtils.isEmpty(holdingIds)) {
       log.info("batchUpdateAdjacentHoldingsWithNewInstanceId:: No adjacent holdings were found to update, ignoring update");
       return Future.succeededFuture();
     }
-    return batchUpdateAdjacentHoldings(holdingIds, holder.getInstanceId(), holder.getRequestContext())
+    return batchUpdateAdjacentHoldings(holdingIds, holder.getInstanceId(), requestContext)
       .onComplete(asyncResult -> log.info("batchUpdateAdjacentHoldingsWithNewInstanceId:: Updated adjacent holdings, size: {}", holdingIds.size()))
       .mapEmpty();
   }
@@ -79,12 +80,12 @@ public class InventoryUpdateService {
         .forEach(holding -> holding.put(HOLDING_INSTANCE_ID, newInstanceId)));
   }
 
-  public Future<JsonObject> getAndSetHolderInstanceByIdIfRequired(HoldingEventHolder holder) {
+  public Future<JsonObject> getAndSetHolderInstanceByIdIfRequired(HoldingEventHolder holder, RequestContext requestContext) {
     if (holder.instanceIdEqual()) {
       log.info("getAndSetHolderInstanceByIdIfRequired:: Populating holder instance is not required, ignoring GET request");
       return Future.succeededFuture();
     }
     var requestEntry = new RequestEntry(String.format(STORAGE_INSTANCE_URL.getPath(), holder.getInstanceId()));
-    return restClient.get(requestEntry, holder.getRequestContext());
+    return restClient.get(requestEntry, requestContext);
   }
 }
