@@ -218,11 +218,6 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<List<PoLine>> getPoLinesByHoldingId(String holdingId, Conn conn) {
-    var criterion = getCriterionByFieldNameAndValue(LOCATIONS_HOLDING_ID_FIELD, holdingId);
-    return getPoLinesByField(criterion, conn);
-  }
-
   @SneakyThrows
   public Future<List<PoLine>> getPoLinesByCqlQuery(String query, Conn conn) {
     var cqlWrapper = new QueryHolder(PO_LINE_TABLE,  query, 0, Integer.MAX_VALUE).buildCQLQuery();
