@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -130,7 +131,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     );
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
-    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
@@ -140,7 +141,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
     assertEquals(2, actualPieces.stream().filter(piece -> piece.getReceivingTenantId().equals(DIKU_TENANT)).count());
@@ -174,7 +175,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -182,7 +183,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
 
     assertEquals(2, actualPieces.stream().filter(piece -> piece.getReceivingTenantId().equals(DIKU_TENANT)).count());
@@ -207,7 +208,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     );
 
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
-    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
     var result = handler.handle(kafkaRecord);
@@ -216,7 +217,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
     verify(pieceService, times(0)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
     assertEquals(2, actualPoLines.stream()
@@ -236,14 +237,14 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var kafkaRecord = createHoldingEventKafkaRecord(holdingId1, DIKU_TENANT, CREATE, LOCATION_ID);
 
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
-    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
     verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
     verify(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
-    verify(poLinesService).getPoLinesByHoldingId(eq(holdingId1), any(Conn.class));
+    verify(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     verify(pieceService, times(0)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
@@ -262,7 +263,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var expectedPoLines = List.of(createPoLine(poLineId, List.of(createLocation(holdingId, DIKU_TENANT), createLocation(holdingId, DIKU_TENANT)), LOCATION_ID));
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId), any(Conn.class));
-    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByHoldingId(eq(holdingId), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     doThrow(new RuntimeException("Piece save failed")).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doThrow(new RuntimeException("PoLine save failed")).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();

@@ -1,6 +1,7 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_HOLDING_CREATE;
+import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PO_LINE_LOCATIONS_HOLDING_ID_CQL;
 
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   private Future<Void> processPoLinesUpdate(String holdingId, String permanentLocationId,
                                             String tenantIdFromEvent, String centralTenantId,
                                             Map<String, String> headers, Conn conn) {
-    return poLinesService.getPoLinesByHoldingId(holdingId, conn)
+    return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
