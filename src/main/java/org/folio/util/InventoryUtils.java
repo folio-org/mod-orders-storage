@@ -1,52 +1,52 @@
 package org.folio.util;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.log4j.Log4j2;
 import org.folio.rest.jaxrs.model.Contributor;
+import org.folio.rest.jaxrs.model.ProductId;
 
 import java.util.List;
 
+import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME;
+import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME_TYPE_ID;
+import static org.folio.event.dto.InstanceFields.CONTRIBUTORS;
+import static org.folio.event.dto.InstanceFields.DATE_OF_PUBLICATION;
+import static org.folio.event.dto.InstanceFields.IDENTIFIERS;
+import static org.folio.event.dto.InstanceFields.IDENTIFIER_TYPE_ID;
+import static org.folio.event.dto.InstanceFields.IDENTIFIER_TYPE_VALUE;
+import static org.folio.event.dto.InstanceFields.PUBLICATION;
+import static org.folio.event.dto.InstanceFields.PUBLISHER;
+import static org.folio.event.dto.InstanceFields.TITLE;
+
 @Log4j2
 public class InventoryUtils {
-
-  public static final String INSTANCE_ID = "id";
-  public static final String INSTANCE_TITLE = "title";
-  public static final String INSTANCE_PUBLISHER = "publisher";
-  public static final String INSTANCE_CONTRIBUTORS = "contributors";
-  public static final String INSTANCE_DATE_OF_PUBLICATION = "dateOfPublication";
-  public static final String INSTANCE_PUBLICATION = "publication";
-  public static final String CONTRIBUTOR_NAME = "name";
-  public static final String CONTRIBUTOR_NAME_TYPE_ID = "contributorNameTypeId";
-
-  public static final String HOLDING_ID = "id";
-  public static final String HOLDING_INSTANCE_ID = "instanceId";
-  public static final String HOLDING_PERMANENT_LOCATION_ID = "permanentLocationId";
 
   private InventoryUtils() {
   }
 
   public static String getInstanceTitle(JsonObject instance) {
-    return instance.getString(INSTANCE_TITLE);
+    return instance.getString(TITLE.getValue());
   }
 
   public static String getPublisher(JsonObject instance) {
-    var publication = instance.getJsonArray(INSTANCE_PUBLICATION);
+    var publication = instance.getJsonArray(PUBLICATION.getValue());
     if (publication == null || publication.isEmpty()) {
       return null;
     }
-    return publication.getJsonObject(0).getString(INSTANCE_PUBLISHER);
+    return publication.getJsonObject(0).getString(PUBLISHER.getValue());
   }
 
   public static String getPublicationDate(JsonObject instance) {
-    var publication = instance.getJsonArray(INSTANCE_PUBLICATION);
+    var publication = instance.getJsonArray(PUBLICATION.getValue());
     if (publication == null || publication.isEmpty()) {
       return null;
     }
-    return publication.getJsonObject(0).getString(INSTANCE_DATE_OF_PUBLICATION);
+    return publication.getJsonObject(0).getString(DATE_OF_PUBLICATION.getValue());
   }
 
   public static List<Contributor> getContributors(JsonObject instance) {
-    var contributors = instance.getJsonArray(INSTANCE_CONTRIBUTORS);
+    var contributors = instance.getJsonArray(CONTRIBUTORS.getValue());
     if (contributors == null || contributors.isEmpty()) {
       return List.of();
     }
@@ -54,8 +54,22 @@ public class InventoryUtils {
       .stream()
       .map(JsonObject.class::cast)
       .map(jsonObject -> new Contributor()
-        .withContributor(jsonObject.getString(CONTRIBUTOR_NAME))
-        .withContributorNameTypeId(jsonObject.getString(CONTRIBUTOR_NAME_TYPE_ID)))
+        .withContributor(jsonObject.getString(CONTRIBUTOR_NAME.getValue()))
+        .withContributorNameTypeId(jsonObject.getString(CONTRIBUTOR_NAME_TYPE_ID.getValue())))
+      .toList();
+  }
+
+  public static List<ProductId> getProductIds(JsonObject instance) {
+    JsonArray productIds = instance.getJsonArray(IDENTIFIERS.getValue());
+    if (productIds == null || productIds.isEmpty()) {
+      return List.of();
+    }
+    return productIds
+      .stream()
+      .map(JsonObject.class::cast)
+      .map(jsonObject -> new ProductId()
+        .withProductId(jsonObject.getString(IDENTIFIER_TYPE_VALUE.getValue()))
+        .withProductIdType(jsonObject.getString(IDENTIFIER_TYPE_ID.getValue())))
       .toList();
   }
 }

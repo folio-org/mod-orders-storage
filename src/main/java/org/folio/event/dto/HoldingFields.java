@@ -1,14 +1,14 @@
 package org.folio.event.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
-public enum InventoryFields {
+@AllArgsConstructor
+public enum HoldingFields {
 
   ID("id"),
-  HOLDINGS_RECORD_ID("holdingsRecordId"),
+  INSTANCE_ID("instanceId"),
   PERMANENT_LOCATION_ID("permanentLocationId");
 
   private final String value;

@@ -1,8 +1,8 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
-import static org.folio.event.dto.InventoryFields.HOLDINGS_RECORD_ID;
-import static org.folio.event.dto.InventoryFields.ID;
+import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
+import static org.folio.event.dto.ItemFields.ID;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;

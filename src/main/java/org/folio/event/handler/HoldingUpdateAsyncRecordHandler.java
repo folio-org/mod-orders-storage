@@ -141,7 +141,8 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
           .withTitleOrPackage(InventoryUtils.getInstanceTitle(holder.getInstance()))
           .withPublisher(InventoryUtils.getPublisher(holder.getInstance()))
           .withPublicationDate(InventoryUtils.getPublicationDate(holder.getInstance()))
-          .withContributors(InventoryUtils.getContributors(holder.getInstance()));
+          .withContributors(InventoryUtils.getContributors(holder.getInstance()))
+          .getDetails().withProductIds(InventoryUtils.getProductIds(holder.getInstance()));
         updatedPoLines.add(poLine);
         log.info("updatePoLinesInstance:: Added new instance data to POL, poLineId: {}", poLine.getId());
       }
