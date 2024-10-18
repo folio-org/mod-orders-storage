@@ -1,6 +1,8 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_HOLDING_CREATE;
+import static org.folio.event.dto.HoldingFields.ID;
+import static org.folio.event.dto.HoldingFields.PERMANENT_LOCATION_ID;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PO_LINE_LOCATIONS_HOLDING_ID_CQL;
 
 import java.util.List;
@@ -8,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.folio.event.dto.InventoryFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
@@ -51,8 +52,8 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   protected Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String centralTenantId,
                                                        Map<String, String> headers, DBClient dbClient) {
     var holdingObject = JsonObject.mapFrom(resourceEvent.getNewValue());
-    var holdingId = holdingObject.getString(InventoryFields.ID.getValue());
-    var permanentLocationId = holdingObject.getString(InventoryFields.PERMANENT_LOCATION_ID.getValue());
+    var holdingId = holdingObject.getString(ID.getValue());
+    var permanentLocationId = holdingObject.getString(PERMANENT_LOCATION_ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> {

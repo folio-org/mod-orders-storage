@@ -2,8 +2,8 @@ package org.folio.event.handler;
 
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
-import static org.folio.event.dto.InventoryFields.HOLDINGS_RECORD_ID;
-import static org.folio.event.dto.InventoryFields.ID;
+import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
+import static org.folio.event.dto.ItemFields.ID;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;

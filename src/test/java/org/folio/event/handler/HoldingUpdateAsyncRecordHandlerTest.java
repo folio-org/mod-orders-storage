@@ -7,12 +7,15 @@ import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.folio.TestUtils;
+import org.folio.event.dto.InstanceFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Contributor;
+import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.ProductId;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -35,6 +38,19 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import static org.folio.TestUtils.mockContext;
+import static org.folio.event.dto.HoldingFields.ID;
+import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
+import static org.folio.event.dto.HoldingFields.PERMANENT_LOCATION_ID;
+import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME;
+import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME_TYPE_ID;
+import static org.folio.event.dto.InstanceFields.CONTRIBUTORS;
+import static org.folio.event.dto.InstanceFields.DATE_OF_PUBLICATION;
+import static org.folio.event.dto.InstanceFields.IDENTIFIERS;
+import static org.folio.event.dto.InstanceFields.IDENTIFIER_TYPE_ID;
+import static org.folio.event.dto.InstanceFields.IDENTIFIER_TYPE_VALUE;
+import static org.folio.event.dto.InstanceFields.PUBLICATION;
+import static org.folio.event.dto.InstanceFields.PUBLISHER;
+import static org.folio.event.dto.InstanceFields.TITLE;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PO_LINE_LOCATIONS_HOLDING_ID_CQL;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
@@ -42,19 +58,9 @@ import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourc
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
 import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
-import static org.folio.util.InventoryUtils.CONTRIBUTOR_NAME;
-import static org.folio.util.InventoryUtils.CONTRIBUTOR_NAME_TYPE_ID;
-import static org.folio.util.InventoryUtils.HOLDING_ID;
-import static org.folio.util.InventoryUtils.HOLDING_INSTANCE_ID;
-import static org.folio.util.InventoryUtils.HOLDING_PERMANENT_LOCATION_ID;
-import static org.folio.util.InventoryUtils.INSTANCE_CONTRIBUTORS;
-import static org.folio.util.InventoryUtils.INSTANCE_DATE_OF_PUBLICATION;
-import static org.folio.util.InventoryUtils.INSTANCE_ID;
-import static org.folio.util.InventoryUtils.INSTANCE_PUBLICATION;
-import static org.folio.util.InventoryUtils.INSTANCE_PUBLISHER;
-import static org.folio.util.InventoryUtils.INSTANCE_TITLE;
 import static org.folio.util.InventoryUtils.getContributors;
 import static org.folio.util.InventoryUtils.getInstanceTitle;
+import static org.folio.util.InventoryUtils.getProductIds;
 import static org.folio.util.InventoryUtils.getPublicationDate;
 import static org.folio.util.InventoryUtils.getPublisher;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -81,12 +87,16 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   private static final String DATE_OF_PUBLICATION_1 = "2022-01-01";
   private static final String CONTRIBUTOR_1 = "Contributor1";
   private static final String CONTRIBUTOR_NAME_TYPE_ID_1 = "1";
+  private static final String IDENTIFIER_TYPE_VALUE_1 = "Id1";
+  private static final String IDENTIFIER_TYPE_ID_1 = "1";
 
   private static final String TITLE_2 = "Title2";
   private static final String PUBLISHER_2 = "Publisher2";
   private static final String DATE_OF_PUBLICATION_2 = "2023-01-01";
   private static final String CONTRIBUTOR_2 = "Contributor2";
   private static final String CONTRIBUTOR_NAME_TYPE_ID_2 = "2";
+  private static final String IDENTIFIER_TYPE_VALUE_2 = "Id2";
+  private static final String IDENTIFIER_TYPE_ID_2 = "2";
 
   @Spy
   private SettingService settingService;
@@ -147,12 +157,12 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
-      createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
+      createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
 
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
@@ -202,12 +212,12 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2),
-      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
+      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2),
+      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
 
     doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
@@ -231,6 +241,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
         && poLine.getPublisher().equals(getPublisher(newInstance))
         && poLine.getPublicationDate().equals(getPublicationDate(newInstance))
         && poLine.getContributors().equals(getContributors(newInstance))
+        && poLine.getDetails().getProductIds().equals(getProductIds(newInstance))
       )
       .count());
     assertEquals(2, actualPoLines.stream()
@@ -262,12 +273,12 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2),
-      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
+      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2),
+      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
 
     doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
@@ -291,6 +302,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
         && poLine.getPublisher().equals(getPublisher(newInstance))
         && poLine.getPublicationDate().equals(getPublicationDate(newInstance))
         && poLine.getContributors().equals(getContributors(newInstance))
+        && poLine.getDetails().getProductIds().equals(getProductIds(newInstance))
       )
       .count());
     assertEquals(2, actualPoLines.stream()
@@ -352,12 +364,12 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
 
     var actualPoLines = List.of(
-      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1),
-      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1)
+      createPoLine(poLineId1, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
+      createPoLine(poLineId2, instanceId1, List.of(oldHoldingValueBeforeUpdate), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2),
-      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2)
+      createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2),
+      createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
 
     doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
@@ -384,45 +396,58 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   }
 
   private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
-                                     String titleOrPackage, String publisher, String publicationDate, String contributor, String contributorNameTypeId) {
-    return createPoLine(poLineId, instanceId, holdings, null, titleOrPackage, publisher, publicationDate, contributor, contributorNameTypeId);
+                              String titleOrPackage, String publisher, String publicationDate,
+                              String contributor, String contributorNameTypeId,
+                              String productId, String productIdType) {
+    return createPoLine(poLineId, instanceId, holdings, null, titleOrPackage, publisher,
+                        publicationDate, contributor, contributorNameTypeId, productId, productIdType);
   }
 
-  private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings, List<String> oldPermanentSearchLocationIds,
-                                     String titleOrPackage, String publisher, String publicationDate, String contributor, String contributorNameTypeId) {
+  private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
+                              List<String> oldPermanentSearchLocationIds,
+                              String titleOrPackage, String publisher, String publicationDate,
+                              String contributor, String contributorNameTypeId,
+                              String productId, String productIdType) {
     // The order of searchLocationIds is very important for test mocking
     // add old ids first, then add new expected ids
     var searchLocationIds = new ArrayList<String>();
     if (!CollectionUtils.isEmpty(oldPermanentSearchLocationIds)) {
       searchLocationIds.addAll(oldPermanentSearchLocationIds);
     }
-    holdings.forEach(holding -> searchLocationIds.add(holding.getString(HOLDING_PERMANENT_LOCATION_ID)));
+    holdings.forEach(holding -> searchLocationIds.add(holding.getString(PERMANENT_LOCATION_ID.getValue())));
     var locations = new ArrayList<Location>();
-    holdings.forEach(holding -> locations.add(new Location().withHoldingId(holding.getString(HOLDING_ID))));
+    holdings.forEach(holding -> locations.add(new Location().withHoldingId(holding.getString(ID.getValue()))));
+    var contributors = List.of(new Contributor().withContributor(contributor).withContributorNameTypeId(contributorNameTypeId));
+    var productIds = List.of(new ProductId().withProductId(productId).withProductIdType(productIdType));
     return new PoLine().withId(poLineId)
       .withInstanceId(instanceId)
       .withTitleOrPackage(titleOrPackage)
       .withPublisher(publisher)
       .withPublicationDate(publicationDate)
-      .withContributors(List.of(new Contributor().withContributor(contributor).withContributorNameTypeId(contributorNameTypeId)))
+      .withContributors(contributors)
       .withSearchLocationIds(searchLocationIds)
-      .withLocations(locations);
+      .withLocations(locations)
+      .withDetails(new Details().withProductIds(productIds));
   }
 
   private JsonObject createHoldings(String holdingId, String instanceId, String permanentLocationId) {
-    return new JsonObject().put(HOLDING_ID, holdingId)
-      .put(HOLDING_INSTANCE_ID, instanceId)
-      .put(HOLDING_PERMANENT_LOCATION_ID, permanentLocationId);
+    return new JsonObject().put(ID.getValue(), holdingId)
+      .put(INSTANCE_ID.getValue(), instanceId)
+      .put(PERMANENT_LOCATION_ID.getValue(), permanentLocationId);
   }
 
   private JsonObject createInstance(String instanceId) {
-    return new JsonObject().put(INSTANCE_ID, instanceId)
-      .put(INSTANCE_TITLE, TITLE_2)
-      .put(INSTANCE_PUBLICATION, new JsonArray().add(new JsonObject()
-        .put(INSTANCE_PUBLISHER, PUBLISHER_2)
-        .put(INSTANCE_DATE_OF_PUBLICATION, DATE_OF_PUBLICATION_2)))
-      .put(INSTANCE_CONTRIBUTORS, new JsonArray().add(new JsonObject()
-        .put(CONTRIBUTOR_NAME, CONTRIBUTOR_2)
-        .put(CONTRIBUTOR_NAME_TYPE_ID, CONTRIBUTOR_NAME_TYPE_ID_2)));
+    return new JsonObject().put(InstanceFields.ID.getValue(), instanceId)
+      .put(TITLE.getValue(), TITLE_2)
+      .put(PUBLICATION.getValue(), new JsonArray().add(new JsonObject()
+        .put(PUBLISHER.getValue(), PUBLISHER_2)
+        .put(DATE_OF_PUBLICATION.getValue(), DATE_OF_PUBLICATION_2)))
+      .put(CONTRIBUTORS.getValue(), new JsonArray().add(new JsonObject()
+        .put(CONTRIBUTOR_NAME.getValue(), CONTRIBUTOR_2)
+        .put(CONTRIBUTOR_NAME_TYPE_ID.getValue(), CONTRIBUTOR_NAME_TYPE_ID_2)))
+      .put(IDENTIFIERS.getValue(), new JsonArray().add(new JsonObject()
+        .put(IDENTIFIER_TYPE_VALUE.getValue(), IDENTIFIER_TYPE_VALUE_2)
+        .put(IDENTIFIER_TYPE_ID.getValue(), IDENTIFIER_TYPE_ID_2)
+      ));
   }
 }

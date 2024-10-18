@@ -16,9 +16,9 @@ import java.util.List;
 
 import static one.util.streamex.StreamEx.ofSubLists;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ_15;
+import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
 import static org.folio.util.HelperUtils.collectResultsOnSuccess;
 import static org.folio.util.HelperUtils.convertIdsToCqlQuery;
-import static org.folio.util.InventoryUtils.HOLDING_INSTANCE_ID;
 import static org.folio.util.ResourcePath.STORAGE_BATCH_HOLDING_URL;
 import static org.folio.util.ResourcePath.STORAGE_HOLDING_URL;
 import static org.folio.util.ResourcePath.STORAGE_INSTANCE_URL;
@@ -26,7 +26,7 @@ import static org.folio.util.ResourcePath.STORAGE_INSTANCE_URL;
 @Log4j2
 public class InventoryUpdateService {
 
-  private static final String HOLDINGS_RECORDS = "holdingsRecords";
+  public static final String HOLDINGS_RECORDS = "holdingsRecords";
   private static final String UPSERT = "upsert";
   private static final String TRUE = "true";
 
@@ -77,7 +77,7 @@ public class InventoryUpdateService {
       result.getJsonArray(HOLDINGS_RECORDS).stream()
         .filter(Objects::nonNull)
         .map(JsonObject.class::cast)
-        .forEach(holding -> holding.put(HOLDING_INSTANCE_ID, newInstanceId)));
+        .forEach(holding -> holding.put(INSTANCE_ID.getValue(), newInstanceId)));
   }
 
   public Future<JsonObject> getAndSetHolderInstanceByIdIfRequired(HoldingEventHolder holder, RequestContext requestContext) {

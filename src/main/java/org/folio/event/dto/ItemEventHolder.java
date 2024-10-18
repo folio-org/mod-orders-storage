@@ -30,11 +30,11 @@ public class ItemEventHolder {
   public void prepareAllIds() {
     var oldValue = JsonObject.mapFrom(resourceEvent.getOldValue());
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
-    setItemId(newValue.getString(InventoryFields.ID.getValue()));
-    setHoldingId(newValue.getString(InventoryFields.HOLDINGS_RECORD_ID.getValue()));
+    setItemId(newValue.getString(ItemFields.ID.getValue()));
+    setHoldingId(newValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue()));
     setHoldingIdPair(Pair.of(
-      oldValue.getString(InventoryFields.HOLDINGS_RECORD_ID.getValue()),
-      newValue.getString(InventoryFields.HOLDINGS_RECORD_ID.getValue())));
+      oldValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue()),
+      newValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue())));
   }
 
   public boolean holdingIdEqual() {

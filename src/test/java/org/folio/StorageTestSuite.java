@@ -82,8 +82,8 @@ import lombok.SneakyThrows;
 import net.mguenther.kafka.junit.EmbeddedKafkaCluster;
 import net.mguenther.kafka.junit.ObserveKeyValues;
 
-
 public class StorageTestSuite {
+
   private static final Logger log = LogManager.getLogger();
 
   private static Vertx vertx;
@@ -100,8 +100,8 @@ public class StorageTestSuite {
   private static final String KAFKA_ENV = "ENV";
   private static final String OKAPI_URL_KEY = "OKAPI_URL";
   public static final int mockPort = NetworkUtils.nextFreePort();
-  private StorageTestSuite() {}
 
+  private StorageTestSuite() {}
 
   public static URL storageUrl(String path) throws MalformedURLException {
     return new URL("http", "localhost", port, path);

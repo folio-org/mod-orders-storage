@@ -10,9 +10,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.folio.util.InventoryUtils.HOLDING_ID;
-import static org.folio.util.InventoryUtils.HOLDING_INSTANCE_ID;
-import static org.folio.util.InventoryUtils.HOLDING_PERMANENT_LOCATION_ID;
+import static org.folio.event.dto.HoldingFields.ID;
+import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
+import static org.folio.event.dto.HoldingFields.PERMANENT_LOCATION_ID;
 
 @Data
 @Builder
@@ -34,12 +34,12 @@ public class HoldingEventHolder {
   public void prepareAllIds() {
     var oldValue = JsonObject.mapFrom(resourceEvent.getOldValue());
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
-    setHoldingId(newValue.getString(HOLDING_ID));
-    setInstanceId(newValue.getString(HOLDING_INSTANCE_ID));
+    setHoldingId(newValue.getString(ID.getValue()));
+    setInstanceId(newValue.getString(INSTANCE_ID.getValue()));
     setInstanceIdPair(
-      Pair.of(oldValue.getString(HOLDING_INSTANCE_ID), newValue.getString(HOLDING_INSTANCE_ID)));
+      Pair.of(oldValue.getString(INSTANCE_ID.getValue()), newValue.getString(INSTANCE_ID.getValue())));
     setSearchLocationIdPair(
-      Pair.of(oldValue.getString(HOLDING_PERMANENT_LOCATION_ID), newValue.getString(HOLDING_PERMANENT_LOCATION_ID)));
+      Pair.of(oldValue.getString(PERMANENT_LOCATION_ID.getValue()), newValue.getString(PERMANENT_LOCATION_ID.getValue())));
   }
 
   public String getActiveTenantId() {

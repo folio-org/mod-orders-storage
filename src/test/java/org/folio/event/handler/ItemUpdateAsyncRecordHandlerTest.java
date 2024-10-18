@@ -1,13 +1,13 @@
 package org.folio.event.handler;
 
 import static org.folio.TestUtils.mockContext;
+import static org.folio.event.dto.HoldingFields.ID;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
 import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
-import static org.folio.util.InventoryUtils.HOLDING_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +33,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.folio.TestUtils;
-import org.folio.event.dto.InventoryFields;
+import org.folio.event.dto.ItemFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
@@ -216,7 +216,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
   }
 
   private static JsonObject createItem(String itemId, String holdingId) {
-    return new JsonObject().put(HOLDING_ID, itemId)
-      .put(InventoryFields.HOLDINGS_RECORD_ID.getValue(), holdingId);
+    return new JsonObject().put(ID.getValue(), itemId)
+      .put(ItemFields.HOLDINGS_RECORD_ID.getValue(), holdingId);
   }
 }
