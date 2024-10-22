@@ -55,6 +55,11 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
 
   private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject item, String tenantIdFromEvent,
                                            String centralTenantId, Conn conn) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.info("updatePieces:: No pieces were found to update for item: '{}' and tenant: '{}' in centralTenant: {}",
+        item.getString(ID.getValue()), tenantIdFromEvent, centralTenantId);
+      return Future.succeededFuture(List.of());
+    }
     var holdingId = item.getString(HOLDINGS_RECORD_ID.getValue());
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantIdFromEvent);
 
