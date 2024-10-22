@@ -76,10 +76,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       })
       .compose(poLines -> updatePoLines(holder, poLines, conn))
       .compose(poLines -> updateTitles(holder, poLines, conn).map(poLines))
-      .compose(poLines -> {
-        log.info("processPoLinesUpdate:: saving order lines outbox logs, holdingId: {}, poLines: {}", holder.getHoldingId(), poLines.size());
-        return auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(poLines);
-      });
+      .onSuccess(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(poLines));
   }
 
   private Future<List<PoLine>> updatePoLines(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {

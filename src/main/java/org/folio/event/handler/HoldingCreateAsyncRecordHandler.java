@@ -73,11 +73,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                             Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
-      .compose(poLines -> {
-        log.info("processPoLinesUpdate:: Saving order lines outbox logs for {} poLine(s) in centralTenant: '{}'",
-          poLines.size(), centralTenantId);
-        return auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers);
-      })
+      .onSuccess(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
@@ -85,11 +81,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                            Map<String, String> headers, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
-      .compose(pieces -> {
-        log.info("processPiecesUpdate:: Saving pieces outbox logs for {} piece(s) in centralTenant: '{}'",
-          pieces.size(), centralTenantId);
-        return auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers);
-      })
+      .onSuccess(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
