@@ -26,7 +26,7 @@
     <vertx.version>4.5.10</vertx.version>
     <kafkaclients.version>3.6.1</kafkaclients.version>
     <lombok.version>1.18.34</lombok.version>
-    <postgres.image>postgres:12-alpine</postgres.image>
+    <postgres.image>postgres:16-alpine</postgres.image>
     <log4j.version>2.24.1</log4j.version>
 
     <!--Dependency properties-->
