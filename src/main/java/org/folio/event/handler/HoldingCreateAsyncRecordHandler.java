@@ -111,6 +111,11 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
 
   private Future<List<Piece>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent,
                                            String centralTenantId, Conn conn) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.info("updatePieces:: No pieces to update were found for holding: '{}' and tenant: '{}' in centralTenant: '{}",
+        holdingId, tenantIdFromEvent, centralTenantId);
+      return Future.succeededFuture(List.of());
+    }
     var piecesToUpdate = pieces.stream()
       .filter(Objects::nonNull)
       .filter(piece -> !Objects.equals(piece.getReceivingTenantId(), tenantIdFromEvent))
