@@ -73,11 +73,11 @@ public class InventoryUpdateAsyncRecordHandlerTest {
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
     doReturn(Future.succeededFuture(tenantId))
       .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-    doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(1)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler, times(1)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
   }
 
   @Test
@@ -91,7 +91,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
   }
 
   @Test
@@ -106,7 +106,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
   }
 
   @Test
@@ -121,7 +121,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
   }
 
   @Test
@@ -131,6 +131,6 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalArgumentException.class, expectedException.getClass());
     assertTrue(expectedException.getMessage().contains(KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG));
-    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler, times(0)).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
   }
 }

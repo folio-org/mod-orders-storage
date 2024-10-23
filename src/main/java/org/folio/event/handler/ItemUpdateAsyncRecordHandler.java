@@ -38,14 +38,20 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   }
 
   @Override
-  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers, String centralTenantId) {
-    var holder = createItemEventHolder(resourceEvent, headers, centralTenantId);
-    var dbClient = createDBClient(holder.getActiveTenantId());
+  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers) {
+    var holder = createItemEventHolder(resourceEvent, headers);
     holder.prepareAllIds();
     if (holder.holdingIdEqual()) {
-      log.info("processInventoryUpdateEvent:: No holding id to update, ignoring update");
+      log.info("processInventoryUpdateEvent:: Holding is not updated in Item '{}', ignoring update", holder.getItemId());
       return Future.succeededFuture();
     }
+    return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
+      .compose(centralTenantId -> processItemUpdateEvent(holder, centralTenantId));
+  }
+
+  private Future<Void> processItemUpdateEvent(ItemEventHolder holder, String centralTenantId) {
+    holder.setCentralTenantId(centralTenantId);
+    var dbClient = createDBClient(holder.getActiveTenantId());
     return dbClient.getPgClient()
       .withTrans(conn -> processPiecesUpdate(holder, conn))
       .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
@@ -81,13 +87,11 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .toList();
   }
 
-  private ItemEventHolder createItemEventHolder(ResourceEvent resourceEvent, Map<String, String> headers,
-                                                String centralTenantId) {
+  private ItemEventHolder createItemEventHolder(ResourceEvent resourceEvent, Map<String, String> headers) {
     return ItemEventHolder.builder()
       .resourceEvent(resourceEvent)
       .headers(headers)
       .tenantId(extractTenantFromHeaders(headers))
-      .centralTenantId(centralTenantId)
       .build();
   }
 }
