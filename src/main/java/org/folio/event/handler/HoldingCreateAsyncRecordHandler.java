@@ -14,9 +14,7 @@ import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.Location;
-import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
-import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -56,32 +54,32 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     var permanentLocationId = holdingObject.getString(PERMANENT_LOCATION_ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
-      .withTrans(conn -> createDBClient(tenantIdFromEvent).getPgClient().withTrans(connAudit -> {
+      .withTrans(conn -> {
         var tenantIdUpdatesFuture = List.of(
           // order of tenants is important
-          processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, headers, conn, connAudit),
-          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn, connAudit)
+          processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, headers, conn),
+          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn)
         );
         return GenericCompositeFuture.all(tenantIdUpdatesFuture).mapEmpty();
-      }))
+      })
       .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
   private Future<Void> processPoLinesUpdate(String holdingId, String permanentLocationId,
                                             String tenantIdFromEvent, String centralTenantId,
-                                            Map<String, String> headers, Conn conn, Conn connAudit) {
+                                            Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
-      .onSuccess(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(connAudit, poLines, OrderLineAuditEvent.Action.EDIT, headers))
+      // .onSuccess(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
   private Future<Void> processPiecesUpdate(String holdingId, String tenantIdFromEvent, String centralTenantId,
-                                           Map<String, String> headers, Conn conn, Conn connAudit) {
+                                           Map<String, String> headers, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
-      .onSuccess(pieces -> auditOutboxService.savePiecesOutboxLog(connAudit, pieces, PieceAuditEvent.Action.EDIT, headers))
+      // .onSuccess(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
