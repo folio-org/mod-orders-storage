@@ -14,9 +14,7 @@ import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.Location;
-import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
-import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -73,7 +71,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                             Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
-      .onSuccess(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
+      // .onSuccess(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
@@ -81,7 +79,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                            Map<String, String> headers, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
-      .onSuccess(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
+      // .onSuccess(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
