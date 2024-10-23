@@ -70,7 +70,8 @@ public final class DbUtils {
     try {
       return JsonObject.mapFrom(response.getEntity()).mapTo(entityClass);
     } catch (RuntimeException e) {
-      throw new IllegalStateException(String.format("Cannot convert response '%s' to entity '%s'", response.getEntity(), entityClass.getName()));
+      throw new IllegalStateException(String.format("Cannot convert response '%s' to entity '%s' - error message: %s",
+        response.getEntity(), entityClass.getName(), e.getMessage()));
     }
   }
 }

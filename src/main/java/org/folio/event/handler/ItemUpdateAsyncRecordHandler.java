@@ -54,7 +54,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     var dbClient = createDBClient(holder.getActiveTenantId());
     return dbClient.getPgClient()
       .withTrans(conn -> processPiecesUpdate(holder, conn))
-      .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
+      .compose(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 

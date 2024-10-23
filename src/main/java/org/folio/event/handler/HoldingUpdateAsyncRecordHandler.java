@@ -69,7 +69,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .withTrans(conn -> processPoLinesUpdate(holder, conn, requestContext))
       .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
       .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
-      .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
+      .compose(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 

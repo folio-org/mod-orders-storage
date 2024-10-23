@@ -60,7 +60,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .withTrans(conn -> processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn)
         .compose(poLines -> processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, conn).map(pieces -> Pair.of(poLines, pieces))))
       .compose(data -> saveOutboxLogs(tenantIdFromEvent, data, headers))
-      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
+      .compose(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
