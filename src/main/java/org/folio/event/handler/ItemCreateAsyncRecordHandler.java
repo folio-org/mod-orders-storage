@@ -96,5 +96,4 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       }
     });
   }
-
 }

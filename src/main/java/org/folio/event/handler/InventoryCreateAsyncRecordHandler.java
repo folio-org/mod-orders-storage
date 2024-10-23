@@ -103,5 +103,4 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
    */
   protected abstract Future<Void> processInventoryCreationEvent(ResourceEvent resourceEvent, String centralTenantId,
                                                                 Map<String, String> headers, DBClient dbClient);
-
 }
