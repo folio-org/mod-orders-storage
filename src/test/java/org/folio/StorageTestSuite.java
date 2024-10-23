@@ -67,7 +67,6 @@ import org.folio.spring.SpringContextUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Nested;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
@@ -91,8 +90,6 @@ public class StorageTestSuite {
   public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
   private static final Header URL_HEADER = new Header(XOkapiHeaders.URL, "http://localhost:" + port);
   private static TenantJob tenantJob;
-  private static PostgreSQLContainer<?> postgresSQLContainer;
-  public static final String POSTGRES_DOCKER_IMAGE = "postgres:12-alpine";
   public static EmbeddedKafkaCluster kafkaCluster;
   public static final String KAFKA_ENV_VALUE = "test-env";
   private static final String KAFKA_HOST = "KAFKA_HOST";
