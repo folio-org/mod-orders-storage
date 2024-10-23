@@ -49,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -136,7 +135,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
@@ -188,7 +187,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
@@ -240,7 +239,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT));
 
@@ -287,7 +286,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService, times(0)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
@@ -320,7 +319,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(RuntimeException.class, expectedException.getClass());
-    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap(), anyString());
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), any(Conn.class));
     verify(poLinesService, times(1)).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }

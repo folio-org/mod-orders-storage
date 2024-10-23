@@ -52,7 +52,12 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
+  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers) {
+    return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
+      .compose(centralTenantId -> processHoldingUpdateEvent(resourceEvent, headers, centralTenantId));
+  }
+
+  private Future<Void> processHoldingUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
                                                      String centralTenantId) {
     var holder = createInventoryUpdateHolder(resourceEvent, headers, centralTenantId);
     var dbClient = createDBClient(holder.getActiveTenantId());
