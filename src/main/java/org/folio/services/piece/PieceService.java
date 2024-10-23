@@ -27,6 +27,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import lombok.extern.log4j.Log4j2;
+import org.folio.util.SerializerUtil;
 
 @Log4j2
 public class PieceService {
@@ -87,7 +88,7 @@ public class PieceService {
 
   private String buildUpdatePieceBatchQuery(Collection<Piece> pieces, String tenantId) {
     List<JsonObject> jsonPieces = pieces.stream()
-      .map(JsonObject::mapFrom)
+      .map(SerializerUtil::toJson)
       .toList();
     return String.format(
       "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id;",

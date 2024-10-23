@@ -51,6 +51,7 @@ import io.vertx.ext.web.handler.HttpException;
 import lombok.extern.log4j.Log4j2;
 import one.util.streamex.StreamEx;
 import org.folio.rest.tools.utils.MetadataUtil;
+import org.folio.util.SerializerUtil;
 
 @Log4j2
 public class PoLinesService {
@@ -266,7 +267,7 @@ public class PoLinesService {
 
   private String buildUpdatePoLineBatchQuery(Collection<PoLine> poLines, String tenantId) {
     List<JsonObject> jsonPoLines = poLines.stream()
-      .map(JsonObject::mapFrom)
+      .map(SerializerUtil::toJson)
       .toList();
     return String.format(
       "UPDATE %s AS po_line SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = po_line.id;",
