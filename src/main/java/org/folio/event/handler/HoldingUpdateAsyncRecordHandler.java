@@ -50,14 +50,19 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
-                                                     String centralTenantId) {
-    var holder = createInventoryUpdateHolder(resourceEvent, headers, centralTenantId);
+  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers) {
+    var holder = createInventoryUpdateHolder(resourceEvent, headers);
     holder.prepareAllIds();
     if (holder.instanceIdEqual() && holder.searchLocationIdEqual()) {
       log.info("processInventoryUpdateEvent:: No instance id or search location ids to update, ignoring update");
       return Future.succeededFuture();
     }
+    return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
+      .compose(centralTenantId -> processHoldingUpdateEvent(holder, centralTenantId));
+  }
+
+  private Future<Void> processHoldingUpdateEvent(HoldingEventHolder holder, String centralTenantId) {
+    holder.setCentralTenantId(centralTenantId);
     var requestContext = new RequestContext(getContext(), holder.getHeaders());
     return createDBClient(holder.getActiveTenantId()).getPgClient()
       // batchUpdateAdjacentHoldingsWithNewInstanceId must not run in the same transaction as processPoLinesUpdate
@@ -168,13 +173,11 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     return true;
   }
 
-  public HoldingEventHolder createInventoryUpdateHolder(ResourceEvent resourceEvent, Map<String, String> headers,
-                                                        String centralTenantId) {
+  public HoldingEventHolder createInventoryUpdateHolder(ResourceEvent resourceEvent, Map<String, String> headers) {
     return HoldingEventHolder.builder()
       .resourceEvent(resourceEvent)
       .headers(headers)
       .tenantId(extractTenantFromHeaders(headers))
-      .centralTenantId(centralTenantId)
       .build();
   }
 }

@@ -51,8 +51,7 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
       }
       log.info("handle:: Processing new kafkaRecord, topic: {}, key: {}, eventType: {}",
         kafkaRecord.topic(), kafkaRecord.key(), resourceEvent.getType());
-      return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
-        .compose(centralTenantId -> processInventoryUpdateEvent(resourceEvent, headers, centralTenantId))
+      return processInventoryUpdateEvent(resourceEvent, headers)
         .onSuccess(v -> log.info("handle:: Processing successful, topic: {}, key: {}, eventType: {}",
           kafkaRecord.topic(), kafkaRecord.key(),resourceEvent.getType()))
         .onFailure(t -> log.error("Failed to process event: {}", kafkaRecord.value(), t))
@@ -68,6 +67,5 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
    *
    * @return future
    */
-  protected abstract Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
-                                                              String centralTenantId);
+  protected abstract Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> header);
 }
