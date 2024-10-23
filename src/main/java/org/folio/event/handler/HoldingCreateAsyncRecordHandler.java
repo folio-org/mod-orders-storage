@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
@@ -56,33 +57,33 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     var permanentLocationId = holdingObject.getString(PERMANENT_LOCATION_ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
-      .withTrans(conn -> {
-        var tenantIdUpdatesFuture = List.of(
-          // order of tenants is important
-          processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, headers, conn),
-          processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, headers, conn)
-        );
-        return GenericCompositeFuture.all(tenantIdUpdatesFuture).mapEmpty();
+      .withTrans(conn -> processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn)
+        .compose(poLines -> processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, conn).map(pieces -> Pair.of(poLines, pieces))))
+      .compose(data -> saveOutboxLogs(tenantIdFromEvent, data, headers))
+      .compose(v -> auditOutboxService.processOutboxEventLogs(headers))
+      .mapEmpty();
+  }
+
+  private Future<Void> saveOutboxLogs(String tenantId, Pair<List<PoLine>, List<Piece>> data, Map<String, String> headers) {
+    return createDBClient(tenantId)
+      .getPgClient().withTrans(conn -> {
+        var poLineOutboxLog = auditOutboxService.saveOrderLinesOutboxLogs(conn, data.getLeft(), OrderLineAuditEvent.Action.EDIT, headers);
+        var pieceOutboxLog = auditOutboxService.savePiecesOutboxLog(conn, data.getRight(), PieceAuditEvent.Action.EDIT, headers);
+        return GenericCompositeFuture.all(List.of(poLineOutboxLog, pieceOutboxLog)).mapEmpty();
       })
-      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
-  private Future<Void> processPoLinesUpdate(String holdingId, String permanentLocationId,
-                                            String tenantIdFromEvent, String centralTenantId,
-                                            Map<String, String> headers, Conn conn) {
+  private Future<List<PoLine>> processPoLinesUpdate(String holdingId, String permanentLocationId,
+                                                    String tenantIdFromEvent, String centralTenantId, Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
-      .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
-      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
-      .mapEmpty();
+      .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn));
   }
 
-  private Future<Void> processPiecesUpdate(String holdingId, String tenantIdFromEvent, String centralTenantId,
-                                           Map<String, String> headers, Conn conn) {
+  private Future<List<Piece>> processPiecesUpdate(String holdingId, String tenantIdFromEvent,
+                                                  String centralTenantId, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
-      .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
-      .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
-      .mapEmpty();
+      .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn));
   }
 
   private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,
@@ -111,6 +112,11 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
 
   private Future<List<Piece>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent,
                                            String centralTenantId, Conn conn) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.info("updatePieces:: No pieces to update were found for holding: '{}' and tenant: '{}' in centralTenant: '{}",
+        holdingId, tenantIdFromEvent, centralTenantId);
+      return Future.succeededFuture(List.of());
+    }
     var piecesToUpdate = pieces.stream()
       .filter(Objects::nonNull)
       .filter(piece -> !Objects.equals(piece.getReceivingTenantId(), tenantIdFromEvent))
@@ -132,5 +138,4 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .filter(location -> Objects.equals(location.getHoldingId(), holdingId))
       .forEach(location -> location.setTenantId(tenantIdFromEvent));
   }
-
 }

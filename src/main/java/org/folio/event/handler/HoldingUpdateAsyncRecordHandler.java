@@ -50,21 +50,26 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   }
 
   @Override
-  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers,
-                                                     String centralTenantId) {
-    var holder = createInventoryUpdateHolder(resourceEvent, headers, centralTenantId);
+  protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers) {
+    var holder = createInventoryUpdateHolder(resourceEvent, headers);
     holder.prepareAllIds();
     if (holder.instanceIdEqual() && holder.searchLocationIdEqual()) {
-      log.info("processInventoryUpdateEvent:: No instance id or search location ids to update, ignoring update");
+      log.info("processInventoryUpdateEvent:: No instance id or search location ids to update in holding '{}', ignoring update", holder.getHoldingId());
       return Future.succeededFuture();
     }
+    return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
+      .compose(centralTenantId -> processHoldingUpdateEvent(holder, centralTenantId));
+  }
+
+  private Future<Void> processHoldingUpdateEvent(HoldingEventHolder holder, String centralTenantId) {
+    holder.setCentralTenantId(centralTenantId);
     var requestContext = new RequestContext(getContext(), holder.getHeaders());
     return createDBClient(holder.getActiveTenantId()).getPgClient()
       // batchUpdateAdjacentHoldingsWithNewInstanceId must not run in the same transaction as processPoLinesUpdate
       .withTrans(conn -> processPoLinesUpdate(holder, conn, requestContext))
       .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
       .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
-      .onSuccess(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
+      .compose(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 
@@ -76,7 +81,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       })
       .compose(poLines -> updatePoLines(holder, poLines, conn))
       .compose(poLines -> updateTitles(holder, poLines, conn).map(poLines))
-      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(poLines));
+      .onSuccess(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(poLines));
   }
 
   private Future<List<PoLine>> updatePoLines(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
@@ -168,13 +173,11 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     return true;
   }
 
-  public HoldingEventHolder createInventoryUpdateHolder(ResourceEvent resourceEvent, Map<String, String> headers,
-                                                        String centralTenantId) {
+  public HoldingEventHolder createInventoryUpdateHolder(ResourceEvent resourceEvent, Map<String, String> headers) {
     return HoldingEventHolder.builder()
       .resourceEvent(resourceEvent)
       .headers(headers)
       .tenantId(extractTenantFromHeaders(headers))
-      .centralTenantId(centralTenantId)
       .build();
   }
 }

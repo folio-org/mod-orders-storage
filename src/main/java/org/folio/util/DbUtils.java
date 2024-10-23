@@ -23,6 +23,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public final class DbUtils {
 
+  private DbUtils() {}
+
   public static Future<RowSet<Row>> failOnNoUpdateOrDelete(RowSet<Row> rowSet) {
     return rowSet.rowCount() > 0 ?
       Future.succeededFuture(rowSet) :
@@ -65,9 +67,11 @@ public final class DbUtils {
   }
 
   public static <T> T convertResponseToEntity(Response response, Class<T> entityClass) {
-    return JsonObject.mapFrom(response.getEntity()).mapTo(entityClass);
+    try {
+      return JsonObject.mapFrom(response.getEntity()).mapTo(entityClass);
+    } catch (RuntimeException e) {
+      throw new IllegalStateException(String.format("Cannot convert response '%s' to entity '%s' - error message: %s",
+        response.getEntity(), entityClass.getName(), e.getMessage()));
+    }
   }
-
-  private DbUtils() {}
-
 }

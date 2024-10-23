@@ -49,12 +49,17 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> updatePieces(pieces, itemObject, tenantIdFromEvent, centralTenantId, conn)) // order of tenants is important
         .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers)))
-      .onSuccess(ar -> auditOutboxService.processOutboxEventLogs(headers))
+      .compose(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
   private Future<List<Piece>> updatePieces(List<Piece> pieces, JsonObject item, String tenantIdFromEvent,
                                            String centralTenantId, Conn conn) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.info("updatePieces:: No pieces were found to update for item: '{}' and tenant: '{}' in centralTenant: {}",
+        item.getString(ID.getValue()), tenantIdFromEvent, centralTenantId);
+      return Future.succeededFuture(List.of());
+    }
     var holdingId = item.getString(HOLDINGS_RECORD_ID.getValue());
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantIdFromEvent);
 
@@ -91,5 +96,4 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       }
     });
   }
-
 }
