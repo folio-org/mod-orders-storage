@@ -12,9 +12,9 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.testcontainers.shaded.org.apache.commons.lang3.ObjectUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
