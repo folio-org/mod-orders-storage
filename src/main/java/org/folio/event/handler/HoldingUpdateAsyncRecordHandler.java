@@ -54,7 +54,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     var holder = createInventoryUpdateHolder(resourceEvent, headers);
     holder.prepareAllIds();
     if (holder.instanceIdEqual() && holder.searchLocationIdEqual()) {
-      log.info("processInventoryUpdateEvent:: No instance id or search location ids to update, ignoring update");
+      log.info("processInventoryUpdateEvent:: No instance id or search location ids to update in holding '{}', ignoring update", holder.getHoldingId());
       return Future.succeededFuture();
     }
     return consortiumConfigurationService.getCentralTenantId(getContext(), headers)

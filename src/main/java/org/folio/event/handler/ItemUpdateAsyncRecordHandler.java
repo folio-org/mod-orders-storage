@@ -42,7 +42,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     var holder = createItemEventHolder(resourceEvent, headers);
     holder.prepareAllIds();
     if (holder.holdingIdEqual()) {
-      log.info("processInventoryUpdateEvent:: Holding is not updated in Item '{}', ignoring update", holder.getItemId());
+      log.info("processInventoryUpdateEvent:: No update in holdingId in Item '{}', so skipping process invent", holder.getItemId());
       return Future.succeededFuture();
     }
     return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
