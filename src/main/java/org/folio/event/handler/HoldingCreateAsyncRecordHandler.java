@@ -101,16 +101,13 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
 
     log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}' in centralTenant: '{}'",
       poLines.size(), holdingId, tenantIdFromEvent, centralTenantId);
-    poLines.forEach(poLine -> {
-      updateLocationTenantIdIfNeeded(poLine.getLocations(), holdingId, tenantIdFromEvent);
-      var searchLocationIds = poLine.getSearchLocationIds();
-      if (!searchLocationIds.contains(permanentLocationId)) {
-        searchLocationIds.add(permanentLocationId);
-        log.info("updatePoLines:: Added new search location, poLineId: {}, searchLocationId: {}",
-          poLine.getId(), permanentLocationId);
-      }
-    });
 
+    var poLinesToUpdate = poLines.stream().filter(poLine -> {
+      var poLineLocations = poLine.getLocations().stream().map(Location::getHoldingId).toList();
+      return poLineLocations.contains(holdingId);
+    }).toList();
+
+    updatePoLineLocations(poLinesToUpdate, tenantIdFromEvent, permanentLocationId);
     return poLinesService.updatePoLines(poLines, conn, centralTenantId)
       .map(v -> poLines);
   }
@@ -138,9 +135,16 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     return pieceService.updatePieces(piecesToUpdate, conn, centralTenantId);
   }
 
-  private void updateLocationTenantIdIfNeeded(List<Location> locations, String holdingId, String tenantIdFromEvent) {
-    locations.stream()
-      .filter(location -> Objects.equals(location.getHoldingId(), holdingId))
-      .forEach(location -> location.setTenantId(tenantIdFromEvent));
+  private void updatePoLineLocations(List<PoLine> poLinesToUpdate, String tenantIdFromEvent, String permanentLocationId) {
+    poLinesToUpdate.forEach(poLine -> {
+      poLine.getLocations().forEach(location -> location.setTenantId(tenantIdFromEvent));
+
+      var searchLocationIds = poLine.getSearchLocationIds();
+      if (!searchLocationIds.contains(permanentLocationId)) {
+        searchLocationIds.add(permanentLocationId);
+        log.info("updatePoLines:: Added new search location, poLineId: {}, searchLocationId: {}",
+          poLine.getId(), permanentLocationId);
+      }
+    });
   }
 }
