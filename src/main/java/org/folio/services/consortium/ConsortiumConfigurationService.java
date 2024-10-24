@@ -72,8 +72,8 @@ public class ConsortiumConfigurationService {
           });
       })
       .recover(throwable -> {
-        log.warn("getCentralTenantId:: Error when retrieving central tenant id, unsupported endpoint or permission missing", throwable);
-        return null;
+        log.warn("getCentralTenantId:: Error when retrieving central tenant id, unsupported endpoint or missing permission", throwable);
+        return Future.succeededFuture();
       });
   }
 

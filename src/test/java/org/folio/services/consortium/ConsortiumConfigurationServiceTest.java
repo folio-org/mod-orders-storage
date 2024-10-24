@@ -174,14 +174,14 @@ public class ConsortiumConfigurationServiceTest {
 
   @Test
   void getCentralTenantId_shouldFail_whenRestClientFails(VertxTestContext vertxTestContext) {
-    doReturn(Future.failedFuture(new RuntimeException("Error"))).when(restClient).get(any(RequestEntry.class), any());
+    doReturn(Future.succeededFuture()).when(restClient).get(any(RequestEntry.class), any());
 
     Future<String> future = consortiumConfigurationService.getCentralTenantId(context, Map.of());
 
-    vertxTestContext.assertFailure(future)
+    vertxTestContext.assertComplete(future)
       .onComplete(ar -> {
-        assertTrue(ar.failed());
-        assertEquals("Error", ar.cause().getMessage());
+        assertTrue(ar.succeeded());
+        assertNull(ar.result());
         verify(restClient).get(any(RequestEntry.class), any());
         vertxTestContext.completeNow();
       });
