@@ -42,7 +42,7 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
       }
       var resourceEvent = new JsonObject(kafkaRecord.value()).mapTo(ResourceEvent.class);
       if (!Objects.equals(resourceEvent.getType(), inventoryEventType.getEventType())) {
-        log.warn("handle:: Unsupported event type: {}, ignoring record processing", resourceEvent.getType());
+        log.debug("handle:: Unsupported event type: {}, ignoring record processing", resourceEvent.getType());
         return Future.succeededFuture(kafkaRecord.key());
       }
       if (Objects.isNull(resourceEvent.getOldValue()) || Objects.isNull(resourceEvent.getNewValue())) {

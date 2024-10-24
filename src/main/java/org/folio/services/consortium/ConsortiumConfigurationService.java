@@ -70,6 +70,10 @@ public class ConsortiumConfigurationService {
               return null;
             }
           });
+      })
+      .recover(throwable -> {
+        log.warn("getCentralTenantId:: Error when retrieving central tenant id, unsupported endpoint or missing permission", throwable);
+        return Future.succeededFuture();
       });
   }
 

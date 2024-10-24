@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
@@ -24,6 +23,7 @@ import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.HeaderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
@@ -57,33 +57,31 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     var permanentLocationId = holdingObject.getString(PERMANENT_LOCATION_ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
-      .withTrans(conn -> processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn)
-        .compose(poLines -> processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, conn).map(pieces -> Pair.of(poLines, pieces))))
-      .compose(data -> saveOutboxLogs(tenantIdFromEvent, data, headers))
-      .compose(v -> auditOutboxService.processOutboxEventLogs(headers))
-      .mapEmpty();
-  }
-
-  private Future<Void> saveOutboxLogs(String tenantId, Pair<List<PoLine>, List<Piece>> data, Map<String, String> headers) {
-    return createDBClient(tenantId)
-      .getPgClient().withTrans(conn -> {
-        var poLineOutboxLog = auditOutboxService.saveOrderLinesOutboxLogs(conn, data.getLeft(), OrderLineAuditEvent.Action.EDIT, headers);
-        var pieceOutboxLog = auditOutboxService.savePiecesOutboxLog(conn, data.getRight(), PieceAuditEvent.Action.EDIT, headers);
-        return GenericCompositeFuture.all(List.of(poLineOutboxLog, pieceOutboxLog)).mapEmpty();
+      .withTrans(conn -> {
+        var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(centralTenantId, headers);
+        var poLineFuture = processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
+        var pieceFuture = processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
+        return GenericCompositeFuture.all(List.of(poLineFuture, pieceFuture)).mapEmpty();
       })
+      .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> processPoLinesUpdate(String holdingId, String permanentLocationId,
-                                                    String tenantIdFromEvent, String centralTenantId, Conn conn) {
+  private Future<Void> processPoLinesUpdate(String holdingId, String permanentLocationId,
+                                            String tenantIdFromEvent, String centralTenantId, Map<String, String> headers,
+                                            Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
-      .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn));
+      .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
+      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
+      .mapEmpty();
   }
 
-  private Future<List<Piece>> processPiecesUpdate(String holdingId, String tenantIdFromEvent,
-                                                  String centralTenantId, Conn conn) {
+  private Future<Void> processPiecesUpdate(String holdingId, String tenantIdFromEvent,
+                                           String centralTenantId, Map<String, String> headers,Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
-      .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn));
+      .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
+      .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
+      .mapEmpty();
   }
 
   private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,

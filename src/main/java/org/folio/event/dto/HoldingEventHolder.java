@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.Map;
-import java.util.Objects;
 
 import static org.folio.event.dto.HoldingFields.ID;
 import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
@@ -40,10 +39,6 @@ public class HoldingEventHolder {
       Pair.of(oldValue.getString(INSTANCE_ID.getValue()), newValue.getString(INSTANCE_ID.getValue())));
     setSearchLocationIdPair(
       Pair.of(oldValue.getString(PERMANENT_LOCATION_ID.getValue()), newValue.getString(PERMANENT_LOCATION_ID.getValue())));
-  }
-
-  public String getActiveTenantId() {
-    return Objects.nonNull(centralTenantId) ? centralTenantId : tenantId;
   }
 
   public boolean instanceIdEqual() {
