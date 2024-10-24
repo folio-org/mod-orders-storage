@@ -57,14 +57,12 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("processInventoryUpdateEvent:: No instance id or search location ids to update in holding '{}', ignoring update", holder.getHoldingId());
       return Future.succeededFuture();
     }
-    return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
-      .compose(centralTenantId -> processHoldingUpdateEvent(holder, centralTenantId));
+    return processHoldingUpdateEvent(holder);
   }
 
-  private Future<Void> processHoldingUpdateEvent(HoldingEventHolder holder, String centralTenantId) {
-    holder.setCentralTenantId(centralTenantId);
+  private Future<Void> processHoldingUpdateEvent(HoldingEventHolder holder) {
     var requestContext = new RequestContext(getContext(), holder.getHeaders());
-    return createDBClient(holder.getActiveTenantId()).getPgClient()
+    return createDBClient(holder.getTenantId()).getPgClient()
       // batchUpdateAdjacentHoldingsWithNewInstanceId must not run in the same transaction as processPoLinesUpdate
       .withTrans(conn -> processPoLinesUpdate(holder, conn, requestContext))
       .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
@@ -95,10 +93,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLines:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(List.of());
     }
-    // Must pass the correct active tenantId to resolve which schema name is to be used in the poLine update
-    // in a non-ecs environment the active tenantId is the same as the event tenantId
-    // in an ecs environment with central ordering being enabled the active tenantId is the central tenantId
-    return poLinesService.updatePoLines(poLines, conn, holder.getActiveTenantId())
+    return poLinesService.updatePoLines(poLines, conn, holder.getTenantId())
       .map(v -> {
         log.info("updatePoLines:: Successfully updated POLs for holdingId: {}, POLs updated: {}", holder.getHoldingId(), poLines.size());
         // Very important to return an empty poLine array in cases where no
