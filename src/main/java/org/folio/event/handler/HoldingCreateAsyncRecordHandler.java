@@ -102,11 +102,10 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     log.info("updatePoLines:: Updating {} poLine(s) with holdingId '{}', setting receivingTenantId to '{}' in centralTenant: '{}'",
       poLines.size(), holdingId, tenantIdFromEvent, centralTenantId);
 
-    var poLinesToUpdate = poLines.stream()
-      .filter(poLine -> {
-        var poLineLocations = poLine.getLocations().stream().map(Location::getHoldingId).toList();
-        return poLineLocations.contains(holdingId);
-      }).toList();
+    var poLinesToUpdate = poLines.stream().filter(poLine -> {
+      var poLineLocations = poLine.getLocations().stream().map(Location::getHoldingId).toList();
+      return poLineLocations.contains(holdingId);
+    }).toList();
 
     updatePoLineLocations(poLinesToUpdate, tenantIdFromEvent, permanentLocationId);
     return poLinesService.updatePoLines(poLines, conn, centralTenantId)
