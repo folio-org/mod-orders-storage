@@ -1,42 +1,27 @@
 package org.folio.event.handler;
 
-import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import org.folio.TestUtils;
 import org.folio.event.dto.ResourceEvent;
-import org.folio.models.ConsortiumConfiguration;
 import org.folio.services.consortium.ConsortiumConfigurationService;
-import org.folio.services.setting.SettingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-
-import javax.ws.rs.core.Response;
-import java.util.Optional;
 
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.EventType.UPDATE;
 import static org.folio.event.handler.InventoryUpdateAsyncRecordHandler.KAFKA_CONSUMER_RECORD_VALUE_NULL_MSG;
-import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;
-import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
-import static org.folio.event.handler.TestHandlerUtil.createSetting;
-import static org.folio.event.handler.TestHandlerUtil.createSettingCollection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -44,8 +29,7 @@ import static org.mockito.Mockito.verify;
 
 public class InventoryUpdateAsyncRecordHandlerTest {
 
-  @Spy
-  private SettingService settingService;
+
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
 
@@ -62,17 +46,10 @@ public class InventoryUpdateAsyncRecordHandlerTest {
     }
   }
 
-  @ParameterizedTest
-  @ValueSource(strings = {DIKU_TENANT, CENTRAL_TENANT})
-  void positive_shouldProcessInventoryUpdateEvent(String tenantId) {
+  @Test
+  void positive_shouldProcessInventoryUpdateEvent() {
     var resourceEvent = createDefaultUpdateResourceEvent();
     var kafkaRecord = createKafkaRecord(resourceEvent, DIKU_TENANT);
-    doReturn(Future.succeededFuture(Response.ok(createSettingCollection(createSetting("true"))).build()))
-      .when(settingService).getSettings(anyString(), anyInt(), anyInt(), anyMap(), any(Context.class));
-    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(tenantId, CONSORTIUM_ID))))
-      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
-    doReturn(Future.succeededFuture(tenantId))
-      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
     doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
 
     var result = handler.handle(kafkaRecord);

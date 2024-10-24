@@ -8,6 +8,7 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import io.vertx.core.MultiMap;
 import io.vertx.kafka.client.producer.KafkaHeader;
@@ -15,6 +16,7 @@ import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.okapi.common.XOkapiHeaders;
 
 public final class HeaderUtils {
+
   public static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
 
   private HeaderUtils() {
@@ -52,5 +54,11 @@ public final class HeaderUtils {
     CaseInsensitiveMap<String, String> headersCopy = new CaseInsensitiveMap<>(headers);
     headersCopy.put(XOkapiHeaders.TENANT, tenantId);
     return headersCopy;
+  }
+
+  public static  Map<String, String> copyHeadersAndUpdatedTenant(String centralTenantId, Map<String, String> headers) {
+    var newHeaders = headers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    newHeaders.put(XOkapiHeaders.TENANT, centralTenantId);
+    return newHeaders;
   }
 }

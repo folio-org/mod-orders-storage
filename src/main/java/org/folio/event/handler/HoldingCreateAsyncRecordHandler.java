@@ -8,13 +8,11 @@ import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PO_LINE_LO
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
-import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
@@ -25,6 +23,7 @@ import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.HeaderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Context;
@@ -59,7 +58,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> {
-        var updatedHeaders = copyHeadersAndUpdatedTenant(centralTenantId, headers);
+        var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(centralTenantId, headers);
         var poLineFuture = processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
         var pieceFuture = processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
         return GenericCompositeFuture.all(List.of(poLineFuture, pieceFuture)).mapEmpty();
@@ -68,15 +67,9 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .mapEmpty();
   }
 
-  private Map<String, String> copyHeadersAndUpdatedTenant(String centralTenantId, Map<String, String> headers) {
-    var newHeaders = headers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    newHeaders.put(XOkapiHeaders.TENANT, centralTenantId);
-    return newHeaders;
-  }
-
   private Future<Void> processPoLinesUpdate(String holdingId, String permanentLocationId,
-                                                    String tenantIdFromEvent, String centralTenantId, Map<String, String> headers,
-                                                    Conn conn) {
+                                            String tenantIdFromEvent, String centralTenantId, Map<String, String> headers,
+                                            Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
@@ -84,7 +77,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   private Future<Void> processPiecesUpdate(String holdingId, String tenantIdFromEvent,
-                                                  String centralTenantId, Map<String, String> headers,Conn conn) {
+                                           String centralTenantId, Map<String, String> headers,Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
       .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
