@@ -44,7 +44,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       var eventType = resourceEvent.getType();
 
       if (!Objects.equals(eventType, inventoryEventType.getEventType())) {
-        log.info("handle:: Unsupported event type: {}", eventType);
+        log.debug("handle:: Unsupported event type: {}", eventType);
         return Future.succeededFuture();
       }
 
