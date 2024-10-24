@@ -49,7 +49,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> updatePieces(pieces, itemObject, tenantIdFromEvent, centralTenantId, conn)) // order of tenants is important
         .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers)))
-      .compose(v -> auditOutboxService.processOutboxEventLogs(headers))
+      .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 

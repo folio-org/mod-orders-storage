@@ -14,6 +14,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.okapi.common.GenericCompositeFuture;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
@@ -59,13 +60,15 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     return dbClient.getPgClient()
       .withTrans(conn -> processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn)
         .compose(poLines -> processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, conn).map(pieces -> Pair.of(poLines, pieces))))
-      .compose(data -> saveOutboxLogs(tenantIdFromEvent, data, headers))
-      .compose(v -> auditOutboxService.processOutboxEventLogs(headers))
+      .compose(data -> saveOutboxLogs(centralTenantId, data, headers))
+      .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
-  private Future<Void> saveOutboxLogs(String tenantId, Pair<List<PoLine>, List<Piece>> data, Map<String, String> headers) {
-    return createDBClient(tenantId)
+  private Future<Void> saveOutboxLogs(String centralTenantId, Pair<List<PoLine>, List<Piece>> data,
+                                      Map<String, String> headers) {
+    headers.put(XOkapiHeaders.TENANT, centralTenantId);
+    return createDBClient(centralTenantId)
       .getPgClient().withTrans(conn -> {
         var poLineOutboxLog = auditOutboxService.saveOrderLinesOutboxLogs(conn, data.getLeft(), OrderLineAuditEvent.Action.EDIT, headers);
         var pieceOutboxLog = auditOutboxService.savePiecesOutboxLog(conn, data.getRight(), PieceAuditEvent.Action.EDIT, headers);
