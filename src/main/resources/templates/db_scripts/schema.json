@@ -531,6 +531,10 @@
         {
           "fieldName": "claimingActive",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "instanceId",
+          "caseSensitive": false
         }
       ],
       "fullTextIndex": [
@@ -677,7 +681,7 @@
          }
        ]
      },
-     {
+    {
       "tableName": "order_templates",
       "fromModuleVersion": "mod-orders-storage-13.7.0",
       "withMetadata": false,
