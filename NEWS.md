@@ -22,6 +22,7 @@ The primary focus of this release was to enhance Kafka consumer processing, upda
 * [MODORDSTOR-380](https://folio-org.atlassian.net/browse/MODORDSTOR-380) - Implement CRUD for Settings API
 * [MODORDSTOR-376](https://folio-org.atlassian.net/browse/MODORDSTOR-376) - Create "Bound" flag for receiving pieces
 * [MODORDSTOR-364](https://folio-org.atlassian.net/browse/MODORDSTOR-364) - Create routing_list table and API for it
+* [MODORDERS-1192](https://folio-org.atlassian.net/browse/MODORDERS-1192) - Add consumer to handle Holding Update event to update all other PO Line holdings to the same instance 
 
 ### Bug Fixes
 * [MODORDSTOR-410](https://folio-org.atlassian.net/browse/MODORDSTOR-410) - Replace PomReader with ModuleName fixing Zip Slip (CWE-22)
