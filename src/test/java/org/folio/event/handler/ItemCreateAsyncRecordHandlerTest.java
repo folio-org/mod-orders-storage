@@ -1,5 +1,6 @@
 package org.folio.event.handler;
 
+import static java.util.stream.Collectors.groupingBy;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
@@ -7,8 +8,9 @@ import static org.folio.event.dto.ItemFields.ID;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.COLLEGE_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
-import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.UNIVERSITY_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.extractResourceEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -20,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,23 +32,29 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.folio.TestUtils;
-import org.folio.event.EventType;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.okapi.common.XOkapiHeaders;
+import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
+import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
@@ -61,6 +70,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   private SettingService settingService;
   @Mock
   private PieceService pieceService;
+  @Mock
+  private PoLinesService poLinesService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
@@ -80,20 +91,20 @@ public class ItemCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
+      TestUtils.setInternalState(itemHandler, "poLinesService", poLinesService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
-      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(CENTRAL_TENANT, CONSORTIUM_ID))))
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
-      doReturn(Future.succeededFuture(DIKU_TENANT))
-        .when(consortiumConfigurationService)
-        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, DIKU_TENANT)));
       doReturn(Future.succeededFuture(CENTRAL_TENANT))
         .when(consortiumConfigurationService)
-        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, DIKU_TENANT, CONSORTIUM_ID, CENTRAL_TENANT)));
-      doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
+        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT)));
+      doReturn(Future.succeededFuture(CENTRAL_TENANT))
+        .when(consortiumConfigurationService)
+        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT, CONSORTIUM_ID, CENTRAL_TENANT)));
       doReturn(Future.succeededFuture(0)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(any());
       doReturn(pgClient).when(dbClient).getPgClient();
@@ -102,122 +113,235 @@ public class ItemCreateAsyncRecordHandlerTest {
   }
 
   @Test
-  void positive_shouldProcessItemCreateEvent() {
-    String pieceId1 = UUID.randomUUID().toString();
-    String pieceId2 = UUID.randomUUID().toString();
-    String pieceId3 = UUID.randomUUID().toString();
-    String itemId = UUID.randomUUID().toString();
-    String holdingId = UUID.randomUUID().toString();
-    String locationId = UUID.randomUUID().toString();
-    String eventTenantId = "university";
+  void positive_shouldProcessItemCreateEventWithPiecesAndPoLinesUpdate() {
+    // PoLine 1
+    var poLineId1 = UUID.randomUUID().toString();
+    var pieceId1 = UUID.randomUUID().toString();
+    var pieceId2 = UUID.randomUUID().toString();
+    var pieceId3 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    var holdingId2 = UUID.randomUUID().toString();
+    var holdingId3 = UUID.randomUUID().toString();
+    var itemId1 = UUID.randomUUID().toString();
+    var itemId2 = UUID.randomUUID().toString();
+    // PoLine 2
+    var poLineId2 = UUID.randomUUID().toString();
+    var pieceId4 = UUID.randomUUID().toString();
+    var holdingId4 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, COLLEGE_TENANT);
 
-    var kafkaRecord = createItemEventKafkaRecord(itemId, holdingId, eventTenantId, CREATE);
-    var actualPiece1 = createPiece(pieceId1, itemId)
-      .withHoldingId(holdingId)
-      .withReceivingTenantId("college");
-    var actualPiece2 = createPiece(pieceId2, itemId)
-      .withLocationId(locationId)
-      .withReceivingTenantId("college");
-    var actualPiece3 = createPiece(pieceId3, itemId)
-      .withHoldingId(UUID.randomUUID().toString())
-      .withReceivingTenantId(DIKU_TENANT);
+    // PoLine 1 pieces 1, 2, 3
+    var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var piece2 = createPiece(pieceId2, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId2).withFormat(Piece.Format.ELECTRONIC);
+    var piece3 = createPiece(pieceId3, itemId2).withPoLineId(poLineId1).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId3).withFormat(Piece.Format.ELECTRONIC);
+    var affectedPiece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece2 = createPiece(pieceId2, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.ELECTRONIC);
+    var unaffectedPiece3 = createPiece(pieceId3, itemId2).withPoLineId(poLineId1).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId3).withFormat(Piece.Format.ELECTRONIC);
+    // PoLine 2 piece 4
+    var piece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId4).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    // PoLine 1
+    var poLine1 = createPoLine(poLineId1, List.of(piece1, piece2, piece3));
+    var affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2, unaffectedPiece3));
+    // PoLine 2
+    var poLine2 = createPoLine(poLineId2, List.of(piece4));
+    var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece4));
 
-    var pieces = List.of(actualPiece1, actualPiece2, actualPiece3);
+    // PoLines & Pieces
+    var pieces = List.of(piece1, piece2, piece4);
+    var poLines = List.of(poLine1, poLine2);
+    var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
+    var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
 
-    var expectedPieces = List.of(
-      createPiece(pieceId1, itemId).withHoldingId(holdingId).withReceivingTenantId(eventTenantId),
-      createPiece(pieceId2, itemId).withLocationId(locationId).withReceivingTenantId(eventTenantId),
-      createPiece(pieceId3, itemId).withHoldingId(holdingId).withReceivingTenantId(eventTenantId)
-    );
-
-    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
-    doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
+    // Update Pieces
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
+    // Update PoLines
+    doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
+    doReturn(Future.succeededFuture(List.of(affectedPiece4))).when(pieceService).getPiecesByPoLineId(eq(poLineId2), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    doReturn(Future.succeededFuture(affectedPoLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
-    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
-    verify(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
-    verify(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
+    // Update Pieces
+    verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
+    verify(pieceService, times(1)).updatePieces(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    // Update PoLines
+    verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
+    verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
+    verify(poLinesService, times(1)).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    verify(poLinesService, times(1)).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
-    assertEquals(holdingId, actualPiece1.getHoldingId());
-    assertEquals(eventTenantId, actualPiece1.getReceivingTenantId());
-    assertNull(actualPiece2.getHoldingId());
-    assertEquals(locationId, actualPiece2.getLocationId());
-    assertEquals(eventTenantId, actualPiece2.getReceivingTenantId());
+    assertEquals(holdingId1, piece1.getHoldingId());
+    assertEquals(holdingId1, piece2.getHoldingId());
+    assertEquals(holdingId3, unaffectedPiece3.getHoldingId());
+    assertEquals(holdingId1, piece4.getHoldingId());
+    assertEquals(COLLEGE_TENANT, piece1.getReceivingTenantId());
+    assertEquals(COLLEGE_TENANT, piece2.getReceivingTenantId());
+    assertEquals(CENTRAL_TENANT, piece3.getReceivingTenantId());
+    assertEquals(COLLEGE_TENANT, piece4.getReceivingTenantId());
+  }
+
+  @Test
+  void positive_shouldProcessItemCreateEventWithNoPiecesOrPoLineUpdate() {
+    // PoLine 1
+    var poLineId1 = UUID.randomUUID().toString();
+    var pieceId1 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    var itemId1 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, COLLEGE_TENANT);
+
+    // PoLine 1 piece 1
+    var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    // PoLine 1
+    var poLine1 = createPoLine(poLineId1, List.of(piece1));
+
+    // PoLines & Pieces
+    var pieces = List.of(piece1);
+    var poLines = List.of(poLine1);
+
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    doReturn(Future.succeededFuture(List.of(poLine1))).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(List.of(piece1))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId())), eq(conn));
+    doReturn(Future.succeededFuture(poLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT));
+
+    var result = handler.handle(kafkaRecord);
+    assertTrue(result.succeeded());
+
+    // Update Pieces
+    verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
+    verify(pieceService, never()).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, never()).savePiecesOutboxLog(any(Conn.class), anyList(), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    // Update PoLines
+    verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
+    verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
+    verify(poLinesService, never()).getPoLinesByLineIdsByChunks(any(), eq(conn));
+    verify(poLinesService, never()).updatePoLines(any(), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(dbClient.getPgClient(), times(0)).execute(any());
+  }
+
+
+  @Test
+  void positive_shouldSkipProcessItemCreateEventWhenNoPiecesWereFound() {
+    var holdingId1 = UUID.randomUUID().toString();
+    var itemId1 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, COLLEGE_TENANT);
+
+    doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+
+    var result = handler.handle(kafkaRecord);
+    assertTrue(result.succeeded());
+
+    // Update Pieces
+    verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
+    verify(pieceService, never()).updatePieces(anyList(), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, never()).savePiecesOutboxLog(any(Conn.class), anyList(), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    // Update PoLines
+    verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
+    verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
+    verify(poLinesService, never()).getPoLinesByLineIdsByChunks(any(), eq(conn));
+    verify(poLinesService, never()).updatePoLines(any(), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(dbClient.getPgClient(), times(0)).execute(any());
   }
 
   @Test
   void positive_shouldSkipProcessItemCreateEventWhenNoPieceHasSameTenantIdOrHoldingId() {
-    String pieceId1 = UUID.randomUUID().toString();
-    String pieceId2 = UUID.randomUUID().toString();
-    String itemId = UUID.randomUUID().toString();
-    String holdingId = UUID.randomUUID().toString();
-    String locationId = UUID.randomUUID().toString();
-    String tenantId = DIKU_TENANT;
+    var pieceId1 = UUID.randomUUID().toString();
+    var pieceId2 = UUID.randomUUID().toString();
+    var itemId1 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    var locationId1 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, CENTRAL_TENANT);
 
-    var kafkaRecord = createItemEventKafkaRecord(itemId, holdingId, tenantId, CREATE);
     // These pieces should be skipped
-    // alreadyUpdatedPiece1 have the same tenantId and holdingId
-    var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId)
-      .withHoldingId(holdingId)
-      .withReceivingTenantId(tenantId);
-    // alreadyUpdatedPiece2 have the same tenantId and existing locationId
-    var alreadyUpdatedPiece2 = createPiece(pieceId2, itemId)
-      .withLocationId(locationId)
-      .withReceivingTenantId(tenantId);
+    // alreadyUpdatedPiece1 have the same tenantId and holdingId1
+    var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId1).withHoldingId(holdingId1) .withReceivingTenantId(CENTRAL_TENANT);
+    // alreadyUpdatedPiece2 have the same tenantId and existing locationId1
+    var alreadyUpdatedPiece2 = createPiece(pieceId2, itemId1).withLocationId(locationId1).withReceivingTenantId(CENTRAL_TENANT);
     var pieces = List.of(alreadyUpdatedPiece1, alreadyUpdatedPiece2);
-    List<Piece> expectedPieces = List.of();
 
-    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
-    doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    doReturn(Future.succeededFuture(List.of())).when(pieceService).updatePieces(eq(List.of()), eq(conn), eq(CENTRAL_TENANT));
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
     assertNull(alreadyUpdatedPiece2.getHoldingId());
-    assertEquals(locationId, alreadyUpdatedPiece2.getLocationId());
+    assertEquals(locationId1, alreadyUpdatedPiece2.getLocationId());
 
-    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
-    verify(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
+    verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
     // skip update pieces in db, in case of no pieces to update
     verify(dbClient.getPgClient(), times(0)).execute(any());
   }
 
   @Test
   void negative_shouldReturnFailedFutureIfSavePieceInDBIsFailed() {
-    String pieceId = UUID.randomUUID().toString();
-    String itemId = UUID.randomUUID().toString();
-    String holdingId = UUID.randomUUID().toString();
-    String tenantId = DIKU_TENANT;
+    var pieceId1 = UUID.randomUUID().toString();
+    var itemId1 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, CENTRAL_TENANT);
 
-    var kafkaRecord = createItemEventKafkaRecord(itemId, holdingId, tenantId, CREATE);
-    var actualPiece = createPiece(pieceId, itemId);
-    var expectedPieces = List.of(createPiece(pieceId, itemId)
-      .withHoldingId(holdingId)
-      .withReceivingTenantId(tenantId)
-    );
+    var actualPiece = createPiece(pieceId1, itemId1);
+    var expectedPieces = List.of(createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT) );
 
-    doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId), eq(conn));
-    doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(CENTRAL_TENANT));
 
     var result = handler.handle(kafkaRecord);
 
     assertTrue(result.failed());
     assertEquals(RuntimeException.class, result.cause().getClass());
 
-    verify(handler).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(DIKU_TENANT), anyMap(), eq(dbClient));
+    verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
   }
 
-  private static Piece createPiece(String pieceId, String itemId) {
+  private Piece createPiece(String pieceId, String itemId) {
     return new Piece().withId(pieceId).withItemId(itemId);
   }
 
-  private static KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId, String tenantId, EventType type) {
-    var resourceEvent = createResourceEvent(tenantId, type);
-    var itemObject = JsonObject.of(ID.getValue(), itemId, HOLDINGS_RECORD_ID.getValue(), holdingRecordId);
-    resourceEvent.setNewValue(itemObject);
-    return createKafkaRecord(resourceEvent, DIKU_TENANT);
+  private PoLine createPoLine(String poLineId, List<Piece> pieces) {
+    var locations = new ArrayList<Location>();
+    var piecesByTenantIdGrouped = pieces.stream()
+      .collect(groupingBy(Piece::getReceivingTenantId, Collectors.toList()));
+    piecesByTenantIdGrouped.forEach((tenantId, piecesByTenant) -> {
+      var piecesByHoldingIdGrouped = piecesByTenant.stream()
+        .collect(groupingBy(Piece::getHoldingId, Collectors.toList()));
+      piecesByHoldingIdGrouped.forEach((holdingId, piecesByHolding) -> {
+        var piecesByFormat = piecesByHolding.stream()
+          .collect(groupingBy(Piece::getFormat, Collectors.toList()));
+        var location = new Location().withTenantId(tenantId)
+          .withHoldingId(holdingId)
+          .withQuantity(piecesByHolding.size())
+          .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
+          .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size());
+        locations.add(location);
+      });
+    });
+    return new PoLine().withId(poLineId).withLocations(locations);
   }
 
+  private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId, String tenantId) {
+    var resourceEvent = createResourceEvent(tenantId, CREATE);
+    var itemObject = JsonObject.of(ID.getValue(), itemId, HOLDINGS_RECORD_ID.getValue(), holdingRecordId);
+    resourceEvent.setNewValue(itemObject);
+    return createKafkaRecord(resourceEvent, CENTRAL_TENANT);
+  }
 }
