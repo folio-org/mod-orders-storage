@@ -198,7 +198,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-kafka-wrapper</artifactId>
-      <version>3.1.1</version>
+      <version>3.2.0</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
