@@ -1,4 +1,41 @@
-## 13.8.0 - Unreleased
+## 13.9.0 - Unreleased
+
+## 13.8.0 - Released (Ramsons R2 2024)
+The primary focus of this release was to enhance Kafka consumer processing, update tenant logic, and improve filtering performance.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.0...v13.8.0)
+
+### Stories
+* [MODORDSTOR-426](https://folio-org.atlassian.net/browse/MODORDSTOR-426) - Update libraries of dependant acq modules to the latest versions
+* [MODORDSTOR-419](https://folio-org.atlassian.net/browse/MODORDSTOR-419) - Implement Item update event consumer logic to update piece holding across single tenant
+* [MODORDSTOR-417](https://folio-org.atlassian.net/browse/MODORDSTOR-417) - Add Kafka consumer for Item Create events with processing logic
+* [MODORDSTOR-416](https://folio-org.atlassian.net/browse/MODORDSTOR-416) - Add Kafka consumer for Holdings Create events with processing logic
+* [MODORDSTOR-409](https://folio-org.atlassian.net/browse/MODORDSTOR-409) - Investigate way to improve performance of Receiving filtering
+* [MODORDSTOR-408](https://folio-org.atlassian.net/browse/MODORDSTOR-408) - Upgrading tenant resets reference and sample records
+* [MODORDSTOR-406](https://folio-org.atlassian.net/browse/MODORDSTOR-406) - Investigate way to improve performance of Orders filtering
+* [MODORDSTOR-402](https://folio-org.atlassian.net/browse/MODORDSTOR-402) - Setup consortia for Open/UnOpen/Change Instance in cross-tenant environments
+* [MODORDSTOR-401](https://folio-org.atlassian.net/browse/MODORDSTOR-401) - Create migration to populate Holding::permanentLocationId
+* [MODORDSTOR-396](https://folio-org.atlassian.net/browse/MODORDSTOR-396) - Add index for searchLocationIds
+* [MODORDSTOR-393](https://folio-org.atlassian.net/browse/MODORDSTOR-393) - Add bindItemIds to Title schema
+* [MODORDSTOR-383](https://folio-org.atlassian.net/browse/MODORDSTOR-383) - Add receivingTenantId to the Piece schema
+* [MODORDSTOR-381](https://folio-org.atlassian.net/browse/MODORDSTOR-381) - Add tenantId to the Location schema
+* [MODORDSTOR-380](https://folio-org.atlassian.net/browse/MODORDSTOR-380) - Implement CRUD for Settings API
+* [MODORDSTOR-376](https://folio-org.atlassian.net/browse/MODORDSTOR-376) - Create "Bound" flag for receiving pieces
+* [MODORDSTOR-364](https://folio-org.atlassian.net/browse/MODORDSTOR-364) - Create routing_list table and API for it
+
+### Bug Fixes
+* [MODORDSTOR-410](https://folio-org.atlassian.net/browse/MODORDSTOR-410) - Replace PomReader with ModuleName fixing Zip Slip (CWE-22)
+* [MODORDSTOR-399](https://folio-org.atlassian.net/browse/MODORDSTOR-399) - Missing interface dependencies in module descriptor
+* [MODORDSTOR-394](https://folio-org.atlassian.net/browse/MODORDSTOR-394) - PO numbers do not go up consecutively
+
+### Tech Debts
+* [MODORDSTOR-411](https://folio-org.atlassian.net/browse/MODORDSTOR-411) - Delete unused acquisition method "Test user method"
+
+
+### Dependencies
+* Bump `raml` from `35.2.0` to `35.3.0`
+* Added `folio-module-descriptor-validator` version `1.0.0`
+
 
 ## 13.7.0 - Released (Quesnelia R1 2024)
 The primary focus of this release was to implement claiming batch status job and improve title functionality
