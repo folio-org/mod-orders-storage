@@ -32,6 +32,7 @@ import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.HeaderUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Log4j2
@@ -58,9 +59,12 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var itemId = itemObject.getString(ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
-      .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
-        .compose(pieces -> processPiecesUpdate(pieces, itemObject, tenantIdFromEvent, centralTenantId, headers, conn))
-        .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, tenantIdFromEvent, centralTenantId, headers, conn))
+      .withTrans(conn -> {
+        var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(centralTenantId, headers);
+        return pieceService.getPiecesByItemId(itemId, conn)
+          .compose(pieces -> processPiecesUpdate(pieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
+          .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn));
+        }
       )
       .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
