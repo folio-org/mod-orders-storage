@@ -69,7 +69,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   private Future<List<Piece>> processPiecesUpdate(List<Piece> pieces, JsonObject itemObject, String tenantIdFromEvent,
                                                   String centralTenantId, Map<String, String> headers, Conn conn) {
     if (CollectionUtils.isEmpty(pieces)) {
-      log.info("processPiecesUpdate:: No pieces were found to update for item: '{}' and tenant: '{}' in centralTenant: {}",
+      log.info("processPiecesUpdate:: No pieces were found to update for item: '{}' and tenant: '{}' in centralTenant: '{}'",
         itemObject.getString(ID.getValue()), tenantIdFromEvent, centralTenantId);
       return Future.succeededFuture(List.of());
     }
@@ -83,7 +83,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantIdFromEvent);
 
     if (CollectionUtils.isEmpty(updateRequiredPieces)) {
-      log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}' in centralTenant: {}",
+      log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}' in centralTenant: '{}'",
         item.getString(ID.getValue()), tenantIdFromEvent, centralTenantId);
       return Future.succeededFuture(List.of());
     }
@@ -93,7 +93,12 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
         "in centralTenant: '{}'", updateRequiredPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
 
     return pieceService.updatePieces(updateRequiredPieces, conn, centralTenantId)
-      .compose(updatedPieces -> auditOutboxService.savePiecesOutboxLog(conn, updatedPieces, PieceAuditEvent.Action.EDIT, headers).map(updatedPieces));
+      .compose(updatedPieces -> {
+        log.info("updatePieces:: Updated '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}' " +
+          "in centralTenant: '{}'", updatedPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
+        updatedPieces.forEach(updatedPiece -> log.info("updatePieces:: Updated piece: {}", JsonObject.mapFrom(updatedPiece).encode()));
+        return auditOutboxService.savePiecesOutboxLog(conn, updatedPieces, PieceAuditEvent.Action.EDIT, headers).map(updatedPieces);
+      });
   }
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantIdFromEvent) {
