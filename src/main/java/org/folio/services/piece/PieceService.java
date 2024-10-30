@@ -42,6 +42,11 @@ public class PieceService {
     return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, client);
   }
 
+  public Future<List<Piece>> getPiecesByPoLineId(String poLineId, Conn conn) {
+    var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
+    return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, conn);
+  }
+
   public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
     var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
     return getPiecesByField(criterion, conn);
