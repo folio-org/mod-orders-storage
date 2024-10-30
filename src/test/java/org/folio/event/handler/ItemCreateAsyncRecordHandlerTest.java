@@ -507,10 +507,9 @@ public class ItemCreateAsyncRecordHandlerTest {
   private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId,
                                                                          String effectiveLocationId, String tenantId) {
     var resourceEvent = createResourceEvent(tenantId, CREATE);
-    var itemObject = new JsonObject();
-    itemObject.put(ID.getValue(), itemId);
-    itemObject.put(HOLDINGS_RECORD_ID.getValue(), holdingRecordId);
-    itemObject.put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId);
+    var itemObject = new JsonObject().put(ID.getValue(), itemId)
+      .put(HOLDINGS_RECORD_ID.getValue(), holdingRecordId)
+      .put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId);
     resourceEvent.setNewValue(itemObject);
     return createKafkaRecord(resourceEvent, CENTRAL_TENANT);
   }

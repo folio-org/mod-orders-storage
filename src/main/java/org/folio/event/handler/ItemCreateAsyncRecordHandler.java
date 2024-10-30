@@ -87,7 +87,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var holdingId = item.getString(HOLDINGS_RECORD_ID.getValue());
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantIdFromEvent);
 
-    log.info("updatePieces:: Preparing '{}' piece(s) for update processing", pieces.size());
+    log.debug("updatePieces:: Preparing '{}' piece(s) for update processing", pieces.size());
     if (CollectionUtils.isEmpty(updateRequiredPieces)) {
       log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}' in centralTenant: '{}'",
         item.getString(ID.getValue()), tenantIdFromEvent, centralTenantId);
@@ -123,7 +123,6 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     });
   }
 
-  // Find affected POLs from updated pieces, find all other POL pieces, reconstruct POL locations from all pieces
   private Future<Void> processPoLinesUpdate(List<Piece> pieces, JsonObject itemObject, String tenantIdFromEvent,
                                             String centralTenantId, Map<String, String> headers, Conn conn) {
     if (CollectionUtils.isEmpty(pieces)) {
@@ -135,7 +134,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       .map(Piece::getPoLineId)
       .distinct()
       .toList();
-    log.info("processPoLinesUpdate:: Preparing '{}' poLineIds for update processing", poLineIds.size());
+    log.debug("processPoLinesUpdate:: Preparing '{}' poLineIds for update processing", poLineIds.size());
     return poLinesService.getPoLinesByLineIdsByChunks(poLineIds, conn)
       .compose(poLines -> {
         var poLinePiecePairsFutures = new ArrayList<Future<Pair<PoLine, List<Piece>>>>();
@@ -156,15 +155,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var updatedPoLines = new ArrayList<PoLine>();
     log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in centralTenant: '{}'",
       poLinePiecePairs.size(), itemObject.getString(ID.getValue()), centralTenantId);
-    poLinePiecePairs.forEach(poLineListPair -> {
-      var poLine = poLineListPair.getLeft();
-      var pieces = poLineListPair.getRight();
-      var locationsUpdated = updatePoLineLocations(pieces, poLine);
-      var searchLocationIdsUpdated = updatePoLineSearchLocationIds(itemObject, poLine);
-      if (Boolean.TRUE.equals(locationsUpdated) || Boolean.TRUE.equals(searchLocationIdsUpdated)) {
-        updatedPoLines.add(poLine);
-      }
-    });
+    poLinePiecePairs.forEach(poLineListPair -> processPoLinePiecePairs(itemObject, poLineListPair, updatedPoLines));
     if (CollectionUtils.isEmpty(updatedPoLines)) {
       log.info("updatePoLines:: No POLs were changed to update for item: '{}'", itemObject.getString(ID.getValue()));
       return Future.succeededFuture(List.of());
@@ -172,6 +163,16 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     return poLinesService.updatePoLines(updatedPoLines, conn, centralTenantId)
       .compose(v -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
+  }
+
+  private void processPoLinePiecePairs(JsonObject itemObject, Pair<PoLine, List<Piece>> poLineListPair, ArrayList<PoLine> updatedPoLines) {
+    var poLine = poLineListPair.getLeft();
+    var pieces = poLineListPair.getRight();
+    var isLocationsUpdated = updatePoLineLocations(pieces, poLine);
+    var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(itemObject, poLine);
+    if (Boolean.TRUE.equals(isLocationsUpdated) || Boolean.TRUE.equals(isSearchLocationIdsUpdated)) {
+      updatedPoLines.add(poLine);
+    }
   }
 
   private boolean updatePoLineLocations(List<Piece> pieces, PoLine poLine) {
@@ -184,7 +185,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
         .filter(piece -> Objects.nonNull(piece.getHoldingId()))
         .collect(Collectors.groupingBy(Piece::getHoldingId, Collectors.toList()));
       piecesByHoldingIdGrouped.forEach((holdingId, piecesByHoldings) -> {
-        var piecesByFormat = piecesByHoldings.stream() .filter(Objects::nonNull)
+        var piecesByFormat = piecesByHoldings.stream().filter(Objects::nonNull)
           .filter(piece -> Objects.nonNull(piece.getFormat()))
           .collect(Collectors.groupingBy(Piece::getFormat, Collectors.toList()));
         var location = new Location().withTenantId(tenantId)
@@ -199,8 +200,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       log.info("updatePoLineLocations:: No POL locations were found to update, poLineId: {}", poLine.getId());
       return false;
     }
-    var oldLocations = CollectionUtils.isNotEmpty(poLine.getLocations()) ? JsonArray.of(poLine.getLocations()).encode() : List.of();
-    log.info("updatePoLineLocations:: Updating POL '{}' locations, old locations: '{}'", poLine.getId(), oldLocations);
+    log.info("updatePoLineLocations:: Updating POL '{}' locations, old locations: '{}'", poLine.getId(), JsonArray.of(poLine.getLocations()).encode());
     poLine.withLocations(locations);
     log.info("updatePoLineLocations:: Updating POL '{}' locations, new locations: '{}'", poLine.getId(), JsonArray.of(locations).encode());
     return true;
