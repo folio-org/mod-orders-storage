@@ -92,12 +92,14 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     log.info("updatePieces:: Updating '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}' " +
         "in centralTenant: '{}'", updateRequiredPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
 
+    updateRequiredPieces.forEach(updateRequiredPiece -> log.info("updatePieces:: Updated required piece: {}", JsonObject.mapFrom(updateRequiredPiece).encode()));
+
     return pieceService.updatePieces(updateRequiredPieces, conn, centralTenantId)
       .compose(updatedPieces -> {
         log.info("updatePieces:: Updated '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}' " +
           "in centralTenant: '{}'", updatedPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
         updatedPieces.forEach(updatedPiece -> log.info("updatePieces:: Updated piece: {}", JsonObject.mapFrom(updatedPiece).encode()));
-        return auditOutboxService.savePiecesOutboxLog(conn, updatedPieces, PieceAuditEvent.Action.EDIT, headers).map(updatedPieces);
+        return auditOutboxService.savePiecesOutboxLog(conn, updatedPieces, PieceAuditEvent.Action.EDIT, headers).map(updateRequiredPieces);
       });
   }
 
