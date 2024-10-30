@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
+import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
@@ -124,12 +125,14 @@ public class ItemCreateAsyncRecordHandlerTest {
     var holdingId3 = UUID.randomUUID().toString();
     var itemId1 = UUID.randomUUID().toString();
     var itemId2 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
+    var effectiveLocationId2 = UUID.randomUUID().toString();
     // PoLine 2
     var poLineId2 = UUID.randomUUID().toString();
     var pieceId4 = UUID.randomUUID().toString();
     var holdingId4 = UUID.randomUUID().toString();
     // Kafka record
-    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, COLLEGE_TENANT);
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId2, COLLEGE_TENANT);
 
     // PoLine 1 pieces 1, 2, 3
     var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
@@ -142,11 +145,11 @@ public class ItemCreateAsyncRecordHandlerTest {
     var piece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId4).withFormat(Piece.Format.PHYSICAL);
     var affectedPiece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
     // PoLine 1
-    var poLine1 = createPoLine(poLineId1, List.of(piece1, piece2, piece3));
-    var affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2, unaffectedPiece3));
+    var poLine1 = createPoLine(poLineId1, List.of(piece1, piece2, piece3), List.of(effectiveLocationId1));
+    var affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2, unaffectedPiece3), List.of(effectiveLocationId1, effectiveLocationId2));
     // PoLine 2
-    var poLine2 = createPoLine(poLineId2, List.of(piece4));
-    var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece4));
+    var poLine2 = createPoLine(poLineId2, List.of(piece4), List.of(effectiveLocationId1));
+    var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece4), List.of(effectiveLocationId1, effectiveLocationId2));
 
     // PoLines & Pieces
     var pieces = List.of(piece1, piece2, piece4);
@@ -191,19 +194,179 @@ public class ItemCreateAsyncRecordHandlerTest {
   }
 
   @Test
+  void positive_shouldProcessItemCreateEventWithPiecesAndPoLinesUpdateSameSearchLocationIds() {
+    // PoLine 1
+    var poLineId1 = UUID.randomUUID().toString();
+    var pieceId1 = UUID.randomUUID().toString();
+    var pieceId2 = UUID.randomUUID().toString();
+    var pieceId3 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    var holdingId2 = UUID.randomUUID().toString();
+    var holdingId3 = UUID.randomUUID().toString();
+    var itemId1 = UUID.randomUUID().toString();
+    var itemId2 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
+    // PoLine 2
+    var poLineId2 = UUID.randomUUID().toString();
+    var pieceId4 = UUID.randomUUID().toString();
+    var holdingId4 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId1, COLLEGE_TENANT);
+
+    // PoLine 1 pieces 1, 2, 3
+    var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var piece2 = createPiece(pieceId2, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId2).withFormat(Piece.Format.ELECTRONIC);
+    var piece3 = createPiece(pieceId3, itemId2).withPoLineId(poLineId1).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId3).withFormat(Piece.Format.ELECTRONIC);
+    var affectedPiece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece2 = createPiece(pieceId2, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.ELECTRONIC);
+    var unaffectedPiece3 = createPiece(pieceId3, itemId2).withPoLineId(poLineId1).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId3).withFormat(Piece.Format.ELECTRONIC);
+    // PoLine 2 piece 4
+    var piece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId4).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    // PoLine 1
+    var poLine1 = createPoLine(poLineId1, List.of(piece1, piece2, piece3), List.of(effectiveLocationId1));
+    var affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2, unaffectedPiece3), List.of(effectiveLocationId1));
+    // PoLine 2
+    var poLine2 = createPoLine(poLineId2, List.of(piece4), List.of(effectiveLocationId1));
+    var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece4), List.of(effectiveLocationId1));
+
+    // PoLines & Pieces
+    var pieces = List.of(piece1, piece2, piece4);
+    var poLines = List.of(poLine1, poLine2);
+    var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
+    var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+
+    // Update Pieces
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
+    // Update PoLines
+    doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
+    doReturn(Future.succeededFuture(List.of(affectedPiece4))).when(pieceService).getPiecesByPoLineId(eq(poLineId2), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    doReturn(Future.succeededFuture(affectedPoLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
+
+    var result = handler.handle(kafkaRecord);
+    assertTrue(result.succeeded());
+
+    // Update Pieces
+    verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
+    verify(pieceService, times(1)).updatePieces(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    // Update PoLines
+    verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
+    verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
+    verify(poLinesService, times(1)).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    verify(poLinesService, times(1)).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+
+    assertEquals(holdingId1, piece1.getHoldingId());
+    assertEquals(holdingId1, piece2.getHoldingId());
+    assertEquals(holdingId3, unaffectedPiece3.getHoldingId());
+    assertEquals(holdingId1, piece4.getHoldingId());
+    assertEquals(COLLEGE_TENANT, piece1.getReceivingTenantId());
+    assertEquals(COLLEGE_TENANT, piece2.getReceivingTenantId());
+    assertEquals(CENTRAL_TENANT, piece3.getReceivingTenantId());
+    assertEquals(COLLEGE_TENANT, piece4.getReceivingTenantId());
+  }
+
+  @Test
+  void positive_shouldProcessItemCreateEventWithPiecesAndPoLinesUpdateSameLocationsAndSearchLocationIds() {
+    // PoLine 1
+    var poLineId1 = UUID.randomUUID().toString();
+    var pieceId1 = UUID.randomUUID().toString();
+    var pieceId2 = UUID.randomUUID().toString();
+    var pieceId3 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    var holdingId2 = UUID.randomUUID().toString();
+    var holdingId3 = UUID.randomUUID().toString();
+    var itemId1 = UUID.randomUUID().toString();
+    var itemId2 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
+    var effectiveLocationId2 = UUID.randomUUID().toString();
+    // PoLine 2
+    var poLineId2 = UUID.randomUUID().toString();
+    var pieceId4 = UUID.randomUUID().toString();
+    var holdingId4 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId2, COLLEGE_TENANT);
+
+    // PoLine 1 pieces 1, 2, 3
+    var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var piece2 = createPiece(pieceId2, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId2).withFormat(Piece.Format.ELECTRONIC);
+    var piece3 = createPiece(pieceId3, itemId2).withPoLineId(poLineId1).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId3).withFormat(Piece.Format.ELECTRONIC);
+    var affectedPiece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece2 = createPiece(pieceId2, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.ELECTRONIC);
+    var unaffectedPiece3 = createPiece(pieceId3, itemId2).withPoLineId(poLineId1).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId3).withFormat(Piece.Format.ELECTRONIC);
+    // PoLine 2 piece 4
+    var piece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(CENTRAL_TENANT).withHoldingId(holdingId4).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece4 = createPiece(pieceId4, itemId1).withPoLineId(poLineId2).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    // PoLine 1
+    var poLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2, unaffectedPiece3), List.of(effectiveLocationId1, effectiveLocationId2));
+    var affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2, unaffectedPiece3), List.of(effectiveLocationId1, effectiveLocationId2));
+    // PoLine 2
+    var poLine2 = createPoLine(poLineId2, List.of(affectedPiece4), List.of(effectiveLocationId1, effectiveLocationId2));
+    var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece4), List.of(effectiveLocationId1, effectiveLocationId2));
+
+    // PoLines & Pieces
+    var pieces = List.of(piece1, piece2, piece4);
+    var poLines = List.of(poLine1, poLine2);
+    var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
+    var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+
+    // Update Pieces
+    doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
+    // Update PoLines
+    doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
+    doReturn(Future.succeededFuture(List.of(affectedPiece4))).when(pieceService).getPiecesByPoLineId(eq(poLineId2), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    doReturn(Future.succeededFuture(affectedPoLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
+
+    var result = handler.handle(kafkaRecord);
+    assertTrue(result.succeeded());
+
+    // Update Pieces
+    verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
+    verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
+    verify(pieceService, times(1)).updatePieces(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    // Update PoLines
+    verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
+    verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
+    verify(poLinesService, times(1)).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    verify(poLinesService, never()).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT));
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+
+    assertEquals(holdingId1, piece1.getHoldingId());
+    assertEquals(holdingId1, piece2.getHoldingId());
+    assertEquals(holdingId3, unaffectedPiece3.getHoldingId());
+    assertEquals(holdingId1, piece4.getHoldingId());
+    assertEquals(COLLEGE_TENANT, piece1.getReceivingTenantId());
+    assertEquals(COLLEGE_TENANT, piece2.getReceivingTenantId());
+    assertEquals(CENTRAL_TENANT, piece3.getReceivingTenantId());
+    assertEquals(COLLEGE_TENANT, piece4.getReceivingTenantId());
+  }
+
+  @Test
   void positive_shouldProcessItemCreateEventWithNoPiecesOrPoLineUpdate() {
     // PoLine 1
     var poLineId1 = UUID.randomUUID().toString();
     var pieceId1 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var itemId1 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
     // Kafka record
-    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, COLLEGE_TENANT);
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId1, COLLEGE_TENANT);
 
     // PoLine 1 piece 1
     var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
     // PoLine 1
-    var poLine1 = createPoLine(poLineId1, List.of(piece1));
+    var poLine1 = createPoLine(poLineId1, List.of(piece1), List.of(effectiveLocationId1));
 
     // PoLines & Pieces
     var pieces = List.of(piece1);
@@ -232,13 +395,13 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(dbClient.getPgClient(), times(0)).execute(any());
   }
 
-
   @Test
   void positive_shouldSkipProcessItemCreateEventWhenNoPiecesWereFound() {
     var holdingId1 = UUID.randomUUID().toString();
     var itemId1 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
     // Kafka record
-    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, COLLEGE_TENANT);
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId1, COLLEGE_TENANT);
 
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
 
@@ -264,10 +427,11 @@ public class ItemCreateAsyncRecordHandlerTest {
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
     var itemId1 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var locationId1 = UUID.randomUUID().toString();
     // Kafka record
-    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, CENTRAL_TENANT);
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId1, CENTRAL_TENANT);
 
     // These pieces should be skipped
     // alreadyUpdatedPiece1 have the same tenantId and holdingId1
@@ -295,9 +459,10 @@ public class ItemCreateAsyncRecordHandlerTest {
   void negative_shouldReturnFailedFutureIfSavePieceInDBIsFailed() {
     var pieceId1 = UUID.randomUUID().toString();
     var itemId1 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     // Kafka record
-    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, CENTRAL_TENANT);
+    var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId1, CENTRAL_TENANT);
 
     var actualPiece = createPiece(pieceId1, itemId1);
     var expectedPieces = List.of(createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT) );
@@ -317,8 +482,8 @@ public class ItemCreateAsyncRecordHandlerTest {
     return new Piece().withId(pieceId).withItemId(itemId);
   }
 
-  private PoLine createPoLine(String poLineId, List<Piece> pieces) {
-    var locations = new ArrayList<Location>();
+  private PoLine createPoLine(String poLineId, List<Piece> pieces, List<String> searchLocationIds) {
+    var oldLocations = new ArrayList<Location>();
     var piecesByTenantIdGrouped = pieces.stream()
       .collect(groupingBy(Piece::getReceivingTenantId, Collectors.toList()));
     piecesByTenantIdGrouped.forEach((tenantId, piecesByTenant) -> {
@@ -332,15 +497,20 @@ public class ItemCreateAsyncRecordHandlerTest {
           .withQuantity(piecesByHolding.size())
           .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
           .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size());
-        locations.add(location);
+        oldLocations.add(location);
       });
     });
-    return new PoLine().withId(poLineId).withLocations(locations);
+    var oldPermanentSearchLocationIds = new ArrayList<>(searchLocationIds);
+    return new PoLine().withId(poLineId).withLocations(oldLocations).withSearchLocationIds(oldPermanentSearchLocationIds);
   }
 
-  private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId, String tenantId) {
+  private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId,
+                                                                         String effectiveLocationId, String tenantId) {
     var resourceEvent = createResourceEvent(tenantId, CREATE);
-    var itemObject = JsonObject.of(ID.getValue(), itemId, HOLDINGS_RECORD_ID.getValue(), holdingRecordId);
+    var itemObject = new JsonObject();
+    itemObject.put(ID.getValue(), itemId);
+    itemObject.put(HOLDINGS_RECORD_ID.getValue(), holdingRecordId);
+    itemObject.put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId);
     resourceEvent.setNewValue(itemObject);
     return createKafkaRecord(resourceEvent, CENTRAL_TENANT);
   }

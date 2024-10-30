@@ -8,7 +8,8 @@ import lombok.Getter;
 public enum ItemFields {
 
   ID("id"),
-  HOLDINGS_RECORD_ID("holdingsRecordId");
+  HOLDINGS_RECORD_ID("holdingsRecordId"),
+  EFFECTIVE_LOCATION_ID("effectiveLocationId");
 
   private final String value;
 }

@@ -1,6 +1,7 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
+import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
 import static org.folio.util.HelperUtils.collectResultsOnSuccess;
@@ -86,6 +87,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var holdingId = item.getString(HOLDINGS_RECORD_ID.getValue());
     var updateRequiredPieces = filterPiecesToUpdate(pieces, holdingId, tenantIdFromEvent);
 
+    log.info("updatePieces:: Preparing '{}' piece(s) for update processing", pieces.size());
     if (CollectionUtils.isEmpty(updateRequiredPieces)) {
       log.info("updatePieces:: No pieces to update for item: '{}' and tenant: '{}' in centralTenant: '{}'",
         item.getString(ID.getValue()), tenantIdFromEvent, centralTenantId);
@@ -96,15 +98,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     log.info("updatePieces:: Updating '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}' " +
         "in centralTenant: '{}'", updateRequiredPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
 
-    updateRequiredPieces.forEach(updateRequiredPiece -> log.info("updatePieces:: Updated required piece: {}", JsonObject.mapFrom(updateRequiredPiece).encode()));
-
     return pieceService.updatePieces(updateRequiredPieces, conn, centralTenantId)
-      .compose(updatedPieces -> {
-        log.info("updatePieces:: Updated '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}' " +
-          "in centralTenant: '{}'", updatedPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
-        updatedPieces.forEach(updatedPiece -> log.info("updatePieces:: Updated piece: {}", JsonObject.mapFrom(updatedPiece).encode()));
-        return auditOutboxService.savePiecesOutboxLog(conn, updatedPieces, PieceAuditEvent.Action.EDIT, headers).map(updateRequiredPieces);
-      });
+      .compose(v -> auditOutboxService.savePiecesOutboxLog(conn, updateRequiredPieces, PieceAuditEvent.Action.EDIT, headers).map(updateRequiredPieces));
   }
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantIdFromEvent) {
@@ -151,42 +146,74 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
         });
         return collectResultsOnSuccess(poLinePiecePairsFutures);
       })
-      .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, centralTenantId, headers, conn))
+      .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, itemObject, centralTenantId, headers, conn))
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, String centralTenantId,
-                                             Map<String, String> headers, Conn conn) {
+  // Update locations and searchLocationIds for each POL
+  private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject itemObject,
+                                             String centralTenantId, Map<String, String> headers, Conn conn) {
     var updatedPoLines = new ArrayList<PoLine>();
+    log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in centralTenant: '{}'",
+      poLinePiecePairs.size(), itemObject.getString(ID.getValue()), centralTenantId);
     poLinePiecePairs.forEach(poLineListPair -> {
       var poLine = poLineListPair.getLeft();
       var pieces = poLineListPair.getRight();
-      var locations = new ArrayList<Location>();
-      var piecesByTenantIdGrouped = pieces.stream()
-        .collect(Collectors.groupingBy(Piece::getReceivingTenantId, Collectors.toList()));
-      piecesByTenantIdGrouped.forEach((tenantId, piecesByTenant) -> {
-        var piecesByHoldingIdGrouped = piecesByTenant.stream()
-          .collect(Collectors.groupingBy(Piece::getHoldingId, Collectors.toList()));
-        piecesByHoldingIdGrouped.forEach((holdingId, piecesByHoldings) -> {
-          var piecesByFormat = piecesByHoldings.stream()
-            .collect(Collectors.groupingBy(Piece::getFormat, Collectors.toList()));
-          var location = new Location().withTenantId(tenantId)
-            .withHoldingId(holdingId)
-            .withQuantity(piecesByHoldings.size())
-            .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
-            .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size());
-          locations.add(location);
-        });
-      });
-      if (!locations.isEmpty()) {
-        var oldLocations = CollectionUtils.isNotEmpty(poLine.getLocations()) ? JsonArray.of(poLine.getLocations()).encode() : List.of();
-        log.info("updatePoLines:: Updating PO Line '{}' with old locations: '{}'", poLine.getId(), oldLocations);
-        updatedPoLines.add(poLine.withLocations(locations));
-        log.info("updatePoLines:: Updating PO Line '{}' with new locations: '{}'", poLine.getId(), JsonArray.of(locations).encode());
+      var locationsUpdated = updatePoLineLocations(pieces, poLine);
+      var searchLocationIdsUpdated = updatePoLineSearchLocationIds(itemObject, poLine);
+      if (Boolean.TRUE.equals(locationsUpdated) || Boolean.TRUE.equals(searchLocationIdsUpdated)) {
+        updatedPoLines.add(poLine);
       }
     });
+    if (CollectionUtils.isEmpty(updatedPoLines)) {
+      log.info("updatePoLines:: No POLs were changed to update for item: '{}'", itemObject.getString(ID.getValue()));
+      return Future.succeededFuture(List.of());
+    }
     return poLinesService.updatePoLines(updatedPoLines, conn, centralTenantId)
       .compose(v -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
+  }
+
+  private boolean updatePoLineLocations(List<Piece> pieces, PoLine poLine) {
+    var locations = new ArrayList<Location>();
+    var piecesByTenantIdGrouped = pieces.stream()
+      .collect(Collectors.groupingBy(Piece::getReceivingTenantId, Collectors.toList()));
+    piecesByTenantIdGrouped.forEach((tenantId, piecesByTenant) -> {
+      var piecesByHoldingIdGrouped = piecesByTenant.stream()
+        .collect(Collectors.groupingBy(Piece::getHoldingId, Collectors.toList()));
+      piecesByHoldingIdGrouped.forEach((holdingId, piecesByHoldings) -> {
+        var piecesByFormat = piecesByHoldings.stream()
+          .collect(Collectors.groupingBy(Piece::getFormat, Collectors.toList()));
+        var location = new Location().withTenantId(tenantId)
+          .withHoldingId(holdingId)
+          .withQuantity(piecesByHoldings.size())
+          .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
+          .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size());
+        locations.add(location);
+      });
+    });
+    if (locations.isEmpty() || Objects.equals(locations, poLine.getLocations())) {
+      log.info("updatePoLineLocations:: No POL locations were found to update, poLineId: {}", poLine.getId());
+      return false;
+    }
+    var oldLocations = CollectionUtils.isNotEmpty(poLine.getLocations()) ? JsonArray.of(poLine.getLocations()).encode() : List.of();
+    log.info("updatePoLineLocations:: Updating POL '{}' locations, old locations: '{}'", poLine.getId(), oldLocations);
+    poLine.withLocations(locations);
+    log.info("updatePoLineLocations:: Updating POL '{}' locations, new locations: '{}'", poLine.getId(), JsonArray.of(locations).encode());
+    return true;
+  }
+
+  private boolean updatePoLineSearchLocationIds(JsonObject itemObject, PoLine poLine) {
+    var searchLocationIds = poLine.getSearchLocationIds();
+    var effectiveLocationId = itemObject.getString(EFFECTIVE_LOCATION_ID.getValue());
+    if (searchLocationIds.contains(effectiveLocationId)) {
+      log.info("updatePoLineSearchLocationIds:: No POL search locations were found to update, poLineId: {}", poLine.getId());
+      return false;
+    }
+    log.info("updatePoLineSearchLocationIds:: Updating POL '{}' searchLocationIds, old searchLocationIds: '{}'", poLine.getId(), poLine.getSearchLocationIds());
+    searchLocationIds.add(effectiveLocationId);
+    poLine.withSearchLocationIds(searchLocationIds);
+    log.info("updatePoLineSearchLocationIds:: Updating POL '{}' searchLocationIds, new searchLocationIds: '{}'", poLine.getId(), searchLocationIds);
+    return true;
   }
 }
