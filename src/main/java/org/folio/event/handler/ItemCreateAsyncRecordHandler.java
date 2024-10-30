@@ -152,10 +152,9 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
   // Update locations and searchLocationIds for each POL
   private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject itemObject,
                                              String centralTenantId, Map<String, String> headers, Conn conn) {
-    var updatedPoLines = new ArrayList<PoLine>();
     log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in centralTenant: '{}'",
       poLinePiecePairs.size(), itemObject.getString(ID.getValue()), centralTenantId);
-    poLinePiecePairs.forEach(poLineListPair -> processPoLinePiecePairs(itemObject, poLineListPair, updatedPoLines));
+    var updatedPoLines = processPoLinePiecePairs(poLinePiecePairs, itemObject);
     if (CollectionUtils.isEmpty(updatedPoLines)) {
       log.info("updatePoLines:: No POLs were changed to update for item: '{}'", itemObject.getString(ID.getValue()));
       return Future.succeededFuture(List.of());
@@ -165,14 +164,18 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       .mapEmpty();
   }
 
-  private void processPoLinePiecePairs(JsonObject itemObject, Pair<PoLine, List<Piece>> poLineListPair, ArrayList<PoLine> updatedPoLines) {
-    var poLine = poLineListPair.getLeft();
-    var pieces = poLineListPair.getRight();
-    var isLocationsUpdated = updatePoLineLocations(pieces, poLine);
-    var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(itemObject, poLine);
-    if (Boolean.TRUE.equals(isLocationsUpdated) || Boolean.TRUE.equals(isSearchLocationIdsUpdated)) {
-      updatedPoLines.add(poLine);
-    }
+  private ArrayList<PoLine> processPoLinePiecePairs(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject itemObject) {
+    var updatedPoLines = new ArrayList<PoLine>();
+    poLinePiecePairs.forEach(poLineListPair -> {
+      var poLine = poLineListPair.getLeft();
+      var pieces = poLineListPair.getRight();
+      var isLocationsUpdated = updatePoLineLocations(pieces, poLine);
+      var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(itemObject, poLine);
+      if (Boolean.TRUE.equals(isLocationsUpdated) || Boolean.TRUE.equals(isSearchLocationIdsUpdated)) {
+        updatedPoLines.add(poLine);
+      }
+    });
+    return updatedPoLines;
   }
 
   private boolean updatePoLineLocations(List<Piece> pieces, PoLine poLine) {
