@@ -176,13 +176,16 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
 
   private boolean updatePoLineLocations(List<Piece> pieces, PoLine poLine) {
     var locations = new ArrayList<Location>();
-    var piecesByTenantIdGrouped = pieces.stream()
+    var piecesByTenantIdGrouped = pieces.stream().filter(Objects::nonNull)
+      .filter(piece -> Objects.nonNull(piece.getReceivingTenantId()))
       .collect(Collectors.groupingBy(Piece::getReceivingTenantId, Collectors.toList()));
     piecesByTenantIdGrouped.forEach((tenantId, piecesByTenant) -> {
-      var piecesByHoldingIdGrouped = piecesByTenant.stream()
+      var piecesByHoldingIdGrouped = piecesByTenant.stream().filter(Objects::nonNull)
+        .filter(piece -> Objects.nonNull(piece.getHoldingId()))
         .collect(Collectors.groupingBy(Piece::getHoldingId, Collectors.toList()));
       piecesByHoldingIdGrouped.forEach((holdingId, piecesByHoldings) -> {
-        var piecesByFormat = piecesByHoldings.stream()
+        var piecesByFormat = piecesByHoldings.stream() .filter(Objects::nonNull)
+          .filter(piece -> Objects.nonNull(piece.getFormat()))
           .collect(Collectors.groupingBy(Piece::getFormat, Collectors.toList()));
         var location = new Location().withTenantId(tenantId)
           .withHoldingId(holdingId)
