@@ -10,30 +10,24 @@ import org.folio.TestUtils;
 import org.folio.event.dto.InstanceFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
-import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ProductId;
-import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
-import org.folio.services.setting.SettingService;
-import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -52,7 +46,6 @@ import static org.folio.event.dto.InstanceFields.PUBLICATION;
 import static org.folio.event.dto.InstanceFields.PUBLISHER;
 import static org.folio.event.dto.InstanceFields.TITLE;
 import static org.folio.event.handler.HoldingUpdateAsyncRecordHandler.PO_LINE_LOCATIONS_HOLDING_ID_CQL;
-import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
@@ -97,8 +90,6 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   private static final String IDENTIFIER_TYPE_VALUE_2 = "Id2";
   private static final String IDENTIFIER_TYPE_ID_2 = "2";
 
-  @Spy
-  private SettingService settingService;
   @Mock
   private PoLinesService poLinesService;
   @Mock
@@ -126,12 +117,6 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
-      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
-        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
-      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
-        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
-      doReturn(Future.succeededFuture(DIKU_TENANT))
-        .when(consortiumConfigurationService).getCentralTenantId(any(), any());
       doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());

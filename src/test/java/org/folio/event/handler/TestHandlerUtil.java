@@ -19,14 +19,16 @@ import static org.folio.event.EventType.UPDATE;
 
 public class TestHandlerUtil {
 
-  static final String DIKU_TENANT = "diku";
   static final String OKAPI_URL = "http://okapi:9130";
   static final String KAFKA_TOPIC = "dummy.topic";
   static final String RECORD_KEY = "dummy_key";
   static final int PARTITION = 1;
   static final int OFFSET = 1;
-  static final String CENTRAL_TENANT = "central";
   static final String CONSORTIUM_ID = "consortiumId";
+  static final String DIKU_TENANT = "diku";
+  static final String CENTRAL_TENANT = "central";
+  static final String UNIVERSITY_TENANT = "university";
+  static final String COLLEGE_TENANT = "college";
 
   private TestHandlerUtil() {
   }
