@@ -421,7 +421,9 @@
         {
           "fieldName": "locations",
           "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": true,
+          "arraySubfield": "holdingId",
+          "arrayModifiers": ["holdingId"]
         }
       ],
       "ginIndex": [
