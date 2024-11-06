@@ -565,6 +565,12 @@
           "targetTableAlias": "titles",
           "tableAlias": "pieces",
           "tOps": "ADD"
+        },
+        {
+          "targetPath": ["poLineId", "purchaseOrderId"],
+          "targetTable": "purchase_order",
+          "targetTableAlias": "purchaseOrder",
+          "tableAlias": "pieces"
         }
       ],
       "index": [
