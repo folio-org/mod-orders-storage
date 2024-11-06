@@ -417,6 +417,11 @@
           "fieldName": "orderFormat",
           "caseSensitive": false,
           "removeAccents": true
+        },
+        {
+          "fieldName": "locations",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ],
       "ginIndex": [
@@ -550,7 +555,9 @@
       "foreignKeys": [
         {
           "fieldName": "poLineId",
-          "targetTable": "po_line"
+          "targetTable": "po_line",
+          "targetTableAlias": "poLine",
+          "tableAlias": "pieces"
         },
         {
           "fieldName": "titleId",
@@ -591,6 +598,10 @@
         },
         {
           "fieldName": "bindItemId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "receivingTenantId",
           "caseSensitive": false
         }
       ],
