@@ -550,7 +550,9 @@
       "foreignKeys": [
         {
           "fieldName": "poLineId",
-          "targetTable": "po_line"
+          "targetTable": "po_line",
+          "targetTableAlias": "poLine",
+          "tableAlias": "pieces"
         },
         {
           "fieldName": "titleId",
@@ -558,6 +560,12 @@
           "targetTableAlias": "titles",
           "tableAlias": "pieces",
           "tOps": "ADD"
+        },
+        {
+          "targetPath": ["poLineId", "purchaseOrderId"],
+          "targetTable": "purchase_order",
+          "targetTableAlias": "purchaseOrder",
+          "tableAlias": "pieces"
         }
       ],
       "index": [
@@ -591,6 +599,10 @@
         },
         {
           "fieldName": "bindItemId",
+          "caseSensitive": false
+        },
+        {
+          "fieldName": "receivingTenantId",
           "caseSensitive": false
         }
       ],
