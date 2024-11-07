@@ -417,13 +417,6 @@
           "fieldName": "orderFormat",
           "caseSensitive": false,
           "removeAccents": true
-        },
-        {
-          "fieldName": "locations",
-          "caseSensitive": false,
-          "removeAccents": true,
-          "arraySubfield": "holdingId",
-          "arrayModifiers": ["holdingId"]
         }
       ],
       "ginIndex": [
