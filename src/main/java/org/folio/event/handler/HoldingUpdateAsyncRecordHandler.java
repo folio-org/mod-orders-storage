@@ -18,6 +18,7 @@ import org.folio.rest.persist.Conn;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.HeaderUtils;
 import org.folio.util.InventoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -57,7 +58,18 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("processInventoryUpdateEvent:: No instance id or search location ids to update in holding '{}', ignoring update", holder.getHoldingId());
       return Future.succeededFuture();
     }
-    return processHoldingUpdateEvent(holder);
+    return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
+      .compose(centralTenantId -> {
+        holder.setCentralTenantId(centralTenantId);
+        return processHoldingUpdateEvent(holder)
+          .compose(poLines -> {
+            if (Boolean.FALSE.equals(holder.isPoLinesUpdated()) && Objects.nonNull(centralTenantId)) {
+              return processHoldingUpdateEventInCentralTenant(holder);
+            }
+            return Future.succeededFuture();
+          })
+          .onComplete(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()));
+      });
   }
 
   private Future<Void> processHoldingUpdateEvent(HoldingEventHolder holder) {
@@ -67,7 +79,6 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .withTrans(conn -> processPoLinesUpdate(holder, conn, requestContext))
       .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
       .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
-      .onComplete(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 
@@ -87,9 +98,9 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLines:: No POLs were found for holding to update, holdingId: {}", holder.getHoldingId());
       return Future.succeededFuture(List.of());
     }
-    var instanceIdUpdated = updatePoLinesInstance(holder, poLines);
-    var searchLocationIdsUpdated = updatePoLinesSearchLocationIds(holder, poLines);
-    if (Boolean.FALSE.equals(instanceIdUpdated.getLeft()) && !searchLocationIdsUpdated) {
+    var isInstanceIdUpdated = updatePoLinesInstance(holder, poLines);
+    var isSearchLocationIdsUpdated = updatePoLinesSearchLocationIds(holder, poLines);
+    if (Boolean.FALSE.equals(isInstanceIdUpdated.getLeft()) && !isSearchLocationIdsUpdated) {
       log.info("updatePoLines:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(List.of());
     }
@@ -98,7 +109,8 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
         log.info("updatePoLines:: Successfully updated POLs for holdingId: {}, POLs updated: {}", holder.getHoldingId(), poLines.size());
         // Very important to return an empty poLine array in cases where no
         // instanceId update took place to avoid a recursive invocation of the same consumer
-        return Boolean.TRUE.equals(instanceIdUpdated.getLeft()) ? instanceIdUpdated.getRight() : List.of();
+        holder.setPoLinesUpdated(true);
+        return Boolean.TRUE.equals(isInstanceIdUpdated.getLeft()) ? isInstanceIdUpdated.getRight() : List.of();
       });
   }
 
@@ -174,5 +186,35 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .headers(headers)
       .tenantId(extractTenantFromHeaders(headers))
       .build();
+  }
+
+  private Future<Void> processHoldingUpdateEventInCentralTenant(HoldingEventHolder holder) {
+    return createDBClient(holder.getCentralTenantId()).getPgClient()
+      .withTrans(conn -> processPoLinesUpdateInCentralTenant(holder, conn))
+      .mapEmpty();
+  }
+
+  private Future<List<PoLine>> processPoLinesUpdateInCentralTenant(HoldingEventHolder holder, Conn conn) {
+    var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(holder.getCentralTenantId(), holder.getHeaders());
+    return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn)
+      .compose(poLines -> updatePoLinesInCentralTenant(holder, poLines, conn))
+      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, updatedHeaders).map(poLines));
+  }
+
+  private Future<List<PoLine>> updatePoLinesInCentralTenant(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
+    if (CollectionUtils.isEmpty(poLines)) {
+      log.info("updatePoLinesInCentralTenant:: No POLs were found for holding to update, holdingId: {}", holder.getHoldingId());
+      return Future.succeededFuture(List.of());
+    }
+    var isSearchLocationIdsUpdated = updatePoLinesSearchLocationIds(holder, poLines);
+    if (!isSearchLocationIdsUpdated) {
+      log.info("updatePoLinesInCentralTenant:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
+      return Future.succeededFuture(List.of());
+    }
+    return poLinesService.updatePoLines(poLines, conn, holder.getCentralTenantId())
+      .map(v -> {
+        log.info("updatePoLinesInCentralTenant:: Successfully updated POLs for holdingId: {}, POLs updated: {}", holder.getHoldingId(), poLines.size());
+        return poLines;
+      });
   }
 }

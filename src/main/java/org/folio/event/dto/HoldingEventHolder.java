@@ -29,6 +29,7 @@ public class HoldingEventHolder {
   private JsonObject instance;
   private Pair<String, String> instanceIdPair;
   private Pair<String, String> searchLocationIdPair;
+  private boolean poLinesUpdated;
 
   public void prepareAllIds() {
     var oldValue = JsonObject.mapFrom(resourceEvent.getOldValue());
