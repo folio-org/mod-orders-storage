@@ -67,8 +67,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
               return processHoldingUpdateEventInCentralTenant(holder);
             }
             return Future.succeededFuture();
-          })
-          .onComplete(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()));
+          });
       });
   }
 
@@ -79,6 +78,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .withTrans(conn -> processPoLinesUpdate(holder, conn, requestContext))
       .map(poLines -> extractDistinctAdjacentHoldingsToUpdate(holder, poLines))
       .compose(adjacentHoldingIds -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, adjacentHoldingIds, requestContext))
+      .onComplete(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 
@@ -189,13 +189,14 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   }
 
   private Future<Void> processHoldingUpdateEventInCentralTenant(HoldingEventHolder holder) {
+    var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(holder.getCentralTenantId(), holder.getHeaders());
     return createDBClient(holder.getCentralTenantId()).getPgClient()
-      .withTrans(conn -> processPoLinesUpdateInCentralTenant(holder, conn))
+      .withTrans(conn -> processPoLinesUpdateInCentralTenant(holder, conn, updatedHeaders))
+      .onComplete(v -> auditOutboxService.processOutboxEventLogs(updatedHeaders))
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> processPoLinesUpdateInCentralTenant(HoldingEventHolder holder, Conn conn) {
-    var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(holder.getCentralTenantId(), holder.getHeaders());
+  private Future<List<PoLine>> processPoLinesUpdateInCentralTenant(HoldingEventHolder holder, Conn conn, Map<String, String> updatedHeaders) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn)
       .compose(poLines -> updatePoLinesInCentralTenant(holder, poLines, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, updatedHeaders).map(poLines));
