@@ -14,6 +14,7 @@ import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ProductId;
 import org.folio.rest.jaxrs.model.Setting;
@@ -140,8 +141,6 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       doReturn(Future.succeededFuture(CENTRAL_TENANT))
         .when(consortiumConfigurationService).getCentralTenantId(any(), any());
       doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any());
-      doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
-      doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(connCentral), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(eq(UNIVERSITY_TENANT));
       doReturn(dbClientCentral).when(handler).createDBClient(eq(CENTRAL_TENANT));
@@ -179,6 +178,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(List.of()), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -234,6 +234,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -295,6 +296,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -350,6 +352,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(connCentral));
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(List.of()), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(connCentral), eq(List.of()), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -389,6 +393,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(connCentral));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(connCentral), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(List.of()), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(List.of()), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(connCentral), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -416,6 +422,27 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       .count());
 
     assertTrue(actualPoLines.containsAll(expectedPoLines));
+  }
+
+  @Test
+  void positive_shouldProcessInventoryUpdateEventWithNothingChanged() {
+    var instanceId1 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    var permanentSearchLocationId1 = UUID.randomUUID().toString();
+
+    var oldHoldingValueBeforeUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
+    var newHoldingValueAfterUpdate = createHoldings(holdingId1, instanceId1, permanentSearchLocationId1);
+    var kafkaRecord = createKafkaRecordWithValues(oldHoldingValueBeforeUpdate, newHoldingValueAfterUpdate, UNIVERSITY_TENANT);
+    var query = String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId1);
+
+    var result = handler.handle(kafkaRecord);
+    assertTrue(result.succeeded());
+
+    verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
+    verify(poLinesService, times(0)).getPoLinesByCqlQuery(eq(query), eq(conn));
+    verify(poLinesService, times(0)).getPoLinesByCqlQuery(eq(query), eq(connCentral));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(connCentral), eq(CENTRAL_TENANT));
   }
 
   @Test
