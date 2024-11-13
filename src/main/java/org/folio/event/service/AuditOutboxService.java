@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +66,6 @@ public class AuditOutboxService {
         }
 
         log.info("Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
-        logs.forEach(logEntry -> log.info("Printing log entry, tenantId: {}, entry: {}", tenantId, JsonObject.mapFrom(logEntry)));
         List<Future<Boolean>> futures = getKafkaFutures(logs, okapiHeaders);
         return GenericCompositeFuture.join(futures)
           .map(logs.stream().map(OutboxEventLog::getEventId).collect(Collectors.toList()))
