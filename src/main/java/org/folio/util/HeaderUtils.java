@@ -57,7 +57,7 @@ public final class HeaderUtils {
   }
 
   public static  Map<String, String> copyHeadersAndUpdatedTenant(String centralTenantId, Map<String, String> headers) {
-    var newHeaders = headers.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    var newHeaders = headers.entrySet().stream().collect(Collectors.toMap(CaseInsensitiveMap.Entry::getKey, Map.Entry::getValue));
     newHeaders.put(XOkapiHeaders.TENANT, centralTenantId);
     return newHeaders;
   }
