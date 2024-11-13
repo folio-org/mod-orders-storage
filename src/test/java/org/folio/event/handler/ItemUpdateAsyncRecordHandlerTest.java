@@ -150,7 +150,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var oldItemValueBeforeUpdate = createItem(itemId, holdingId1);
     var newItemValueBeforeUpdate = createItem(itemId, holdingId2);
 
-    var resourceEvent = createDefaultUpdateResourceEvent();
+    var resourceEvent = createDefaultUpdateResourceEvent(DIKU_TENANT);
     resourceEvent.setOldValue(oldItemValueBeforeUpdate);
     resourceEvent.setNewValue(newItemValueBeforeUpdate);
     var kafkaRecord = createKafkaRecord(resourceEvent, DIKU_TENANT);
@@ -198,7 +198,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
   @Test
   void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
-    var resourceEvent = createDefaultUpdateResourceEvent();
+    var resourceEvent = createDefaultUpdateResourceEvent(DIKU_TENANT);
     var kafkaRecord = createKafkaRecord(resourceEvent, null);
 
     var expectedException = handler.handle(kafkaRecord).cause();

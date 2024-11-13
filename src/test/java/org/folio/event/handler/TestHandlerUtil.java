@@ -34,27 +34,13 @@ public class TestHandlerUtil {
   }
 
   static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent, String tenantId) {
-    String recordValue;
-    if (Objects.nonNull(resourceEvent)) {
-      recordValue = Json.encode(resourceEvent);
-    } else {
-      recordValue = new JsonObject().encode();
-    }
+    var recordValue = Objects.nonNull(resourceEvent) ? Json.encode(resourceEvent) : new JsonObject().encode();
     var consumerRecord = new ConsumerRecord<>(KAFKA_TOPIC, PARTITION, OFFSET, RECORD_KEY, recordValue);
     if (Objects.nonNull(tenantId)) {
       consumerRecord.headers().add(new RecordHeader(XOkapiHeaders.URL, OKAPI_URL.getBytes()));
-      consumerRecord.headers().add(new RecordHeader(XOkapiHeaders.TENANT, DIKU_TENANT.getBytes()));
+      consumerRecord.headers().add(new RecordHeader(XOkapiHeaders.TENANT, tenantId.getBytes()));
     }
     return new KafkaConsumerRecordImpl<>(consumerRecord);
-  }
-
-  static ResourceEvent createDefaultUpdateResourceEvent() {
-    return ResourceEvent.builder()
-      .type(UPDATE)
-      .tenant(DIKU_TENANT)
-      .newValue(new JsonObject())
-      .oldValue(new JsonObject())
-      .build();
   }
 
   static ResourceEvent extractResourceEvent(KafkaConsumerRecord<String, String> kafkaRecord) {
@@ -72,9 +58,26 @@ public class TestHandlerUtil {
   }
 
   public static KafkaConsumerRecord<String, String> createKafkaRecordWithValues(JsonObject oldItemValue, JsonObject newItemValue) {
-    var resourceEvent = createDefaultUpdateResourceEvent();
+    var resourceEvent = createDefaultUpdateResourceEvent(DIKU_TENANT);
     resourceEvent.setOldValue(oldItemValue);
     resourceEvent.setNewValue(newItemValue);
     return createKafkaRecord(resourceEvent, DIKU_TENANT);
+  }
+
+  public static KafkaConsumerRecord<String, String> createKafkaRecordWithValues(JsonObject oldItemValue, JsonObject newItemValue,
+                                                                                String tenantId) {
+    var resourceEvent = createDefaultUpdateResourceEvent(tenantId);
+    resourceEvent.setOldValue(oldItemValue);
+    resourceEvent.setNewValue(newItemValue);
+    return createKafkaRecord(resourceEvent, tenantId);
+  }
+
+  static ResourceEvent createDefaultUpdateResourceEvent(String tenantId) {
+    return ResourceEvent.builder()
+      .type(UPDATE)
+      .tenant(tenantId)
+      .newValue(new JsonObject())
+      .oldValue(new JsonObject())
+      .build();
   }
 }
