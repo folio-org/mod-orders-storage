@@ -104,6 +104,11 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     } else {
       poLinesToLog = dto.getPoLineWithUpdatedSearchLocationIds();
     }
+    if (poLinesToLog.isEmpty()) {
+      log.info("saveOrderLinesOutboxLogsConditionally:: No updated POLs were found to log, holdingId: {}, instanceId: {}, searchLocationIds: {}",
+        holder.getHoldingId(), dto.isInstanceIdUpdated(), dto.isSearchLocationIdsUpdated());
+      return Future.succeededFuture(dto);
+    }
     log.info("saveOrderLinesOutboxLogsConditionally:: Logging updated POLs, holdingId: {}, size: {}, instanceId: {}, searchLocationIds: {}",
       holder.getHoldingId(), poLinesToLog.size(), dto.isInstanceIdUpdated(), dto.isSearchLocationIdsUpdated());
     return auditOutboxService.saveOrderLinesOutboxLogs(conn, poLinesToLog, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()).map(dto);
