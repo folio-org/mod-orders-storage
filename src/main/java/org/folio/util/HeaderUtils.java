@@ -8,7 +8,6 @@ import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import io.vertx.core.MultiMap;
 import io.vertx.kafka.client.producer.KafkaHeader;
@@ -54,11 +53,5 @@ public final class HeaderUtils {
     CaseInsensitiveMap<String, String> headersCopy = new CaseInsensitiveMap<>(headers);
     headersCopy.put(XOkapiHeaders.TENANT, tenantId);
     return headersCopy;
-  }
-
-  public static  Map<String, String> copyHeadersAndUpdatedTenant(String centralTenantId, Map<String, String> headers) {
-    var newHeaders = headers.entrySet().stream().collect(Collectors.toMap(CaseInsensitiveMap.Entry::getKey, Map.Entry::getValue));
-    newHeaders.put(XOkapiHeaders.TENANT.toLowerCase(), centralTenantId);
-    return newHeaders;
   }
 }

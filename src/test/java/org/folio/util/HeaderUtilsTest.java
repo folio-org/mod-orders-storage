@@ -58,9 +58,10 @@ class HeaderUtilsTest {
   }
 
   @Test
-  void testCopyHeadersAndUpdatedTenant() {
-    var headers = Map.of("key", "value");
-    var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant("centralTenant", headers);
-    assertEquals("centralTenant", updatedHeaders.get(XOkapiHeaders.TENANT));
+  void testPrepareHeaderForTenantWithCaseSensitivity() {
+    var headers = Map.of(XOkapiHeaders.TENANT, "college");
+    CaseInsensitiveMap<String, String> preparedHeaders = HeaderUtils.prepareHeaderForTenant("central", headers);
+    assertEquals("central", preparedHeaders.get(XOkapiHeaders.TENANT.toUpperCase()));
+    assertEquals("central", preparedHeaders.get(XOkapiHeaders.TENANT.toLowerCase()));
   }
 }

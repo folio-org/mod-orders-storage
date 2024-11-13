@@ -62,6 +62,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
       .compose(centralTenantId -> {
         holder.setCentralTenantId(centralTenantId);
+        log.info("processInventoryUpdateEvent:: Using central tenant id: {}", holder.getCentralTenantId());
         return processHoldingUpdateEvent(holder)
           .compose(dto -> {
             if (dto.getAffectedRows() == 0 && Objects.nonNull(centralTenantId)) {
@@ -222,7 +223,8 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   }
 
   private Future<Void> processHoldingUpdateEventInCentralTenant(HoldingEventHolder holder) {
-    var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(holder.getCentralTenantId(), holder.getHeaders());
+    var updatedHeaders = HeaderUtils.prepareHeaderForTenant(holder.getCentralTenantId(), holder.getHeaders());
+    log.info("processHoldingUpdateEventInCentralTenant:: Using central tenant id: {}", holder.getCentralTenantId());
     return createDBClient(holder.getCentralTenantId()).getPgClient()
       .withTrans(conn -> processPoLinesUpdateInCentralTenant(holder, conn, updatedHeaders))
       .onComplete(v -> auditOutboxService.processOutboxEventLogs(updatedHeaders))
@@ -230,6 +232,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   }
 
   private Future<Void> processPoLinesUpdateInCentralTenant(HoldingEventHolder holder, Conn conn, Map<String, String> updatedHeaders) {
+    log.info("processPoLinesUpdateInCentralTenant:: Using headers: {}", updatedHeaders);
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn)
       .compose(poLines -> updatePoLinesInCentralTenant(holder, poLines, conn))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, updatedHeaders).map(poLines))
