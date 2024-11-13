@@ -17,7 +17,7 @@ public class HoldingUpdate {
   private int affectedRows;
   private boolean isInstanceIdUpdated;
   private boolean isSearchLocationIdsUpdated;
-  private List<PoLine> poLineWithUpdatedInstanceId;
-  private List<PoLine> poLineWithUpdatedSearchLocationIds;
+  private List<PoLine> poLinesWithUpdatedInstanceId;
+  private List<PoLine> poLinesWithUpdatedSearchLocationIds;
   private List<String> adjacentHoldingIds;
 }

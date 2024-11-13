@@ -92,7 +92,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
         return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn);
       })
       .compose(poLines -> updatePoLines(holder, poLines, conn))
-      .compose(dto -> updateTitles(holder, dto.getPoLineWithUpdatedInstanceId(), conn).map(dto))
+      .compose(dto -> updateTitles(holder, dto.getPoLinesWithUpdatedInstanceId(), conn).map(dto))
       .compose(dto -> saveOrderLinesOutboxLogsConditionally(holder, conn, dto));
   }
 
@@ -100,9 +100,9 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   private Future<HoldingUpdate> saveOrderLinesOutboxLogsConditionally(HoldingEventHolder holder, Conn conn, HoldingUpdate dto) {
     List<PoLine> poLinesToLog;
     if (Boolean.TRUE.equals(dto.isInstanceIdUpdated()) && Boolean.FALSE.equals(dto.isSearchLocationIdsUpdated())) {
-      poLinesToLog = dto.getPoLineWithUpdatedInstanceId();
+      poLinesToLog = dto.getPoLinesWithUpdatedInstanceId();
     } else {
-      poLinesToLog = dto.getPoLineWithUpdatedSearchLocationIds();
+      poLinesToLog = dto.getPoLinesWithUpdatedSearchLocationIds();
     }
     if (poLinesToLog.isEmpty()) {
       log.info("saveOrderLinesOutboxLogsConditionally:: No updated POLs were found to log, holdingId: {}, instanceId: {}, searchLocationIds: {}",
@@ -134,16 +134,16 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
           .affectedRows(affectedRows)
           .isInstanceIdUpdated(isInstanceIdUpdated.getLeft())
           .isSearchLocationIdsUpdated(isSearchLocationIdsUpdated)
-          .poLineWithUpdatedInstanceId(Boolean.TRUE.equals(isInstanceIdUpdated.getLeft()) ? isInstanceIdUpdated.getRight() : List.of())
-          .poLineWithUpdatedSearchLocationIds(poLines)
+          .poLinesWithUpdatedInstanceId(Boolean.TRUE.equals(isInstanceIdUpdated.getLeft()) ? isInstanceIdUpdated.getRight() : List.of())
+          .poLinesWithUpdatedSearchLocationIds(poLines)
           .build();
       });
   }
 
   private HoldingUpdate createNoUpdatedPoLinesDto() {
     return HoldingUpdate.builder()
-      .poLineWithUpdatedInstanceId(List.of())
-      .poLineWithUpdatedSearchLocationIds(List.of())
+      .poLinesWithUpdatedInstanceId(List.of())
+      .poLinesWithUpdatedSearchLocationIds(List.of())
       .build();
   }
 
@@ -158,7 +158,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   // Create a list of distinct holding ids to update
   // will exclude the current holdingId coming from the kafka event
   private void extractDistinctAdjacentHoldingsToUpdate(HoldingEventHolder holder, HoldingUpdate dto) {
-    dto.setAdjacentHoldingIds(dto.getPoLineWithUpdatedInstanceId().stream()
+    dto.setAdjacentHoldingIds(dto.getPoLinesWithUpdatedInstanceId().stream()
       .map(PoLine::getLocations)
       .flatMap(Collection::stream)
       .map(Location::getHoldingId)
