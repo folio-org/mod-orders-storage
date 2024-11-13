@@ -1,5 +1,14 @@
 ## 13.9.0 - Unreleased
 
+## 13.8.1 - Released (Ramsons R2 2024 Bug Fix)
+The primary focus of this release was to include missing interfaces
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.0...v13.8.1)
+
+### Stories
+* [MODORDSTOR-432](https://folio-org.atlassian.net/browse/MODORDSTOR-432) - Missing interface dependencies in module descriptor
+
+
 ## 13.8.0 - Released (Ramsons R2 2024)
 The primary focus of this release was to enhance Kafka consumer processing, update tenant logic, and improve filtering performance.
 
