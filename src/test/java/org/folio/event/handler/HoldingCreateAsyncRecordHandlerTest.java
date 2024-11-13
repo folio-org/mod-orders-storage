@@ -87,7 +87,6 @@ public class HoldingCreateAsyncRecordHandlerTest {
       TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
       handler = spy(holdingHandler);
-      doReturn(pgClient).when(dbClient).getPgClient();
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
       doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))

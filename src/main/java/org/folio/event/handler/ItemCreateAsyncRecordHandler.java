@@ -61,7 +61,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> {
-        var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(centralTenantId, headers);
+        var updatedHeaders = HeaderUtils.prepareHeaderForTenant(centralTenantId, headers);
         return pieceService.getPiecesByItemId(itemId, conn)
           .compose(pieces -> processPiecesUpdate(pieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
           .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn));
