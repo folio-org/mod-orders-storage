@@ -1,5 +1,14 @@
 ## 13.9.0 - Unreleased
 
+## 13.8.2 - Released (Ramsons R2 2024 Bug Fix)
+The primary focus of this release was to fix search locations for POL when moving holding
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.1...v13.8.2)
+
+### Stories
+* [MODORDSTOR-431](https://folio-org.atlassian.net/browse/MODORDSTOR-431) - ECS | Update search locations for POL created in Central tenant after updating the permanent location of the holding from Member tenant related to the POL
+
+
 ## 13.8.1 - Released (Ramsons R2 2024 Bug Fix)
 The primary focus of this release was to include missing interfaces
 
