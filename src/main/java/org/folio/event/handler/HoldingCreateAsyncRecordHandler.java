@@ -58,7 +58,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
     var tenantIdFromEvent = resourceEvent.getTenant();
     return dbClient.getPgClient()
       .withTrans(conn -> {
-        var updatedHeaders = HeaderUtils.copyHeadersAndUpdatedTenant(centralTenantId, headers);
+        var updatedHeaders = HeaderUtils.prepareHeaderForTenant(centralTenantId, headers);
         var poLineFuture = processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
         var pieceFuture = processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
         return GenericCompositeFuture.all(List.of(poLineFuture, pieceFuture)).mapEmpty();

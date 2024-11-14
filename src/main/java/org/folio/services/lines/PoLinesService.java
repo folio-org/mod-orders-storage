@@ -226,10 +226,6 @@ public class PoLinesService {
     return getEntitiesByField(PO_LINE_TABLE, PoLine.class, cqlWrapper, conn);
   }
 
-  public Future<List<PoLine>> getPoLinesByField(Criterion criterion, Conn conn) {
-    return getEntitiesByField(PO_LINE_TABLE, PoLine.class, criterion, conn);
-  }
-
   public Future<Integer> updatePoLines(Collection<PoLine> poLines, Conn conn, String tenantId) {
     String query = buildUpdatePoLineBatchQuery(poLines, tenantId);
     return poLinesDAO.updatePoLines(query, conn);

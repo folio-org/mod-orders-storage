@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verify;
 
 public class InventoryUpdateAsyncRecordHandlerTest {
 
-
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
 
@@ -48,7 +47,7 @@ public class InventoryUpdateAsyncRecordHandlerTest {
 
   @Test
   void positive_shouldProcessInventoryUpdateEvent() {
-    var resourceEvent = createDefaultUpdateResourceEvent();
+    var resourceEvent = createDefaultUpdateResourceEvent(DIKU_TENANT);
     var kafkaRecord = createKafkaRecord(resourceEvent, DIKU_TENANT);
     doReturn(Future.succeededFuture()).when(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
 
