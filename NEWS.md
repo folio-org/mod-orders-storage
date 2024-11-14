@@ -1,7 +1,7 @@
 ## 13.9.0 - Unreleased
 
 ## 13.8.2 - Released (Ramsons R2 2024 Bug Fix)
-The primary focus of this release was to fix search locations for POL when moving holding
+The primary focus of this release was to fix search locations for POL when updating holding in central tenant
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.1...v13.8.2)
 
