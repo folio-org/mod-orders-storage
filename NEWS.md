@@ -5,7 +5,7 @@ The primary focus of this release was to fix search locations for POL when movin
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.1...v13.8.2)
 
-### Stories
+### Buf Fixes
 * [MODORDSTOR-431](https://folio-org.atlassian.net/browse/MODORDSTOR-431) - ECS | Update search locations for POL created in Central tenant after updating the permanent location of the holding from Member tenant related to the POL
 
 
