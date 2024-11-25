@@ -1,5 +1,14 @@
 ## 13.9.0 - Unreleased
 
+## 13.8.3 - Released (Ramsons R2 2024 Bug Fix)
+The primary focus of this release was to fix sql query in Piece claiming job
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.2...v13.8.3)
+
+### Buf Fixes
+* [MODORDSTOR-434](https://folio-org.atlassian.net/browse/MODORDSTOR-434) - $1::text fixing "could not determine data type" in PieceClaimingRepository SQL
+
+
 ## 13.8.2 - Released (Ramsons R2 2024 Bug Fix)
 The primary focus of this release was to fix search locations for POL when updating holding in central tenant
 
