@@ -26,7 +26,7 @@ public class PieceClaimingRepository {
             'statusUpdatedDate', to_char(clock_timestamp(),'YYYY-MM-DD"T"HH24:MI:SS.MSTZH:TZM')::text,
             'metadata', pieces.jsonb -> 'metadata' || jsonb_build_object(
                 'updatedDate', to_char(clock_timestamp(),'YYYY-MM-DD"T"HH24:MI:SS.MSTZH:TZM')::text,
-                'updatedByUserId', $1))
+                'updatedByUserId', $1::text))
         FROM %1$s.%3$s as titles
         WHERE (titles.jsonb ->> 'claimingActive')::boolean = TRUE
         AND pieces.titleid = titles.id
