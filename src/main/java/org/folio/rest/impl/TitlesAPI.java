@@ -8,6 +8,9 @@ import javax.ws.rs.core.Response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
@@ -20,15 +23,15 @@ import org.folio.rest.persist.PgUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import lombok.extern.log4j.Log4j2;
 
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.title.TitleService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Log4j2
 public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
+
+  private static final Logger log = LogManager.getLogger();
 
   private final PostgresClient pgClient;
 

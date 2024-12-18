@@ -7,6 +7,8 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.annotations.Validate;
@@ -30,10 +32,10 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import lombok.extern.log4j.Log4j2;
 
-@Log4j2
 public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersStoragePiecesBatch {
+
+  private static final Logger log = LogManager.getLogger();
 
   private final PostgresClient pgClient;
 
