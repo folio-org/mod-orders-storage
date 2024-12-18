@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.util.HelperUtils.extractEntityFields;
+import static org.folio.util.MetadataUtils.populateMetadata;
 
 import java.util.Map;
 
@@ -114,11 +115,12 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
   @Override
   public void putOrdersStoragePiecesBatch(PiecesCollection piecesCollection, Map<String, String> okapiHeaders,
                                           Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    log.info("putOrdersStoragePiecesBatch:: Batch updating {} pieces: {}", piecesCollection.getPieces().size(), piecesCollection.getPieces());
-    pgClient.withTrans(conn -> pieceService.updatePieces(piecesCollection.getPieces(), conn, TenantTool.tenantId(okapiHeaders))
-        .compose(updatedPieces -> auditOutboxService.savePiecesOutboxLog(conn, updatedPieces, PieceAuditEvent.Action.EDIT, okapiHeaders)))
+    var piecesIds = extractEntityFields(piecesCollection.getPieces(), Piece::getId);
+    var pieces = piecesCollection.getPieces().stream().map(piece -> populateMetadata(piece::getMetadata, piece::withMetadata, okapiHeaders)).toList();
+    log.info("putOrdersStoragePiecesBatch:: Batch updating {} pieces: {}", piecesIds.size(), piecesIds);
+    pgClient.withTrans(conn -> pieceService.updatePieces(pieces, conn, TenantTool.tenantId(okapiHeaders))
+        .compose(v -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, okapiHeaders)))
       .onComplete(ar -> {
-        var piecesIds = extractEntityFields(piecesCollection.getPieces(), Piece::getId);
         if (ar.succeeded()) {
           log.info("putOrdersStoragePiecesBatch:: Successfully updated pieces: {}", piecesIds);
           auditOutboxService.processOutboxEventLogs(okapiHeaders);

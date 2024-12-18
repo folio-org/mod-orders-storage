@@ -9,6 +9,7 @@ import static org.folio.rest.persist.HelperUtils.getQueryValues;
 import static org.folio.util.DbUtils.getEntitiesByField;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -43,7 +44,7 @@ public class PieceService {
   private static final String HOLDING_ID_FIELD = "holdingId";
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
-  private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id;";
+  private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id RETURNING pieces.*;";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
