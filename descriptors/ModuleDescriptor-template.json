@@ -61,6 +61,11 @@
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/pieces/{id}",
           "permissionsRequired": ["orders-storage.pieces.item.delete"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/pieces-batch",
+          "permissionsRequired": ["orders-storage.pieces-batch.collection.put"]
         }
       ]
     },
@@ -781,6 +786,11 @@
       "description" : "Delete a piece"
     },
     {
+      "permissionName" : "orders-storage.pieces-batch.collection.put",
+      "displayName" : "Pieces batch update",
+      "description" : "Update a set of Pieces in a batch"
+    },
+    {
       "permissionName" : "orders-storage.pieces.all",
       "displayName" : "All orders-storage pieces perms",
       "description" : "All permissions for the orders-storage-pieces",
@@ -789,7 +799,8 @@
         "orders-storage.pieces.item.post",
         "orders-storage.pieces.item.get",
         "orders-storage.pieces.item.put",
-        "orders-storage.pieces.item.delete"
+        "orders-storage.pieces.item.delete",
+        "orders-storage.pieces-batch.collection.put"
       ]
     },
     {
