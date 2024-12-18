@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static org.folio.models.TableNames.PIECES_TABLE;
+import static org.folio.util.HelperUtils.extractEntityFields;
 
 import java.util.Map;
 
@@ -103,6 +104,25 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
           asyncResultHandler.handle(buildNoContentResponse());
         } else {
           log.error("Update piece failed, id={}", id, ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+        }
+      });
+  }
+
+  @Override
+  public void putOrdersStoragePiecesBatch(PiecesCollection piecesCollection, Map<String, String> okapiHeaders,
+                                          Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    log.info("putOrdersStoragePiecesBatch:: Batch updating {} pieces: {}", piecesCollection.getPieces().size(), piecesCollection.getPieces());
+    pgClient.withTrans(conn -> pieceService.updatePieces(piecesCollection.getPieces(), conn, TenantTool.tenantId(okapiHeaders))
+        .compose(updatedPieces -> auditOutboxService.savePiecesOutboxLog(conn, updatedPieces, PieceAuditEvent.Action.EDIT, okapiHeaders)))
+      .onComplete(ar -> {
+        var piecesIds = extractEntityFields(piecesCollection.getPieces(), Piece::getId);
+        if (ar.succeeded()) {
+          log.info("putOrdersStoragePiecesBatch:: Successfully updated pieces: {}", piecesIds);
+          auditOutboxService.processOutboxEventLogs(okapiHeaders);
+          asyncResultHandler.handle(buildNoContentResponse());
+        } else {
+          log.error("putOrdersStoragePiecesBatch:: Failed to update pieces: {}", piecesIds, ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         }
       });

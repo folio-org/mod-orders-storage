@@ -38,18 +38,20 @@ import org.folio.util.SerializerUtil;
 @Log4j2
 public class PieceService {
 
-  private static final String POLINE_ID_FIELD = "poLineId";
+  private static final String PO_LINE_ID_FIELD = "poLineId";
   private static final String ITEM_ID_FIELD = "itemId";
   private static final String HOLDING_ID_FIELD = "holdingId";
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
+  private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id;";
+
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
-    var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
+    var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
     return client.getPgClient().withConn(conn -> getPiecesByField(criterion, conn));
   }
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, Conn conn) {
-    var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
+    var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
     return getPiecesByField(criterion, conn);
   }
 
@@ -110,6 +112,10 @@ public class PieceService {
   }
 
   public Future<List<Piece>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.warn("updatePieces:: Pieces list is empty, skipping the update");
+      return Future.succeededFuture(List.of());
+    }
     String query = buildUpdatePieceBatchQuery(pieces, tenantId);
     return conn.execute(query)
       .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
@@ -121,9 +127,7 @@ public class PieceService {
     List<JsonObject> jsonPieces = pieces.stream()
       .map(SerializerUtil::toJson)
       .toList();
-    return String.format(
-      "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id;",
-      getFullTableName(tenantId, PIECES_TABLE), getQueryValues(jsonPieces));
+    return String.format(PIECES_BATCH_UPDATE_SQL, getFullTableName(tenantId, PIECES_TABLE), getQueryValues(jsonPieces));
   }
 
   public Future<Tx<PoLine>> updatePieces(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
