@@ -1,8 +1,8 @@
 package org.folio.rest.impl;
 
-import java.util.List;
+import static org.folio.util.HelperUtils.extractEntityFields;
+
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.core.Response;
 
@@ -50,11 +50,12 @@ public class PoLineBatchAPI extends BaseApi implements OrdersStoragePoLinesBatch
       .compose(cf ->
         poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders))
       .onComplete(ar -> {
+        var poLineIds = extractEntityFields(poLineCollection.getPoLines(), PoLine::getId);
         if (ar.failed()) {
-          log.error("putOrdersStoragePoLinesBatch:: failed, PO line ids: {} ", getPoLineIdsForLogMessage(poLineCollection.getPoLines()), ar.cause());
+          log.error("putOrdersStoragePoLinesBatch:: Failed to update PoLines: {}", poLineIds, ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
-          log.info("putOrdersStoragePoLinesBatch:: completed, PO line ids: {} ", getPoLineIdsForLogMessage(poLineCollection.getPoLines()));
+          log.info("putOrdersStoragePoLinesBatch:: Successfully updated PoLines: {}", poLineIds);
           auditOutboxService.processOutboxEventLogs(okapiHeaders);
           asyncResultHandler.handle(buildNoContentResponse());
         }
@@ -66,9 +67,4 @@ public class PoLineBatchAPI extends BaseApi implements OrdersStoragePoLinesBatch
     return HelperUtils.getEndpoint(OrdersStoragePoLinesBatch.class);
   }
 
-  private String getPoLineIdsForLogMessage(List<PoLine> polines) {
-    return polines.stream()
-      .map(PoLine::getId)
-      .collect(Collectors.joining(", "));
-  }
 }

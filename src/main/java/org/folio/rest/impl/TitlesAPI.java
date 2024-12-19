@@ -1,11 +1,14 @@
 package org.folio.rest.impl;
 
+import static org.folio.models.TableNames.TITLES_TABLE;
+
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
@@ -20,6 +23,7 @@ import org.folio.rest.persist.PgUtil;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.title.TitleService;
 import org.folio.spring.SpringContextUtil;
@@ -28,8 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
 
   private static final Logger log = LogManager.getLogger();
-
-  public static final String TITLES_TABLE = "titles";
 
   private final PostgresClient pgClient;
 

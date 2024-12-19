@@ -77,7 +77,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   private Future<Void> processPiecesUpdate(String holdingId, String tenantIdFromEvent,
-                                           String centralTenantId, Map<String, String> headers,Conn conn) {
+                                           String centralTenantId, Map<String, String> headers, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
       .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))

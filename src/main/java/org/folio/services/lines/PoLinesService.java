@@ -2,11 +2,12 @@ package org.folio.services.lines;
 
 import static java.util.stream.Collectors.toList;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ_15;
+import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
+import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.core.ResponseUtil.handleFailure;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
-import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
 import static org.folio.rest.persist.HelperUtils.ID_FIELD_NAME;
 import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
@@ -31,7 +32,6 @@ import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.core.models.RequestContext;
-import org.folio.rest.impl.PiecesAPI;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
@@ -57,7 +57,6 @@ import org.folio.util.SerializerUtil;
 public class PoLinesService {
 
   private static final String PO_LINE_ID = "poLineId";
-  private static final String LOCATIONS_HOLDING_ID_FIELD = "location.holdingId";
 
   private final PoLinesDAO poLinesDAO;
   private final AuditOutboxService auditOutboxService;
@@ -443,7 +442,7 @@ public class PoLinesService {
     Promise<Tx<String>> promise = Promise.promise();
     Criterion criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, tx.getEntity());
 
-    client.getPgClient().delete(tx.getConnection(), PiecesAPI.PIECES_TABLE, criterion, ar -> {
+    client.getPgClient().delete(tx.getConnection(), PIECES_TABLE, criterion, ar -> {
       if (ar.failed()) {
         log.error("Delete Pieces failed, criterion={}", criterion, ar.cause());
         httpHandleFailure(promise, ar);

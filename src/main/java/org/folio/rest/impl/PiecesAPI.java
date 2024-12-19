@@ -1,47 +1,47 @@
 package org.folio.rest.impl;
 
-import java.util.Date;
+import static org.folio.models.TableNames.PIECES_TABLE;
+import static org.folio.util.HelperUtils.extractEntityFields;
+import static org.folio.util.MetadataUtils.populateMetadata;
+
 import java.util.Map;
-import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.event.service.AuditOutboxService;
-import org.folio.models.TableNames;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PieceCollection;
+import org.folio.rest.jaxrs.model.PiecesCollection;
 import org.folio.rest.jaxrs.resource.OrdersStoragePieces;
-import org.folio.rest.persist.Conn;
+import org.folio.rest.jaxrs.resource.OrdersStoragePiecesBatch;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.rest.tools.utils.TenantTool;
+import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
-import org.folio.util.DbUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 
-public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
+public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersStoragePiecesBatch {
+
   private static final Logger log = LogManager.getLogger();
-
-  public static final String PIECES_TABLE = "pieces";
 
   private final PostgresClient pgClient;
 
+  @Autowired
+  private PieceService pieceService;
   @Autowired
   private AuditOutboxService auditOutboxService;
   @Autowired
@@ -66,7 +66,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
   @Validate
   public void postOrdersStoragePieces(Piece entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    pgClient.withTrans(conn -> createPiece(conn, entity)
+    pgClient.withTrans(conn -> pieceService.createPiece(conn, entity)
       .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.CREATE, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
@@ -78,18 +78,6 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         }
       });
-  }
-
-  private Future<String> createPiece(Conn conn, Piece piece) {
-    piece.setStatusUpdatedDate(new Date());
-    if (StringUtils.isBlank(piece.getId())) {
-      piece.setId(UUID.randomUUID().toString());
-    }
-    log.debug("Creating new piece with id={}", piece.getId());
-
-    return conn.save(TableNames.PIECES_TABLE, piece.getId(), piece)
-      .onSuccess(rowSet -> log.info("Piece successfully created, id={}", piece.getId()))
-      .onFailure(e -> log.error("Create piece failed, id={}", piece.getId(), e));
   }
 
   @Override
@@ -110,7 +98,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
   @Validate
   public void putOrdersStoragePiecesById(String id, Piece entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    pgClient.withTrans(conn -> updatePiece(conn, entity, id)
+    pgClient.withTrans(conn -> pieceService.updatePiece(conn, entity, id)
       .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.EDIT, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
@@ -124,13 +112,24 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces {
       });
   }
 
-  private Future<RowSet<Row>> updatePiece(Conn conn, Piece piece, String id) {
-    log.debug("Updating piece with id={}", id);
-
-    return conn.update(TableNames.PIECES_TABLE, piece, id)
-      .compose(DbUtils::failOnNoUpdateOrDelete)
-      .onSuccess(rowSet -> log.info("Piece successfully updated, id={}", id))
-      .onFailure(e -> log.error("Update piece failed, id={}", id, e));
+  @Override
+  public void putOrdersStoragePiecesBatch(PiecesCollection piecesCollection, Map<String, String> okapiHeaders,
+                                          Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    var piecesIds = extractEntityFields(piecesCollection.getPieces(), Piece::getId);
+    var pieces = piecesCollection.getPieces().stream().map(piece -> populateMetadata(piece::getMetadata, piece::withMetadata, okapiHeaders)).toList();
+    log.info("putOrdersStoragePiecesBatch:: Batch updating {} pieces: {}", piecesIds.size(), piecesIds);
+    pgClient.withTrans(conn -> pieceService.updatePieces(pieces, conn, TenantTool.tenantId(okapiHeaders))
+        .compose(v -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, okapiHeaders)))
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          log.info("putOrdersStoragePiecesBatch:: Successfully updated pieces: {}", piecesIds);
+          auditOutboxService.processOutboxEventLogs(okapiHeaders);
+          asyncResultHandler.handle(buildNoContentResponse());
+        } else {
+          log.error("putOrdersStoragePiecesBatch:: Failed to update pieces: {}", piecesIds, ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+        }
+      });
   }
 
   @Override

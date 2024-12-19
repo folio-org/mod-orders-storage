@@ -192,6 +192,14 @@ public abstract class TestBase {
       .put(storageUrl(endpoint));
   }
 
+  Response putData(String endpoint, String input, Headers headers) throws MalformedURLException {
+    return given()
+      .headers(headers)
+      .contentType(ContentType.JSON)
+      .body(input)
+      .put(storageUrl(endpoint));
+  }
+
   Response putData(String endpoint, String id, String input) throws MalformedURLException {
     return putData(endpoint, id, input, new Headers(TENANT_HEADER));
   }

@@ -62,7 +62,7 @@ public final class DbUtils {
 
   public static <T> List<T> getRowSetAsList(RowSet<Row> rowSet, Class<T> entityClass) {
     return IteratorUtils.toList(rowSet.iterator()).stream()
-      .map(row -> row.toJson().mapTo(entityClass))
+      .map(row -> row.getJsonObject("jsonb").mapTo(entityClass))
       .toList();
   }
 

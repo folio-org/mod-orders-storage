@@ -11,8 +11,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 import static org.folio.dao.audit.AuditOutboxEventsLogRepository.OUTBOX_TABLE_NAME;
-import static org.folio.rest.impl.PiecesAPI.PIECES_TABLE;
-import static org.folio.rest.impl.TitlesAPI.TITLES_TABLE;
+import static org.folio.models.TableNames.PIECES_TABLE;
+import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.persist.PostgresClient.convertToPsqlStandard;
 
 public class PieceClaimingRepository {
