@@ -83,7 +83,7 @@ public class PieceService {
   }
 
   public Future<RowSet<Row>> updatePiece(Conn conn, Piece piece, String id) {
-    log.debug("updatePiece:: Updating pieceL: '{}'", id);
+    log.debug("updatePiece:: Updating piece: '{}'", id);
     return conn.update(TableNames.PIECES_TABLE, piece, id)
       .compose(DbUtils::failOnNoUpdateOrDelete)
       .onSuccess(rowSet -> log.info("updatePiece:: Piece successfully updated: '{}'", id))
