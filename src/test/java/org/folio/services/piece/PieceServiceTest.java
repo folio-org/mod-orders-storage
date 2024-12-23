@@ -8,6 +8,8 @@ import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 import java.util.UUID;
@@ -289,4 +291,22 @@ public class PieceServiceTest extends TestBase {
     });
   }
 
+  @Test
+  void shouldNotUpdatePiecesWhenEmpty(Vertx vertx, VertxTestContext testContext) {
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(connection -> {
+      var conn = spy(connection);
+      List<Piece> piecesToUpdate = List.of();
+      var updatePiecesFuture = pieceService.updatePieces(piecesToUpdate, conn, TEST_TENANT);
+
+      return testContext.assertComplete(updatePiecesFuture)
+        .onComplete(ar -> {
+          List<Piece> actPieces = ar.result();
+          testContext.verify(() -> {
+            assertThat(actPieces, is(piecesToUpdate));
+            verifyNoInteractions(conn);
+          });
+          testContext.completeNow();
+        });
+    });
+  }
 }

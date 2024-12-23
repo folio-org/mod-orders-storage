@@ -1,0 +1,45 @@
+#%RAML 1.0
+title: "mod-orders"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1.0
+
+documentation:
+  - title: Pieces batch API
+    content: This module implements the Pieces batch processing interface. This API is intended for internal use only.
+
+types:
+  pieces-collection: !include acq-models/mod-orders-storage/schemas/piece_collection.json
+  UUID:
+    type: string
+    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+resourceTypes:
+  collection: !include raml-util/rtypes/collection.raml
+  collection-item: !include raml-util/rtypes/item-collection.raml
+traits:
+
+
+/orders-storage/pieces-batch:
+  displayName: Process list of Pieces in a batch
+  description: Process list of Pieces in a batch APIs
+  put:
+    description: "Update the list of Pieces in a batch"
+    body:
+      application/json:
+        type: pieces-collection
+        example:
+          strict: false
+          value: !include acq-models/mod-orders-storage/examples/piece_collection.sample
+    responses:
+      204:
+        description: "Collection successfully updated"
+      400:
+        description: "Bad request, e.g. malformed request body or query parameter. Details of the error (e.g. name of the parameter or line/character number with malformed data) provided in the response."
+        body:
+          text/plain:
+            example: "unable to update <<resourcePathName|!singularize>> -- malformed JSON at 13:4"
+      500:
+        description: "Internal server error, e.g. due to misconfiguration"
+        body:
+          text/plain:
+            example: "internal server error, contact administrator"
