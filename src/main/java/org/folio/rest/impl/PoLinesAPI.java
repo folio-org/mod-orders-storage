@@ -72,7 +72,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
               .map(b -> poLineId))))
         .onComplete(ar -> {
           if (ar.failed()) {
-            log.error("Package order Line creation failed, id={}", poLine.getId(), ar.cause());
+            log.error("Package order Line creation failed", ar.cause());
             asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
             log.info("Package order Line creation complete, id={}, number={}",
@@ -96,7 +96,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
             .compose(title -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(poLine), OrderLineAuditEvent.Action.CREATE, okapiHeaders))))
         .onComplete(ar -> {
           if (ar.failed()) {
-            log.error("Order Line and Title creation failed, id={}", poLine.getId(), ar.cause());
+            log.error("Order Line and Title creation failed", ar.cause());
             asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
             log.info("createPoLineWithTitle complete, poLineId={}, poLineNumber={}", poLine.getId(),
@@ -150,7 +150,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
             .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders))))
         .onComplete(ar -> {
           if (ar.failed()) {
-            log.error("Update package order line failed, id={}", id, ar.cause());
+            log.error("Update package order line failed", ar.cause());
             asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
             log.info("Update order line complete, id={}", id);
@@ -165,7 +165,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
             pgClient.withTrans(conn -> poLinesService.updatePoLineWithTitle(conn, id, poLine, new RequestContext(vertxContext, okapiHeaders))))
           .onComplete(ar -> {
             if (ar.failed()) {
-              log.error("Update order line with title failed, id={}", id, ar.cause());
+              log.error("Update order line with title failed", ar.cause());
               asyncResultHandler.handle(buildErrorResponse(ar.cause()));
             } else {
               log.info("Update order line complete, id={}", id);
@@ -192,7 +192,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
     orderLinePatchOperationService.patch(id, entity, requestContext)
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("Patch order line failed, id={}", id, ar.cause());
+          log.error("Patch order line failed", ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
           log.info("Patch order line complete, id={}", id);

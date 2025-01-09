@@ -74,7 +74,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
           auditOutboxService.processOutboxEventLogs(okapiHeaders);
           asyncResultHandler.handle(buildResponseWithLocation(entity, getEndpoint(entity)));
         } else {
-          log.error("Piece creation failed, id={}", entity.getId(), ar.cause());
+          log.error("Piece creation failed", ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         }
       });

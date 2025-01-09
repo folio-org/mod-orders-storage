@@ -161,7 +161,7 @@ public class PoLinesService {
     conn.save(PO_LINE_TABLE, poLine.getId(), poLine)
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("createPoLine failed, id={}", poLine.getId(), ar.cause());
+          log.error("createPoLine failed", ar.cause());
           httpHandleFailure(promise, ar);
         } else {
           log.info("PoLine with id {} has been created", poLine.getId());
@@ -346,7 +346,7 @@ public class PoLinesService {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, ar -> {
       if (ar.failed()) {
-        log.error("updatePoLine(poLineTx, client) failed, poLineId={}", poLine.getId(), ar.cause());
+        log.error("updatePoLine(poLineTx, client) failed", ar.cause());
         httpHandleFailure(promise, ar);
       } else {
         if (ar.result().rowCount() == 0) {
@@ -368,7 +368,7 @@ public class PoLinesService {
     conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("updatePoLine(conn, poLine) failed, poLineId={}", poLine.getId(), ar.cause());
+          log.error("updatePoLine(conn, poLine) failed", ar.cause());
           httpHandleFailure(promise, ar);
         } else {
           if (ar.result().rowCount() == 0) {
@@ -391,7 +391,7 @@ public class PoLinesService {
     conn.save(TITLES_TABLE, title.getId(), title)
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("createTitleAndSave failed to save title, titleId={}", title.getId(), ar.cause());
+          log.error("createTitleAndSave failed to save title", ar.cause());
           httpHandleFailure(promise, ar);
         } else {
           log.info("createTitleAndSave complete, titleId={}", title.getId());
@@ -421,7 +421,7 @@ public class PoLinesService {
     conn.update(TITLES_TABLE, newTitle, JSONB, criterion.toString(), false)
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("updateTitle(conn, title, poLine) failed, titleId={}", title.getId(), ar.cause());
+          log.error("updateTitle(conn, title, poLine) failed", ar.cause());
           httpHandleFailure(promise, ar);
         } else {
           log.info("updateTitle(conn, title, poLine) complete, titleId={}", title.getId());
@@ -509,7 +509,7 @@ public class PoLinesService {
       })
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("updateTitle(conn, poLine) failed, poLineId={}", poLine.getId(), ar.cause());
+          log.error("updateTitle(conn, poLine) failed", ar.cause());
         } else {
           log.info("updateTitle(conn, poLine) complete, poLineId={}", poLine.getId());
         }
