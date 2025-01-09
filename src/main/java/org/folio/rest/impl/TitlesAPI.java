@@ -60,7 +60,7 @@ public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
     pgClient.withConn(conn -> titleService.saveTitle(title, conn))
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("Title creation failed, title={}", JsonObject.mapFrom(title).encodePrettily(), ar.cause());
+          log.error("Title creation failed", ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
           log.info("Title creation complete, id={}", title.getId());

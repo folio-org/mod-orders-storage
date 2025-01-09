@@ -46,7 +46,7 @@ public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemp
       .onComplete(
         ar -> {
           if (ar.failed()) {
-            log.error("Failed to create order template, template={}", mapFrom(entity).encode(), ar.cause());
+            log.error("Failed to create order template", ar.cause());
             asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
             log.info("Order template created successfully, id={}", mapFrom(ar.result().getEntity()).getString("id"));
@@ -83,7 +83,7 @@ public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemp
       .onComplete(
         ar -> {
           if (ar.failed()) {
-            log.error("Failed to update order template, template={}", mapFrom(entity).encode(), ar.cause());
+            log.error("Failed to update order template", ar.cause());
             asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
             log.info("Order template updated successfully, id={}", id);

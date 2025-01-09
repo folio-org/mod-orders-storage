@@ -73,7 +73,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
           .compose(v2 -> auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.CREATE, okapiHeaders))))
       .onComplete(ar -> {
         if (ar.failed()) {
-          log.error("Order creation failed, order={}", JsonObject.mapFrom(order).encodePrettily(), ar.cause());
+          log.error("Order creation failed", ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
           log.info("Order creation complete, id={}", order.getId());
@@ -138,8 +138,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
             auditOutboxService.processOutboxEventLogs(okapiHeaders);
             asyncResultHandler.handle(ar);
           } else {
-            log.error("Update order failed, id={}, order={}", id, JsonObject.mapFrom(order).encodePrettily(),
-              ar.cause());
+            log.error("Update order failed, id={}", id, ar.cause());
             asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           }
         });
