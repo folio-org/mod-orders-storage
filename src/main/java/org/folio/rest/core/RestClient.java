@@ -1,6 +1,5 @@
 package org.folio.rest.core;
 
-import static java.util.Objects.nonNull;
 import static org.folio.rest.core.RestConstants.OKAPI_URL;
 import static org.folio.util.HeaderUtils.convertToCaseInsensitiveMultiMap;
 
@@ -42,7 +41,6 @@ public class RestClient {
         .expect(ResponsePredicate.SC_OK)
         .send()
         .map(HttpResponse::bodyAsJsonObject)
-        .onSuccess(body -> logResponseOnSuccess(httpMethod, endpoint, body))
         .onFailure(e -> logResponseOnFailure(httpMethod, endpoint, e));
     } catch (Exception e) {
       logger.error(EXCEPTION_CALLING_ENDPOINT_MSG, httpMethod, endpoint, e.getMessage(), e);
@@ -63,17 +61,10 @@ public class RestClient {
         .expect(expect)
         .sendJson(payload)
         .map(HttpResponse::bodyAsJsonObject)
-        .onSuccess(body -> logResponseOnSuccess(httpMethod, endpoint, body))
         .onFailure(e -> logResponseOnFailure(httpMethod, endpoint, e));
     } catch (Exception e) {
       logger.error(EXCEPTION_CALLING_ENDPOINT_MSG, httpMethod, endpoint, e.getMessage(), e);
       return Future.failedFuture(e);
-    }
-  }
-
-  private static void logResponseOnSuccess(HttpMethod httpMethod, String endpoint, JsonObject body) {
-    if (logger.isDebugEnabled()) {
-      logger.debug("The response body for {} {}: {}", httpMethod, endpoint, nonNull(body) ? body.encodePrettily() : null);
     }
   }
 

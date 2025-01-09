@@ -34,7 +34,7 @@ public class OrderPostgresDAO implements OrderDAO {
     return conn.execute(sql)
       .map(rowSet -> {
         if (rowSet.rowCount() == 0) {
-          log.error("getNextPoNumber:: Could not get a new purchase order number (rowCount is 0); sql: {}",sql);
+          log.error("getNextPoNumber:: Could not get a new purchase order number (rowCount is 0); sql: {}", sql);
           throw new HttpException(500, "Could not get a new purchase order number (rowCount is 0)");
         }
         Row row = rowSet.iterator().next();

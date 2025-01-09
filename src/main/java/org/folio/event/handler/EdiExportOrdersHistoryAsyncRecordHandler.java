@@ -34,8 +34,6 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
 
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaRecord) {
-    if (log.isDebugEnabled())
-      log.debug("EdiExportOrdersHistoryAsyncRecordHandler.handle, kafkaRecord={}", kafkaRecord.value());
     try {
       ExportHistory exportHistory = new JsonObject(kafkaRecord.value()).mapTo(ExportHistory.class);
       String tenantId = extractTenantFromHeaders(kafkaRecord.headers());
@@ -43,7 +41,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
       return exportHistory(exportHistory, client)
         .map(v -> kafkaRecord.value());
     } catch (Exception e) {
-      log.error("Failed to process export history kafka record, kafkaRecord={}", kafkaRecord, e);
+      log.error("Failed to process export history kafka record, record key: {}", kafkaRecord.key(), e);
       return Future.failedFuture(e);
     }
   }
@@ -65,8 +63,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
       .onComplete(ar -> {
         if (ar.failed()) {
           if (log.isErrorEnabled())
-            log.error("Can't store export history, exportHistory={}",
-              JsonObject.mapFrom(exportHistory).encodePrettily(), ar.cause());
+            log.error("Can't store export history", ar.cause());
         } else {
           log.debug("Completed EdiExportOrdersHistoryAsyncRecordHandler.handle");
         }

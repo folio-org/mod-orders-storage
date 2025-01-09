@@ -36,7 +36,7 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaConsumerRecord) {
     final var recordValue = kafkaConsumerRecord.value();
-    log.debug("handle:: Trying to process kafkaConsumerRecord: {}", recordValue);
+    log.debug("handle:: Trying to process kafkaConsumerRecord, record key: {}", kafkaConsumerRecord.key());
     try {
       verifyKafkaRecord(kafkaConsumerRecord);
 
@@ -49,12 +49,12 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       }
 
       if (Objects.isNull(resourceEvent.getNewValue())) {
-        log.warn("handle:: Failed to find new version. 'new' is null: {}", resourceEvent);
+        log.warn("handle:: Failed to find new version. 'new' is null, record key: {}", kafkaConsumerRecord.key());
         return Future.succeededFuture();
       }
 
       if (Objects.isNull(resourceEvent.getTenant())) {
-        log.warn("handle:: Failed to find tenant. 'tenant' is null: {}", resourceEvent);
+        log.warn("handle:: Failed to find tenant. 'tenant' is null, record key: {}", kafkaConsumerRecord.key());
         return Future.succeededFuture();
       }
 
@@ -62,10 +62,10 @@ public abstract class InventoryCreateAsyncRecordHandler extends BaseAsyncRecordH
       return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
         .compose(centralTenantId -> processInventoryCreationEventIfNeeded(resourceEvent, centralTenantId, headers))
         .onSuccess(v -> log.info("handle:: '{}' event for '{}' processed successfully", eventType, inventoryEventType.getTopicName()))
-        .onFailure(t -> log.error("Failed to process event: {}", recordValue, t))
+        .onFailure(t -> log.error("Failed to process event, record key: {}", kafkaConsumerRecord.key(), t))
         .map(kafkaConsumerRecord.key());
     } catch (Exception e) {
-      log.error("Failed to process kafkaConsumerRecord: {}", kafkaConsumerRecord, e);
+      log.error("Failed to process kafkaConsumerRecord, record key: {}", kafkaConsumerRecord.key(), e);
       return Future.failedFuture(e);
     }
   }

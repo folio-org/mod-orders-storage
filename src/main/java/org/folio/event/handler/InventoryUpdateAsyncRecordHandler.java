@@ -54,7 +54,7 @@ public abstract class InventoryUpdateAsyncRecordHandler extends BaseAsyncRecordH
       return processInventoryUpdateEvent(resourceEvent, headers)
         .onSuccess(v -> log.info("handle:: Processing successful, topic: {}, key: {}, eventType: {}",
           kafkaRecord.topic(), kafkaRecord.key(),resourceEvent.getType()))
-        .onFailure(t -> log.error("Failed to process event: {}", kafkaRecord.value(), t))
+        .onFailure(t -> log.error("Failed to process event, record key: {}", kafkaRecord.key(), t))
         .map(kafkaRecord.key());
     } catch (Exception e) {
       log.error("handle:: Failed to process kafka record from topic {}", kafkaRecord.topic(), e);
