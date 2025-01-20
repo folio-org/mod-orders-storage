@@ -70,6 +70,22 @@
       ]
     },
     {
+      "id": "orders-storage.wrapper-pieces",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/wrapper-pieces",
+          "permissionsRequired": ["orders-storage.wrapper-pieces.collection.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/wrapper-pieces/{id}",
+          "permissionsRequired": ["orders-storage.wrapper-pieces.item.get"]
+        }
+      ]
+    },
+    {
       "id": "orders-storage.titles",
       "version": "1.1",
       "handlers": [
@@ -804,6 +820,25 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.wrapper-pieces.collection.get",
+      "displayName" : "orders-storage.wrapper-pieces-collection get",
+      "description" : "Get a collection of wrapper pieces"
+    },
+    {
+      "permissionName" : "orders-storage.wrapper-pieces.item.get",
+      "displayName" : "orders-storage.wrapper-pieces-item get",
+      "description" : "Fetch a wrapper piece"
+    },
+    {
+      "permissionName" : "orders-storage.wrapper-pieces.all",
+      "displayName" : "All orders-storage wrapper pieces perms",
+      "description" : "All permissions for the orders-storage-wrapper-pieces",
+      "subPermissions" : [
+        "orders-storage.wrapper-pieces.collection.get",
+        "orders-storage.wrapper-pieces.item.get"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.titles.collection.get",
       "displayName" : "orders-storage.titles-collection get",
       "description" : "Get a collection of titles"
@@ -1505,6 +1540,7 @@
       "subPermissions" : [
         "orders-storage.alerts.all",
         "orders-storage.pieces.all",
+        "orders-storage.wrapper-pieces.all",
         "orders-storage.titles.all",
         "orders-storage.po-lines.all",
         "orders-storage.acquisition-methods.all",
