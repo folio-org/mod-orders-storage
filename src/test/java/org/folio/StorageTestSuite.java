@@ -52,6 +52,7 @@ import org.folio.rest.impl.ReceivingHistoryTest;
 import org.folio.rest.impl.SearchOrderLinesTest;
 import org.folio.rest.impl.TenantReferenceDataTest;
 import org.folio.rest.impl.TenantSampleDataTest;
+import org.folio.rest.impl.WrapperPiecesAPITest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.ExceptionUtilTest;
@@ -311,4 +312,6 @@ public class StorageTestSuite {
   class InventoryUpdateServiceTestNested extends InventoryUpdateServiceTest {}
   @Nested
   class RestClientTestNested extends RestClientTest {}
+  @Nested
+  class WrapperPiecesAPITestNested extends WrapperPiecesAPITest {}
 }

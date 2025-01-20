@@ -1,0 +1,25 @@
+{
+  "vendorId": "09e1ff42-1da7-450d-9857-157fa2a1446d",
+  "piece": {
+    "id": "203dff6d-1d58-47d8-986b-395e13a2b381",
+    "displaySummary": "Test 1-1-1",
+    "format": "Physical",
+    "itemId": "35bcac8f-d649-4d9b-a16c-3bb6b6be5e61",
+    "poLineId": "3de0a931-be1a-4749-8ed0-3fd0bcb6ee91",
+    "titleId": "ba4f552b-7263-463e-bc7c-42ab6fab60e0",
+    "holdingId": "81a1e03f-75a7-41d5-a257-53d158b7d1cf",
+    "displayOnHolding": false,
+    "displayToPublic": false,
+    "discoverySuppress": false,
+    "receivingStatus": "Expected",
+    "supplement": false,
+    "isBound": false,
+    "statusUpdatedDate": "2025-01-20T07:05:45.339+00:00",
+    "metadata": {
+      "createdDate": "2025-01-20T07:05:45.335+00:00",
+      "createdByUserId": "15f7cf1e-de8c-46c3-bb8a-c963064442f5",
+      "updatedDate": "2025-01-20T07:06:46.177+00:00",
+      "updatedByUserId": "15f7cf1e-de8c-46c3-bb8a-c963064442f5"
+    }
+  }
+}

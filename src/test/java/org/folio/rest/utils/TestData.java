@@ -29,6 +29,10 @@ public class TestData {
     String DEFAULT_81 = "data/pieces/81_default.json";
   }
 
+  public interface WrapperPiece {
+    String DEFAULT = "data/wrapper-pieces/default.json";
+  }
+
   public interface Title {
     String DEFAULT = "data/titles/interesting-times.json";
   }

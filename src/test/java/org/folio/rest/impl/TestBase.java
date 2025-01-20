@@ -22,9 +22,9 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -114,6 +114,13 @@ public abstract class TestBase {
       .get(storageUrl(endpoint));
   }
 
+  Response getData(String endpoint, Headers headers) throws MalformedURLException {
+    return given()
+      .headers(headers)
+      .contentType(ContentType.JSON)
+      .get(storageUrl(endpoint));
+  }
+
   Response getData(String endpoint) throws MalformedURLException {
     return getData(endpoint, TENANT_HEADER);
   }
@@ -132,6 +139,14 @@ public abstract class TestBase {
     return given()
       .pathParam("id", id)
       .header(tenant)
+      .contentType(ContentType.JSON)
+      .get(storageUrl(endpoint));
+  }
+
+  Response getDataById(String endpoint, String id, Headers headers) throws MalformedURLException {
+    return given()
+      .pathParam("id", id)
+      .headers(headers)
       .contentType(ContentType.JSON)
       .get(storageUrl(endpoint));
   }
@@ -312,7 +327,7 @@ public abstract class TestBase {
     String value = "";
     try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename)) {
       if (inputStream != null) {
-        value = IOUtils.toString(inputStream, "UTF-8");
+        value = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
       }
     } catch (Exception e) {
       value = "";
