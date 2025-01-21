@@ -1,7 +1,7 @@
 CREATE OR REPLACE VIEW ${myuniversity}_${mymodule}.wrapper_pieces_view AS
 select t.id,
 			 jsonb_build_object(
-         'vendorId', (d.jsonb->>'vendor'),
+         'vendorId', (e.jsonb->>'vendor'),
        	 'piece', t.jsonb,
        	 'poLine', c.jsonb,
        	 'title', d.jsonb,
