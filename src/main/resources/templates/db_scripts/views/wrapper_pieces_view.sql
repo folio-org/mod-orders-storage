@@ -4,7 +4,8 @@ select t.id,
          'vendorId', (d.jsonb->>'vendor'),
        	 'piece', t.jsonb,
        	 'poLine', c.jsonb,
-       	 'purchaseOrder', d.jsonb
+       	 'title', d.jsonb,
+       	 'purchaseOrder', e.jsonb
        ) jsonb,
 			 t.creation_date,
 			 t.created_by,
@@ -12,5 +13,6 @@ select t.id,
 			 t.titleid
   from ${myuniversity}_${mymodule}.pieces t
     join ${myuniversity}_${mymodule}.po_line c on c.id = t.polineid
-    join ${myuniversity}_${mymodule}.purchase_order d on d.id = c.purchaseorderid
+    join ${myuniversity}_${mymodule}.titles d on d.id = t.titleId
+    join ${myuniversity}_${mymodule}.purchase_order e on e.id = c.purchaseorderid
 ;
