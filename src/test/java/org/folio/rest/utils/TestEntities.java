@@ -11,7 +11,6 @@ public enum TestEntities {
   PO_LINE("/orders-storage/po-lines", PoLine.class, TestData.PoLine.DEFAULT, "description", "Gift", 5),
   TITLES("/orders-storage/titles", Title.class, TestData.Title.DEFAULT, "title", "New title", 5),
   PIECE("/orders-storage/pieces", Piece.class, TestData.Piece.DEFAULT, "comment", "Update Comment", 0),
-  WRAPPER_PIECE("/orders-storage/wrapper-pieces", WrapperPiece.class, TestData.WrapperPiece.DEFAULT, "piece", null, 0),
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, TestData.OrderInvoiceRelationship.DEFAULT, "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 0),
   ORDER_TEMPLATE("/orders-storage/order-templates", OrderTemplate.class, TestData.OrderTemplate.DEFAULT, "templateCode", "Amazon-A", 5),
   ACQUISITIONS_UNIT("/acquisitions-units-storage/units", AcquisitionsUnit.class, TestData.AcquisitionsUnit.DEFAULT, "name", "met", 1),

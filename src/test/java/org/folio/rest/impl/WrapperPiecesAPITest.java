@@ -28,7 +28,6 @@ import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
 import static org.folio.rest.utils.TestEntities.TITLES;
-import static org.folio.rest.utils.TestEntities.WRAPPER_PIECE;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @CopilotGenerated(partiallyGenerated = true)
 public class WrapperPiecesAPITest extends TestBase {
 
+  private static final String ENDPOINT = "/orders-storage/wrapper-pieces";
   private static final int PIECES_COUNT = 5;
 
   @BeforeAll
@@ -54,7 +54,7 @@ public class WrapperPiecesAPITest extends TestBase {
     log.info("--- mod-orders-storage Wrapper Pieces API test: Get all Wrapper Pieces");
     var createdData = createData();
 
-    var wrapperPieceCollection = getData(WRAPPER_PIECE.getEndpoint(), createdData.getHeaders())
+    var wrapperPieceCollection = getData(ENDPOINT, createdData.getHeaders())
       .then()
       .statusCode(HttpStatus.OK_200)
       .extract()
@@ -76,7 +76,7 @@ public class WrapperPiecesAPITest extends TestBase {
     var createdData = createData();
     var pieceId = createdData.getPieceIds().get(0);
 
-    getDataById(WRAPPER_PIECE.getEndpointWithId(), pieceId, createdData.getHeaders())
+    getDataById(ENDPOINT + "/{id}", pieceId, createdData.getHeaders())
       .then()
       .statusCode(HttpStatus.OK_200)
       .body("vendorId", equalTo(createdData.getVendorId()))
