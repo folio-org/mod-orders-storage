@@ -160,6 +160,11 @@
       "run": "after",
       "snippetPath": "data-migration/13.8.0/populate_search_locations_ids.ftl",
       "fromModuleVersion": "mod-orders-storage-13.8.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "views/wrapper_pieces_view.sql",
+      "fromModuleVersion": "mod-orders-storage-13.9.0"
     }
   ],
   "tables": [
