@@ -25,6 +25,7 @@ import org.folio.rest.jaxrs.model.CustomField.Type;
 import org.folio.rest.jaxrs.model.CustomFieldOptionStatistic;
 import org.folio.rest.jaxrs.model.CustomFieldStatistic;
 import org.folio.rest.jaxrs.model.CustomFields;
+import org.folio.rest.jaxrs.model.CustomFields_;
 import org.folio.rest.jaxrs.model.OrderTemplate;
 import org.folio.rest.jaxrs.model.OrderTemplateCollection;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -353,7 +354,7 @@ public class CustomFieldsAPITest extends TestBase {
         .withId(UUID.randomUUID().toString())
         .withPoNumber("1111")
         .withCustomFields(
-          new CustomFields()
+          new CustomFields_()
             .withAdditionalProperty("textbox", "text1")
             .withAdditionalProperty("singleselect", "opt_0")
             .withAdditionalProperty(
@@ -366,7 +367,7 @@ public class CustomFieldsAPITest extends TestBase {
         .withVendor(UUID.randomUUID().toString())
         .withOrderType(OrderType.ONE_TIME)
         .withCustomFields(
-          new CustomFields()
+          new CustomFields_()
             .withAdditionalProperty("textbox", "text2")
             .withAdditionalProperty("singleselect", "opt_2")
             .withAdditionalProperty(
