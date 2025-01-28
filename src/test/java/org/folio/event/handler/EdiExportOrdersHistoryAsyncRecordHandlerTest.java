@@ -120,7 +120,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(poLines))
       .when(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
     doReturn(Future.succeededFuture(1))
-      .when(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());
+      .when(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString(), any());
     doReturn(pgClient)
       .when(dbClient).getPgClient();
     doReturn(DIKU_TENANT)
@@ -138,7 +138,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     exportHistoryMethod.invoke(handler, exportHistory, dbClient);
 
     verify(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
-    verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());
+    verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString(), any());
 
     assertEquals(exportHistory.getExportDate(), poLines.get(0).getLastEDIExportDate());
   }

@@ -10,10 +10,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.TenantJob;
@@ -75,6 +77,7 @@ public class PoLIneServiceVertxTest extends TestBase {
     String id = UUID.randomUUID().toString();
     PoLine poLine = new PoLine().withId(id)
       .withTitleOrPackage("Test ' title");
+    var headers = Map.of(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
     Promise<Void> promise1 = Promise.promise();
     final DBClient client = new DBClient(vertx, TEST_TENANT);
     PostgresClient pgClient = client.getPgClient();
@@ -90,7 +93,7 @@ public class PoLIneServiceVertxTest extends TestBase {
     testContext.assertComplete(promise1.future()
         .compose(aVoid -> promise2.future())
         .compose(o -> pgClient.withConn(conn ->
-          poLinesService.updatePoLines(List.of(poLine), conn, client.getTenantId()))))
+          poLinesService.updatePoLines(List.of(poLine), conn, client.getTenantId(), headers))))
       .onComplete(ar -> {
         Integer numUpdLines = ar.result();
         testContext.verify(() -> {
