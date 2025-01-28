@@ -176,7 +176,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
+    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(List.of()), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
@@ -185,7 +185,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    verify(poLinesService, times(1)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT));
+    verify(poLinesService, times(1)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT), any());
 
     assertEquals(2, actualPoLines.stream()
       .filter(poLine -> poLine.getInstanceId().equals(instanceId1))
@@ -232,7 +232,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
+    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
@@ -241,7 +241,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    verify(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
+    verify(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
 
     assertEquals(0, actualPoLines.stream()
       .filter(poLine -> poLine.getInstanceId().equals(instanceId1))
@@ -294,7 +294,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
+    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
@@ -303,7 +303,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    verify(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
+    verify(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
 
     assertEquals(0, actualPoLines.stream()
       .filter(poLine -> poLine.getInstanceId().equals(instanceId1))
@@ -361,8 +361,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), eq(connCentral));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(connCentral), eq(CENTRAL_TENANT));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT), any());
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(connCentral), eq(CENTRAL_TENANT), any());
   }
 
   @Test
@@ -391,7 +391,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(connCentral));
-    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(connCentral), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(connCentral), eq(CENTRAL_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(List.of()), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(List.of()), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(connCentral), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
@@ -402,8 +402,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService, times(1)).getPoLinesByCqlQuery(eq(query), eq(conn));
     verify(poLinesService, times(1)).getPoLinesByCqlQuery(eq(query), eq(connCentral));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT));
-    verify(poLinesService, times(1)).updatePoLines(anyList(), eq(connCentral), eq(CENTRAL_TENANT));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT), any());
+    verify(poLinesService, times(1)).updatePoLines(anyList(), eq(connCentral), eq(CENTRAL_TENANT), any());
 
     assertEquals(2, actualPoLines.stream()
       .filter(poLine -> poLine.getInstanceId().equals(instanceId1))
@@ -441,8 +441,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService, times(0)).getPoLinesByCqlQuery(eq(query), eq(conn));
     verify(poLinesService, times(0)).getPoLinesByCqlQuery(eq(query), eq(connCentral));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(connCentral), eq(CENTRAL_TENANT));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT), any());
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(connCentral), eq(CENTRAL_TENANT), any());
   }
 
   @Test
@@ -471,14 +471,14 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT));
+    doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(pgClient).when(dbClient).getPgClient();
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(RuntimeException.class, expectedException.getClass());
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
-    verify(poLinesService, times(1)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT));
+    verify(poLinesService, times(1)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT), any());
   }
 
   @Test
@@ -489,7 +489,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalStateException.class, expectedException.getClass());
     assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
-    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT));
+    verify(poLinesService, times(0)).updatePoLines(anyList(), eq(conn), eq(UNIVERSITY_TENANT), any());
   }
 
   private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
