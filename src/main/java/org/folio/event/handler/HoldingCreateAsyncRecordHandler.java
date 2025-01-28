@@ -71,7 +71,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                             String tenantIdFromEvent, String centralTenantId, Map<String, String> headers,
                                             Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
-      .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn))
+      .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn, headers))
       .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
@@ -85,7 +85,8 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
   }
 
   private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,
-                                             String tenantIdFromEvent, String centralTenantId, Conn conn) {
+                                             String tenantIdFromEvent, String centralTenantId, Conn conn,
+                                             Map<String, String> headers) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}' in centralTenant: '{}'",
         holdingId, tenantIdFromEvent, centralTenantId);
@@ -104,7 +105,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       }
     });
 
-    return poLinesService.updatePoLines(poLines, conn, centralTenantId)
+    return poLinesService.updatePoLines(poLines, conn, centralTenantId, headers)
       .map(v -> poLines);
   }
 

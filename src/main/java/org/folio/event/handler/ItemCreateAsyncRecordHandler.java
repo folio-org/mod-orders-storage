@@ -159,7 +159,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       log.info("updatePoLines:: No POLs were changed to update for item: '{}'", itemObject.getString(ID.getValue()));
       return Future.succeededFuture(List.of());
     }
-    return poLinesService.updatePoLines(updatedPoLines, conn, centralTenantId)
+    return poLinesService.updatePoLines(updatedPoLines, conn, centralTenantId, headers)
       .compose(v -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }

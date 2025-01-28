@@ -1,6 +1,7 @@
 package org.folio.event.handler;
 
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
+import static org.folio.util.HeaderUtils.getHeaderMap;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -8,6 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,10 +37,11 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
   @Override
   public Future<String> handle(KafkaConsumerRecord<String, String> kafkaRecord) {
     try {
+      var headers = getHeaderMap(kafkaRecord.headers());
       ExportHistory exportHistory = new JsonObject(kafkaRecord.value()).mapTo(ExportHistory.class);
-      String tenantId = extractTenantFromHeaders(kafkaRecord.headers());
+      String tenantId = extractTenantFromHeaders(headers);
       DBClient client = new DBClient(getVertx(), tenantId);
-      return exportHistory(exportHistory, client)
+      return exportHistory(exportHistory, client, headers)
         .map(v -> kafkaRecord.value());
     } catch (Exception e) {
       log.error("Failed to process export history kafka record, record key: {}", kafkaRecord.key(), e);
@@ -46,7 +49,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
     }
   }
 
-  private Future<Void> exportHistory(ExportHistory exportHistory, DBClient client) {
+  private Future<Void> exportHistory(ExportHistory exportHistory, DBClient client, Map<String, String> headers) {
     return exportHistoryService.createExportHistory(exportHistory, client)
       .compose(createdExportHistory -> client.getPgClient().withConn(conn ->
         poLinesService.getPoLinesByLineIdsByChunks(exportHistory.getExportedPoLineIds(), conn)
@@ -54,7 +57,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
           .compose(poLines -> {
             if (CollectionUtils.isNotEmpty(poLines)) {
               log.info("poLines not empty, updating them");
-              return poLinesService.updatePoLines(poLines, conn, client.getTenantId());
+              return poLinesService.updatePoLines(poLines, conn, client.getTenantId(), headers);
             }
             log.info("Export EDI date was not updated : {}", createdExportHistory.getId());
             return Future.succeededFuture(0);

@@ -15,6 +15,7 @@ import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
 import static org.folio.util.DbUtils.getEntitiesByField;
+import static org.folio.util.MetadataUtils.populateMetadata;
 
 import javax.ws.rs.core.Response;
 import java.util.Collection;
@@ -224,7 +225,9 @@ public class PoLinesService {
     return getEntitiesByField(PO_LINE_TABLE, PoLine.class, cqlWrapper, conn);
   }
 
-  public Future<Integer> updatePoLines(Collection<PoLine> poLines, Conn conn, String tenantId) {
+  public Future<Integer> updatePoLines(Collection<PoLine> poLines, Conn conn, String tenantId,
+                                       Map<String, String> headers) {
+    poLines.forEach(poLine -> populateMetadata(poLine::getMetadata, poLine::withMetadata, headers));
     String query = buildUpdatePoLineBatchQuery(poLines, tenantId);
     return poLinesDAO.updatePoLines(query, conn);
   }

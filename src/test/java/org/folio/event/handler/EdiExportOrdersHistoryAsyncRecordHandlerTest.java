@@ -12,11 +12,13 @@ import static org.mockito.Mockito.when;
 import io.vertx.core.Vertx;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 import org.folio.TestUtils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.mockito.Mock;
@@ -114,13 +116,15 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       .withExportType("EDIFACT_ORDERS_EXPORT")
       .withExportedPoLineIds(List.of(lineId))
       .withExportDate(Calendar.getInstance().getTime());
+    var headers = Map.of(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
+
     doReturn(Future.succeededFuture(exportHistory))
       .when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
     List<PoLine> poLines = List.of(new PoLine().withId(lineId));
     doReturn(Future.succeededFuture(poLines))
       .when(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
     doReturn(Future.succeededFuture(1))
-      .when(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());
+      .when(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString(), any());
     doReturn(pgClient)
       .when(dbClient).getPgClient();
     doReturn(DIKU_TENANT)
@@ -132,13 +136,13 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       .when(pgClient).withConn(any());
 
     Method exportHistoryMethod = EdiExportOrdersHistoryAsyncRecordHandler.class
-      .getDeclaredMethod("exportHistory", ExportHistory.class, DBClient.class);
+      .getDeclaredMethod("exportHistory", ExportHistory.class, DBClient.class, Map.class);
     exportHistoryMethod.setAccessible(true);
 
-    exportHistoryMethod.invoke(handler, exportHistory, dbClient);
+    exportHistoryMethod.invoke(handler, exportHistory, dbClient, headers);
 
     verify(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
-    verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString());
+    verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString(), any());
 
     assertEquals(exportHistory.getExportDate(), poLines.get(0).getLastEDIExportDate());
   }

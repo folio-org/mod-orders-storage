@@ -125,7 +125,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLines:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(createNoUpdatedPoLinesDto());
     }
-    return poLinesService.updatePoLines(poLines, conn, holder.getTenantId())
+    return poLinesService.updatePoLines(poLines, conn, holder.getTenantId(), holder.getHeaders())
       .map(affectedRows -> {
         log.info("updatePoLines:: Successfully updated POLs for holdingId: {}, POLs updated: {}/{}", holder.getHoldingId(), affectedRows, poLines.size());
         // Very important to return an empty poLine array in cases where no
@@ -246,7 +246,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLinesInCentralTenant:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(List.of());
     }
-    return poLinesService.updatePoLines(poLines, conn, holder.getCentralTenantId())
+    return poLinesService.updatePoLines(poLines, conn, holder.getCentralTenantId(), holder.getHeaders())
       .map(affectedRows -> {
         log.info("updatePoLinesInCentralTenant:: Successfully updated POLs for holdingId: {}, POLs updated: {}/{}", holder.getHoldingId(), affectedRows, poLines.size());
         return poLines;

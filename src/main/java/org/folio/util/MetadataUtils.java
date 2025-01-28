@@ -13,7 +13,8 @@ public class MetadataUtils {
 
   private MetadataUtils() { }
 
-  public static <T> T populateMetadata(Supplier<Metadata> metadataExtractor, Function<Metadata, T> metadataSetter, Map<String, String> okapiHeaders) {
+  public static <T> T populateMetadata(Supplier<Metadata> metadataExtractor, Function<Metadata, T> metadataSetter,
+                                       Map<String, String> okapiHeaders) {
     var userId =  okapiHeaders.get(XOkapiHeaders.USER_ID);
     var metadata = Optional.ofNullable(metadataExtractor.get()).orElseGet(Metadata::new);
     metadata.setUpdatedDate(new Date());
