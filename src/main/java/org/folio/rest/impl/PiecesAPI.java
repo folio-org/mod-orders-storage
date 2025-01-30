@@ -4,10 +4,13 @@ import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.util.HelperUtils.extractEntityFields;
 import static org.folio.util.MetadataUtils.populateMetadata;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import java.util.Map;
-
 import javax.ws.rs.core.Response;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
@@ -27,12 +30,6 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 
 public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersStoragePiecesBatch {
 
@@ -107,6 +104,25 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
           asyncResultHandler.handle(buildNoContentResponse());
         } else {
           log.error("Update piece failed, id={}", id, ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+        }
+      });
+  }
+
+  @Override
+  public void postOrdersStoragePiecesBatch(PiecesCollection piecesCollection, Map<String, String> okapiHeaders,
+                                           Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    log.info("postOrdersStoragePiecesBatch:: Batch creating {} pieces", piecesCollection.getPieces().size());
+    pgClient
+      .withTrans(conn -> pieceService.createPieces(piecesCollection.getPieces(), conn, okapiHeaders)
+        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, okapiHeaders)))
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          log.info("Create '{}' pieces completed", piecesCollection.getPieces());
+          auditOutboxService.processOutboxEventLogs(okapiHeaders);
+          asyncResultHandler.handle(buildResponseWithLocation(piecesCollection, getEndpoint(piecesCollection)));
+        } else {
+          log.error("Piece creation failed", ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         }
       });

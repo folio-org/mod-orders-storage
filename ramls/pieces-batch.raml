@@ -9,19 +9,51 @@ documentation:
 
 types:
   pieces-collection: !include acq-models/mod-orders-storage/schemas/piece_collection.json
-  UUID:
-    type: string
-    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+  errors: !include raml-util/schemas/errors.schema
 
-resourceTypes:
-  collection: !include raml-util/rtypes/collection.raml
-  collection-item: !include raml-util/rtypes/item-collection.raml
 traits:
-
+  validate: !include raml-util/traits/validation.raml
 
 /orders-storage/pieces-batch:
   displayName: Process list of Pieces in a batch
   description: Process list of Pieces in a batch APIs
+  is: [ validate ]
+  post:
+    description: Create batch pieces
+    body:
+      application/json:
+        type: pieces-collection
+        example:
+          strict: false
+          value: !include acq-models/mod-orders-storage/examples/piece_collection.sample
+    responses:
+      200:
+        description: "Returns processing result of the piece collection"
+        body:
+          application/json:
+            type: pieces-collection
+            example:
+              strict: false
+              value: !include acq-models/mod-orders-storage/examples/piece_collection.sample
+      422:
+        description: "Bad request, e.g. malformed request body or query parameter. Details of the error (e.g. name of the parameter or line/character number with malformed data) provided in the response."
+        body:
+          application/json:
+            example:
+              strict: false
+              value: !include raml-util/examples/errors.sample
+          text/plain:
+            example: |
+              "unable to process object -- malformed JSON at 13:4"
+      500:
+        description: "Internal server error, e.g. due to misconfiguration"
+        body:
+          application/json:
+            example:
+              strict: false
+              value: !include raml-util/examples/errors.sample
+          text/plain:
+            example: "internal server error, contact administrator"
   put:
     description: "Update the list of Pieces in a batch"
     body:
