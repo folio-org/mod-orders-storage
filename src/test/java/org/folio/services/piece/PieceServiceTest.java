@@ -3,6 +3,7 @@ package org.folio.services.piece;
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
+import static org.folio.rest.RestVerticle.OKAPI_USERID_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
@@ -297,6 +299,26 @@ public class PieceServiceTest extends TestBase {
       var conn = spy(connection);
       List<Piece> piecesToUpdate = List.of();
       var updatePiecesFuture = pieceService.updatePieces(piecesToUpdate, conn, TEST_TENANT);
+
+      return testContext.assertComplete(updatePiecesFuture)
+        .onComplete(ar -> {
+          List<Piece> actPieces = ar.result();
+          testContext.verify(() -> {
+            assertThat(actPieces, is(piecesToUpdate));
+            verifyNoInteractions(conn);
+          });
+          testContext.completeNow();
+        });
+    });
+  }
+
+  @Test
+  void shouldNotCreatePiecesWhenEmpty(Vertx vertx, VertxTestContext testContext) {
+    var headers = Map.of(OKAPI_USERID_HEADER, UUID.randomUUID().toString());
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(connection -> {
+      var conn = spy(connection);
+      List<Piece> piecesToUpdate = List.of();
+      var updatePiecesFuture = pieceService.createPieces(piecesToUpdate, conn, headers);
 
       return testContext.assertComplete(updatePiecesFuture)
         .onComplete(ar -> {

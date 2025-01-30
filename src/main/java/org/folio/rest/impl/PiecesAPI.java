@@ -120,7 +120,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
         if (ar.succeeded()) {
           log.info("Create '{}' pieces completed", piecesCollection.getPieces());
           auditOutboxService.processOutboxEventLogs(okapiHeaders);
-          asyncResultHandler.handle(buildOkResponse(piecesCollection));
+          asyncResultHandler.handle(buildResponseWithLocation(piecesCollection, getEndpoint(piecesCollection)));
         } else {
           log.error("Piece creation failed", ar.cause());
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));

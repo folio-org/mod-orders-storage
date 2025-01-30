@@ -89,7 +89,6 @@ public class PieceService {
       log.warn("createPieces:: Pieces list is empty, skipping the create");
       return Future.succeededFuture(List.of());
     }
-
     for (Piece piece : pieces) {
       if (StringUtils.isBlank(piece.getId())) {
         piece.setId(UUID.randomUUID().toString());
@@ -98,7 +97,7 @@ public class PieceService {
     }
     var pieceIds = extractEntityFields(pieces, Piece::getId);
     return conn.saveBatch(PIECES_TABLE, pieces)
-      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
+      .map(rows -> pieces)
       .onSuccess(ar -> log.info("createPieces:: Saved pieces: {}", pieceIds))
       .onFailure(t -> log.error("createPieces:: Failed pieces: {}", pieceIds, t));
   }

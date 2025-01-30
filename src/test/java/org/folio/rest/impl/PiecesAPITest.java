@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -128,6 +127,28 @@ public class PiecesAPITest extends TestBase {
     // then
     List<String> events = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_PIECE_CHANGED.getTopicName(), 0, userId);
     assertEquals(0, events.size());
+  }
+
+  @Test
+  void postOrdersStoragePiecesBatch_shouldCreatePiecesSuccessfully() throws MalformedURLException {
+    log.info("--- mod-orders-storage piece test: batch create pieces");
+
+    pieceIds.add(UUID.randomUUID().toString());
+    pieceIds.add(UUID.randomUUID().toString());
+    var jsonPiece1 = getEntity(TestData.Piece.DEFAULT, pieceIds.get(0), "poLineId", poLineId, "titleId", titleId);
+    var jsonPiece2 = getEntity(TestData.Piece.DEFAULT, pieceIds.get(1), "poLineId", poLineId, "titleId", titleId);
+
+    var piece1 = new JsonObject(jsonPiece1).mapTo(Piece.class);
+    var piece2 = new JsonObject(jsonPiece2).mapTo(Piece.class);
+
+    var piecesCollection = new PiecesCollection().withPieces(List.of(piece1, piece2));
+    postData(PIECES_BATCH_ENDPOINT, Json.encode(piecesCollection), headers).then().statusCode(201);
+    callAuditOutboxApi(headers);
+
+    List<String> events = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_PIECE_CHANGED.getTopicName(), 2, userId);
+    assertEquals(2, events.size());
+    checkPieceEventContent(events.get(0), PieceAuditEvent.Action.CREATE);
+    checkPieceEventContent(events.get(1), PieceAuditEvent.Action.CREATE);
   }
 
   private void prepareData() throws MalformedURLException {
