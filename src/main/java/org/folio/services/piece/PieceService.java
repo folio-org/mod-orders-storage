@@ -7,12 +7,14 @@ import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
 import static org.folio.util.DbUtils.getEntitiesByField;
+import static org.folio.util.HelperUtils.extractEntityFields;
+import static org.folio.util.MetadataUtils.populateMetadata;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -80,6 +82,25 @@ public class PieceService {
     return conn.save(TableNames.PIECES_TABLE, piece.getId(), piece)
       .onSuccess(rowSet -> log.info("createPiece:: Piece successfully created: '{}'", piece.getId()))
       .onFailure(e -> log.error("createPiece:: Create piece failed: '{}'", piece.getId(), e));
+  }
+
+  public Future<List<Piece>> createPieces(List<Piece> pieces, Conn conn, Map<String, String> okapiHeaders) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.warn("createPieces:: Pieces list is empty, skipping the create");
+      return Future.succeededFuture(List.of());
+    }
+
+    for (Piece piece : pieces) {
+      if (StringUtils.isBlank(piece.getId())) {
+        piece.setId(UUID.randomUUID().toString());
+      }
+      populateMetadata(piece::getMetadata, piece::withMetadata, okapiHeaders);
+    }
+    var pieceIds = extractEntityFields(pieces, Piece::getId);
+    return conn.saveBatch(PIECES_TABLE, pieces)
+      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
+      .onSuccess(ar -> log.info("createPieces:: Saved pieces: {}", pieceIds))
+      .onFailure(t -> log.error("createPieces:: Failed pieces: {}", pieceIds, t));
   }
 
   public Future<RowSet<Row>> updatePiece(Conn conn, Piece piece, String id) {
