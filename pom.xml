@@ -33,7 +33,7 @@
 
     <!--Dependency properties-->
     <streamx.version>0.8.3</streamx.version>
-    <rest-assured.version>5.5.0</rest-assured.version>
+    <rest-assured.version>5.5.1</rest-assured.version>
     <aspectj.version>1.9.22.1</aspectj.version>
     <common-lang.version>2.6</common-lang.version>
     <jackson-bom.version>2.18.0</jackson-bom.version>
