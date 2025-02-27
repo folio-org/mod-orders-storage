@@ -13,6 +13,10 @@
   </licenses>
 
   <properties>
+    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+
     <!--Project properties-->
     <module_name>mod-orders-storage</module_name>
     <http.port>8081</http.port>
@@ -20,10 +24,9 @@
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
     <raml-module-builder.version>35.3.0</raml-module-builder.version>
-    <java.version>17</java.version>
 
     <!--Dependency Management Properties-->
-    <vertx.version>4.5.10</vertx.version>
+    <vertx.version>4.5.13</vertx.version>
     <kafkaclients.version>3.6.1</kafkaclients.version>
     <lombok.version>1.18.34</lombok.version>
     <log4j.version>2.24.1</log4j.version>
@@ -32,23 +35,23 @@
     <streamx.version>0.8.3</streamx.version>
     <rest-assured.version>5.5.0</rest-assured.version>
     <aspectj.version>1.9.22.1</aspectj.version>
-    <aspectj-maven-plugin.version>1.14</aspectj-maven-plugin.version>
     <common-lang.version>2.6</common-lang.version>
     <jackson-bom.version>2.18.0</jackson-bom.version>
-    <folio-di-support.version>2.1.0</folio-di-support.version>
+    <folio-di-support.version>2.2.0</folio-di-support.version>
 
     <!--Folio dependencies properties-->
     <mod-configuration-client.version>5.10.0</mod-configuration-client.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
 
     <!--Maven plugin properties-->
-    <exec-maven-plugin.version>3.4.1</exec-maven-plugin.version>
+    <aspectj-maven-plugin.version>1.14</aspectj-maven-plugin.version>
+    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
     <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
     <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
-    <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
     <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
 
@@ -280,7 +283,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${maven-compiler-plugin.version}</version>
         <configuration>
-          <release>${java.version}</release>
+          <release>17</release>
           <encoding>UTF-8</encoding>
           <parameters>true</parameters>
         </configuration>
