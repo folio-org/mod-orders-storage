@@ -23,25 +23,28 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>35.4.0-SNAPSHOT</raml-module-builder.version>
+    <raml-module-builder.version>35.4.0</raml-module-builder.version>
 
     <!--Dependency Management Properties-->
     <vertx.version>4.5.13</vertx.version>
     <kafkaclients.version>3.6.1</kafkaclients.version>
-    <lombok.version>1.18.34</lombok.version>
-    <log4j.version>2.24.1</log4j.version>
+    <lombok.version>1.18.36</lombok.version>
+    <log4j.version>2.24.3</log4j.version>
 
     <!--Dependency properties-->
     <streamx.version>0.8.3</streamx.version>
     <rest-assured.version>5.5.1</rest-assured.version>
     <aspectj.version>1.9.22.1</aspectj.version>
     <common-lang.version>2.6</common-lang.version>
-    <jackson-bom.version>2.18.0</jackson-bom.version>
-    <folio-di-support.version>2.2.0</folio-di-support.version>
+    <jackson-bom.version>2.18.2</jackson-bom.version>
+    <caffeine.version>3.2.0</caffeine.version>
 
     <!--Folio dependencies properties-->
     <mod-configuration-client.version>5.10.0</mod-configuration-client.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
+    <folio-di-support.version>3.0.0</folio-di-support.version>
+    <folio-custom-fields.version>2.2.0</folio-custom-fields.version>
+    <folio-kafka-wrapper.version>3.2.0</folio-kafka-wrapper.version>
 
     <!--Maven plugin properties-->
     <aspectj-maven-plugin.version>1.14</aspectj-maven-plugin.version>
@@ -56,7 +59,8 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
 
     <!--Test Scope dependencies-->
-    <junit-jupiter.version>5.11.2</junit-jupiter.version>
+    <junit-jupiter.version>5.12.0</junit-jupiter.version>
+    <mockito.version>5.15.2</mockito.version>
     <jmockit.version>1.49</jmockit.version>
 
     <!--Sonar properties-->
@@ -138,7 +142,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-custom-fields</artifactId>
-      <version>2.1.0</version>
+      <version>${folio-custom-fields.version}</version>
     </dependency>
     <!-- test dependencies -->
     <dependency>
@@ -173,7 +177,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-junit-jupiter</artifactId>
-      <version>5.14.2</version>
+      <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -201,7 +205,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>folio-kafka-wrapper</artifactId>
-      <version>3.2.0</version>
+      <version>${folio-kafka-wrapper.version}</version>
     </dependency>
     <dependency>
       <groupId>io.vertx</groupId>
@@ -223,7 +227,7 @@
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
-      <version>3.1.8</version>
+      <version>${caffeine.version}</version>
     </dependency>
     <dependency>
       <groupId>net.mguenther.kafka</groupId>
