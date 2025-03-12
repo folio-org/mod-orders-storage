@@ -1,9 +1,9 @@
 ## 14.0.0 - Unreleased
 
 ## 13.9.0 - Released (Sunflower R1 2025)
-The primary focus of this release was to enhance Kafka consumer processing, update tenant logic, and improve filtering performance.
+The primary focus of this release was to introduce new batch update pieces endpoint, populate metadata for entities batch operations, and batch create pieces API.
 
-[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.7.0...v13.8.0)
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.0...v13.9.0)
 
 ### Stories
 * [MODORDSTOR-435](https://folio-org.atlassian.net/browse/MODORDSTOR-435) - Introduce new batch update pieces endpoint
@@ -14,18 +14,9 @@ The primary focus of this release was to enhance Kafka consumer processing, upda
 * [MODINVSTOR-1322](https://folio-org.atlassian.net/browse/MODINVSTOR-1322) - Extend domain events - update ResourceEvent with new fields
 * [FOLIO-4211](https://folio-org.atlassian.net/browse/FOLIO-4211) - Update to mod-orders-storage Java 21
 
-### Bug Fixes
-* [MODORDSTOR-410](https://folio-org.atlassian.net/browse/MODORDSTOR-410) - Replace PomReader with ModuleName fixing Zip Slip (CWE-22)
-* [MODORDSTOR-399](https://folio-org.atlassian.net/browse/MODORDSTOR-399) - Missing interface dependencies in module descriptor
-* [MODORDSTOR-394](https://folio-org.atlassian.net/browse/MODORDSTOR-394) - PO numbers do not go up consecutively
-
-### Tech Debts
-* [MODORDSTOR-411](https://folio-org.atlassian.net/browse/MODORDSTOR-411) - Delete unused acquisition method "Test user method"
-
-
 ### Dependencies
 * Bump `raml` from `35.2.0` to `35.3.0`
-* Added `folio-module-descriptor-validator` version `1.0.0`
+* Bump `java` from `17` to `21`
 
 
 ## 13.8.0 - Released (Ramsons R2 2024)
