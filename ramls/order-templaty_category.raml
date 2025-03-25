@@ -1,0 +1,54 @@
+#%RAML 1.0
+title: "mod-orders"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1
+
+documentation:
+  - title: Order Template Categories
+    content: <b>This module implements the CRUD interface for Order Template Categories API. This API is intended for internal use only.</b>
+
+types:
+    order-template-category: !include acq-models/mod-orders-storage/schemas/order_template_category.json
+    order-template-category-collection: !include acq-models/mod-orders-storage/schemas/order_template_category_collection.json
+    errors: !include raml-util/schemas/errors.schema
+    UUID:
+     type: string
+     pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+traits:
+    validate: !include raml-util/traits/validation.raml
+    pageable:  !include raml-util/traits/pageable.raml
+    searchable: !include raml-util/traits/searchable.raml
+
+resourceTypes:
+    collection: !include raml-util/rtypes/collection.raml
+    collection-item: !include raml-util/rtypes/item-collection.raml
+
+/orders-storage/order-template-categories:
+  type:
+    collection:
+      exampleCollection: !include acq-models/mod-orders-storage/examples/order_template_category_collection.sample
+      exampleItem: !include acq-models/mod-orders-storage/examples/order_template_category_post.sample
+      schemaCollection: order-template-category-collection
+      schemaItem: order-template-category
+  post:
+    description: Create new order template
+    is: [validate]
+  get:
+    description: Get list of order template category
+    is: [
+      searchable: {description: "with valid searchable fields: for example name", example: "[\"name\", \"Fiction\", \"=\"]"},
+      pageable
+    ]
+  /{id}:
+    uriParameters:
+      id:
+        description: The UUID of an Order Template Category
+        type: UUID
+    type:
+      collection-item:
+        exampleItem: !include acq-models/mod-orders-storage/examples/order_template_category_get.sample
+        schema: order-template-category
+    put:
+      description: Update order template category
+      is: [validate]

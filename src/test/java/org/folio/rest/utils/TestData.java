@@ -41,6 +41,10 @@ public class TestData {
     String DEFAULT = "data/order-templates/amazon_book_orders.json";
   }
 
+  public interface OrderTemplateCategory {
+    String DEFAULT = "data/order-template-categories/amazon_book_orders.json";
+  }
+
   public interface AcquisitionsUnit {
     String DEFAULT = "data/acquisitions-units/acquisitions-unit.json";
   }
