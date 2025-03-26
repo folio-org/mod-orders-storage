@@ -42,7 +42,7 @@ public class TestData {
   }
 
   public interface OrderTemplateCategory {
-    String DEFAULT = "data/order-template-categories/amazon_book_orders.json";
+    String DEFAULT = "mockdata/order-template-categories/amazon_book_orders.json";
   }
 
   public interface AcquisitionsUnit {
