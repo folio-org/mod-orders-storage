@@ -700,7 +700,7 @@
      },
     {
       "tableName": "order_template_categories",
-      "fromModuleVersion": "mod-orders-storage-13.9.0",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
       "withOptimisticLocking": "failOnConflict",
       "withMetadata": true,
       "uniqueIndex": [
