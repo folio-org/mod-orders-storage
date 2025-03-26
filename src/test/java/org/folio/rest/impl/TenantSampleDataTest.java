@@ -6,6 +6,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.postTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.purge;
 import static org.folio.rest.utils.TestEntities.EXPORT_HISTORY;
+import static org.folio.rest.utils.TestEntities.ORDER_TEMPLATE_CATEGORIES;
 import static org.folio.rest.utils.TestEntities.PREFIX;
 import static org.folio.rest.utils.TestEntities.REASON_FOR_CLOSURE;
 import static org.folio.rest.utils.TestEntities.SUFFIX;
@@ -104,8 +105,8 @@ public class TenantSampleDataTest extends TestBase {
       tenantJob = postTenant(PARTIAL_TENANT_HEADER, tenantAttributes);
 
       List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
-                                                .filter(entity -> !EXPORT_HISTORY.equals(entity))
-                                                .toList();
+        .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
+        .toList();
       for (TestEntities entity : entitySamples) {
         log.info("Test expected quantity for " + entity.name());
         verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
@@ -169,7 +170,7 @@ public class TenantSampleDataTest extends TestBase {
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(true, false);
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
     List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
-      .filter(entity -> !EXPORT_HISTORY.equals(entity))
+      .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
     for (TestEntities entity : entitySamples) {
       log.info("Test expected quantity for " + entity.name());
@@ -185,7 +186,7 @@ public class TenantSampleDataTest extends TestBase {
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
     List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
-      .filter(entity -> !EXPORT_HISTORY.equals(entity))
+      .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
     for(TestEntities te: entitySamples) {
       verifyCollectionQuantity(te.getEndpoint(), te.getEstimatedSystemDataRecordsQuantity());

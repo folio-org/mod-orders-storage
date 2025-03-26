@@ -39,6 +39,7 @@ public enum TestEntitiesCustomFields {
     new CustomFields().withAdditionalProperty("externalOrderNumber", false),
     "must be a string");
 
+
   private final JsonObject sampleEntity;
   private final JsonObject sampleEntityWithValidCustomFields;
   private final JsonObject sampleEntityWithInvalidCustomFields;

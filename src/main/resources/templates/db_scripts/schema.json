@@ -699,16 +699,33 @@
        ]
      },
     {
+      "tableName": "order_template_categories",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
+      "withOptimisticLocking": "failOnConflict",
+      "withMetadata": true,
+      "uniqueIndex": [
+        {
+          "fieldName": "name"
+        }
+      ]
+    },
+    {
       "tableName": "order_templates",
       "fromModuleVersion": "mod-orders-storage-13.7.0",
       "withMetadata": false,
       "customSnippetPath": "order_templates_table.sql",
       "uniqueIndex": [
-         {
-           "fieldName" : "templateName"
-         }
-       ]
-     },
+        {
+          "fieldName": "templateName"
+        }
+      ],
+      "foreignKeys": [
+        {
+          "fieldName": "categoryId",
+          "targetTable": "order_template_categories"
+        }
+      ]
+    },
     {
       "tableName": "reasons_for_closure",
       "fromModuleVersion": "mod-orders-storage-10.0.0",

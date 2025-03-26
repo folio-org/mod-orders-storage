@@ -351,6 +351,37 @@
       ]
     },
     {
+      "id": "orders-storage.order-template-categories",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/order-template-categories",
+          "permissionsRequired": ["orders-storage.order-template-categories.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/order-template-categories",
+          "permissionsRequired": ["orders-storage.order-template-categories.item.post"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/order-template-categories/{id}",
+          "permissionsRequired": ["orders-storage.order-template-categories.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/orders-storage/order-template-categories/{id}",
+          "permissionsRequired": ["orders-storage.order-template-categories.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/order-template-categories/{id}",
+          "permissionsRequired": ["orders-storage.order-template-categories.item.delete"]
+        }
+      ]
+      },
+    {
       "id": "acquisitions-units-storage.units",
       "version": "1.1",
       "handlers": [
@@ -1160,6 +1191,43 @@
       ]
     },
     {
+      "permissionName" : "orders-storage.order-template-categories.collection.get",
+      "displayName" : "order-order-template-categories-collection get",
+      "description" : "Get a collection of order template categories"
+    },
+    {
+      "permissionName" : "orders-storage.order-template-categories.item.post",
+      "displayName" : "order-template-categories post",
+      "description" : "Create a new order template category"
+    },
+    {
+      "permissionName" : "orders-storage.order-template-categories.item.get",
+      "displayName" : "order-template-categories-item get",
+      "description" : "Fetch an order template categories"
+    },
+    {
+      "permissionName" : "orders-storage.order-template-categories.item.put",
+      "displayName" : "order-template-categories-item put",
+      "description" : "Update an order template category"
+    },
+    {
+      "permissionName" : "orders-storage.order-template-categories.item.delete",
+      "displayName" : "order-template-categories-item delete",
+      "description" : "Delete an order template category"
+    },
+    {
+      "permissionName" : "orders-storage.order-template-categories.all",
+      "displayName" : "All order-template-categories perms",
+      "description" : "All permissions for the order-template-categories",
+      "subPermissions" : [
+        "orders-storage.order-template-categories.collection.get",
+        "orders-storage.order-template-categories.item.post",
+        "orders-storage.order-template-categories.item.get",
+        "orders-storage.order-template-categories.item.put",
+        "orders-storage.order-template-categories.item.delete"
+      ]
+    },
+    {
       "permissionName" : "acquisitions-units-storage.units.collection.get",
       "displayName" : "acquisitions-units-collection get",
       "description" : "Get a collection of acquisitions units"
@@ -1562,6 +1630,7 @@
         "orders-storage.reporting-codes.all",
         "orders-storage.order-invoice-relationships.all",
         "orders-storage.order-templates.all",
+        "orders-storage.order-template-categories.all",
         "acquisitions-units-storage.units.all",
         "acquisitions-units-storage.memberships.all",
         "orders-storage.configuration.reasons-for-closure.all",
