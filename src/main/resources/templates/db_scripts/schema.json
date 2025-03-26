@@ -701,6 +701,7 @@
     {
       "tableName": "order_template_categories",
       "fromModuleVersion": "mod-orders-storage-13.9.0",
+      "withOptimisticLocking": "failOnConflict",
       "withMetadata": true,
       "uniqueIndex": [
         {
