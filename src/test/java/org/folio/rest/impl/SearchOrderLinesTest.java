@@ -79,6 +79,12 @@ public class SearchOrderLinesTest extends TestBase {
   }
 
   @Test
+  void testGetPolinesWithProductId() throws MalformedURLException {
+    var poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=productIds=9780262012102");
+    assertThat(poLines, hasSize(1));
+  }
+
+  @Test
   public void testgetPolineswithlimit() throws MalformedURLException {
     log.info("--- mod-orders-storage po-lines: Verify the limit parameter");
     List<PoLine> filteredByPoAndP0LineFields = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?limit=5");

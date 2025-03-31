@@ -422,6 +422,10 @@
           "fieldName": "orderFormat",
           "caseSensitive": false,
           "removeAccents": true
+        },
+        {
+          "fieldName": "productIds",
+          "multiFieldNames": "details.productIds[*].productId"
         }
       ],
       "ginIndex": [
