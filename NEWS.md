@@ -1,5 +1,14 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.1 - Released (Sunflower R1 2025 Bug Fix)
+The primary focus of this release was to improve performance of searching po lines by product ids. 
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.0...v13.9.1)
+
+### Bug Fixes
+* [MODORDSTOR-447](https://folio-org.atlassian.net/browse/MODORDSTOR-447) - Implement productIds=… database search index
+
+
 ## 13.9.0 - Released (Sunflower R1 2025)
 The primary focus of this release was to introduce new batch update pieces endpoint, populate metadata for entities batch operations, and batch create pieces API.
 

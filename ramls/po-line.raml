@@ -1,7 +1,7 @@
 #%RAML 1.0
 title: "mod-orders"
 baseUri: http://github.com/folio-org/mod-orders-storage
-version: v9.3
+version: v12.4
 
 documentation:
   - title: PO Line
@@ -35,7 +35,7 @@ resourceTypes:
       schemaCollection: po-line-collection
       schemaItem: po-line
   get:
-    description: Get list of po lines
+    description: "Get list of po lines; virtual field productIds contains each details.productIds[*].productId"
     is: [
       searchable: {description: "with valid searchable fields: for example code", example: "[\"code\", \"MEDGRANT\", \"=\"]"},
       pageable
