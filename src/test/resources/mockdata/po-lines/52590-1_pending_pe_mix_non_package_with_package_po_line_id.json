@@ -52,7 +52,7 @@
     "expectedActivation": "2019-07-20T00:00:00.000Z",
     "materialType": "a7eb0130-7287-4485-b32c-b4b5814da0fa",
     "trial": true,
-    "userLimit": 0
+    "userLimit": "0"
   },
    "fundDistribution": [
     {
