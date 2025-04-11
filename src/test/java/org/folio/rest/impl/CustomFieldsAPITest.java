@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import static io.restassured.RestAssured.given;
 import static org.folio.StorageTestSuite.storageUrl;
+import static org.folio.TestUtils.PURCHASE_METHOD;
 import static org.folio.rest.utils.TestEntities.CUSTOM_FIELDS;
 import static org.folio.rest.utils.TestEntities.ORDER_TEMPLATE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
@@ -20,6 +21,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.folio.rest.jaxrs.model.Cost;
 import org.folio.rest.jaxrs.model.CustomField;
 import org.folio.rest.jaxrs.model.CustomField.Type;
 import org.folio.rest.jaxrs.model.CustomFieldOptionStatistic;
@@ -379,9 +381,11 @@ public class CustomFieldsAPITest extends TestBase {
     PoLine poLine1 =
       new PoLine()
         .withId(UUID.randomUUID().toString())
+        .withAcquisitionMethod(PURCHASE_METHOD)
         .withOrderFormat(OrderFormat.OTHER)
         .withSource(Source.USER)
         .withPurchaseOrderId(purchaseOrders.get(0).getId())
+        .withCost((new Cost()).withCurrency("USD").withQuantityPhysical(1).withListUnitPrice(1d))
         .withTitleOrPackage("title1")
         .withCustomFields(
           new CustomFields()
@@ -393,9 +397,11 @@ public class CustomFieldsAPITest extends TestBase {
     PoLine poLine2 =
       new PoLine()
         .withId(UUID.randomUUID().toString())
+        .withAcquisitionMethod(PURCHASE_METHOD)
         .withOrderFormat(OrderFormat.OTHER)
         .withSource(Source.USER)
         .withPurchaseOrderId(purchaseOrders.get(1).getId())
+        .withCost((new Cost()).withCurrency("USD").withQuantityPhysical(1).withListUnitPrice(1d))
         .withTitleOrPackage("title2")
         .withCustomFields(
           new CustomFields()

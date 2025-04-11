@@ -20,6 +20,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Vertx;
 
 public class TestUtils {
+  public static final String PURCHASE_METHOD = "df26d81b-9d63-4ff8-bf41-49bf75cfa70e";
   private TestUtils() {}
 
   public static String getMockData(String path) throws IOException {
