@@ -46,8 +46,11 @@ public class AuditOutboxServiceTest {
   @InjectMocks
   private AuditOutboxService auditOutboxService;
 
+  private Map<String, String> okapiHeaders;
+
   @BeforeEach
   void setUp() {
+    okapiHeaders = Map.of("x-okapi-tenant", "testTenant");
     when(pgClientFactory.createInstance(any())).thenReturn(pgClient);
     when(lockRepository.selectWithLocking(any(), any(), any())).thenReturn(Future.succeededFuture(1));
     when(pgClient.withTrans(any())).thenAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn));
@@ -55,7 +58,6 @@ public class AuditOutboxServiceTest {
 
   @Test
   void processOutboxEventLogs_handlesEmptyLogsGracefully() {
-    Map<String, String> okapiHeaders = Map.of("x-okapi-tenant", "testTenant");
     when(outboxRepository.fetchEventLogs(any(), any())).thenReturn(Future.succeededFuture(List.of()));
 
     Future<Integer> result = auditOutboxService.processOutboxEventLogs(okapiHeaders);
@@ -66,7 +68,6 @@ public class AuditOutboxServiceTest {
 
   @Test
   void processOutboxEventLogs_sendsEventsAndDeletesLogs() {
-    Map<String, String> okapiHeaders = Map.of("x-okapi-tenant", "testTenant");
     OutboxEventLog eventLog = new OutboxEventLog()
       .withEventId("eventId")
       .withEntityType(OutboxEventLog.EntityType.ORDER)
@@ -84,7 +85,6 @@ public class AuditOutboxServiceTest {
 
   @Test
   void processOutboxEventLogs_handlesProducerFailure() {
-    Map<String, String> okapiHeaders = Map.of("x-okapi-tenant", "testTenant");
     OutboxEventLog eventLog = new OutboxEventLog()
       .withEventId("eventId")
       .withEntityType(OutboxEventLog.EntityType.ORDER)
@@ -101,7 +101,6 @@ public class AuditOutboxServiceTest {
 
   @Test
   void processOutboxEventLogs_handlesInvalidEntityType() {
-    Map<String, String> okapiHeaders = Map.of("x-okapi-tenant", "testTenant");
     OutboxEventLog eventLog = new OutboxEventLog()
       .withEventId("eventId")
       .withEntityType(null)
@@ -114,6 +113,22 @@ public class AuditOutboxServiceTest {
     assertTrue(result.failed());
     assertInstanceOf(IllegalStateException.class, result.cause());
     assertEquals("Entity type is null for event with id: eventId", result.cause().getMessage());
+  }
+
+  @Test
+  void processOutboxEventLogs_handlesMissingMetadata() {
+    OutboxEventLog eventLog = new OutboxEventLog()
+      .withEventId("eventId")
+      .withEntityType(OutboxEventLog.EntityType.PIECE)
+      .withAction("Edit")
+      .withPayload("{}");
+    when(outboxRepository.fetchEventLogs(any(), any())).thenReturn(Future.succeededFuture(List.of(eventLog)));
+    when(producer.sendPieceEvent(any(), any(), any())).thenThrow(new IllegalArgumentException("Metadata is missing"));
+    when(outboxRepository.deleteBatch(any(), any(), any())).thenReturn(Future.succeededFuture(1));
+
+    Future<Integer> result = auditOutboxService.processOutboxEventLogs(okapiHeaders);
+
+    assertTrue(result.succeeded());
   }
 
 }
