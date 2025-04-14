@@ -84,23 +84,29 @@ public class AuditOutboxService {
 
   private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {
     return eventLogs.stream().map(eventLog -> {
-      switch (eventLog.getEntityType()) {
-        case ORDER -> {
-          PurchaseOrder entity = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);
-          OrderAuditEvent.Action action = OrderAuditEvent.Action.fromValue(eventLog.getAction());
-          return producer.sendOrderEvent(entity, action, okapiHeaders);
+      try {
+        switch (eventLog.getEntityType()) {
+          case ORDER -> {
+            PurchaseOrder entity = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);
+            OrderAuditEvent.Action action = OrderAuditEvent.Action.fromValue(eventLog.getAction());
+            return producer.sendOrderEvent(entity, action, okapiHeaders);
+          }
+          case ORDER_LINE -> {
+            PoLine entity = Json.decodeValue(eventLog.getPayload(), PoLine.class);
+            OrderLineAuditEvent.Action action = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
+            return producer.sendOrderLineEvent(entity, action, okapiHeaders);
+          }
+          case PIECE -> {
+            Piece entity = Json.decodeValue(eventLog.getPayload(), Piece.class);
+            PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
+            return producer.sendPieceEvent(entity, action, okapiHeaders);
+          }
+          default -> throw new IllegalStateException("Missing handler for events with entityType: " + eventLog.getEntityType());
         }
-        case ORDER_LINE -> {
-          PoLine entity = Json.decodeValue(eventLog.getPayload(), PoLine.class);
-          OrderLineAuditEvent.Action action = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
-          return producer.sendOrderLineEvent(entity, action, okapiHeaders);
-        }
-        case PIECE -> {
-          Piece entity = Json.decodeValue(eventLog.getPayload(), Piece.class);
-          PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
-          return producer.sendPieceEvent(entity, action, okapiHeaders);
-        }
-        default -> throw new IllegalStateException("Missing handler for events with entityType: " + eventLog.getEntityType());
+      } catch (IllegalArgumentException e) {
+        log.warn("getKafkaFutures:: Unable to process event '{}' with entity of type '{}' and action '{}', reason: {}",
+          eventLog.getEventId(), eventLog.getEntityType(), eventLog.getAction(), e.getMessage());
+        return Future.succeededFuture(false);
       }
     }).collect(Collectors.toList());
   }
