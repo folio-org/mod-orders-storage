@@ -85,6 +85,9 @@ public class AuditOutboxService {
   private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {
     return eventLogs.stream().map(eventLog -> {
       try {
+        if (eventLog.getEntityType() == null) {
+          throw new IllegalStateException("Entity type is null for event with id: " + eventLog.getEventId());
+        }
         switch (eventLog.getEntityType()) {
           case ORDER -> {
             PurchaseOrder entity = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);

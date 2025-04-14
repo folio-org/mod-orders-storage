@@ -4,10 +4,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.event.AuditEventType;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaTopicNameHelper;
@@ -28,10 +25,11 @@ import io.vertx.core.Vertx;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @RequiredArgsConstructor
+@Log4j2
 public class AuditEventProducer {
-  private static final Logger log = LogManager.getLogger();
 
   private final KafkaConfig kafkaConfig;
 
@@ -92,7 +90,7 @@ public class AuditEventProducer {
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
-    Metadata metadata = getMetadataOrThrow(order::getMetadata, order.getId());
+    Metadata metadata = getMetadataOrThrow(order.getMetadata(), order.getId());
     return new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -104,7 +102,7 @@ public class AuditEventProducer {
   }
 
   private OrderLineAuditEvent getOrderLineEvent(PoLine poLine, OrderLineAuditEvent.Action eventAction) {
-    Metadata metadata = getMetadataOrThrow(poLine::getMetadata, poLine.getId());
+    Metadata metadata = getMetadataOrThrow(poLine.getMetadata(), poLine.getId());
     return new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -117,7 +115,7 @@ public class AuditEventProducer {
   }
 
   private PieceAuditEvent getPieceEvent(Piece piece, PieceAuditEvent.Action eventAction) {
-    Metadata metadata = getMetadataOrThrow(piece::getMetadata, piece.getId());
+    Metadata metadata = getMetadataOrThrow(piece.getMetadata(), piece.getId());
     return new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -161,8 +159,8 @@ public class AuditEventProducer {
       tenantId, eventType);
   }
 
-  private Metadata getMetadataOrThrow(Supplier<Metadata> metadata, String id) {
-    return Optional.ofNullable(metadata.get())
+  private Metadata getMetadataOrThrow(Metadata metadata, String id) {
+    return Optional.ofNullable(metadata)
       .orElseThrow(() -> new IllegalArgumentException("Metadata is null for entity with id: %s".formatted(id)));
   }
 
