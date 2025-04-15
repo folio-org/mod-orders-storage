@@ -26,19 +26,15 @@ import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.folio.util.ResourcePath;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 @Log4j2
-@Service
 public class ConsortiumConfigurationService {
 
   private final RestClient restClient;
   private final SettingService settingService;
   private final AsyncCache<String, Optional<ConsortiumConfiguration>> asyncCache;
 
-  public ConsortiumConfigurationService(RestClient restClient, SettingService settingService,
-                                        @Value("${orders-storage.cache.consortium-data.expiration.time.seconds:300}") long cacheExpirationTime) {
+  public ConsortiumConfigurationService(RestClient restClient, SettingService settingService, long cacheExpirationTime) {
     this.restClient = restClient;
     this.settingService = settingService;
 
