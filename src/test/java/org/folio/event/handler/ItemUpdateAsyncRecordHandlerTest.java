@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -47,52 +48,52 @@ import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 @Slf4j
 public class ItemUpdateAsyncRecordHandlerTest {
 
   private static final String PO_LINE_SAVE_FAILED_MSG = "Pieces save failed";
 
-  @Mock
   private PieceService pieceService;
-  @Mock
   private AuditOutboxService auditOutboxService;
-  @Mock
   private DBClient dbClient;
-  @Mock
   private PostgresClient pgClient;
-  @Mock
   private Conn conn;
-  @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
-  @Mock
   private SettingService settingService;
 
   private InventoryUpdateAsyncRecordHandler handler;
 
   @BeforeEach
   public void initMocks() throws Exception {
-    try (var ignored = MockitoAnnotations.openMocks(this)) {
-      var vertx = Vertx.vertx();
-      var itemHandler = new ItemUpdateAsyncRecordHandler(vertx, mockContext(vertx));
-      TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
-      TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
-      TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
-      handler = spy(itemHandler);
-      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
-        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
-      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
-        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
-      doReturn(Future.succeededFuture(DIKU_TENANT))
-        .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-      doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
-      doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
-      doReturn(dbClient).when(handler).createDBClient(any());
-      doReturn(pgClient).when(dbClient).getPgClient();
-      doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
-    }
+    createMocks();
+    var vertx = Vertx.vertx();
+    var itemHandler = new ItemUpdateAsyncRecordHandler(vertx, mockContext(vertx));
+    TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
+    TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
+    TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
+    handler = spy(itemHandler);
+    doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+      .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.succeededFuture(DIKU_TENANT))
+      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
+    doReturn(dbClient).when(handler).createDBClient(any());
+    doReturn(pgClient).when(dbClient).getPgClient();
+    doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
+  }
+
+  private void createMocks() {
+    pieceService = mock(PieceService.class);
+    auditOutboxService = mock(AuditOutboxService.class);
+    dbClient = mock(DBClient.class);
+    pgClient = mock(PostgresClient.class);
+    conn = mock(Conn.class);
+    consortiumConfigurationService = mock(ConsortiumConfigurationService.class);
+    settingService = mock(SettingService.class);
   }
 
   @Test

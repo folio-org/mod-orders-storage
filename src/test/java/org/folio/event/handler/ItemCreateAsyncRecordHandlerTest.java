@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -61,56 +62,55 @@ import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 public class ItemCreateAsyncRecordHandlerTest {
 
-  @Spy
   private SettingService settingService;
-  @Mock
   private PieceService pieceService;
-  @Mock
   private PoLinesService poLinesService;
-  @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
-  @Mock
   private AuditOutboxService auditOutboxService;
-  @Mock
   private DBClient dbClient;
-  @Mock
   private PostgresClient pgClient;
-  @Mock
   private Conn conn;
 
   private InventoryCreateAsyncRecordHandler handler;
 
   @BeforeEach
   public void initMocks() throws Exception {
-    try (var ignored = MockitoAnnotations.openMocks(this)) {
-      var vertx = Vertx.vertx();
-      var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
-      TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
-      TestUtils.setInternalState(itemHandler, "poLinesService", poLinesService);
-      TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
-      TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
-      handler = spy(itemHandler);
-      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
-        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
-      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(CENTRAL_TENANT, CONSORTIUM_ID))))
-        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
-      doReturn(Future.succeededFuture(CENTRAL_TENANT))
-        .when(consortiumConfigurationService)
-        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT)));
-      doReturn(Future.succeededFuture(CENTRAL_TENANT))
-        .when(consortiumConfigurationService)
-        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT, CONSORTIUM_ID, CENTRAL_TENANT)));
-      doReturn(Future.succeededFuture(0)).when(auditOutboxService).processOutboxEventLogs(anyMap());
-      doReturn(dbClient).when(handler).createDBClient(any());
-      doReturn(pgClient).when(dbClient).getPgClient();
-      doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
-    }
+    createMocks();
+    var vertx = Vertx.vertx();
+    var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
+    TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
+    TestUtils.setInternalState(itemHandler, "poLinesService", poLinesService);
+    TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
+    TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
+    handler = spy(itemHandler);
+    doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+      .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(CENTRAL_TENANT, CONSORTIUM_ID))))
+      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+    doReturn(Future.succeededFuture(CENTRAL_TENANT))
+      .when(consortiumConfigurationService)
+      .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT)));
+    doReturn(Future.succeededFuture(CENTRAL_TENANT))
+      .when(consortiumConfigurationService)
+      .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT, CONSORTIUM_ID, CENTRAL_TENANT)));
+    doReturn(Future.succeededFuture(0)).when(auditOutboxService).processOutboxEventLogs(anyMap());
+    doReturn(dbClient).when(handler).createDBClient(any());
+    doReturn(pgClient).when(dbClient).getPgClient();
+    doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
+  }
+
+  private void createMocks() {
+     settingService = mock(SettingService.class);
+     pieceService = mock(PieceService.class);
+     poLinesService = mock(PoLinesService.class);
+     consortiumConfigurationService = mock(ConsortiumConfigurationService.class);
+     auditOutboxService = mock(AuditOutboxService.class);
+     dbClient = mock(DBClient.class);
+     pgClient = mock(PostgresClient.class);
+     conn = mock(Conn.class);
   }
 
   @Test
