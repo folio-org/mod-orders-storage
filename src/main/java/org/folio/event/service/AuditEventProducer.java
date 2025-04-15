@@ -2,10 +2,9 @@ package org.folio.event.service;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.event.AuditEventType;
 import org.folio.kafka.KafkaConfig;
 import org.folio.kafka.KafkaTopicNameHelper;
@@ -26,10 +25,11 @@ import io.vertx.core.Vertx;
 import io.vertx.kafka.client.producer.KafkaProducer;
 import io.vertx.kafka.client.producer.KafkaProducerRecord;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
 @RequiredArgsConstructor
+@Log4j2
 public class AuditEventProducer {
-  private static final Logger log = LogManager.getLogger();
 
   private final KafkaConfig kafkaConfig;
 
@@ -90,7 +90,7 @@ public class AuditEventProducer {
   }
 
   private OrderAuditEvent getOrderEvent(PurchaseOrder order, OrderAuditEvent.Action eventAction) {
-    Metadata metadata = order.getMetadata();
+    Metadata metadata = getMetadataOrThrow(order.getMetadata(), order.getId());
     return new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -98,11 +98,11 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOrderSnapshot(order.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
+      .withOrderSnapshot(order.withMetadata(null)); // not populate metadata to not include it in snapshot's comparison in UI
   }
 
   private OrderLineAuditEvent getOrderLineEvent(PoLine poLine, OrderLineAuditEvent.Action eventAction) {
-    Metadata metadata = poLine.getMetadata();
+    Metadata metadata = getMetadataOrThrow(poLine.getMetadata(), poLine.getId());
     return new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -111,11 +111,11 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOrderLineSnapshot(poLine.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
+      .withOrderLineSnapshot(poLine.withMetadata(null)); // not populate metadata to not include it in snapshot's comparison in UI
   }
 
   private PieceAuditEvent getPieceEvent(Piece piece, PieceAuditEvent.Action eventAction) {
-    Metadata metadata = piece.getMetadata();
+    Metadata metadata = getMetadataOrThrow(piece.getMetadata(), piece.getId());
     return new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -123,7 +123,7 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withPieceSnapshot(piece.withMetadata(null)); // not populate metadata to not include it in snapshot's comparation in UI
+      .withPieceSnapshot(piece.withMetadata(null)); // not populate metadata to not include it in snapshot's comparison in UI
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,
@@ -158,4 +158,10 @@ public class AuditEventProducer {
     return KafkaTopicNameHelper.formatTopicName(envId, KafkaTopicNameHelper.getDefaultNameSpace(),
       tenantId, eventType);
   }
+
+  private Metadata getMetadataOrThrow(Metadata metadata, String id) {
+    return Optional.ofNullable(metadata)
+      .orElseThrow(() -> new IllegalArgumentException("Metadata is null for entity with id: %s".formatted(id)));
+  }
+
 }
