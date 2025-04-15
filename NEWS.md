@@ -1,5 +1,14 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.2 - Released (Sunflower R1 2025 Bug Fix)
+The primary focus of this release was to prevent audit outbox processing if an entity has missing metadata
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.1...v13.9.2)
+
+### Stories
+* [MODORDSTOR-450](https://folio-org.atlassian.net/browse/MODORDSTOR-450) - Prevent audit outbox processing if an entity has missing metadata
+
+
 ## 13.9.1 - Released (Sunflower R1 2025 Bug Fix)
 The primary focus of this release was to improve performance of searching po lines by product ids. 
 
