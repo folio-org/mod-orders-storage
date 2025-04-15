@@ -26,8 +26,10 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
 
 @Log4j2
+@Service
 public class SettingService {
 
   private static final String SETTINGS_TABLE = "settings";
@@ -36,10 +38,7 @@ public class SettingService {
 
   private final AsyncCache<String, Optional<Setting>> asyncCache;
 
-  @Value("${orders-storage.cache.setting-data.expiration.time.seconds:300}")
-  private long cacheExpirationTime;
-
-  public SettingService() {
+  public SettingService(@Value("${orders-storage.cache.setting-data.expiration.time.seconds:300}") long cacheExpirationTime) {
     asyncCache = Caffeine.newBuilder()
       .expireAfterWrite(cacheExpirationTime, TimeUnit.SECONDS)
       .executor(task -> Vertx.currentContext().runOnContext(v -> task.run()))
@@ -103,7 +102,6 @@ public class SettingService {
   private static Optional<Setting> extractSettingIfExistsAndIsUnique(SettingCollection settings) {
     return settings.getTotalRecords() == null || settings.getTotalRecords() != 1 || CollectionUtils.isEmpty(settings.getSettings())
       ? Optional.empty()
-      : Optional.of(settings.getSettings().get(0));
+      : Optional.of(settings.getSettings().getFirst());
   }
-
 }
