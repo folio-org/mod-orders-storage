@@ -1,6 +1,7 @@
 package org.folio.services.consortium;
-
+import io.vertx.core.Context;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
@@ -15,6 +16,8 @@ import org.folio.services.setting.SettingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -24,24 +27,28 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @CopilotGenerated(partiallyGenerated = true)
 @ExtendWith({VertxExtension.class, MockitoExtension.class})
 public class ConsortiumConfigurationServiceTest {
 
+  @InjectMocks
+  private ConsortiumConfigurationService consortiumConfigurationService;
+
+  @Mock
   private RestClient restClient;
+  @Mock
   private SettingService settingService;
+  @Mock
   private RequestContext requestContext;
-  private ConsortiumConfigurationService service;
+
+  private Context context;
 
   @BeforeEach
   public void initMocks() {
-    restClient = mock(RestClient.class);
-    settingService = mock(SettingService.class);
-    requestContext = mock(RequestContext.class);
-    service = new ConsortiumConfigurationService(restClient, settingService);
+    context = Vertx.vertx().getOrCreateContext();
+    consortiumConfigurationService.init();
   }
 
   @Test
@@ -54,7 +61,7 @@ public class ConsortiumConfigurationServiceTest {
 
     doReturn(Future.succeededFuture(consortiumConfiguration)).when(restClient).get(any(RequestEntry.class), any());
 
-    Future<Optional<ConsortiumConfiguration>> future = service.getConsortiumConfiguration(requestContext);
+    Future<Optional<ConsortiumConfiguration>> future = consortiumConfigurationService.getConsortiumConfiguration(requestContext);
 
     vertxTestContext.assertComplete(future)
       .onComplete(ar -> {
@@ -75,7 +82,7 @@ public class ConsortiumConfigurationServiceTest {
 
     doReturn(Future.succeededFuture(consortiumConfiguration)).when(restClient).get(any(RequestEntry.class), any());
 
-    Future<Optional<ConsortiumConfiguration>> future = service.getConsortiumConfiguration(requestContext);
+    Future<Optional<ConsortiumConfiguration>> future = consortiumConfigurationService.getConsortiumConfiguration(requestContext);
 
     vertxTestContext.assertComplete(future)
       .onComplete(ar -> {
@@ -90,7 +97,7 @@ public class ConsortiumConfigurationServiceTest {
   void getConsortiumConfiguration_shouldFail_whenRestClientFails(VertxTestContext vertxTestContext) {
     doReturn(Future.failedFuture(new RuntimeException("Error"))).when(restClient).get(any(RequestEntry.class), any());
 
-    Future<Optional<ConsortiumConfiguration>> future = service.getConsortiumConfiguration(requestContext);
+    Future<Optional<ConsortiumConfiguration>> future = consortiumConfigurationService.getConsortiumConfiguration(requestContext);
 
     vertxTestContext.assertFailure(future)
       .onComplete(ar -> {
@@ -112,7 +119,7 @@ public class ConsortiumConfigurationServiceTest {
     doReturn(Future.succeededFuture(consortiumConfiguration)).when(restClient).get(any(RequestEntry.class), any());
     doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true")))).when(settingService).getSettingByKey(any(), any(), any());
 
-    Future<String> future = service.getCentralTenantId(requestContext.getContext(), Map.of());
+    Future<String> future = consortiumConfigurationService.getCentralTenantId(context, Map.of());
 
     vertxTestContext.assertComplete(future)
       .onComplete(ar -> {
@@ -135,7 +142,7 @@ public class ConsortiumConfigurationServiceTest {
     doReturn(Future.succeededFuture(consortiumConfiguration)).when(restClient).get(any(RequestEntry.class), any());
     doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("false")))).when(settingService).getSettingByKey(any(), any(), any());
 
-    Future<String> future = service.getCentralTenantId(requestContext.getContext(), Map.of());
+    Future<String> future = consortiumConfigurationService.getCentralTenantId(context, Map.of());
 
     vertxTestContext.assertComplete(future)
       .onComplete(ar -> {
@@ -155,7 +162,7 @@ public class ConsortiumConfigurationServiceTest {
 
     doReturn(Future.succeededFuture(consortiumConfiguration)).when(restClient).get(any(RequestEntry.class), any());
 
-    Future<String> future = service.getCentralTenantId(requestContext.getContext(), Map.of());
+    Future<String> future = consortiumConfigurationService.getCentralTenantId(context, Map.of());
 
     vertxTestContext.assertComplete(future)
       .onComplete(ar -> {
@@ -170,7 +177,7 @@ public class ConsortiumConfigurationServiceTest {
   void getCentralTenantId_shouldFail_whenRestClientFails(VertxTestContext vertxTestContext) {
     doReturn(Future.succeededFuture()).when(restClient).get(any(RequestEntry.class), any());
 
-    Future<String> future = service.getCentralTenantId(requestContext.getContext(), Map.of());
+    Future<String> future = consortiumConfigurationService.getCentralTenantId(context, Map.of());
 
     vertxTestContext.assertComplete(future)
       .onComplete(ar -> {
