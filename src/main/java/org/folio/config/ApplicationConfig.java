@@ -210,5 +210,4 @@ public class ApplicationConfig {
   RestClient restClient() {
     return new RestClient();
   }
-
 }

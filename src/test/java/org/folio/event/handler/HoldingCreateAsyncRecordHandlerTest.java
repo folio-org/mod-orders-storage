@@ -1,7 +1,6 @@
 package org.folio.event.handler;
 
 import static org.folio.TestUtils.mockContext;
-import static org.folio.event.EventType.CREATE;
 import static org.folio.event.dto.HoldingFields.ID;
 import static org.folio.event.dto.HoldingFields.PERMANENT_LOCATION_ID;
 import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
@@ -110,7 +109,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var poLineId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var holdingId2 = UUID.randomUUID().toString();
-    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1, DIKU_TENANT, CREATE, LOCATION_ID);
+    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1);
 
     var actualPieces = List.of(
       createPiece(pieceId1, holdingId1).withReceivingTenantId("college"),
@@ -125,8 +124,8 @@ public class HoldingCreateAsyncRecordHandlerTest {
       createPoLine(poLineId2, List.of(createLocation(holdingId1, "college"), createLocation(holdingId1, DIKU_TENANT)))
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId2, "college")), LOCATION_ID),
-      createPoLine(poLineId2, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId1, DIKU_TENANT)), LOCATION_ID)
+      createPoLineWithSearchLocationId(poLineId1, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId2, "college"))),
+      createPoLineWithSearchLocationId(poLineId2, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId1, DIKU_TENANT)))
     );
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
@@ -162,7 +161,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
-    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1, DIKU_TENANT, CREATE, LOCATION_ID);
+    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1);
 
     var actualPieces = List.of(
       createPiece(pieceId1, holdingId1).withReceivingTenantId("college"),
@@ -195,15 +194,15 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var poLineId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var holdingId2 = UUID.randomUUID().toString();
-    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1, DIKU_TENANT, CREATE, LOCATION_ID);
+    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1);
 
     var actualPoLines = List.of(
       createPoLine(poLineId1, List.of(createLocation(holdingId1, "college"), createLocation(holdingId2, "college"))),
       createPoLine(poLineId2, List.of(createLocation(holdingId1, "college"), createLocation(holdingId1, DIKU_TENANT)))
     );
     var expectedPoLines = List.of(
-      createPoLine(poLineId1, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId2, "college")), LOCATION_ID),
-      createPoLine(poLineId2, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId1, DIKU_TENANT)), LOCATION_ID)
+      createPoLineWithSearchLocationId(poLineId1, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId2, "college"))),
+      createPoLineWithSearchLocationId(poLineId2, List.of(createLocation(holdingId1, DIKU_TENANT), createLocation(holdingId1, DIKU_TENANT)))
     );
 
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
@@ -233,7 +232,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
   @Test
   void positive_shouldSkipHoldingCreateEventWhenNoPoLineOrPieceIsFound() {
     var holdingId1 = UUID.randomUUID().toString();
-    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1, DIKU_TENANT, CREATE, LOCATION_ID);
+    var kafkaRecord = createHoldingEventKafkaRecord(holdingId1);
 
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
     doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
@@ -253,13 +252,13 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var pieceId = UUID.randomUUID().toString();
     var poLineId = UUID.randomUUID().toString();
     var holdingId = UUID.randomUUID().toString();
-    var kafkaRecord = createHoldingEventKafkaRecord(holdingId, DIKU_TENANT, CREATE, LOCATION_ID);
+    var kafkaRecord = createHoldingEventKafkaRecord(holdingId);
 
     var actualPieces = List.of(createPiece(pieceId, holdingId).withReceivingTenantId("college"));
     var expectedPieces = List.of(createPiece(pieceId, holdingId).withReceivingTenantId(DIKU_TENANT));
 
     var actualPoLines = List.of(createPoLine(poLineId, List.of(createLocation(holdingId, "college"), createLocation(holdingId, DIKU_TENANT))));
-    var expectedPoLines = List.of(createPoLine(poLineId, List.of(createLocation(holdingId, DIKU_TENANT), createLocation(holdingId, DIKU_TENANT)), LOCATION_ID));
+    var expectedPoLines = List.of(createPoLineWithSearchLocationId(poLineId, List.of(createLocation(holdingId, DIKU_TENANT), createLocation(holdingId, DIKU_TENANT))));
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId), any(Conn.class));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
@@ -281,19 +280,17 @@ public class HoldingCreateAsyncRecordHandlerTest {
     return new PoLine().withId(poLineId).withLocations(locations);
   }
 
-  private static PoLine createPoLine(String poLineId, List<Location> locations, String searchLocationId) {
-    return new PoLine().withId(poLineId).withLocations(locations).withSearchLocationIds(List.of(searchLocationId));
+  private static PoLine createPoLineWithSearchLocationId(String poLineId, List<Location> locations) {
+    return new PoLine().withId(poLineId).withLocations(locations).withSearchLocationIds(List.of(HoldingCreateAsyncRecordHandlerTest.LOCATION_ID));
   }
 
   private static Location createLocation(String holdingId, String tenantId) {
     return new Location().withHoldingId(holdingId).withTenantId(tenantId);
   }
 
-  private static KafkaConsumerRecord<String, String> createHoldingEventKafkaRecord(String id, String tenantId,
-                                                                                   EventType type,
-                                                                                   String permanentLocationId) {
-    var resourceEvent = createResourceEvent(tenantId, type);
-    var holdingObject = JsonObject.of(ID.getValue(), id, PERMANENT_LOCATION_ID.getValue(), permanentLocationId);
+  private static KafkaConsumerRecord<String, String> createHoldingEventKafkaRecord(String id) {
+    var resourceEvent = createResourceEvent(TestHandlerUtil.DIKU_TENANT, EventType.CREATE);
+    var holdingObject = JsonObject.of(ID.getValue(), id, PERMANENT_LOCATION_ID.getValue(), HoldingCreateAsyncRecordHandlerTest.LOCATION_ID);
     resourceEvent.setNewValue(holdingObject);
     return createKafkaRecord(resourceEvent, DIKU_TENANT);
   }

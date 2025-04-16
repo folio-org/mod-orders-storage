@@ -48,6 +48,7 @@ public class ConsortiumConfigurationServiceTest {
   @BeforeEach
   public void initMocks() {
     context = Vertx.vertx().getOrCreateContext();
+    consortiumConfigurationService.init();
   }
 
   @Test
