@@ -41,7 +41,7 @@ public class ConsortiumConfigurationServiceTest {
     restClient = mock(RestClient.class);
     settingService = mock(SettingService.class);
     requestContext = mock(RequestContext.class);
-    service = new ConsortiumConfigurationService(restClient, settingService, 1L);
+    service = new ConsortiumConfigurationService(restClient, settingService);
   }
 
   @Test

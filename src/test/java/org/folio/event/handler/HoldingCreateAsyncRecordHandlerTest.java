@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,60 +45,60 @@ import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
+import org.mockito.Spy;
 
 public class HoldingCreateAsyncRecordHandlerTest {
 
   private static final String LOCATION_ID = UUID.randomUUID().toString();
-
+  @Spy
   private SettingService settingService;
+  @Mock
   private PieceService pieceService;
+  @Mock
   private PoLinesService poLinesService;
+  @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
+  @Mock
   private AuditOutboxService auditOutboxService;
+  @Mock
   private DBClient dbClient;
+  @Mock
   private PostgresClient pgClient;
+  @Mock
   private Conn conn;
 
   private InventoryCreateAsyncRecordHandler handler;
 
   @BeforeEach
   public void initMocks() throws Exception {
-    createMocks();
-    var vertx = Vertx.vertx();
-    var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, mockContext(vertx));
-    TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
-    TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
-    TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
-    TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
-    handler = spy(holdingHandler);
-    doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
-      .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
-    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
-      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
-    doReturn(Future.succeededFuture(DIKU_TENANT))
-      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
-    doReturn(dbClient).when(handler).createDBClient(any());
-    doReturn(pgClient).when(dbClient).getPgClient();
-    doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
-  }
-
-  private void createMocks() {
-    settingService = mock(SettingService.class);
-    pieceService = mock(PieceService.class);
-    poLinesService = mock(PoLinesService.class);
-    consortiumConfigurationService = mock(ConsortiumConfigurationService.class);
-    auditOutboxService = mock(AuditOutboxService.class);
-    dbClient = mock(DBClient.class);
-    pgClient = mock(PostgresClient.class);
-    conn = mock(Conn.class);
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      var vertx = Vertx.vertx();
+      var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, mockContext(vertx));
+      TestUtils.setInternalState(holdingHandler, "pieceService", pieceService);
+      TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
+      TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
+      handler = spy(holdingHandler);
+      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
+        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(DIKU_TENANT))
+        .when(consortiumConfigurationService).getCentralTenantId(any(), any());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), any(), anyMap());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
+      doReturn(dbClient).when(handler).createDBClient(any());
+      doReturn(pgClient).when(dbClient).getPgClient();
+      doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
+    }
   }
 
   @Test
@@ -282,8 +281,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
   }
 
   private static PoLine createPoLineWithSearchLocationId(String poLineId, List<Location> locations) {
-    return new PoLine().withId(poLineId).withLocations(locations)
-      .withSearchLocationIds(List.of(HoldingCreateAsyncRecordHandlerTest.LOCATION_ID));
+    return new PoLine().withId(poLineId).withLocations(locations).withSearchLocationIds(List.of(HoldingCreateAsyncRecordHandlerTest.LOCATION_ID));
   }
 
   private static Location createLocation(String holdingId, String tenantId) {

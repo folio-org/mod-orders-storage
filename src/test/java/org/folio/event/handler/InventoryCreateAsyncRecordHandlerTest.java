@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,6 +42,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -54,26 +56,24 @@ import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
 public class InventoryCreateAsyncRecordHandlerTest {
 
+  @Spy
   private SettingService settingService;
+  @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
 
   private List<InventoryCreateAsyncRecordHandler> handlers;
 
   @BeforeEach
   public void initMocks() throws Exception {
-    createMocks();
-    var vertx = Vertx.vertx();
-    var context = mockContext(vertx);
-    var itemHandler = new ItemCreateAsyncRecordHandler(vertx, context);
-    var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, context);
-    handlers = List.of(spy(itemHandler), spy(holdingHandler));
-    handlers.forEach(handler ->
-      TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService));
-  }
-
-  private void createMocks() {
-    settingService = mock(SettingService.class);
-    consortiumConfigurationService = mock(ConsortiumConfigurationService.class);
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      var vertx = Vertx.vertx();
+      var context = mockContext(vertx);
+      var itemHandler = new ItemCreateAsyncRecordHandler(vertx, context);
+      var holdingHandler = new HoldingCreateAsyncRecordHandler(vertx, context);
+      handlers = List.of(spy(itemHandler), spy(holdingHandler));
+      handlers.forEach(handler ->
+        TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService));
+    }
   }
 
   @ParameterizedTest

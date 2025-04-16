@@ -2,6 +2,7 @@ package org.folio.services.setting;
 
 import static org.folio.util.DbUtils.convertResponseToEntity;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 
 @Log4j2
 public class SettingService {
@@ -33,9 +35,13 @@ public class SettingService {
   private static final String SETTINGS_BY_KEY_QUERY = "key==%s";
   private static final String SETTINGS_CACHE_KEY = "%s.%s";
 
-  private final AsyncCache<String, Optional<Setting>> asyncCache;
+  private AsyncCache<String, Optional<Setting>> asyncCache;
 
-  public SettingService(long cacheExpirationTime) {
+  @Value("${orders-storage.cache.setting-data.expiration.time.seconds:300}")
+  private long cacheExpirationTime;
+
+  @PostConstruct
+  void init() {
     asyncCache = Caffeine.newBuilder()
       .expireAfterWrite(cacheExpirationTime, TimeUnit.SECONDS)
       .executor(task -> Vertx.currentContext().runOnContext(v -> task.run()))

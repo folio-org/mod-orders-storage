@@ -42,7 +42,6 @@ import org.folio.services.piece.PieceService;
 import org.folio.services.setting.SettingService;
 import org.folio.services.title.TitleService;
 import org.folio.services.user.NoOpUserService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -193,9 +192,8 @@ public class ApplicationConfig {
   }
 
   @Bean
-  ConsortiumConfigurationService consortiumConfigurationService(RestClient restClient, SettingService settingService,
-                                                                @Value("${orders-storage.cache.consortium-data.expiration.time.seconds:300}") long cacheExpirationTime) {
-    return new ConsortiumConfigurationService(restClient, settingService, cacheExpirationTime);
+  ConsortiumConfigurationService consortiumConfigurationService(RestClient restClient, SettingService settingService) {
+    return new ConsortiumConfigurationService(restClient, settingService);
   }
 
   @Bean
@@ -204,8 +202,8 @@ public class ApplicationConfig {
   }
 
   @Bean
-  SettingService settingService(@Value("${orders-storage.cache.setting-data.expiration.time.seconds:300}") long cacheExpirationTime) {
-    return new SettingService(cacheExpirationTime);
+  SettingService settingService() {
+    return new SettingService();
   }
 
   @Bean

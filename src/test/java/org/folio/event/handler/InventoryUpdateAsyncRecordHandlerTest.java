@@ -8,6 +8,8 @@ import org.folio.event.dto.ResourceEvent;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
@@ -21,29 +23,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class InventoryUpdateAsyncRecordHandlerTest {
 
+  @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
 
   private InventoryUpdateAsyncRecordHandler handler;
 
   @BeforeEach
   public void initMocks() throws Exception {
-    createMocks();
-    var vertx = Vertx.vertx();
-    var context = mockContext(vertx);
-    var holdingHandler = new HoldingUpdateAsyncRecordHandler(vertx, context);
-    handler = spy(holdingHandler);
-    TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService);
-  }
-
-  private void createMocks() {
-    consortiumConfigurationService = mock(ConsortiumConfigurationService.class);
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      var vertx = Vertx.vertx();
+      var context = mockContext(vertx);
+      var holdingHandler = new HoldingUpdateAsyncRecordHandler(vertx, context);
+      handler = spy(holdingHandler);
+      TestUtils.setInternalState(handler, "consortiumConfigurationService", consortiumConfigurationService);
+    }
   }
 
   @Test

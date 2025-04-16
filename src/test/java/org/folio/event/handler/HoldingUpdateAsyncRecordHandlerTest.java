@@ -28,6 +28,9 @@ import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +74,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -97,58 +99,56 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   private static final String IDENTIFIER_TYPE_VALUE_2 = "Id2";
   private static final String IDENTIFIER_TYPE_ID_2 = "2";
 
+  @Spy
   private SettingService settingService;
+  @Mock
   private PoLinesService poLinesService;
+  @Mock
   private InventoryUpdateService inventoryUpdateService;
+  @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
+  @Mock
   private AuditOutboxService auditOutboxService;
+  @Mock
   private DBClient dbClient;
+  @Mock
   private DBClient dbClientCentral;
+  @Mock
   private PostgresClient pgClient;
+  @Mock
   private PostgresClient pgClientCentral;
+  @Mock
   private Conn conn;
+  @Mock
   private Conn connCentral;
 
   private InventoryUpdateAsyncRecordHandler handler;
 
   @BeforeEach
   public void initMocks() throws Exception {
-    createMocks();
-    var vertx = Vertx.vertx();
-    var holdingHandler = new HoldingUpdateAsyncRecordHandler(vertx, mockContext(vertx));
-    TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
-    TestUtils.setInternalState(holdingHandler, "inventoryUpdateService", inventoryUpdateService);
-    TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
-    TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
-    handler = spy(holdingHandler);
-    doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
-      .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
-    doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(CENTRAL_TENANT, CONSORTIUM_ID))))
-      .when(consortiumConfigurationService).getConsortiumConfiguration(any());
-    doReturn(Future.succeededFuture(CENTRAL_TENANT))
-      .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-    doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
-    doReturn(dbClient).when(handler).createDBClient(eq(UNIVERSITY_TENANT));
-    doReturn(dbClientCentral).when(handler).createDBClient(eq(CENTRAL_TENANT));
-    doReturn(pgClient).when(dbClient).getPgClient();
-    doReturn(pgClientCentral).when(dbClientCentral).getPgClient();
-    doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
-    doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(connCentral)).when(pgClientCentral).withTrans(any());
-  }
-
-  private void createMocks() {
-    settingService = mock(SettingService.class);
-    poLinesService = mock(PoLinesService.class);
-    inventoryUpdateService = mock(InventoryUpdateService.class);
-    consortiumConfigurationService = mock(ConsortiumConfigurationService.class);
-    auditOutboxService = mock(AuditOutboxService.class);
-    dbClient = mock(DBClient.class);
-    dbClientCentral = mock(DBClient.class);
-    pgClient = mock(PostgresClient.class);
-    pgClientCentral= mock(PostgresClient.class);
-    conn = mock(Conn.class);
-    connCentral = mock(Conn.class);
+    try (var ignored = MockitoAnnotations.openMocks(this)) {
+      var vertx = Vertx.vertx();
+      var holdingHandler = new HoldingUpdateAsyncRecordHandler(vertx, mockContext(vertx));
+      TestUtils.setInternalState(holdingHandler, "poLinesService", poLinesService);
+      TestUtils.setInternalState(holdingHandler, "inventoryUpdateService", inventoryUpdateService);
+      TestUtils.setInternalState(holdingHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      TestUtils.setInternalState(holdingHandler, "auditOutboxService", auditOutboxService);
+      handler = spy(holdingHandler);
+      doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
+        .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
+      doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(CENTRAL_TENANT, CONSORTIUM_ID))))
+        .when(consortiumConfigurationService).getConsortiumConfiguration(any());
+      doReturn(Future.succeededFuture(CENTRAL_TENANT))
+        .when(consortiumConfigurationService).getCentralTenantId(any(), any());
+      doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any());
+      doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
+      doReturn(dbClient).when(handler).createDBClient(eq(UNIVERSITY_TENANT));
+      doReturn(dbClientCentral).when(handler).createDBClient(eq(CENTRAL_TENANT));
+      doReturn(pgClient).when(dbClient).getPgClient();
+      doReturn(pgClientCentral).when(dbClientCentral).getPgClient();
+      doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn)).when(pgClient).withTrans(any());
+      doAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(connCentral)).when(pgClientCentral).withTrans(any());
+    }
   }
 
   @Test
@@ -497,7 +497,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
                               String contributor, String contributorNameTypeId,
                               String productId, String productIdType) {
     return createPoLine(poLineId, instanceId, holdings, null, titleOrPackage, publisher,
-                        publicationDate, contributor, contributorNameTypeId, productId, productIdType);
+      publicationDate, contributor, contributorNameTypeId, productId, productIdType);
   }
 
   private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
