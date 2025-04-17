@@ -28,12 +28,14 @@ import org.folio.services.setting.util.SettingKey;
 import org.folio.util.ResourcePath;
 import org.springframework.beans.factory.annotation.Value;
 
+import javax.annotation.PostConstruct;
+
 @Log4j2
 public class ConsortiumConfigurationService {
 
   private final RestClient restClient;
   private final SettingService settingService;
-  private final AsyncCache<String, Optional<ConsortiumConfiguration>> asyncCache;
+  private AsyncCache<String, Optional<ConsortiumConfiguration>> asyncCache;
 
   @Value("${orders-storage.cache.consortium-data.expiration.time.seconds:300}")
   private long cacheExpirationTime;
@@ -41,7 +43,10 @@ public class ConsortiumConfigurationService {
   public ConsortiumConfigurationService(RestClient restClient, SettingService settingService) {
     this.restClient = restClient;
     this.settingService = settingService;
+  }
 
+  @PostConstruct
+  void init() {
     asyncCache = Caffeine.newBuilder()
       .expireAfterWrite(cacheExpirationTime, TimeUnit.SECONDS)
       .executor(task -> Vertx.currentContext().runOnContext(v -> task.run()))

@@ -497,7 +497,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
                               String contributor, String contributorNameTypeId,
                               String productId, String productIdType) {
     return createPoLine(poLineId, instanceId, holdings, null, titleOrPackage, publisher,
-                        publicationDate, contributor, contributorNameTypeId, productId, productIdType);
+      publicationDate, contributor, contributorNameTypeId, productId, productIdType);
   }
 
   private PoLine createPoLine(String poLineId, String instanceId, List<JsonObject> holdings,
