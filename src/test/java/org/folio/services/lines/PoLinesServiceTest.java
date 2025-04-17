@@ -416,7 +416,8 @@ public class PoLinesServiceTest {
   public void shouldFailUpdatePoLineWithTitleWhenUpdatingTitle() {
     String poLineId = UUID.randomUUID().toString();
     PoLine poLine = new PoLine()
-      .withId(poLineId);
+      .withId(poLineId)
+      .withPurchaseOrderId(UUID.randomUUID().toString());
     String titleId = UUID.randomUUID().toString();
     Title title = new Title()
       .withId(titleId)
