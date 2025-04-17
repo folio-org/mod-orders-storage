@@ -3,37 +3,6 @@
   "name": "Orders CRUD module",
   "provides": [
     {
-      "id": "orders-storage.alerts",
-      "version": "3.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/alerts",
-          "permissionsRequired": ["orders-storage.alerts.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/orders-storage/alerts",
-          "permissionsRequired": ["orders-storage.alerts.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/alerts/{id}",
-          "permissionsRequired": ["orders-storage.alerts.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/orders-storage/alerts/{id}",
-          "permissionsRequired": ["orders-storage.alerts.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/orders-storage/alerts/{id}",
-          "permissionsRequired": ["orders-storage.alerts.item.delete"]
-        }
-      ]
-    },
-    {
       "id": "orders-storage.pieces",
       "version": "5.0",
       "handlers": [
@@ -232,37 +201,6 @@
           "methods": ["GET"],
           "pathPattern": "/orders-storage/receiving-history",
           "permissionsRequired": ["orders-storage.receiving-history.collection.get"]
-        }
-      ]
-    },
-    {
-      "id": "orders-storage.reporting-codes",
-      "version": "3.0",
-      "handlers": [
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/reporting-codes",
-          "permissionsRequired": ["orders-storage.reporting-codes.collection.get"]
-        },
-        {
-          "methods": ["POST"],
-          "pathPattern": "/orders-storage/reporting-codes",
-          "permissionsRequired": ["orders-storage.reporting-codes.item.post"]
-        },
-        {
-          "methods": ["GET"],
-          "pathPattern": "/orders-storage/reporting-codes/{id}",
-          "permissionsRequired": ["orders-storage.reporting-codes.item.get"]
-        },
-        {
-          "methods": ["PUT"],
-          "pathPattern": "/orders-storage/reporting-codes/{id}",
-          "permissionsRequired": ["orders-storage.reporting-codes.item.put"]
-        },
-        {
-          "methods": ["DELETE"],
-          "pathPattern": "/orders-storage/reporting-codes/{id}",
-          "permissionsRequired": ["orders-storage.reporting-codes.item.delete"]
         }
       ]
     },
@@ -776,43 +714,6 @@
   ],
   "permissionSets" : [
     {
-      "permissionName" : "orders-storage.alerts.collection.get",
-      "displayName" : "alert-collection get",
-      "description" : "Get a collection of alerts"
-    },
-    {
-      "permissionName" : "orders-storage.alerts.item.post",
-      "displayName" : "alert-item post",
-      "description" : "Create a new alert"
-    },
-    {
-      "permissionName" : "orders-storage.alerts.item.get",
-      "displayName" : "alert-item get",
-      "description" : "Fetch an alert"
-    },
-    {
-      "permissionName" : "orders-storage.alerts.item.put",
-      "displayName" : "alert-item put",
-      "description" : "Update an alert"
-    },
-    {
-      "permissionName" : "orders-storage.alerts.item.delete",
-      "displayName" : "alert-item delete",
-      "description" : "Delete an alert"
-    },
-    {
-      "permissionName" : "orders-storage.alerts.all",
-      "displayName" : "All alert perms",
-      "description" : "All permissions for the alert",
-      "subPermissions" : [
-        "orders-storage.alerts.collection.get",
-        "orders-storage.alerts.item.post",
-        "orders-storage.alerts.item.get",
-        "orders-storage.alerts.item.put",
-        "orders-storage.alerts.item.delete"
-      ]
-    },
-    {
       "permissionName" : "orders-storage.pieces.collection.get",
       "displayName" : "orders-storage.pieces-collection get",
       "description" : "Get a collection of pieces"
@@ -1051,43 +952,6 @@
       "description" : "All permissions for the orders-storage-receiving-history",
       "subPermissions" : [
         "orders-storage.receiving-history.collection.get"
-      ]
-    },
-    {
-      "permissionName" : "orders-storage.reporting-codes.collection.get",
-      "displayName" : "reporting-code-collection get",
-      "description" : "Get a collection of reporting-codes"
-    },
-    {
-      "permissionName" : "orders-storage.reporting-codes.item.post",
-      "displayName" : "reporting-code-item post",
-      "description" : "Create a new reporting-code"
-    },
-    {
-      "permissionName" : "orders-storage.reporting-codes.item.get",
-      "displayName" : "reporting-code-item get",
-      "description" : "Fetch a reporting-code"
-    },
-    {
-      "permissionName" : "orders-storage.reporting-codes.item.put",
-      "displayName" : "reporting-code-item put",
-      "description" : "Update a reporting-code"
-    },
-    {
-      "permissionName" : "orders-storage.reporting-codes.item.delete",
-      "displayName" : "reporting_code-item delete",
-      "description" : "Delete a reporting-code"
-    },
-    {
-      "permissionName" : "orders-storage.reporting-codes.all",
-      "displayName" : "All reporting_code perms",
-      "description" : "All permissions for the reporting-code",
-      "subPermissions" : [
-        "orders-storage.reporting-codes.collection.get",
-        "orders-storage.reporting-codes.item.post",
-        "orders-storage.reporting-codes.item.get",
-        "orders-storage.reporting-codes.item.put",
-        "orders-storage.reporting-codes.item.delete"
       ]
     },
     {
@@ -1617,7 +1481,6 @@
       "displayName" : "All orders-storage-module perms",
       "description" : "All permissions for the orders-storage module",
       "subPermissions" : [
-        "orders-storage.alerts.all",
         "orders-storage.pieces.all",
         "orders-storage.wrapper-pieces.all",
         "orders-storage.titles.all",
@@ -1627,7 +1490,6 @@
         "orders-storage.po-line-number.all",
         "orders-storage.purchase-orders.all",
         "orders-storage.receiving-history.all",
-        "orders-storage.reporting-codes.all",
         "orders-storage.order-invoice-relationships.all",
         "orders-storage.order-templates.all",
         "orders-storage.order-template-categories.all",
