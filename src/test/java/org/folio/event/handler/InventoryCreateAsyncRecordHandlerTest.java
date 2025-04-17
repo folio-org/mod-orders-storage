@@ -148,7 +148,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
       var cause = res.cause();
       assertInstanceOf(RuntimeException.class, cause);
-      assertEquals(cause.getMessage(), errorMessage);
+      assertEquals(errorMessage, cause.getMessage());
 
       verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });
@@ -172,7 +172,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
 
       var cause = res.cause();
       assertInstanceOf(RuntimeException.class, cause);
-      assertEquals(cause.getMessage(), errorMessage);
+      assertEquals(errorMessage, cause.getMessage());
 
       verify(handler, times(0)).processInventoryCreationEvent(any(ResourceEvent.class), eq(DIKU_TENANT), anyMap(), any(DBClient.class));
     });

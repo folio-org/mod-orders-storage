@@ -2,6 +2,7 @@ package org.folio.services.setting;
 
 import static org.folio.util.DbUtils.convertResponseToEntity;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Optional;
@@ -15,7 +16,6 @@ import org.folio.rest.jaxrs.resource.OrdersStorageSettings;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.setting.util.SettingKey;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.github.benmanes.caffeine.cache.AsyncCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -26,6 +26,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 
 @Log4j2
 public class SettingService {
@@ -34,12 +35,13 @@ public class SettingService {
   private static final String SETTINGS_BY_KEY_QUERY = "key==%s";
   private static final String SETTINGS_CACHE_KEY = "%s.%s";
 
-  private final AsyncCache<String, Optional<Setting>> asyncCache;
+  private AsyncCache<String, Optional<Setting>> asyncCache;
 
   @Value("${orders-storage.cache.setting-data.expiration.time.seconds:300}")
   private long cacheExpirationTime;
 
-  public SettingService() {
+  @PostConstruct
+  void init() {
     asyncCache = Caffeine.newBuilder()
       .expireAfterWrite(cacheExpirationTime, TimeUnit.SECONDS)
       .executor(task -> Vertx.currentContext().runOnContext(v -> task.run()))
@@ -103,7 +105,6 @@ public class SettingService {
   private static Optional<Setting> extractSettingIfExistsAndIsUnique(SettingCollection settings) {
     return settings.getTotalRecords() == null || settings.getTotalRecords() != 1 || CollectionUtils.isEmpty(settings.getSettings())
       ? Optional.empty()
-      : Optional.of(settings.getSettings().get(0));
+      : Optional.of(settings.getSettings().getFirst());
   }
-
 }
