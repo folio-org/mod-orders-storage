@@ -154,9 +154,9 @@ public class PurchaseOrderLinesApiTest extends TestBase {
 
     Response response = postData(poLineTstEntities.getEndpoint(), data.toString(), headers);
     response.then()
-      .statusCode(422);
+      .statusCode(400);
 
-    // 422 status, so create order line event should not be produced
+    // 400 status, so create order line event should not be produced
     List<String> sentCreateOrderLineEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 0, userId);
     assertTrue(CollectionUtils.isEmpty(sentCreateOrderLineEvents));
   }

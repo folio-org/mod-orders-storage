@@ -2,14 +2,6 @@ package org.folio.rest.utils;
 
 public class TestData {
 
-  public interface Alert {
-    String DEFAULT = "data/alerts/alert.json";
-  }
-
-  public interface ReportingCode {
-    String DEFAULT = "data/reporting-codes/reporting_code.json";
-  }
-
   public interface PurchaseOrder {
     String DEFAULT = "data/purchase-orders/52590_one-time_pending.json";
     String DEFAULT_81 = "data/purchase-orders/81_ongoing_pending.json";

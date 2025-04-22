@@ -170,18 +170,21 @@
       "run": "after",
       "snippetPath": "data-migration/14.0.0/change_userlimit_to_string.ftl",
       "fromModuleVersion": "mod-orders-storage-14.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/14.0.0/remove_alerts_and_reporting_codes.ftl",
+      "fromModuleVersion": "mod-orders-storage-14.0.0"
     }
   ],
   "tables": [
     {
       "tableName": "alert",
-      "fromModuleVersion": "mod-orders-storage-7.0.0",
-      "withMetadata": true
+      "mode": "delete"
     },
     {
       "tableName": "reporting_code",
-      "fromModuleVersion": "mod-orders-storage-7.0.0",
-      "withMetadata": true
+      "mode": "delete"
     },
     {
       "tableName": "purchase_order",

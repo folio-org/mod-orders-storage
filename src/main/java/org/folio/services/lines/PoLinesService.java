@@ -151,8 +151,11 @@ public class PoLinesService {
   }
 
   public Future<String> createPoLine(Conn conn, PoLine poLine) {
+    if (poLine.getPurchaseOrderId() == null) {
+      log.error("Can't create po line: missing purchaseOrderId");
+      return Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "Can't create po line: missing purchaseOrderId"));
+    }
     Promise<String> promise = Promise.promise();
-
     if (poLine.getId() == null) {
       poLine.setId(UUID.randomUUID()
         .toString());
@@ -365,8 +368,11 @@ public class PoLinesService {
   }
 
   public Future<PoLine> updatePoLine(Conn conn, PoLine poLine) {
+    if (poLine.getPurchaseOrderId() == null) {
+      log.error("Can't update po line: missing purchaseOrderId");
+      return Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "Can't update po line: missing purchaseOrderId"));
+    }
     Promise<PoLine> promise = Promise.promise();
-
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
       .onComplete(ar -> {
