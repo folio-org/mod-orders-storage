@@ -1,5 +1,14 @@
 ## 13.9.0 - Unreleased
 
+## 13.8.4 - Released (Ramsons R2 2024 Bug Fix)
+The primary focus of this release was to add migration script to fill isBound flag to pieces
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.3...v13.8.4)
+
+### Bug Fixes
+* [MODORDSTOR-453](https://folio-org.atlassian.net/browse/MODORDSTOR-453) - Existing pieces are not displayed in Receiving due to the absence of the isBound flag
+
+
 ## 13.8.3 - Released (Ramsons R2 2024 Bug Fix)
 The primary focus of this release was to fix sql query in Piece claiming job
 
