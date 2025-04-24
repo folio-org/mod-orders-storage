@@ -164,7 +164,7 @@
     {
       "run": "after",
       "snippetPath": "data-migration/13.8.0/pieces_add_isBound.sql",
-      "fromModuleVersion": "mod-orders-storage-13.8.0"
+      "fromModuleVersion": "mod-orders-storage-13.8.4"
     },
     {
       "run": "after",
