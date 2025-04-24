@@ -1,5 +1,14 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.3 - Released (Sunflower R1 2025 Bug Fix)
+The primary focus of this release was to add migration script to add isBound flag to pieces
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.2...v13.9.3)
+
+### Bug Fixes
+* [MODORDSTOR-453](https://folio-org.atlassian.net/browse/MODORDSTOR-453) - Existing pieces are not displayed in Receiving due to the absence of the isBound flag
+
+
 ## 13.9.2 - Released (Sunflower R1 2025 Bug Fix)
 The primary focus of this release was to prevent audit outbox processing if an entity has missing metadata
 
