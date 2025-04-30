@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -36,12 +37,17 @@ import org.folio.event.dto.ItemFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
+import org.folio.rest.jaxrs.model.Location;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.inventory.OrderLineLocationUpdateService;
+import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
@@ -49,6 +55,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 @Slf4j
 public class ItemUpdateAsyncRecordHandlerTest {
@@ -57,6 +64,10 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
   @Mock
   private PieceService pieceService;
+  @Mock
+  private PoLinesService poLinesService;
+  @Spy
+  private OrderLineLocationUpdateService orderLineLocationUpdateService;
   @Mock
   private AuditOutboxService auditOutboxService;
   @Mock
@@ -78,8 +89,11 @@ public class ItemUpdateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemUpdateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
+      TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      TestUtils.setInternalState(orderLineLocationUpdateService, "pieceService", pieceService);
+      TestUtils.setInternalState(orderLineLocationUpdateService, "poLinesService", poLinesService);
       handler = spy(itemHandler);
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
@@ -97,33 +111,48 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
   @Test
   void positive_shouldProcessItemUpdateEventWithHoldingsUpdate() {
+    var poLineId = UUID.randomUUID().toString();
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
     var locationId = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
+    var effectiveLocationId2 = UUID.randomUUID().toString();
     var itemId = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var holdingId2 = UUID.randomUUID().toString();
-    var oldItemValueBeforeUpdate = createItem(itemId, holdingId1);
-    var newItemValueBeforeUpdate = createItem(itemId, holdingId2);
+    var oldItemValueBeforeUpdate = createItem(itemId, holdingId1).put(ItemFields.EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1);
+    var newItemValueBeforeUpdate = createItem(itemId, holdingId2).put(ItemFields.EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2);
     var kafkaRecord = createKafkaRecordWithValues(oldItemValueBeforeUpdate, newItemValueBeforeUpdate);
 
+    var poLine = createPoLine(poLineId, holdingId1);
+    var expectedPoLine = createPoLine(poLineId, holdingId1);
+    expectedPoLine.getSearchLocationIds().add(effectiveLocationId2);
+
     var actualPieces = List.of(
-      createPiece(pieceId1, itemId, holdingId1, null),
-      createPiece(pieceId2, itemId, null, locationId)
+      createPiece(pieceId1, itemId, holdingId1, null).withPoLineId(poLineId),
+      createPiece(pieceId2, itemId, null, locationId).withPoLineId(poLineId)
     );
     var expectedPieces = List.of(
-      createPiece(pieceId1, itemId, holdingId2, null)
+      createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
+    doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
+    verify(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    verify(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
+    verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
+    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
   }
 
   @Test
@@ -207,11 +236,18 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verifyNoInteractions(pieceService);
   }
 
+  private static PoLine createPoLine(String poLineId, String holdingId) {
+    return new PoLine().withId(poLineId)
+      .withSearchLocationIds(new ArrayList<>(List.of(holdingId)))
+      .withLocations(new ArrayList<>(List.of(new Location().withHoldingId(holdingId).withQuantity(1).withQuantityPhysical(1))));
+  }
+
   private static Piece createPiece(String pieceId, String itemId, String holdingId, String locationId) {
     return new Piece().withId(pieceId)
       .withItemId(itemId)
       .withHoldingId(holdingId)
-      .withLocationId(locationId);
+      .withLocationId(locationId)
+      .withFormat(Piece.Format.PHYSICAL);
   }
 
   private static JsonObject createItem(String itemId, String holdingId) {

@@ -55,6 +55,7 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.setting.SettingService;
@@ -73,6 +74,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   private PieceService pieceService;
   @Mock
   private PoLinesService poLinesService;
+  @Spy
+  private OrderLineLocationUpdateService orderLineLocationUpdateService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
@@ -92,9 +95,11 @@ public class ItemCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
-      TestUtils.setInternalState(itemHandler, "poLinesService", poLinesService);
+      TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
+      TestUtils.setInternalState(orderLineLocationUpdateService, "pieceService", pieceService);
+      TestUtils.setInternalState(orderLineLocationUpdateService, "poLinesService", poLinesService);
       handler = spy(itemHandler);
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
