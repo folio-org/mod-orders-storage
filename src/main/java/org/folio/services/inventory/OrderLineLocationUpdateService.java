@@ -18,20 +18,19 @@ import org.folio.rest.persist.Conn;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.util.HelperUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+@AllArgsConstructor
 @Log4j2
 public class OrderLineLocationUpdateService {
 
-  @Autowired
-  private PoLinesService poLinesService;
-  @Autowired
-  private PieceService pieceService;
+  private final PoLinesService poLinesService;
+  private final PieceService pieceService;
 
   public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, String centralTenantId, Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByLineIdsByChunks(poLineIds, conn)

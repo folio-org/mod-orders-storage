@@ -62,6 +62,7 @@ import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -74,8 +75,6 @@ public class ItemCreateAsyncRecordHandlerTest {
   private PieceService pieceService;
   @Mock
   private PoLinesService poLinesService;
-  @Spy
-  private OrderLineLocationUpdateService orderLineLocationUpdateService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
@@ -86,6 +85,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   private PostgresClient pgClient;
   @Mock
   private Conn conn;
+  @InjectMocks
+  private OrderLineLocationUpdateService orderLineLocationUpdateService;
 
   private InventoryCreateAsyncRecordHandler handler;
 
@@ -98,8 +99,6 @@ public class ItemCreateAsyncRecordHandlerTest {
       TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
-      TestUtils.setInternalState(orderLineLocationUpdateService, "pieceService", pieceService);
-      TestUtils.setInternalState(orderLineLocationUpdateService, "poLinesService", poLinesService);
       handler = spy(itemHandler);
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
         .when(settingService).getSettingByKey(eq(SettingKey.CENTRAL_ORDERING_ENABLED), any(), any());
