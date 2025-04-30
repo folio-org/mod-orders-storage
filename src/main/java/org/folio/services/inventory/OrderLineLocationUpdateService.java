@@ -1,5 +1,7 @@
 package org.folio.services.inventory;
 
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.groupingBy;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.ID;
 
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,26 +35,26 @@ public class OrderLineLocationUpdateService {
   private final PoLinesService poLinesService;
   private final PieceService pieceService;
 
-  public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, String centralTenantId, Map<String, String> headers, Conn conn) {
+  public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, String tenantId, Map<String, String> headers, Conn conn) {
     return poLinesService.getPoLinesByLineIdsByChunks(poLineIds, conn)
       .map(poLines -> poLines.stream().map(poLine -> pieceService
           .getPiecesByPoLineId(poLine.getId(), conn)
           .map(pieces -> Pair.of(poLine, pieces)))
         .toList())
       .compose(HelperUtils::collectResultsOnSuccess)
-      .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, item, centralTenantId, headers, conn));
+      .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, item, tenantId, headers, conn));
   }
 
   private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
-                                             String centralTenantId, Map<String, String> headers, Conn conn) {
-    log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in centralTenant: '{}'",
-      poLinePiecePairs.size(), item.getString(ID.getValue()), centralTenantId);
+                                             String tenantId, Map<String, String> headers, Conn conn) {
+    log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in tenant: '{}'",
+      poLinePiecePairs.size(), item.getString(ID.getValue()), tenantId);
     var poLinesToUpdate = processPoLinePiecePairs(poLinePiecePairs, item);
     if (CollectionUtils.isEmpty(poLinesToUpdate)) {
       log.info("updatePoLines:: No POLs were changed to update for item: '{}'", item.getString(ID.getValue()));
       return Future.succeededFuture(List.of());
     }
-    return poLinesService.updatePoLines(poLinesToUpdate, conn, centralTenantId, headers)
+    return poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
       .map(v -> poLinesToUpdate);
   }
 
@@ -72,21 +75,23 @@ public class OrderLineLocationUpdateService {
   private boolean updatePoLineLocations(PoLine poLine, List<Piece> pieces) {
     var locations = new ArrayList<Location>();
     var piecesByTenantIdGrouped = pieces.stream().filter(Objects::nonNull)
-      .filter(piece -> Objects.nonNull(piece.getReceivingTenantId()))
-      .collect(Collectors.groupingBy(Piece::getReceivingTenantId, Collectors.toList()));
+      .collect(groupingBy(p -> Optional.ofNullable(p.getReceivingTenantId()), Collectors.toList()));
     piecesByTenantIdGrouped.forEach((tenantId, piecesByTenant) -> {
       var piecesByHoldingIdGrouped = piecesByTenant.stream().filter(Objects::nonNull)
-        .filter(piece -> Objects.nonNull(piece.getHoldingId()))
-        .collect(Collectors.groupingBy(Piece::getHoldingId, Collectors.toList()));
+        .filter(piece -> nonNull(piece.getHoldingId()))
+        .collect(groupingBy(Piece::getHoldingId, Collectors.toList()));
       piecesByHoldingIdGrouped.forEach((holdingId, piecesByHoldings) -> {
         var piecesByFormat = piecesByHoldings.stream().filter(Objects::nonNull)
-          .filter(piece -> Objects.nonNull(piece.getFormat()))
-          .collect(Collectors.groupingBy(Piece::getFormat, Collectors.toList()));
-        locations.add(new Location().withTenantId(tenantId)
+          .filter(piece -> nonNull(piece.getFormat()))
+          .collect(groupingBy(Piece::getFormat, Collectors.toList()));
+        var qtyPhysical = piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size();
+        var qtyElectronic = piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size();
+        var locTenantId = tenantId.orElse(null);
+        locations.add(new Location().withTenantId(locTenantId)
           .withHoldingId(holdingId)
           .withQuantity(piecesByHoldings.size())
-          .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
-          .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size()));
+          .withQuantityPhysical(qtyPhysical > 0 ? qtyPhysical : null)
+          .withQuantityElectronic(qtyElectronic > 0 ? qtyElectronic : null));
       });
     });
     if (locations.isEmpty() || Objects.equals(locations, poLine.getLocations())) {

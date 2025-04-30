@@ -74,7 +74,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     var piecesToUpdate = filterPiecesToUpdate(holder, pieces);
 
     if (CollectionUtils.isEmpty(piecesToUpdate)) {
-      log.info("updatePoLines:: No Pieces were found for holding to update, itemId: {}, holdingId: {}",
+      log.info("updatePieces:: No Pieces were found for holding to update, itemId: {}, holdingId: {}",
         holder.getItemId(), holder.getHoldingId());
       return Future.succeededFuture(List.of());
     }
@@ -86,9 +86,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   private List<Piece> filterPiecesToUpdate(ItemEventHolder holder, List<Piece> pieces) {
     return pieces.stream()
       .filter(Objects::nonNull)
-      .filter(piece ->
-        ObjectUtils.notEqual(piece.getHoldingId(), holder.getHoldingId())
-          && Objects.isNull(piece.getLocationId()))
+      .filter(piece -> ObjectUtils.notEqual(piece.getHoldingId(), holder.getHoldingId()) && Objects.isNull(piece.getLocationId()))
       .toList();
   }
 
@@ -100,7 +98,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
     log.debug("processPoLinesUpdate:: Preparing '{}' poLineIds for update processing", poLineIds.size());
-    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), holder.getCentralTenantId(), holder.getHeaders(), conn)
+    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), holder.getActiveTenantId(), holder.getHeaders(), conn)
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
       .mapEmpty();
   }
