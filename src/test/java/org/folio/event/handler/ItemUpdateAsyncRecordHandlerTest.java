@@ -123,9 +123,8 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var newItemValueBeforeUpdate = createItem(itemId, holdingId2).put(ItemFields.EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2);
     var kafkaRecord = createKafkaRecordWithValues(oldItemValueBeforeUpdate, newItemValueBeforeUpdate);
 
-    var poLine = createPoLine(poLineId, holdingId1);
-    var expectedPoLine = createPoLine(poLineId, holdingId1);
-    expectedPoLine.getSearchLocationIds().add(effectiveLocationId2);
+    var poLine = createPoLine(poLineId, holdingId1, effectiveLocationId1);
+    var expectedPoLine = createPoLine(poLineId, holdingId2, effectiveLocationId1, effectiveLocationId2);
 
     var actualPieces = List.of(
       createPiece(pieceId1, itemId, holdingId1, null).withPoLineId(poLineId),
@@ -235,9 +234,9 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verifyNoInteractions(pieceService);
   }
 
-  private static PoLine createPoLine(String poLineId, String holdingId) {
+  private static PoLine createPoLine(String poLineId, String holdingId, String... effectiveLocationIds) {
     return new PoLine().withId(poLineId)
-      .withSearchLocationIds(new ArrayList<>(List.of(holdingId)))
+      .withSearchLocationIds(new ArrayList<>(List.of(effectiveLocationIds)))
       .withLocations(new ArrayList<>(List.of(new Location().withHoldingId(holdingId).withQuantity(1).withQuantityPhysical(1))));
   }
 

@@ -496,11 +496,13 @@ public class ItemCreateAsyncRecordHandlerTest {
       piecesByHoldingIdGrouped.forEach((holdingId, piecesByHolding) -> {
         var piecesByFormat = piecesByHolding.stream()
           .collect(groupingBy(Piece::getFormat, Collectors.toList()));
+        var qtyPhysical = piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size();
+        var qtyElectronic = piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size();
         var location = new Location().withTenantId(tenantId)
           .withHoldingId(holdingId)
           .withQuantity(piecesByHolding.size())
-          .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
-          .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size());
+          .withQuantityPhysical(qtyPhysical > 0 ? qtyPhysical : null)
+          .withQuantityElectronic(qtyElectronic > 0 ? qtyElectronic : null);
         oldLocations.add(location);
       });
     });
