@@ -25,6 +25,7 @@ import org.folio.service.UserService;
 import org.folio.services.configuration.TenantLocaleSettingsService;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.inventory.InventoryUpdateService;
+import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLineNumbersService;
 import org.folio.services.lines.PoLinesBatchService;
 import org.folio.services.lines.PoLinesService;
@@ -204,6 +205,11 @@ public class ApplicationConfig {
   @Bean
   SettingService settingService() {
     return new SettingService();
+  }
+
+  @Bean
+  OrderLineLocationUpdateService orderLineLocationUpdateService(PoLinesService poLinesService, PieceService pieceService) {
+    return new OrderLineLocationUpdateService(poLinesService, pieceService);
   }
 
   @Bean
