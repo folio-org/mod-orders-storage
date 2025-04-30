@@ -16,9 +16,11 @@ import org.apache.commons.lang.ObjectUtils;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
+import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.persist.Conn;
+import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
 
   @Autowired
   private PieceService pieceService;
-
+  @Autowired
+  private OrderLineLocationUpdateService orderLineLocationUpdateService;
   @Autowired
   private AuditOutboxService auditOutboxService;
 
@@ -53,16 +56,18 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     holder.setCentralTenantId(centralTenantId);
     var dbClient = createDBClient(holder.getActiveTenantId());
     return dbClient.getPgClient()
-      .withTrans(conn -> processPiecesUpdate(holder, conn))
+      .withTrans(conn -> processPiecesUpdate(holder, conn)
+        .compose(pieces -> processPoLinesUpdate(pieces, holder, conn)))
       .onComplete(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
       .mapEmpty();
   }
 
-  private Future<Boolean> processPiecesUpdate(ItemEventHolder holder, Conn conn) {
+  private Future<List<Piece>> processPiecesUpdate(ItemEventHolder holder, Conn conn) {
     return pieceService.getPiecesByItemId(holder.getItemId(), conn)
       .compose(pieces -> updatePieces(holder, pieces, conn))
-      .compose(piecesToUpdate -> auditOutboxService.savePiecesOutboxLog(conn, piecesToUpdate, PieceAuditEvent.Action.EDIT,
-        holder.getHeaders()));
+      .compose(piecesToUpdate -> auditOutboxService
+        .savePiecesOutboxLog(conn, piecesToUpdate, PieceAuditEvent.Action.EDIT, holder.getHeaders())
+        .map(piecesToUpdate));
   }
 
   private Future<List<Piece>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
@@ -87,6 +92,19 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .toList();
   }
 
+  private Future<Void> processPoLinesUpdate(List<Piece> pieces, ItemEventHolder holder, Conn conn) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.info("processPoLinesUpdate:: No updated pieces were found to update for item: '{}' and tenant: '{}' in centralTenant: {}",
+        holder.getItemId(), holder.getTenantId(), holder.getCentralTenantId());
+      return Future.succeededFuture();
+    }
+    var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
+    log.debug("processPoLinesUpdate:: Preparing '{}' poLineIds for update processing", poLineIds.size());
+    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), holder.getCentralTenantId(), holder.getHeaders(), conn)
+      .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
+      .mapEmpty();
+  }
+
   private ItemEventHolder createItemEventHolder(ResourceEvent resourceEvent, Map<String, String> headers) {
     return ItemEventHolder.builder()
       .resourceEvent(resourceEvent)
@@ -94,4 +112,5 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .tenantId(extractTenantFromHeaders(headers))
       .build();
   }
+
 }
