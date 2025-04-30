@@ -55,12 +55,14 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -83,6 +85,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   private PostgresClient pgClient;
   @Mock
   private Conn conn;
+  @InjectMocks
+  private OrderLineLocationUpdateService orderLineLocationUpdateService;
 
   private InventoryCreateAsyncRecordHandler handler;
 
@@ -92,7 +96,7 @@ public class ItemCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
-      TestUtils.setInternalState(itemHandler, "poLinesService", poLinesService);
+      TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);
@@ -492,11 +496,13 @@ public class ItemCreateAsyncRecordHandlerTest {
       piecesByHoldingIdGrouped.forEach((holdingId, piecesByHolding) -> {
         var piecesByFormat = piecesByHolding.stream()
           .collect(groupingBy(Piece::getFormat, Collectors.toList()));
+        var qtyPhysical = piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size();
+        var qtyElectronic = piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size();
         var location = new Location().withTenantId(tenantId)
           .withHoldingId(holdingId)
           .withQuantity(piecesByHolding.size())
-          .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
-          .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size());
+          .withQuantityPhysical(qtyPhysical > 0 ? qtyPhysical : null)
+          .withQuantityElectronic(qtyElectronic > 0 ? qtyElectronic : null);
         oldLocations.add(location);
       });
     });

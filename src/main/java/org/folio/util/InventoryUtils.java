@@ -2,6 +2,7 @@ package org.folio.util;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.ProductId;
@@ -20,10 +21,8 @@ import static org.folio.event.dto.InstanceFields.PUBLISHER;
 import static org.folio.event.dto.InstanceFields.TITLE;
 
 @Log4j2
+@UtilityClass
 public class InventoryUtils {
-
-  private InventoryUtils() {
-  }
 
   public static String getInstanceTitle(JsonObject instance) {
     return instance.getString(TITLE.getValue());
@@ -72,4 +71,5 @@ public class InventoryUtils {
         .withProductIdType(jsonObject.getString(IDENTIFIER_TYPE_ID.getValue())))
       .toList();
   }
+
 }

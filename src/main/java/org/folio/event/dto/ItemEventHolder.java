@@ -23,6 +23,7 @@ public class ItemEventHolder {
   private String tenantId;
 
   private String itemId;
+  private JsonObject item;
   private String holdingId;
   private Pair<String, String> holdingIdPair;
   private String centralTenantId;
@@ -30,6 +31,7 @@ public class ItemEventHolder {
   public void prepareAllIds() {
     var oldValue = JsonObject.mapFrom(resourceEvent.getOldValue());
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
+    setItem(newValue);
     setItemId(newValue.getString(ItemFields.ID.getValue()));
     setHoldingId(newValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue()));
     setHoldingIdPair(Pair.of(
