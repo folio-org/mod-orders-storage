@@ -39,7 +39,7 @@ public class OrderLineLocationUpdateService {
     log.info("processPoLinesUpdate:: Fetching '{}' POL(s) to update location data", poLineIds.size());
     return poLinesService.getPoLinesByLineIdsByChunks(poLineIds, conn)
       .map(poLines -> poLines.stream().map(poLine -> pieceService
-          .getPiecesByPoLineId(poLine.getId(), conn)
+          .getPiecesByPoLineIdForUpdate(poLine.getId(), tenantId, conn)
           .map(pieces -> Pair.of(poLine, pieces)))
         .toList())
       .compose(HelperUtils::collectResultsOnSuccess)

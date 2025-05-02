@@ -61,7 +61,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   }
 
   private Future<List<Piece>> processPiecesUpdate(ItemEventHolder holder, Conn conn) {
-    return pieceService.getPiecesByItemIdForHoldingUpdate(holder.getItemId(), holder.getHoldingId(), holder.getActiveTenantId(), conn)
+    return pieceService.getPiecesByItemId(holder.getItemId(), conn)
       .compose(pieces -> updatePieces(holder, pieces, conn))
       .compose(piecesToUpdate -> auditOutboxService
         .savePiecesOutboxLog(conn, piecesToUpdate, PieceAuditEvent.Action.EDIT, holder.getHeaders())
