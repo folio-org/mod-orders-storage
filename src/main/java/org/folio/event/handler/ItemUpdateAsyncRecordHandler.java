@@ -5,12 +5,14 @@ import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -69,12 +71,21 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   }
 
   private Future<List<Piece>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
-    if (CollectionUtils.isEmpty(pieces)) {
+    var piecesToUpdate = filterPiecesToUpdate(holder, pieces);
+
+    if (CollectionUtils.isEmpty(piecesToUpdate)) {
       log.info("updatePieces:: No pieces were found to update holding by itemId: '{}' and holdingId: '{}'", holder.getItemId(), holder.getHoldingId());
       return Future.succeededFuture(List.of());
     }
-    pieces.forEach(piece -> piece.setHoldingId(holder.getHoldingId()));
-    return pieceService.updatePieces(pieces, conn, holder.getTenantId());
+    piecesToUpdate.forEach(piece -> piece.setHoldingId(holder.getHoldingId()));
+    return pieceService.updatePieces(piecesToUpdate, conn, holder.getTenantId());
+  }
+
+  private List<Piece> filterPiecesToUpdate(ItemEventHolder holder, List<Piece> pieces) {
+    return pieces.stream()
+      .filter(Objects::nonNull)
+      .filter(piece -> ObjectUtils.notEqual(piece.getHoldingId(), holder.getHoldingId()) && Objects.isNull(piece.getLocationId()))
+      .toList();
   }
 
   private Future<Void> processPoLinesUpdate(List<Piece> pieces, ItemEventHolder holder, Conn conn) {
