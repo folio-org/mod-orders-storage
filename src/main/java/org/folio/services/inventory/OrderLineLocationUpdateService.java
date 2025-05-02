@@ -36,6 +36,7 @@ public class OrderLineLocationUpdateService {
   private final PieceService pieceService;
 
   public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, String tenantId, Map<String, String> headers, Conn conn) {
+    log.info("processPoLinesUpdate:: Fetching '{}' POL(s) to update location data", poLineIds.size());
     return poLinesService.getPoLinesByLineIdsByChunks(poLineIds, conn)
       .map(poLines -> poLines.stream().map(poLine -> pieceService
           .getPiecesByPoLineId(poLine.getId(), conn)
@@ -47,13 +48,13 @@ public class OrderLineLocationUpdateService {
 
   private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
                                              String tenantId, Map<String, String> headers, Conn conn) {
-    log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in tenant: '{}'",
-      poLinePiecePairs.size(), item.getString(ID.getValue()), tenantId);
     var poLinesToUpdate = processPoLinePiecePairs(poLinePiecePairs, item);
     if (CollectionUtils.isEmpty(poLinesToUpdate)) {
-      log.info("updatePoLines:: No POLs were changed to update for item: '{}'", item.getString(ID.getValue()));
+      log.info("updatePoLines:: No POLs were changed to update for item: '{}' in tenant: '{}'", item.getString(ID.getValue()), tenantId);
       return Future.succeededFuture(List.of());
     }
+    log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in tenant: '{}'",
+      poLinesToUpdate.size(), item.getString(ID.getValue()), tenantId);
     return poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
       .map(v -> poLinesToUpdate);
   }
@@ -64,9 +65,7 @@ public class OrderLineLocationUpdateService {
         var pieces = poLineListPair.getRight();
         var isLocationsUpdated = updatePoLineLocations(poLine, pieces);
         var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(poLine, itemObject.getString(EFFECTIVE_LOCATION_ID.getValue()));
-        return isLocationsUpdated || isSearchLocationIdsUpdated
-          ? poLine
-          : null;
+        return (isLocationsUpdated || isSearchLocationIdsUpdated) ? poLine : null;
       })
       .filter(Objects::nonNull)
       .toList();

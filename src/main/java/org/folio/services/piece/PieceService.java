@@ -35,6 +35,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.Tuple;
 import lombok.extern.log4j.Log4j2;
 import org.folio.util.SerializerUtil;
 
@@ -47,6 +48,9 @@ public class PieceService {
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id RETURNING pieces.*;";
+  private static final String PIECES_BY_ITEM_FOR_HOLDING_UPDATE_SQL =
+    "SELECT * FROM %s WHERE jsonb->>'itemId' = $1 AND jsonb->>'holdingId' <> $2 " +
+    "AND ((jsonb ? 'locationId') = false OR jsonb->>'locationId' IS NULL) FOR UPDATE;";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
@@ -61,6 +65,13 @@ public class PieceService {
   public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
     var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
     return getPiecesByField(criterion, conn);
+  }
+
+  public Future<List<Piece>> getPiecesByItemIdForHoldingUpdate(String itemId, String holdingId, String tenantId, Conn conn) {
+    return conn.execute(String.format(PIECES_BY_ITEM_FOR_HOLDING_UPDATE_SQL, getFullTableName(tenantId, PIECES_TABLE)), Tuple.of(itemId, holdingId))
+      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
+      .onSuccess(result -> log.info("getPiecesByItemIdForHoldingUpdate:: Successfully fetched {} pieces for update using tenantId: '{}'", result.size(), tenantId))
+      .onFailure(t -> log.error("Failed fetching pieces for update using tenantId: '{}'", tenantId, t));
   }
 
   public Future<List<Piece>> getPiecesByHoldingId(String itemId, Conn conn) {

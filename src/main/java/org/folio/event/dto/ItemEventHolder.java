@@ -4,18 +4,12 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.vertx.core.json.JsonObject;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.With;
 import org.apache.commons.lang3.tuple.Pair;
 
 @Data
-@With
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ItemEventHolder {
 
   private ResourceEvent resourceEvent;
@@ -28,7 +22,7 @@ public class ItemEventHolder {
   private Pair<String, String> holdingIdPair;
   private String centralTenantId;
 
-  public void prepareAllIds() {
+  public ItemEventHolder prepareAllIds() {
     var oldValue = JsonObject.mapFrom(resourceEvent.getOldValue());
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
     setItem(newValue);
@@ -37,9 +31,10 @@ public class ItemEventHolder {
     setHoldingIdPair(Pair.of(
       oldValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue()),
       newValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue())));
+    return this;
   }
 
-  public boolean holdingIdEqual() {
+  public boolean isHoldingIdUpdated() {
     return holdingIdPair.getLeft().equals(holdingIdPair.getRight());
   }
 
