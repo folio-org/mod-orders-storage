@@ -135,7 +135,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     );
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineIdForUpdate(eq(poLineId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
@@ -146,7 +146,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    verify(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
+    verify(pieceService).getPiecesByPoLineIdForUpdate(eq(poLineId), eq(DIKU_TENANT), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
@@ -218,6 +218,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(RuntimeException.class, expectedException.getClass());
+
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService, times(1)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
