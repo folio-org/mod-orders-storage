@@ -34,7 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import io.restassured.http.Header;
-import io.vertx.core.Promise;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -62,12 +62,12 @@ public class PieceServiceTest extends TestBase {
 
   @AfterEach
   void cleanupData() {
-
     deleteTenant(tenantJob, TEST_TENANT_HEADER);
   }
 
   @Test
   void shouldReturnPiecesByPoLineId(Vertx vertx, VertxTestContext testContext) {
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
 
@@ -76,29 +76,10 @@ public class PieceServiceTest extends TestBase {
       .withId(pieceId)
       .withPoLineId(poLineId);
 
-    Promise<Void> promise1 = Promise.promise();
-    Promise<Void> promise2 = Promise.promise();
-    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    var future = createPoLineAndPiece(poLine, piece, client)
+      .compose(o -> pieceService.getPiecesByPoLineId(poLineId, client));
 
-    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
-      promise1.complete();
-      log.info("PoLine was saved");
-    });
-
-
-    promise1.future().onComplete(v -> {
-      client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
-        if (ar.failed()) {
-          promise2.fail(ar.cause());
-        } else {
-          promise2.complete();
-          log.info("Piece was saved");
-        }
-      });
-    });
-
-    testContext.assertComplete(promise2.future()
-        .compose(o -> pieceService.getPiecesByPoLineId(poLineId, client)))
+    testContext.assertComplete(future)
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
@@ -110,6 +91,7 @@ public class PieceServiceTest extends TestBase {
 
   @Test
   void shouldFailedGetPiecesByPoLineId(Vertx vertx, VertxTestContext testContext) {
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
     String incorrectPoLineId = UUID.randomUUID().toString();
@@ -121,36 +103,42 @@ public class PieceServiceTest extends TestBase {
       .withPoLineId(poLineId)
       .withHoldingId(holdingId);
 
-    Promise<Void> promise1 = Promise.promise();
-    Promise<Void> promise2 = Promise.promise();
-    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    var future = createPoLineAndPiece(poLine, piece, client)
+      .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client));
 
-    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
-      promise1.complete();
-      log.info("PoLine was saved");
-    });
-
-
-    promise1.future().onComplete(v -> {
-      client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
-        if (ar.failed()) {
-          promise2.fail(ar.cause());
-        } else {
-          promise2.complete();
-          log.info("Piece was saved");
-        }
-      });
-    });
-
-    testContext.assertComplete(promise2.future()
-      .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client))
+    testContext.assertComplete(future)
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
           assertNull(actPieces);
         });
         testContext.completeNow();
-      }));
+      });
+  }
+
+
+  @Test
+  void shouldReturnPiecesByPoLineIdForUpdate(Vertx vertx, VertxTestContext testContext) {
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    String poLineId = UUID.randomUUID().toString();
+    String pieceId = UUID.randomUUID().toString();
+    PoLine poLine = new PoLine().withId(poLineId);
+    Piece piece = new Piece()
+      .withId(pieceId)
+      .withPoLineId(poLineId);
+
+    var future = client.getPgClient().withConn(conn -> conn.save(PO_LINE_TABLE, poLineId, poLine)
+      .compose(v -> conn.save(PIECES_TABLE, pieceId, piece))
+      .compose(v -> pieceService.getPiecesByPoLineIdForUpdate(poLineId, TEST_TENANT, conn)));
+
+    testContext.assertComplete(future)
+      .onComplete(ar -> {
+        List<Piece> actPieces = ar.result();
+        testContext.verify(() -> {
+          assertThat(actPieces.getFirst().getId(), is(pieceId));
+        });
+        testContext.completeNow();
+      });
   }
 
   @Test
@@ -169,7 +157,7 @@ public class PieceServiceTest extends TestBase {
 
         return testContext.assertComplete(getPiecesFuture).onComplete(ar -> {
           List<Piece> actPieces = ar.result();
-          testContext.verify(() -> assertThat(actPieces.get(0).getId(), is(pieceId)));
+          testContext.verify(() -> assertThat(actPieces.getFirst().getId(), is(pieceId)));
           testContext.completeNow();
         });
       });
@@ -204,8 +192,7 @@ public class PieceServiceTest extends TestBase {
     String poLineId = UUID.randomUUID().toString();
     String pieceId = UUID.randomUUID().toString();
     String holdingId = UUID.randomUUID().toString();
-    Promise<Void> promise1 = Promise.promise();
-    Promise<Void> promise2 = Promise.promise();
+
     final DBClient client = new DBClient(vertx, TEST_TENANT);
     PoLine poLine = new PoLine().withId(poLineId);
     Piece piece = new Piece()
@@ -221,37 +208,20 @@ public class PieceServiceTest extends TestBase {
 
     Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
 
-    client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
-      promise1.complete();
-      log.info("PoLine was saved");
-    });
+    var poLinePieceFuture = createPoLineAndPiece(poLine, piece, client);
 
-    promise1.future().onComplete(v -> {
-      client.getPgClient().save(PIECES_TABLE, pieceId, piece, ar -> {
-        if (ar.failed()) {
-          promise2.fail(ar.cause());
-        } else {
-          promise2.complete();
-          log.info("Piece was saved");
-        }
-      });
-    });
-
-    testContext.assertComplete(
-      tx.startTx()
-        .compose(poLineTx ->
-          promise2.future()
-            .compose(o -> pieceService.updatePieces(poLineTx, replaceInstanceRef, client)))
-        .compose(Tx::endTx)
-        .onComplete(v -> pieceService.getPiecesByPoLineId(poLineId, client)
-          .onComplete(ar -> {
-            List<Piece> actPieces = ar.result();
-            testContext.verify(() -> {
-              assertThat(actPieces.get(0).getId(), is(pieceId));
-              assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
-            });
-            testContext.completeNow();
-          })));
+    testContext.assertComplete(tx.startTx()
+      .compose(poLineTx -> poLinePieceFuture.compose(o -> pieceService.updatePieces(poLineTx, replaceInstanceRef, client)))
+      .compose(Tx::endTx)
+      .onComplete(v -> pieceService.getPiecesByPoLineId(poLineId, client)
+        .onComplete(ar -> {
+          List<Piece> actPieces = ar.result();
+          testContext.verify(() -> {
+            assertThat(actPieces.getFirst().getId(), is(pieceId));
+            assertThat(actPieces.getFirst().getHoldingId(), is(newHoldingId));
+          });
+          testContext.completeNow();
+        })));
   }
 
   @Test
@@ -283,10 +253,10 @@ public class PieceServiceTest extends TestBase {
           .onComplete(ar -> {
             List<Piece> actPieces = ar.result();
             testContext.verify(() -> {
-              assertThat(actPieces.get(0).getId(), is(pieceId));
-              assertThat(actPieces.get(0).getItemId(), is(itemId));
-              assertThat(actPieces.get(0).getHoldingId(), is(newHoldingId));
-              assertThat(actPieces.get(0).getReceivingTenantId(), is(TEST_TENANT));
+              assertThat(actPieces.getFirst().getId(), is(pieceId));
+              assertThat(actPieces.getFirst().getItemId(), is(itemId));
+              assertThat(actPieces.getFirst().getHoldingId(), is(newHoldingId));
+              assertThat(actPieces.getFirst().getReceivingTenantId(), is(TEST_TENANT));
             });
             testContext.completeNow();
           }));
@@ -331,4 +301,15 @@ public class PieceServiceTest extends TestBase {
         });
     });
   }
+
+  private Future<Void> createPoLineAndPiece(PoLine poLine, Piece piece, DBClient client) {
+    var pgClient = client.getPgClient();
+    return client.getPgClient()
+      .save(PO_LINE_TABLE, poLine.getId(), poLine)
+      .onSuccess(s -> log.info("PoLine was saved"))
+      .compose(v -> pgClient.save(PIECES_TABLE, piece.getId(), piece))
+      .onSuccess(s -> log.info("Piece was saved"))
+      .mapEmpty();
+  }
+
 }
