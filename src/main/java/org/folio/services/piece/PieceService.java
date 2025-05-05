@@ -49,20 +49,22 @@ public class PieceService {
 
   private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id RETURNING pieces.*;";
   private static final String PIECES_BY_POL_ID_FOR_UPDATE_SQL = "SELECT * FROM %s WHERE polineid = $1 FOR UPDATE;";
+  private static final String PIECES_BY_ITEM_ID_EXIST_SQL = "SELECT COUNT(*) FROM %s WHERE jsonb->>'itemId' = $1;";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
     return client.getPgClient().withConn(conn -> getPiecesByField(criterion, conn));
   }
 
-  public Future<List<Piece>> getPiecesByPoLineId(String poLineId, Conn conn) {
-    var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
-    return getPiecesByField(criterion, conn);
-  }
-
   public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
     var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
     return getPiecesByField(criterion, conn);
+  }
+
+  public Future<Boolean> getPiecesByItemIdExist(String itemId, String tenantId, Conn conn) {
+    return conn.execute(String.format(PIECES_BY_ITEM_ID_EXIST_SQL, getFullTableName(tenantId, PIECES_TABLE)), Tuple.of(itemId))
+      .map(DbUtils::getRowSetAsCount)
+      .map(count -> count > 0);
   }
 
   public Future<List<Piece>> getPiecesByPoLineIdForUpdate(String poLineId, String tenantId, Conn conn) {

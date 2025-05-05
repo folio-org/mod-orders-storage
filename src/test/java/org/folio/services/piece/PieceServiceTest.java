@@ -82,9 +82,7 @@ public class PieceServiceTest extends TestBase {
     testContext.assertComplete(future)
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
-        testContext.verify(() -> {
-          assertThat(actPieces.get(0).getId(), is(pieceId));
-        });
+        testContext.verify(() -> assertThat(actPieces.getFirst().getId(), is(pieceId)));
         testContext.completeNow();
       });
   }
@@ -109,9 +107,7 @@ public class PieceServiceTest extends TestBase {
     testContext.assertComplete(future)
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
-        testContext.verify(() -> {
-          assertNull(actPieces);
-        });
+        testContext.verify(() -> assertNull(actPieces));
         testContext.completeNow();
       });
   }
@@ -134,9 +130,7 @@ public class PieceServiceTest extends TestBase {
     testContext.assertComplete(future)
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
-        testContext.verify(() -> {
-          assertThat(actPieces.getFirst().getId(), is(pieceId));
-        });
+        testContext.verify(() -> assertThat(actPieces.getFirst().getId(), is(pieceId)));
         testContext.completeNow();
       });
   }

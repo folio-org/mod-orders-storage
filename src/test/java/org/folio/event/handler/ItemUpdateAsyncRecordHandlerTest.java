@@ -134,6 +134,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
       createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
 
+    doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineIdForUpdate(eq(poLineId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
@@ -182,6 +183,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     resourceEvent.setNewValue(newItemValueBeforeUpdate);
     var kafkaRecord = createKafkaRecord(resourceEvent, DIKU_TENANT);
 
+    doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
 
     var result = handler.handle(kafkaRecord);
@@ -212,6 +214,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
       createPiece(pieceId1, itemId, holdingId2, null)
     );
 
+    doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();

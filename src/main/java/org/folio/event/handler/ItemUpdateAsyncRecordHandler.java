@@ -1,6 +1,7 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_UPDATE;
+import static org.folio.util.FutureUtils.asFuture;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 
 import java.util.List;
@@ -48,21 +49,29 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture();
     }
     return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
-      .compose(centralTenantId -> processItemUpdateEvent(holder, centralTenantId));
+      .compose(centralTenantId -> asFuture(() -> holder.setCentralTenantId(centralTenantId)))
+      .compose(v -> processItemUpdateEvent(holder));
   }
 
-  private Future<Void> processItemUpdateEvent(ItemEventHolder holder, String centralTenantId) {
-    holder.setCentralTenantId(centralTenantId);
+  private Future<Void> processItemUpdateEvent(ItemEventHolder holder) {
     log.info("processItemUpdateEvent:: Processing item update event for item: '{}' and tenant: '{}' in centralTenant: '{}', active tenant being: '{}'",
       holder.getItemId(), holder.getTenantId(), holder.getCentralTenantId(), holder.getActiveTenantId());
+    return determineOrderTenant(holder)
+      .compose(v -> createDBClient(holder.getOrderTenantId()).getPgClient()
+        .withTrans(conn -> processPiecesUpdate(holder, conn)
+          .compose(pieces -> processPoLinesUpdate(pieces, holder, conn)))
+        .onComplete(ar -> auditOutboxService.processOutboxEventLogs(holder.getHeaders())));
+  }
+
+  private Future<Void> determineOrderTenant(ItemEventHolder holder) {
     return createDBClient(holder.getActiveTenantId()).getPgClient()
-      .withTrans(conn -> processPiecesUpdate(holder, conn)
-        .compose(pieces -> processPoLinesUpdate(pieces, holder, conn)))
-      .onComplete(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()))
-      .mapEmpty();
+      .withTrans(conn -> pieceService.getPiecesByItemIdExist(holder.getItemId(), holder.getActiveTenantId(), conn)
+        .map(exists -> exists ? holder.getActiveTenantId() : holder.getTenantId()))
+      .compose(tenantId -> asFuture(() -> holder.setOrderTenantId(tenantId)));
   }
 
   private Future<List<Piece>> processPiecesUpdate(ItemEventHolder holder, Conn conn) {
+    log.info("processPiecesUpdate:: Processing pieces update with determined order tenant: '{}'", holder.getOrderTenantId());
     return pieceService.getPiecesByItemId(holder.getItemId(), conn)
       .compose(pieces -> updatePieces(holder, pieces, conn))
       .compose(piecesToUpdate -> auditOutboxService
@@ -78,7 +87,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture(List.of());
     }
     piecesToUpdate.forEach(piece -> piece.setHoldingId(holder.getHoldingId()));
-    return pieceService.updatePieces(piecesToUpdate, conn, holder.getTenantId());
+    return pieceService.updatePieces(piecesToUpdate, conn, holder.getOrderTenantId());
   }
 
   private List<Piece> filterPiecesToUpdate(ItemEventHolder holder, List<Piece> pieces) {
@@ -94,7 +103,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture();
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
-    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), holder.getActiveTenantId(), holder.getHeaders(), conn)
+    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), holder.getOrderTenantId(), holder.getHeaders(), conn)
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
       .mapEmpty();
   }

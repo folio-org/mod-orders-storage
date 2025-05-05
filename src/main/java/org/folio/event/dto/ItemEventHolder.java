@@ -16,11 +16,13 @@ public class ItemEventHolder {
   private Map<String, String> headers;
   private String tenantId;
 
+  private String orderTenantId;
+  private String centralTenantId;
+
   private String itemId;
   private JsonObject item;
   private String holdingId;
   private Pair<String, String> holdingIdPair;
-  private String centralTenantId;
 
   public ItemEventHolder prepareAllIds() {
     var oldValue = JsonObject.mapFrom(resourceEvent.getOldValue());
@@ -41,4 +43,5 @@ public class ItemEventHolder {
   public String getActiveTenantId() {
     return Objects.nonNull(centralTenantId) ? centralTenantId : tenantId;
   }
+
 }

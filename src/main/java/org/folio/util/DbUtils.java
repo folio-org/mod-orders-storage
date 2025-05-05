@@ -66,6 +66,12 @@ public final class DbUtils {
       .toList();
   }
 
+  public static long getRowSetAsCount(RowSet<Row> rowSet) {
+    return IteratorUtils.toList(rowSet.iterator()).stream()
+      .map(row -> row.getLong(0))
+      .findFirst().orElse(0L);
+  }
+
   public static <T> T convertResponseToEntity(Response response, Class<T> entityClass) {
     try {
       return JsonObject.mapFrom(response.getEntity()).mapTo(entityClass);
