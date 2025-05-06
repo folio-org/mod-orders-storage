@@ -1,8 +1,8 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_UPDATE;
-import static org.folio.util.FutureUtils.asFuture;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
+import static org.folio.util.HelperUtils.asFuture;
 
 import java.util.List;
 import java.util.Map;
