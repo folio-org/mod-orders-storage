@@ -48,19 +48,11 @@ public class PieceService {
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id RETURNING pieces.*;";
-  private static final String PIECES_BY_POL_ID_FOR_UPDATE_SQL = "SELECT * FROM %s WHERE polineid = $1 FOR UPDATE;";
   private static final String PIECES_BY_ITEM_ID_EXIST_SQL = "SELECT COUNT(*) FROM %s WHERE jsonb->>'itemId' = $1;";
 
-  public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
+  public Future<List<Piece>> getPiecesByPoLineId(String poLineId, Conn conn) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
-    return client.getPgClient().withConn(conn -> getPiecesByField(criterion, conn));
-  }
-
-  public Future<List<Piece>> getPiecesByPoLineIdForUpdate(String poLineId, String tenantId, Conn conn) {
-    return conn.execute(String.format(PIECES_BY_POL_ID_FOR_UPDATE_SQL, getFullTableName(tenantId, PIECES_TABLE)), Tuple.of(poLineId))
-      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
-      .onSuccess(result -> log.info("getPiecesByPoLineIdForHoldingUpdate:: Successfully fetched {} pieces for update using tenantId: '{}'", result.size(), tenantId))
-      .onFailure(t -> log.error("Failed fetching pieces for update using tenantId: '{}'", tenantId, t));
+    return getPiecesByField(criterion, conn);
   }
 
   public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
@@ -163,7 +155,7 @@ public class PieceService {
   }
 
   public Future<Tx<PoLine>> updatePieces(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
-    return getPiecesByPoLineId(poLineTx.getEntity().getId(), client)
+    return client.getPgClient().withConn(conn -> getPiecesByPoLineId(poLineTx.getEntity().getId(), conn))
       .compose(pieces -> updateHoldingForPieces(poLineTx, pieces, replaceInstanceRef, client))
       .onComplete(ar -> {
         if (ar.failed()) {

@@ -37,9 +37,9 @@ public class OrderLineLocationUpdateService {
 
   public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, String tenantId, Map<String, String> headers, Conn conn) {
     log.info("processPoLinesUpdate:: Fetching '{}' POL(s) to update location data", poLineIds.size());
-    return poLinesService.getPoLinesByLineIdsByChunks(poLineIds, conn)
+    return poLinesService.getPoLinesByIdsForUpdate(poLineIds, tenantId, conn)
       .map(poLines -> poLines.stream().map(poLine -> pieceService
-          .getPiecesByPoLineIdForUpdate(poLine.getId(), tenantId, conn)
+          .getPiecesByPoLineId(poLine.getId(), conn)
           .map(pieces -> Pair.of(poLine, pieces)))
         .toList())
       .compose(HelperUtils::collectResultsOnSuccess)
