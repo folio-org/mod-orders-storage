@@ -8,7 +8,9 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -179,6 +181,35 @@ public class PieceServiceTest extends TestBase {
             testContext.completeNow();
           });
       });
+  }
+
+  @Test
+  void shouldReturnPiecesByItemIdExist(Vertx vertx, VertxTestContext testContext) {
+    var itemId = UUID.randomUUID().toString();
+    var pieceId = UUID.randomUUID().toString();
+    var piece = new Piece().withId(pieceId).withItemId(itemId);
+
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn -> {
+      var future = conn.save(PIECES_TABLE, pieceId, piece)
+        .compose(saved -> pieceService.getPiecesByItemIdExist(itemId, TEST_TENANT, conn));
+      return testContext.assertComplete(future).onComplete(ar -> {
+        testContext.verify(() -> assertTrue(ar.result()));
+        testContext.completeNow();
+      });
+    });
+  }
+
+  @Test
+  void shouldReturnPiecesByItemIdNotExist(Vertx vertx, VertxTestContext testContext) {
+    var itemId = UUID.randomUUID().toString();
+
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn -> {
+      var future = pieceService.getPiecesByItemIdExist(itemId, TEST_TENANT, conn);
+      return testContext.assertComplete(future).onComplete(ar -> {
+        testContext.verify(() -> assertFalse(ar.result()));
+        testContext.completeNow();
+      });
+    });
   }
 
   @Test

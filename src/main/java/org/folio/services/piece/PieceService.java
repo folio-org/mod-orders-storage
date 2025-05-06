@@ -56,6 +56,13 @@ public class PieceService {
     return client.getPgClient().withConn(conn -> getPiecesByField(criterion, conn));
   }
 
+  public Future<List<Piece>> getPiecesByPoLineIdForUpdate(String poLineId, String tenantId, Conn conn) {
+    return conn.execute(String.format(PIECES_BY_POL_ID_FOR_UPDATE_SQL, getFullTableName(tenantId, PIECES_TABLE)), Tuple.of(poLineId))
+      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
+      .onSuccess(result -> log.info("getPiecesByPoLineIdForHoldingUpdate:: Successfully fetched {} pieces for update using tenantId: '{}'", result.size(), tenantId))
+      .onFailure(t -> log.error("Failed fetching pieces for update using tenantId: '{}'", tenantId, t));
+  }
+
   public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
     var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
     return getPiecesByField(criterion, conn);
@@ -65,13 +72,6 @@ public class PieceService {
     return conn.execute(String.format(PIECES_BY_ITEM_ID_EXIST_SQL, getFullTableName(tenantId, PIECES_TABLE)), Tuple.of(itemId))
       .map(DbUtils::getRowSetAsCount)
       .map(count -> count > 0);
-  }
-
-  public Future<List<Piece>> getPiecesByPoLineIdForUpdate(String poLineId, String tenantId, Conn conn) {
-    return conn.execute(String.format(PIECES_BY_POL_ID_FOR_UPDATE_SQL, getFullTableName(tenantId, PIECES_TABLE)), Tuple.of(poLineId))
-      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
-      .onSuccess(result -> log.info("getPiecesByPoLineIdForHoldingUpdate:: Successfully fetched {} pieces for update using tenantId: '{}'", result.size(), tenantId))
-      .onFailure(t -> log.error("Failed fetching pieces for update using tenantId: '{}'", tenantId, t));
   }
 
   public Future<List<Piece>> getPiecesByHoldingId(String itemId, Conn conn) {
