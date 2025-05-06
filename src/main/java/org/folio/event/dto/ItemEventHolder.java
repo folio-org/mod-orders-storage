@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.util.HeaderUtils;
 
 @Data
 @Builder
@@ -34,6 +35,11 @@ public class ItemEventHolder {
       oldValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue()),
       newValue.getString(ItemFields.HOLDINGS_RECORD_ID.getValue())));
     return this;
+  }
+
+  public void setOrderTenantId(String orderTenantId) {
+    this.orderTenantId = orderTenantId;
+    this.headers = HeaderUtils.prepareHeaderForTenant(orderTenantId, headers);
   }
 
   public boolean isHoldingIdUpdated() {
