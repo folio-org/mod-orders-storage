@@ -136,9 +136,9 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineIdForUpdate(eq(poLineId), eq(DIKU_TENANT), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
+    doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
@@ -147,9 +147,9 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    verify(pieceService).getPiecesByPoLineIdForUpdate(eq(poLineId), eq(DIKU_TENANT), any(Conn.class));
+    verify(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
+    verify(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
   }

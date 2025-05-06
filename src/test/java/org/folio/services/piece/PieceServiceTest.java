@@ -79,7 +79,8 @@ public class PieceServiceTest extends TestBase {
       .withPoLineId(poLineId);
 
     var future = createPoLineAndPiece(poLine, piece, client)
-      .compose(o -> pieceService.getPiecesByPoLineId(poLineId, client));
+      .compose(v -> client.getPgClient()
+        .withConn(conn -> pieceService.getPiecesByPoLineId(poLineId, conn)));
 
     testContext.assertComplete(future)
       .onComplete(ar -> {
@@ -104,7 +105,8 @@ public class PieceServiceTest extends TestBase {
       .withHoldingId(holdingId);
 
     var future = createPoLineAndPiece(poLine, piece, client)
-      .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client));
+      .compose(v -> client.getPgClient()
+        .withConn(conn -> pieceService.getPiecesByPoLineId(incorrectPoLineId, conn)));
 
     testContext.assertComplete(future)
       .onComplete(ar -> {
@@ -114,28 +116,6 @@ public class PieceServiceTest extends TestBase {
       });
   }
 
-
-  @Test
-  void shouldReturnPiecesByPoLineIdForUpdate(Vertx vertx, VertxTestContext testContext) {
-    final DBClient client = new DBClient(vertx, TEST_TENANT);
-    String poLineId = UUID.randomUUID().toString();
-    String pieceId = UUID.randomUUID().toString();
-    PoLine poLine = new PoLine().withId(poLineId);
-    Piece piece = new Piece()
-      .withId(pieceId)
-      .withPoLineId(poLineId);
-
-    var future = client.getPgClient().withConn(conn -> conn.save(PO_LINE_TABLE, poLineId, poLine)
-      .compose(v -> conn.save(PIECES_TABLE, pieceId, piece))
-      .compose(v -> pieceService.getPiecesByPoLineIdForUpdate(poLineId, TEST_TENANT, conn)));
-
-    testContext.assertComplete(future)
-      .onComplete(ar -> {
-        List<Piece> actPieces = ar.result();
-        testContext.verify(() -> assertThat(actPieces.getFirst().getId(), is(pieceId)));
-        testContext.completeNow();
-      });
-  }
 
   @Test
   void shouldReturnPiecesByItemId(Vertx vertx, VertxTestContext testContext) {
@@ -238,7 +218,7 @@ public class PieceServiceTest extends TestBase {
     testContext.assertComplete(tx.startTx()
       .compose(poLineTx -> poLinePieceFuture.compose(o -> pieceService.updatePieces(poLineTx, replaceInstanceRef, client)))
       .compose(Tx::endTx)
-      .onComplete(v -> pieceService.getPiecesByPoLineId(poLineId, client)
+      .onComplete(v -> client.getPgClient().withConn(conn -> pieceService.getPiecesByPoLineId(poLineId, conn)
         .onComplete(ar -> {
           List<Piece> actPieces = ar.result();
           testContext.verify(() -> {
@@ -246,7 +226,7 @@ public class PieceServiceTest extends TestBase {
             assertThat(actPieces.getFirst().getHoldingId(), is(newHoldingId));
           });
           testContext.completeNow();
-        })));
+        }))));
   }
 
   @Test
