@@ -13,6 +13,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
@@ -66,7 +67,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   private Future<Void> determineOrderTenant(ItemEventHolder holder) {
     return createDBClient(holder.getActiveTenantId()).getPgClient()
       .withTrans(conn -> pieceService.getPiecesByItemIdExist(holder.getItemId(), holder.getActiveTenantId(), conn)
-        .map(exists -> exists ? holder.getActiveTenantId() : holder.getTenantId()))
+        .map(exists -> BooleanUtils.isTrue(exists) ? holder.getActiveTenantId() : holder.getTenantId()))
       .compose(tenantId -> asFuture(() -> holder.setOrderTenantId(tenantId)));
   }
 
