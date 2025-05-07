@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.Piece;
@@ -35,9 +36,24 @@ public class OrderLineLocationUpdateService {
   private final PoLinesService poLinesService;
   private final PieceService pieceService;
 
-  public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, String tenantId, Map<String, String> headers, Conn conn) {
-    return poLinesService.getPoLinesByLineIdsByChunks(poLineIds, conn)
-      .map(poLines -> poLines.stream().map(poLine -> pieceService
+  /**
+   * Fetches POLs by poLineIds and updates their location data based on the item object. If skipFiltering is true, POLs
+   * with independent workflow will be updated as well, otherwise only POLs with synchronized workflow will be updated.
+   *
+   * @param poLineIds     list of poLineIds to be updated
+   * @param item          the item object
+   * @param skipFiltering true if independent workflow POLs should be updated
+   * @param tenantId      tenantId of the order
+   * @param headers       headers to be used for the request
+   * @param conn          connection to be used for the request
+   * @return a future with the list of updated POLs
+   */
+  public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering, String tenantId, Map<String, String> headers, Conn conn) {
+    log.info("processPoLinesUpdate:: Fetching '{}' POL(s) to update location data", poLineIds.size());
+    return poLinesService.getPoLinesByIdsForUpdate(poLineIds, tenantId, conn)
+      .map(poLines -> poLines.stream()
+        .filter(poLine -> skipFiltering || BooleanUtils.isNotTrue(poLine.getCheckinItems()))
+        .map(poLine -> pieceService
           .getPiecesByPoLineId(poLine.getId(), conn)
           .map(pieces -> Pair.of(poLine, pieces)))
         .toList())
@@ -47,13 +63,13 @@ public class OrderLineLocationUpdateService {
 
   private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
                                              String tenantId, Map<String, String> headers, Conn conn) {
-    log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in tenant: '{}'",
-      poLinePiecePairs.size(), item.getString(ID.getValue()), tenantId);
     var poLinesToUpdate = processPoLinePiecePairs(poLinePiecePairs, item);
     if (CollectionUtils.isEmpty(poLinesToUpdate)) {
-      log.info("updatePoLines:: No POLs were changed to update for item: '{}'", item.getString(ID.getValue()));
+      log.info("updatePoLines:: No POLs were changed to update for item: '{}' in tenant: '{}'", item.getString(ID.getValue()), tenantId);
       return Future.succeededFuture(List.of());
     }
+    log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in tenant: '{}'",
+      poLinesToUpdate.size(), item.getString(ID.getValue()), tenantId);
     return poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
       .map(v -> poLinesToUpdate);
   }
@@ -64,9 +80,7 @@ public class OrderLineLocationUpdateService {
         var pieces = poLineListPair.getRight();
         var isLocationsUpdated = updatePoLineLocations(poLine, pieces);
         var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(poLine, itemObject.getString(EFFECTIVE_LOCATION_ID.getValue()));
-        return isLocationsUpdated || isSearchLocationIdsUpdated
-          ? poLine
-          : null;
+        return (isLocationsUpdated || isSearchLocationIdsUpdated) ? poLine : null;
       })
       .filter(Objects::nonNull)
       .toList();

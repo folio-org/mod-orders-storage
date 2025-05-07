@@ -27,6 +27,7 @@ import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
+import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
 import org.folio.util.DbUtils;
 
@@ -35,6 +36,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+import io.vertx.sqlclient.Tuple;
 import lombok.extern.log4j.Log4j2;
 import org.folio.util.SerializerUtil;
 
@@ -47,6 +49,7 @@ public class PieceService {
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
   private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id RETURNING pieces.*;";
+  private static final String PIECES_BY_ITEM_ID_COUNT_SQL = "SELECT COUNT(*) FROM %s WHERE left(lower(%s.f_unaccent(jsonb->>'itemId')), 600) = $1;";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
@@ -61,6 +64,13 @@ public class PieceService {
   public Future<List<Piece>> getPiecesByItemId(String itemId, Conn conn) {
     var criterion = getCriterionByFieldNameAndValue(ITEM_ID_FIELD, itemId);
     return getPiecesByField(criterion, conn);
+  }
+
+  public Future<Boolean> getPiecesByItemIdExist(String itemId, String tenantId, Conn conn) {
+    var query = String.format(PIECES_BY_ITEM_ID_COUNT_SQL, getFullTableName(tenantId, PIECES_TABLE), PostgresClient.convertToPsqlStandard(tenantId));
+    return conn.execute(query, Tuple.of(itemId))
+      .map(DbUtils::getRowSetAsCount)
+      .map(count -> count > 0);
   }
 
   public Future<List<Piece>> getPiecesByHoldingId(String itemId, Conn conn) {

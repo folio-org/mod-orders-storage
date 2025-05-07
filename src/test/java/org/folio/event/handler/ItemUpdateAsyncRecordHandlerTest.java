@@ -31,7 +31,6 @@ import java.util.function.Function;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import lombok.extern.slf4j.Slf4j;
 import org.folio.TestUtils;
 import org.folio.event.dto.ItemFields;
 import org.folio.event.dto.ResourceEvent;
@@ -53,12 +52,12 @@ import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
-@Slf4j
 public class ItemUpdateAsyncRecordHandlerTest {
 
   private static final String PO_LINE_SAVE_FAILED_MSG = "Pieces save failed";
@@ -108,8 +107,9 @@ public class ItemUpdateAsyncRecordHandlerTest {
     }
   }
 
-  @Test
-  void positive_shouldProcessItemUpdateEventWithHoldingsUpdate() {
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void positive_shouldProcessItemUpdateEventWithHoldingsUpdate(boolean checkinItems) {
     var poLineId = UUID.randomUUID().toString();
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
@@ -123,7 +123,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var newItemValueBeforeUpdate = createItem(itemId, holdingId2).put(ItemFields.EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2);
     var kafkaRecord = createKafkaRecordWithValues(oldItemValueBeforeUpdate, newItemValueBeforeUpdate);
 
-    var poLine = createPoLine(poLineId, holdingId1, effectiveLocationId1);
+    var poLine = createPoLine(poLineId, holdingId1, effectiveLocationId1).withCheckinItems(checkinItems);
     var expectedPoLine = createPoLine(poLineId, holdingId2, effectiveLocationId1, effectiveLocationId2);
 
     var actualPieces = List.of(
@@ -134,23 +134,24 @@ public class ItemUpdateAsyncRecordHandlerTest {
       createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
 
+    doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
+    doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    verify(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLineId)), any(Conn.class));
-    verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
-    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
+    verify(pieceService, times(checkinItems ? 0 : 1)).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
+    verify(poLinesService, times(checkinItems ? 0 : 1)).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
+    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(checkinItems ? List.of() : List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
   }
 
   @Test
@@ -182,6 +183,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     resourceEvent.setNewValue(newItemValueBeforeUpdate);
     var kafkaRecord = createKafkaRecord(resourceEvent, DIKU_TENANT);
 
+    doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
 
     var result = handler.handle(kafkaRecord);
@@ -212,12 +214,14 @@ public class ItemUpdateAsyncRecordHandlerTest {
       createPiece(pieceId1, itemId, holdingId2, null)
     );
 
+    doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(RuntimeException.class, expectedException.getClass());
+
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService, times(1)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));

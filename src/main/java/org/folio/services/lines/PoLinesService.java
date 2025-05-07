@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import io.vertx.sqlclient.Tuple;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,12 +53,14 @@ import io.vertx.ext.web.handler.HttpException;
 import lombok.extern.log4j.Log4j2;
 import one.util.streamex.StreamEx;
 import org.folio.rest.tools.utils.MetadataUtil;
+import org.folio.util.DbUtils;
 import org.folio.util.SerializerUtil;
 
 @Log4j2
 public class PoLinesService {
 
   private static final String PO_LINE_ID = "poLineId";
+  private static final String PO_LINES_BY_ID_FOR_UPDATE_SQL = "SELECT * FROM %s WHERE id = ANY($1) FOR UPDATE;";
 
   private final PoLinesDAO poLinesDAO;
   private final AuditOutboxService auditOutboxService;
@@ -223,9 +226,17 @@ public class PoLinesService {
 
   @SneakyThrows
   public Future<List<PoLine>> getPoLinesByCqlQuery(String query, Conn conn) {
-    var cqlWrapper = new QueryHolder(PO_LINE_TABLE,  query, 0, Integer.MAX_VALUE).buildCQLQuery();
+    var cqlWrapper = new QueryHolder(PO_LINE_TABLE, query, 0, Integer.MAX_VALUE).buildCQLQuery();
     log.info("getPoLinesByCqlQuery:: Created a CQL query: {}", cqlWrapper.getWhereClause());
     return getEntitiesByField(PO_LINE_TABLE, PoLine.class, cqlWrapper, conn);
+  }
+
+  public Future<List<PoLine>> getPoLinesByIdsForUpdate(List<String> poLineIds, String tenantId, Conn conn) {
+    var ids = poLineIds.stream().map(UUID::fromString).toArray(UUID[]::new);
+    return conn.execute(String.format(PO_LINES_BY_ID_FOR_UPDATE_SQL, getFullTableName(tenantId, PO_LINE_TABLE)), Tuple.of(ids))
+      .map(rows -> DbUtils.getRowSetAsList(rows, PoLine.class))
+      .onSuccess(result -> log.info("getPoLinesByIdsForUpdate:: Successfully fetched {} POL(s) for update using tenantId: '{}'", result.size(), tenantId))
+      .onFailure(t -> log.error("Failed fetching POL(s) for update using tenantId: '{}'", tenantId, t));
   }
 
   public Future<Integer> updatePoLines(Collection<PoLine> poLines, Conn conn, String tenantId,

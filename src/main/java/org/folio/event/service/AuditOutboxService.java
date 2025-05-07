@@ -156,9 +156,9 @@ public class AuditOutboxService {
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> savePiecesOutboxLog(Conn conn,
-                                            List<Piece> pieces,
-                                            PieceAuditEvent.Action action,
-                                            Map<String, String> okapiHeaders) {
+                                             List<Piece> pieces,
+                                             PieceAuditEvent.Action action,
+                                             Map<String, String> okapiHeaders) {
     var futures = pieces.stream()
       .map(piece -> savePieceOutboxLog(conn, piece, action, okapiHeaders))
       .toList();
