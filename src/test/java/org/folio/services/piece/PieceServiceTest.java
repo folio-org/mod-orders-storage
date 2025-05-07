@@ -79,8 +79,7 @@ public class PieceServiceTest extends TestBase {
       .withPoLineId(poLineId);
 
     var future = createPoLineAndPiece(poLine, piece, client)
-      .compose(v -> client.getPgClient()
-        .withConn(conn -> pieceService.getPiecesByPoLineId(poLineId, conn)));
+      .compose(o -> pieceService.getPiecesByPoLineId(poLineId, client));
 
     testContext.assertComplete(future)
       .onComplete(ar -> {
@@ -105,8 +104,7 @@ public class PieceServiceTest extends TestBase {
       .withHoldingId(holdingId);
 
     var future = createPoLineAndPiece(poLine, piece, client)
-      .compose(v -> client.getPgClient()
-        .withConn(conn -> pieceService.getPiecesByPoLineId(incorrectPoLineId, conn)));
+      .compose(o -> pieceService.getPiecesByPoLineId(incorrectPoLineId, client));
 
     testContext.assertComplete(future)
       .onComplete(ar -> {
@@ -218,7 +216,7 @@ public class PieceServiceTest extends TestBase {
     testContext.assertComplete(tx.startTx()
       .compose(poLineTx -> poLinePieceFuture.compose(o -> pieceService.updatePieces(poLineTx, replaceInstanceRef, client)))
       .compose(Tx::endTx)
-      .onComplete(v -> client.getPgClient().withConn(conn -> pieceService.getPiecesByPoLineId(poLineId, conn)
+      .onComplete(v -> pieceService.getPiecesByPoLineId(poLineId, client)
         .onComplete(ar -> {
           List<Piece> actPieces = ar.result();
           testContext.verify(() -> {
@@ -226,7 +224,7 @@ public class PieceServiceTest extends TestBase {
             assertThat(actPieces.getFirst().getHoldingId(), is(newHoldingId));
           });
           testContext.completeNow();
-        }))));
+        })));
   }
 
   @Test

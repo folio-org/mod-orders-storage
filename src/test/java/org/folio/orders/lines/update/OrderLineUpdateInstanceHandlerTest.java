@@ -220,7 +220,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         });
         testContext.completeNow();
       })
-      .compose(v -> client.getPgClient().withConn(conn -> pieceService.getPiecesByPoLineId(poLineId, conn)))
+      .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
@@ -368,7 +368,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         });
         testContext.completeNow();
       })
-      .compose(v -> client.getPgClient().withConn(conn -> pieceService.getPiecesByPoLineId(poLineId, conn)))
+      .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
@@ -564,7 +564,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         });
         testContext.completeNow();
       })
-      .compose(v -> client.getPgClient().withConn(conn -> pieceService.getPiecesByPoLineId(poLineId, conn)))
+      .compose(v -> pieceService.getPiecesByPoLineId(poLineId, client))
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
         testContext.verify(() -> {
