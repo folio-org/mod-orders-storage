@@ -120,6 +120,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
     log.debug("processPoLinesUpdate:: Preparing '{}' poLineIds for update processing", poLineIds.size());
+    // The skipFiltering is set to true to update all POLs regardless of the checkinItems flag, as items could be located in
+    // different tenants and to keep consistency, POLs must be updated regardless of the checkinItems flag (Receiving Workflow)
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, itemObject, true, centralTenantId, headers, conn)
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
