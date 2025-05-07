@@ -18,12 +18,12 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
+import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
+@UtilityClass
 public final class DbUtils {
-
-  private DbUtils() {}
 
   public static Future<RowSet<Row>> failOnNoUpdateOrDelete(RowSet<Row> rowSet) {
     return rowSet.rowCount() > 0 ?
@@ -80,4 +80,5 @@ public final class DbUtils {
         response.getEntity(), entityClass.getName(), e.getMessage()));
     }
   }
+
 }

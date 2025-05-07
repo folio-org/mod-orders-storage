@@ -12,8 +12,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,9 +28,11 @@ import java.util.stream.Stream;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.rest.core.models.RequestContext;
@@ -54,6 +58,7 @@ import javax.ws.rs.core.Response;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.sqlclient.Tuple;
 import org.mockito.stubbing.Answer;
 
 @ExtendWith(VertxExtension.class)
@@ -195,6 +200,25 @@ public class PoLinesServiceTest {
 
     assertEquals(poLines, actPoLines);
     verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
+  }
+
+  @Test
+  public void shouldRetrievePoLinesForUpdate() {
+    PoLine poLine = new PoLine().withId(UUID.randomUUID().toString());
+    var tenant = "tenant";
+    var row = mock(Row.class);
+    var rowIterator = mock(RowIterator.class);
+
+    when(rowIterator.hasNext()).thenReturn(true, false);
+    when(rowIterator.next()).thenReturn(row);
+    when(row.getJsonObject("jsonb")).thenReturn(JsonObject.mapFrom(poLine));
+    when(rowSet.iterator()).thenReturn(rowIterator);
+    when(conn.execute(any(String.class), any(Tuple.class))).thenReturn(Future.succeededFuture(rowSet));
+
+    List<PoLine> actPoLines = poLinesService.getPoLinesByIdsForUpdate(List.of(poLine.getId()), tenant, conn).result();
+
+    assertEquals(List.of(poLine), actPoLines);
+    verify(conn).execute(any(String.class), any(Tuple.class));
   }
 
   @Test

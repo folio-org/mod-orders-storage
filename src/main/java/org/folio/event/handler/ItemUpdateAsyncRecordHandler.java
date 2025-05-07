@@ -104,7 +104,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture();
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
-    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), holder.getOrderTenantId(), holder.getHeaders(), conn)
+    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn)
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
       .mapEmpty();
   }

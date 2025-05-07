@@ -120,7 +120,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
     log.debug("processPoLinesUpdate:: Preparing '{}' poLineIds for update processing", poLineIds.size());
-    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, itemObject, centralTenantId, headers, conn)
+    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, itemObject, true, centralTenantId, headers, conn)
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
