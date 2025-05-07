@@ -439,7 +439,7 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     // These pieces should be skipped
     // alreadyUpdatedPiece1 have the same tenantId and holdingId1
-    var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId1).withHoldingId(holdingId1) .withReceivingTenantId(CENTRAL_TENANT);
+    var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT);
     // alreadyUpdatedPiece2 have the same tenantId and existing locationId1
     var alreadyUpdatedPiece2 = createPiece(pieceId2, itemId1).withLocationId(locationId1).withReceivingTenantId(CENTRAL_TENANT);
     var pieces = List.of(alreadyUpdatedPiece1, alreadyUpdatedPiece2);
@@ -469,7 +469,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId1, CENTRAL_TENANT);
 
     var actualPiece = createPiece(pieceId1, itemId1);
-    var expectedPieces = List.of(createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT) );
+    var expectedPieces = List.of(createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT));
 
     doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
     doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(CENTRAL_TENANT));

@@ -226,7 +226,7 @@ public class PoLinesService {
 
   @SneakyThrows
   public Future<List<PoLine>> getPoLinesByCqlQuery(String query, Conn conn) {
-    var cqlWrapper = new QueryHolder(PO_LINE_TABLE,  query, 0, Integer.MAX_VALUE).buildCQLQuery();
+    var cqlWrapper = new QueryHolder(PO_LINE_TABLE, query, 0, Integer.MAX_VALUE).buildCQLQuery();
     log.info("getPoLinesByCqlQuery:: Created a CQL query: {}", cqlWrapper.getWhereClause());
     return getEntitiesByField(PO_LINE_TABLE, PoLine.class, cqlWrapper, conn);
   }

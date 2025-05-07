@@ -40,12 +40,12 @@ public class OrderLineLocationUpdateService {
    * Fetches POLs by poLineIds and updates their location data based on the item object. If skipFiltering is true, POLs
    * with independent workflow will be updated as well, otherwise only POLs with synchronized workflow will be updated.
    *
-   * @param poLineIds    list of poLineIds to be updated
-   * @param item         the item object
+   * @param poLineIds     list of poLineIds to be updated
+   * @param item          the item object
    * @param skipFiltering true if independent workflow POLs should be updated
-   * @param tenantId     tenantId of the order
-   * @param headers      headers to be used for the request
-   * @param conn         connection to be used for the request
+   * @param tenantId      tenantId of the order
+   * @param headers       headers to be used for the request
+   * @param conn          connection to be used for the request
    * @return a future with the list of updated POLs
    */
   public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering, String tenantId, Map<String, String> headers, Conn conn) {
