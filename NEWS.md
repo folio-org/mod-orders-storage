@@ -1,5 +1,14 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.4 - Released (Sunflower R1 2025 Bug Fix)
+The primary focus of this release was to apply a fix to Update POL Locations after updating related pieces.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.3...v13.9.4)
+
+### Bug Fixes
+* [MODORDSTOR-456](https://folio-org.atlassian.net/browse/MODORDSTOR-456) - After move item in inventory piece Holding ID is updated but POL holding ID is not
+
+
 ## 13.9.3 - Released (Sunflower R1 2025 Bug Fix)
 The primary focus of this release was to add migration script to add isBound flag to pieces
 
