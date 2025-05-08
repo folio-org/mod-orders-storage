@@ -12,8 +12,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,9 +28,11 @@ import java.util.stream.Stream;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.sqlclient.Row;
+import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.rest.core.models.RequestContext;
@@ -54,6 +58,7 @@ import javax.ws.rs.core.Response;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.sqlclient.Tuple;
 import org.mockito.stubbing.Answer;
 
 @ExtendWith(VertxExtension.class)
@@ -176,7 +181,7 @@ public class PoLinesServiceTest {
     Future<List<PoLine>> f = poLinesService.getPoLinesByOrderId(poID, conn);
 
     assertThat(f.failed(), is(true));
-    HttpException thrown = (HttpException)f.cause();
+    HttpException thrown = (HttpException) f.cause();
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), thrown.getCode());
     verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
@@ -198,6 +203,25 @@ public class PoLinesServiceTest {
   }
 
   @Test
+  public void shouldRetrievePoLinesForUpdate() {
+    PoLine poLine = new PoLine().withId(UUID.randomUUID().toString());
+    var tenant = "tenant";
+    var row = mock(Row.class);
+    var rowIterator = mock(RowIterator.class);
+
+    when(rowIterator.hasNext()).thenReturn(true, false);
+    when(rowIterator.next()).thenReturn(row);
+    when(row.getJsonObject("jsonb")).thenReturn(JsonObject.mapFrom(poLine));
+    when(rowSet.iterator()).thenReturn(rowIterator);
+    when(conn.execute(any(String.class), any(Tuple.class))).thenReturn(Future.succeededFuture(rowSet));
+
+    List<PoLine> actPoLines = poLinesService.getPoLinesByIdsForUpdate(List.of(poLine.getId()), tenant, conn).result();
+
+    assertEquals(List.of(poLine), actPoLines);
+    verify(conn).execute(any(String.class), any(Tuple.class));
+  }
+
+  @Test
   public void shouldFailedWhenRetrievePoLinesIsFailedInTheDAOLayer() {
     String poID = UUID.randomUUID().toString();
     doReturn(failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), "notFound")))
@@ -206,7 +230,7 @@ public class PoLinesServiceTest {
     Future<List<PoLine>> f = poLinesService.getPoLinesByLineIdsByChunks(List.of(poID), conn);
 
     assertThat(f.failed(), is(true));
-    HttpException thrown = (HttpException)f.cause();
+    HttpException thrown = (HttpException) f.cause();
     assertEquals(Response.Status.NOT_FOUND.getStatusCode(), thrown.getCode());
     verify(poLinesDAO).getPoLines(any(Criterion.class), any(Conn.class));
   }
@@ -225,7 +249,7 @@ public class PoLinesServiceTest {
     Future<PoLine> f = poLinesService.getPoLineById(poLineId, dbClient);
 
     assertThat(f.failed(), is(true));
-    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
+    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
     verify(pgClient).getById(anyString(), eq(poLineId), eq(PoLine.class), any());
   }
@@ -239,7 +263,7 @@ public class PoLinesServiceTest {
     Future<PoLine> f = poLinesService.getPoLineById(conn, poLineId);
 
     assertThat(f.failed(), is(true));
-    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
+    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
     verify(conn).getById(anyString(), eq(poLineId), eq(PoLine.class));
   }
@@ -272,7 +296,7 @@ public class PoLinesServiceTest {
     Future<PoLine> f = poLinesService.createTitle(conn, poLine, new HashMap<>());
 
     assertThat(f.failed(), is(true));
-    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
+    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
     verify(conn).getById(anyString(), eq(poLineId), eq(PoLine.class));
     verify(conn).save(anyString(), anyString(), any(Title.class));
@@ -300,7 +324,7 @@ public class PoLinesServiceTest {
     Future<PoLine> f = poLinesService.createTitle(conn, poLine, new HashMap<>());
 
     assertThat(f.failed(), is(true));
-    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
+    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
     verify(conn).save(anyString(), anyString(), any(Title.class));
   }
@@ -337,7 +361,7 @@ public class PoLinesServiceTest {
       .onComplete(ar -> {
         testContext.verify(() -> {
           verify(pgClient, times(1)).delete(any(), anyString(), any(Criterion.class), any());
-          io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)ar.cause();
+          io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) ar.cause();
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
           assertThat(thrown.getPayload(), is("unknown"));
         });
@@ -381,7 +405,7 @@ public class PoLinesServiceTest {
       .onComplete(ar -> {
         testContext.verify(() -> {
           verify(pgClient, times(2)).delete(any(), anyString(), any(Criterion.class), any());
-          io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)ar.cause();
+          io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) ar.cause();
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
           assertThat(thrown.getPayload(), is("unknown"));
         });
@@ -407,7 +431,7 @@ public class PoLinesServiceTest {
     Future<Tx<PoLine>> f = poLinesService.updatePoLine(poLineTx, dbClient);
 
     assertThat(f.failed(), is(true));
-    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
+    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
     verify(pgClient).update(any(), anyString(), any(PoLine.class), anyString(), anyString(), anyBoolean(), any());
   }
@@ -449,7 +473,7 @@ public class PoLinesServiceTest {
     Future<Void> f = poLinesService.updatePoLineWithTitle(conn, poLineId, poLine, requestContext);
 
     assertThat(f.failed(), is(true));
-    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException)f.cause();
+    io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
     verify(conn, times(2)).update(anyString(), any(), anyString(), anyString(), anyBoolean());
     verify(conn).get(anyString(), eq(Title.class), any(Criterion.class), anyBoolean());

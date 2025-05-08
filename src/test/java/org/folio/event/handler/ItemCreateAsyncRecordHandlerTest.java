@@ -55,12 +55,14 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -83,6 +85,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   private PostgresClient pgClient;
   @Mock
   private Conn conn;
+  @InjectMocks
+  private OrderLineLocationUpdateService orderLineLocationUpdateService;
 
   private InventoryCreateAsyncRecordHandler handler;
 
@@ -92,7 +96,7 @@ public class ItemCreateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemCreateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
-      TestUtils.setInternalState(itemHandler, "poLinesService", poLinesService);
+      TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);
@@ -164,7 +168,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     doReturn(Future.succeededFuture(List.of(affectedPiece4))).when(pieceService).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     doReturn(Future.succeededFuture(affectedPoLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT), any());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
 
@@ -179,7 +183,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    verify(poLinesService, times(1)).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    verify(poLinesService, times(1)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, times(1)).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
     verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
@@ -243,7 +247,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     doReturn(Future.succeededFuture(List.of(affectedPiece4))).when(pieceService).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     doReturn(Future.succeededFuture(affectedPoLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT), any());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
 
@@ -258,7 +262,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    verify(poLinesService, times(1)).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    verify(poLinesService, times(1)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, times(1)).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
     verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
@@ -323,7 +327,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     doReturn(Future.succeededFuture(List.of(affectedPiece4))).when(pieceService).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     doReturn(Future.succeededFuture(affectedPoLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT), any());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
 
@@ -338,7 +342,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    verify(poLinesService, times(1)).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId(), poLine2.getId())), eq(conn));
+    verify(poLinesService, times(1)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, never()).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
     verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
@@ -375,7 +379,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
     doReturn(Future.succeededFuture(List.of(poLine1))).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(List.of(piece1))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
-    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByLineIdsByChunks(eq(List.of(poLine1.getId())), eq(conn));
+    doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId())), eq(CENTRAL_TENANT), eq(conn));
     doReturn(Future.succeededFuture(poLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT), any());
 
     var result = handler.handle(kafkaRecord);
@@ -389,7 +393,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
     verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
-    verify(poLinesService, never()).getPoLinesByLineIdsByChunks(any(), eq(conn));
+    verify(poLinesService, never()).getPoLinesByIdsForUpdate(any(), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, never()).updatePoLines(any(), eq(conn), eq(CENTRAL_TENANT), any());
     verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(dbClient.getPgClient(), times(0)).execute(any());
@@ -416,7 +420,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update PoLines
     verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
     verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
-    verify(poLinesService, never()).getPoLinesByLineIdsByChunks(any(), eq(conn));
+    verify(poLinesService, never()).getPoLinesByIdsForUpdate(any(), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, never()).updatePoLines(any(), eq(conn), eq(CENTRAL_TENANT), any());
     verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(dbClient.getPgClient(), times(0)).execute(any());
@@ -435,7 +439,7 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     // These pieces should be skipped
     // alreadyUpdatedPiece1 have the same tenantId and holdingId1
-    var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId1).withHoldingId(holdingId1) .withReceivingTenantId(CENTRAL_TENANT);
+    var alreadyUpdatedPiece1 = createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT);
     // alreadyUpdatedPiece2 have the same tenantId and existing locationId1
     var alreadyUpdatedPiece2 = createPiece(pieceId2, itemId1).withLocationId(locationId1).withReceivingTenantId(CENTRAL_TENANT);
     var pieces = List.of(alreadyUpdatedPiece1, alreadyUpdatedPiece2);
@@ -465,7 +469,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var kafkaRecord = createItemEventKafkaRecord(itemId1, holdingId1, effectiveLocationId1, CENTRAL_TENANT);
 
     var actualPiece = createPiece(pieceId1, itemId1);
-    var expectedPieces = List.of(createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT) );
+    var expectedPieces = List.of(createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT));
 
     doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
     doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(CENTRAL_TENANT));
@@ -492,11 +496,13 @@ public class ItemCreateAsyncRecordHandlerTest {
       piecesByHoldingIdGrouped.forEach((holdingId, piecesByHolding) -> {
         var piecesByFormat = piecesByHolding.stream()
           .collect(groupingBy(Piece::getFormat, Collectors.toList()));
+        var qtyPhysical = piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size();
+        var qtyElectronic = piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size();
         var location = new Location().withTenantId(tenantId)
           .withHoldingId(holdingId)
           .withQuantity(piecesByHolding.size())
-          .withQuantityPhysical(piecesByFormat.getOrDefault(Piece.Format.PHYSICAL, List.of()).size())
-          .withQuantityElectronic(piecesByFormat.getOrDefault(Piece.Format.ELECTRONIC, List.of()).size());
+          .withQuantityPhysical(qtyPhysical > 0 ? qtyPhysical : null)
+          .withQuantityElectronic(qtyElectronic > 0 ? qtyElectronic : null);
         oldLocations.add(location);
       });
     });
