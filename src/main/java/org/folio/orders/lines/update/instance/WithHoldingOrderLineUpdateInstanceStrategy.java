@@ -3,6 +3,7 @@ package org.folio.orders.lines.update.instance;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.handler.HttpException;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHolder;
@@ -70,10 +71,7 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
   private Future<Tx<PoLine>> updateHoldings(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
     List<Holding> holdings = replaceInstanceRef.getHoldings();
 
-    if (!isUpdatedHolding(holdings)) {
-      log.info("Holding does not require an update");
-      return Future.succeededFuture(poLineTx);
-    } else {
+    if (isUpdatedHolding(holdings)) {
       return pieceService.updatePieces(poLineTx, replaceInstanceRef, client)
         .compose(v -> updateLocation(poLineTx, replaceInstanceRef))
         .onComplete(ar -> {
@@ -83,11 +81,25 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
             log.debug("updateHoldings completed, poLine id={}", poLineTx.getEntity().getId());
           }
         });
+    } else {
+      log.info("Holding does not require an update");
+      return Future.succeededFuture(poLineTx);
     }
   }
 
   private boolean isUpdatedHolding(List<Holding> holdings) {
-    return holdings.stream().noneMatch(holding -> holding.getFromHoldingId().equals(holding.getToHoldingId()));
+    var updateHoldings = 0;
+    for (var holding : holdings) {
+      var fromHoldingId = holding.getFromHoldingId();
+      var toHoldingId = holding.getToHoldingId();
+      if (StringUtils.equals(fromHoldingId, toHoldingId)) {
+        log.info("isUpdatedHolding:: Ignoring holding due to equal id: {}", toHoldingId);
+        continue;
+      }
+      log.info("isUpdatedHolding:: Found holding to update from: {}, to: {}", fromHoldingId, toHoldingId);
+      updateHoldings++;
+    }
+    return updateHoldings > 0;
   }
 
   private Future<Tx<PoLine>> updateLocation(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef) {
