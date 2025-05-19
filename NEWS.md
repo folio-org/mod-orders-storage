@@ -1,5 +1,14 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.5 - Released (Sunflower R1 2025 Bug Fix)
+The primary focus of this release was to fix the issue with "Invalid reference" displayed in PO line after changing instance connection for the P/E mix order.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.4...v13.9.5)
+
+### Bug Fixes
+* [MODORDSTOR-458](https://folio-org.atlassian.net/browse/MODORDSTOR-458) - “Invalid reference” is displayed in PO line after changing instance connection for the P/E mix order
+
+
 ## 13.9.4 - Released (Sunflower R1 2025 Bug Fix)
 The primary focus of this release was to apply a fix to Update POL Locations after updating related pieces.
 
