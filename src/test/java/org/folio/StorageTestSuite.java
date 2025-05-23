@@ -238,10 +238,10 @@ public class StorageTestSuite {
       kafkaConsumer.subscribe(List.of(topic));
       records = kafkaConsumer.poll(Duration.ofSeconds(30));
     }
-    records.forEach(record -> {
-      var header = record.headers().lastHeader(RestVerticle.OKAPI_USERID_HEADER.toLowerCase());
+    records.forEach(rec -> {
+      var header = rec.headers().lastHeader(RestVerticle.OKAPI_USERID_HEADER.toLowerCase());
       if (header != null && new String(header.value()).equalsIgnoreCase(userId)) {
-        result.add(record.value());
+        result.add(rec.value());
       }
     });
 
