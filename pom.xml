@@ -27,7 +27,6 @@
 
     <!--Dependency Management Properties-->
     <vertx.version>4.5.13</vertx.version>
-    <kafkaclients.version>3.6.1</kafkaclients.version>
     <lombok.version>1.18.36</lombok.version>
     <log4j.version>2.24.3</log4j.version>
 
@@ -60,6 +59,7 @@
 
     <!--Test Scope dependencies-->
     <junit-jupiter.version>5.12.0</junit-jupiter.version>
+    <testcontainers-bom.version>1.20.5</testcontainers-bom.version>
     <mockito.version>5.15.2</mockito.version>
     <jmockit.version>1.49</jmockit.version>
 
@@ -98,6 +98,13 @@
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
         <version>${junit-jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>${testcontainers-bom.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -169,6 +176,11 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>kafka</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jmockit</groupId>
       <artifactId>jmockit</artifactId>
       <version>${jmockit.version}</version>
@@ -213,11 +225,6 @@
       <version>${vertx.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-clients</artifactId>
-      <version>${kafkaclients.version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>${lombok.version}</version>
@@ -228,30 +235,6 @@
       <groupId>com.github.ben-manes.caffeine</groupId>
       <artifactId>caffeine</artifactId>
       <version>${caffeine.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>net.mguenther.kafka</groupId>
-      <artifactId>kafka-junit</artifactId>
-      <version>3.6.0</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-log4j12</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>log4j</groupId>
-          <artifactId>log4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>net.sf.jopt-simple</groupId>
-          <artifactId>jopt-simple</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.fasterxml.jackson.module</groupId>
-          <artifactId>jackson-module-scala_2.13</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>

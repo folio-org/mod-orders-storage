@@ -1,7 +1,6 @@
 package org.folio.rest.impl;
 
 import lombok.extern.log4j.Log4j2;
-import org.eclipse.jetty.http.HttpStatus;
 import org.folio.CopilotGenerated;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -24,6 +23,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import static io.vertx.core.json.JsonObject.mapFrom;
+import static org.folio.HttpStatus.HTTP_OK;
 import static org.folio.rest.utils.TestEntities.PIECE;
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
@@ -56,7 +56,7 @@ public class WrapperPiecesAPITest extends TestBase {
 
     var wrapperPieceCollection = getData(ENDPOINT, createdData.getHeaders())
       .then()
-      .statusCode(HttpStatus.OK_200)
+      .statusCode(HTTP_OK.toInt())
       .extract()
       .as(WrapperPieceCollection.class);
 
@@ -78,7 +78,7 @@ public class WrapperPiecesAPITest extends TestBase {
 
     getDataById(ENDPOINT + "/{id}", pieceId, createdData.getHeaders())
       .then()
-      .statusCode(HttpStatus.OK_200)
+      .statusCode(HTTP_OK.toInt())
       .body("vendorId", equalTo(createdData.getVendorId()))
       .body("piece.id", equalTo(pieceId));
   }
