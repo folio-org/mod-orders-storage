@@ -34,5 +34,6 @@
       "e-book"
     ]
   },
-  "receiptStatus": "Receipt Not Required"
+  "receiptStatus": "Receipt Not Required",
+  "categoryIds": []
 }

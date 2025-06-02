@@ -33,5 +33,6 @@
       "e-journal"
     ]
   },
-  "reEncumber": true
+  "reEncumber": true,
+  "categoryIds": []
 }
