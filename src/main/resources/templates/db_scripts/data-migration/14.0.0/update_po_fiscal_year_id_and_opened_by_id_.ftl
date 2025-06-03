@@ -1,6 +1,7 @@
 <#if mode.name() == "UPDATE">
 
 -- 1. Update fiscalYearId by using dateOrdered or approvalDate to find the fiscal year between 2 dates
+-- if PO is open, has at least 1 fund distribution and fiscalYearId is null
 
 with po_fy as(
   select distinct po.id, to_jsonb(fy.id) fiscal_year_id
