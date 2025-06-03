@@ -44,8 +44,8 @@ import org.junit.jupiter.api.Test;
 
 import io.restassured.http.Header;
 
-
 public class TenantSampleDataTest extends TestBase {
+
   private static final Logger log = LogManager.getLogger();
 
   private static final Header NONEXISTENT_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, "no_tenant");
@@ -56,42 +56,47 @@ public class TenantSampleDataTest extends TestBase {
 
   @BeforeAll
   static void createRequiredTables() {
-    createTable("inventory_schema.sql");
+    createTables("inventory_schema.sql");
+    createTables("finance_schema.sql");
   }
 
   @SneakyThrows
-  private static void createTable(String schemaName) {
-    InputStream tableInput = TenantSampleDataTest.class.getClassLoader().getResourceAsStream(schemaName);
-    String sqlFile = IOUtils.toString(Objects.requireNonNull(tableInput), StandardCharsets.UTF_8);
-    CompletableFuture<Void> schemaCreated = new CompletableFuture<>();
-    PostgresClient.getInstance(StorageTestSuite.getVertx()).runSQLFile(sqlFile, false)
-      .onComplete(listAsyncResult -> schemaCreated.complete(null));
-    schemaCreated.get(60, TimeUnit.SECONDS);
+  private static void createTables(String schemaName) {
+    log.info("creating tables for schema: {}", schemaName);
+
+    try (InputStream tableInput = TenantSampleDataTest.class.getClassLoader().getResourceAsStream(schemaName)) {
+      String sqlFile = IOUtils.toString(Objects.requireNonNull(tableInput), StandardCharsets.UTF_8);
+      CompletableFuture<Void> schemaCreated = new CompletableFuture<>();
+      PostgresClient.getInstance(StorageTestSuite.getVertx()).runSQLFile(sqlFile, false)
+        .onComplete(listAsyncResult -> schemaCreated.complete(null));
+      schemaCreated.get(60, TimeUnit.SECONDS);
+    }
   }
 
   @AfterAll
-  public static void after() {
+  static void after() {
     deleteTenant(tenantJob, ANOTHER_TENANT_HEADER);
   }
 
   @Test
-  public void sampleDataTests() throws MalformedURLException {
+  void sampleDataTests() throws MalformedURLException {
     try {
-      log.info("-- create a tenant with no sample data --");
+      log.info("-- Create a tenant with no sample data --");
       tenantJob = prepareTenant(ANOTHER_TENANT_HEADER, false, false);
       deleteReasonsForClosure(ANOTHER_TENANT_HEADER);
-      log.info("-- upgrade the tenant with sample data, so that it will be inserted now --");
+
+      log.info("-- Upgrade the tenant with sample data, so that it will be inserted now --");
       tenantJob = upgradeTenantWithSampleDataLoad();
-      log.info("-- upgrade the tenant again with no sample data, so the previously inserted data stays in tact --");
+
+      log.info("-- Upgrade the tenant again with no sample data, so the previously inserted data stays intact --");
       tenantJob = upgradeTenantWithNoSampleDataLoad();
-    }
-    finally {
+    } finally {
       purge(ANOTHER_TENANT_HEADER);
     }
   }
 
   @Test
-  public void testPartialSampleDataLoading() throws MalformedURLException {
+  void testPartialSampleDataLoading() throws MalformedURLException {
     log.info("load sample data");
     try{
       TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(true, false);
@@ -108,7 +113,8 @@ public class TenantSampleDataTest extends TestBase {
         .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
         .toList();
       for (TestEntities entity : entitySamples) {
-        log.info("Test expected quantity for " + entity.name());
+        log.info("testPartialSampleDataLoading:: Test expected quantity for {}", entity.name());
+
         verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
       }
     } finally {
@@ -165,22 +171,23 @@ public class TenantSampleDataTest extends TestBase {
   }
 
   private TenantJob upgradeTenantWithSampleDataLoad() throws MalformedURLException {
-
     log.info("upgrading Module with sample");
+
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(true, false);
     tenantJob = postTenant(ANOTHER_TENANT_HEADER, tenantAttributes);
     List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
       .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
     for (TestEntities entity : entitySamples) {
-      log.info("Test expected quantity for " + entity.name());
+      log.info("upgradeTenantWithSampleDataLoad:: Test expected quantity for name {}", entity.name());
+
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() + entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
     }
+
     return tenantJob;
   }
 
   private TenantJob upgradeTenantWithNoSampleDataLoad() throws MalformedURLException {
-
     log.info("upgrading Module without sample data");
 
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
@@ -188,15 +195,17 @@ public class TenantSampleDataTest extends TestBase {
     List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
       .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
-    for(TestEntities te: entitySamples) {
-      verifyCollectionQuantity(te.getEndpoint(), te.getEstimatedSystemDataRecordsQuantity());
+    for (TestEntities entity: entitySamples) {
+      log.info("upgradeTenantWithNoSampleDataLoad:: Test expected quantity: 0 for name: {}", entity.name());
+
+      verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity());
     }
     return tenantJob;
   }
 
 
   @Test
-  public void upgradeTenantWithNonExistentDb() throws MalformedURLException {
+  void upgradeTenantWithNonExistentDb() throws MalformedURLException {
     log.info("upgrading Module for non existed tenant");
 
     TenantAttributes tenantAttributes = TenantApiTestUtil.prepareTenantBody(false, false);
@@ -206,13 +215,12 @@ public class TenantSampleDataTest extends TestBase {
 
       // Check that no sample data loaded
       for (TestEntities entity : TestEntities.values()) {
-        log.info("Test expected quantity: {} for name: {}" , 0, entity.name());
+        log.info("upgradeTenantWithNonExistentDb:: Test expected quantity: 0 for name: {}", entity.name());
+
         verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() , NONEXISTENT_TENANT_HEADER);
       }
-    }
-    finally {
+    } finally {
       purge(NONEXISTENT_TENANT_HEADER);
     }
   }
-
 }

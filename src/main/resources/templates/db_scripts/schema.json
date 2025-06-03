@@ -183,7 +183,7 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/14.0.0/set_fiscal_year_id_to_purchase_orders.ftl",
+      "snippetPath": "data-migration/14.0.0/update_po_fiscal_year_id_and_opened_by_id_.ftl",
       "fromModuleVersion": "mod-orders-storage-14.0.0"
     }
   ],
