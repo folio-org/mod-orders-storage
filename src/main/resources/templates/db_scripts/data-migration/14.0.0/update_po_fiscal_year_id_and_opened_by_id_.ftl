@@ -10,9 +10,9 @@ with po_fy as(
 	    join ${myuniversity}_mod_finance_storage.fiscal_year fy
 	      on coalesce(po.jsonb->>'dateOrdered', po.jsonb->>'approvalDate')
 	        between (fy.jsonb->>'periodStart') and (fy.jsonb->>'periodEnd')
-	  where not (po.jsonb ? 'fiscalYearId')
-	    and left(lower(f_unaccent(po.jsonb->>'workflowStatus')), 600) like lower(f_unaccent('Open'))
+	  where left(lower(f_unaccent(po.jsonb->>'workflowStatus')), 600) like lower(f_unaccent('Open'))
 	    and jsonb_array_length(pol.jsonb->'fundDistribution') > 0
+	    and not (po.jsonb ? 'fiscalYearId')
 )
 
 update ${myuniversity}_mod_orders_storage.purchase_order po_dst
@@ -26,8 +26,8 @@ update ${myuniversity}_mod_orders_storage.purchase_order po_dst
 
 update ${myuniversity}_mod_orders_storage.purchase_order
 	set jsonb = jsonb_set(jsonb, '{openedById}', jsonb->'approvedById')
-	where not (jsonb ? 'openedById')
-	  and left(lower(f_unaccent(jsonb->>'workflowStatus')), 600) like lower(f_unaccent('Open'))
+	where left(lower(f_unaccent(jsonb->>'workflowStatus')), 600) like lower(f_unaccent('Open'))
+	  and not (jsonb ? 'openedById')
 ;
 
 </#if>
