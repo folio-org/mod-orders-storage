@@ -20,13 +20,13 @@ import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.tools.utils.ModuleName;
 
 public class TenantApiTestUtil {
+
   private static final Logger log = LogManager.getLogger();
 
   public static final String LOAD_SYNC_PARAMETER = "loadSync";
-  private static final int TENANT_OP_WAITINGTIME = 60000;
+  private static final int TENANT_OP_WAITING_TIME = 60000;
 
   private TenantApiTestUtil() {
-
   }
 
   public static TenantAttributes prepareTenantBody(Boolean isLoadSampleData, Boolean isLoadReferenceData) {
@@ -41,10 +41,6 @@ public class TenantApiTestUtil {
     tenantAttributes.withModuleTo(moduleId).withParameters(parameters);
 
     return tenantAttributes;
-  }
-
-  public static TenantAttributes prepareTenantBody() {
-    return prepareTenantBody(true, true);
   }
 
   public static TenantJob prepareTenant(Header tenantHeader, boolean isLoadSampleData, boolean isLoadReferenceData) {
@@ -62,10 +58,12 @@ public class TenantApiTestUtil {
           future.completeExceptionally(ar.cause());
         } else {
           TenantJob tenantJob = ar.result().bodyAsJson(TenantJob.class);
-          tClient.getTenantByOperationId(tenantJob.getId(), TENANT_OP_WAITINGTIME, ar2 -> {
+          tClient.getTenantByOperationId(tenantJob.getId(), TENANT_OP_WAITING_TIME, ar2 -> {
             if (ar2.failed()) {
+              log.error("PostTenant failed", ar.cause());
               future.completeExceptionally(ar2.cause());
             } else {
+              log.info("PostTenant completed");
               future.complete(tenantJob);
             }
           });
@@ -73,6 +71,7 @@ public class TenantApiTestUtil {
       });
       return future.get(60, TimeUnit.SECONDS);
     } catch (Exception e) {
+      log.error("PostTenant interrupted", e);
       fail(e);
       return null;
     }
@@ -98,9 +97,7 @@ public class TenantApiTestUtil {
         log.error("deleteTenant interrupted", e);
         fail(e);
       }
-
     }
-
   }
 
   public static void purge(Header tenantHeader) {
