@@ -10,8 +10,11 @@ with po_fy as(
 	    join ${myuniversity}_mod_finance_storage.fiscal_year fy
 	      on coalesce(po.jsonb->>'dateOrdered', po.jsonb->>'approvalDate')
 	        between (fy.jsonb->>'periodStart') and (fy.jsonb->>'periodEnd')
-	  where (po.jsonb->>'workflowStatus') = 'Open'
-	    and not (po.jsonb ? 'fiscalYearId')
+	  where not (po.jsonb ? 'fiscalYearId')
+	    and case when length(lower(f_unaccent('Open'))) <= 600
+        then left(lower(f_unaccent(po.jsonb->>'workflowStatus')) ,600) like lower(f_unaccent('Open'))
+        else left(lower(f_unaccent(po.jsonb->>'workflowStatus')), 600) like left(lower(f_unaccent('Open')), 600)
+          and lower(f_unaccent(po.jsonb->>'workflowStatus')) like lower(f_unaccent('Open')) end
 	    and jsonb_array_length(pol.jsonb->'fundDistribution') > 0
 )
 
@@ -26,8 +29,11 @@ update ${myuniversity}_mod_orders_storage.purchase_order po_dst
 
 update ${myuniversity}_mod_orders_storage.purchase_order
 	set jsonb = jsonb_set(jsonb, '{openedById}', jsonb->'approvedById')
-	where (jsonb->>'workflowStatus') = 'Open'
-	  and not (jsonb ? 'openedById')
+	where not (jsonb ? 'openedById')
+	  and case when length(lower(f_unaccent('Open'))) <= 600
+      then left(lower(f_unaccent(jsonb->>'workflowStatus')),600) like lower(f_unaccent('Open'))
+      else left(lower(f_unaccent(jsonb->>'workflowStatus')),600) like left(lower(f_unaccent('Open')), 600)
+        and lower(f_unaccent(jsonb->>'workflowStatus')) like lower(f_unaccent('Open')) end
 ;
 
 </#if>
