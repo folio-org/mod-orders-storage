@@ -113,7 +113,7 @@ po_lines_for_update AS (
     LEFT JOIN pol_new_locations_aggregate pnl ON ptp.pol_id::text = pnl.pol_id_text
 )
 
--- Final UPDATE statement
+-- Final UPDATE statement to only update changed PO Lines.
 UPDATE ${myuniversity}_${mymodule}.po_line AS pol
 SET jsonb = jsonb_set(
                 pol.jsonb,
@@ -121,4 +121,4 @@ SET jsonb = jsonb_set(
                 upd.new_locations_array_to_set
             )
 FROM po_lines_for_update upd
-WHERE pol.id = upd.pol_id AND upd.current_locations_array != upd.new_locations_array_to_set; -- Only update if changed
+WHERE pol.id = upd.pol_id AND upd.current_locations_array != upd.new_locations_array_to_set;
