@@ -1,10 +1,8 @@
-<#if mode.name() == "UPDATE">
-
 -- Select PO Lines that need potential updates
 WITH po_lines_to_process AS (
     SELECT
         pol.id AS pol_id,
-        COALESCE(pol.jsonb->'locations', '[]'::jsonb) AS current_locations_array -- For comparison
+        COALESCE(pol.jsonb->'locations', '[]'::jsonb) AS current_locations_array
     FROM ${myuniversity}_${mymodule}.po_line pol
     JOIN ${myuniversity}_${mymodule}.purchase_order po ON (pol.jsonb->>'purchaseOrderId')::uuid = po.id
     WHERE (pol.jsonb->>'checkinItems')::boolean = false AND po.jsonb->>'workflowStatus' = 'Open'
@@ -29,7 +27,7 @@ piece_final_keys AS (
         pd.piece_format,
         pd.piece_receiving_tenant_id,
         CASE
-            WHEN pd.piece_holding_id IS NOT NULL THEN -- location id is nullable if no piece with same holding has it populated
+            WHEN pd.piece_holding_id IS NOT NULL THEN
                 MAX(pd.piece_location_id) OVER (PARTITION BY pd.pol_id_text, pd.piece_receiving_tenant_id, pd.piece_holding_id)
             ELSE
                 pd.piece_location_id
@@ -124,5 +122,3 @@ SET jsonb = jsonb_set(
             )
 FROM po_lines_for_update upd
 WHERE pol.id = upd.pol_id AND upd.current_locations_array != upd.new_locations_array_to_set;
-
-</#if>
