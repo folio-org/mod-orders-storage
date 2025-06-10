@@ -1,3 +1,5 @@
+<#if mode.name() == "UPDATE">
+
 -- Select PO Lines that need potential updates
 WITH po_lines_to_process AS (
     SELECT
@@ -122,3 +124,5 @@ SET jsonb = jsonb_set(
             )
 FROM po_lines_for_update upd
 WHERE pol.id = upd.pol_id AND upd.current_locations_array != upd.new_locations_array_to_set;
+
+</#if>
