@@ -110,4 +110,4 @@ SET jsonb = jsonb_set(
                 upd.new_locations_array
             )
 FROM po_lines_for_update upd
-WHERE pol.id = upd.pol_id AND NOT (upd.current_locations_array @> upd.new_locations_array AND upd.current_locations_array <@ upd.new_locations_array);
+WHERE pol.id = upd.pol_id AND NOT (upd.current_locations_array @> upd.new_locations_array AND upd.current_locations_array <#noparse><@</#noparse> upd.new_locations_array);
