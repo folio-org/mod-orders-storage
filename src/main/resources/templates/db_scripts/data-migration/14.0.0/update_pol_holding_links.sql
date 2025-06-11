@@ -4,7 +4,7 @@ WITH po_lines_to_process AS (
         pol.id AS pol_id,
         COALESCE(pol.jsonb->'locations', '[]'::jsonb) AS current_locations_array
     FROM ${myuniversity}_${mymodule}.po_line pol
-    JOIN ${myuniversity}_${mymodule}.purchase_order po ON (pol.jsonb->>'purchaseOrderId')::uuid = po.id
+    JOIN ${myuniversity}_${mymodule}.purchase_order po ON pol.purchaseorderid = po.id
     WHERE (pol.jsonb->>'checkinItems')::boolean = false AND po.jsonb->>'workflowStatus' = 'Open'
 ),
 
@@ -17,7 +17,7 @@ pieces_data AS (
         p.jsonb->>'receivingTenantId' AS piece_receiving_tenant_id,
         p.jsonb->>'format' AS piece_format
     FROM ${myuniversity}_${mymodule}.pieces p
-    JOIN po_lines_to_process ptp ON p.jsonb->>'poLineId' = ptp.pol_id::text
+    JOIN po_lines_to_process ptp ON p.polineid = ptp.pol_id
 ),
 
 -- Determine the final grouping keys (final_location_id, final_holding_id) for each piece.
