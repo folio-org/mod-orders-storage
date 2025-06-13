@@ -36,8 +36,11 @@ public class CommonSettingsService {
       .withLimit(Integer.MAX_VALUE)
       .withQuery(TENANT_LOCALE_QUERY);
     return restClient.get(requestEntry, requestContext)
-      .map(jsonObject -> jsonObject.mapTo(CommonSettingsCollection.class))
-      .map(settings -> {
+      .map(jsonObject -> {
+        if (jsonObject == null) {
+          return defaultValue;
+        }
+        var settings = jsonObject.mapTo(CommonSettingsCollection.class);
         if (CollectionUtils.isEmpty(settings.getItems())) {
           return defaultValue;
         }
