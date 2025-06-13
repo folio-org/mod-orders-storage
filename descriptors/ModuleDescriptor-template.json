@@ -535,7 +535,7 @@
             "orders-storage.claiming.process.execute"
           ],
           "modulePermissions": [
-            "configuration.entries.collection.get"
+            "mod-settings.global.read.stripes-core.prefs.manage"
           ]
         }
       ]
@@ -692,8 +692,8 @@
   ],
   "requires": [
     {
-      "id": "configuration",
-      "version": "2.0"
+      "id": "settings",
+      "version": "1.2"
     },
     {
       "id": "user-tenants",

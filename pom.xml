@@ -39,7 +39,6 @@
     <caffeine.version>3.2.0</caffeine.version>
 
     <!--Folio dependencies properties-->
-    <mod-configuration-client.version>5.10.0</mod-configuration-client.version>
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
     <folio-di-support.version>3.0.0</folio-di-support.version>
     <folio-custom-fields.version>2.3.1</folio-custom-fields.version>
@@ -135,11 +134,6 @@
       <groupId>org.folio</groupId>
       <artifactId>domain-models-api-interfaces</artifactId>
       <version>${raml-module-builder.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.folio</groupId>
-      <artifactId>mod-configuration-client</artifactId>
-      <version>${mod-configuration-client.version}</version>
     </dependency>
     <dependency>
       <groupId>org.folio</groupId>
