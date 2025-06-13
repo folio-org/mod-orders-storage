@@ -28,6 +28,10 @@ import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * This service class is used to fetch and manage settings in the orders storage module. Unlike <code>CommonSettingService</code>,
+ * this class fetches settings from the database directly rather than using <code>mod-settings</code>.
+ */
 @Log4j2
 public class SettingService {
 

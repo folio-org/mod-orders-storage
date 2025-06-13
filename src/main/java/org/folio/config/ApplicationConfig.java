@@ -22,7 +22,6 @@ import org.folio.rest.core.RestClient;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
-import org.folio.services.configuration.TenantLocaleSettingsService;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
@@ -40,6 +39,7 @@ import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstance
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.services.piece.PieceClaimingService;
 import org.folio.services.piece.PieceService;
+import org.folio.services.setting.CommonSettingsService;
 import org.folio.services.setting.SettingService;
 import org.folio.services.title.TitleService;
 import org.folio.services.user.NoOpUserService;
@@ -180,16 +180,11 @@ public class ApplicationConfig {
   }
 
   @Bean
-  TenantLocaleSettingsService tenantLocaleSettingsService() {
-    return new TenantLocaleSettingsService();
-  }
-
-  @Bean
   PieceClaimingService pieceClaimingService(PostgresClientFactory pgClientFactory,
                                             ExtensionRepository extensionRepository,
                                             PieceClaimingRepository pieceClaimingRepository,
-                                            TenantLocaleSettingsService tenantLocaleSettingsService) {
-    return new PieceClaimingService(pgClientFactory, extensionRepository, pieceClaimingRepository, tenantLocaleSettingsService);
+                                            CommonSettingsService commonSettingsService) {
+    return new PieceClaimingService(pgClientFactory, extensionRepository, pieceClaimingRepository, commonSettingsService);
   }
 
   @Bean
@@ -205,6 +200,11 @@ public class ApplicationConfig {
   @Bean
   SettingService settingService() {
     return new SettingService();
+  }
+
+  @Bean
+  CommonSettingsService commonSettingsService(RestClient restClient) {
+    return new CommonSettingsService(restClient);
   }
 
   @Bean
