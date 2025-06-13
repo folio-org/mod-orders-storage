@@ -37,11 +37,9 @@ public class MockServer {
 
   // Mock data paths
   public static final String BASE_MOCK_DATA_PATH = "mockdata/";
-  public static final String CONFIG_MOCK_PATH = BASE_MOCK_DATA_PATH + "configurations.entries/%s.json";
-
-  public static final String DEFAULT_CONFIG_NAME = "config_default";
-
-  public static final String CONFIGS = "configs";
+  public static final String SETTINGS_MOCK_PATH = BASE_MOCK_DATA_PATH + "settings.entries/%s.json";
+  public static final String DEFAULT_SETTINGS_NAME = "settings_default";
+  public static final String SETTINGS_FIELD = "items";
 
   public static Table<String, HttpMethod, List<JsonObject>> serverRqRs = HashBasedTable.create();
   public static HashMap<String, List<String>> serverRqQueries = new HashMap<>();
@@ -103,25 +101,25 @@ public class MockServer {
 
     router.route().handler(BodyHandler.create());
 
-    router.get("/configurations/entries").handler(this::handleConfigurationModuleResponse);
+    router.get("/settings/entries").handler(this::handleSettingsModuleResponse);
 
     return router;
   }
 
-  private void handleConfigurationModuleResponse(RoutingContext ctx) {
+  private void handleSettingsModuleResponse(RoutingContext ctx) {
     try {
-      List<JsonObject> configEntries = serverRqRs.column(HttpMethod.SEARCH).get(CONFIGS);
-      if (CollectionUtils.isNotEmpty(configEntries)) {
-        JsonObject configs = new JsonObject().put(CONFIGS, configEntries);
-        serverResponse(ctx, 200, APPLICATION_JSON, configs.encodePrettily());
+      List<JsonObject> settingEntries = serverRqRs.column(HttpMethod.SEARCH).get(SETTINGS_FIELD);
+      if (CollectionUtils.isNotEmpty(settingEntries)) {
+        JsonObject settings = new JsonObject().put(SETTINGS_FIELD, settingEntries);
+        serverResponse(ctx, 200, APPLICATION_JSON, settings.encodePrettily());
         return;
       }
 
       String tenant = ctx.request().getHeader(OKAPI_HEADER_TENANT);
       try {
-        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(CONFIG_MOCK_PATH, tenant)));
+        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(SETTINGS_MOCK_PATH, tenant)));
       } catch(Exception exc){
-        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(CONFIG_MOCK_PATH, DEFAULT_CONFIG_NAME)));
+        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(SETTINGS_MOCK_PATH, DEFAULT_SETTINGS_NAME)));
       }
     } catch (IOException e) {
       serverResponse(ctx, 500, APPLICATION_JSON, INTERNAL_SERVER_ERROR.getReasonPhrase());
