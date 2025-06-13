@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
-@CopilotGenerated(partiallyGenerated = true)
+@CopilotGenerated(partiallyGenerated = true, model = "o3-mini")
 @ExtendWith(MockitoExtension.class)
 public class CommonSettingsServiceTest {
 
