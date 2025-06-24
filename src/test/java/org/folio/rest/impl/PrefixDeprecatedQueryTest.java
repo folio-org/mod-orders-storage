@@ -1,27 +1,29 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
+import static io.vertx.core.json.JsonObject.mapFrom;
+
+import static org.folio.rest.utils.TestEntities.PREFIX;
+import static org.folio.StorageTestSuite.storageUrl;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+
 import io.restassured.http.ContentType;
+import io.restassured.http.Headers;
+
+import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.UUID;
+
 import lombok.extern.log4j.Log4j2;
-import org.folio.rest.utils.IsolatedTenant;
 
 import org.folio.rest.jaxrs.model.Prefix;
 import org.folio.rest.util.TestConfig;
-import org.junit.jupiter.api.Test;
+import org.folio.rest.utils.IsolatedTenant;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-
-import java.net.MalformedURLException;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import static io.vertx.core.json.JsonObject.mapFrom;
-import static io.restassured.RestAssured.given;
-import static org.folio.rest.utils.TestEntities.PREFIX;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import io.restassured.http.Headers;
-import static org.folio.StorageTestSuite.storageUrl;
+import org.junit.jupiter.api.Test;
 
 @Log4j2
 @IsolatedTenant
