@@ -3,15 +3,15 @@ SET jsonb = jsonb_set(
     jsonb,
     '{deprecated}',
     'false'::jsonb,
-    true  -- create if missing
+    true
 )
-WHERE NOT jsonb ? 'deprecated';  -- Only update rows missing the key
+WHERE NOT jsonb ? 'deprecated';
 
 UPDATE ${myuniversity}_${mymodule}.suffixes
 SET jsonb = jsonb_set(
     jsonb,
     '{deprecated}',
     'false'::jsonb,
-    true  -- create if missing
+    true
 )
-WHERE NOT jsonb ? 'deprecated';  -- Only update rows missing the key
+WHERE NOT jsonb ? 'deprecated';
