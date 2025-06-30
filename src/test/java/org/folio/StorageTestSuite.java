@@ -52,11 +52,13 @@ import org.folio.rest.impl.OrdersAPITest;
 import org.folio.rest.impl.PiecesAPITest;
 import org.folio.rest.impl.PoLineBatchAPITest;
 import org.folio.rest.impl.PoNumberTest;
+import org.folio.rest.impl.PrefixDeprecatedQueryTest;
 import org.folio.rest.impl.PurchaseOrderLineNumberTest;
 import org.folio.rest.impl.PurchaseOrderLinesApiTest;
 import org.folio.rest.impl.PurchaseOrderNumberUniquenessTest;
 import org.folio.rest.impl.ReceivingHistoryTest;
 import org.folio.rest.impl.SearchOrderLinesTest;
+import org.folio.rest.impl.SuffixDeprecatedQueryTest;
 import org.folio.rest.impl.TenantReferenceDataTest;
 import org.folio.rest.impl.TenantSampleDataTest;
 import org.folio.rest.impl.WrapperPiecesAPITest;
@@ -345,4 +347,10 @@ public class StorageTestSuite {
   class RestClientTestNested extends RestClientTest {}
   @Nested
   class WrapperPiecesAPITestNested extends WrapperPiecesAPITest {}
+
+  @Nested
+  class PrefixDeprecatedQueryTestNested extends PrefixDeprecatedQueryTest {}
+
+  @Nested
+  class SuffixDeprecatedQueryTestNested extends SuffixDeprecatedQueryTest {}
 }
