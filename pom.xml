@@ -41,7 +41,7 @@
     <!--Folio dependencies properties-->
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
     <folio-di-support.version>3.0.0</folio-di-support.version>
-    <folio-custom-fields.version>2.3.1</folio-custom-fields.version>
+    <folio-custom-fields.version>3.0.0-SNAPSHOT</folio-custom-fields.version>
     <folio-kafka-wrapper.version>3.2.0</folio-kafka-wrapper.version>
 
     <!--Maven plugin properties-->
