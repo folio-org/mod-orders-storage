@@ -78,6 +78,8 @@ public class TenantReferenceAPI extends TenantAPI {
     if (isNew(tenantAttributes, "13.7.0")) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
+        // Disabled in response to https://folio-org.atlassian.net/browse/MODORDSTOR-472
+        // .add("custom-fields", "custom-fields")
         .add("purchase-orders", "orders-storage/purchase-orders")
         .add("po-lines", "orders-storage/po-lines")
         .add("titles", "orders-storage/titles")
