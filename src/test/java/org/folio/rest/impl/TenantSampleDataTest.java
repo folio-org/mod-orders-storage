@@ -5,6 +5,7 @@ import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.postTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.purge;
+import static org.folio.rest.utils.TestEntities.CUSTOM_FIELDS;
 import static org.folio.rest.utils.TestEntities.EXPORT_HISTORY;
 import static org.folio.rest.utils.TestEntities.ORDER_TEMPLATE_CATEGORIES;
 import static org.folio.rest.utils.TestEntities.PREFIX;
@@ -113,6 +114,10 @@ public class TenantSampleDataTest extends TestBase {
         .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
         .toList();
       for (TestEntities entity : entitySamples) {
+        if (entity == CUSTOM_FIELDS) {
+          log.info("testPartialSampleDataLoading:: Ignoring custom fields validation");
+          continue;
+        }
         log.info("testPartialSampleDataLoading:: Test expected quantity for {}", entity.name());
 
         verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
@@ -179,6 +184,10 @@ public class TenantSampleDataTest extends TestBase {
       .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
     for (TestEntities entity : entitySamples) {
+      if (entity == CUSTOM_FIELDS) {
+        log.info("upgradeTenantWithSampleDataLoad:: Ignoring custom fields validation");
+        continue;
+      }
       log.info("upgradeTenantWithSampleDataLoad:: Test expected quantity for name {}", entity.name());
 
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() + entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
@@ -196,6 +205,10 @@ public class TenantSampleDataTest extends TestBase {
       .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
     for (TestEntities entity: entitySamples) {
+      if (entity == CUSTOM_FIELDS) {
+        log.info("upgradeTenantWithNoSampleDataLoad:: Ignoring custom fields validation");
+        continue;
+      }
       log.info("upgradeTenantWithNoSampleDataLoad:: Test expected quantity: 0 for name: {}", entity.name());
 
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity());

@@ -64,8 +64,8 @@ public class CustomFieldsAPITest extends TestBase {
   void testCustomFieldStatisticCount() {
     populateSampleData();
 
-    assertEquals(2, getCustomFieldStatisticCount(customFieldsPO.get(0)));
-    assertEquals(3, getCustomFieldStatisticCount(customFieldsPOL.get(0)));
+    assertEquals(2, getCustomFieldStatisticCount(customFieldsPO.getFirst()));
+    assertEquals(3, getCustomFieldStatisticCount(customFieldsPOL.getFirst()));
   }
 
   @Test
@@ -81,7 +81,7 @@ public class CustomFieldsAPITest extends TestBase {
     populateSampleData();
 
     // delete custom field PO
-    deleteCustomField(customFieldsPO.get(0));
+    deleteCustomField(customFieldsPO.getFirst());
 
     // POs should be updated
     Map<String, PurchaseOrder> allPurchaseOrders = getAllPurchaseOrders();
@@ -101,31 +101,31 @@ public class CustomFieldsAPITest extends TestBase {
 
     // order template remains unchanged
     assertThat(
-      getAllOrderTemplates().get(orderTemplates.get(0).getId()),
-      samePropertyValuesAs(orderTemplates.get(0)));
+      getAllOrderTemplates().get(orderTemplates.getFirst().getId()),
+      samePropertyValuesAs(orderTemplates.getFirst()));
 
     // delete custom field POL
-    deleteCustomField(customFieldsPOL.get(0));
+    deleteCustomField(customFieldsPOL.getFirst());
 
     // POs remain unchanged
     allPurchaseOrders = getAllPurchaseOrders();
-    PurchaseOrder purchaseOrder1_1 = allPurchaseOrders.get(purchaseOrders.get(0).getId());
-    PurchaseOrder purchaseOrder2_1 = allPurchaseOrders.get(purchaseOrders.get(1).getId());
-    assertThat(purchaseOrder1_1, samePropertyValuesAs(purchaseOrder1));
-    assertThat(purchaseOrder2_1, samePropertyValuesAs(purchaseOrder2));
+    PurchaseOrder purchaseOrder11 = allPurchaseOrders.get(purchaseOrders.get(0).getId());
+    PurchaseOrder purchaseOrder21 = allPurchaseOrders.get(purchaseOrders.get(1).getId());
+    assertThat(purchaseOrder11, samePropertyValuesAs(purchaseOrder1));
+    assertThat(purchaseOrder21, samePropertyValuesAs(purchaseOrder2));
 
     // POLs should be updated
     allPoLines = getAllPoLines();
-    PoLine poLine1_1 = allPoLines.get(poLines.get(0).getId());
-    PoLine poLine2_1 = allPoLines.get(poLines.get(1).getId());
-    assertEquals(2, poLine1_1.getCustomFields().getAdditionalProperties().size());
-    assertNull(poLine1_1.getCustomFields().getAdditionalProperties().get("textbox_2"));
-    assertEquals(2, poLine2_1.getCustomFields().getAdditionalProperties().size());
-    assertNull(poLine2_1.getCustomFields().getAdditionalProperties().get("textbox_2"));
+    PoLine poLine1a = allPoLines.get(poLines.get(0).getId());
+    PoLine poLine2a = allPoLines.get(poLines.get(1).getId());
+    assertEquals(2, poLine1a.getCustomFields().getAdditionalProperties().size());
+    assertNull(poLine1a.getCustomFields().getAdditionalProperties().get("textbox_2"));
+    assertEquals(2, poLine2a.getCustomFields().getAdditionalProperties().size());
+    assertNull(poLine2a.getCustomFields().getAdditionalProperties().get("textbox_2"));
 
     // order template should be updated
     Map<String, OrderTemplate> allOrderTemplates = getAllOrderTemplates();
-    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.get(0).getId());
+    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.getFirst().getId());
     JsonObject customFieldData = getCustomFieldData(orderTemplate);
     assertEquals(4, customFieldData.size());
     assertNull(customFieldData.getValue("textbox"));
@@ -136,7 +136,7 @@ public class CustomFieldsAPITest extends TestBase {
     populateSampleData();
 
     // remove single option from custom field PO
-    customFieldsPO.get(1).getSelectField().getOptions().getValues().remove(0);
+    customFieldsPO.get(1).getSelectField().getOptions().getValues().removeFirst();
     putCustomField(customFieldsPO.get(1));
 
     // POs should be updated
@@ -156,33 +156,33 @@ public class CustomFieldsAPITest extends TestBase {
 
     // order template should be updated
     Map<String, OrderTemplate> allOrderTemplates = getAllOrderTemplates();
-    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.get(0).getId());
+    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.getFirst().getId());
     JsonObject customFieldData = getCustomFieldData(orderTemplate);
     assertEquals(4, customFieldData.size());
     assertNull(customFieldData.getValue("singleselect"));
 
     // remove single option from custom field POL
-    customFieldsPOL.get(1).getSelectField().getOptions().getValues().remove(0);
+    customFieldsPOL.get(1).getSelectField().getOptions().getValues().removeFirst();
     putCustomField(customFieldsPOL.get(1));
 
     // POs should remain unchanged
     allPurchaseOrders = getAllPurchaseOrders();
-    PurchaseOrder purchaseOrder1_1 = allPurchaseOrders.get(purchaseOrders.get(0).getId());
-    PurchaseOrder purchaseOrder2_1 = allPurchaseOrders.get(purchaseOrders.get(1).getId());
-    assertThat(purchaseOrder1_1, samePropertyValuesAs(purchaseOrder1));
-    assertThat(purchaseOrder2_1, samePropertyValuesAs(purchaseOrder2));
+    PurchaseOrder purchaseOrder1a = allPurchaseOrders.get(purchaseOrders.get(0).getId());
+    PurchaseOrder purchaseOrder2a = allPurchaseOrders.get(purchaseOrders.get(1).getId());
+    assertThat(purchaseOrder1a, samePropertyValuesAs(purchaseOrder1));
+    assertThat(purchaseOrder2a, samePropertyValuesAs(purchaseOrder2));
 
     // one POL should be updated
     allPoLines = getAllPoLines();
-    PoLine poLine1_1 = allPoLines.get(poLines.get(0).getId());
-    PoLine poLine2_1 = allPoLines.get(poLines.get(1).getId());
-    assertEquals(2, poLine1_1.getCustomFields().getAdditionalProperties().size());
-    assertNull(poLine1_1.getCustomFields().getAdditionalProperties().get("singleselect_2"));
-    assertThat(poLine2_1, samePropertyValuesAs(poLines.get(1)));
+    PoLine poLine1a = allPoLines.get(poLines.get(0).getId());
+    PoLine poLine2a = allPoLines.get(poLines.get(1).getId());
+    assertEquals(2, poLine1a.getCustomFields().getAdditionalProperties().size());
+    assertNull(poLine1a.getCustomFields().getAdditionalProperties().get("singleselect_2"));
+    assertThat(poLine2a, samePropertyValuesAs(poLines.get(1)));
 
     // order template should be updated
     allOrderTemplates = getAllOrderTemplates();
-    orderTemplate = allOrderTemplates.get(orderTemplates.get(0).getId());
+    orderTemplate = allOrderTemplates.get(orderTemplates.getFirst().getId());
     customFieldData = getCustomFieldData(orderTemplate);
     assertEquals(3, customFieldData.size());
     assertNull(customFieldData.getValue("singleselect_2"));
@@ -221,7 +221,7 @@ public class CustomFieldsAPITest extends TestBase {
 
     // order template should be updated
     Map<String, OrderTemplate> allOrderTemplates = getAllOrderTemplates();
-    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.get(0).getId());
+    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.getFirst().getId());
     JsonObject customFieldData = getCustomFieldData(orderTemplate);
     assertEquals(5, customFieldData.size());
     assertEquals(new JsonArray().add("opt_1"), customFieldData.getValue("multiselect"));
@@ -237,25 +237,25 @@ public class CustomFieldsAPITest extends TestBase {
 
     // POs remain unchanged
     allPurchaseOrders = getAllPurchaseOrders();
-    PurchaseOrder purchaseOrder1_1 = allPurchaseOrders.get(purchaseOrders.get(0).getId());
-    PurchaseOrder purchaseOrder2_1 = allPurchaseOrders.get(purchaseOrders.get(1).getId());
-    assertThat(purchaseOrder1_1, samePropertyValuesAs(purchaseOrder1));
-    assertThat(purchaseOrder2_1, samePropertyValuesAs(purchaseOrder2));
+    PurchaseOrder purchaseOrder1a = allPurchaseOrders.get(purchaseOrders.get(0).getId());
+    PurchaseOrder purchaseOrder2a = allPurchaseOrders.get(purchaseOrders.get(1).getId());
+    assertThat(purchaseOrder1a, samePropertyValuesAs(purchaseOrder1));
+    assertThat(purchaseOrder2a, samePropertyValuesAs(purchaseOrder2));
 
     // POLs should be updated
     allPoLines = getAllPoLines();
-    PoLine poLine1_1 = allPoLines.get(poLines.get(0).getId());
-    PoLine poLine2_1 = allPoLines.get(poLines.get(1).getId());
-    assertEquals(3, poLine1_1.getCustomFields().getAdditionalProperties().size());
+    PoLine poLine1a = allPoLines.get(poLines.get(0).getId());
+    PoLine poLine2a = allPoLines.get(poLines.get(1).getId());
+    assertEquals(3, poLine1a.getCustomFields().getAdditionalProperties().size());
     assertEquals(
       List.of("opt_1"),
-      poLine1_1.getCustomFields().getAdditionalProperties().get("multiselect_2"));
-    assertEquals(2, poLine2_1.getCustomFields().getAdditionalProperties().size());
-    assertNull(poLine2_1.getCustomFields().getAdditionalProperties().get("multiselect_2"));
+      poLine1a.getCustomFields().getAdditionalProperties().get("multiselect_2"));
+    assertEquals(2, poLine2a.getCustomFields().getAdditionalProperties().size());
+    assertNull(poLine2a.getCustomFields().getAdditionalProperties().get("multiselect_2"));
 
     // order template should be updated
     allOrderTemplates = getAllOrderTemplates();
-    orderTemplate = allOrderTemplates.get(orderTemplates.get(0).getId());
+    orderTemplate = allOrderTemplates.get(orderTemplates.getFirst().getId());
     customFieldData = getCustomFieldData(orderTemplate);
     assertEquals(5, customFieldData.size());
     assertEquals(new JsonArray().add("opt_1"), customFieldData.getValue("multiselect_2"));
@@ -267,7 +267,7 @@ public class CustomFieldsAPITest extends TestBase {
     populateSampleData();
 
     // remove opt from custom field using PutCustomFieldsCollection
-    customFieldsPO.get(1).getSelectField().getOptions().getValues().remove(0);
+    customFieldsPO.get(1).getSelectField().getOptions().getValues().removeFirst();
     putCustomFieldCollection(
       new PutCustomFieldCollection()
         .withCustomFields(customFieldsPO)
@@ -291,7 +291,7 @@ public class CustomFieldsAPITest extends TestBase {
 
     // order template should be updated
     Map<String, OrderTemplate> allOrderTemplates = getAllOrderTemplates();
-    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.get(0).getId());
+    OrderTemplate orderTemplate = allOrderTemplates.get(orderTemplates.getFirst().getId());
     JsonObject customFieldData = getCustomFieldData(orderTemplate);
     assertEquals(4, customFieldData.size());
     assertNull(customFieldData.getValue("singleselect"));
