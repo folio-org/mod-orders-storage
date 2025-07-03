@@ -25,6 +25,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 
 public class TenantReferenceAPI extends TenantAPI {
+
   private static final Logger log = LogManager.getLogger();
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
@@ -35,7 +36,8 @@ public class TenantReferenceAPI extends TenantAPI {
   }
 
   @Override
-  public Future<Integer> loadData(TenantAttributes attributes, String tenantId, Map<String, String> headers, Context vertxContext) {
+  public Future<Integer> loadData(TenantAttributes attributes, String tenantId,
+                                  Map<String, String> headers, Context vertxContext) {
     log.info("postTenant");
     Vertx vertx = vertxContext.owner();
     Parameter parameter = new Parameter().withKey(PARAMETER_LOAD_SYSTEM).withValue("true");
@@ -76,7 +78,6 @@ public class TenantReferenceAPI extends TenantAPI {
     if (isNew(tenantAttributes, "13.7.0")) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
-        .add("custom-fields", "custom-fields")
         .add("purchase-orders", "orders-storage/purchase-orders")
         .add("po-lines", "orders-storage/po-lines")
         .add("titles", "orders-storage/titles")
@@ -120,14 +121,14 @@ public class TenantReferenceAPI extends TenantAPI {
   }
 
   @Override
-  public void deleteTenantByOperationId(String operationId, Map<String, String> headers, Handler<AsyncResult<Response>> hndlr,
-    Context cntxt) {
+  public void deleteTenantByOperationId(String operationId, Map<String, String> headers,
+                                        Handler<AsyncResult<Response>> handler, Context context) {
     log.info("deleteTenant, operationId={}", operationId);
     super.deleteTenantByOperationId(operationId, headers, res -> {
-      Vertx vertx = cntxt.owner();
+      Vertx vertx = context.owner();
       String tenantId = TenantTool.tenantId(headers);
       PostgresClient.getInstance(vertx, tenantId)
-        .closeClient(event -> hndlr.handle(res));
-    }, cntxt);
+        .closeClient(event -> handler.handle(res));
+    }, context);
   }
 }
