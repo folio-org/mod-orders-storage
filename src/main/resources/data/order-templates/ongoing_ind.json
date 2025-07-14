@@ -1,0 +1,21 @@
+{
+  "id": "6031ea93-e3e5-4cab-83fe-94497d1c7251",
+  "templateCode": "Ongoing-ind",
+  "templateName": "Ongoing independent",
+  "categoryIds": [
+    "d4f980f4-317e-424d-93a3-cee413f7dad6"
+  ],
+  "orderType": "Ongoing",
+  "acquisitionMethod" : "306489dd-0053-49ee-a068-c316444a8f55",
+  "approved" : true,
+  "cost" : {
+    "quantityPhysical" : 1
+  },
+  "checkinItems" : true,
+  "orderFormat": "Physical Resource",
+  "physical" : {
+    "materialType" : "d9acad2f-2aac-4b48-9097-e6ab85906b25",
+    "createInventory" : "Instance, Holding, Item"
+  },
+  "vendor": "11fb627a-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

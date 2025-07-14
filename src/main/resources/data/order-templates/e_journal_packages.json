@@ -3,6 +3,9 @@
   "receiptStatus": "Receipt Not Required",
   "templateCode": "Packages: eJournals",
   "templateName": "eJournal packages",
+  "categoryIds": [
+    "d4f980f4-317e-424d-93a3-cee413f7dad6"
+  ],
   "acqUnitIds": [
     "0ebb1f7d-983f-3026-8a4c-5318e0ebc041"
   ],

@@ -1,0 +1,21 @@
+{
+  "id": "0d73553c-3908-4328-b0e7-d7948523c64a",
+  "templateCode": "apifirm",
+  "templateName": "API Firm orders",
+  "categoryIds": [
+    "d4f980f4-317e-424d-93a3-cee413f7dad6",
+    "12e66fdd-b2a9-4e6b-b7d4-0e0b40bd0aec"
+  ],
+  "reEncumber": true,
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "claimingActive" : true,
+  "claimingInterval" : "30",
+  "checkinItems" : false,
+  "orderFormat": "Physical Resource",
+  "orderType": "One-Time",
+  "physical" : {
+    "materialType" : "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+    "createInventory" : "Instance, Holding, Item"
+  },
+  "vendor": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1"
+}
