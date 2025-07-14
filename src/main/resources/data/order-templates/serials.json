@@ -1,0 +1,26 @@
+{
+  "id": "d51de2fb-1ebe-4e6c-9ec5-d4b2654e7d1e",
+  "templateCode": "serials",
+  "templateName": "Print serials",
+  "categoryIds": [
+    "d4f980f4-317e-424d-93a3-cee413f7dad6"
+  ],
+  "reEncumber": true,
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "claimingActive" : true,
+  "claimingInterval" : "10",
+  "orderType": "Ongoing",
+  "ongoing" : {
+    "isSubscription" : true,
+    "interval" : "365"
+  },
+  "orderFormat": "Physical Resource",
+  "details" : {
+    "isBinderyActive" : true
+  },
+  "physical" : {
+    "materialType" : "d9acad2f-2aac-4b48-9097-e6ab85906b25",
+    "createInventory" : "Instance, Holding, Item"
+  },
+  "vendor": "d0fb5aa0-cdf1-11e8-a8d5-f2801f1b9fd1"
+}

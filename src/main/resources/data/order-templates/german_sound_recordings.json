@@ -2,6 +2,9 @@
   "id": "cc637c23-d1fb-47b9-bcda-1d6f0812dc01",
   "templateCode": "German music",
   "templateName": "German sound recordings",
+  "categoryIds": [
+    "d4f980f4-317e-424d-93a3-cee413f7dad6"
+  ],
   "acqUnitIds": [
     "0ebb1f7d-983f-3026-8a4c-5318e0ebc041"
   ],

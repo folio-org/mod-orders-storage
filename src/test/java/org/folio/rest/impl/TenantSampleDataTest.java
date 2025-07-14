@@ -111,7 +111,7 @@ public class TenantSampleDataTest extends TestBase {
       tenantJob = postTenant(PARTIAL_TENANT_HEADER, tenantAttributes);
 
       List<TestEntities> entitySamples = Arrays.stream(TestEntities.values())
-        .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
+        .filter(entity -> !EXPORT_HISTORY.equals(entity))
         .toList();
       for (TestEntities entity : entitySamples) {
         if (entity == CUSTOM_FIELDS) {

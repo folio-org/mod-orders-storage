@@ -3,8 +3,13 @@
   "templateCode": "Amazon-B",
   "templateDescription": "Use to create orders in FOLIO after they are placed on Amazon",
   "templateName": "Amazon book orders",
+  "categoryIds": [
+    "d4f980f4-317e-424d-93a3-cee413f7dad6"
+  ],
+  "reEncumber": true,
   "acquisitionMethod": "306489dd-0053-49ee-a068-c316444a8f55",
   "approved": true,
+  "checkinItems" : false,
   "billTo" : "5f8a321e-6b38-4d90-92d4-bf08f91a2242",
   "cancellationRestriction": true,
   "cost": {

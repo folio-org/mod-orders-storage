@@ -90,6 +90,12 @@ public class TenantReferenceAPI extends TenantAPI {
         .add("configuration/prefixes", "orders-storage/configuration/prefixes")
         .add("configuration/suffixes", "orders-storage/configuration/suffixes");
     }
+
+    if (isNew(tenantAttributes, "14.0.0")) {
+      tl.withKey(PARAMETER_LOAD_SAMPLE)
+        .withLead("data")
+        .add("order-template-categories", "orders-storage/order-template-categories");
+    }
   }
 
   /**

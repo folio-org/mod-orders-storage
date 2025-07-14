@@ -750,12 +750,6 @@
         {
           "fieldName": "templateName"
         }
-      ],
-      "foreignKeys": [
-        {
-          "fieldName": "categoryId",
-          "targetTable": "order_template_categories"
-        }
       ]
     },
     {
