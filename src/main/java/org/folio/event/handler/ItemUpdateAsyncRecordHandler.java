@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_UPDATE;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 import static org.folio.util.HelperUtils.asFuture;
+import static org.folio.util.InventoryUtils.isInstanceChanged;
 
 import java.util.List;
 import java.util.Map;
@@ -18,10 +19,12 @@ import org.apache.commons.lang.ObjectUtils;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
+import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.persist.Conn;
+import org.folio.services.inventory.HoldingsService;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
@@ -34,6 +37,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   private PieceService pieceService;
   @Autowired
   private OrderLineLocationUpdateService orderLineLocationUpdateService;
+  @Autowired
+  private HoldingsService holdingsService;
   @Autowired
   private AuditOutboxService auditOutboxService;
 
@@ -104,7 +109,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture();
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
-    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn)
+    return holdingsService.getHoldingsPairByIds(holder.getHoldingIdPair(),new RequestContext(getContext(), holder.getHeaders()))
+      .compose(holdingsPair -> orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), isInstanceChanged(holdingsPair), holder.getOrderTenantId(), holder.getHeaders(), conn))
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
       .mapEmpty();
   }
