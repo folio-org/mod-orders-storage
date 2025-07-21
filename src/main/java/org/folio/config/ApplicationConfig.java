@@ -23,6 +23,7 @@ import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.inventory.HoldingsService;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLineNumbersService;
@@ -193,8 +194,13 @@ public class ApplicationConfig {
   }
 
   @Bean
-  InventoryUpdateService inventoryUpdateService(RestClient restClient) {
-    return new InventoryUpdateService(restClient);
+  InventoryUpdateService inventoryUpdateService(HoldingsService holdingsService, RestClient restClient) {
+    return new InventoryUpdateService(holdingsService, restClient);
+  }
+
+  @Bean
+  HoldingsService holdingsService(RestClient restClient) {
+    return new HoldingsService(restClient);
   }
 
   @Bean
