@@ -15,6 +15,7 @@ import org.folio.rest.core.models.RequestEntry;
 
 import java.util.List;
 
+import static org.folio.event.dto.HoldingFields.HOLDINGS_RECORDS;
 import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
 import static org.folio.util.ResourcePath.STORAGE_BATCH_HOLDING_URL;
 import static org.folio.util.ResourcePath.STORAGE_INSTANCE_URL;
@@ -23,7 +24,6 @@ import static org.folio.util.ResourcePath.STORAGE_INSTANCE_URL;
 @RequiredArgsConstructor
 public class InventoryUpdateService {
 
-  public static final String HOLDINGS_RECORDS = "holdingsRecords";
   private static final String UPSERT = "upsert";
   private static final String TRUE = "true";
 
@@ -49,7 +49,7 @@ public class InventoryUpdateService {
       }
       updateResultNewInstanceId(getResults, newInstanceId);
       var batchPostRequestEntry = new RequestEntry(STORAGE_BATCH_HOLDING_URL.getPath()).withQueryParameter(UPSERT, TRUE);
-      var payload = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray(getResults));
+      var payload = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray(getResults));
       return restClient.post(batchPostRequestEntry, payload, ResponsePredicate.SC_CREATED, requestContext)
         .mapEmpty();
     });
@@ -57,7 +57,7 @@ public class InventoryUpdateService {
 
   private void updateResultNewInstanceId(List<JsonObject> results, String newInstanceId) {
     results.forEach(result ->
-      result.getJsonArray(HOLDINGS_RECORDS).stream()
+      result.getJsonArray(HOLDINGS_RECORDS.getValue()).stream()
         .filter(Objects::nonNull)
         .map(JsonObject.class::cast)
         .forEach(holding -> holding.put(INSTANCE_ID.getValue(), newInstanceId)));

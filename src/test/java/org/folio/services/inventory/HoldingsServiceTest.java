@@ -16,8 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
+import static org.folio.event.dto.HoldingFields.HOLDINGS_RECORDS;
 import static org.folio.event.dto.HoldingFields.ID;
-import static org.folio.services.inventory.InventoryUpdateService.HOLDINGS_RECORDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -45,7 +45,7 @@ public class HoldingsServiceTest {
     // given
     JsonObject holding1 = new JsonObject().put(ID.getValue(), HOLDING_ID_1);
     JsonObject holding2 = new JsonObject().put(ID.getValue(), HOLDING_ID_2);
-    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray().add(holding1).add(holding2));
+    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray().add(holding1).add(holding2));
 
     when(restClient.get(any(RequestEntry.class), eq(requestContext)))
       .thenReturn(Future.succeededFuture(response));
@@ -68,8 +68,7 @@ public class HoldingsServiceTest {
   @Test
   void shouldReturnEmptyJsonObjectsWhenHoldingsNotFound() {
     // given
-    JsonObject response = new JsonObject()
-      .put(HOLDINGS_RECORDS, new JsonArray());
+    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray());
 
     when(restClient.get(any(RequestEntry.class), eq(requestContext)))
       .thenReturn(Future.succeededFuture(response));
@@ -91,7 +90,7 @@ public class HoldingsServiceTest {
   void shouldGetHoldingsByIds() {
     // given
     JsonObject holding1 = new JsonObject().put(ID.getValue(), HOLDING_ID_1);
-    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray().add(holding1));
+    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray().add(holding1));
 
     when(restClient.get(any(RequestEntry.class), eq(requestContext)))
       .thenReturn(Future.succeededFuture(response));
@@ -104,7 +103,7 @@ public class HoldingsServiceTest {
     future.onComplete(result -> {
       List<JsonObject> holdings = result.result();
       assertEquals(1, holdings.size());
-      assertEquals(HOLDING_ID_1, holdings.getFirst().getJsonArray(HOLDINGS_RECORDS)
+      assertEquals(HOLDING_ID_1, holdings.getFirst().getJsonArray(HOLDINGS_RECORDS.getValue())
         .getJsonObject(0).getString(ID.getValue()));
     });
   }
@@ -112,7 +111,7 @@ public class HoldingsServiceTest {
   @Test
   void shouldReturnEmptyListWhenNoHoldingsFound() {
     // given
-    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray());
+    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray());
 
     when(restClient.get(any(RequestEntry.class), eq(requestContext)))
       .thenReturn(Future.succeededFuture(response));
@@ -125,7 +124,7 @@ public class HoldingsServiceTest {
     future.onComplete(result -> {
       List<JsonObject> holdings = result.result();
       assertEquals(1, holdings.size());
-      assertTrue(holdings.getFirst().getJsonArray(HOLDINGS_RECORDS).isEmpty());
+      assertTrue(holdings.getFirst().getJsonArray(HOLDINGS_RECORDS.getValue()).isEmpty());
     });
   }
 
@@ -148,7 +147,7 @@ public class HoldingsServiceTest {
   void shouldHandleChunkedRequestsForLargeHoldingsList() {
     // given
     List<String> manyHoldingIds = List.of(HOLDING_ID_1, HOLDING_ID_2, "holding-id-3");
-    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray().add(new JsonObject().put(ID.getValue(), HOLDING_ID_1)));
+    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray().add(new JsonObject().put(ID.getValue(), HOLDING_ID_1)));
 
     when(restClient.get(any(RequestEntry.class), eq(requestContext)))
       .thenReturn(Future.succeededFuture(response));

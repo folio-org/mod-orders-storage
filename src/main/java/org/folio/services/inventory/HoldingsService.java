@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ_15;
-import static org.folio.services.inventory.InventoryUpdateService.HOLDINGS_RECORDS;
+import static org.folio.event.dto.HoldingFields.HOLDINGS_RECORDS;
 import static org.folio.util.HelperUtils.collectResultsOnSuccess;
 import static org.folio.util.HelperUtils.convertIdsToCqlQuery;
 import static org.folio.util.ResourcePath.STORAGE_HOLDING_URL;
@@ -30,7 +30,7 @@ public class HoldingsService {
     return getHoldingsByIds(List.of(holdingIds.getLeft(), holdingIds.getRight()), requestContext)
       .map(holdingsCollections -> {
         var holdings = holdingsCollections.stream()
-          .flatMap(result -> result.getJsonArray(HOLDINGS_RECORDS).stream())
+          .flatMap(result -> result.getJsonArray(HOLDINGS_RECORDS.getValue()).stream())
           .map(JsonObject.class::cast)
           .toList();
         var holdingsById = StreamEx.of(holdings).toMap(h -> h.getString(HoldingFields.ID.getValue()), Function.identity());

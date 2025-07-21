@@ -17,9 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.UUID;
 
+import static org.folio.event.dto.HoldingFields.HOLDINGS_RECORDS;
 import static org.folio.event.dto.HoldingFields.ID;
 import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
-import static org.folio.services.inventory.InventoryUpdateService.HOLDINGS_RECORDS;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -60,7 +60,7 @@ public class InventoryUpdateServiceTest {
     var resourceEvent = new ResourceEvent();
     resourceEvent.setNewValue(new JsonObject().put(INSTANCE_ID.getValue(), UUID.randomUUID().toString()));
     var holdingObject = new JsonObject().put(ID.getValue(), UUID.randomUUID().toString());
-    var holdingRecordsJsonObjects = List.of(new JsonObject().put(HOLDINGS_RECORDS, new JsonArray().add(holdingObject)));
+    var holdingRecordsJsonObjects = List.of(new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray().add(holdingObject)));
     var holder = HoldingEventHolder.builder().resourceEvent(resourceEvent).build();
     var holdingIds = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
