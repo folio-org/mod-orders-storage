@@ -33,6 +33,8 @@ public class InventoryUpdateServiceTest {
   @Mock
   private RestClient restClient;
   @Mock
+  private HoldingsService holdingsService;
+  @Mock
   private RequestContext requestContext;
 
   @Test
@@ -58,17 +60,17 @@ public class InventoryUpdateServiceTest {
     var resourceEvent = new ResourceEvent();
     resourceEvent.setNewValue(new JsonObject().put(INSTANCE_ID.getValue(), UUID.randomUUID().toString()));
     var holdingObject = new JsonObject().put(ID.getValue(), UUID.randomUUID().toString());
-    var holdingRecordsJsonObject = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray().add(holdingObject));
+    var holdingRecordsJsonObjects = List.of(new JsonObject().put(HOLDINGS_RECORDS, new JsonArray().add(holdingObject)));
     var holder = HoldingEventHolder.builder().resourceEvent(resourceEvent).build();
     var holdingIds = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
-    when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(holdingRecordsJsonObject));
+    when(holdingsService.getHoldingsByIds(any(), any())).thenReturn(Future.succeededFuture(holdingRecordsJsonObjects));
     when(restClient.post(any(), any(), any(), any())).thenReturn(Future.succeededFuture());
 
     var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds, requestContext);
 
     assertDoesNotThrow(result::result);
-    verify(restClient, times(1)).get(any(), any());
+    verify(holdingsService, times(1)).getHoldingsByIds(any(), any());
     verify(restClient, times(1)).post(any(), any(), any(), any());
   }
 
