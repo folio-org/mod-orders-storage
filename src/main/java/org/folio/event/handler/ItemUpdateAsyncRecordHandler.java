@@ -18,13 +18,16 @@ import org.apache.commons.lang.ObjectUtils;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
+import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.persist.Conn;
+import org.folio.services.inventory.HoldingsService;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.InventoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Log4j2
@@ -34,6 +37,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   private PieceService pieceService;
   @Autowired
   private OrderLineLocationUpdateService orderLineLocationUpdateService;
+  @Autowired
+  private HoldingsService holdingsService;
   @Autowired
   private AuditOutboxService auditOutboxService;
 
@@ -104,9 +109,20 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture();
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
-    return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn)
+    return processInstanceIdsChange(holder)
+      .compose(instanceIdChanged -> orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), instanceIdChanged, holder.getOrderTenantId(), holder.getHeaders(), conn))
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
       .mapEmpty();
+  }
+
+  private Future<Boolean> processInstanceIdsChange(ItemEventHolder holder) {
+    return holdingsService.getHoldingsPairByIds(holder.getHoldingIdPair(), new RequestContext(getContext(), holder.getHeaders()))
+      .map(InventoryUtils::isInstanceChanged)
+      .onSuccess(instanceIdChanged -> {
+        if (instanceIdChanged) {
+          log.info("processInstanceIdsChange:: Instance ID changed for item: '{}', updating adjacent holdings", holder.getItemId());
+        }
+      });
   }
 
   private ItemEventHolder createItemEventHolder(ResourceEvent resourceEvent, Map<String, String> headers) {
