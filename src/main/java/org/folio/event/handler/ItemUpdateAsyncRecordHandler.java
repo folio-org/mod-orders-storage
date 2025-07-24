@@ -2,6 +2,7 @@ package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_UPDATE;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
+import static org.folio.util.HeaderUtils.prepareHeaderForTenant;
 import static org.folio.util.HelperUtils.asFuture;
 
 import java.util.List;
@@ -116,7 +117,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   }
 
   private Future<Boolean> processInstanceIdsChange(ItemEventHolder holder) {
-    return holdingsService.getHoldingsPairByIds(holder.getHoldingIdPair(), new RequestContext(getContext(), holder.getHeaders()))
+    var holdingTenantHeaders = prepareHeaderForTenant(holder.getTenantId(), holder.getHeaders());
+    return holdingsService.getHoldingsPairByIds(holder.getHoldingIdPair(), new RequestContext(getContext(), holdingTenantHeaders))
       .map(InventoryUtils::isInstanceChanged)
       .onSuccess(instanceIdChanged -> {
         if (instanceIdChanged) {
