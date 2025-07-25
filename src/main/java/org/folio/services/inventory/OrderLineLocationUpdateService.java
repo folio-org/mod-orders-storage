@@ -75,8 +75,9 @@ public class OrderLineLocationUpdateService {
     log.info("repairPoLineLocationData:: Fetching '{}' POL(s) to repair location data", poLineIds.size());
     return poLinesService.getPoLinesByIdsForUpdate(poLineIds, tenantId, conn)
       .map(poLines -> repairPoLineLocations(poLines, holdingIdPair))
-      .compose(poLinesToUpdate -> poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
-        .map(v -> poLinesToUpdate));
+      .compose(poLinesToUpdate -> CollectionUtils.isEmpty(poLinesToUpdate)
+        ? Future.succeededFuture(List.of())
+        : poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers).map(v -> poLinesToUpdate));
   }
 
   private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
@@ -154,9 +155,10 @@ public class OrderLineLocationUpdateService {
         }
       });
       if (locations.equals(poLine.getLocations())) {
-        log.info("repairPoLineLocations:: No changes were made to POL: '{}'", poLine.getId());
         return false;
       }
+      log.info("repairPoLineLocations:: Replacing locations of POL: '{}' having old value: '{}' with new value: '{}'",
+        poLine.getId(), JsonArray.of(poLine.getLocations()).encode(), JsonArray.of(locations).encode());
       poLine.setLocations(locations);
       return true;
     }).toList();
