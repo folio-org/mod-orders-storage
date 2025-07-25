@@ -147,20 +147,24 @@ public class OrderLineLocationUpdateService {
   }
 
   private List<PoLine> repairPoLineLocations(List<PoLine> poLines, Pair<String, String> holdingIdPair) {
-    log.info("repairPoLineLocations:: Repairing POLs locations, replacing old holding id with the new one: '{}'", holdingIdPair);
-    var updatedPoLines = poLines.stream()
-      .filter(poLine -> {
-        boolean updated = false;
-        for (Location location : poLine.getLocations()) {
-          if (Objects.equals(location.getHoldingId(), holdingIdPair.getLeft())) {
-            location.setHoldingId(holdingIdPair.getRight());
-            updated = true;
-          }
+    return poLines.stream().filter(poLine -> {
+      var locations = new ArrayList<>(poLine.getLocations());
+      locations.forEach(location -> {
+        if (Objects.equals(location.getHoldingId(), holdingIdPair.getLeft())) {
+          location.setHoldingId(holdingIdPair.getRight());
         }
-        return updated;
-      }).toList();
-    log.info("repairPoLineLocations:: {} POLs were updated with new holding id: '{}'", updatedPoLines.size(), holdingIdPair.getRight());
-    return updatedPoLines;
+      });
+      log.info("[DEBUG] repairPoLineLocations:: Holding ID pair: '{}' for POL: '{}'", holdingIdPair, poLine.getId());
+      log.info("[DEBUG] repairPoLineLocations:: Replacing locations of POL: '{}' having old value: '{}' with new value: '{}'",
+        poLine.getId(), JsonArray.of(poLine.getLocations()).encode(), JsonArray.of(locations).encode());
+      if (locations.equals(poLine.getLocations())) {
+        return false;
+      }
+      log.info("repairPoLineLocations:: Replacing locations of POL: '{}' having old value: '{}' with new value: '{}'",
+        poLine.getId(), JsonArray.of(poLine.getLocations()).encode(), JsonArray.of(locations).encode());
+      poLine.setLocations(locations);
+      return true;
+    }).toList();
   }
 
 }
