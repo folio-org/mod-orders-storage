@@ -31,9 +31,7 @@ import java.util.function.Function;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtils;
-import org.folio.event.dto.HoldingFields;
 import org.folio.event.dto.ItemFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -47,7 +45,6 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
-import org.folio.services.inventory.HoldingsService;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
@@ -56,7 +53,7 @@ import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -81,8 +78,6 @@ public class ItemUpdateAsyncRecordHandlerTest {
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
   private SettingService settingService;
-  @Mock
-  private HoldingsService holdingsService;
   @InjectMocks
   private OrderLineLocationUpdateService orderLineLocationUpdateService;
 
@@ -95,7 +90,6 @@ public class ItemUpdateAsyncRecordHandlerTest {
       var itemHandler = new ItemUpdateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
       TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
-      TestUtils.setInternalState(itemHandler, "holdingsService", holdingsService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
       handler = spy(itemHandler);
@@ -105,8 +99,6 @@ public class ItemUpdateAsyncRecordHandlerTest {
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(DIKU_TENANT))
         .when(consortiumConfigurationService).getCentralTenantId(any(), any());
-      doReturn(Future.succeededFuture(Pair.of(new JsonObject(), new JsonObject())))
-        .when(holdingsService).getHoldingsPairByIds(any(), any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(any(Conn.class), anyList(), any(), anyMap());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(any());
@@ -116,9 +108,8 @@ public class ItemUpdateAsyncRecordHandlerTest {
   }
 
   @ParameterizedTest
-  @CsvSource(value = {"true|true", "false|true", "true|false", "false|false"}, delimiter = '|')
-  void positive_shouldProcessItemUpdateEventWithHoldingsUpdate(boolean checkinItems, boolean instanceIdChanged) {
-    var shouldUpdatePol = !checkinItems || instanceIdChanged; // POL must be updated for synchronized workflow or if instanceId is changed
+  @ValueSource(booleans = {false, true})
+  void positive_shouldProcessItemUpdateEventWithHoldingsUpdate(boolean checkinItems) {
     var poLineId = UUID.randomUUID().toString();
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
@@ -133,7 +124,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var kafkaRecord = createKafkaRecordWithValues(oldItemValueBeforeUpdate, newItemValueBeforeUpdate);
 
     var poLine = createPoLine(poLineId, holdingId1, effectiveLocationId1).withCheckinItems(checkinItems);
-    var expectedPoLine = createPoLine(poLineId, holdingId2, effectiveLocationId1, effectiveLocationId2).withCheckinItems(checkinItems);
+    var expectedPoLine = createPoLine(poLineId, holdingId2, effectiveLocationId1, effectiveLocationId2);
 
     var actualPieces = List.of(
       createPiece(pieceId1, itemId, holdingId1, null).withPoLineId(poLineId),
@@ -143,11 +134,6 @@ public class ItemUpdateAsyncRecordHandlerTest {
       createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
 
-    var holdingsPair = Pair.of(
-      new JsonObject().put(HoldingFields.INSTANCE_ID.getValue(), "instanceId"),
-      new JsonObject().put(HoldingFields.INSTANCE_ID.getValue(), "instanceId" + (instanceIdChanged ? "Updated" : ""))
-    );
-
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
@@ -155,7 +141,6 @@ public class ItemUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
-    doReturn(Future.succeededFuture(holdingsPair)).when(holdingsService).getHoldingsPairByIds(any(), any());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -164,9 +149,9 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
-    verify(pieceService, times(shouldUpdatePol ? 1 : 0)).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
-    verify(poLinesService, times(shouldUpdatePol ? 1 : 0)).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
-    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(shouldUpdatePol ? List.of(expectedPoLine) : List.of()), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(pieceService, times(checkinItems ? 0 : 1)).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
+    verify(poLinesService, times(checkinItems ? 0 : 1)).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
+    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(checkinItems ? List.of() : List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
   }
 
   @Test
