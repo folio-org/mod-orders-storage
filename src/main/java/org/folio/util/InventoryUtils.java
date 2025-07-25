@@ -3,13 +3,10 @@ package org.folio.util;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.tuple.Pair;
-import org.folio.event.dto.HoldingFields;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.ProductId;
 
 import java.util.List;
-import java.util.Objects;
 
 import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME;
 import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME_TYPE_ID;
@@ -27,12 +24,6 @@ public class InventoryUtils {
 
   public static String getInstanceTitle(JsonObject instance) {
     return instance.getString(TITLE.getValue());
-  }
-
-  public static boolean isInstanceChanged(Pair<JsonObject, JsonObject> holdingsPair) {
-    String oldInstanceId = holdingsPair.getLeft().getString(HoldingFields.INSTANCE_ID.getValue());
-    String newInstanceId = holdingsPair.getRight().getString(HoldingFields.INSTANCE_ID.getValue());
-    return !Objects.equals(oldInstanceId, newInstanceId);
   }
 
   public static String getPublisher(JsonObject instance) {

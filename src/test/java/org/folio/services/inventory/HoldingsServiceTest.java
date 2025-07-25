@@ -3,7 +3,6 @@ package org.folio.services.inventory;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.commons.lang3.tuple.Pair;
 import org.folio.CopilotGenerated;
 import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
@@ -39,52 +38,6 @@ public class HoldingsServiceTest {
   private RequestContext requestContext;
   @InjectMocks
   private HoldingsService holdingsService;
-
-  @Test
-  void shouldGetHoldingsPairByIds() {
-    // given
-    JsonObject holding1 = new JsonObject().put(ID.getValue(), HOLDING_ID_1);
-    JsonObject holding2 = new JsonObject().put(ID.getValue(), HOLDING_ID_2);
-    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray().add(holding1).add(holding2));
-
-    when(restClient.get(any(RequestEntry.class), eq(requestContext)))
-      .thenReturn(Future.succeededFuture(response));
-
-    // when
-    Future<Pair<JsonObject, JsonObject>> future = holdingsService
-      .getHoldingsPairByIds(Pair.of(HOLDING_ID_1, HOLDING_ID_2), requestContext);
-
-    // then
-    assertTrue(future.succeeded());
-    future.onComplete(result -> {
-      Pair<JsonObject, JsonObject> holdingsPair = result.result();
-      assertEquals(HOLDING_ID_1, holdingsPair.getLeft().getString(ID.getValue()));
-      assertEquals(HOLDING_ID_2, holdingsPair.getRight().getString(ID.getValue()));
-    });
-
-    verify(restClient).get(any(RequestEntry.class), eq(requestContext));
-  }
-
-  @Test
-  void shouldReturnEmptyJsonObjectsWhenHoldingsNotFound() {
-    // given
-    JsonObject response = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray());
-
-    when(restClient.get(any(RequestEntry.class), eq(requestContext)))
-      .thenReturn(Future.succeededFuture(response));
-
-    // when
-    Future<Pair<JsonObject, JsonObject>> future = holdingsService
-      .getHoldingsPairByIds(Pair.of(HOLDING_ID_1, HOLDING_ID_2), requestContext);
-
-    // then
-    assertTrue(future.succeeded());
-    future.onComplete(result -> {
-      Pair<JsonObject, JsonObject> holdingsPair = result.result();
-      assertTrue(holdingsPair.getLeft().isEmpty());
-      assertTrue(holdingsPair.getRight().isEmpty());
-    });
-  }
 
   @Test
   void shouldGetHoldingsByIds() {
