@@ -11,14 +11,15 @@ import java.util.Optional;
 
 import io.vertx.core.MultiMap;
 import io.vertx.kafka.client.producer.KafkaHeader;
-import lombok.experimental.UtilityClass;
 import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.folio.okapi.common.XOkapiHeaders;
 
-@UtilityClass
 public final class HeaderUtils {
 
   public static final String TENANT_NOT_SPECIFIED_MSG = "Tenant must be specified in the kafka record " + OKAPI_HEADER_TENANT;
+
+  private HeaderUtils() {
+  }
 
   public static String extractTenantFromHeaders(List<KafkaHeader> headers) {
     return Optional.ofNullable(extractValueFromHeaders(headers, OKAPI_HEADER_TENANT))
