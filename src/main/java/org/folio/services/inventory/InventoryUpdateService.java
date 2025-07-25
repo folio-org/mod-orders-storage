@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.event.dto.HoldingEventHolder;
@@ -14,27 +15,20 @@ import org.folio.rest.core.models.RequestEntry;
 
 import java.util.List;
 
-import static one.util.streamex.StreamEx.ofSubLists;
-import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ_15;
+import static org.folio.event.dto.HoldingFields.HOLDINGS_RECORDS;
 import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
-import static org.folio.util.HelperUtils.collectResultsOnSuccess;
-import static org.folio.util.HelperUtils.convertIdsToCqlQuery;
 import static org.folio.util.ResourcePath.STORAGE_BATCH_HOLDING_URL;
-import static org.folio.util.ResourcePath.STORAGE_HOLDING_URL;
 import static org.folio.util.ResourcePath.STORAGE_INSTANCE_URL;
 
 @Log4j2
+@RequiredArgsConstructor
 public class InventoryUpdateService {
 
-  public static final String HOLDINGS_RECORDS = "holdingsRecords";
   private static final String UPSERT = "upsert";
   private static final String TRUE = "true";
 
+  private final HoldingsService holdingsService;
   private final RestClient restClient;
-
-  public InventoryUpdateService(RestClient restClient) {
-    this.restClient = restClient;
-  }
 
   public Future<Void> batchUpdateAdjacentHoldingsWithNewInstanceId(HoldingEventHolder holder, List<String> holdingIds,
                                                                    RequestContext requestContext) {
@@ -48,33 +42,22 @@ public class InventoryUpdateService {
   }
 
   private Future<Void> batchUpdateAdjacentHoldings(List<String> holdingIds, String newInstanceId, RequestContext requestContext) {
-    var holdingFutures = collectResultsOnSuccess(ofSubLists(holdingIds, MAX_IDS_FOR_GET_RQ_15)
-      .map(ids -> getHoldingsChunk(ids, requestContext)).toList());
-    return holdingFutures.compose(getResults -> {
+    return holdingsService.getHoldingsByIds(holdingIds, requestContext).compose(getResults -> {
       if (getResults.isEmpty()) {
         log.info("batchUpdateAdjacentHoldings:: No holdings were found with ids '{}', ignoring update", holdingIds);
         return Future.succeededFuture();
       }
       updateResultNewInstanceId(getResults, newInstanceId);
       var batchPostRequestEntry = new RequestEntry(STORAGE_BATCH_HOLDING_URL.getPath()).withQueryParameter(UPSERT, TRUE);
-      var payload = new JsonObject().put(HOLDINGS_RECORDS, new JsonArray(getResults));
+      var payload = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray(getResults));
       return restClient.post(batchPostRequestEntry, payload, ResponsePredicate.SC_CREATED, requestContext)
         .mapEmpty();
     });
   }
 
-  private Future<JsonObject> getHoldingsChunk(List<String> holdingIds, RequestContext requestContext) {
-    var query = convertIdsToCqlQuery(holdingIds);
-    var requestEntry = new RequestEntry(STORAGE_HOLDING_URL.getPath())
-      .withQuery(query)
-      .withOffset(0)
-      .withLimit(MAX_IDS_FOR_GET_RQ_15);
-    return restClient.get(requestEntry, requestContext);
-  }
-
   private void updateResultNewInstanceId(List<JsonObject> results, String newInstanceId) {
     results.forEach(result ->
-      result.getJsonArray(HOLDINGS_RECORDS).stream()
+      result.getJsonArray(HOLDINGS_RECORDS.getValue()).stream()
         .filter(Objects::nonNull)
         .map(JsonObject.class::cast)
         .forEach(holding -> holding.put(INSTANCE_ID.getValue(), newInstanceId)));
