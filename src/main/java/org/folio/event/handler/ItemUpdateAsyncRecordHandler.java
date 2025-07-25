@@ -111,7 +111,9 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
     return processInstanceIdsChange(holder)
-      .compose(instanceIdChanged -> orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), instanceIdChanged, holder.getOrderTenantId(), holder.getHeaders(), conn))
+      .compose(instanceIdChanged -> instanceIdChanged
+        ? orderLineLocationUpdateService.repairPoLineLocationData(poLineIds, holder.getHoldingIdPair(), holder.getOrderTenantId(), holder.getHeaders(), conn)
+        : orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn))
       .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
       .mapEmpty();
   }

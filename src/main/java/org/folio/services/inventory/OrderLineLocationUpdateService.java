@@ -61,6 +61,24 @@ public class OrderLineLocationUpdateService {
       .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, item, tenantId, headers, conn));
   }
 
+  /**
+   * Fetches POLs by poLineIds and repairs their location data based on the holding id pair. Repair is done by
+   * replacing the previous holding id with the new one. Finally, all updated POLs are saved.
+   *
+   * @param poLineIds list of poLineIds to be updated
+   * @param tenantId  tenantId of the order
+   * @param headers   headers to be used for the request
+   * @param conn      connection to be used for the request
+   * @return a future with the list of updated POLs
+   */
+  public Future<List<PoLine>> repairPoLineLocationData(List<String> poLineIds, Pair<String, String> holdingIdPair, String tenantId, Map<String, String> headers, Conn conn) {
+    log.info("repairPoLineLocationData:: Fetching '{}' POL(s) to repair location data", poLineIds.size());
+    return poLinesService.getPoLinesByIdsForUpdate(poLineIds, tenantId, conn)
+      .map(poLines -> repairPoLineLocations(poLines, holdingIdPair))
+      .compose(poLinesToUpdate -> poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
+        .map(v -> poLinesToUpdate));
+  }
+
   private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
                                              String tenantId, Map<String, String> headers, Conn conn) {
     var poLinesToUpdate = processPoLinePiecePairs(poLinePiecePairs, item);
@@ -125,6 +143,23 @@ public class OrderLineLocationUpdateService {
       poLine.getId(), poLine.getSearchLocationIds(), itemEffectiveLocation);
     poLine.getSearchLocationIds().add(itemEffectiveLocation);
     return true;
+  }
+
+  private List<PoLine> repairPoLineLocations(List<PoLine> poLines, Pair<String, String> holdingIdPair) {
+    return poLines.stream().filter(poLine -> {
+      var locations = new ArrayList<>(poLine.getLocations());
+      locations.forEach(location -> {
+        if (Objects.equals(location.getHoldingId(), holdingIdPair.getLeft())) {
+          location.setHoldingId(holdingIdPair.getRight());
+        }
+      });
+      if (locations.equals(poLine.getLocations())) {
+        log.info("repairPoLineLocations:: No changes were made to POL: '{}'", poLine.getId());
+        return false;
+      }
+      poLine.setLocations(locations);
+      return true;
+    }).toList();
   }
 
 }
