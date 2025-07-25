@@ -154,6 +154,9 @@ public class OrderLineLocationUpdateService {
           location.setHoldingId(holdingIdPair.getRight());
         }
       });
+      log.info("[DEBUG] repairPoLineLocations:: Holding ID pair: '{}' for POL: '{}'", holdingIdPair, poLine.getId());
+      log.info("[DEBUG] repairPoLineLocations:: Replacing locations of POL: '{}' having old value: '{}' with new value: '{}'",
+        poLine.getId(), JsonArray.of(poLine.getLocations()).encode(), JsonArray.of(locations).encode());
       if (locations.equals(poLine.getLocations())) {
         return false;
       }
