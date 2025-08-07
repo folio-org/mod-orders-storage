@@ -1,3 +1,5 @@
+<#if mode.name() == "UPDATE">
+
 insert into ${myuniversity}_mod_orders_storage.settings (id, jsonb)
   select cd.id,
          jsonb_build_object(
@@ -13,3 +15,5 @@ insert into ${myuniversity}_mod_orders_storage.settings (id, jsonb)
           from ${myuniversity}_mod_orders_storage.settings s
           where s.id = cd.id
       );
+
+</#if>
