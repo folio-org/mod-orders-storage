@@ -66,7 +66,7 @@ public class ConsortiumConfigurationService {
         return settingService.getSettingByKey(SettingKey.CENTRAL_ORDERING_ENABLED, centralHeaders, context)
           .map(centralOrderingSetting -> centralOrderingSetting.map(Setting::getValue).orElse(null))
           .map(orderingEnabled -> {
-            if (Boolean.parseBoolean((String) orderingEnabled)) {
+            if (Boolean.parseBoolean(orderingEnabled)) {
               var tenantId = configuration.centralTenantId();
               log.info("getCentralTenantId:: Central ordering is enabled, central tenant id: {}", tenantId);
               return tenantId;
