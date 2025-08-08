@@ -59,6 +59,7 @@ public class TenantSampleDataTest extends TestBase {
   static void createRequiredTables() {
     createTables("inventory_schema.sql");
     createTables("finance_schema.sql");
+    createTables("configuration_schema.sql");
   }
 
   @SneakyThrows
