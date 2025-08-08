@@ -13,7 +13,7 @@ insert into ${myuniversity}_mod_orders_storage.settings (id, jsonb)
       and not exists(
         select 1
           from ${myuniversity}_mod_orders_storage.settings s
-          where s.id = cd.id
+          where (s.jsonb->>'key') = (cd.jsonb->>'configName')
       );
 
 </#if>
