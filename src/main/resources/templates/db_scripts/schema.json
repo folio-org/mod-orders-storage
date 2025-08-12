@@ -538,6 +538,14 @@
           "fieldName": "searchLocationIds",
           "caseSensitive": false,
           "removeAccents": true
+        },
+        {
+          "fieldName": "locations",
+          "tOps": "ADD",
+          "caseSensitive": false,
+          "removeAccents": true,
+          "arraySubfield": "holdingId",
+          "arrayModifiers": ["holdingId"]
         }
       ]
     },
