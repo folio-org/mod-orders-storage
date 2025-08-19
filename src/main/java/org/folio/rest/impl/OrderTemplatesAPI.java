@@ -21,8 +21,10 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 
 public class OrderTemplatesAPI extends BaseApi implements OrdersStorageOrderTemplates {
+
   private static final Logger log = LogManager.getLogger();
-  private static final String ORDER_TEMPLATES_TABLE = "order_templates";
+
+  public static final String ORDER_TEMPLATES_TABLE = "order_templates";
 
   @Override
   @Validate

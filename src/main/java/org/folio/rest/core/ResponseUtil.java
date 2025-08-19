@@ -15,6 +15,7 @@ import org.folio.rest.jaxrs.model.Errors;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.handler.HttpException;
+import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 
 import org.folio.rest.persist.PgExceptionUtil;
@@ -22,6 +23,7 @@ import org.folio.rest.persist.PgExceptionUtil;
 import javax.ws.rs.core.Response;
 
 @Log4j2
+@UtilityClass
 public class ResponseUtil {
 
   public static void handleFailure(Promise<?> promise, Throwable throwable) {
@@ -63,19 +65,19 @@ public class ResponseUtil {
     return INTERNAL_SERVER_ERROR.getStatusCode();
   }
 
+  public static Future<Response> buildNoContentResponse() {
+    return Future.succeededFuture(Response.noContent().build());
+  }
+
   public static Future<Response> buildErrorResponse(Throwable throwable) {
-    final String message;
-    final int code;
-
-    if (throwable instanceof HttpException vertxHttpException) {
-      code = vertxHttpException.getStatusCode();
-      message = vertxHttpException.getPayload();
-    } else {
-      code = INTERNAL_SERVER_ERROR.getStatusCode();
-      message = throwable.getMessage();
-    }
-
-    return Future.succeededFuture(buildErrorResponse(code, message));
+    return Future.succeededFuture(switch (throwable) {
+      case org.folio.rest.exceptions.HttpException httpException ->
+        buildErrorResponse(httpException.getCode(), ExceptionUtil.errorAsString(httpException.getErrors()));
+      case io.vertx.ext.web.handler.HttpException vertxHttpException ->
+        buildErrorResponse(vertxHttpException.getStatusCode(), vertxHttpException.getPayload());
+      default ->
+        buildErrorResponse(INTERNAL_SERVER_ERROR.getStatusCode(), Optional.ofNullable(throwable.getMessage()).orElse("An unexpected error occurred"));
+    });
   }
 
   private static Response buildErrorResponse(int code, String message) {
@@ -84,8 +86,6 @@ public class ResponseUtil {
       .entity(message)
       .build();
   }
-
-  private ResponseUtil() {}
 
 }
 

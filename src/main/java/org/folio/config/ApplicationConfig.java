@@ -38,6 +38,7 @@ import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategyResolver;
 import org.folio.orders.lines.update.PatchOperationHandler;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
+import org.folio.services.order.OrderTemplateCategoryService;
 import org.folio.services.piece.PieceClaimingService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.setting.CommonSettingsService;
@@ -216,6 +217,11 @@ public class ApplicationConfig {
   @Bean
   OrderLineLocationUpdateService orderLineLocationUpdateService(PoLinesService poLinesService, PieceService pieceService) {
     return new OrderLineLocationUpdateService(poLinesService, pieceService);
+  }
+
+  @Bean
+  OrderTemplateCategoryService orderTemplateCategoryService() {
+    return new OrderTemplateCategoryService();
   }
 
   @Bean
