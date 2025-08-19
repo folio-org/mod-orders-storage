@@ -65,13 +65,20 @@ public class ResponseUtil {
     return INTERNAL_SERVER_ERROR.getStatusCode();
   }
 
+  public static Future<Response> buildNoContentResponse() {
+    return Future.succeededFuture(Response.noContent().build());
+  }
+
   public static Future<Response> buildErrorResponse(Throwable throwable) {
     final String message;
     final int code;
 
-    if (throwable instanceof HttpException vertxHttpException) {
+    if (throwable instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
       code = vertxHttpException.getStatusCode();
       message = vertxHttpException.getPayload();
+    } else if (throwable instanceof org.folio.rest.exceptions.HttpException httpException) {
+      code = httpException.getCode();
+      message = ExceptionUtil.errorAsString(httpException.getErrors());
     } else {
       code = INTERNAL_SERVER_ERROR.getStatusCode();
       message = throwable.getMessage();
@@ -85,10 +92,6 @@ public class ResponseUtil {
       .header(CONTENT_TYPE, code == 422 ? APPLICATION_JSON: TEXT_PLAIN)
       .entity(message)
       .build();
-  }
-
-  public static Future<Response> buildNoContentResponse() {
-    return Future.succeededFuture(Response.noContent().build());
   }
 
 }
