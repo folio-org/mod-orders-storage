@@ -7,11 +7,9 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.builders.error.NameCodeConstraintErrorBuilder;
 import org.folio.rest.core.ResponseUtil;
 import org.folio.rest.jaxrs.model.AcquisitionsUnit;
+import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PostgresClient;
 
 import io.vertx.core.AsyncResult;
@@ -20,17 +18,17 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class AcquisitionService {
-  private static final Logger log = LogManager.getLogger();
+
   private static final String ACQUISITIONS_UNIT_TABLE = "acquisitions_unit";
 
   private final PostgresClient pgClient;
-  private final NameCodeConstraintErrorBuilder nameCodeConstraintErrorBuilder;
 
   public AcquisitionService(Vertx vertx, String tenantId) {
     this.pgClient = PostgresClient.getInstance(vertx, tenantId);
-    this.nameCodeConstraintErrorBuilder = new NameCodeConstraintErrorBuilder();
   }
 
   public void createAcquisitionsUnit(AcquisitionsUnit acquisitionsUnit, Context vertxContext, Handler<AsyncResult<Response>> asyncResultHandler) {
@@ -53,7 +51,7 @@ public class AcquisitionService {
     }
     pgClient.save(ACQUISITIONS_UNIT_TABLE, acquisitionsUnit.getId(), acquisitionsUnit, ar -> {
       if (ar.failed()) {
-        promise.fail(nameCodeConstraintErrorBuilder.buildException(ar, AcquisitionsUnit.class));
+        promise.fail(HelperUtils.buildException(ar, AcquisitionsUnit.class));
       } else {
         promise.complete(acquisitionsUnit);
       }

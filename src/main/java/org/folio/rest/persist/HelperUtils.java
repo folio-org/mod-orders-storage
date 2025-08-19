@@ -1,5 +1,6 @@
 package org.folio.rest.persist;
 
+import static org.folio.rest.exceptions.ErrorCodes.GENERIC_ERROR_CODE;
 import static org.folio.rest.persist.PgUtil.response;
 import static org.folio.rest.exceptions.ErrorCodes.UNIQUE_FIELD_CONSTRAINT_ERROR;
 
@@ -12,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,9 +33,12 @@ import org.folio.rest.persist.interfaces.Results;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import lombok.experimental.UtilityClass;
+
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+@UtilityClass
 public class HelperUtils {
   private static final Logger log = LogManager.getLogger();
   private static final Pattern orderBy = Pattern.compile("(?<=ORDER BY).*?(?=$|LIMIT.*$|OFFSET.*$)");
@@ -41,9 +46,6 @@ public class HelperUtils {
   public static final String JSONB = "jsonb";
   public static final String METADATA = "metadata";
   public static final String ID_FIELD_NAME = "id";
-
-  private HelperUtils() {
-  }
 
   public static <T, E> void getEntitiesCollectionWithDistinctOn(EntitiesMetadataHolder<T, E> entitiesMetadataHolder, QueryHolder queryHolder, String sortField, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext, Map<String, String> okapiHeaders) {
     Method respond500 = getRespond500(entitiesMetadataHolder, asyncResultHandler);
@@ -182,6 +184,41 @@ public class HelperUtils {
     return error;
   }
 
+  public static <T> HttpException buildException(AsyncResult<T> reply, Class<?> clazz ) {
+    String error = convertExceptionToStringError(reply, clazz);
+    if (GENERIC_ERROR_CODE.getCode().equals(error)) {
+      return new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), error);
+    }
+    return new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), error);
+  }
+
+  public static <T> String convertExceptionToStringError(AsyncResult<T> reply, Class<?> clazz) {
+    String msg = PgExceptionUtil.badRequestMessage(reply.cause());
+    return Optional.ofNullable(msg)
+      .map(HelperUtils::getSQLUniqueConstraintName)
+      .map(uniqueConstraintName -> buildFieldConstraintError(uniqueConstraintName, clazz))
+      .orElse(GENERIC_ERROR_CODE.getCode());
+  }
+
+  public static String buildFieldConstraintError(String uniqueConstraintName, Class<?> clazz)  {
+    final String FIELD_VALUE = "value";
+    final String FIELD_CODE = "Code";
+    final String FIELD_NAME = "Name";
+
+    String errorField = null;
+    if (uniqueConstraintName.contains(FIELD_VALUE)) {
+      errorField = FIELD_VALUE;
+    } else if (uniqueConstraintName.contains(FIELD_CODE.toLowerCase())) {
+      errorField = FIELD_CODE;
+    } else if (uniqueConstraintName.contains(FIELD_NAME.toLowerCase())) {
+      errorField = FIELD_NAME;
+    }
+
+    return errorField != null
+      ? JsonObject.mapFrom(HelperUtils.buildFieldConstraintError(clazz.getSimpleName(), errorField)).encode()
+      : JsonObject.mapFrom(GENERIC_ERROR_CODE.toError()).encode();
+  }
+
   public static String getFullTableName(String tenantId, String tableName) {
     return PostgresClient.convertToPsqlStandard(tenantId) + "." + tableName;
   }
@@ -190,4 +227,5 @@ public class HelperUtils {
     return entities.stream().map(entity -> "('" + entity.getString("id") + "', $$" + entity.encode() + "$$::json)").collect(
       Collectors.joining(","));
   }
+
 }

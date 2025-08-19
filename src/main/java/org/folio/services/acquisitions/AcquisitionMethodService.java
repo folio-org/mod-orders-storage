@@ -7,11 +7,9 @@ import java.util.UUID;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.builders.error.ValueConstraintErrorBuilder;
 import org.folio.rest.core.ResponseUtil;
 import org.folio.rest.jaxrs.model.AcquisitionMethod;
+import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PostgresClient;
 
 import io.vertx.core.AsyncResult;
@@ -20,17 +18,17 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class AcquisitionMethodService {
-  private static final Logger log = LogManager.getLogger();
+
   public static final String ACQUISITION_METHOD_TABLE = "acquisition_method";
 
   private final PostgresClient pgClient;
-  private final ValueConstraintErrorBuilder valueConstraintErrorBuilder;
 
   public AcquisitionMethodService(Vertx vertx, String tenantId) {
     this.pgClient = PostgresClient.getInstance(vertx, tenantId);
-    this.valueConstraintErrorBuilder = new ValueConstraintErrorBuilder();
   }
 
   public void createAcquisitionsMethod(AcquisitionMethod acquisitionMethod, Context vertxContext, Handler<AsyncResult<Response>> asyncResultHandler) {
@@ -53,11 +51,12 @@ public class AcquisitionMethodService {
     }
     pgClient.save(ACQUISITION_METHOD_TABLE, acquisitionMethod.getId(), acquisitionMethod, ar -> {
       if (ar.failed()) {
-        promise.fail(valueConstraintErrorBuilder.buildException(ar, AcquisitionMethod.class));
+        promise.fail(HelperUtils.buildException(ar, AcquisitionMethod.class));
       } else {
         promise.complete(acquisitionMethod);
       }
     });
     return promise.future();
   }
+
 }
