@@ -15,6 +15,7 @@ import org.folio.rest.jaxrs.model.Errors;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Promise;
 import io.vertx.ext.web.handler.HttpException;
+import lombok.experimental.UtilityClass;
 import lombok.extern.log4j.Log4j2;
 
 import org.folio.rest.persist.PgExceptionUtil;
@@ -22,6 +23,7 @@ import org.folio.rest.persist.PgExceptionUtil;
 import javax.ws.rs.core.Response;
 
 @Log4j2
+@UtilityClass
 public class ResponseUtil {
 
   public static void handleFailure(Promise<?> promise, Throwable throwable) {
@@ -85,7 +87,9 @@ public class ResponseUtil {
       .build();
   }
 
-  private ResponseUtil() {}
+  public static Future<Response> buildNoContentResponse() {
+    return Future.succeededFuture(Response.noContent().build());
+  }
 
 }
 
