@@ -184,7 +184,7 @@ public class HelperUtils {
     return error;
   }
 
-  public static <T> HttpException buildException(AsyncResult<T> reply, Class<?> clazz ) {
+  public static <T> HttpException buildException(AsyncResult<T> reply, Class<?> clazz) {
     String error = convertExceptionToStringError(reply, clazz);
     if (GENERIC_ERROR_CODE.getCode().equals(error)) {
       return new HttpException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), error);
@@ -200,7 +200,7 @@ public class HelperUtils {
       .orElse(GENERIC_ERROR_CODE.getCode());
   }
 
-  public static String buildFieldConstraintError(String uniqueConstraintName, Class<?> clazz)  {
+  public static String buildFieldConstraintError(String uniqueConstraintName, Class<?> clazz) {
     final String FIELD_VALUE = "value";
     final String FIELD_CODE = "Code";
     final String FIELD_NAME = "Name";
@@ -214,9 +214,9 @@ public class HelperUtils {
       errorField = FIELD_NAME;
     }
 
-    return errorField != null
-      ? JsonObject.mapFrom(HelperUtils.buildFieldConstraintError(clazz.getSimpleName(), errorField)).encode()
-      : JsonObject.mapFrom(GENERIC_ERROR_CODE.toError()).encode();
+    return JsonObject.mapFrom(errorField != null
+      ? HelperUtils.buildFieldConstraintError(clazz.getSimpleName(), errorField)
+      : GENERIC_ERROR_CODE.toError()).encode();
   }
 
   public static String getFullTableName(String tenantId, String tableName) {
