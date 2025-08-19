@@ -70,21 +70,14 @@ public class ResponseUtil {
   }
 
   public static Future<Response> buildErrorResponse(Throwable throwable) {
-    final String message;
-    final int code;
-
-    if (throwable instanceof io.vertx.ext.web.handler.HttpException vertxHttpException) {
-      code = vertxHttpException.getStatusCode();
-      message = vertxHttpException.getPayload();
-    } else if (throwable instanceof org.folio.rest.exceptions.HttpException httpException) {
-      code = httpException.getCode();
-      message = ExceptionUtil.errorAsString(httpException.getErrors());
-    } else {
-      code = INTERNAL_SERVER_ERROR.getStatusCode();
-      message = throwable.getMessage();
-    }
-
-    return Future.succeededFuture(buildErrorResponse(code, message));
+    return Future.succeededFuture(switch (throwable) {
+      case org.folio.rest.exceptions.HttpException httpException ->
+        buildErrorResponse(httpException.getCode(), ExceptionUtil.errorAsString(httpException.getErrors()));
+      case io.vertx.ext.web.handler.HttpException vertxHttpException ->
+        buildErrorResponse(vertxHttpException.getStatusCode(), vertxHttpException.getPayload());
+      default ->
+        buildErrorResponse(INTERNAL_SERVER_ERROR.getStatusCode(), Optional.ofNullable(throwable.getMessage()).orElse("An unexpected error occurred"));
+    });
   }
 
   private static Response buildErrorResponse(int code, String message) {
