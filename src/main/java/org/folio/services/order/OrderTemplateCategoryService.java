@@ -2,7 +2,6 @@ package org.folio.services.order;
 
 import static org.folio.rest.core.ResponseUtil.buildErrorResponse;
 import static org.folio.rest.core.ResponseUtil.buildNoContentResponse;
-import static org.folio.rest.exceptions.ErrorCodes.ORDER_TEMPLATE_CATEGORY_IS_USED;
 import static org.folio.rest.impl.OrderTemplatesAPI.ORDER_TEMPLATES_TABLE;
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 
@@ -10,6 +9,7 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 
 import org.apache.http.HttpStatus;
+import org.folio.rest.exceptions.ErrorCodes;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.OrderTemplateCategory;
 import org.folio.rest.jaxrs.model.OrderTemplateCategoryCollection;
@@ -64,8 +64,11 @@ public class OrderTemplateCategoryService {
     new DBClient(vertxContext, okapiHeaders).getPgClient()
       .withTrans(conn -> getOrderTemplatesNumberByCategoryId(id, tenantId, conn)
         .compose(count -> count > 0
-          ? Future.failedFuture(new HttpException(HttpStatus.SC_UNPROCESSABLE_ENTITY, ORDER_TEMPLATE_CATEGORY_IS_USED))
+          ? Future.failedFuture(new HttpException(HttpStatus.SC_UNPROCESSABLE_ENTITY, ErrorCodes.ORDER_TEMPLATE_CATEGORY_IS_USED))
           : conn.delete(ORDER_TEMPLATES_TABLE, id))
+        .compose(result -> result.rowCount() == 0
+          ? Future.failedFuture(new HttpException(HttpStatus.SC_NOT_FOUND, ErrorCodes.RESOURCE_NOT_FOUND))
+          : Future.succeededFuture())
         .onSuccess(s -> asyncResultHandler.handle(buildNoContentResponse()))
         .onFailure(t -> asyncResultHandler.handle(buildErrorResponse(t))));
   }
