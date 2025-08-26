@@ -4,6 +4,7 @@ import io.vertx.core.Promise;
 import io.vertx.ext.web.handler.HttpException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHolder;
@@ -11,6 +12,7 @@ import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
 
 import io.vertx.core.Future;
+import one.util.streamex.StreamEx;
 import org.folio.rest.jaxrs.model.Holding;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -22,9 +24,9 @@ import org.folio.services.piece.PieceService;
 import org.folio.services.title.TitleService;
 
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+import java.util.function.Function;
 
 @RequiredArgsConstructor
 public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpdateInstanceStrategy {
@@ -73,7 +75,7 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
 
     if (isUpdatedHolding(holdings)) {
       return pieceService.updatePieces(poLineTx, replaceInstanceRef, client)
-        .compose(v -> updateLocation(poLineTx, replaceInstanceRef))
+        .map(v -> updateLocations(poLineTx, replaceInstanceRef))
         .onComplete(ar -> {
           if (ar.failed()) {
             log.warn("updateHoldings failed, poLine id={}", poLineTx.getEntity().getId(), ar.cause());
@@ -102,30 +104,38 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
     return updateHoldings > 0;
   }
 
-  private Future<Tx<PoLine>> updateLocation(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef) {
-    PoLine poLine = poLineTx.getEntity();
-    List<Holding> holdings = replaceInstanceRef.getHoldings();
-    List<Location> updatedLocation = new ArrayList<>();
-
-    poLine.getLocations().forEach(location -> {
-      Optional<Holding> currentHolding = holdings.stream().filter(holding -> holding.getFromHoldingId().equals(location.getHoldingId()))
-        .findFirst();
-
-      if (currentHolding.isEmpty()) {
-        updatedLocation.add(location);
-      } else {
-        if (currentHolding.get().getToHoldingId() != null) {
-          location.setHoldingId(currentHolding.get().getToHoldingId());
+  private Tx<PoLine> updateLocations(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef) {
+    poLineTx.getEntity().getLocations().forEach(location -> replaceInstanceRef.getHoldings().stream()
+      .filter(holding -> holding.getFromHoldingId().equals(location.getHoldingId()))
+      .findFirst().ifPresent(holding -> {
+        if (holding.getToHoldingId() != null) {
+          location.setHoldingId(holding.getToHoldingId());
         } else {
-          location.setLocationId(currentHolding.get().getToLocationId());
+          location.setLocationId(holding.getToLocationId());
         }
-        updatedLocation.add(location);
-      }
-    });
+      }));
 
-    poLine.setLocations(updatedLocation);
+    var processedLocations = StreamEx.of(poLineTx.getEntity().getLocations())
+      .groupingBy(location -> Pair.of(location.getHoldingId(), location.getLocationId()))
+      .values().stream()
+      .map(this::mergeLocations)
+      .filter(Objects::nonNull)
+      .toList();
 
-    return Future.succeededFuture(poLineTx);
+    poLineTx.getEntity().setLocations(processedLocations);
+    return poLineTx;
+  }
+
+  private Location mergeLocations(List<Location> locations) {
+    return locations.stream().reduce((accLoc, nextLoc) -> accLoc
+        .withQuantity(combineLocationQuantities(Location::getQuantity, accLoc, nextLoc))
+        .withQuantityPhysical(combineLocationQuantities(Location::getQuantityPhysical, accLoc, nextLoc))
+        .withQuantityElectronic(combineLocationQuantities(Location::getQuantityElectronic, accLoc, nextLoc)))
+      .orElse(null);
+  }
+
+  private Integer combineLocationQuantities(Function<Location, Integer> qtyGetter, Location... locations) {
+    return StreamEx.of(locations).map(qtyGetter).nonNull().reduce(Integer::sum).orElse(null);
   }
 
 }
