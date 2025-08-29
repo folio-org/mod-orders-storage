@@ -188,11 +188,6 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/14.0.0/update_pol_holding_links.sql",
-      "fromModuleVersion": "mod-orders-storage-14.0.0"
-    },
-    {
-      "run": "after",
       "snippetPath": "data-migration/14.0.0/prefixes_and_suffixes_add_deprecated.sql",
       "fromModuleVersion": "mod-orders-storage-14.0.0"
     },
