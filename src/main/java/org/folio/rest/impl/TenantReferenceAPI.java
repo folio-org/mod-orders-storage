@@ -94,7 +94,8 @@ public class TenantReferenceAPI extends TenantAPI {
     if (isNew(tenantAttributes, "14.0.0")) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
-        .add("order-template-categories", "orders-storage/order-template-categories");
+        .add("order-template-categories", "orders-storage/order-template-categories")
+        .add("pieces", "/orders-storage/pieces-batch");
     }
   }
 

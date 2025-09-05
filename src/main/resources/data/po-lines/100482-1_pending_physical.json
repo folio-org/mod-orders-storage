@@ -1,0 +1,85 @@
+{
+  "id": "791defcf-3248-4424-bbd6-2bc4db3dd2ea",
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "agreementId": "09c6ed1b-3984-4d9a-8f9b-e1200b68b61c",
+  "cancellationRestriction": false,
+  "cancellationRestrictionNote": "",
+  "checkinItems": true,
+  "claimingActive": true,
+  "claimingInterval": "10",
+  "claims": [],
+  "collection": false,
+  "cost": {
+    "additionalCost": 0,
+    "currency": "USD",
+    "discount": 0,
+    "discountType": "percentage",
+    "listUnitPrice": 20.00,
+    "listUnitPriceElectronic": 0.00,
+    "poLineEstimatedPrice": 20.00,
+    "quantityElectronic": 0,
+    "quantityPhysical": 1
+  },
+  "description": "",
+  "details": {
+    "productIds": [
+      {
+        "productId": "0747-0088",
+        "productIdType": "913300b2-03ed-469a-8179-c1092c991227"
+      }
+    ],
+    "subscriptionInterval": 0,
+    "isBinderyActive": true
+  },
+  "donor": "",
+  "edition": "First edition",
+  "fundDistribution": [
+    {
+      "code": "UNIV-SUBN",
+      "encumbrance": "eb506834-6c70-4239-8d1a-6414a5b08014",
+      "fundId": "4428a37c-8bae-4f0d-865d-970d83d5ad55",
+      "distributionType": "percentage",
+      "value": 100.0
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "758258bc-ecc1-41b8-abca-f7b610822ffd",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "paymentStatus": "Pending",
+  "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialSupplier": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
+    "volumes": [
+      "vol. 1"
+    ]
+  },
+  "poLineDescription": "",
+  "poLineNumber": "100468-1",
+  "publicationDate": "1915",
+  "publisher": "American Bar Association",
+  "purchaseOrderId": "37dd39ef-9111-4c77-9aa4-3574152839bc",
+  "receiptStatus": "Pending",
+  "requester": "",
+  "rush": false,
+  "selector": "",
+  "source": "User",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  },
+  "titleOrPackage": "ABA Journal",
+  "instanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+  "vendorDetail": {
+    "instructions": "",
+    "noteFromVendor": "",
+    "vendorAccount": ""
+  }
+}
