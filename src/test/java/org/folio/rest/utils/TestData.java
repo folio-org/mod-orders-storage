@@ -17,8 +17,8 @@ public class TestData {
   }
 
   public interface Piece {
-    String DEFAULT = "data/pieces/52590_default.json";
-    String DEFAULT_81 = "data/pieces/81_default.json";
+    String DEFAULT = "mockdata/pieces/52590_default.json";
+    String DEFAULT_81 = "mockdata/pieces/81_default.json";
   }
 
   public interface Title {
@@ -26,7 +26,7 @@ public class TestData {
   }
 
   public interface OrderInvoiceRelationship {
-    String DEFAULT = "data/order-invoice-relationships/52590_default.json";
+    String DEFAULT = "mockdata/order-invoice-relationships/52590_default.json";
   }
 
   public interface OrderTemplate {
