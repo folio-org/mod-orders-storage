@@ -1,7 +1,5 @@
 package org.folio.services.setting;
 
-import static org.folio.rest.core.ResponseUtil.buildErrorResponse;
-import static org.folio.rest.core.ResponseUtil.buildOkResponse;
 import static org.folio.util.DbUtils.convertResponseToEntity;
 
 import javax.annotation.PostConstruct;
@@ -11,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.model.SettingCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageSettings;
@@ -60,24 +59,22 @@ public class SettingService {
   }
 
   public Future<SettingCollection> getSettings(String query, int offset, int limit, Map<String, String> okapiHeaders, Context vertxContext) {
+    if (StringUtils.isBlank(query)) {
+      return getSettingsCollection(query, offset, limit, okapiHeaders, vertxContext);
+    }
     try {
       var settingCacheKey = SETTINGS_CACHE_KEY.formatted(TenantTool.tenantId(okapiHeaders), query, offset, limit);
       return Future.fromCompletionStage(asyncCache.get(settingCacheKey, (key, executor) ->
-        PgUtil.get(SETTINGS_TABLE, Setting.class, SettingCollection.class, query, offset, limit, okapiHeaders, vertxContext, GetOrdersStorageSettingsResponse.class)
-          .map(response -> convertResponseToEntity(response, SettingCollection.class))
-          .toCompletionStage().toCompletableFuture()));
+          getSettingsCollection(query, offset, limit, okapiHeaders, vertxContext).toCompletionStage().toCompletableFuture()));
     } catch (Exception e) {
       log.error("Error when retrieving settings by query: '{}'", query, e);
       return Future.failedFuture(e);
     }
   }
 
-  public void getSettings(String query, int offset, int limit, Map<String, String> okapiHeaders,
-                          Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    getSettings(query, offset, limit, okapiHeaders, vertxContext)
-      .onComplete(ar -> asyncResultHandler.handle(ar.succeeded()
-        ? buildOkResponse(ar.result())
-        : buildErrorResponse(ar.cause())));
+  private Future<SettingCollection> getSettingsCollection(String query, int offset, int limit, Map<String, String> okapiHeaders, Context vertxContext) {
+    return PgUtil.get(SETTINGS_TABLE, Setting.class, SettingCollection.class, query, offset, limit, okapiHeaders, vertxContext, GetOrdersStorageSettingsResponse.class)
+      .compose(response -> convertResponseToEntity(response, SettingCollection.class));
   }
 
   public void createSetting(Setting entity, Map<String, String> okapiHeaders,
