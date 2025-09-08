@@ -65,6 +65,10 @@ public class ResponseUtil {
     return INTERNAL_SERVER_ERROR.getStatusCode();
   }
 
+  public static Future<Response> buildOkResponse(Object body) {
+    return Future.succeededFuture(Response.ok(body, APPLICATION_JSON).build());
+  }
+
   public static Future<Response> buildNoContentResponse() {
     return Future.succeededFuture(Response.noContent().build());
   }
