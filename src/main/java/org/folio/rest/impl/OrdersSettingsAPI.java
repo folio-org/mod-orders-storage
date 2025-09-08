@@ -36,7 +36,7 @@ public class OrdersSettingsAPI extends BaseApi implements OrdersStorageSettings 
     settingService.getSettings(query, offset, limit, okapiHeaders, vertxContext)
       .onComplete(ar -> asyncResultHandler.handle(ar.succeeded()
         ? buildOkResponse(ar.result())
-        : buildErrorResponse(ar.cause())));;
+        : buildErrorResponse(ar.cause())));
   }
 
   @Override
