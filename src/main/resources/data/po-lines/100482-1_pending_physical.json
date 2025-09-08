@@ -55,10 +55,7 @@
   "physical": {
     "createInventory": "Instance, Holding, Item",
     "materialSupplier": "e0fb5df2-cdf1-11e8-a8d5-f2801f1b9fd1",
-    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
-    "volumes": [
-      "vol. 1"
-    ]
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
   },
   "poLineDescription": "",
   "poLineNumber": "100468-1",
@@ -75,8 +72,8 @@
       "reference"
     ]
   },
-  "titleOrPackage": "ABA Journal",
-  "instanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+  "titleOrPackage": "ABA Journal Package",
+  "isPackage": true,
   "vendorDetail": {
     "instructions": "",
     "noteFromVendor": "",

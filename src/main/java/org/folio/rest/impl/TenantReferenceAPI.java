@@ -95,6 +95,7 @@ public class TenantReferenceAPI extends TenantAPI {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
         .add("order-template-categories", "orders-storage/order-template-categories")
+        .withPostOnly()
         .add("pieces-batch", "orders-storage/pieces-batch");
     }
   }
