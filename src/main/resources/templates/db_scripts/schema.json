@@ -463,6 +463,11 @@
           "removeAccents": true
         },
         {
+          "fieldName": "locations",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
           "fieldName": "details.productIds",
           "caseSensitive": false,
           "removeAccents": true
