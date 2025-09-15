@@ -11,16 +11,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.rest.exceptions.ErrorCodes;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.TitleSequenceNumbers;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Tx;
@@ -28,9 +28,11 @@ import org.folio.rest.persist.Criteria.Criterion;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class TitleService {
-  private static final Logger log = LogManager.getLogger();
+
   private static final String POLINE_ID_FIELD = "poLineId";
 
   public Future<Title> getTitleByPoLineId(String poLineId, DBClient client) {
@@ -113,6 +115,21 @@ public class TitleService {
           .onSuccess(rowSet -> log.info("Title successfully created, id={}", title.getId()))
           .onFailure(e -> log.error("Create title failed, id={}", title.getId(), e));
       });
+  }
+
+  public Future<TitleSequenceNumbers> generateTitleNextSequenceNumbers(String titleId, int sequenceNumbers, Conn conn) {
+    log.info("generateTitleNextSequenceNumbers: Generating {} sequence numbers for title: '{}'", sequenceNumbers, titleId);
+    return conn.getByIdForUpdate(TITLES_TABLE, titleId, Title.class)
+      .compose(title -> {
+        var nextNumber = title.getNextSequenceNumber();
+        var titleSequenceNumbers = new TitleSequenceNumbers()
+          .withSequenceNumbers(IntStream.range(nextNumber, nextNumber + sequenceNumbers)
+            .mapToObj(Integer::toString)
+            .toList());
+        title.setNextSequenceNumber(nextNumber + sequenceNumbers);
+        return saveTitle(title, conn).map(titleSequenceNumbers);
+      })
+      .onFailure(t -> log.error("generateTitleNextSequenceNumbers: Failed to generate sequence numbers for title: '{}'", titleId, t));
   }
 
   private Future<Void> populateTitle(Title title, PoLine poLine, Conn conn) {
