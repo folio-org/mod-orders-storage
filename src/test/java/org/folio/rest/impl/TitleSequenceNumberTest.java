@@ -49,8 +49,8 @@ public class TitleSequenceNumberTest extends TestBase {
     title = getTitle(titleId);
     assertEquals(5, title.getNextSequenceNumber());
 
-    deleteData(PURCHASE_ORDER.getEndpointWithId(), poId);
-    deleteData(PO_LINE.getEndpointWithId(), poLineId);
+    deleteDataSuccess(PO_LINE.getEndpointWithId(), poLineId);
+    deleteDataSuccess(PURCHASE_ORDER.getEndpointWithId(), poId);
   }
 
   private List<String> generateTitleSequenceNumbers(String id, int sequenceNumbers) throws MalformedURLException {
