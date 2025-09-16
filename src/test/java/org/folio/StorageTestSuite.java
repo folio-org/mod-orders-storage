@@ -61,6 +61,7 @@ import org.folio.rest.impl.SearchOrderLinesTest;
 import org.folio.rest.impl.SuffixDeprecatedQueryTest;
 import org.folio.rest.impl.TenantReferenceDataTest;
 import org.folio.rest.impl.TenantSampleDataTest;
+import org.folio.rest.impl.TitleSequenceNumberTest;
 import org.folio.rest.impl.WrapperPiecesAPITest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
@@ -286,6 +287,8 @@ public class StorageTestSuite {
   class PurchaseOrderNumberUniquenessTestNested extends PurchaseOrderNumberUniquenessTest {}
   @Nested
   class ReceivingHistoryTestNested extends ReceivingHistoryTest {}
+  @Nested
+  class TitleSequenceNumberTestNested extends TitleSequenceNumberTest {}
   @Nested
   class SearchOrderLinesTestNested extends SearchOrderLinesTest {}
   @Nested
