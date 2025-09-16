@@ -92,7 +92,7 @@ public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
     pgClient.withConn(conn -> titleService.generateTitleNextSequenceNumbers(id, sequenceNumbers, conn))
       .onComplete(ar -> asyncResultHandler.handle(ar.failed()
         ? buildErrorResponse(ar.cause())
-        : buildNoContentResponse()));
+        : buildOkResponse(ar.result())));
   }
 
   @Override

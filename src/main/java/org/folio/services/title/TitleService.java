@@ -127,7 +127,7 @@ public class TitleService {
             .mapToObj(Integer::toString)
             .toList());
         title.setNextSequenceNumber(nextNumber + sequenceNumbers);
-        return saveTitle(title, conn).map(titleSequenceNumbers);
+        return conn.update(TITLES_TABLE, title, titleId).map(titleSequenceNumbers);
       })
       .onFailure(t -> log.error("generateTitleNextSequenceNumbers: Failed to generate sequence numbers for title: '{}'", titleId, t));
   }
