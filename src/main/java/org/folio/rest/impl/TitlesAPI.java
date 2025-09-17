@@ -89,7 +89,7 @@ public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
 
   @Override
   public void postOrdersStorageTitlesSequenceNumbersById(String id, int sequenceNumbers, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    pgClient.withConn(conn -> titleService.generateTitleNextSequenceNumbers(id, sequenceNumbers, conn))
+    pgClient.withTrans(conn -> titleService.generateTitleNextSequenceNumbers(id, sequenceNumbers, conn))
       .onComplete(ar -> asyncResultHandler.handle(ar.failed()
         ? buildErrorResponse(ar.cause())
         : buildOkResponse(ar.result())));

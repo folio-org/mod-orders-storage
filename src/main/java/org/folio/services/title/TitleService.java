@@ -122,14 +122,11 @@ public class TitleService {
     return conn.getByIdForUpdate(TITLES_TABLE, titleId, Title.class)
       .compose(title -> {
         var nextNumber = title.getNextSequenceNumber();
-        log.error("generateTitleNextSequenceNumbers: A title with an id={} was found with number {}", title.getId(), title.getNextSequenceNumber());
         var titleSequenceNumbers = new TitleSequenceNumbers()
           .withSequenceNumbers(IntStream.range(nextNumber, nextNumber + sequenceNumbers)
             .mapToObj(Integer::toString)
             .toList());
-        log.error("generateTitleNextSequenceNumbers: Generated sequence numbers: {}", titleSequenceNumbers);
         title.setNextSequenceNumber(nextNumber + sequenceNumbers);
-        log.error("generateTitleNextSequenceNumbers: Updated next sequence number to {}", title.getNextSequenceNumber());
         return conn.update(TITLES_TABLE, title, titleId).map(titleSequenceNumbers);
       })
       .onFailure(t -> log.error("generateTitleNextSequenceNumbers: Failed to generate sequence numbers for title: '{}'", titleId, t));
