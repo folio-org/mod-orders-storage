@@ -58,7 +58,7 @@ public class TitleSequenceNumberTest extends TestBase {
       .pathParam("id", id)
       .queryParam("sequenceNumbers", sequenceNumbers)
       .header(TENANT_HEADER)
-      .post(storageUrl(TITLE_SEQUENCE_NUMBERS_ENDPOINT))
+      .get(storageUrl(TITLE_SEQUENCE_NUMBERS_ENDPOINT))
       .then().statusCode(200)
       .extract().as(PoLineNumber.class)
       .getSequenceNumbers();
