@@ -89,7 +89,7 @@
           "permissionsRequired": ["orders-storage.titles.item.delete"]
         },
         {
-          "methods": ["POST"],
+          "methods": ["GET"],
           "pathPattern": "/orders-storage/titles/{id}/sequence-numbers",
           "permissionsRequired": ["orders-storage.titles.sequence-number.get"]
         }
