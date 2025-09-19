@@ -436,6 +436,7 @@ public class PoLinesService {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
     Title newTitle = createTitleObject(poLine, title.getAcqUnitIds(), headers)
       .withIsAcknowledged(title.getIsAcknowledged())
+      .withNextSequenceNumber(title.getNextSequenceNumber())
       .withId(title.getId());
 
     conn.update(TITLES_TABLE, newTitle, JSONB, criterion.toString(), false)
