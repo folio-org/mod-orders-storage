@@ -1,12 +1,15 @@
 package org.folio.services.piece;
 
 import static org.folio.models.TableNames.PIECES_TABLE;
+import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
 import static org.folio.rest.persist.HelperUtils.getCriterionByFieldNameAndValue;
 import static org.folio.rest.persist.HelperUtils.getFullTableName;
 import static org.folio.rest.persist.HelperUtils.getQueryValues;
 import static org.folio.util.DbUtils.getEntitiesByField;
+import static org.folio.util.HelperUtils.chainCall;
+import static org.folio.util.HelperUtils.collectResultsOnSuccess;
 import static org.folio.util.HelperUtils.extractEntityFields;
 import static org.folio.util.MetadataUtils.populateMetadata;
 
@@ -24,12 +27,15 @@ import org.folio.models.TableNames;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.Tx;
+import org.folio.rest.tools.utils.TenantTool;
 import org.folio.util.DbUtils;
+import org.folio.util.SerializerUtil;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -38,7 +44,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import lombok.extern.log4j.Log4j2;
-import org.folio.util.SerializerUtil;
+import one.util.streamex.StreamEx;
 
 @Log4j2
 public class PieceService {
@@ -50,6 +56,8 @@ public class PieceService {
 
   private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id RETURNING pieces.*;";
   private static final String PIECES_BY_ITEM_ID_COUNT_SQL = "SELECT COUNT(*) FROM %s WHERE left(lower(%s.f_unaccent(jsonb->>'itemId')), 600) = $1;";
+  private static final String PIECES_SHIFT_SEQUENCE_NUMBERS =
+    "UPDATE %s SET jsonb = jsonb || jsonb_build_object('sequenceNumber', (jsonb->>'sequenceNumber')::int + $1) WHERE titleId = $2 AND (jsonb->>'sequenceNumber')::int BETWEEN $3 AND $4";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
@@ -82,14 +90,15 @@ public class PieceService {
     return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, conn);
   }
 
-  public Future<String> createPiece(Conn conn, Piece piece) {
+  public Future<String> createPiece(Conn conn, Piece piece, String tenantId) {
     piece.setStatusUpdatedDate(new Date());
     if (StringUtils.isBlank(piece.getId())) {
       piece.setId(UUID.randomUUID().toString());
     }
     log.debug("createPiece:: Creating new piece: '{}'", piece.getId());
 
-    return conn.save(TableNames.PIECES_TABLE, piece.getId(), piece)
+    return shiftSequenceNumbersIfNeeded(List.of(piece), conn, tenantId)
+      .compose(v -> conn.save(TableNames.PIECES_TABLE, piece.getId(), piece))
       .onSuccess(rowSet -> log.info("createPiece:: Piece successfully created: '{}'", piece.getId()))
       .onFailure(e -> log.error("createPiece:: Create piece failed: '{}'", piece.getId(), e));
   }
@@ -106,15 +115,17 @@ public class PieceService {
       populateMetadata(piece::getMetadata, piece::withMetadata, okapiHeaders);
     }
     var pieceIds = extractEntityFields(pieces, Piece::getId);
-    return conn.saveBatch(PIECES_TABLE, pieces)
+    return shiftSequenceNumbersIfNeeded(pieces, conn, TenantTool.tenantId(okapiHeaders))
+      .compose(v -> conn.saveBatch(PIECES_TABLE, pieces))
       .map(rows -> pieces)
       .onSuccess(ar -> log.info("createPieces:: Saved pieces: {}", pieceIds))
       .onFailure(t -> log.error("createPieces:: Failed pieces: {}", pieceIds, t));
   }
 
-  public Future<RowSet<Row>> updatePiece(Conn conn, Piece piece, String id) {
+  public Future<RowSet<Row>> updatePiece(String id, Piece piece, Conn conn, String tenantId) {
     log.debug("updatePiece:: Updating piece: '{}'", id);
-    return conn.update(TableNames.PIECES_TABLE, piece, id)
+    return shiftSequenceNumbersIfNeeded(id, piece, conn, tenantId)
+      .compose(v -> conn.update(TableNames.PIECES_TABLE, piece, id))
       .compose(DbUtils::failOnNoUpdateOrDelete)
       .onSuccess(rowSet -> log.info("updatePiece:: Piece successfully updated: '{}'", id))
       .onFailure(e -> log.error("updatePiece:: Update piece failed: '{}'", id, e));
@@ -194,6 +205,35 @@ public class PieceService {
       .toList()));
 
     return updatePieces(poLineTx, updatedPieces, client);
+  }
+
+  private Future<Void> shiftSequenceNumbersIfNeeded(List<Piece> pieces, Conn conn, String tenantId) {
+    Map<String, List<Piece>> titlesToPieces = StreamEx.of(pieces).groupingBy(Piece::getTitleId);
+    var shiftFutures = titlesToPieces.entrySet().stream()
+      .map(entry -> conn.getById(TITLES_TABLE, entry.getKey(), Title.class)
+        .compose(title -> chainCall(entry.getValue(), piece -> shiftSequenceNumbersIfNeeded(title, piece, conn, tenantId))))
+      .toList();
+    return collectResultsOnSuccess(shiftFutures).mapEmpty();
+  }
+
+  private Future<Void> shiftSequenceNumbersIfNeeded(Title title, Piece piece, Conn conn, String tenantId) {
+    return title.getNextSequenceNumber() > 1
+      ? shiftSequenceNumbers(piece.getTitleId(), title.getNextSequenceNumber(), piece.getSequenceNumber(), conn, tenantId)
+      : Future.succeededFuture();
+  }
+
+  private Future<Void> shiftSequenceNumbersIfNeeded(String pieceId, Piece piece, Conn conn, String tenantId) {
+    return conn.getById(PIECES_TABLE, pieceId, Piece.class)
+      .compose(storagePiece -> storagePiece == null || Objects.equals(storagePiece.getSequenceNumber(), piece.getSequenceNumber())
+        ? Future.succeededFuture()
+        : shiftSequenceNumbers(piece.getTitleId(), storagePiece.getSequenceNumber(), piece.getSequenceNumber(), conn, tenantId));
+  }
+
+  private Future<Void> shiftSequenceNumbers(String titleId, int numberFrom, int numberTo, Conn conn, String tenantId) {
+    int shift = numberTo < numberFrom ? 1 : -1;
+    var tableName = getFullTableName(tenantId, PIECES_TABLE);
+    var parameters = Tuple.of(shift, titleId, Math.min(numberTo, numberFrom), Math.max(numberTo, numberFrom));
+    return conn.execute(PIECES_SHIFT_SEQUENCE_NUMBERS.formatted(tableName), parameters).mapEmpty();
   }
 
 }

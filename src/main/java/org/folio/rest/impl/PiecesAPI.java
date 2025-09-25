@@ -63,7 +63,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
   @Validate
   public void postOrdersStoragePieces(Piece entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    pgClient.withTrans(conn -> pieceService.createPiece(conn, entity)
+    pgClient.withTrans(conn -> pieceService.createPiece(conn, entity, pgClient.getTenantId())
       .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.CREATE, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
@@ -95,7 +95,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
   @Validate
   public void putOrdersStoragePiecesById(String id, Piece entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    pgClient.withTrans(conn -> pieceService.updatePiece(conn, entity, id)
+    pgClient.withTrans(conn -> pieceService.updatePiece(id, entity, conn, pgClient.getTenantId())
       .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.EDIT, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
