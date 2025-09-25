@@ -13,6 +13,7 @@ import static org.folio.util.HelperUtils.collectResultsOnSuccess;
 import static org.folio.util.HelperUtils.extractEntityFields;
 import static org.folio.util.MetadataUtils.populateMetadata;
 
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -40,6 +41,7 @@ import org.folio.util.SerializerUtil;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
@@ -211,6 +213,9 @@ public class PieceService {
     Map<String, List<Piece>> titlesToPieces = StreamEx.of(pieces).groupingBy(Piece::getTitleId);
     var shiftFutures = titlesToPieces.entrySet().stream()
       .map(entry -> conn.getById(TITLES_TABLE, entry.getKey(), Title.class)
+        .compose(title -> title == null
+          ? Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "Title with id %s not found".formatted(entry.getKey())))
+          : Future.succeededFuture(title))
         .compose(title -> chainCall(entry.getValue(), piece -> shiftSequenceNumbersIfNeeded(title, piece, conn, tenantId))))
       .toList();
     return collectResultsOnSuccess(shiftFutures).mapEmpty();
