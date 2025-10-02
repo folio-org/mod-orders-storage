@@ -13,6 +13,16 @@ types:
   piece-audit-event: !include acq-models/mod-orders-storage/schemas/piece_audit_event.json
   outbox-event-log: !include acq-models/mod-orders-storage/schemas/outbox_event_log.json
 
+# workaround to prevent api-lint errors for FQM vendor extensions
+# see https://github.com/folio-org/fqm-tools/blob/main/docs/generation/field-schema.md#raml-validation-errors
+annotationTypes:
+  fqm-essential:
+    type: boolean
+  fqm-visibility:
+    type: string
+  fqm-visible-by-default:
+    type: boolean
+
 /orders-storage/audit-outbox:
   /process:
     post:
