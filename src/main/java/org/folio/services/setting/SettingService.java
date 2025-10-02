@@ -41,7 +41,7 @@ public class SettingService {
 
   private AsyncCache<String, Optional<Setting>> asyncCache;
 
-  @Value("${orders-storage.cache.setting-data.expiration.time.seconds:300}")
+  @Value("${orders-storage.cache.setting-data.expiration.time.seconds:60}")
   private long cacheExpirationTime;
 
   @PostConstruct
