@@ -1,0 +1,70 @@
+[metadata]
+team = "thunderjet"
+domain = "acquisition"
+module = "mod-orders-storage"
+
+[[sources]]
+name = "titles"
+table = "titles"
+
+[[entityTypes]]
+name = "titles"
+private = true
+schema = "./ramls/acq-models/mod-orders-storage/schemas/title.json"
+permissions = ["orders-storage.titles.collection.get"]
+source = "titles"
+sort = ["id", "ASC"]
+useRmbIndexStyle = true
+
+[entityTypes.fieldOverrides.metadata_created_date]
+x-fqm-essential = true
+
+[entityTypes.fieldOverrides.metadata_updated_date]
+x-fqm-essential = true
+
+[entityTypes.fieldOverrides.metadata_created_by_user_id]
+x-fqm-essential = true
+x-fqm-visibility = 'hidden'
+
+[entityTypes.fieldOverrides.metadata_updated_by_user_id]
+x-fqm-essential = true
+x-fqm-visibility = 'hidden'
+
+[entityTypes.fieldOverrides.metadata_created_by_username]
+x-fqm-visibility = 'hidden'
+
+[entityTypes.fieldOverrides.metadata_updated_by_username]
+x-fqm-visibility = 'hidden'
+
+[[sources]]
+name = "pieces"
+table = "pieces"
+
+[[entityTypes]]
+name = "pieces"
+private = true
+schema = "./ramls/acq-models/mod-orders-storage/schemas/piece.json"
+permissions = ["orders-storage.pieces.collection.get"]
+source = "pieces"
+sort = ["id", "ASC"]
+useRmbIndexStyle = true
+
+[entityTypes.fieldOverrides.metadata_created_date]
+x-fqm-essential = true
+
+[entityTypes.fieldOverrides.metadata_updated_date]
+x-fqm-essential = true
+
+[entityTypes.fieldOverrides.metadata_created_by_user_id]
+x-fqm-essential = true
+x-fqm-visibility = 'hidden'
+
+[entityTypes.fieldOverrides.metadata_updated_by_user_id]
+x-fqm-essential = true
+x-fqm-visibility = 'hidden'
+
+[entityTypes.fieldOverrides.metadata_created_by_username]
+x-fqm-visibility = 'hidden'
+
+[entityTypes.fieldOverrides.metadata_updated_by_username]
+x-fqm-visibility = 'hidden'
