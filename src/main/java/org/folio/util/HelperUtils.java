@@ -58,4 +58,19 @@ public class HelperUtils {
     }
   }
 
+  /**
+   * The method allows to compose any elements with the same action in sequence.
+   *
+   * @param  list    elements to be executed in sequence
+   * @param  method  action that will be executed sequentially based on the number of list items
+   * @return         the last composed element(Feature result)
+   */
+  public static <T, R> Future<R> chainCall(List<T> list, Function<T, Future<R>> method) {
+    Future<R> f = Future.succeededFuture();
+    for (T item : list) {
+      f = f.compose(r -> method.apply(item));
+    }
+    return f;
+  }
+
 }

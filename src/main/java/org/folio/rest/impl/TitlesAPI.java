@@ -88,6 +88,14 @@ public class TitlesAPI extends BaseApi implements OrdersStorageTitles {
   }
 
   @Override
+  public void getOrdersStorageTitlesSequenceNumbersById(String id, int sequenceNumbers, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+    pgClient.withTrans(conn -> titleService.generateTitleNextSequenceNumbers(id, sequenceNumbers, conn))
+      .onComplete(ar -> asyncResultHandler.handle(ar.failed()
+        ? buildErrorResponse(ar.cause())
+        : buildOkResponse(ar.result())));
+  }
+
+  @Override
   protected String getEndpoint(Object entity) {
     return HelperUtils.getEndpoint(OrdersStorageTitles.class) + JsonObject.mapFrom(entity).getString("id");
   }

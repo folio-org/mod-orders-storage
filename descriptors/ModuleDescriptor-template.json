@@ -87,6 +87,11 @@
           "methods": ["DELETE"],
           "pathPattern": "/orders-storage/titles/{id}",
           "permissionsRequired": ["orders-storage.titles.item.delete"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/orders-storage/titles/{id}/sequence-numbers",
+          "permissionsRequired": ["orders-storage.titles.sequence-number.get"]
         }
       ]
     },
@@ -807,6 +812,11 @@
       "description" : "Delete a title"
     },
     {
+      "permissionName" : "orders-storage.titles.sequence-number.get",
+      "displayName" : "orders-storage.titles.sequence-number get",
+      "description" : "Generate title sequence numbers"
+    },
+    {
       "permissionName" : "orders-storage.titles.all",
       "displayName" : "All orders-storage titles perms",
       "description" : "All permissions for the orders-storage-titles",
@@ -815,7 +825,8 @@
         "orders-storage.titles.item.post",
         "orders-storage.titles.item.get",
         "orders-storage.titles.item.put",
-        "orders-storage.titles.item.delete"
+        "orders-storage.titles.item.delete",
+        "orders-storage.titles.sequence-number.get"
       ]
     },
     {
