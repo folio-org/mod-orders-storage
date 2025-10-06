@@ -35,7 +35,7 @@ import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 @Log4j2
 public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHandler {
 
-  public static final String PO_LINE_LOCATIONS_HOLDING_ID_CQL = "locations==*%s*";
+  public static final String PO_LINE_LOCATIONS_HOLDING_ID_CQL = "locations = /@holdingId \"%s\"";
 
   @Autowired
   private PoLinesService poLinesService;
