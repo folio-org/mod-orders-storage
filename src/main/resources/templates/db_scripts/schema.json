@@ -538,8 +538,8 @@
           "fieldName": "locations",
           "caseSensitive": false,
           "removeAccents": false,
-          "arraySubfield": "locationId",
-          "arrayModifiers": ["locationId", "holdingId"]
+          "arraySubfield": "holdingId",
+          "arrayModifiers": ["holdingId"]
         },
         {
           "fieldName": "physical.volumes",
