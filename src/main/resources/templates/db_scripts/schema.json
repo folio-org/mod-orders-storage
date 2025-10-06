@@ -535,6 +535,13 @@
           "arrayModifiers": ["refNumberType", "vendorDetailsSource"]
         },
         {
+          "fieldName": "locations",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "arraySubfield": "locationId",
+          "arrayModifiers": ["locationId", "holdingId"]
+        },
+        {
           "fieldName": "physical.volumes",
           "caseSensitive": false,
           "removeAccents": true
