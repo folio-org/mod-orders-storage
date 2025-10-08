@@ -452,6 +452,13 @@
           "arrayModifiers": ["fundId"]
         },
         {
+          "fieldName": "locations",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "arraySubfield": "holdingId",
+          "arrayModifiers": ["holdingId"]
+        },
+        {
           "fieldName": "orderFormat",
           "caseSensitive": false,
           "removeAccents": true
