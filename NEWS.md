@@ -1,5 +1,14 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.5 - Released (Sunflower R1 2025 Hot Fix)
+The primary focus of this release was to apply a new DB index to improve performance of Inventory Kafka Consumers.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.4...v13.9.5)
+
+### Bug Fixes
+* [MODORDSTOR-483](https://folio-org.atlassian.net/browse/MODORDSTOR-483) - Speedup processing of Inventory consumers during DI
+
+
 ## 13.9.4 - Released (Sunflower R1 2025 Bug Fix)
 The primary focus of this release was to apply a fix to Update POL Locations after updating related pieces.
 
