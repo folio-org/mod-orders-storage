@@ -29,7 +29,7 @@
     "fqm.entityType.pieces.received_date": "Received date",
     "fqm.entityType.pieces.status_updated_date": "Status updated date",
     "fqm.entityType.pieces.claiming_interval": "Claiming interval",
-    "fqm.entityType.pieces.internal_note": "Internal note",
+    "fqm.entityType.pieces.internal_note": "Uwaga wewnętrzna",
     "fqm.entityType.pieces.external_note": "External note",
     "fqm.entityType.pieces.metadata_created_date": "Created at",
     "fqm.entityType.pieces.metadata_created_by_user_id": "Created by user UUID",
