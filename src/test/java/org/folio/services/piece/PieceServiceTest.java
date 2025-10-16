@@ -305,6 +305,93 @@ public class PieceServiceTest extends TestBase {
     });
   }
 
+  @Test
+  void shouldUpdatePiecesInventoryDataSuccessfully(Vertx vertx, VertxTestContext testContext) {
+    var pieceId = UUID.randomUUID().toString();
+    var piece = new Piece().withId(pieceId).withHoldingId(UUID.randomUUID().toString());
+    var update = new Piece().withId(pieceId).withHoldingId(newHoldingId).withReceivingTenantId(TEST_TENANT);
+
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn ->
+      conn.save(PIECES_TABLE, pieceId, piece)
+        .compose(v -> pieceService.updatePiecesInventoryData(List.of(update), conn, TEST_TENANT))
+        .onComplete(ar -> {
+          testContext.verify(() -> {
+            assertThat(ar.result().getFirst().getHoldingId(), is(newHoldingId));
+            assertThat(ar.result().getFirst().getReceivingTenantId(), is(TEST_TENANT));
+          });
+          testContext.completeNow();
+        })
+    );
+  }
+
+  @Test
+  void shouldUpdateMultiplePiecesInventoryData(Vertx vertx, VertxTestContext testContext) {
+    var id1 = UUID.randomUUID().toString();
+    var id2 = UUID.randomUUID().toString();
+    var newHoldingId2 = UUID.randomUUID().toString();
+
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn ->
+      conn.save(PIECES_TABLE, id1, new Piece().withId(id1).withHoldingId(UUID.randomUUID().toString()))
+        .compose(v -> conn.save(PIECES_TABLE, id2, new Piece().withId(id2).withHoldingId(UUID.randomUUID().toString())))
+        .compose(v -> pieceService.updatePiecesInventoryData(List.of(
+          new Piece().withId(id1).withHoldingId(newHoldingId),
+          new Piece().withId(id2).withHoldingId(newHoldingId2)), conn, TEST_TENANT))
+        .onComplete(ar -> {
+          testContext.verify(() -> {
+            assertThat(ar.result().size(), is(2));
+            assertThat(ar.result().get(0).getHoldingId(), is(newHoldingId));
+            assertThat(ar.result().get(1).getHoldingId(), is(newHoldingId2));
+          });
+          testContext.completeNow();
+        })
+    );
+  }
+
+  @Test
+  void shouldNotUpdatePiecesInventoryDataWhenEmpty(Vertx vertx, VertxTestContext testContext) {
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(connection -> {
+      var conn = spy(connection);
+      return pieceService.updatePiecesInventoryData(List.of(), conn, TEST_TENANT)
+        .onComplete(ar -> {
+          testContext.verify(() -> {
+            assertThat(ar.result(), is(List.of()));
+            verifyNoInteractions(conn);
+          });
+          testContext.completeNow();
+        });
+    });
+  }
+
+  @Test
+  void shouldUpdatePiecesInventoryDataWithNullValues(Vertx vertx, VertxTestContext testContext) {
+    var pieceId = UUID.randomUUID().toString();
+    var piece = new Piece().withId(pieceId).withHoldingId(UUID.randomUUID().toString());
+
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn ->
+      conn.save(PIECES_TABLE, pieceId, piece)
+        .compose(v -> pieceService.updatePiecesInventoryData(
+          List.of(new Piece().withId(pieceId).withHoldingId(null)), conn, TEST_TENANT))
+        .onComplete(ar -> {
+          testContext.verify(() -> assertNull(ar.result().getFirst().getHoldingId()));
+          testContext.completeNow();
+        })
+    );
+  }
+
+  @Test
+  void shouldHandleNonExistentPieceInInventoryDataUpdate(Vertx vertx, VertxTestContext testContext) {
+    var nonExistentId = UUID.randomUUID().toString();
+
+    new DBClient(vertx, TEST_TENANT).getPgClient().withConn(conn ->
+      pieceService.updatePiecesInventoryData(
+        List.of(new Piece().withId(nonExistentId).withHoldingId(newHoldingId)), conn, TEST_TENANT)
+        .onComplete(ar -> {
+          testContext.verify(() -> assertThat(ar.result().getFirst().getId(), is(nonExistentId)));
+          testContext.completeNow();
+        })
+    );
+  }
+
   private Future<Void> createPoLineAndPiece(PoLine poLine, Piece piece, DBClient client) {
     var pgClient = client.getPgClient();
     return client.getPgClient()

@@ -88,7 +88,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture(List.of());
     }
     piecesToUpdate.forEach(piece -> piece.setHoldingId(holder.getHoldingId()));
-    return pieceService.updatePieces(piecesToUpdate, conn, holder.getOrderTenantId());
+    return pieceService.updatePiecesInventoryData(piecesToUpdate, conn, holder.getOrderTenantId());
   }
 
   private List<Piece> filterPiecesToUpdate(ItemEventHolder holder, List<Piece> pieces) {

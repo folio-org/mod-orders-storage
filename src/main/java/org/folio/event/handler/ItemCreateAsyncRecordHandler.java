@@ -86,7 +86,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     log.info("updatePieces:: Updating '{}' piece(s), setting receivingTenantId to '{}' and holdingId to '{}' " +
         "in centralTenant: '{}'", updateRequiredPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
 
-    return pieceService.updatePieces(updateRequiredPieces, conn, centralTenantId)
+    return pieceService.updatePiecesInventoryData(updateRequiredPieces, conn, centralTenantId)
       .compose(v -> auditOutboxService.savePiecesOutboxLog(conn, updateRequiredPieces, PieceAuditEvent.Action.EDIT, headers).map(updateRequiredPieces));
   }
 

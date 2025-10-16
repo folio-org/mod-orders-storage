@@ -137,7 +137,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
-    doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
@@ -147,7 +147,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    verify(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    verify(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     verify(pieceService, times(checkinItems ? 0 : 1)).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     verify(poLinesService, times(checkinItems ? 0 : 1)).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
@@ -191,7 +191,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    verify(pieceService, times(0)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
+    verify(pieceService, times(0)).updatePiecesInventoryData(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
 
   @Test
@@ -216,7 +216,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();
 
     var expectedException = handler.handle(kafkaRecord).cause();
@@ -224,7 +224,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
-    verify(pieceService, times(1)).updatePieces(anyList(), any(Conn.class), eq(DIKU_TENANT));
+    verify(pieceService, times(1)).updatePiecesInventoryData(anyList(), any(Conn.class), eq(DIKU_TENANT));
   }
 
   @Test
