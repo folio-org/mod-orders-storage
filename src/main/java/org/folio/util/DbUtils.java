@@ -66,6 +66,11 @@ public final class DbUtils {
       .toList();
   }
 
+  public static <T> T getRowSetAsEntity(RowSet<Row> rowSet, Class<T> entityClass) {
+    var resultList = getRowSetAsList(rowSet, entityClass);
+    return resultList.isEmpty() ? null : resultList.getFirst();
+  }
+
   public static long getRowSetAsCount(RowSet<Row> rowSet) {
     return IteratorUtils.toList(rowSet.iterator()).stream()
       .map(row -> row.getLong(0))
