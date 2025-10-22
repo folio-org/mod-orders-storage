@@ -44,6 +44,18 @@ x-fqm-visibility = 'hidden'
 [entityTypes.fieldOverrides.metadata_updated_by_username]
 x-fqm-visibility = 'hidden'
 
+[[entityTypes.fieldAdditions]]
+name = "acq_unit_names"
+dataType = { dataType = 'jsonbArrayType', itemDataType = { dataType = 'stringType'} }
+sourceAlias = "src__acquisition__orders_storage__titles"
+idColumnName = "acq_unit_ids"
+queryable = true
+essential = true
+visibleByDefault = false
+valueGetter = """( SELECT jsonb_agg(acq_unit.jsonb ->> 'name') FILTER (WHERE (acq_unit.jsonb ->> 'name') IS NOT NULL) FROM jsonb_array_elements_text(:sourceAlias.jsonb -> 'acqUnitIds') record(value) JOIN src_acquisitions_unit acq_unit ON record.value::text = acq_unit.id::text )"""
+source = { entityTypeId = '661633d0-4cb5-4764-a108-2132b80320ec', columnName = 'name' }
+valueFunction = "lower(:value)"
+
 [[sources]]
 name = "pieces"
 table = "pieces"
@@ -76,7 +88,7 @@ x-fqm-essential = true
 x-fqm-visibility = 'hidden'
 x-fqm-joins-to-raw = [
   { targetId = 'bb058933-cd06-4539-bd3a-6f248ff98ee2', targetField = 'id', type = 'equality-cast-uuid', direction = 'left'}, # simple_user
-  { targetId = 'f2615ea6-450b-425d-804d-6a495afd9308', targetField = 'id', type = 'equality-cast-uuid', direction = 'left'} # simple_FOLIO_user
+  { targetId = 'f2615ea6-450b-425d-804d-6a495afd9308', targetField = 'id', type = 'equality-cast-uuid', direction = 'left'} # simple_FOLIO_USER
 ]
 
 [entityTypes.fieldOverrides.metadata_created_by_username]
