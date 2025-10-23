@@ -11,16 +11,6 @@ types:
   pieces-collection: !include acq-models/mod-orders-storage/schemas/piece_collection.json
   errors: !include raml-util/schemas/errors.schema
 
-# workaround to prevent api-lint errors for FQM vendor extensions
-# see https://github.com/folio-org/fqm-tools/blob/main/docs/generation/field-schema.md#raml-validation-errors
-annotationTypes:
-  fqm-essential:
-    type: boolean
-  fqm-visibility:
-    type: string
-  fqm-visible-by-default:
-    type: boolean
-
 traits:
   validate: !include raml-util/traits/validation.raml
 
