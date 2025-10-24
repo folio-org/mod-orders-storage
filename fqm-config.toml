@@ -44,6 +44,11 @@ x-fqm-visibility = 'hidden'
 [entityTypes.fieldOverrides.metadata_updated_by_username]
 x-fqm-visibility = 'hidden'
 
+[entityTypes.fieldOverrides.acq_unit_ids]
+x-fqm-value-getter = ":sourceAlias.jsonb -> 'acqUnitIds'"
+x-fqm-filter-value-getter = ":sourceAlias.jsonb -> 'acqUnitIds'"
+x-fqm-value-function = ":value"
+
 [[entityTypes.fieldAdditions]]
 name = "acq_unit_names"
 dataType = { dataType = 'jsonbArrayType', itemDataType = { dataType = 'stringType'} }
