@@ -11,7 +11,7 @@ table = "titles"
 name = "titles"
 private = true
 schema = "./ramls/acq-models/mod-orders-storage/schemas/title.json"
-permissions = ["orders-storage.titles.collection.get"]
+permissions = ["orders-storage.titles.collection.get", "acquisitions-units.units.collection.get", "inventory-storage.identifier-types.collection.get"]
 source = "titles"
 sort = ["id", "ASC"]
 useRmbIndexStyle = true
@@ -43,6 +43,11 @@ x-fqm-visibility = 'hidden'
 
 [entityTypes.fieldOverrides.metadata_updated_by_username]
 x-fqm-visibility = 'hidden'
+
+[entityTypes.fieldOverrides.acq_unit_ids]
+x-fqm-value-getter = ":sourceAlias.jsonb -> 'acqUnitIds'"
+x-fqm-filter-value-getter = ":sourceAlias.jsonb -> 'acqUnitIds'"
+x-fqm-value-function = ":value"
 
 [[entityTypes.fieldAdditions]]
 name = "acq_unit_names"
