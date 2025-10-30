@@ -77,5 +77,6 @@
     "fqm.entityType.titles.metadata_updated_date": "Aktualizováno v",
     "fqm.entityType.titles.metadata_updated_by_user_id": "Aktualizoval/a (UUID uživatele)",
     "fqm.entityType.titles.metadata_updated_by_username": "Aktualizoval/a (uživatelské jméno)",
-    "fqm.entityType.titles.jsonb": "JSONB"
+    "fqm.entityType.titles.jsonb": "JSONB",
+    "fqm.entityType.titles.acq_unit_names": "Acquisition unit"
 }
