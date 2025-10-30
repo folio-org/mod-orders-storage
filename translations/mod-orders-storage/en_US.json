@@ -69,13 +69,14 @@
     "fqm.entityType.titles.claiming_active": "Claiming active",
     "fqm.entityType.titles.claiming_interval": "Claiming interval",
     "fqm.entityType.titles.is_acknowledged": "Is acknowledged",
-    "fqm.entityType.titles.bind_item_ids": "Bind item ids",
-    "fqm.entityType.titles.acq_unit_ids": "Acq unit ids",
+    "fqm.entityType.titles.bind_item_ids": "Bind item IDs",
+    "fqm.entityType.titles.acq_unit_ids": "Acquisition unit IDs",
     "fqm.entityType.titles.metadata_created_date": "Created at",
     "fqm.entityType.titles.metadata_created_by_user_id": "Created by user UUID",
     "fqm.entityType.titles.metadata_created_by_username": "Created by username",
     "fqm.entityType.titles.metadata_updated_date": "Updated at",
     "fqm.entityType.titles.metadata_updated_by_user_id": "Updated by user UUID",
     "fqm.entityType.titles.metadata_updated_by_username": "Updated by username",
-    "fqm.entityType.titles.jsonb": "JSONB"
+    "fqm.entityType.titles.jsonb": "JSONB",
+    "fqm.entityType.titles.acq_unit_names": "Acquisition unit"
 }
