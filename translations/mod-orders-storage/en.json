@@ -1,5 +1,6 @@
 {
   "fqm.entityType.pieces": "Pieces",
+  "fqm.entityType.pieces._description": "Simple entity type for acquisition piece data.",
   "fqm.entityType.pieces.id": "UUID",
   "fqm.entityType.pieces.display_summary": "Display summary",
   "fqm.entityType.pieces.comment": "Comment",
@@ -40,6 +41,7 @@
   "fqm.entityType.pieces.jsonb": "JSONB",
 
   "fqm.entityType.titles": "Titles",
+  "fqm.entityType.titles._description": "Simple entity type for acquisition title data.",
   "fqm.entityType.titles.id": "UUID",
   "fqm.entityType.titles.expected_receipt_date": "Expected receipt date",
   "fqm.entityType.titles.title": "Title",
