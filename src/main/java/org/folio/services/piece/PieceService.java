@@ -60,6 +60,9 @@ public class PieceService {
   private static final String PIECES_BY_ITEM_ID_COUNT_SQL = "SELECT COUNT(*) FROM %s WHERE left(lower(%s.f_unaccent(jsonb->>'itemId')), 600) = $1;";
   private static final String PIECES_SHIFT_SEQUENCE_NUMBERS =
     "UPDATE %s SET jsonb = jsonb || jsonb_build_object('sequenceNumber', (jsonb->>'sequenceNumber')::int + $1) WHERE titleId = $2 AND (jsonb->>'sequenceNumber')::int BETWEEN $3 AND $4";
+  private static final String PIECES_UPDATE_INVENTORY_DATA = "UPDATE %s SET jsonb = " +
+    "jsonb_set(jsonb_set(jsonb, '{holdingId}', COALESCE(to_jsonb($1::text), 'null'::jsonb)), '{receivingTenantId}', COALESCE(to_jsonb($2::text), 'null'::jsonb)) " +
+    "WHERE id = $3::uuid RETURNING *";
 
   public Future<List<Piece>> getPiecesByPoLineId(String poLineId, DBClient client) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(PO_LINE_ID_FIELD, poLineId);
@@ -172,6 +175,42 @@ public class PieceService {
       .map(SerializerUtil::toJson)
       .toList();
     return String.format(PIECES_BATCH_UPDATE_SQL, getFullTableName(tenantId, PIECES_TABLE), getQueryValues(jsonPieces));
+  }
+
+  /**
+   * Updates only inventory-related fields (holdingId and receivingTenantId) for pieces.
+   * This method is used by Kafka event handlers to avoid race conditions with check-in operations.
+   * It uses surgical updates for the specified fields only without affecting others that may be concurrently updated by the check-in API.
+   *
+   * @param pieces List of pieces with inventory field updates (only id, holdingId, and receivingTenantId are used)
+   * @param conn Database connection
+   * @param tenantId Tenant identifier
+   * @return Future with the list of updated pieces
+   */
+  public Future<List<Piece>> updatePiecesInventoryData(List<Piece> pieces, Conn conn, String tenantId) {
+    if (CollectionUtils.isEmpty(pieces)) {
+      log.warn("updatePiecesInventoryFieldsOnly:: Pieces list is empty, skipping the update");
+      return Future.succeededFuture(List.of());
+    }
+    log.info("updatePiecesInventoryFieldsOnly:: Updating {} piece(s) with inventory fields only", pieces.size());
+    var updateFutures = pieces.stream().map(piece -> updatePieceInventoryData(piece, conn, tenantId)).toList();
+    return collectResultsOnSuccess(updateFutures);
+  }
+
+  private Future<Piece> updatePieceInventoryData(Piece piece, Conn conn, String tenantId) {
+    var updateQuery = PIECES_UPDATE_INVENTORY_DATA.formatted(getFullTableName(tenantId, PIECES_TABLE));
+    return conn.execute(updateQuery, Tuple.of(piece.getHoldingId(), piece.getReceivingTenantId(), piece.getId()))
+      .map(rows -> {
+        if (rows.rowCount() == 0) {
+          log.warn("updateSinglePieceInventoryFields:: No piece updated with id: {}", piece.getId());
+          return piece;
+        }
+        var updatedPiece = DbUtils.getRowSetAsEntity(rows, Piece.class);
+        log.info("updateSinglePieceInventoryFields:: Successfully updated piece: {} with holdingId: {}, receivingTenantId: {}",
+          piece.getId(), piece.getHoldingId(), piece.getReceivingTenantId());
+        return updatedPiece;
+      })
+      .onFailure(e -> log.error("updateSinglePieceInventoryFields:: Failed to update piece: {}", piece.getId(), e));
   }
 
   public Future<Tx<PoLine>> updatePieces(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {

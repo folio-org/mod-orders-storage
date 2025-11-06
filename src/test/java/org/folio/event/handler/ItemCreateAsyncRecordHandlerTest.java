@@ -163,7 +163,7 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     // Update Pieces
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -178,7 +178,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update Pieces
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
-    verify(pieceService, times(1)).updatePieces(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(pieceService, times(1)).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
     verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -242,7 +242,7 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     // Update Pieces
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -257,7 +257,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update Pieces
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
-    verify(pieceService, times(1)).updatePieces(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(pieceService, times(1)).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
     verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -322,7 +322,7 @@ public class ItemCreateAsyncRecordHandlerTest {
 
     // Update Pieces
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -337,7 +337,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update Pieces
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
-    verify(pieceService, times(1)).updatePieces(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(pieceService, times(1)).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
     verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -377,7 +377,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var poLines = List.of(poLine1);
 
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(List.of(poLine1))).when(pieceService).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(List.of(poLine1))).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(List.of(piece1))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     doReturn(Future.succeededFuture(poLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId())), eq(CENTRAL_TENANT), eq(conn));
     doReturn(Future.succeededFuture(poLines.size())).when(poLinesService).updatePoLines(eq(poLines), eq(conn), eq(CENTRAL_TENANT), any());
@@ -388,7 +388,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update Pieces
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
-    verify(pieceService, never()).updatePieces(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    verify(pieceService, never()).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     verify(auditOutboxService, never()).savePiecesOutboxLog(any(Conn.class), anyList(), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
@@ -415,7 +415,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Update Pieces
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
-    verify(pieceService, never()).updatePieces(anyList(), eq(conn), eq(CENTRAL_TENANT));
+    verify(pieceService, never()).updatePiecesInventoryData(anyList(), eq(conn), eq(CENTRAL_TENANT));
     verify(auditOutboxService, never()).savePiecesOutboxLog(any(Conn.class), anyList(), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, never()).getPiecesByPoLineId(any(), eq(conn));
@@ -445,7 +445,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var pieces = List.of(alreadyUpdatedPiece1, alreadyUpdatedPiece2);
 
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(List.of())).when(pieceService).updatePieces(eq(List.of()), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(List.of())).when(pieceService).updatePiecesInventoryData(eq(List.of()), eq(conn), eq(CENTRAL_TENANT));
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -472,7 +472,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var expectedPieces = List.of(createPiece(pieceId1, itemId1).withHoldingId(holdingId1).withReceivingTenantId(CENTRAL_TENANT));
 
     doReturn(Future.succeededFuture(List.of(actualPiece))).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doThrow(new RuntimeException("Save failed")).when(pieceService).updatePieces(eq(expectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    doThrow(new RuntimeException("Save failed")).when(pieceService).updatePiecesInventoryData(eq(expectedPieces), eq(conn), eq(CENTRAL_TENANT));
 
     var result = handler.handle(kafkaRecord);
 
