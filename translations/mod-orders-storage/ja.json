@@ -78,5 +78,7 @@
     "fqm.entityType.titles.metadata_updated_by_user_id": "Updated by user UUID",
     "fqm.entityType.titles.metadata_updated_by_username": "Updated by username",
     "fqm.entityType.titles.jsonb": "JSONB",
-    "fqm.entityType.titles.acq_unit_names": "Acquisition unit"
+    "fqm.entityType.titles.acq_unit_names": "Acquisition unit",
+    "fqm.entityType.pieces._description": "Simple entity type for acquisition piece data.",
+    "fqm.entityType.titles._description": "Simple entity type for acquisition title data."
 }
