@@ -93,5 +93,4 @@ After:
 - Only PoLines with `source='API'` are affected
 - It's recommended to backup your database before running the script
 - Test on a non-production environment first
-- Make sure that the tenant does not belong
 
