@@ -78,5 +78,7 @@
     "fqm.entityType.titles.metadata_updated_by_user_id": "Atualizado pelo usuário de UUID",
     "fqm.entityType.titles.metadata_updated_by_username": "Atualizado pelo usuário",
     "fqm.entityType.titles.jsonb": "JSONB",
-    "fqm.entityType.titles.acq_unit_names": "Unidade de aquisição"
+    "fqm.entityType.titles.acq_unit_names": "Unidade de aquisição",
+    "fqm.entityType.pieces._description": "Tipo de entidade simples para dados de partes de aquisição.",
+    "fqm.entityType.titles._description": "Tipo de entidade simples para dados de título de aquisição."
 }
