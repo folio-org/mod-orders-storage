@@ -87,10 +87,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
 
   private Future<HoldingUpdate> processPoLinesUpdate(HoldingEventHolder holder, Conn conn, RequestContext requestContext) {
     return inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext)
-      .compose(instance -> {
-        holder.setInstance(instance);
-        return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn);
-      })
+      .compose(v -> poLinesService.getPoLinesByCqlQuery(PO_LINE_LOCATIONS_HOLDING_ID_CQL.formatted(holder.getHoldingId()), conn))
       .compose(poLines -> updatePoLines(holder, poLines, conn))
       .compose(dto -> updateTitles(holder, dto.getPoLinesWithUpdatedInstanceId(), conn).map(dto))
       .compose(dto -> saveOrderLinesOutboxLogsConditionally(holder, conn, dto));
@@ -182,13 +179,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     var updatedPoLines = new ArrayList<PoLine>(poLines.size());
     for (var poLine : poLines) {
       if (!StringUtils.equals(poLine.getInstanceId(), holder.getInstanceId())) {
-        poLine.withInstanceId(holder.getInstanceId())
-          .withTitleOrPackage(InventoryUtils.getInstanceTitle(holder.getInstance()))
-          .withPublisher(InventoryUtils.getPublisher(holder.getInstance()))
-          .withPublicationDate(InventoryUtils.getPublicationDate(holder.getInstance()))
-          .withContributors(InventoryUtils.getContributors(holder.getInstance()))
-          .getDetails().withProductIds(InventoryUtils.getProductIds(holder.getInstance()));
-        updatedPoLines.add(poLine);
+        updatedPoLines.add(poLinesService.updateInstanceFieldsForPoLine(poLine, holder.getInstance()));
         log.info("updatePoLinesInstance:: Added new instance data to POL, poLineId: {}", poLine.getId());
       }
     }
