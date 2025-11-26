@@ -323,7 +323,7 @@ public abstract class TestBase {
     }
   }
 
-  String getFile(String filename) {
+  protected String getFile(String filename) {
     String value = "";
     try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream(filename)) {
       if (inputStream != null) {

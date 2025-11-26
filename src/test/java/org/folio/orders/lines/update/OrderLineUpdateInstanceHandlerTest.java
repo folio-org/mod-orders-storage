@@ -27,6 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,6 +76,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
   private static final Logger log = LogManager.getLogger();
 
   static final String TEST_TENANT = "test_tenant";
+  public static final String INSTANCE_MOCK_FILE = "mockdata/inventory/instance.json";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
   private Map<String, String> headers = new HashMap<>(Collections.singletonMap(OKAPI_HEADER_TENANT, TEST_TENANT));
 
@@ -155,6 +157,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withId(titleId)
       .withPoLineId(poLineId)
       .withInstanceId(instanceId);
+    JsonObject instance = new JsonObject(getFile(INSTANCE_MOCK_FILE));
     Piece piece = new Piece()
       .withId(pieceId)
       .withPoLineId(poLineId)
@@ -175,9 +178,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
       .withReplaceInstanceRef(replaceInstanceRef);
 
-    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
-    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
-    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+    var orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder(poLine, instance, patchOrderLineRequest);
 
     RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
 
@@ -253,6 +254,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withPhysical(new Physical()
         .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING_ITEM));
 
+    JsonObject instance = new JsonObject(getFile(INSTANCE_MOCK_FILE));
+
     ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
       .withNewInstanceId(newInstanceId)
       .withHoldings(Collections.emptyList());
@@ -261,9 +264,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
       .withReplaceInstanceRef(replaceInstanceRef);
 
-    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
-    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
-    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+    var orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder(poLine, instance, patchOrderLineRequest);
 
     RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
 
@@ -303,6 +304,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withId(titleId)
       .withPoLineId(poLineId)
       .withInstanceId(instanceId);
+    JsonObject instance = new JsonObject(getFile(INSTANCE_MOCK_FILE));
     Piece piece = new Piece()
       .withId(pieceId)
       .withPoLineId(poLineId)
@@ -323,9 +325,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
       .withReplaceInstanceRef(replaceInstanceRef);
 
-    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
-    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
-    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+    var orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder(poLine, instance, patchOrderLineRequest);
 
     RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
 
@@ -406,6 +406,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withId(titleId)
       .withPoLineId(poLineId)
       .withInstanceId(instanceId);
+    JsonObject instance = new JsonObject(getFile(INSTANCE_MOCK_FILE));
     ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
       .withNewInstanceId(newInstanceId)
       .withHoldings(Collections.emptyList());
@@ -417,9 +418,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
       .withReplaceInstanceRef(replaceInstanceRef);
 
-    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
-    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
-    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+    var orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder(poLine, instance, patchOrderLineRequest);
 
     RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
 
@@ -495,6 +494,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withId(titleId)
       .withPoLineId(poLineId)
       .withInstanceId(instanceId);
+    JsonObject instance = new JsonObject(getFile(INSTANCE_MOCK_FILE));
     Piece piece = new Piece()
       .withId(pieceId)
       .withPoLineId(poLineId)
@@ -519,9 +519,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
       .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
       .withReplaceInstanceRef(replaceInstanceRef);
 
-    OrderLineUpdateInstanceHolder orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder();
-    orderLineUpdateInstanceHolder.setPatchOrderLineRequest(patchOrderLineRequest);
-    orderLineUpdateInstanceHolder.setStoragePoLine(poLine);
+    var orderLineUpdateInstanceHolder = new OrderLineUpdateInstanceHolder(poLine, instance, patchOrderLineRequest);
 
     RequestContext requestContext = new RequestContext(vertx.getOrCreateContext(), headers);
 
