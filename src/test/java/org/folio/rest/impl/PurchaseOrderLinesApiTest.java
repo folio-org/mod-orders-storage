@@ -17,18 +17,24 @@ import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleCollection;
+import org.folio.rest.util.TestConfig;
 import org.folio.rest.utils.IsolatedTenant;
 import org.folio.rest.utils.TestData;
 import org.folio.rest.utils.TestEntities;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import static org.folio.rest.utils.TestEntities.PO_LINE;
 import static org.folio.rest.utils.TestEntities.PURCHASE_ORDER;
@@ -40,7 +46,18 @@ import static org.hamcrest.core.StringContains.containsString;
 
 @IsolatedTenant
 public class PurchaseOrderLinesApiTest extends TestBase {
+
   private static final Logger log = LogManager.getLogger();
+
+  @BeforeAll
+  public static void beforeAll() throws ExecutionException, InterruptedException, TimeoutException {
+    TestConfig.startMockServer();
+  }
+
+  @AfterAll
+  public static void afterAll() {
+    TestConfig.closeMockServer();
+  }
 
   @Test
   void testDeletePOLineByIdWithRelatedData() throws MalformedURLException {

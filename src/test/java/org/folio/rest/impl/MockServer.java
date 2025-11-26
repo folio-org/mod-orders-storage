@@ -103,7 +103,7 @@ public class MockServer {
     router.route().handler(BodyHandler.create());
 
     router.get("/settings/entries").handler(this::handleSettingsModuleResponse);
-    router.get("/instance-storage/instances/{id}").handler(this::handleInstanceByIdResponse);
+    router.get("/instance-storage/instances/:id").handler(this::handleInstanceByIdResponse);
 
     return router;
   }
