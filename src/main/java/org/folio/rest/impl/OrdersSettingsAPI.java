@@ -1,12 +1,16 @@
 package org.folio.rest.impl;
 
+import static io.vertx.core.json.JsonObject.mapFrom;
+
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.resource.OrdersStorageSettings;
+import org.folio.rest.persist.HelperUtils;
 import org.folio.services.setting.SettingService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +20,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 
-public class OrdersSettingsAPI implements OrdersStorageSettings {
+public class OrdersSettingsAPI extends BaseApi implements OrdersStorageSettings {
 
   @Autowired
   private SettingService settingService;
@@ -29,7 +33,10 @@ public class OrdersSettingsAPI implements OrdersStorageSettings {
   @Validate
   public void getOrdersStorageSettings(String query, String totalRecords, int offset, int limit, Map<String, String> okapiHeaders,
                                        Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    settingService.getSettings(query, offset, limit, okapiHeaders, asyncResultHandler, vertxContext);
+    settingService.getSettings(query, offset, limit, okapiHeaders, vertxContext)
+      .onComplete(ar -> asyncResultHandler.handle(ar.succeeded()
+        ? buildOkResponse(ar.result())
+        : buildErrorResponse(ar.cause())));
   }
 
   @Override
@@ -58,6 +65,11 @@ public class OrdersSettingsAPI implements OrdersStorageSettings {
   public void deleteOrdersStorageSettingsById(String id, Map<String, String> okapiHeaders,
                                               Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     settingService.deleteSetting(id, okapiHeaders, asyncResultHandler, vertxContext);
+  }
+
+  @Override
+  protected String getEndpoint(Object entity) {
+    return HelperUtils.getEndpoint(OrdersStorageSettings.class) + mapFrom(entity).getString("id");
   }
 
 }
