@@ -2,6 +2,7 @@ package org.folio.services.lines;
 
 import static java.util.stream.Collectors.toList;
 import static org.folio.dao.RepositoryConstants.MAX_IDS_FOR_GET_RQ_15;
+import static org.folio.event.dto.InstanceFields.ID;
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
 import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import io.vertx.sqlclient.Tuple;
@@ -34,10 +36,10 @@ import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
 import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.core.models.RequestContext;
+import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
-import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
@@ -54,6 +56,7 @@ import lombok.extern.log4j.Log4j2;
 import one.util.streamex.StreamEx;
 import org.folio.rest.tools.utils.MetadataUtil;
 import org.folio.util.DbUtils;
+import org.folio.util.InventoryUtils;
 import org.folio.util.SerializerUtil;
 
 @Log4j2
@@ -315,10 +318,20 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Tx<PoLine>> updateInstanceIdForPoLine(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
-    poLineTx.getEntity().setInstanceId(replaceInstanceRef.getNewInstanceId());
-
+  public Future<Tx<PoLine>> updateInstanceIdForPoLine(Tx<PoLine> poLineTx, JsonObject instance, DBClient client) {
+    updateInstanceFieldsForPoLine(poLineTx.getEntity(), instance);
     return updatePoLine(poLineTx, client);
+  }
+
+  public PoLine updateInstanceFieldsForPoLine(PoLine poLine, JsonObject instance) {
+    return poLine.withInstanceId(instance.getString(ID.getValue()))
+      .withTitleOrPackage(InventoryUtils.getInstanceTitle(instance))
+      .withPublisher(InventoryUtils.getPublisher(instance))
+      .withPublicationDate(InventoryUtils.getPublicationDate(instance))
+      .withContributors(InventoryUtils.getContributors(instance))
+      .withDetails(Optional.ofNullable(poLine.getDetails())
+        .orElseGet(Details::new)
+        .withProductIds(InventoryUtils.getProductIds(instance)));
   }
 
   private void populateTitleForPackagePoLineAndSave(Conn conn, Promise<PoLine> promise, PoLine poLine,

@@ -28,6 +28,7 @@ import java.util.concurrent.TimeoutException;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 import static org.folio.TestUtils.getMockData;
+import static org.folio.orders.lines.update.OrderLineUpdateInstanceHandlerTest.INSTANCE_MOCK_FILE;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -102,6 +103,7 @@ public class MockServer {
     router.route().handler(BodyHandler.create());
 
     router.get("/settings/entries").handler(this::handleSettingsModuleResponse);
+    router.get("/instance-storage/instances/:id").handler(this::handleInstanceByIdResponse);
 
     return router;
   }
@@ -125,6 +127,14 @@ public class MockServer {
       serverResponse(ctx, 500, APPLICATION_JSON, INTERNAL_SERVER_ERROR.getReasonPhrase());
     }
 
+  }
+
+  private void handleInstanceByIdResponse(RoutingContext ctx) {
+    try {
+      serverResponse(ctx, 200, APPLICATION_JSON, getMockData(INSTANCE_MOCK_FILE));
+    } catch (IOException e) {
+      serverResponse(ctx, 500, APPLICATION_JSON, INTERNAL_SERVER_ERROR.getReasonPhrase());
+    }
   }
 
   private void serverResponse(RoutingContext ctx, int statusCode, String contentType, String body) {

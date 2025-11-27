@@ -31,6 +31,8 @@ public class InventoryUpdateServiceTest {
   @InjectMocks
   private InventoryUpdateService inventoryUpdateService;
   @Mock
+  private InstancesService instancesService;
+  @Mock
   private RestClient restClient;
   @Mock
   private HoldingsService holdingsService;
@@ -82,7 +84,7 @@ public class InventoryUpdateServiceTest {
     var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext);
 
     assertDoesNotThrow(result::result);
-    verify(restClient, never()).get(any(), any());
+    verify(instancesService, never()).getInstanceById(any(), any());
   }
 
   @Test
@@ -90,11 +92,11 @@ public class InventoryUpdateServiceTest {
     var holder = mock(HoldingEventHolder.class);
     when(holder.instanceIdEqual()).thenReturn(false);
     when(holder.getInstanceId()).thenReturn(UUID.randomUUID().toString());
-    when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(new JsonObject()));
+    when(instancesService.getInstanceById(any(), any())).thenReturn(Future.succeededFuture(new JsonObject()));
 
     var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext);
 
     assertDoesNotThrow(result::result);
-    verify(restClient, times(1)).get(any(), any());
+    verify(instancesService, times(1)).getInstanceById(any(), any());
   }
 }

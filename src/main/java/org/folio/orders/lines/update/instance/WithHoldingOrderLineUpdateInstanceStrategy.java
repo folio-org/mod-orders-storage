@@ -39,21 +39,21 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
   @Override
   public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
     Promise<Void> promise = Promise.promise();
-    if (holder.getPatchOrderLineRequest().getReplaceInstanceRef() == null
-        || holder.getPatchOrderLineRequest().getReplaceInstanceRef().getHoldings().isEmpty()) {
+    if (holder.patchOrderLineRequest().getReplaceInstanceRef() == null
+        || holder.patchOrderLineRequest().getReplaceInstanceRef().getHoldings().isEmpty()) {
       log.error("ReplaceInstanceRef or Holdings is not present");
       promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef or Holdings is not present"));
     } else {
       DBClient client = new DBClient(rqContext.getContext(), rqContext.getHeaders());
-      Tx<PoLine> tx = new Tx<>(holder.getStoragePoLine(), client.getPgClient());
-      String instanceId = holder.getPatchOrderLineRequest().getReplaceInstanceRef().getNewInstanceId();
+      Tx<PoLine> tx = new Tx<>(holder.storagePoLine(), client.getPgClient());
+      String instanceId = holder.patchOrderLineRequest().getReplaceInstanceRef().getNewInstanceId();
 
       rqContext.getContext().runOnContext(v -> {
         log.info("With holding - Update Instance");
         tx.startTx()
           .compose(poLineTx -> titleService.updateTitle(poLineTx, instanceId, client))
-          .compose(poLineTx -> updateHoldings(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
-          .compose(poLineTx -> poLinesService.updateInstanceIdForPoLine(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
+          .compose(poLineTx -> updateHoldings(poLineTx, holder.patchOrderLineRequest().getReplaceInstanceRef(), client))
+          .compose(poLineTx -> poLinesService.updateInstanceIdForPoLine(poLineTx, holder.instance(), client))
           .compose(Tx::endTx)
           .onComplete(ar -> {
             if (ar.failed()) {
