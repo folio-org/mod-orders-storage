@@ -78,7 +78,7 @@
     "fqm.entityType.titles.metadata_updated_by_user_id": "Update door gebruiker UUID",
     "fqm.entityType.titles.metadata_updated_by_username": "Update door Gebruikersnaam",
     "fqm.entityType.titles.jsonb": "JSONB",
-    "fqm.entityType.titles.acq_unit_names": "Acquisition unit",
-    "fqm.entityType.pieces._description": "Simple entity type for acquisition piece data.",
-    "fqm.entityType.titles._description": "Simple entity type for acquisition title data."
+    "fqm.entityType.titles.acq_unit_names": "Acquisitie-afdeling",
+    "fqm.entityType.pieces._description": "Eenvoudig entiteittype voor gegevens van acquisitie Stuk.",
+    "fqm.entityType.titles._description": "Eenvoudig entiteittype voor gegevens over acquisitietitels."
 }
