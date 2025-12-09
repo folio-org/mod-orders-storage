@@ -19,6 +19,7 @@ import io.vertx.sqlclient.SqlResult;
 import io.vertx.sqlclient.Tuple;
 
 public class AuditOutboxEventsLogRepository {
+
   private static final Logger log = LogManager.getLogger();
   public static final String OUTBOX_TABLE_NAME = "outbox_event_log";
   private static final String EVENT_ID_FIELD = "event_id";
@@ -26,13 +27,15 @@ public class AuditOutboxEventsLogRepository {
   private static final String ACTION_FIELD = "action";
   private static final String PAYLOAD_FIELD = "payload";
   private static final String INSERT_SQL = "INSERT INTO %s.%s (event_id, entity_type, action, payload) VALUES ($1, $2, $3, $4)";
-  private static final String SELECT_EVENT_LOGS = "SELECT * FROM %s.%s LIMIT 1000";
+  private static final String SELECT_EVENT_LOGS = "SELECT * FROM %s.%s " +
+    "ORDER BY CASE UPPER(action) WHEN 'CREATE' THEN 1 WHEN 'EDIT' THEN 2 WHEN 'DELETE' THEN 3 ELSE 4 END " +
+    "FOR UPDATE SKIP LOCKED LIMIT 1000";
   public static final String DELETE_SQL = "DELETE from %s.%s where event_id = ANY ($1)";
 
   /**
    * Fetches event logs from outbox table.
    *
-   * @param conn the sql connection from transaction
+   * @param conn     the sql connection from transaction
    * @param tenantId the tenant id
    * @return future with list of fetched event logs
    */
@@ -63,7 +66,7 @@ public class AuditOutboxEventsLogRepository {
   /**
    * Deletes outbox logs by event ids in batch.
    *
-   * @param conn the sql connection from transaction
+   * @param conn     the sql connection from transaction
    * @param eventIds the event ids to delete
    * @param tenantId the tenant id
    * @return future row count how many records have been deleted
