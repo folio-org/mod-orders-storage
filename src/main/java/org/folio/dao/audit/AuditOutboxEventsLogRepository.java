@@ -27,9 +27,7 @@ public class AuditOutboxEventsLogRepository {
   private static final String ACTION_FIELD = "action";
   private static final String PAYLOAD_FIELD = "payload";
   private static final String INSERT_SQL = "INSERT INTO %s.%s (event_id, entity_type, action, payload) VALUES ($1, $2, $3, $4)";
-  private static final String SELECT_EVENT_LOGS = "SELECT * FROM %s.%s " +
-    "ORDER BY CASE UPPER(action) WHEN 'CREATE' THEN 1 WHEN 'EDIT' THEN 2 WHEN 'DELETE' THEN 3 ELSE 4 END " +
-    "FOR UPDATE SKIP LOCKED LIMIT 1000";
+  private static final String SELECT_EVENT_LOGS = "SELECT * FROM %s.%s ORDER BY ((payload #>> '{}')::jsonb->'metadata'->>'updatedDate') FOR UPDATE SKIP LOCKED LIMIT 1000";
   public static final String DELETE_SQL = "DELETE from %s.%s where event_id = ANY ($1)";
 
   /**
