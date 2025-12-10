@@ -1,5 +1,13 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.9 - Released (Sunflower R1 2025 Hot Fix)
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.8...v13.9.9)
+
+### Bug Fixes
+* [MODORDSTOR-519](https://folio-org.atlassian.net/browse/MODORDSTOR-519) - Sunflower - Improve performance of SQL query that cause Lock on DB
+
+
 ## 13.9.8 - Released (Sunflower R1 2025 Hot Fix)
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.7...v13.9.8)
