@@ -5,7 +5,6 @@ import java.util.Map;
 
 import io.vertx.core.Vertx;
 import org.folio.dao.ExtensionRepository;
-import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PieceClaimingRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
@@ -160,16 +159,10 @@ public class ApplicationConfig {
   }
 
   @Bean
-  InternalLockRepository internalLockRepository() {
-    return new InternalLockRepository();
-  }
-
-  @Bean
   AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
-                                        InternalLockRepository lockRepository,
                                         AuditEventProducer producer,
                                         PostgresClientFactory pgClientFactory) {
-    return new AuditOutboxService(outboxRepository, lockRepository, producer, pgClientFactory);
+    return new AuditOutboxService(outboxRepository, producer, pgClientFactory);
   }
 
   @Bean
