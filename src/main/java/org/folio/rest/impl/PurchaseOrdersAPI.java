@@ -23,7 +23,6 @@ import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
 
 public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseOrders {
+
   private static final Logger log = LogManager.getLogger();
+  private static final String ORDER_ID_WHERE_CLAUSE = "WHERE jsonb ->> 'purchaseOrderId' = '%s'";
 
   private final PostgresClient pgClient;
 
@@ -96,18 +97,15 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.debug("Deleting po, id={}", id);
     try {
-      Tx<String> tx = new Tx<>(id, pgClient);
-      DBClient client = new DBClient(vertxContext, okapiHeaders);
-      tx.startTx()
-        .compose(e -> deleteOrderInvoicesRelation(e, client))
-        .compose(e -> deleteOrderById(e, client))
-        .compose(Tx::endTx)
+      new DBClient(vertxContext, okapiHeaders).getPgClient()
+        .withTrans(conn -> deleteOrderInvoicesRelation(id, conn)
+          .compose(orderId -> deleteOrderById(orderId, conn)))
         .onComplete(ar -> {
           if (ar.failed()) {
             HttpException cause = (HttpException) ar.cause();
             log.error("Delete order failed, id={}", id, cause);
             // The result of rollback operation is not so important, main failure cause is used to build the response
-            tx.rollbackTransaction().onComplete(res -> asyncResultHandler.handle(buildErrorResponse(cause)));
+            asyncResultHandler.handle(buildErrorResponse(cause));
           } else {
             log.info("Order deletion complete, id={}", id);
             asyncResultHandler.handle(buildNoContentResponse());
@@ -118,11 +116,12 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
     }
   }
 
-  private Future<Tx<String>> deleteOrderInvoicesRelation(Tx<String> tx, DBClient client) {
-    log.info("Delete order->invoices relations with id={}", tx.getEntity());
-    CQLWrapper cqlWrapper = new CQLWrapper();
-    cqlWrapper.setWhereClause("WHERE jsonb ->> 'purchaseOrderId' = '" + tx.getEntity() + "'");
-    return client.deleteByQuery(tx, TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper, true);
+  private Future<String> deleteOrderInvoicesRelation(String orderId, Conn conn) {
+    log.info("deleteOrderInvoicesRelation:: Delete order->invoices relations with id={}", orderId);
+    var cqlWrapper = new CQLWrapper().setWhereClause(ORDER_ID_WHERE_CLAUSE.formatted(orderId));
+    return conn.delete(TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper)
+      .recover(t -> Future.succeededFuture())
+      .map(orderId);
   }
 
   @Validate
@@ -195,9 +194,9 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
     return promise.future();
   }
 
-  private Future<Tx<String>> deleteOrderById(Tx<String> tx, DBClient client) {
-    log.info("Delete PO with id={}", tx.getEntity());
-    return client.deleteById(tx, TableNames.PURCHASE_ORDER_TABLE);
+  private Future<Void> deleteOrderById(String orderId, Conn conn) {
+    log.info("deleteOrderById:: Delete PO with id={}", orderId);
+    return conn.delete(TableNames.PURCHASE_ORDER_TABLE, orderId).mapEmpty();
   }
 
   @Override

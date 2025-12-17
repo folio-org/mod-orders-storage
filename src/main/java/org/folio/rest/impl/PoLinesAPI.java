@@ -146,7 +146,7 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
     if (Boolean.TRUE.equals(poLine.getIsPackage())) {
       validateCustomFields(vertxContext, okapiHeaders, poLine)
         .compose(v ->
-          pgClient.withTrans(conn -> poLinesService.updatePoLine(conn, poLine)
+          pgClient.withTrans(conn -> poLinesService.updatePoLine(poLine, conn)
             .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders))))
         .onComplete(ar -> {
           if (ar.failed()) {

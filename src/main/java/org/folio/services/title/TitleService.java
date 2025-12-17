@@ -22,12 +22,10 @@ import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleSequenceNumbers;
 import org.folio.rest.persist.Conn;
-import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.util.DbUtils;
 
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -35,60 +33,37 @@ public class TitleService {
 
   private static final String POLINE_ID_FIELD = "poLineId";
 
-  public Future<Title> getTitleByPoLineId(String poLineId, DBClient client) {
-    Promise<Title> promise = Promise.promise();
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
-    client.getPgClient().get(TITLES_TABLE, Title.class, criterion, false, ar -> {
-      if (ar.failed()) {
-        log.error("getTitleByPoLineId(poLineId, client) failed, poLineId={}", poLineId, ar.cause());
-        httpHandleFailure(promise, ar);
-      } else {
-        Optional<Title> result = ar.result()
-          .getResults()
-          .stream()
-          .findFirst();
-        if (result.isEmpty()) {
-          log.warn("getTitleByPoLineId(poLineId, client): no title was found, poLineId={}", poLineId);
-          promise.fail(new Exception(String.format("Title with poLineId=%s was not found", poLineId)));
+  public Future<Title> getTitleByPoLineId(String poLineId, Conn conn) {
+    var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
+    return conn.get(TITLES_TABLE, Title.class, criterion, false)
+      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
+      .compose(result -> {
+        Optional<Title> title = result.getResults().stream().findFirst();
+        if (title.isEmpty()) {
+          log.warn("getTitleByPoLineId:: No title was found, poLineId={}", poLineId);
+          return Future.failedFuture(new Exception("Title with poLineId=%s was not found".formatted(poLineId)));
         } else {
-          log.trace("getTitleByPoLineId(poLineId, client) complete, poLineId={}", poLineId);
-          promise.complete(result.get());
-        }
-      }
-    });
-
-    return promise.future();
-  }
-
-  private Future<Tx<PoLine>> updateInstanceIdForTitle(Tx<PoLine> poLineTx, Title title, String instanceId, DBClient client) {
-    Promise<Tx<PoLine>> promise = Promise.promise();
-
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineTx.getEntity().getId());
-    title.setInstanceId(instanceId);
-    client.getPgClient().update(poLineTx.getConnection(), TITLES_TABLE, title, JSONB, criterion.toString(), false, ar -> {
-      if (ar.failed()) {
-        log.error("updateInstanceIdForTitle failed, poLineId={}, titleId={}", poLineTx.getEntity().getId(),
-          title.getId(), ar.cause());
-        httpHandleFailure(promise, ar);
-      } else {
-        log.info("InstanceId in Title record {} was successfully updated", title.getId());
-        promise.complete(poLineTx);
-      }
-    });
-    return promise.future();
-  }
-
-  public Future<Tx<PoLine>> updateTitle(Tx<PoLine> poLineTx, String instanceId, DBClient client) {
-    return getTitleByPoLineId(poLineTx.getEntity().getId(), client)
-      .compose(title -> updateInstanceIdForTitle(poLineTx, title, instanceId, client))
-      .onComplete(ar -> {
-        if (ar.failed()) {
-          log.error("updateTitle(poLineTx, instanceId, client) failed, poLineId={}, instanceId={}",
-            poLineTx.getEntity().getId(), instanceId, ar.cause());
-        } else {
-          log.debug("updateTitle(poLineTx, instanceId, client) complete");
+          log.trace("getTitleByPoLineId:: Complete, poLineId={}", poLineId);
+          return Future.succeededFuture(title.get());
         }
       });
+  }
+
+  private Future<PoLine> updateInstanceIdForTitle(PoLine poLine, Title title, String instanceId, Conn conn) {
+    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
+    title.setInstanceId(instanceId);
+    return conn.update(TITLES_TABLE, title, JSONB, criterion.toString(), false)
+      .map(rows -> DbUtils.getRowSetAsEntity(rows, PoLine.class))
+      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
+      .onSuccess(v -> log.info("InstanceId in Title record {} was successfully updated", title.getId()))
+      .onFailure(t -> log.error("updateInstanceIdForTitle failed, poLineId={}, titleId={}", poLine.getId(), title.getId(), t));
+  }
+
+  public Future<PoLine> updateTitle(PoLine poLine, String instanceId, Conn conn) {
+    return getTitleByPoLineId(poLine.getId(), conn)
+      .compose(title -> updateInstanceIdForTitle(poLine, title, instanceId, conn))
+      .onSuccess(v -> log.debug("updateTitle:: Succeeded for poLineId={}, instanceId={}", poLine.getId(), instanceId))
+      .onFailure(t -> log.error("updateTitle:: Failed for poLineId={}, instanceId={}", poLine.getId(), instanceId, t));
   }
 
   public Future<String> saveTitle(Title title, Conn conn) {
