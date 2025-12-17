@@ -23,10 +23,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>35.4.0</raml-module-builder.version>
+    <raml-module-builder.version>36.0.0-SNAPSHOT</raml-module-builder.version>
 
     <!--Dependency Management Properties-->
-    <vertx.version>4.5.13</vertx.version>
+    <vertx.version>5.0.5</vertx.version>
     <lombok.version>1.18.36</lombok.version>
     <log4j.version>2.24.3</log4j.version>
 
@@ -42,7 +42,7 @@
     <folio-module-descriptor-validator.version>1.0.0</folio-module-descriptor-validator.version>
     <folio-di-support.version>3.0.0</folio-di-support.version>
     <folio-custom-fields.version>3.0.0-SNAPSHOT</folio-custom-fields.version>
-    <folio-kafka-wrapper.version>3.2.0</folio-kafka-wrapper.version>
+    <folio-kafka-wrapper.version>4.0.0-SNAPSHOT</folio-kafka-wrapper.version>
 
     <!--Maven plugin properties-->
     <aspectj-maven-plugin.version>1.14</aspectj-maven-plugin.version>
