@@ -3,7 +3,6 @@ package org.folio.services.inventory;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -51,8 +50,7 @@ public class InventoryUpdateService {
       updateResultNewInstanceId(getResults, newInstanceId);
       var batchPostRequestEntry = new RequestEntry(STORAGE_BATCH_HOLDING_URL.getPath()).withQueryParameter(UPSERT, TRUE);
       var payload = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray(getResults));
-      return restClient.post(batchPostRequestEntry, payload, ResponsePredicate.SC_CREATED, requestContext)
-        .mapEmpty();
+      return restClient.post(batchPostRequestEntry, payload, requestContext).mapEmpty();
     });
   }
 

@@ -189,7 +189,7 @@ public class PoLinesService {
     }
     Promise<List<PoLine>> promise = Promise.promise();
     List<String> uniqueIdList = poLineIds.stream().distinct().toList();
-    CompositeFuture.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ_15)
+    Future.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ_15)
                         .map(chunkIds -> getPoLinesByLineIds(chunkIds, conn))
                         .collect(toList()))
       .onComplete(ar -> {
@@ -439,8 +439,7 @@ public class PoLinesService {
       .filter(poLine -> !poLine.getIsPackage())
       .map(poLine -> updateTitle(conn, poLine, headers))
       .toList();
-    return GenericCompositeFuture.join(futures)
-      .mapEmpty();
+    return Future.join(futures).mapEmpty();
   }
 
   private Future<PoLine> updateTitle(Conn conn, Title title, PoLine poLine, Map<String, String> headers) {
