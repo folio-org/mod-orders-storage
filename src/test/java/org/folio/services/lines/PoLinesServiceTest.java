@@ -45,7 +45,6 @@ import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.SQLConnection;
-import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.interfaces.Results;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -418,7 +417,6 @@ public class PoLinesServiceTest {
     String poLineId = UUID.randomUUID().toString();
     PoLine poLine = new PoLine()
       .withId(poLineId);
-    Tx<PoLine> poLineTx = new Tx<>(poLine, pgClient);
 
     doReturn(pgClient)
       .when(dbClient).getPgClient();
@@ -428,7 +426,7 @@ public class PoLinesServiceTest {
       return null;
     }).when(pgClient).update(any(), anyString(), any(PoLine.class), anyString(), anyString(), anyBoolean(), any());
 
-    Future<Tx<PoLine>> f = poLinesService.updatePoLine(poLineTx, dbClient);
+    Future<PoLine> f = pgClient.withTrans(conn -> poLinesService.updatePoLine(poLine, conn));
 
     assertThat(f.failed(), is(true));
     io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();

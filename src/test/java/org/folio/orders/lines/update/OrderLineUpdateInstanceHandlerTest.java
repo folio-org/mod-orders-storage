@@ -209,10 +209,11 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         });
       });
 
-    testContext.assertComplete(promise2.future()
+    testContext.assertComplete(client.getPgClient()
+      .withTrans(conn -> promise2.future()
       .compose(v -> promise3.future())
-      .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
-      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+      .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, conn))
       .onComplete(ar -> {
         Title actTitle = ar.result();
         testContext.verify(() -> {
@@ -239,7 +240,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
           assertThat(actPoLine.getLocations().get(0).getHoldingId(), is(newHoldingId));
         });
         testContext.completeNow();
-      });
+      })));
   }
 
   @Test
@@ -356,10 +357,11 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         });
       });
 
-    testContext.assertComplete(promise2.future()
+    testContext.assertComplete(client.getPgClient()
+      .withTrans(conn -> promise2.future()
         .compose(v -> promise3.future())
-        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
-      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, conn))
       .onComplete(ar -> {
         Title actTitle = ar.result();
         testContext.verify(() -> {
@@ -386,7 +388,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
           assertThat(actPoLine.getLocations().get(0).getHoldingId(), is(holdingId));
         });
         testContext.completeNow();
-      });
+      })));
   }
 
   @Test
@@ -437,9 +439,10 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         }
       }));
 
-    testContext.assertComplete(promise2.future()
-        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
-      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+    testContext.assertComplete(client.getPgClient()
+      .withTrans(conn -> promise2.future()
+        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, conn))
       .onComplete(ar -> {
         Title actTitle = ar.result();
         testContext.verify(() -> {
@@ -456,7 +459,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
           assertThat(actPoLine.getInstanceId(), is(newInstanceId));
         });
         testContext.completeNow();
-      });
+      })));
   }
 
   @Test
@@ -550,10 +553,11 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         });
       });
 
-    testContext.assertComplete(promise2.future()
+    testContext.assertComplete(client.getPgClient()
+      .withTrans(conn -> promise2.future()
         .compose(v -> promise3.future())
-        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext)))
-      .compose(v -> titleService.getTitleByPoLineId(poLineId, client))
+        .compose(v -> orderLineUpdateInstanceHandler.handle(orderLineUpdateInstanceHolder, requestContext))
+      .compose(v -> titleService.getTitleByPoLineId(poLineId, conn))
       .onComplete(ar -> {
         Title actTitle = ar.result();
         testContext.verify(() -> {
@@ -580,7 +584,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
           assertThat(actPoLine.getLocations().get(0).getHoldingId(), is(newHoldingId));
         });
         testContext.completeNow();
-      });
+      })));
   }
 
    static class ContextConfiguration {
