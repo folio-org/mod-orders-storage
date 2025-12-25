@@ -102,10 +102,9 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
           .compose(orderId -> deleteOrderById(orderId, conn)))
         .onComplete(ar -> {
           if (ar.failed()) {
-            HttpException cause = (HttpException) ar.cause();
-            log.error("Delete order failed, id={}", id, cause);
+            log.error("Delete order failed, id={}", id, ar.cause());
             // The result of rollback operation is not so important, main failure cause is used to build the response
-            asyncResultHandler.handle(buildErrorResponse(cause));
+            asyncResultHandler.handle(buildErrorResponse(ar.cause()));
           } else {
             log.info("Order deletion complete, id={}", id);
             asyncResultHandler.handle(buildNoContentResponse());
