@@ -219,11 +219,7 @@ public class StorageTestSuite {
 
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
 
-    vertx.deployVerticle(RestVerticle.class.getName(), options)
-      .map(a -> {
-        log.info("test");
-        return a;
-      }).onComplete(ar -> {
+    vertx.deployVerticle(RestVerticle.class.getName(), options).onComplete(ar -> {
       if (ar.succeeded()) {
         deploymentComplete.complete(ar.result());
       } else {
