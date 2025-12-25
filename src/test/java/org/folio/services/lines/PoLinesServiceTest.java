@@ -45,7 +45,6 @@ import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.SQLConnection;
-import org.folio.rest.persist.Tx;
 import org.folio.rest.persist.interfaces.Results;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -341,26 +340,16 @@ public class PoLinesServiceTest {
       .when(requestContext).getContext();
     doReturn(pgClient)
       .when(dbClient).getPgClient();
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<SQLConnection>> handler = invocation.getArgument(0);
-      handler.handle(succeededFuture(null));
-      return null;
-    }).when(pgClient).startTx(any());
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<Void>> handler = invocation.getArgument(1);
-      handler.handle(succeededFuture());
-      return null;
-    }).when(pgClient).rollbackTx(any(), any());
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<RowSet<Row>>> handler = invocation.getArgument(3);
-      handler.handle(failedFuture(new Exception("unknown")));
-      return null;
-    }).when(pgClient).delete(any(), eq("pieces"), any(Criterion.class), any());
-
+    doAnswer((Answer<Future<Void>>) invocation -> {
+      Function<Conn, Future<Void>> function = invocation.getArgument(0);
+      return function.apply(conn);
+    }).when(pgClient).withTrans(any());
+    doAnswer((Answer<Future<RowSet<Row>>>) invocation -> failedFuture(new Exception("unknown")))
+      .when(conn).delete(eq("pieces"), any(Criterion.class));
     testContext.assertFailure(poLinesService.deleteById(poLineId, requestContext))
       .onComplete(ar -> {
         testContext.verify(() -> {
-          verify(pgClient, times(1)).delete(any(), anyString(), any(Criterion.class), any());
+          verify(conn, times(1)).delete(anyString(), any(Criterion.class));
           io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) ar.cause();
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
           assertThat(thrown.getPayload(), is("unknown"));
@@ -381,30 +370,23 @@ public class PoLinesServiceTest {
       .when(requestContext).getContext();
     doReturn(pgClient)
       .when(dbClient).getPgClient();
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<SQLConnection>> handler = invocation.getArgument(0);
-      handler.handle(succeededFuture(null));
-      return null;
-    }).when(pgClient).startTx(any());
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<Void>> handler = invocation.getArgument(1);
-      handler.handle(succeededFuture());
-      return null;
-    }).when(pgClient).rollbackTx(any(), any());
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<RowSet<Row>>> handler = invocation.getArgument(3);
-      String table = invocation.getArgument(1);
+    doAnswer((Answer<Future<Void>>) invocation -> {
+      Function<Conn, Future<Void>> function = invocation.getArgument(0);
+      return function.apply(conn);
+    }).when(pgClient).withTrans(any());
+    doAnswer((Answer<Future<RowSet<Row>>>) invocation -> {
+      String table = invocation.getArgument(0);
       if ("pieces".equals(table))
-        handler.handle(succeededFuture(rowSet));
+        return succeededFuture(rowSet);
       else if ("titles".equals(table))
-        handler.handle(failedFuture(new Exception("unknown")));
+        return failedFuture(new Exception("unknown"));
       return null;
-    }).when(pgClient).delete(any(), anyString(), any(Criterion.class), any());
+    }).when(conn).delete(anyString(), any(Criterion.class));
 
     testContext.assertFailure(poLinesService.deleteById(poLineId, requestContext))
       .onComplete(ar -> {
         testContext.verify(() -> {
-          verify(pgClient, times(2)).delete(any(), anyString(), any(Criterion.class), any());
+          verify(conn, times(2)).delete(anyString(), any(Criterion.class));
           io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) ar.cause();
           assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
           assertThat(thrown.getPayload(), is("unknown"));
@@ -418,22 +400,22 @@ public class PoLinesServiceTest {
     String poLineId = UUID.randomUUID().toString();
     PoLine poLine = new PoLine()
       .withId(poLineId);
-    Tx<PoLine> poLineTx = new Tx<>(poLine, pgClient);
 
     doReturn(pgClient)
       .when(dbClient).getPgClient();
-    doAnswer((Answer<Void>) invocation -> {
-      Handler<AsyncResult<PoLine>> handler = invocation.getArgument(6);
-      handler.handle(failedFuture(new Exception("unknown")));
-      return null;
-    }).when(pgClient).update(any(), anyString(), any(PoLine.class), anyString(), anyString(), anyBoolean(), any());
+    doAnswer((Answer<Future<Void>>) invocation -> {
+      Function<Conn, Future<Void>> function = invocation.getArgument(0);
+      return function.apply(conn);
+    }).when(pgClient).withTrans(any());
+    doAnswer((Answer<Future<RowSet<Row>>>) invocation -> failedFuture(new Exception("unknown")))
+      .when(conn).update(anyString(), any(PoLine.class), anyString(), anyString(), anyBoolean());
 
-    Future<Tx<PoLine>> f = poLinesService.updatePoLine(poLineTx, dbClient);
+    Future<PoLine> f = pgClient.withTrans(conn -> poLinesService.doUpdatePoLine(poLine, conn));
 
     assertThat(f.failed(), is(true));
     io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
     assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), thrown.getStatusCode());
-    verify(pgClient).update(any(), anyString(), any(PoLine.class), anyString(), anyString(), anyBoolean(), any());
+    verify(conn).update(anyString(), any(PoLine.class), anyString(), anyString(), anyBoolean());
   }
 
   @Test

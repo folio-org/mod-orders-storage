@@ -27,7 +27,6 @@ import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.Tx;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -209,13 +208,11 @@ public class PieceServiceTest extends TestBase {
       .withNewInstanceId(newInstanceId)
       .withHoldings(List.of(holding));
 
-    Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
 
     var poLinePieceFuture = createPoLineAndPiece(poLine, piece, client);
 
-    testContext.assertComplete(tx.startTx()
-      .compose(poLineTx -> poLinePieceFuture.compose(o -> pieceService.updatePieces(poLineTx, replaceInstanceRef, client)))
-      .compose(Tx::endTx)
+    testContext.assertComplete(client.getPgClient()
+      .withTrans(conn -> poLinePieceFuture.compose(o -> pieceService.updatePieces(poLine, replaceInstanceRef, conn, TEST_TENANT)))
       .onComplete(v -> pieceService.getPiecesByPoLineId(poLineId, client)
         .onComplete(ar -> {
           List<Piece> actPieces = ar.result();

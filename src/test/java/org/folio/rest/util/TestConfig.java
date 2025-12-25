@@ -44,7 +44,7 @@ public final class TestConfig {
 
     final DeploymentOptions opt = new DeploymentOptions().setConfig(conf);
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
-    vertx.deployVerticle(RestVerticle.class.getName(), opt, ar -> {
+    vertx.deployVerticle(RestVerticle.class.getName(), opt).onComplete(ar -> {
       if (ar.succeeded()) {
         deploymentComplete.complete(ar.result());
       } else {
@@ -80,8 +80,9 @@ public final class TestConfig {
   }
 
   private static Context getFirstContextFromVertx(Vertx vertx) {
-    return vertx.deploymentIDs().stream().flatMap((id) -> ((VertxImpl)vertx)
-      .getDeployment(id).getVerticles().stream())
+    return vertx.deploymentIDs().stream()
+      .flatMap(id -> ((VertxImpl)vertx).deploymentManager().deployment(id).deployment().instances().stream())
+      .map(Verticle.class::cast)
       .map(TestConfig::getContextWithReflection)
       .filter(Objects::nonNull)
       .findFirst()

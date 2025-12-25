@@ -25,7 +25,6 @@ import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleSequenceNumbers;
 import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.Tx;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -78,8 +77,6 @@ public class TitleServiceTest extends TestBase {
       .withPoLineId(poLineId)
       .withInstanceId(instanceId);
 
-    Tx<PoLine> tx = new Tx<>(poLine, client.getPgClient());
-
     client.getPgClient().save(PO_LINE_TABLE, poLineId, poLine, event -> {
       promise1.complete();
       log.info("PoLine was saved");
@@ -96,13 +93,9 @@ public class TitleServiceTest extends TestBase {
       });
     });
 
-    testContext.assertComplete(
-      tx.startTx()
-        .compose(poLineTx ->
-          promise2.future()
-          .compose(o -> titleService.updateTitle(poLineTx, newInstanceId, client)))
-        .compose(Tx::endTx)
-        .onComplete(v -> titleService.getTitleByPoLineId(poLineId, client)
+    testContext.assertComplete(client.getPgClient()
+      .withTrans(conn -> promise2.future().compose(o -> titleService.updateTitle(poLine, newInstanceId, conn))
+        .onComplete(v -> titleService.getTitleByPoLineId(poLineId, conn)
           .onComplete(ar -> {
             Title actTitle = ar.result();
             testContext.verify(() -> {
@@ -110,7 +103,7 @@ public class TitleServiceTest extends TestBase {
               assertThat(actTitle.getInstanceId(), is(newInstanceId));
             });
             testContext.completeNow();
-          })));
+          }))));
   }
 
   @Test
@@ -146,8 +139,9 @@ public class TitleServiceTest extends TestBase {
       });
     });
 
-    testContext.assertComplete(promise2.future()
-        .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
+    testContext.assertComplete(client.getPgClient()
+        .withTrans(conn -> promise2.future()
+          .compose(o -> titleService.getTitleByPoLineId(poLineId, conn))))
       .onComplete(ar -> {
         Title actTitle = ar.result();
         testContext.verify(() -> {
@@ -203,8 +197,9 @@ public class TitleServiceTest extends TestBase {
         }
       })));
 
-    testContext.assertComplete(saveTitlePromise.future()
-        .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
+    testContext.assertComplete(client.getPgClient()
+        .withTrans(conn -> saveTitlePromise.future()
+          .compose(o -> titleService.getTitleByPoLineId(poLineId, conn))))
       .onComplete(ar -> {
         Title actTitle = ar.result();
         testContext.verify(() -> assertEquals(actTitle.getPackageName(), poLine.getTitleOrPackage()));
@@ -261,8 +256,9 @@ public class TitleServiceTest extends TestBase {
         }
       })));
 
-    testContext.assertComplete(saveTitlePromise.future()
-        .compose(o -> titleService.getTitleByPoLineId(poLineId, client)))
+    testContext.assertComplete(client.getPgClient()
+        .withTrans(conn -> saveTitlePromise.future()
+          .compose(o -> titleService.getTitleByPoLineId(poLineId, conn))))
       .onComplete(ar -> {
         Title actTitle = ar.result();
         testContext.verify(() -> assertEquals(actTitle.getPackageName(), poLine.getTitleOrPackage()));
@@ -307,8 +303,9 @@ public class TitleServiceTest extends TestBase {
       });
     });
 
-    testContext.assertFailure(promise2.future()
-      .compose(o -> titleService.getTitleByPoLineId(incorrectPoLineId, client)))
+    testContext.assertFailure(client.getPgClient()
+        .withTrans(conn -> promise2.future()
+          .compose(o -> titleService.getTitleByPoLineId(incorrectPoLineId, conn))))
       .onFailure(event -> {
         String exception = String.format("Title with poLineId=%s was not found", incorrectPoLineId);
         testContext.verify(() -> {
@@ -385,7 +382,7 @@ public class TitleServiceTest extends TestBase {
         });
 
         // Verify that the title's nextSequenceNumber was updated
-        titleService.getTitleByPoLineId(poLineId, client)
+        client.getPgClient().withTrans(conn -> titleService.getTitleByPoLineId(poLineId, conn))
           .onComplete(titleAr -> {
             Title updatedTitle = titleAr.result();
             testContext.verify(() -> {

@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
@@ -62,7 +61,7 @@ public class AuditOutboxService {
 
         log.info("Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
         List<Future<Boolean>> futures = getKafkaFutures(logs, okapiHeaders);
-        return GenericCompositeFuture.join(futures)
+        return Future.join(futures)
           .map(logs.stream().map(OutboxEventLog::getEventId).collect(Collectors.toList()))
           .compose(eventIds -> {
             if (CollectionUtils.isNotEmpty(eventIds)) {
@@ -136,7 +135,7 @@ public class AuditOutboxService {
       .map(poLine -> saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, poLine.getId(), poLine))
       .toList();
 
-    return GenericCompositeFuture.join(futures)
+    return Future.join(futures)
       .map(res -> true)
       .otherwise(t -> false);
   }
@@ -158,7 +157,7 @@ public class AuditOutboxService {
       .map(piece -> savePieceOutboxLog(conn, piece, action, okapiHeaders))
       .toList();
 
-    return GenericCompositeFuture.join(futures)
+    return Future.join(futures)
       .map(res -> true)
       .otherwise(t -> false);
   }

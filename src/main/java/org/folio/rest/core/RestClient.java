@@ -7,15 +7,16 @@ import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.http.HttpResponseExpectation;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.okapi.common.WebClientFactory;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.core.models.RequestEntry;
+import org.folio.rest.exceptions.HttpException;
 
 public class RestClient {
 
@@ -38,8 +39,8 @@ public class RestClient {
       var caseInsensitiveHeader = convertToCaseInsensitiveMultiMap(requestContext.getHeaders());
       return webClient.getAbs(buildAbsEndpoint(endpoint, caseInsensitiveHeader))
         .putHeaders(caseInsensitiveHeader)
-        .expect(ResponsePredicate.SC_OK)
         .send()
+        .compose(RestClient::convertHttpResponse)
         .map(HttpResponse::bodyAsJsonObject)
         .onFailure(e -> logResponseOnFailure(httpMethod, endpoint, e));
     } catch (Exception e) {
@@ -48,18 +49,18 @@ public class RestClient {
     }
   }
 
-  public Future<JsonObject> post(RequestEntry requestEntry, JsonObject payload, ResponsePredicate expect, RequestContext requestContext) {
-    return post(requestEntry.buildEndpoint(), payload, expect, requestContext);
+  public Future<JsonObject> post(RequestEntry requestEntry, JsonObject payload, RequestContext requestContext) {
+    return post(requestEntry.buildEndpoint(), payload, requestContext);
   }
 
-  private Future<JsonObject> post(String endpoint, JsonObject payload, ResponsePredicate expect, RequestContext requestContext) {
+  private Future<JsonObject> post(String endpoint, JsonObject payload, RequestContext requestContext) {
     var httpMethod = HttpMethod.POST;
     try {
       var caseInsensitiveHeader = convertToCaseInsensitiveMultiMap(requestContext.getHeaders());
       return webClient.postAbs(buildAbsEndpoint(endpoint, caseInsensitiveHeader))
         .putHeaders(caseInsensitiveHeader)
-        .expect(expect)
         .sendJson(payload)
+        .compose(RestClient::convertHttpResponse)
         .map(HttpResponse::bodyAsJsonObject)
         .onFailure(e -> logResponseOnFailure(httpMethod, endpoint, e));
     } catch (Exception e) {
@@ -72,8 +73,15 @@ public class RestClient {
     logger.error(EXCEPTION_CALLING_ENDPOINT_MSG, httpMethod, endpoint, e.getMessage());
   }
 
-  private String buildAbsEndpoint(String endpoint, MultiMap okapiHeaders) {
+  private static String buildAbsEndpoint(String endpoint, MultiMap okapiHeaders) {
     var okapiURL = okapiHeaders.get(OKAPI_URL.getValue());
     return okapiURL + endpoint;
   }
+
+  private static <T> Future<HttpResponse<T>> convertHttpResponse(HttpResponse<T> response) {
+    return HttpResponseExpectation.SC_SUCCESS.test(response)
+      ? Future.succeededFuture(response)
+      : Future.failedFuture(new HttpException(response.statusCode(), response.bodyAsString()));
+  }
+
 }

@@ -67,13 +67,13 @@ public class InventoryUpdateServiceTest {
     var holdingIds = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
     when(holdingsService.getHoldingsByIds(any(), any())).thenReturn(Future.succeededFuture(holdingRecordsJsonObjects));
-    when(restClient.post(any(), any(), any(), any())).thenReturn(Future.succeededFuture());
+    when(restClient.post(any(), any(), any())).thenReturn(Future.succeededFuture());
 
     var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds, requestContext);
 
     assertDoesNotThrow(result::result);
     verify(holdingsService, times(1)).getHoldingsByIds(any(), any());
-    verify(restClient, times(1)).post(any(), any(), any(), any());
+    verify(restClient, times(1)).post(any(), any(), any());
   }
 
   @Test

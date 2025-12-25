@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -45,9 +44,7 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.QueryHolder;
-import org.folio.rest.persist.Tx;
 
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -93,27 +90,13 @@ public class PoLinesService {
   }
 
   public Future<Void> deleteById(String id, RequestContext requestContext) {
-    DBClient client = requestContext.toDBClient();
-    Promise<Void> promise = Promise.promise();
-    Tx<String> tx = new Tx<>(id, client.getPgClient());
-    requestContext.getContext().runOnContext(v -> {
-      log.info("Delete po line, id={}", id);
-      tx.startTx()
-        .compose(result -> deletePiecesByPOLineId(result, client))
-        .compose(result -> deleteTitleById(result, client))
-        .compose(result -> deletePOLineById(result, client))
-        .compose(Tx::endTx)
-        .onComplete(ar -> {
-          if (ar.failed()) {
-            log.error("Delete po line failed, rolling back, id={}", id, ar.cause());
-            tx.rollbackTransaction().onComplete(res -> promise.fail(ar.cause()));
-          } else {
-            log.debug("Po line deleteById complete, id={}", id);
-            promise.complete(null);
-          }
-        });
-      });
-    return promise.future();
+    log.info("deleteById:: Deleting POL by id: {}", id);
+    return requestContext.toDBClient().getPgClient()
+      .withTrans(conn -> deletePiecesByPOLineId(id, conn)
+        .compose(v -> deleteTitleById(id, conn))
+        .compose(v -> deletePOLineById(id, conn)))
+      .onSuccess(v -> log.debug("deleteById:: Complete, id: {}", id))
+      .onFailure(t -> log.error("deleteById:: Failed, id: {}", id, t));
   }
 
   public Future<Void> updatePoLineWithTitle(Conn conn, String id, PoLine poLine, RequestContext requestContext) {
@@ -121,7 +104,7 @@ public class PoLinesService {
     Promise<Void> promise = Promise.promise();
     poLine.setId(id);
 
-    updatePoLine(conn, poLine)
+    updatePoLine(poLine, conn)
         .compose(line -> updateTitle(conn, line, requestContext.getHeaders()))
         .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders))
         .onComplete(ar -> {
@@ -189,7 +172,7 @@ public class PoLinesService {
     }
     Promise<List<PoLine>> promise = Promise.promise();
     List<String> uniqueIdList = poLineIds.stream().distinct().toList();
-    CompositeFuture.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ_15)
+    Future.all(StreamEx.ofSubLists(uniqueIdList, MAX_IDS_FOR_GET_RQ_15)
                         .map(chunkIds -> getPoLinesByLineIds(chunkIds, conn))
                         .collect(toList()))
       .onComplete(ar -> {
@@ -318,9 +301,9 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<Tx<PoLine>> updateInstanceIdForPoLine(Tx<PoLine> poLineTx, JsonObject instance, DBClient client) {
-    updateInstanceFieldsForPoLine(poLineTx.getEntity(), instance);
-    return updatePoLine(poLineTx, client);
+  public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn) {
+    updateInstanceFieldsForPoLine(poLine, instance);
+    return doUpdatePoLine(poLine, conn);
   }
 
   public PoLine updateInstanceFieldsForPoLine(PoLine poLine, JsonObject instance) {
@@ -352,68 +335,33 @@ public class PoLinesService {
       });
   }
 
-  private Future<Tx<String>> deleteTitleById(Tx<String> tx, DBClient client) {
-    log.info("Delete title by POLine id={}", tx.getEntity());
-
-    Promise<Tx<String>> promise = Promise.promise();
-    Criterion criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, tx.getEntity());
-    client.getPgClient().delete(tx.getConnection(), TITLES_TABLE, criterion, ar -> {
-      if (ar.failed()) {
-        log.error("Delete title failed, criterion={}", criterion, ar.cause());
-        httpHandleFailure(promise, ar);
-      } else {
-        log.info("{} title(s) of POLine with id={} successfully deleted", ar.result().rowCount(), tx.getEntity());
-        promise.complete(tx);
-      }
-    });
-    return promise.future();
+  private Future<Void> deleteTitleById(String poLineId, Conn conn) {
+    log.info("deleteTitleById:: Delete title by POLine id={}", poLineId);
+    var criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, poLineId);
+    return conn.delete(TITLES_TABLE, criterion)
+      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
+      .onSuccess(rows -> log.info("deleteTitleById:: {} title(s) of POLine with id={} successfully deleted", rows.rowCount(), poLineId))
+      .onFailure(t -> log.error("deleteTitleById:: Failed to delete title with criterion={}, poLineId={}", criterion, poLineId, t))
+      .mapEmpty();
   }
 
-  public Future<Tx<PoLine>> updatePoLine(Tx<PoLine> poLineTx, DBClient client) {
-    Promise<Tx<PoLine>> promise = Promise.promise();
-    PoLine poLine = poLineTx.getEntity();
-
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
-    client.getPgClient().update(poLineTx.getConnection(), PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true, ar -> {
-      if (ar.failed()) {
-        log.error("updatePoLine(poLineTx, client) failed", ar.cause());
-        httpHandleFailure(promise, ar);
-      } else {
-        if (ar.result().rowCount() == 0) {
-          log.error("updatePoLine(poLineTx, client): no line was updated");
-          promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
-        } else {
-          log.info("updatePoLine(poLineTx, client) complete, poLineId={}", poLineTx.getEntity().getId());
-          promise.complete(poLineTx);
-        }
-      }
-    });
-    return promise.future();
-  }
-
-  public Future<PoLine> updatePoLine(Conn conn, PoLine poLine) {
+  public Future<PoLine> updatePoLine(PoLine poLine, Conn conn) {
     if (poLine.getPurchaseOrderId() == null) {
       log.error("Can't update po line: missing purchaseOrderId");
       return Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "Can't update po line: missing purchaseOrderId"));
     }
-    Promise<PoLine> promise = Promise.promise();
-    Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
-    conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
-      .onComplete(ar -> {
-        if (ar.failed()) {
-          log.error("updatePoLine(conn, poLine) failed", ar.cause());
-          httpHandleFailure(promise, ar);
-        } else {
-          if (ar.result().rowCount() == 0) {
-            log.error("updatePoLine(conn, poLine): no line was updated");
-            promise.fail(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
-          } else {
-            log.info("updatePoLine(conn, poLine) complete, poLineId={}", poLine.getId());
-            promise.complete(poLine);
-          }
-        }
-      });
-    return promise.future();
+    return doUpdatePoLine(poLine, conn);
+  }
+
+  public Future<PoLine> doUpdatePoLine(PoLine poLine, Conn conn) {
+    var criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
+    return conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
+      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
+      .compose(rows -> rows.rowCount() == 0
+        ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
+        : Future.succeededFuture(poLine))
+      .onSuccess(v -> log.info("updatePoLine:: Complete, poLineId={}", poLine.getId()))
+      .onComplete(t -> log.error("updatePoLine:: Failed, poLineId={}", poLine.getId(), t.cause()));
   }
 
   private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine, List<String> acqUnitIds, Map<String, String> headers) {
@@ -439,8 +387,7 @@ public class PoLinesService {
       .filter(poLine -> !poLine.getIsPackage())
       .map(poLine -> updateTitle(conn, poLine, headers))
       .toList();
-    return GenericCompositeFuture.join(futures)
-      .mapEmpty();
+    return Future.join(futures).mapEmpty();
   }
 
   private Future<PoLine> updateTitle(Conn conn, Title title, PoLine poLine, Map<String, String> headers) {
@@ -465,27 +412,22 @@ public class PoLinesService {
     return promise.future();
   }
 
-  private Future<Tx<String>> deletePiecesByPOLineId(Tx<String> tx, DBClient client) {
-    log.info("Delete pieces by POLine id={}", tx.getEntity());
-
-    Promise<Tx<String>> promise = Promise.promise();
-    Criterion criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, tx.getEntity());
-
-    client.getPgClient().delete(tx.getConnection(), PIECES_TABLE, criterion, ar -> {
-      if (ar.failed()) {
-        log.error("Delete Pieces failed, criterion={}", criterion, ar.cause());
-        httpHandleFailure(promise, ar);
-      } else {
-        log.info("{} pieces of POLine with id={} successfully deleted", ar.result().rowCount(), tx.getEntity());
-        promise.complete(tx);
-      }
-    });
-    return promise.future();
+  private Future<Void> deletePiecesByPOLineId(String poLineId, Conn conn) {
+    log.info("deletePiecesByPOLineId:: Delete pieces by POLine id={}", poLineId);
+    var criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, poLineId);
+    return conn.delete(PIECES_TABLE, criterion)
+      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
+      .onSuccess(rows -> log.info("deletePiecesByPOLineId:: {} pieces of POLine with id={} successfully deleted", rows.rowCount(), poLineId))
+      .onFailure(t -> log.error("deletePiecesByPOLineId:: Failed to delete pieces with criterion={}, poLineId={}", criterion, poLineId, t))
+      .mapEmpty();
   }
 
-  private Future<Tx<String>> deletePOLineById(Tx<String> tx, DBClient client) {
-    log.info("Delete POLine with id={}", tx.getEntity());
-    return client.deleteById(tx, PO_LINE_TABLE);
+  private Future<Void> deletePOLineById(String poLineId, Conn conn) {
+    log.info("deletePOLineById:: Delete POLine with id={}", poLineId);
+    return conn.delete(PO_LINE_TABLE, poLineId)
+      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
+      .compose(DbUtils::ensureRowModifications)
+      .mapEmpty();
   }
 
   @SneakyThrows
