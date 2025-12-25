@@ -303,7 +303,7 @@ public class PoLinesService {
 
   public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn) {
     updateInstanceFieldsForPoLine(poLine, instance);
-    return updatePoLine(poLine, conn);
+    return doUpdatePoLine(poLine, conn);
   }
 
   public PoLine updateInstanceFieldsForPoLine(PoLine poLine, JsonObject instance) {
@@ -339,7 +339,7 @@ public class PoLinesService {
     log.info("deleteTitleById:: Delete title by POLine id={}", poLineId);
     var criterion = getCriterionByFieldNameAndValue(PO_LINE_ID, poLineId);
     return conn.delete(TITLES_TABLE, criterion)
-      .recover(rows -> Future.failedFuture(httpHandleFailure(rows)))
+      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
       .onSuccess(rows -> log.info("deleteTitleById:: {} title(s) of POLine with id={} successfully deleted", rows.rowCount(), poLineId))
       .onFailure(t -> log.error("deleteTitleById:: Failed to delete title with criterion={}, poLineId={}", criterion, poLineId, t))
       .mapEmpty();
@@ -350,6 +350,10 @@ public class PoLinesService {
       log.error("Can't update po line: missing purchaseOrderId");
       return Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "Can't update po line: missing purchaseOrderId"));
     }
+    return doUpdatePoLine(poLine, conn);
+  }
+
+  public Future<PoLine> doUpdatePoLine(PoLine poLine, Conn conn) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     return conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
       .recover(t -> Future.failedFuture(httpHandleFailure(t)))

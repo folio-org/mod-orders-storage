@@ -53,7 +53,7 @@ public class TitleService {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
     title.setInstanceId(instanceId);
     return conn.update(TITLES_TABLE, title, JSONB, criterion.toString(), false)
-      .map(rows -> DbUtils.getRowSetAsEntity(rows, PoLine.class))
+      .map(poLine)
       .recover(t -> Future.failedFuture(httpHandleFailure(t)))
       .onSuccess(v -> log.info("InstanceId in Title record {} was successfully updated", title.getId()))
       .onFailure(t -> log.error("updateInstanceIdForTitle failed, poLineId={}, titleId={}", poLine.getId(), title.getId(), t));

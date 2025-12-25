@@ -25,6 +25,7 @@ import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.spring.SpringContextUtil;
+import org.folio.util.DbUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
@@ -195,7 +196,9 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
 
   private Future<Void> deleteOrderById(String orderId, Conn conn) {
     log.info("deleteOrderById:: Delete PO with id={}", orderId);
-    return conn.delete(TableNames.PURCHASE_ORDER_TABLE, orderId).mapEmpty();
+    return conn.delete(TableNames.PURCHASE_ORDER_TABLE, orderId)
+      .compose(DbUtils::ensureRowModifications)
+      .mapEmpty();
   }
 
   @Override

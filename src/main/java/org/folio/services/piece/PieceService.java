@@ -133,17 +133,17 @@ public class PieceService {
       .onFailure(e -> log.error("updatePiece:: Update piece failed: '{}'", id, e));
   }
 
-  private Future<PoLine> updatePieces(PoLine poLine, List<Piece> pieces, Conn conn, String tenantId) {
+  private Future<Void> updatePieces(PoLine poLine, List<Piece> pieces, Conn conn, String tenantId) {
     var poLineId = poLine.getId();
     if (CollectionUtils.isEmpty(pieces)) {
       log.info(PIECE_NOT_UPDATED, poLineId);
       return Future.succeededFuture();
     }
     return conn.execute(buildUpdatePieceBatchQuery(pieces, tenantId))
-      .map(rows -> DbUtils.getRowSetAsEntity(rows, PoLine.class))
       .recover(t -> Future.failedFuture(httpHandleFailure(t)))
       .onSuccess(v -> log.info("updatePieces complete, poLineId={}", poLineId))
-      .onFailure(t -> log.error("updatePieces failed, poLineId={}", poLineId, t));
+      .onFailure(t -> log.error("updatePieces failed, poLineId={}", poLineId, t))
+      .mapEmpty();
   }
 
   public Future<List<Piece>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
@@ -201,7 +201,7 @@ public class PieceService {
       .onFailure(e -> log.error("updateSinglePieceInventoryFields:: Failed to update piece: {}", piece.getId(), e));
   }
 
-  public Future<PoLine> updatePieces(PoLine poLine, ReplaceInstanceRef replaceInstanceRef, Conn conn, String tenantId) {
+  public Future<Void> updatePieces(PoLine poLine, ReplaceInstanceRef replaceInstanceRef, Conn conn, String tenantId) {
     return getPiecesByPoLineId(poLine.getId(), conn)
       .compose(pieces -> updateHoldingForPieces(poLine, pieces, replaceInstanceRef, conn, tenantId))
       .onComplete(ar -> {
@@ -215,10 +215,10 @@ public class PieceService {
       });
   }
 
-  private Future<PoLine> updateHoldingForPieces(PoLine poLine, List<Piece> pieces, ReplaceInstanceRef replaceInstanceRef, Conn conn, String tenantId) {
+  private Future<Void> updateHoldingForPieces(PoLine poLine, List<Piece> pieces, ReplaceInstanceRef replaceInstanceRef, Conn conn, String tenantId) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.info(PIECE_NOT_UPDATED, poLine.getId());
-      return Future.succeededFuture(poLine);
+      return Future.succeededFuture();
     }
 
     var updatedPieces = replaceInstanceRef.getHoldings().stream()
