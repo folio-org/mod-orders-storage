@@ -120,7 +120,6 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
     log.info("deleteOrderInvoicesRelation:: Delete order->invoices relations with id={}", orderId);
     var cqlWrapper = new CQLWrapper().setWhereClause(ORDER_ID_WHERE_CLAUSE.formatted(orderId));
     return conn.delete(TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper)
-      .recover(t -> Future.succeededFuture())
       .map(orderId);
   }
 
