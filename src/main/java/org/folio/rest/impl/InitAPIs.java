@@ -1,6 +1,5 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 
 import java.util.List;
@@ -9,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.config.ApplicationConfig;
 import org.folio.dbschema.ObjectMapperTool;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.resource.interfaces.InitAPI;
 import org.folio.spring.SpringContextUtil;
 import org.folio.verticles.EdiExportOrdersHistoryConsumersVerticle;
@@ -70,29 +68,27 @@ public class InitAPIs implements InitAPI {
   // TODO: Refactor the InitAPI interface to git rid of deprecated methods
   @Override
   public void init(Vertx vertx, Context context, Handler<AsyncResult<Boolean>> resultHandler) {
-    vertx.executeBlocking(
-      handler -> {
-        initDatabindCodec();
-        initSpringContext(vertx, context);
-        initKafkaConsumersVerticles(vertx, handler);
-      },
-      ar -> {
-        if (ar.succeeded()) {
-          resultHandler.handle(Future.succeededFuture(true));
-        } else {
-          log.error("Failure to init API", ar.cause());
-          resultHandler.handle(Future.failedFuture(ar.cause()));
-        }
-      });
+    vertx.executeBlocking(() -> {
+      initDatabindCodec();
+      initSpringContext(vertx, context);
+      initKafkaConsumersVerticles(vertx)
+        .onComplete(ar -> {
+          if (ar.succeeded()) {
+            resultHandler.handle(Future.succeededFuture(true));
+          } else {
+            log.error("Failure to init API", ar.cause());
+            resultHandler.handle(Future.failedFuture(ar.cause()));
+          }
+        });
+      return true;
+    });
   }
 
   private void initDatabindCodec() {
     var serializationConfig = ObjectMapperTool.getMapper().getSerializationConfig();
     var deserializationConfig = ObjectMapperTool.getMapper().getDeserializationConfig();
     DatabindCodec.mapper().setConfig(serializationConfig);
-    DatabindCodec.prettyMapper().setConfig(serializationConfig);
     DatabindCodec.mapper().setConfig(deserializationConfig);
-    DatabindCodec.prettyMapper().setConfig(deserializationConfig);
     log.info("initDatabindCodec:: Data bind codec was successfully started");
   }
 
@@ -102,14 +98,11 @@ public class InitAPIs implements InitAPI {
     log.info("initSpringContext:: Spring context was successfully started");
   }
 
-  private void initKafkaConsumersVerticles(Vertx vertx, Promise<Object> handler) {
-    deployKafkaConsumersVerticles(vertx).onComplete(ar -> {
-      if (ar.failed() && isConsumersVerticleMandatory) {
-        handler.fail(ar.cause());
-      } else {
-        handler.complete();
-      }
-    });
+  private Future<?> initKafkaConsumersVerticles(Vertx vertx) {
+    return deployKafkaConsumersVerticles(vertx)
+      .recover(ar -> isConsumersVerticleMandatory
+        ? Future.failedFuture(ar)
+        : Future.succeededFuture());
   }
 
   private Future<?> deployKafkaConsumersVerticles(Vertx vertx) {
@@ -121,7 +114,7 @@ public class InitAPIs implements InitAPI {
       deployVerticle(INVENTORY_HOLDING_UPDATE_CONSUMERS, holdingUpdateConsumerVerticleNumber, holdingUpdateConsumerPoolSize, InventoryHoldingUpdateConsumersVerticle.class, vertx, springContext),
       deployVerticle(EDI_EXPORT_ORDERS_HISTORY_CONSUMERS, ediExportConsumerVerticleNumber, ediExportConsumerPoolSize, EdiExportOrdersHistoryConsumersVerticle.class, vertx, springContext)
     );
-    return GenericCompositeFuture.all(consumers)
+    return Future.all(consumers)
       .onSuccess(future -> log.info("deployKafkaConsumersVerticles:: All {} consumer(s) was successfully started", consumers.size()))
       .onFailure(exception -> log.error("Failed to start consumers", exception));
   }

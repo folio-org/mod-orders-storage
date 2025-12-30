@@ -86,6 +86,7 @@ import io.restassured.http.Header;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Context;
 import io.vertx.core.DeploymentOptions;
+import io.vertx.core.ThreadingModel;
 import io.vertx.core.Verticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.VertxImpl;
@@ -132,8 +133,9 @@ public class StorageTestSuite {
   }
 
   private static Context getFirstContextFromVertx(Vertx vertx) {
-    return vertx.deploymentIDs().stream().flatMap((id) -> ((VertxImpl)vertx)
-      .getDeployment(id).getVerticles().stream())
+    return vertx.deploymentIDs().stream()
+      .flatMap(id -> ((VertxImpl)vertx).deploymentManager().deployment(id).deployment().instances().stream())
+      .map(Verticle.class::cast)
       .map(StorageTestSuite::getContextWithReflection)
       .filter(Objects::nonNull)
       .findFirst()
@@ -182,7 +184,7 @@ public class StorageTestSuite {
     DeploymentOptions options = new DeploymentOptions();
 
     options.setConfig(new JsonObject().put("http.port", port).put(HttpClientMock2.MOCK_MODE, "true"));
-    options.setWorker(true);
+    options.setThreadingModel(ThreadingModel.WORKER);
 
     startVerticle(options);
 
@@ -197,11 +199,10 @@ public class StorageTestSuite {
 
     CompletableFuture<String> undeploymentComplete = new CompletableFuture<>();
 
-    vertx.close(ar -> {
+    vertx.close().onComplete(ar -> {
       if (ar.succeeded()) {
         undeploymentComplete.complete(null);
-      }
-      else {
+      } else {
         undeploymentComplete.completeExceptionally(ar.cause());
       }
     });
@@ -218,7 +219,7 @@ public class StorageTestSuite {
 
     CompletableFuture<String> deploymentComplete = new CompletableFuture<>();
 
-    vertx.deployVerticle(RestVerticle.class.getName(), options, ar -> {
+    vertx.deployVerticle(RestVerticle.class.getName(), options).onComplete(ar -> {
       if (ar.succeeded()) {
         deploymentComplete.complete(ar.result());
       } else {

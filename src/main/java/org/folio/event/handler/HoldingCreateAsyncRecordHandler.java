@@ -12,7 +12,6 @@ import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
@@ -61,7 +60,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
         var updatedHeaders = HeaderUtils.prepareHeaderForTenant(centralTenantId, headers);
         var poLineFuture = processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
         var pieceFuture = processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
-        return GenericCompositeFuture.all(List.of(poLineFuture, pieceFuture)).mapEmpty();
+        return Future.all(List.of(poLineFuture, pieceFuture)).mapEmpty();
       })
       .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();

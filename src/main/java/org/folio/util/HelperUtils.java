@@ -11,7 +11,6 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import lombok.experimental.UtilityClass;
 import one.util.streamex.StreamEx;
-import org.folio.okapi.common.GenericCompositeFuture;
 
 @UtilityClass
 public class HelperUtils {
@@ -26,7 +25,7 @@ public class HelperUtils {
    * @return resulting objects
    */
   public static <T> Future<List<T>> collectResultsOnSuccess(Collection<Future<T>> futures) {
-    return GenericCompositeFuture.join(new ArrayList<>(futures))
+    return Future.join(new ArrayList<>(futures))
       .map(CompositeFuture::list);
   }
 
