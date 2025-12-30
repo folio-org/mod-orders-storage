@@ -32,7 +32,7 @@
 
     <!--Dependency properties-->
     <streamx.version>0.8.3</streamx.version>
-    <rest-assured.version>5.5.1</rest-assured.version>
+    <rest-assured.version>6.0.0</rest-assured.version>
     <aspectj.version>1.9.22.1</aspectj.version>
     <common-lang.version>2.6</common-lang.version>
     <jackson-bom.version>2.18.2</jackson-bom.version>
@@ -57,10 +57,10 @@
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
 
     <!--Test Scope dependencies-->
-    <junit-jupiter.version>5.12.0</junit-jupiter.version>
+    <junit-jupiter.version>6.0.1</junit-jupiter.version>
     <testcontainers-bom.version>1.20.5</testcontainers-bom.version>
-    <mockito.version>5.15.2</mockito.version>
-    <jmockit.version>1.49</jmockit.version>
+    <mockito.version>5.21.0</mockito.version>
+    <jmockit.version>1.50</jmockit.version>
 
     <!--Sonar properties-->
     <sonar.exclusions>**/models/**.java, **/event/dto/**.java, **/HttpException.java, **/ErrorCodes.java</sonar.exclusions>
