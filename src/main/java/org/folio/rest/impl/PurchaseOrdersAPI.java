@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
+import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
 
 import java.util.Map;
 import java.util.UUID;
@@ -23,7 +24,6 @@ import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.HelperUtils;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.cql.CQLWrapper;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.DbUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ import io.vertx.ext.web.handler.HttpException;
 public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseOrders {
 
   private static final Logger log = LogManager.getLogger();
-  private static final String ORDER_ID_WHERE_CLAUSE = "WHERE jsonb ->> 'purchaseOrderId' = '%s'";
+  private static final String PURCHASE_ORDER_ID_COLUMN = "purchaseOrderId";
 
   private final PostgresClient pgClient;
 
@@ -100,7 +100,7 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
     try {
       new DBClient(vertxContext, okapiHeaders).getPgClient()
         .withTrans(conn -> deleteOrderInvoicesRelation(id, conn)
-          .compose(orderId -> deleteOrderById(orderId, conn)))
+          .compose(v -> deleteOrderById(id, conn)))
         .onComplete(ar -> {
           if (ar.failed()) {
             log.error("Delete order failed, id={}", id, ar.cause());
@@ -116,11 +116,10 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
     }
   }
 
-  private Future<String> deleteOrderInvoicesRelation(String orderId, Conn conn) {
+  private Future<Void> deleteOrderInvoicesRelation(String orderId, Conn conn) {
     log.info("deleteOrderInvoicesRelation:: Delete order->invoices relations with id={}", orderId);
-    var cqlWrapper = new CQLWrapper().setWhereClause(ORDER_ID_WHERE_CLAUSE.formatted(orderId));
-    return conn.delete(TableNames.ORDER_INVOICE_RELNS_TABLE, cqlWrapper)
-      .map(orderId);
+    var criterion = getCriteriaByFieldNameAndValueNotJsonb(PURCHASE_ORDER_ID_COLUMN, orderId);
+    return conn.delete(TableNames.ORDER_INVOICE_RELNS_TABLE, criterion).mapEmpty();
   }
 
   @Validate

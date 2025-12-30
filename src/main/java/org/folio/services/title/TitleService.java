@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
 import org.folio.rest.exceptions.ErrorCodes;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -23,7 +24,6 @@ import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleSequenceNumbers;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
-import org.folio.util.DbUtils;
 
 import io.vertx.core.Future;
 import lombok.extern.log4j.Log4j2;
@@ -41,7 +41,7 @@ public class TitleService {
         Optional<Title> title = result.getResults().stream().findFirst();
         if (title.isEmpty()) {
           log.warn("getTitleByPoLineId:: No title was found, poLineId={}", poLineId);
-          return Future.failedFuture(new Exception("Title with poLineId=%s was not found".formatted(poLineId)));
+          return Future.failedFuture(new HttpException(HttpStatus.SC_NOT_FOUND, "Title with poLineId=%s was not found".formatted(poLineId)));
         } else {
           log.trace("getTitleByPoLineId:: Complete, poLineId={}", poLineId);
           return Future.succeededFuture(title.get());
