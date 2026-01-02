@@ -3,7 +3,6 @@ package org.folio.services.inventory;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,8 +16,8 @@ import java.util.List;
 
 import static org.folio.event.dto.HoldingFields.HOLDINGS_RECORDS;
 import static org.folio.event.dto.HoldingFields.INSTANCE_ID;
+import static org.folio.util.HelperUtils.asFuture;
 import static org.folio.util.ResourcePath.STORAGE_BATCH_HOLDING_URL;
-import static org.folio.util.ResourcePath.STORAGE_INSTANCE_URL;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class InventoryUpdateService {
   private static final String TRUE = "true";
 
   private final HoldingsService holdingsService;
+  private final InstancesService instancesService;
   private final RestClient restClient;
 
   public Future<Void> batchUpdateAdjacentHoldingsWithNewInstanceId(HoldingEventHolder holder, List<String> holdingIds,
@@ -50,8 +50,7 @@ public class InventoryUpdateService {
       updateResultNewInstanceId(getResults, newInstanceId);
       var batchPostRequestEntry = new RequestEntry(STORAGE_BATCH_HOLDING_URL.getPath()).withQueryParameter(UPSERT, TRUE);
       var payload = new JsonObject().put(HOLDINGS_RECORDS.getValue(), new JsonArray(getResults));
-      return restClient.post(batchPostRequestEntry, payload, ResponsePredicate.SC_CREATED, requestContext)
-        .mapEmpty();
+      return restClient.post(batchPostRequestEntry, payload, requestContext).mapEmpty();
     });
   }
 
@@ -63,12 +62,13 @@ public class InventoryUpdateService {
         .forEach(holding -> holding.put(INSTANCE_ID.getValue(), newInstanceId)));
   }
 
-  public Future<JsonObject> getAndSetHolderInstanceByIdIfRequired(HoldingEventHolder holder, RequestContext requestContext) {
+  public Future<Void> getAndSetHolderInstanceByIdIfRequired(HoldingEventHolder holder, RequestContext requestContext) {
     if (holder.instanceIdEqual()) {
       log.info("getAndSetHolderInstanceByIdIfRequired:: Populating holder instance is not required, ignoring GET request");
       return Future.succeededFuture();
     }
-    var requestEntry = new RequestEntry(String.format(STORAGE_INSTANCE_URL.getPath(), holder.getInstanceId()));
-    return restClient.get(requestEntry, requestContext);
+    return instancesService.getInstanceById(holder.getInstanceId(), requestContext)
+      .map(instance -> asFuture(() -> holder.setInstance(instance)))
+      .mapEmpty();
   }
 }

@@ -86,4 +86,10 @@ public final class DbUtils {
     }
   }
 
+  public static Future<RowSet<Row>> ensureRowModifications(RowSet<Row> rowSet) {
+      return rowSet.rowCount() == 0
+        ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
+        : Future.succeededFuture(rowSet);
+  }
+
 }

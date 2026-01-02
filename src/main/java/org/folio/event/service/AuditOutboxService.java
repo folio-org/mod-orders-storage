@@ -8,10 +8,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
-import org.folio.okapi.common.GenericCompositeFuture;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
@@ -28,20 +26,17 @@ import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 
 public class AuditOutboxService {
+
   private static final Logger log = LogManager.getLogger();
-  private static final String OUTBOX_LOCK_NAME = "audit_outbox";
 
   private final AuditOutboxEventsLogRepository outboxRepository;
-  private final InternalLockRepository lockRepository;
   private final AuditEventProducer producer;
   private final PostgresClientFactory pgClientFactory;
 
   public AuditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
-                            InternalLockRepository lockRepository,
                             AuditEventProducer producer,
                             PostgresClientFactory pgClientFactory) {
     this.outboxRepository = outboxRepository;
-    this.lockRepository = lockRepository;
     this.producer = producer;
     this.pgClientFactory = pgClientFactory;
   }
@@ -57,8 +52,7 @@ public class AuditOutboxService {
     String tenantId = TenantTool.tenantId(okapiHeaders);
     log.trace("processOutboxEventLogs, tenantId={}", tenantId);
     PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
-    return pgClient.withTrans(conn -> lockRepository.selectWithLocking(conn, OUTBOX_LOCK_NAME, tenantId)
-      .compose(retrievedCount -> outboxRepository.fetchEventLogs(conn, tenantId))
+    return pgClient.withTrans(conn -> outboxRepository.fetchEventLogs(conn, tenantId)
       .compose(logs -> {
         if (CollectionUtils.isEmpty(logs)) {
           log.debug("processOutboxEventLogs completed, no event log found in outbox table");
@@ -67,7 +61,7 @@ public class AuditOutboxService {
 
         log.info("Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
         List<Future<Boolean>> futures = getKafkaFutures(logs, okapiHeaders);
-        return GenericCompositeFuture.join(futures)
+        return Future.join(futures)
           .map(logs.stream().map(OutboxEventLog::getEventId).collect(Collectors.toList()))
           .compose(eventIds -> {
             if (CollectionUtils.isNotEmpty(eventIds)) {
@@ -141,7 +135,7 @@ public class AuditOutboxService {
       .map(poLine -> saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, poLine.getId(), poLine))
       .toList();
 
-    return GenericCompositeFuture.join(futures)
+    return Future.join(futures)
       .map(res -> true)
       .otherwise(t -> false);
   }
@@ -163,7 +157,7 @@ public class AuditOutboxService {
       .map(piece -> savePieceOutboxLog(conn, piece, action, okapiHeaders))
       .toList();
 
-    return GenericCompositeFuture.join(futures)
+    return Future.join(futures)
       .map(res -> true)
       .otherwise(t -> false);
   }
@@ -204,5 +198,4 @@ public class AuditOutboxService {
       .onSuccess(reply -> log.info("Outbox log has been saved for {} with id: {}", entityType, entityId))
       .onFailure(e -> log.warn("Could not save outbox audit log for {} with id: {}", entityType, entityId, e));
   }
-
 }

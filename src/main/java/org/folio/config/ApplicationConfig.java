@@ -5,7 +5,6 @@ import java.util.Map;
 
 import io.vertx.core.Vertx;
 import org.folio.dao.ExtensionRepository;
-import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PieceClaimingRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
@@ -24,6 +23,7 @@ import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.inventory.HoldingsService;
+import org.folio.services.inventory.InstancesService;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLineNumbersService;
@@ -125,8 +125,8 @@ public class ApplicationConfig {
 
   @Bean
   OrderLinePatchOperationService orderLinePatchOperationService (OrderLinePatchOperationHandlerResolver operationHandlerResolver,
-      PoLinesService poLinesService) {
-    return new OrderLinePatchOperationService(operationHandlerResolver, poLinesService);
+      PoLinesService poLinesService, InstancesService instancesService) {
+    return new OrderLinePatchOperationService(operationHandlerResolver, poLinesService, instancesService);
   }
 
   @Bean PoLineNumbersService poLineNumbersService(OrderDAO orderDAO, PoLinesService poLinesService) {
@@ -159,16 +159,10 @@ public class ApplicationConfig {
   }
 
   @Bean
-  InternalLockRepository internalLockRepository() {
-    return new InternalLockRepository();
-  }
-
-  @Bean
   AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
-                                        InternalLockRepository lockRepository,
                                         AuditEventProducer producer,
                                         PostgresClientFactory pgClientFactory) {
-    return new AuditOutboxService(outboxRepository, lockRepository, producer, pgClientFactory);
+    return new AuditOutboxService(outboxRepository, producer, pgClientFactory);
   }
 
   @Bean
@@ -195,13 +189,18 @@ public class ApplicationConfig {
   }
 
   @Bean
-  InventoryUpdateService inventoryUpdateService(HoldingsService holdingsService, RestClient restClient) {
-    return new InventoryUpdateService(holdingsService, restClient);
+  InventoryUpdateService inventoryUpdateService(HoldingsService holdingsService, InstancesService instancesService, RestClient restClient) {
+    return new InventoryUpdateService(holdingsService, instancesService, restClient);
   }
 
   @Bean
   HoldingsService holdingsService(RestClient restClient) {
     return new HoldingsService(restClient);
+  }
+
+  @Bean
+  InstancesService instancesService(RestClient restClient) {
+    return new InstancesService(restClient);
   }
 
   @Bean

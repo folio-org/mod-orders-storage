@@ -11,6 +11,7 @@ import org.folio.event.dto.InstanceFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
+import org.folio.rest.core.RestClient;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.Location;
@@ -22,12 +23,14 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.services.consortium.ConsortiumConfigurationService;
+import org.folio.services.inventory.InstancesService;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.setting.SettingService;
 import org.folio.services.setting.util.SettingKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -72,6 +75,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -104,6 +108,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   @Mock
   private PoLinesService poLinesService;
   @Mock
+  private InstancesService instancesService;
+  @InjectMocks @Spy
   private InventoryUpdateService inventoryUpdateService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
@@ -140,6 +146,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(CENTRAL_TENANT))
         .when(consortiumConfigurationService).getCentralTenantId(any(), any());
+      doCallRealMethod().when(poLinesService).updateInstanceFieldsForPoLine(any(), any());
       doReturn(Future.succeededFuture()).when(inventoryUpdateService).batchUpdateAdjacentHoldingsWithNewInstanceId(any(), any(), any());
       doReturn(Future.succeededFuture(true)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(eq(UNIVERSITY_TENANT));
@@ -230,7 +237,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
 
-    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
@@ -292,7 +300,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
 
-    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
@@ -469,7 +478,8 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
 
-    doReturn(Future.succeededFuture(newInstance)).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(pgClient).when(dbClient).getPgClient();

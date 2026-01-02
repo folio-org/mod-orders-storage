@@ -1,24 +1,23 @@
 package org.folio.orders.lines.update.instance;
 
-import io.vertx.core.Promise;
 import io.vertx.ext.web.handler.HttpException;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceHolder;
 import org.folio.orders.lines.update.OrderLineUpdateInstanceStrategy;
 import org.folio.rest.core.models.RequestContext;
 
 import io.vertx.core.Future;
+import lombok.extern.log4j.Log4j2;
 import one.util.streamex.StreamEx;
 import org.folio.rest.jaxrs.model.Holding;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
-import org.folio.rest.persist.Tx;
+import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.services.title.TitleService;
@@ -28,9 +27,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+@Log4j2
 @RequiredArgsConstructor
 public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpdateInstanceStrategy {
-  private static final Logger log = LogManager.getLogger();
 
   private final TitleService titleService;
   private final PoLinesService poLinesService;
@@ -38,55 +37,40 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
 
   @Override
   public Future<Void> updateInstance(OrderLineUpdateInstanceHolder holder, RequestContext rqContext) {
-    Promise<Void> promise = Promise.promise();
-    if (holder.getPatchOrderLineRequest().getReplaceInstanceRef() == null
-        || holder.getPatchOrderLineRequest().getReplaceInstanceRef().getHoldings().isEmpty()) {
-      log.error("ReplaceInstanceRef or Holdings is not present");
-      promise.fail(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef or Holdings is not present"));
-    } else {
-      DBClient client = new DBClient(rqContext.getContext(), rqContext.getHeaders());
-      Tx<PoLine> tx = new Tx<>(holder.getStoragePoLine(), client.getPgClient());
-      String instanceId = holder.getPatchOrderLineRequest().getReplaceInstanceRef().getNewInstanceId();
-
-      rqContext.getContext().runOnContext(v -> {
-        log.info("With holding - Update Instance");
-        tx.startTx()
-          .compose(poLineTx -> titleService.updateTitle(poLineTx, instanceId, client))
-          .compose(poLineTx -> updateHoldings(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
-          .compose(poLineTx -> poLinesService.updateInstanceIdForPoLine(poLineTx, holder.getPatchOrderLineRequest().getReplaceInstanceRef(), client))
-          .compose(Tx::endTx)
-          .onComplete(ar -> {
-            if (ar.failed()) {
-              log.warn("Instance failed to update, poLine id={}", tx.getEntity().getId(), ar.cause());
-              tx.rollbackTransaction().onComplete(res -> promise.fail(ar.cause()));
-            } else {
-              log.info("Instance was updated successfully, poLine id={}", tx.getEntity().getId());
-              promise.complete(null);
-            }
-          });
-      });
+    if (holder.patchOrderLineRequest().getReplaceInstanceRef() == null
+      || holder.patchOrderLineRequest().getReplaceInstanceRef().getHoldings().isEmpty()) {
+      log.error("updateInstance:: ReplaceInstanceRef or Holdings is not present");
+      return Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "ReplaceInstanceRef or Holdings is not present"));
     }
 
-    return promise.future();
+    log.info("updateInstance:: Updating instance for poLine id={}", holder.storagePoLine().getId());
+    var storagePol = holder.storagePoLine();
+    var instanceId = holder.patchOrderLineRequest().getReplaceInstanceRef().getNewInstanceId();
+    var tenantId = TenantTool.tenantId(rqContext.getHeaders());
+
+    return new DBClient(rqContext.getContext(), rqContext.getHeaders()).getPgClient()
+      .withTrans(conn -> titleService.updateTitle(storagePol, instanceId, conn)
+        .compose(poLine -> updateHoldings(poLine, holder.patchOrderLineRequest().getReplaceInstanceRef(), conn, tenantId))
+        .compose(poLine -> poLinesService.updateInstanceIdForPoLine(poLine, holder.instance(), conn)))
+      .onSuccess(v -> log.info("updateInstance:: Instance was updated successfully, poLine id={}", storagePol.getId()))
+      .onFailure(err -> log.warn("updateInstance:: Instance failed to update, poLine id={}", storagePol.getId(), err))
+      .mapEmpty();
   }
 
-  private Future<Tx<PoLine>> updateHoldings(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef, DBClient client) {
-    List<Holding> holdings = replaceInstanceRef.getHoldings();
-
-    if (isUpdatedHolding(holdings)) {
-      return pieceService.updatePieces(poLineTx, replaceInstanceRef, client)
-        .map(v -> updateLocations(poLineTx, replaceInstanceRef))
-        .onComplete(ar -> {
-          if (ar.failed()) {
-            log.warn("updateHoldings failed, poLine id={}", poLineTx.getEntity().getId(), ar.cause());
-          } else {
-            log.debug("updateHoldings completed, poLine id={}", poLineTx.getEntity().getId());
-          }
-        });
-    } else {
+  private Future<PoLine> updateHoldings(PoLine poLine, ReplaceInstanceRef replaceInstanceRef, Conn conn, String tenantId) {
+    if (!isUpdatedHolding(replaceInstanceRef.getHoldings())) {
       log.info("Holding does not require an update");
-      return Future.succeededFuture(poLineTx);
+      return Future.succeededFuture(poLine);
     }
+    return pieceService.updatePieces(poLine, replaceInstanceRef, conn, tenantId)
+      .map(v -> updateLocations(poLine, replaceInstanceRef))
+      .onComplete(ar -> {
+        if (ar.failed()) {
+          log.warn("updateHoldings failed, poLine id={}", poLine.getId(), ar.cause());
+        } else {
+          log.debug("updateHoldings completed, poLine id={}", poLine.getId());
+        }
+      });
   }
 
   private boolean isUpdatedHolding(List<Holding> holdings) {
@@ -104,26 +88,27 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
     return updateHoldings > 0;
   }
 
-  private Tx<PoLine> updateLocations(Tx<PoLine> poLineTx, ReplaceInstanceRef replaceInstanceRef) {
-    poLineTx.getEntity().getLocations().forEach(location -> replaceInstanceRef.getHoldings().stream()
-      .filter(holding -> holding.getFromHoldingId().equals(location.getHoldingId()))
-      .findFirst().ifPresent(holding -> {
-        if (holding.getToHoldingId() != null) {
-          location.setHoldingId(holding.getToHoldingId());
-        } else {
-          location.setLocationId(holding.getToLocationId());
-        }
-      }));
+  private PoLine updateLocations(PoLine poLine, ReplaceInstanceRef replaceInstanceRef) {
+    poLine.getLocations()
+      .forEach(location -> replaceInstanceRef.getHoldings().stream()
+        .filter(holding -> holding.getFromHoldingId().equals(location.getHoldingId()))
+        .findFirst()
+        .ifPresent(holding -> {
+          if (holding.getToHoldingId() != null) {
+            location.setHoldingId(holding.getToHoldingId());
+          } else {
+            location.setLocationId(holding.getToLocationId());
+          }
+        }));
 
-    var processedLocations = StreamEx.of(poLineTx.getEntity().getLocations())
+    var processedLocations = StreamEx.of(poLine.getLocations())
       .groupingBy(location -> Pair.of(location.getHoldingId(), location.getLocationId()))
       .values().stream()
       .map(this::mergeLocations)
       .filter(Objects::nonNull)
       .toList();
 
-    poLineTx.getEntity().setLocations(processedLocations);
-    return poLineTx;
+    return poLine.withLocations(processedLocations);
   }
 
   private Location mergeLocations(List<Location> locations) {

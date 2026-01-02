@@ -31,6 +31,8 @@ public class InventoryUpdateServiceTest {
   @InjectMocks
   private InventoryUpdateService inventoryUpdateService;
   @Mock
+  private InstancesService instancesService;
+  @Mock
   private RestClient restClient;
   @Mock
   private HoldingsService holdingsService;
@@ -65,13 +67,13 @@ public class InventoryUpdateServiceTest {
     var holdingIds = List.of(UUID.randomUUID().toString(), UUID.randomUUID().toString());
 
     when(holdingsService.getHoldingsByIds(any(), any())).thenReturn(Future.succeededFuture(holdingRecordsJsonObjects));
-    when(restClient.post(any(), any(), any(), any())).thenReturn(Future.succeededFuture());
+    when(restClient.post(any(), any(), any())).thenReturn(Future.succeededFuture());
 
     var result = inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, holdingIds, requestContext);
 
     assertDoesNotThrow(result::result);
     verify(holdingsService, times(1)).getHoldingsByIds(any(), any());
-    verify(restClient, times(1)).post(any(), any(), any(), any());
+    verify(restClient, times(1)).post(any(), any(), any());
   }
 
   @Test
@@ -82,7 +84,7 @@ public class InventoryUpdateServiceTest {
     var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext);
 
     assertDoesNotThrow(result::result);
-    verify(restClient, never()).get(any(), any());
+    verify(instancesService, never()).getInstanceById(any(), any());
   }
 
   @Test
@@ -90,11 +92,11 @@ public class InventoryUpdateServiceTest {
     var holder = mock(HoldingEventHolder.class);
     when(holder.instanceIdEqual()).thenReturn(false);
     when(holder.getInstanceId()).thenReturn(UUID.randomUUID().toString());
-    when(restClient.get(any(), any())).thenReturn(Future.succeededFuture(new JsonObject()));
+    when(instancesService.getInstanceById(any(), any())).thenReturn(Future.succeededFuture(new JsonObject()));
 
     var result = inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext);
 
     assertDoesNotThrow(result::result);
-    verify(restClient, times(1)).get(any(), any());
+    verify(instancesService, times(1)).getInstanceById(any(), any());
   }
 }

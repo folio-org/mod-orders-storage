@@ -1,26 +1,17 @@
 package org.folio.orders.lines.update;
 
+import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 
-public class OrderLineUpdateInstanceHolder {
+import io.vertx.core.json.JsonObject;
 
-  private PoLine storagePoLine;
-  private StoragePatchOrderLineRequest patchOrderLineRequest;
+public record OrderLineUpdateInstanceHolder(PoLine storagePoLine,
+                                            JsonObject instance,
+                                            StoragePatchOrderLineRequest patchOrderLineRequest) {
 
-  public PoLine getStoragePoLine() {
-    return storagePoLine;
+  public OrderLinePatchOperationType getOperationType() {
+    return OrderLinePatchOperationType.fromValue(patchOrderLineRequest.getOperation().value());
   }
 
-  public StoragePatchOrderLineRequest getPatchOrderLineRequest() {
-    return patchOrderLineRequest;
-  }
-
-  public void setStoragePoLine(PoLine storagePoLine) {
-    this.storagePoLine = storagePoLine;
-  }
-
-  public void setPatchOrderLineRequest(StoragePatchOrderLineRequest patchOrderLineRequest) {
-    this.patchOrderLineRequest = patchOrderLineRequest;
-  }
 }

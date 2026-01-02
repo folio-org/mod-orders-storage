@@ -145,7 +145,7 @@ public class AuditEventProducer {
     return producer.send(kafkaProducerRecord)
       .map(event -> true)
       .onComplete(reply -> {
-        producer.end(ear -> producer.close());
+        producer.end().onComplete(ear -> producer.close());
         if (reply.succeeded()) {
           log.info("Event with type '{}' for {} id: '{}' was sent to kafka topic '{}'", eventType, entityType, key, topicName);
         } else {
