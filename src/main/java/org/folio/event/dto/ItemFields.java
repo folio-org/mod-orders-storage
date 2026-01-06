@@ -9,7 +9,11 @@ public enum ItemFields {
 
   ID("id"),
   HOLDINGS_RECORD_ID("holdingsRecordId"),
-  EFFECTIVE_LOCATION_ID("effectiveLocationId");
+  EFFECTIVE_LOCATION_ID("effectiveLocationId"),
+  BARCODE("barcode"),
+  CALL_NUMBER("callNumber"),
+  ACCESSION_NUMBER("accessionNumber"),
+  EFFECTIVE_CALL_NUMBER_COMPONENTS("effectiveCallNumberComponents");
 
   private final String value;
 }
