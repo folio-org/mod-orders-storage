@@ -71,10 +71,10 @@ public class ItemEventHolder {
   }
 
   public boolean isItemRecordUpdated() {
-    return !(holdingIdPair.getLeft().equals(holdingIdPair.getRight())
-      && barcodePair.getLeft().equals(barcodePair.getRight())
-      && callNumberPair.getLeft().equals(callNumberPair.getRight())
-      && accessionNumberPair.getLeft().equals(accessionNumberPair.getRight()));
+    return !(Objects.equals(holdingIdPair.getLeft(), holdingIdPair.getRight())
+      && Objects.equals(barcodePair.getLeft(), barcodePair.getRight())
+      && Objects.equals(callNumberPair.getLeft(), callNumberPair.getRight())
+      && Objects.equals(accessionNumberPair.getLeft(), accessionNumberPair.getRight()));
   }
 
   public String getActiveTenantId() {
