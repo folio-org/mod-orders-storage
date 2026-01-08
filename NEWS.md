@@ -1,5 +1,14 @@
 ## 13.9.0 - Unreleased
 
+## 13.8.5 - Released (Ramsons R2 2024 Bug Fix)
+The primary focus of this release was to implement RMB logging improvements and security fixes
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.8.4...v13.8.5)
+
+### Bug Fixes
+* [MODORDSTOR-496](https://folio-org.atlassian.net/browse/MODORDSTOR-496) - Ramsons CSP - RMB Logging release - RMB 35.3.2
+
+
 ## 13.8.4 - Released (Ramsons R2 2024 Bug Fix)
 The primary focus of this release was to add migration script to fill isBound flag to pieces
 

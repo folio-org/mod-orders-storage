@@ -19,11 +19,11 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>35.3.0</raml-module-builder.version>
+    <raml-module-builder.version>35.3.2</raml-module-builder.version>
     <java.version>17</java.version>
 
     <!--Dependency Management Properties-->
-    <vertx.version>4.5.10</vertx.version>
+    <vertx.version>4.5.23</vertx.version>
     <kafkaclients.version>3.6.1</kafkaclients.version>
     <lombok.version>1.18.34</lombok.version>
     <log4j.version>2.24.1</log4j.version>
