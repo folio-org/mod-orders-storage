@@ -52,8 +52,8 @@ public class ItemEventHolder {
       oldValue.getString(BARCODE.getValue()),
       newValue.getString(BARCODE.getValue())));
     setCallNumberPair(Pair.of(
-      oldValue.getJsonObject(EFFECTIVE_CALL_NUMBER_COMPONENTS.getValue()).getString(CALL_NUMBER.getValue()),
-      newValue.getJsonObject(EFFECTIVE_CALL_NUMBER_COMPONENTS.getValue()).getString(CALL_NUMBER.getValue())));
+      oldValue.getJsonObject(EFFECTIVE_CALL_NUMBER_COMPONENTS.getValue(), JsonObject.of()).getString(CALL_NUMBER.getValue()),
+      newValue.getJsonObject(EFFECTIVE_CALL_NUMBER_COMPONENTS.getValue(), JsonObject.of()).getString(CALL_NUMBER.getValue())));
     setAccessionNumberPair(Pair.of(
       oldValue.getString(ACCESSION_NUMBER.getValue()),
       newValue.getString(ACCESSION_NUMBER.getValue())));
