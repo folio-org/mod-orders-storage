@@ -49,7 +49,7 @@ public final class DbUtils {
         var result = ar.getResults();
         if (result.isEmpty()) {
           log.info("getEntitiesByField:: No entity of table '{}' was found with criterion: {}", tableName, criterion);
-          return null;
+          return List.<T>of();
         }
         log.trace("getEntitiesByField:: Fetching entities of table '{}' completed with criterion: {}", tableName, criterion);
         return result;

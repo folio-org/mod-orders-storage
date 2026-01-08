@@ -28,7 +28,7 @@ import org.folio.services.setting.util.SettingKey;
 import org.folio.util.ResourcePath;
 import org.springframework.beans.factory.annotation.Value;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 @Log4j2
 public class ConsortiumConfigurationService {

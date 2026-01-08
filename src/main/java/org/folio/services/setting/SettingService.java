@@ -2,7 +2,7 @@ package org.folio.services.setting;
 
 import static org.folio.util.DbUtils.convertResponseToEntity;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Optional;
