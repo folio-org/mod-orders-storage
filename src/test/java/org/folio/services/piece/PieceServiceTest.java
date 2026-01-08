@@ -7,6 +7,7 @@ import static org.folio.rest.RestVerticle.OKAPI_USERID_HEADER;
 import static org.folio.rest.utils.TenantApiTestUtil.deleteTenant;
 import static org.folio.rest.utils.TenantApiTestUtil.prepareTenant;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -108,7 +109,7 @@ public class PieceServiceTest extends TestBase {
     testContext.assertComplete(future)
       .onComplete(ar -> {
         List<Piece> actPieces = ar.result();
-        testContext.verify(() -> assertNull(actPieces));
+        testContext.verify(() -> assertThat(actPieces, empty()));
         testContext.completeNow();
       });
   }
@@ -154,7 +155,7 @@ public class PieceServiceTest extends TestBase {
         return testContext.assertComplete(getPiecesFuture)
           .onComplete(ar -> {
             List<Piece> actPieces = ar.result();
-            testContext.verify(() -> assertNull(actPieces));
+            testContext.verify(() -> assertThat(actPieces, empty()));
             testContext.completeNow();
           });
       });
