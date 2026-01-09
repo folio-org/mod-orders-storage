@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-orders-storage</artifactId>
-  <version>13.9.6-SNAPSHOT</version>
+  <version>13.9.7-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -23,10 +23,10 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>35.4.0</raml-module-builder.version>
+    <raml-module-builder.version>35.4.2</raml-module-builder.version>
 
     <!--Dependency Management Properties-->
-    <vertx.version>4.5.13</vertx.version>
+    <vertx.version>4.5.23</vertx.version>
     <kafkaclients.version>3.6.1</kafkaclients.version>
     <lombok.version>1.18.36</lombok.version>
     <log4j.version>2.24.3</log4j.version>

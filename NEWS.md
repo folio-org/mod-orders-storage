@@ -1,5 +1,14 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.6 - Released (Sunflower R1 2025 Hot Fix)
+The primary focus of the release was to update to RMB 35.4.2 and Vertx 4.5.23
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.5...v13.9.6)
+
+### Bug Fixes
+* [MODORDSTOR-497](https://folio-org.atlassian.net/browse/MODORDSTOR-497) - Sunflower CSP - RMB Logging release - RMB 35.4.1 Vertx 4.5.23
+
+
 ## 13.9.5 - Released (Sunflower R1 2025 Hot Fix)
 The primary focus of this release was to apply a new DB index to improve performance of Inventory Kafka Consumers.
 
