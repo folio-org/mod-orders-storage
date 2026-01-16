@@ -52,7 +52,7 @@
     "fqm.entityType.titles.product_ids.product_id_type._qualified": "Title — Product identifiers — Product ID type",
     "fqm.entityType.titles.product_ids.product_id": "Product ID",
     "fqm.entityType.titles.product_ids.product_id._qualified": "Title — Product identifiers — Product ID",
-    "fqm.entityType.titles.contributors": "Contributors",
+    "fqm.entityType.titles.contributors": "Współautorzy",
     "fqm.entityType.titles.contributors.contributor_name_type_id": "Contributor name type UUID",
     "fqm.entityType.titles.contributors.contributor_name_type_id._qualified": "Title — Contributors — Contributor name type UUID",
     "fqm.entityType.titles.contributors.contributor": "Contributor",
