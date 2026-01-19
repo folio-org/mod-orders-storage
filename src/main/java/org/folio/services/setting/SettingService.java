@@ -6,13 +6,14 @@ import jakarta.annotation.PostConstruct;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.model.SettingCollection;
 import org.folio.rest.jaxrs.resource.OrdersStorageSettings;
+import org.folio.rest.jaxrs.resource.OrdersStorageSettings.GetOrdersStorageSettingsResponse;
 import org.folio.rest.persist.PgUtil;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.services.setting.util.SettingKey;
@@ -37,9 +38,9 @@ public class SettingService {
 
   private static final String SETTINGS_TABLE = "settings";
   private static final String SETTINGS_BY_KEY_QUERY = "key==%s";
-  private static final String SETTINGS_CACHE_KEY = "%s.%s";
+  private static final String SETTINGS_CACHE_KEY = "%s.%s.%s.%s";
 
-  private AsyncCache<String, Optional<Setting>> asyncCache;
+  private AsyncCache<String, SettingCollection> asyncCache;
 
   @Value("${orders-storage.cache.setting-data.expiration.time.seconds:60}")
   private long cacheExpirationTime;
@@ -53,33 +54,27 @@ public class SettingService {
   }
 
   public Future<Optional<Setting>> getSettingByKey(SettingKey settingKey, Map<String, String> okapiHeaders, Context vertxContext) {
+    return getSettings(SETTINGS_BY_KEY_QUERY.formatted(settingKey.getName()), 0, 1, okapiHeaders, vertxContext)
+      .map(SettingService::extractSettingIfExistsAndIsUnique);
+  }
+
+  public Future<SettingCollection> getSettings(String query, int offset, int limit, Map<String, String> okapiHeaders, Context vertxContext) {
+    if (StringUtils.isBlank(query)) {
+      return getSettingsCollection(query, offset, limit, okapiHeaders, vertxContext);
+    }
     try {
-      var settingCacheKey = String.format(SETTINGS_CACHE_KEY, TenantTool.tenantId(okapiHeaders), settingKey.getName());
+      var settingCacheKey = SETTINGS_CACHE_KEY.formatted(TenantTool.tenantId(okapiHeaders), query, offset, limit);
       return Future.fromCompletionStage(asyncCache.get(settingCacheKey, (key, executor) ->
-        getSettingByKeyFromDB(settingKey, okapiHeaders, vertxContext)));
+          getSettingsCollection(query, offset, limit, okapiHeaders, vertxContext).toCompletionStage().toCompletableFuture()));
     } catch (Exception e) {
-      log.error("Error when retrieving setting with key: '{}'", settingKey.getName(), e);
+      log.error("Error when retrieving settings by query: '{}'", query, e);
       return Future.failedFuture(e);
     }
   }
 
-  private CompletableFuture<Optional<Setting>> getSettingByKeyFromDB(SettingKey settingKey, Map<String, String> okapiHeaders, Context vertxContext) {
-    var query = String.format(SETTINGS_BY_KEY_QUERY, settingKey.getName());
-    return getSettings(query, 0, 1, okapiHeaders, vertxContext)
-      .map(response -> convertResponseToEntity(response, SettingCollection.class))
-      .map(SettingService::extractSettingIfExistsAndIsUnique)
-      .toCompletionStage().toCompletableFuture();
-  }
-
-  public void getSettings(String query, int offset, int limit, Map<String, String> okapiHeaders,
-                          Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    getSettings(query, offset, limit, okapiHeaders, vertxContext)
-      .onComplete(asyncResultHandler);
-  }
-
-  public Future<Response> getSettings(String query, int offset, int limit, Map<String, String> okapiHeaders, Context vertxContext) {
-    return PgUtil.get(SETTINGS_TABLE, Setting.class, SettingCollection.class, query, offset, limit, okapiHeaders, vertxContext,
-      OrdersStorageSettings.GetOrdersStorageSettingsResponse.class);
+  private Future<SettingCollection> getSettingsCollection(String query, int offset, int limit, Map<String, String> okapiHeaders, Context vertxContext) {
+    return PgUtil.get(SETTINGS_TABLE, Setting.class, SettingCollection.class, query, offset, limit, okapiHeaders, vertxContext, GetOrdersStorageSettingsResponse.class)
+      .compose(response -> convertResponseToEntity(response, SettingCollection.class));
   }
 
   public void createSetting(Setting entity, Map<String, String> okapiHeaders,
