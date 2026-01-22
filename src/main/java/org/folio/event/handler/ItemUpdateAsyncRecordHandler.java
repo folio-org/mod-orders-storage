@@ -45,8 +45,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   @Override
   protected Future<Void> processInventoryUpdateEvent(ResourceEvent resourceEvent, Map<String, String> headers) {
     var holder = createItemEventHolder(resourceEvent, headers);
-    if (holder.isHoldingIdUpdated()) {
-      log.info("processInventoryUpdateEvent:: holdingId was not updated for item: '{}', skipping processing event", holder.getItemId());
+    if (!holder.isItemRecordUpdated()) {
+      log.info("processInventoryUpdateEvent:: Necessary item record fields were not updated: '{}', skipping processing event", holder.getItemId());
       return Future.succeededFuture();
     }
     return consortiumConfigurationService.getCentralTenantId(getContext(), headers)
@@ -87,14 +87,21 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       log.info("updatePieces:: No pieces were found to update holding by itemId: '{}' and holdingId: '{}'", holder.getItemId(), holder.getHoldingId());
       return Future.succeededFuture(List.of());
     }
-    piecesToUpdate.forEach(piece -> piece.setHoldingId(holder.getHoldingId()));
+    piecesToUpdate.forEach(piece -> piece
+      .withHoldingId(holder.getHoldingId())
+      .withBarcode(holder.getBarcode())
+      .withCallNumber(holder.getCallNumber())
+      .withAccessionNumber(holder.getAccessionNumber()));
     return pieceService.updatePiecesInventoryData(piecesToUpdate, conn, holder.getOrderTenantId());
   }
 
   private List<Piece> filterPiecesToUpdate(ItemEventHolder holder, List<Piece> pieces) {
     return pieces.stream()
       .filter(Objects::nonNull)
-      .filter(piece -> ObjectUtils.notEqual(piece.getHoldingId(), holder.getHoldingId()) && Objects.isNull(piece.getLocationId()))
+      .filter(piece -> ObjectUtils.notEqual(piece.getHoldingId(), holder.getHoldingId()) && Objects.isNull(piece.getLocationId())
+        || ObjectUtils.notEqual(piece.getBarcode(), holder.getBarcode())
+        || ObjectUtils.notEqual(piece.getCallNumber(), holder.getCallNumber())
+        || ObjectUtils.notEqual(piece.getAccessionNumber(), holder.getAccessionNumber()))
       .toList();
   }
 
