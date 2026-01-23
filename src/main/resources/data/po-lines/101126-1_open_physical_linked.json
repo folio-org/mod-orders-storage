@@ -1,0 +1,56 @@
+{
+  "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "cancellationRestriction": false,
+  "checkinItems": false,
+  "collection": false,
+  "cost": {
+    "additionalCost": 0,
+    "currency": "USD",
+    "discount": 0,
+    "discountType": "percentage",
+    "listUnitPrice": 10.00,
+    "listUnitPriceElectronic": 0.00,
+    "poLineEstimatedPrice": 10.00,
+    "quantityElectronic": 0,
+    "quantityPhysical": 1
+  },
+  "details": {
+    "productIds": [],
+    "subscriptionInterval": 0
+  },
+  "fundDistribution": [
+    {
+      "code": "UNIV-SUBN",
+      "fundId": "4428a37c-8bae-4f0d-865d-970d83d5ad55",
+      "distributionType": "percentage",
+      "value": 100.0
+    }
+  ],
+  "instanceId": "69640328-788e-43fc-9c3c-af39e243f3b7",
+  "locations": [
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "paymentStatus": "Pending",
+  "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
+  },
+  "poLineNumber": "101126-1",
+  "purchaseOrderId": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+  "receiptStatus": "Pending",
+  "rush": false,
+  "source": "User",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  },
+  "titleOrPackage": "ABA Journal"
+}
