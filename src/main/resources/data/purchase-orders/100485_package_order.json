@@ -1,0 +1,19 @@
+{
+  "id": "3d4e5f6a-7b8c-4d9e-0f1a-2b3c4d5e6f7a",
+  "acqUnitIds": [],
+  "approved": true,
+  "approvalDate": "2025-06-01T00:00:00.000Z",
+  "approvedById": "e63273e7-48f5-4c43-ab4e-1751ecacaa21",
+  "manualPo": false,
+  "nextPolNumber": 2,
+  "orderType": "One-Time",
+  "poNumber": "100485",
+  "reEncumber": true,
+  "vendor": "c428b467-7cec-45e1-8f8a-9a46d00181ff",
+  "workflowStatus": "Open",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  }
+}

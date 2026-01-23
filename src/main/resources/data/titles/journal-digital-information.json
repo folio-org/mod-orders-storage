@@ -1,0 +1,11 @@
+{
+  "id": "2c3d4e5f-6a7b-4c8d-9e0f-1a2b3c4d5e6f",
+  "title": "Journal of Digital Information",
+  "poLineId": "1b2c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e",
+  "productIds": [
+    {
+      "productId": "2345-6789",
+      "productIdType": "913300b2-03ed-469a-8179-c1092c991227"
+    }
+  ]
+}
