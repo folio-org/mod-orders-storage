@@ -343,8 +343,8 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
     verify(poLinesService, times(1)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
-    verify(poLinesService, never()).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
-    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(poLinesService, times(1)).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
+    verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     assertEquals(holdingId1, piece1.getHoldingId());
     assertEquals(holdingId1, piece2.getHoldingId());

@@ -60,8 +60,9 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     return determineOrderTenant(holder)
       .compose(v -> createDBClient(holder.getOrderTenantId()).getPgClient()
         .withTrans(conn -> processPiecesUpdate(holder, conn)
-          .compose(pieces -> processPoLinesUpdate(pieces, holder, conn)))
-        .onComplete(ar -> auditOutboxService.processOutboxEventLogs(holder.getHeaders())));
+          .compose(pieces -> processPoLinesUpdate(pieces, holder, conn))
+      )
+      .onComplete(ar -> auditOutboxService.processOutboxEventLogs(holder.getHeaders())));
   }
 
   private Future<Void> determineOrderTenant(ItemEventHolder holder) {

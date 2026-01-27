@@ -163,5 +163,4 @@ public class AuditEventProducer {
     return Optional.ofNullable(metadata)
       .orElseThrow(() -> new IllegalArgumentException("Metadata is null for entity with id: %s".formatted(id)));
   }
-
 }

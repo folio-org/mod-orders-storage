@@ -21,6 +21,7 @@ import io.vertx.sqlclient.Tuple;
 public class AuditOutboxEventsLogRepository {
 
   private static final Logger log = LogManager.getLogger();
+
   public static final String OUTBOX_TABLE_NAME = "outbox_event_log";
   private static final String EVENT_ID_FIELD = "event_id";
   private static final String ENTITY_TYPE_FIELD = "entity_type";

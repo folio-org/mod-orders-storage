@@ -1,9 +1,9 @@
 package org.folio.event.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -55,57 +55,68 @@ public class AuditOutboxService {
     return pgClient.withTrans(conn -> outboxRepository.fetchEventLogs(conn, tenantId)
       .compose(logs -> {
         if (CollectionUtils.isEmpty(logs)) {
-          log.debug("processOutboxEventLogs completed, no event log found in outbox table");
+          log.debug("processOutboxEventLogs:: No event log found in outbox table");
           return Future.succeededFuture(0);
         }
 
-        log.info("Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
-        List<Future<Boolean>> futures = getKafkaFutures(logs, okapiHeaders);
-        return Future.join(futures)
-          .map(logs.stream().map(OutboxEventLog::getEventId).collect(Collectors.toList()))
-          .compose(eventIds -> {
-            if (CollectionUtils.isNotEmpty(eventIds)) {
-              return outboxRepository.deleteBatch(conn, eventIds, tenantId)
-                .onSuccess(rowsCount -> log.info("{} logs have been deleted from outbox table", rowsCount))
-                .onFailure(ex -> log.error("Logs deletion failed", ex));
+        log.info("processOutboxEventLogs:: Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
+        var futures = getKafkaFutures(logs, okapiHeaders);
+
+        // Wait for all futures to complete (succeed or fail)
+        return Future.all(futures)
+          .recover(t -> Future.succeededFuture()) // Recover so we can process partial successes
+          .compose(v -> {
+            // Only collect event IDs for successfully sent events
+            var successfulEventIds = new ArrayList<String>();
+            for (int i = 0; i < futures.size(); i++) {
+              if (futures.get(i).succeeded()) {
+                successfulEventIds.add(logs.get(i).getEventId());
+              }
             }
-            log.debug("processOutboxEventLogs completed, eventIds was empty");
-            return Future.succeededFuture(0);
+
+            if (CollectionUtils.isEmpty(successfulEventIds)) {
+              log.warn("processOutboxEventLogs:: No events were successfully sent to Kafka");
+              return Future.succeededFuture(0);
+            }
+
+            log.info("processOutboxEventLogs:: Successfully sent {} out of {} events to Kafka", successfulEventIds.size(), logs.size());
+            return outboxRepository.deleteBatch(conn, successfulEventIds, tenantId)
+              .onSuccess(rowsCount -> log.info("processOutboxEventLogs:: {} logs have been deleted from outbox table", rowsCount))
+              .onFailure(ex -> log.error("Logs deletion failed", ex));
           });
       })
     );
   }
 
-  private List<Future<Boolean>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {
-    return eventLogs.stream().map(eventLog -> {
+  private List<Future<Void>> getKafkaFutures(List<OutboxEventLog> eventLogs, Map<String, String> okapiHeaders) {
+    return eventLogs.stream().<Future<Void>>map(eventLog -> {
       try {
         if (eventLog.getEntityType() == null) {
-          throw new IllegalStateException("Entity type is null for event with id: " + eventLog.getEventId());
+          log.warn("getKafkaFutures:: Entity type is null for event with id: {}", eventLog.getEventId());
+          return Future.failedFuture("Entity type is null for event with id: " + eventLog.getEventId());
         }
-        switch (eventLog.getEntityType()) {
+        return switch (eventLog.getEntityType()) {
           case ORDER -> {
             PurchaseOrder entity = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);
             OrderAuditEvent.Action action = OrderAuditEvent.Action.fromValue(eventLog.getAction());
-            return producer.sendOrderEvent(entity, action, okapiHeaders);
+            yield producer.sendOrderEvent(entity, action, okapiHeaders).mapEmpty();
           }
           case ORDER_LINE -> {
             PoLine entity = Json.decodeValue(eventLog.getPayload(), PoLine.class);
             OrderLineAuditEvent.Action action = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
-            return producer.sendOrderLineEvent(entity, action, okapiHeaders);
+            yield producer.sendOrderLineEvent(entity, action, okapiHeaders).mapEmpty();
           }
           case PIECE -> {
             Piece entity = Json.decodeValue(eventLog.getPayload(), Piece.class);
             PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
-            return producer.sendPieceEvent(entity, action, okapiHeaders);
+            yield producer.sendPieceEvent(entity, action, okapiHeaders).mapEmpty();
           }
-          default -> throw new IllegalStateException("Missing handler for events with entityType: " + eventLog.getEntityType());
-        }
-      } catch (IllegalArgumentException e) {
-        log.warn("getKafkaFutures:: Unable to process event '{}' with entity of type '{}' and action '{}', reason: {}",
-          eventLog.getEventId(), eventLog.getEntityType(), eventLog.getAction(), e.getMessage());
-        return Future.succeededFuture(false);
+        };
+      } catch (Exception e) {
+        log.warn("getKafkaFutures:: Failed to process event with id: {}", eventLog.getEventId(), e);
+        return Future.failedFuture(e);
       }
-    }).collect(Collectors.toList());
+    }).toList();
   }
 
   /**

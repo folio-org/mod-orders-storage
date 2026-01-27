@@ -76,14 +76,15 @@ public class OrderLineLocationUpdateService {
 
   private List<PoLine> processPoLinePiecePairs(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject itemObject) {
     return poLinePiecePairs.stream().map(poLineListPair -> {
-        var poLine = poLineListPair.getLeft();
-        var pieces = poLineListPair.getRight();
-        var isLocationsUpdated = updatePoLineLocations(poLine, pieces);
-        var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(poLine, itemObject.getString(EFFECTIVE_LOCATION_ID.getValue()));
-        return (isLocationsUpdated || isSearchLocationIdsUpdated) ? poLine : null;
-      })
-      .filter(Objects::nonNull)
-      .toList();
+      var poLine = poLineListPair.getLeft();
+      var pieces = poLineListPair.getRight();
+      var isLocationsUpdated = updatePoLineLocations(poLine, pieces);
+      var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(poLine, itemObject.getString(EFFECTIVE_LOCATION_ID.getValue()));
+      var isPoLineLocationsChanged = isLocationsUpdated || isSearchLocationIdsUpdated;
+      log.info("processPoLinePiecePairs:: POL locations changed: {}", isPoLineLocationsChanged);
+      return poLine;
+    })
+    .toList();
   }
 
   private boolean updatePoLineLocations(PoLine poLine, List<Piece> pieces) {

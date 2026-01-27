@@ -54,7 +54,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     return dbClient.getPgClient()
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> processPiecesUpdate(pieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
-        .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn)))
+        .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
+      )
       .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
