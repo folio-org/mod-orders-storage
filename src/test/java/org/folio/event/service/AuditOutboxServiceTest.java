@@ -1,7 +1,6 @@
 package org.folio.event.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -87,12 +86,22 @@ public class AuditOutboxServiceTest {
       .withAction("Create")
       .withPayload("{}");
     when(outboxRepository.fetchEventLogs(any(), any())).thenReturn(Future.succeededFuture(List.of(eventLog)));
-    when(producer.sendOrderEvent(any(), any(), any())).thenThrow(new RuntimeException("Producer error"));
+    when(producer.sendOrderEvent(any(), any(), any())).thenReturn(Future.failedFuture(new RuntimeException("Producer error")));
 
     Future<Integer> result = auditOutboxService.processOutboxEventLogs(okapiHeaders);
 
-    assertTrue(result.failed());
-    assertEquals("Producer error", result.cause().getMessage());
+    // Wait for future to complete
+    while (!result.isComplete()) {
+      try {
+        Thread.sleep(10);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+    }
+
+    // Producer exceptions are now caught and handled gracefully
+    assertTrue(result.succeeded());
+    assertEquals(0, result.result()); // No events successfully processed
   }
 
   @Test
@@ -106,9 +115,8 @@ public class AuditOutboxServiceTest {
 
     Future<Integer> result = auditOutboxService.processOutboxEventLogs(okapiHeaders);
 
-    assertTrue(result.failed());
-    assertInstanceOf(IllegalStateException.class, result.cause());
-    assertEquals("Entity type is null for event with id: eventId", result.cause().getMessage());
+    assertTrue(result.succeeded());
+    assertEquals(0, result.result());
   }
 
   @Test
@@ -119,11 +127,12 @@ public class AuditOutboxServiceTest {
       .withAction("Edit")
       .withPayload("{}");
     when(outboxRepository.fetchEventLogs(any(), any())).thenReturn(Future.succeededFuture(List.of(eventLog)));
-    when(producer.sendPieceEvent(any(), any(), any())).thenThrow(new IllegalArgumentException("Metadata is missing"));
-    when(outboxRepository.deleteBatch(any(), any(), any())).thenReturn(Future.succeededFuture(1));
+    when(producer.sendPieceEvent(any(), any(), any())).thenReturn(Future.failedFuture(new IllegalArgumentException("Metadata is null for entity with id: pieceId")));
 
     Future<Integer> result = auditOutboxService.processOutboxEventLogs(okapiHeaders);
 
+    // The event should be skipped gracefully, not throw an exception
     assertTrue(result.succeeded());
+    assertEquals(0, result.result()); // No events successfully processed
   }
 }
