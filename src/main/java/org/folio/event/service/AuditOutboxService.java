@@ -75,7 +75,7 @@ public class AuditOutboxService {
             }
 
             if (CollectionUtils.isEmpty(successfulEventIds)) {
-              log.warn("processOutboxEventLogs:: No events were successfully sent to Kafka");
+              log.debug("processOutboxEventLogs:: No events were successfully sent to Kafka");
               return Future.succeededFuture(0);
             }
 
