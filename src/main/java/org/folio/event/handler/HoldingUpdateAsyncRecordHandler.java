@@ -20,7 +20,6 @@ import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.HeaderUtils;
-import org.folio.util.InventoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -81,8 +80,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
         extractDistinctAdjacentHoldingsToUpdate(holder, dto);
         return dto;
       })
-      .compose(dto -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, dto.getAdjacentHoldingIds(), requestContext).map(dto))
-      .onComplete(v -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()));
+      .compose(dto -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, dto.getAdjacentHoldingIds(), requestContext).map(dto));
   }
 
   private Future<HoldingUpdate> processPoLinesUpdate(HoldingEventHolder holder, Conn conn, RequestContext requestContext) {
@@ -90,13 +88,14 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .compose(v -> poLinesService.getPoLinesByCqlQuery(PO_LINE_LOCATIONS_HOLDING_ID_CQL.formatted(holder.getHoldingId()), conn))
       .compose(poLines -> updatePoLines(holder, poLines, conn))
       .compose(dto -> updateTitles(holder, dto.getPoLinesWithUpdatedInstanceId(), conn).map(dto))
-      .compose(dto -> saveOrderLinesOutboxLogsConditionally(holder, conn, dto));
+      .compose(dto -> saveOrderLinesOutboxLogsConditionally(holder, conn, dto))
+      .compose(dto -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()).map(dto));
   }
 
   // Supported 2 operations: Move instance in "member tenant" & edit holding in "central tenant"
   private Future<HoldingUpdate> saveOrderLinesOutboxLogsConditionally(HoldingEventHolder holder, Conn conn, HoldingUpdate dto) {
     List<PoLine> poLinesToLog;
-    if (Boolean.TRUE.equals(dto.isInstanceIdUpdated()) && Boolean.FALSE.equals(dto.isSearchLocationIdsUpdated())) {
+    if (dto.isInstanceIdUpdated() && !dto.isSearchLocationIdsUpdated()) {
       poLinesToLog = dto.getPoLinesWithUpdatedInstanceId();
     } else {
       poLinesToLog = dto.getPoLinesWithUpdatedSearchLocationIds();

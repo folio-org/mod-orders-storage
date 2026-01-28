@@ -48,7 +48,8 @@ public class OrderLineLocationUpdateService {
    * @param conn          connection to be used for the request
    * @return a future with the list of updated POLs
    */
-  public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering, String tenantId, Map<String, String> headers, Conn conn) {
+  public Future<List<Pair<Boolean, PoLine>>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering,
+                                                       String tenantId, Map<String, String> headers, Conn conn) {
     log.info("processPoLinesUpdate:: Fetching '{}' POL(s) to update location data", poLineIds.size());
     return poLinesService.getPoLinesByIdsForUpdate(poLineIds, tenantId, conn)
       .map(poLines -> poLines.stream()
@@ -61,33 +62,37 @@ public class OrderLineLocationUpdateService {
       .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, item, tenantId, headers, conn));
   }
 
-  private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
+  private Future<List<Pair<Boolean, PoLine>>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
                                              String tenantId, Map<String, String> headers, Conn conn) {
-    var poLinesToUpdate = processPoLinePiecePairs(poLinePiecePairs, item);
-    if (CollectionUtils.isEmpty(poLinesToUpdate)) {
+    var updatedPoLinesPairs = processPoLinePiecePairs(poLinePiecePairs, item);
+    if (CollectionUtils.isEmpty(updatedPoLinesPairs)) {
       log.info("updatePoLines:: No POLs were changed to update for item: '{}' in tenant: '{}'", item.getString(ID.getValue()), tenantId);
       return Future.succeededFuture(List.of());
     }
+    var poLinesToUpdate = updatedPoLinesPairs.stream().filter(Objects::nonNull)
+      .map(Pair::getRight)
+      .toList();
     log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in tenant: '{}'",
       poLinesToUpdate.size(), item.getString(ID.getValue()), tenantId);
     return poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
-      .map(v -> poLinesToUpdate);
+      .map(v -> updatedPoLinesPairs);
   }
 
-  private List<PoLine> processPoLinePiecePairs(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject itemObject) {
+  private List<Pair<Boolean, PoLine>> processPoLinePiecePairs(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject itemObject) {
     return poLinePiecePairs.stream().map(poLineListPair -> {
       var poLine = poLineListPair.getLeft();
       var pieces = poLineListPair.getRight();
       var isLocationsUpdated = updatePoLineLocations(poLine, pieces);
       var isSearchLocationIdsUpdated = updatePoLineSearchLocationIds(poLine, itemObject.getString(EFFECTIVE_LOCATION_ID.getValue()));
-      var isPoLineLocationsChanged = isLocationsUpdated || isSearchLocationIdsUpdated;
-      log.info("processPoLinePiecePairs:: POL locations changed: {}", isPoLineLocationsChanged);
-      return poLine;
+      var isPoLineLocationsChanged = isLocationsUpdated.getRight() || isSearchLocationIdsUpdated;
+      log.info("processPoLinePiecePairs:: POL locations changed: {}, are quantities final: {}, search locations changed: {}",
+        isLocationsUpdated.getLeft(), isLocationsUpdated.getRight(), isSearchLocationIdsUpdated);
+      return Pair.of(isPoLineLocationsChanged, poLine);
     })
     .toList();
   }
 
-  private boolean updatePoLineLocations(PoLine poLine, List<Piece> pieces) {
+  private Pair<Boolean, Boolean> updatePoLineLocations(PoLine poLine, List<Piece> pieces) {
     var locations = new ArrayList<Location>();
     var piecesByTenantIdGrouped = pieces.stream().filter(Objects::nonNull)
       .collect(groupingBy(p -> Optional.ofNullable(p.getReceivingTenantId()), Collectors.toList()));
@@ -109,13 +114,15 @@ public class OrderLineLocationUpdateService {
           .withQuantityElectronic(qtyElectronic > 0 ? qtyElectronic : null));
       });
     });
+    var isQuantityFinal = locations.stream().filter(Objects::nonNull)
+      .anyMatch(location -> pieces.size() == location.getQuantity());
     if (locations.isEmpty() || Objects.equals(locations, poLine.getLocations())) {
-      return false;
+      return Pair.of(false, isQuantityFinal);
     }
     log.info("updatePoLineLocations:: Replacing locations of POL: '{}' having old value: '{}' with new value: '{}'",
       poLine.getId(), JsonArray.of(poLine.getLocations()).encode(), JsonArray.of(locations).encode());
     poLine.withLocations(locations);
-    return true;
+    return Pair.of(true, isQuantityFinal);
   }
 
   private boolean updatePoLineSearchLocationIds(PoLine poLine, String itemEffectiveLocation) {
@@ -127,5 +134,4 @@ public class OrderLineLocationUpdateService {
     poLine.getSearchLocationIds().add(itemEffectiveLocation);
     return true;
   }
-
 }

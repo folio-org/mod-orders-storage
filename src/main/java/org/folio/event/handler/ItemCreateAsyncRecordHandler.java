@@ -16,6 +16,7 @@ import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -55,8 +56,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
       .withTrans(conn -> pieceService.getPiecesByItemId(itemId, conn)
         .compose(pieces -> processPiecesUpdate(pieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
         .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
+        .compose(v -> auditOutboxService.processOutboxEventLogs(headers))
       )
-      .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 
@@ -124,8 +125,12 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     // The skipFiltering is set to true to update all POLs regardless of the checkinItems flag, as items could be located in
     // different tenants and to keep consistency, POLs must be updated regardless of the checkinItems flag (Receiving Workflow)
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, itemObject, true, centralTenantId, headers, conn)
-      .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers))
+      .compose(updatedPoLinesPairs -> {
+        var updatedPoLines = updatedPoLinesPairs.stream().filter(Objects::nonNull)
+          .map(Pair::getRight)
+          .toList();
+        return auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers);
+      })
       .mapEmpty();
   }
-
 }
