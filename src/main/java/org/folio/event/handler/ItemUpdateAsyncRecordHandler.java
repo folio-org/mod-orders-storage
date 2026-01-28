@@ -120,7 +120,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
         // or if search locations were changed. We don't want to log individual quantity change events, because
         // 1-they oversaturate the consumers and 2-they dilute the quality of information in the log pane
         var updatedPoLines = updatedPoLinesPairs.stream().filter(Objects::nonNull)
-          .filter(pair -> Boolean.FALSE.equals(pair.getRight().getCheckinItems()) && pair.getLeft())
+          .filter(pair -> Boolean.TRUE.equals(pair.getRight().getCheckinItems())
+            || Boolean.FALSE.equals(pair.getRight().getCheckinItems()) && pair.getLeft())
           .map(Pair::getRight)
           .toList();
         return auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders());
