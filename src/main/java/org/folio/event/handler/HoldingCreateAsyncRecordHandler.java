@@ -60,9 +60,9 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
         var updatedHeaders = HeaderUtils.prepareHeaderForTenant(centralTenantId, headers);
         var poLineFuture = processPoLinesUpdate(holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
         var pieceFuture = processPiecesUpdate(holdingId, tenantIdFromEvent, centralTenantId, updatedHeaders, conn);
-        return Future.all(List.of(poLineFuture, pieceFuture))
-          .compose(v -> auditOutboxService.processOutboxEventLogs(headers));
+        return Future.all(List.of(poLineFuture, pieceFuture)).mapEmpty();
       })
+      .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
   }
 

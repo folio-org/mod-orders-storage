@@ -80,7 +80,8 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
         extractDistinctAdjacentHoldingsToUpdate(holder, dto);
         return dto;
       })
-      .compose(dto -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, dto.getAdjacentHoldingIds(), requestContext).map(dto));
+      .compose(dto -> inventoryUpdateService.batchUpdateAdjacentHoldingsWithNewInstanceId(holder, dto.getAdjacentHoldingIds(), requestContext).map(dto))
+      .onComplete(dto -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()));
   }
 
   private Future<HoldingUpdate> processPoLinesUpdate(HoldingEventHolder holder, Conn conn, RequestContext requestContext) {
@@ -88,13 +89,14 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .compose(v -> poLinesService.getPoLinesByCqlQuery(PO_LINE_LOCATIONS_HOLDING_ID_CQL.formatted(holder.getHoldingId()), conn))
       .compose(poLines -> updatePoLines(holder, poLines, conn))
       .compose(dto -> updateTitles(holder, dto.getPoLinesWithUpdatedInstanceId(), conn).map(dto))
-      .compose(dto -> saveOrderLinesOutboxLogsConditionally(holder, conn, dto))
-      .compose(dto -> auditOutboxService.processOutboxEventLogs(holder.getHeaders()).map(dto));
+      .compose(dto -> saveOrderLinesOutboxLogsConditionally(holder, conn, dto));
   }
 
   // Supported 2 operations: Move instance in "member tenant" & edit holding in "central tenant"
   private Future<HoldingUpdate> saveOrderLinesOutboxLogsConditionally(HoldingEventHolder holder, Conn conn, HoldingUpdate dto) {
     List<PoLine> poLinesToLog;
+    log.info("saveOrderLinesOutboxLogsConditionally:: isInstanceIdUpdated={} (count={}), isSearchLocationIdsUpdated={} (count={})",
+      dto.isInstanceIdUpdated(), dto.getPoLinesWithUpdatedInstanceId().size(), dto.isSearchLocationIdsUpdated(), dto.getPoLinesWithUpdatedSearchLocationIds().size());
     if (dto.isInstanceIdUpdated() && !dto.isSearchLocationIdsUpdated()) {
       poLinesToLog = dto.getPoLinesWithUpdatedInstanceId();
     } else {

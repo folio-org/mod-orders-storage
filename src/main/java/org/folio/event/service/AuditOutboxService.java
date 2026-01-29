@@ -19,7 +19,6 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.persist.Conn;
-import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
 
 import io.vertx.core.Future;
@@ -49,9 +48,9 @@ public class AuditOutboxService {
    * @return future with integer how many records have been processed
    */
   public Future<Integer> processOutboxEventLogs(Map<String, String> okapiHeaders) {
-    String tenantId = TenantTool.tenantId(okapiHeaders);
-    log.trace("processOutboxEventLogs, tenantId={}", tenantId);
-    PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
+    var tenantId = TenantTool.tenantId(okapiHeaders);
+    log.trace("processOutboxEventLogs:: Preparing to process outbox event logs, tenantId={}", tenantId);
+    var pgClient = pgClientFactory.createInstance(tenantId);
     return pgClient.withTrans(conn -> outboxRepository.fetchEventLogs(conn, tenantId)
       .compose(logs -> {
         if (CollectionUtils.isEmpty(logs)) {
@@ -59,7 +58,7 @@ public class AuditOutboxService {
           return Future.succeededFuture(0);
         }
 
-        log.info("processOutboxEventLogs:: Fetched {} event logs from outbox table, going to send them to kafka", logs.size());
+        log.info("processOutboxEventLogs:: Fetched {} event logs from outbox table, going to send them to Kafka", logs.size());
         var futures = getKafkaFutures(logs, okapiHeaders);
 
         // Wait for all futures to complete (succeed or fail)
@@ -81,7 +80,7 @@ public class AuditOutboxService {
 
             log.info("processOutboxEventLogs:: Successfully sent {} out of {} events to Kafka", successfulEventIds.size(), logs.size());
             return outboxRepository.deleteBatch(conn, successfulEventIds, tenantId)
-              .onSuccess(rowsCount -> log.info("processOutboxEventLogs:: {} logs have been deleted from outbox table", rowsCount))
+              .onSuccess(count -> log.info("processOutboxEventLogs:: Logs deleted from outbox table: {}", count))
               .onFailure(ex -> log.error("Logs deletion failed", ex));
           });
       })
