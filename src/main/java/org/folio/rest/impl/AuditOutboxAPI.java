@@ -5,8 +5,6 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.resource.OrdersStorageAuditOutbox;
 import org.folio.spring.SpringContextUtil;
@@ -16,8 +14,6 @@ import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public class AuditOutboxAPI implements OrdersStorageAuditOutbox {
-
-  private static final Logger log = LogManager.getLogger();
 
   @Autowired
   private AuditOutboxService auditOutboxService;
