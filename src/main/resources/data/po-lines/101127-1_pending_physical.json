@@ -1,0 +1,55 @@
+{
+  "id": "e5f6a7b8-c9d0-4e1f-8a3b-4c5d6e7f8a9b",
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "cancellationRestriction": false,
+  "checkinItems": false,
+  "collection": false,
+  "cost": {
+    "additionalCost": 0,
+    "currency": "USD",
+    "discount": 0,
+    "discountType": "percentage",
+    "listUnitPrice": 10.00,
+    "listUnitPriceElectronic": 0.00,
+    "poLineEstimatedPrice": 10.00,
+    "quantityElectronic": 0,
+    "quantityPhysical": 1
+  },
+  "details": {
+    "productIds": [],
+    "subscriptionInterval": 0
+  },
+  "fundDistribution": [
+    {
+      "code": "UNIV-SUBN",
+      "fundId": "4428a37c-8bae-4f0d-865d-970d83d5ad55",
+      "distributionType": "percentage",
+      "value": 100.0
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "paymentStatus": "Pending",
+  "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
+  },
+  "poLineNumber": "101127-1",
+  "purchaseOrderId": "d4e5f6a7-b8c9-4d0e-8f2a-3b4c5d6e7f8a",
+  "receiptStatus": "Pending",
+  "rush": false,
+  "source": "User",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  },
+  "titleOrPackage": "Reference Manual Title"
+}
