@@ -15,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -112,7 +113,19 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn)
-      .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
+      .compose(updatedPoLinesPairs -> {
+        // If the receiving workflow is "synchronized", try to filter the scheduled events by the final quantity
+        // or if search locations were changed. We don't want to log individual quantity change events, because
+        // 1-they oversaturate the consumers and 2-they dilute the quality of information in the log pane
+        log.info("processPoLinesUpdate:: Preparing to save POL {} logs before filtering", updatedPoLinesPairs.size());
+        var updatedPoLines = updatedPoLinesPairs.stream().filter(Objects::nonNull)
+          .filter(pair -> Boolean.TRUE.equals(pair.getRight().getCheckinItems())
+            || Boolean.FALSE.equals(pair.getRight().getCheckinItems()) && pair.getLeft())
+          .map(Pair::getRight)
+          .toList();
+        log.info("processPoLinesUpdate:: Preparing to save POL {} logs after filtering", updatedPoLines.size());
+        return auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders());
+      })
       .mapEmpty();
   }
 
@@ -124,5 +137,4 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .build()
       .prepareAllIds();
   }
-
 }

@@ -165,6 +165,7 @@ public class PoLinesService {
     return promise.future();
   }
 
+  @SuppressWarnings("unchecked")
   public Future<List<PoLine>> getPoLinesByLineIdsByChunks(List<String> poLineIds, Conn conn) {
     log.trace("getPoLinesByLineIds, poLineIds={}", poLineIds);
     if (CollectionUtils.isEmpty(poLineIds)) {
@@ -179,7 +180,7 @@ public class PoLinesService {
         if (ar.succeeded()) {
           log.trace("getPoLinesByLineIds completed, poLineIds={}", poLineIds);
           promise.complete(ar.result().list().stream()
-            .map(chunkList -> (List<PoLine>)chunkList)
+            .map(chunkList -> (List<PoLine>) chunkList)
             .filter(CollectionUtils::isNotEmpty)
             .flatMap(Collection::stream)
             .toList());
@@ -357,11 +358,14 @@ public class PoLinesService {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     return conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
       .recover(t -> Future.failedFuture(httpHandleFailure(t)))
-      .compose(rows -> rows.rowCount() == 0
-        ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
-        : Future.succeededFuture(poLine))
-      .onSuccess(v -> log.info("updatePoLine:: Complete, poLineId={}", poLine.getId()))
-      .onComplete(t -> log.error("updatePoLine:: Failed, poLineId={}", poLine.getId(), t.cause()));
+      .compose(rows -> {
+        log.debug("doUpdatePoLine:: Result rows={}", rows.rowCount());
+        return rows.rowCount() == 0
+          ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
+          : Future.succeededFuture(poLine);
+      })
+      .onSuccess(v -> log.info("doUpdatePoLine:: Success, poLineId={}", poLine.getId()))
+      .onFailure(t -> log.error("doUpdatePoLine:: Failed, poLineId={}", poLine.getId(), t));
   }
 
   private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine, List<String> acqUnitIds, Map<String, String> headers) {

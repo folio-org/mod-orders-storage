@@ -20,7 +20,6 @@ import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.HeaderUtils;
-import org.folio.util.InventoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -96,7 +95,9 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   // Supported 2 operations: Move instance in "member tenant" & edit holding in "central tenant"
   private Future<HoldingUpdate> saveOrderLinesOutboxLogsConditionally(HoldingEventHolder holder, Conn conn, HoldingUpdate dto) {
     List<PoLine> poLinesToLog;
-    if (Boolean.TRUE.equals(dto.isInstanceIdUpdated()) && Boolean.FALSE.equals(dto.isSearchLocationIdsUpdated())) {
+    log.info("saveOrderLinesOutboxLogsConditionally:: isInstanceIdUpdated={} (count={}), isSearchLocationIdsUpdated={} (count={})",
+      dto.isInstanceIdUpdated(), dto.getPoLinesWithUpdatedInstanceId().size(), dto.isSearchLocationIdsUpdated(), dto.getPoLinesWithUpdatedSearchLocationIds().size());
+    if (dto.isInstanceIdUpdated() && !dto.isSearchLocationIdsUpdated()) {
       poLinesToLog = dto.getPoLinesWithUpdatedInstanceId();
     } else {
       poLinesToLog = dto.getPoLinesWithUpdatedSearchLocationIds();

@@ -101,7 +101,6 @@ public abstract class TestBase {
       .body("totalRecords", equalTo(quantity));
   }
 
-
   void verifyCollectionQuantity(String endpoint, int quantity) throws MalformedURLException {
     // Verify that the specified quantity of records exist
     verifyCollectionQuantity(endpoint, quantity,TENANT_HEADER);
