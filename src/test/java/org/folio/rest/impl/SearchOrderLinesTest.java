@@ -65,7 +65,7 @@ public class SearchOrderLinesTest extends TestBase {
   public void testgetPolineswithPOQuery() throws MalformedURLException {
     log.info("--- mod-orders-storage po-lines: Verify query with field from PO and a field from PO Line");
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=purchaseOrder.workflowStatus=Pending and orderFormat==Physical Resource");
-    assertThat(poLines, hasSize(3));
+    assertThat(poLines, hasSize(4));
     assertThat(poLines.get(0).getOrderFormat(), is(OrderFormat.PHYSICAL_RESOURCE));
   }
 
@@ -73,7 +73,7 @@ public class SearchOrderLinesTest extends TestBase {
   public void testgetPolineswithPOLinesQuery() throws MalformedURLException {
     log.info("--- mod-orders-storage po-lines: Verify query on fields from PO Lines");
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + "?query=orderFormat==Physical Resource and physical.createInventory=Instance, Holding, Item");
-    assertThat(poLines, hasSize(3));
+    assertThat(poLines, hasSize(7));
     assertThat(poLines.get(0).getOrderFormat(), is(OrderFormat.PHYSICAL_RESOURCE));
     assertThat(poLines.get(0).getPhysical().getCreateInventory(), is(CreateInventory.INSTANCE_HOLDING_ITEM));
   }
@@ -106,7 +106,7 @@ public class SearchOrderLinesTest extends TestBase {
     // Check that there are PO Line(s) associated with an order which has acquisition unit(s) assigned
     String notEmptyAcqUnitsQuery = "?query=purchaseOrder.acqUnitIds=\"\" NOT purchaseOrder.acqUnitIds==[]";
     List<PoLine> poLines = queryAndGetPOLines(ORDER_LINES_ENDPOINT + notEmptyAcqUnitsQuery);
-    assertThat(poLines, hasSize(2));
+    assertThat(poLines, hasSize(3));
     String purchaseOrderId = poLines.get(0).getPurchaseOrderId();
 
     // Check that the same result if querying `po-lines` endpoint

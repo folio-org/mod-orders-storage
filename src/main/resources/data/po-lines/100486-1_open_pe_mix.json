@@ -1,5 +1,5 @@
 {
-  "id": "9d0e1f2a-3b4c-4d5e-6f7a-8b9c0d1e2f3a",
+  "id": "9d0e1f2a-3b4c-4d5e-8f7a-8b9c0d1e2f3a",
   "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
   "cancellationRestriction": false,
   "checkinItems": false,
@@ -53,7 +53,7 @@
     "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
   },
   "poLineNumber": "100486-1",
-  "purchaseOrderId": "8c9d0e1f-2a3b-4c4d-5e6f-7a8b9c0d1e2f",
+  "purchaseOrderId": "8c9d0e1f-2a3b-4c4d-8e6f-7a8b9c0d1e2f",
   "receiptStatus": "Pending",
   "rush": false,
   "source": "User",
