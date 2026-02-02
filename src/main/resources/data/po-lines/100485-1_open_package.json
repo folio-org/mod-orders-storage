@@ -1,0 +1,62 @@
+{
+  "id": "4e5f6a7b-8c9d-4e0f-8a2b-3c4d5e6f7a8b",
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "cancellationRestriction": false,
+  "checkinItems": false,
+  "collection": false,
+  "cost": {
+    "additionalCost": 0,
+    "currency": "USD",
+    "discount": 0,
+    "discountType": "percentage",
+    "listUnitPrice": 100.00,
+    "listUnitPriceElectronic": 0.00,
+    "poLineEstimatedPrice": 100.00,
+    "quantityElectronic": 0,
+    "quantityPhysical": 1
+  },
+  "details": {
+    "productIds": [],
+    "subscriptionInterval": 0
+  },
+  "fundDistribution": [
+    {
+      "code": "USHIST",
+      "fundId": "65032151-39a5-4cef-8810-5350eb316300",
+      "distributionType": "percentage",
+      "value": 50.0
+    },
+    {
+      "code": "EUROHIST",
+      "fundId": "e9285a1c-1dfc-4380-868c-e74073003f43",
+      "distributionType": "percentage",
+      "value": 50.0
+    }
+  ],
+  "isPackage": true,
+  "locations": [
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "paymentStatus": "Pending",
+  "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
+  },
+  "poLineNumber": "100485-1",
+  "purchaseOrderId": "3d4e5f6a-7b8c-4d9e-8f1a-2b3c4d5e6f7a",
+  "receiptStatus": "Pending",
+  "rush": false,
+  "source": "User",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  },
+  "titleOrPackage": "Reference Book Collection Package"
+}

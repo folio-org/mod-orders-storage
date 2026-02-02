@@ -5,9 +5,9 @@ import org.folio.rest.jaxrs.model.*;
 public enum TestEntities {
   // the below order is important to satisfy the foreign key constraints
   CUSTOM_FIELDS("/custom-fields", CustomField.class, TestData.CustomFields.PO, "helpText", "New help text", 2),
-  PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, TestData.PurchaseOrder.DEFAULT, "poNumber", "666666", 7),
-  PO_LINE("/orders-storage/po-lines", PoLine.class, TestData.PoLine.DEFAULT, "description", "Gift", 6),
-  TITLES("/orders-storage/titles", Title.class, TestData.Title.DEFAULT, "title", "New title", 6),
+  PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, TestData.PurchaseOrder.DEFAULT, "poNumber", "666666", 13),
+  PO_LINE("/orders-storage/po-lines", PoLine.class, TestData.PoLine.DEFAULT, "description", "Gift", 12),
+  TITLES("/orders-storage/titles", Title.class, TestData.Title.DEFAULT, "title", "New title", 14),
   PIECE("/orders-storage/pieces", Piece.class, TestData.Piece.DEFAULT, "comment", "Update Comment", 24),
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, TestData.OrderInvoiceRelationship.DEFAULT, "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 0),
   ORDER_TEMPLATE("/orders-storage/order-templates", OrderTemplate.class, TestData.OrderTemplate.DEFAULT, "templateCode", "Amazon-A", 9),
