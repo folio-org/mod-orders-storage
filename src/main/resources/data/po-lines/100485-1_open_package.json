@@ -27,8 +27,8 @@
       "value": 50.0
     },
     {
-      "code": "EUROHIST",
-      "fundId": "e9285a1c-1dfc-4380-868c-e74073003f43",
+      "code": "ASIAHIST",
+      "fundId": "55f48dc6-efa7-4cfe-bc7c-4786efe493e3",
       "distributionType": "percentage",
       "value": 50.0
     }
