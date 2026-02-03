@@ -137,6 +137,26 @@ public class PieceService {
       .onFailure(e -> log.error("updatePiece:: Update piece failed: '{}'", id, e));
   }
 
+
+  public Future<Piece> getPieceById(String id, Conn conn) {
+    log.debug("getPieceById:: Getting piece: '{}'", id);
+    return conn.getById(PIECES_TABLE, id, Piece.class)
+      .compose(piece -> piece == null
+        ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), "Piece not found: " + id))
+        : Future.succeededFuture(piece));
+  }
+
+  public Future<Void> deletePiece(String id, Conn conn) {
+    log.debug("deletePiece:: Deleting piece: '{}'", id);
+    var criterion = getCriterionByFieldNameAndValue("id", id);
+    return conn.delete(PIECES_TABLE, criterion)
+      .compose(DbUtils::failOnNoUpdateOrDelete)
+      .onSuccess(rowSet -> log.info("deletePiece:: Piece successfully deleted: '{}'", id))
+      .onFailure(e -> log.error("deletePiece:: Delete piece failed: '{}'", id, e))
+      .mapEmpty();
+  }
+
+
   private Future<Void> updatePieces(PoLine poLine, List<Piece> pieces, Conn conn, String tenantId) {
     var poLineId = poLine.getId();
     if (CollectionUtils.isEmpty(pieces)) {
