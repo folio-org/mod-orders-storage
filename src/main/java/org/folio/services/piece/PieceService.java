@@ -148,8 +148,7 @@ public class PieceService {
 
   public Future<Void> deletePiece(String id, Conn conn) {
     log.debug("deletePiece:: Deleting piece: '{}'", id);
-    var criterion = getCriterionByFieldNameAndValue("id", id);
-    return conn.delete(PIECES_TABLE, criterion)
+    return conn.delete(PIECES_TABLE, id)
       .compose(DbUtils::failOnNoUpdateOrDelete)
       .onSuccess(rowSet -> log.info("deletePiece:: Piece successfully deleted: '{}'", id))
       .onFailure(e -> log.error("deletePiece:: Delete piece failed: '{}'", id, e))
