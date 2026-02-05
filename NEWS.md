@@ -1,5 +1,12 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.7 - Released (Sunflower R1 2025 Hot Fix)
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.6...v13.9.7)
+
+### Bug Fixes
+* [MODORDSTOR-499](https://folio-org.atlassian.net/browse/MODORDSTOR-499) - Deleting pieces doesn't generate event message in Kafka
+
 ## 13.9.6 - Released (Sunflower R1 2025 Hot Fix)
 The primary focus of the release was to update to RMB 35.4.2 and Vertx 4.5.23
 
