@@ -88,7 +88,21 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
   @Validate
   public void deleteOrdersStoragePiecesById(String id, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
-    PgUtil.deleteById(PIECES_TABLE, id, okapiHeaders, vertxContext, DeleteOrdersStoragePiecesByIdResponse.class, asyncResultHandler);
+    pgClient.withTrans(conn ->
+      pieceService.getPieceById(id, conn)
+        .compose(piece -> pieceService.deletePiece(id, conn)
+          .map(v -> populateMetadata(piece::getMetadata, piece::withMetadata, okapiHeaders)))
+        .compose(piece -> auditOutboxService.savePieceOutboxLog(conn, piece, PieceAuditEvent.Action.DELETE, okapiHeaders)))
+      .onComplete(ar -> {
+        if (ar.succeeded()) {
+          log.info("Delete piece complete, id={}", id);
+          auditOutboxService.processOutboxEventLogs(okapiHeaders);
+          asyncResultHandler.handle(buildNoContentResponse());
+        } else {
+          log.error("Delete piece failed, id={}", id, ar.cause());
+          asyncResultHandler.handle(buildErrorResponse(ar.cause()));
+        }
+      });
   }
 
   @Override
