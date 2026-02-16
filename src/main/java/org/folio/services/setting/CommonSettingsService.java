@@ -1,10 +1,8 @@
 package org.folio.services.setting;
 
 import java.time.ZoneId;
-import java.util.Optional;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.folio.rest.acq.model.settings.CommonSettingsCollection;
+import org.apache.commons.lang3.StringUtils;
 import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.core.models.RequestEntry;
@@ -20,34 +18,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CommonSettingsService {
 
-  private static final String TENANT_LOCALE_QUERY = "(scope==stripes-core.prefs.manage and key==tenantLocaleSettings)";
   private static final String TIMEZONE_SETTING = "timezone";
   private static final String DEFAULT_TIMEZONE = "UTC";
 
   private final RestClient restClient;
 
   public Future<ZoneId> getTenantTimeZone(RequestContext requestContext) {
-    return loadTenantLocaleSettings(TIMEZONE_SETTING, DEFAULT_TIMEZONE, requestContext);
-  }
-
-  private Future<ZoneId> loadTenantLocaleSettings(String key, String defaultValue, RequestContext requestContext) {
-    var requestEntry = new RequestEntry(ResourcePath.SETTINGS_URL.getPath())
-      .withOffset(0)
-      .withLimit(Integer.MAX_VALUE)
-      .withQuery(TENANT_LOCALE_QUERY);
+    var requestEntry = new RequestEntry(ResourcePath.LOCALE_URL.getPath());
     return restClient.get(requestEntry, requestContext)
       .map(jsonObject -> {
         if (jsonObject == null) {
-          return defaultValue;
+          return DEFAULT_TIMEZONE;
         }
-        var settings = jsonObject.mapTo(CommonSettingsCollection.class);
-        if (CollectionUtils.isEmpty(settings.getItems())) {
-          return defaultValue;
-        }
-        return Optional.ofNullable(settings.getItems().getFirst().getValue())
-          .map(value -> value.getAdditionalProperties().get(key))
-          .map(Object::toString)
-          .orElse(defaultValue);
+        var timezone = jsonObject.getString(TIMEZONE_SETTING);
+        return StringUtils.isNotBlank(timezone) ? timezone : DEFAULT_TIMEZONE;
       })
       .map(ZoneId::of);
   }

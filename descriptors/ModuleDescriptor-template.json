@@ -540,7 +540,7 @@
             "orders-storage.claiming.process.execute"
           ],
           "modulePermissions": [
-            "mod-settings.global.read.stripes-core.prefs.manage"
+            "locale.item.get"
           ]
         }
       ]
@@ -697,8 +697,8 @@
   ],
   "requires": [
     {
-      "id": "settings",
-      "version": "1.2"
+      "id": "locale",
+      "version": "1.0"
     },
     {
       "id": "user-tenants",
