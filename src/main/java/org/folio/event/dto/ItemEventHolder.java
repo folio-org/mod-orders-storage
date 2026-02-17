@@ -3,6 +3,7 @@ package org.folio.event.dto;
 
 import static org.folio.event.dto.ItemFields.ACCESSION_NUMBER;
 import static org.folio.event.dto.ItemFields.BARCODE;
+import static org.folio.event.dto.ItemFields.BATCH_ID;
 import static org.folio.event.dto.ItemFields.CALL_NUMBER;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_CALL_NUMBER_COMPONENTS;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
@@ -28,6 +29,9 @@ public class ItemEventHolder {
   private String orderTenantId;
   private String centralTenantId;
 
+  private String batchId;
+  private boolean isLastInBatch;
+
   private String itemId;
   private JsonObject item;
   private String holdingId;
@@ -44,6 +48,7 @@ public class ItemEventHolder {
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
     setItem(newValue);
     setItemId(newValue.getString(ID.getValue()));
+    setBatchId(newValue.getString(BATCH_ID.getValue()));
 
     setHoldingIdPair(Pair.of(
       oldValue.getString(HOLDINGS_RECORD_ID.getValue()),

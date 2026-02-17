@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
+import static org.folio.event.dto.ItemFields.BATCH_ID;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
@@ -45,6 +46,7 @@ import org.folio.TestUtils;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.okapi.common.XOkapiHeaders;
+import org.folio.rest.jaxrs.model.BatchTracking;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
@@ -54,6 +56,7 @@ import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.batch.BatchTrackingService;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.lines.PoLinesService;
@@ -78,6 +81,8 @@ public class ItemCreateAsyncRecordHandlerTest {
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
   @Mock
+  private BatchTrackingService batchTrackingService;
+  @Mock
   private AuditOutboxService auditOutboxService;
   @Mock
   private DBClient dbClient;
@@ -98,6 +103,7 @@ public class ItemCreateAsyncRecordHandlerTest {
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
       TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
       TestUtils.setInternalState(itemHandler, "consortiumConfigurationService", consortiumConfigurationService);
+      TestUtils.setInternalState(itemHandler, "batchTrackingService", batchTrackingService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
       handler = spy(itemHandler);
       doReturn(Future.succeededFuture(Optional.of(new Setting().withValue("true"))))
@@ -482,6 +488,112 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
   }
 
+  @Test
+  void positive_shouldProcessItemCreateEventsInBatch() {
+    // Inventory data
+    var itemId1 = UUID.randomUUID().toString();
+    var itemId2 = UUID.randomUUID().toString();
+    var effectiveLocationId1 = UUID.randomUUID().toString();
+    var effectiveLocationId2 = UUID.randomUUID().toString();
+    // Batch tracking
+    var batchId = UUID.randomUUID().toString();
+    var batchTracking = new BatchTracking().withId(batchId).withTotalRecords(2);
+    // PoLine 1
+    var poLineId1 = UUID.randomUUID().toString();
+    var pieceId1 = UUID.randomUUID().toString();
+    var pieceId2 = UUID.randomUUID().toString();
+    var holdingId1 = UUID.randomUUID().toString();
+    var holdingId2 = UUID.randomUUID().toString();
+    // PoLine 2
+    var poLineId2 = UUID.randomUUID().toString();
+    var pieceId3 = UUID.randomUUID().toString();
+    var pieceId4 = UUID.randomUUID().toString();
+    // Kafka record
+    var kafkaRecord1 = createItemEventKafkaRecord(itemId1, holdingId2, batchId, effectiveLocationId2, COLLEGE_TENANT);
+    var kafkaRecord2 = createItemEventKafkaRecord(itemId2, holdingId1, batchId, effectiveLocationId1, COLLEGE_TENANT);
+
+    // PoLine 1 pieces 1, 2
+    var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var piece2 = createPiece(pieceId2, itemId2).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId2).withFormat(Piece.Format.PHYSICAL);
+    var poLine1 = createPoLine(poLineId1, List.of(piece1, piece2), List.of(effectiveLocationId1, effectiveLocationId2));
+
+    // PoLine 2 piece 3, 4
+    var piece3 = createPiece(pieceId3, itemId1).withPoLineId(poLineId2).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var piece4 = createPiece(pieceId4, itemId2).withPoLineId(poLineId2).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId2).withFormat(Piece.Format.PHYSICAL);
+    var poLine2 = createPoLine(poLineId2, List.of(piece3, piece4), List.of(effectiveLocationId1, effectiveLocationId2));
+
+    // Common mocks
+    doReturn(Future.succeededFuture(List.of(piece1, piece3))).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    doReturn(Future.succeededFuture(List.of(piece2, piece4))).when(pieceService).getPiecesByItemId(eq(itemId2), eq(conn));
+    doReturn(Future.succeededFuture()).when(pieceService).updatePiecesInventoryData(anyList(), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture()).when(poLinesService).updatePoLines(anyList(), eq(conn), eq(CENTRAL_TENANT), any());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
+
+    //// First event processing ////
+    // Affected entities after first event processing
+    var affectedPiece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId2).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece3 = createPiece(pieceId3, itemId1).withPoLineId(poLineId2).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId2).withFormat(Piece.Format.PHYSICAL);
+    doReturn(Future.succeededFuture(List.of(poLine1, poLine2))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), eq(conn));
+
+    var affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, piece2), List.of(effectiveLocationId1, effectiveLocationId2));
+    var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece3, piece4), List.of(effectiveLocationId1, effectiveLocationId2));
+    var affectedPieces = List.of(affectedPiece1, affectedPiece3);
+    var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+
+    doReturn(Future.succeededFuture(List.of(poLine1, poLine2))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), eq(conn));
+    doReturn(Future.succeededFuture(List.of(affectedPiece1, piece2))).when(pieceService).getPiecesByPoLineId(poLineId1, conn);
+    doReturn(Future.succeededFuture(List.of(affectedPiece3, piece4))).when(pieceService).getPiecesByPoLineId(poLineId2, conn);
+    doReturn(Future.succeededFuture(batchTracking.withProcessedCount(1))).when(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
+
+    var result = handler.handle(kafkaRecord1);
+    assertTrue(result.succeeded());
+
+    // Update Pieces
+    verify(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
+    verify(pieceService).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    // Update PoLines
+    verify(poLinesService).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
+    // Batch tracking - should be increased, but batch should not be finished yet, as we have 2 records in batch and only 1 processed
+    verify(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
+    verify(batchTrackingService, never()).deleteBatchTracking(conn, batchId);
+    // Audit logs - No POL log should be saved until batch is finished
+    verify(auditOutboxService).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+
+
+    //// Second event processing ////
+    var affectedPiece2 = createPiece(pieceId2, itemId2).withPoLineId(poLineId1).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    var affectedPiece4 = createPiece(pieceId4, itemId2).withPoLineId(poLineId2).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
+    doReturn(Future.succeededFuture(List.of(affectedPoLine1, affectedPoLine2))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), eq(conn));
+
+    affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2), List.of(effectiveLocationId1, effectiveLocationId2));
+    affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece3, affectedPiece4), List.of(effectiveLocationId1, effectiveLocationId2));
+    affectedPieces = List.of(affectedPiece2, affectedPiece4);
+    affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+
+    doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2))).when(pieceService).getPiecesByPoLineId(poLineId1, conn);
+    doReturn(Future.succeededFuture(List.of(affectedPiece3, affectedPiece4))).when(pieceService).getPiecesByPoLineId(poLineId2, conn);
+    doReturn(Future.succeededFuture(batchTracking.withProcessedCount(2))).when(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
+    doReturn(Future.succeededFuture(batchTracking.withProcessedCount(2))).when(batchTrackingService).deleteBatchTracking(conn, batchId);
+
+    result = handler.handle(kafkaRecord2);
+    assertTrue(result.succeeded());
+
+    // Update Pieces
+    verify(pieceService).getPiecesByItemId(eq(itemId2), eq(conn));
+    verify(pieceService).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
+    // Update PoLines
+    verify(poLinesService).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
+    // Batch tracking - should be increased and batch should be finished, as we have 2 records in batch and both are processed
+    verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
+    verify(batchTrackingService).deleteBatchTracking(conn, batchId);
+    // Audit logs - Now POL logs should be saved, as batch is finished
+    verify(auditOutboxService).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+
+  }
+
   private Piece createPiece(String pieceId, String itemId) {
     return new Piece().withId(pieceId).withItemId(itemId);
   }
@@ -512,10 +624,16 @@ public class ItemCreateAsyncRecordHandlerTest {
 
   private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId,
                                                                          String effectiveLocationId, String tenantId) {
+    return createItemEventKafkaRecord(itemId, holdingRecordId, null, effectiveLocationId, tenantId);
+  }
+
+  private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId, String batchId,
+                                                                         String effectiveLocationId, String tenantId) {
     var resourceEvent = createResourceEvent(tenantId, CREATE);
     var itemObject = new JsonObject().put(ID.getValue(), itemId)
       .put(HOLDINGS_RECORD_ID.getValue(), holdingRecordId)
-      .put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId);
+      .put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId)
+      .put(BATCH_ID.getValue(), batchId);
     resourceEvent.setNewValue(itemObject);
     return createKafkaRecord(resourceEvent, CENTRAL_TENANT);
   }

@@ -1,0 +1,24 @@
+#%RAML 1.0
+title: "mod-orders-storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1.0
+
+documentation:
+  - title: Batch Tracking Cleanup API
+    content: <b>Batch Tracking Cleanup API. This API is intended for internal use only by the Timer interface.</b>
+
+/orders-storage/batch-tracking/cleanup:
+  post:
+    description: Clean up old batch tracking records (older than 24 hours)
+    responses:
+      200:
+        description: "Cleanup completed successfully"
+        body:
+          text/plain:
+            example: "Cleaned up 5 batch tracking records"
+      500:
+        description: "Internal server error"
+        body:
+          text/plain:
+            example: "Internal server error"
+

@@ -1,0 +1,66 @@
+#%RAML 1.0
+title: "mod-orders-storage"
+baseUri: http://github.com/folio-org/mod-orders-storage
+version: v1.0
+
+documentation:
+  - title: Batch Tracking API
+    content: <b>Batch Tracking API for tracking aggregated item Kafka events</b>
+
+types:
+  batch-tracking: !include acq-models/mod-orders-storage/schemas/batch_tracking.json
+  exampleItem: !include acq-models/mod-orders-storage/examples/batch_tracking.sample
+  errors: !include raml-util/schemas/errors.schema
+  UUID:
+    type: string
+    pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$
+
+traits:
+  validate: !include raml-util/traits/validation.raml
+
+/orders-storage/batch-tracking:
+  displayName: Batch Tracking
+  post:
+    description: Create a new batch tracking record
+    is: [validate]
+    body:
+      application/json:
+        type: batch-tracking
+    responses:
+      201:
+        description: "Batch tracking record successfully created"
+        body:
+          application/json:
+            type: batch-tracking
+      400:
+        description: "Bad request"
+        body:
+          text/plain:
+            example: "Invalid batch tracking data"
+      500:
+        description: "Internal server error"
+        body:
+          text/plain:
+            example: "Internal server error"
+  /{id}:
+    uriParameters:
+      id:
+        description: "Batch tracking ID (UUID)"
+        type: UUID
+    delete:
+      description: Delete a batch tracking record by ID
+      responses:
+        204:
+          description: "Batch tracking record successfully deleted"
+        404:
+          description: "Batch tracking record not found"
+          body:
+            text/plain:
+              example: "Batch tracking record not found"
+        500:
+          description: "Internal server error"
+          body:
+            text/plain:
+              example: "Internal server error"
+
+

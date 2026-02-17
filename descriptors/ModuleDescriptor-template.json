@@ -655,6 +655,22 @@
       ]
     },
     {
+      "id": "orders-storage.batch-tracking",
+      "version": "1.0",
+      "handlers": [
+        {
+          "methods": ["POST"],
+          "pathPattern": "/orders-storage/batch-tracking",
+          "permissionsRequired": ["orders-storage.batch-tracking.item.post"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/orders-storage/batch-tracking/{id}",
+          "permissionsRequired": ["orders-storage.batch-tracking.item.delete"]
+        }
+      ]
+    },
+    {
       "id": "_tenant",
       "version": "2.0",
       "interfaceType": "system",
@@ -688,6 +704,15 @@
             "POST"
           ],
           "pathPattern": "/orders-storage/claiming/process",
+          "modulePermissions": [],
+          "unit": "hour",
+          "delay": "1"
+        },
+        {
+          "methods": [
+            "POST"
+          ],
+          "pathPattern": "/orders-storage/batch-tracking/cleanup",
           "modulePermissions": [],
           "unit": "hour",
           "delay": "1"
@@ -1476,6 +1501,25 @@
       "description" : "Delete a setting"
     },
     {
+      "permissionName" : "orders-storage.batch-tracking.item.post",
+      "displayName" : "batch-tracking post",
+      "description" : "Create a batch tracking record"
+    },
+    {
+      "permissionName" : "orders-storage.batch-tracking.item.delete",
+      "displayName" : "batch-tracking delete",
+      "description" : "Delete a batch tracking record"
+    },
+    {
+      "permissionName" : "orders-storage.batch-tracking.all",
+      "displayName" : "All batch-tracking perms",
+      "description" : "All permissions for batch tracking",
+      "subPermissions" : [
+        "orders-storage.batch-tracking.item.post",
+        "orders-storage.batch-tracking.item.delete"
+      ]
+    },
+    {
       "permissionName" : "orders-storage.settings.all",
       "displayName" : "setting all",
       "description" : "All permissions for setting",
@@ -1514,7 +1558,8 @@
         "orders-storage.claiming.all",
         "orders-storage.custom-fields.all",
         "orders-storage.routing-lists.all",
-        "orders-storage.settings.all"
+        "orders-storage.settings.all",
+        "orders-storage.batch-tracking.all"
       ]
     }
   ],

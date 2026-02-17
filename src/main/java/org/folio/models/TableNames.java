@@ -1,6 +1,10 @@
 package org.folio.models;
 
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
 public final class TableNames {
+
   public static final String PURCHASE_ORDER_TABLE = "purchase_order";
   public static final String ORDER_INVOICE_RELNS_TABLE = "order_invoice_relationship";
   public static final String PO_LINE_TABLE = "po_line";
@@ -11,7 +15,6 @@ public final class TableNames {
   public static final String EXPORT_HISTORY_TABLE = "export_history";
   public static final String ROUTING_LIST_TABLE = "routing_list";
   public static final String ORDER_NUMBER_TABLE = "order_number";
-
-  private TableNames() { }
+  public static final String BATCH_TRACKING_TABLE = "batch_tracking";
 
 }
