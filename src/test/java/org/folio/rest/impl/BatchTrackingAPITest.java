@@ -33,13 +33,13 @@ public class BatchTrackingAPITest extends TestBase {
   void testPostBatchTracking_success() throws MalformedURLException {
     log.info("--- mod-orders-storage batch-tracking test: POST with valid data");
 
-    // given
+    // Given
     var batchTracking = createValidBatchTracking();
 
-    // when
+    // When
     Response response = postData(BATCH_TRACKING_ENDPOINT, convertToJson(batchTracking).encodePrettily(), headers);
 
-    // then
+    // Then
     response.then()
       .log().all()
       .statusCode(201)
@@ -58,60 +58,60 @@ public class BatchTrackingAPITest extends TestBase {
   void testPostBatchTracking_withNoData() throws MalformedURLException {
     log.info("--- mod-orders-storage batch-tracking test: POST with no data");
 
-    // when
+    // When
     Response response = postData(BATCH_TRACKING_ENDPOINT, "{}", headers);
 
-    // then - should fail validation because totalRecords is required
+    // Then
     response.then()
       .log().all()
-      .statusCode(422); // Unprocessable Entity for validation errors
+      .statusCode(422);
   }
 
   @Test
   void testPostBatchTracking_withConflictingData() throws MalformedURLException {
     log.info("--- mod-orders-storage batch-tracking test: POST with conflicting data (duplicate ID)");
 
-    // given - create first batch tracking record
+    // Given
     var batchTracking = createValidBatchTracking();
     createEntity(BATCH_TRACKING_ENDPOINT, convertToJson(batchTracking).encodePrettily(), headers);
 
-    // when - try to create another with the same batchId
+    // When
     Response response = postData(BATCH_TRACKING_ENDPOINT, convertToJson(batchTracking).encodePrettily(), headers);
 
-    // then - should fail due to unique constraint violation
+    // Then
     response.then()
       .log().all()
-      .statusCode(400); // Bad request for duplicate key
+      .statusCode(400);
   }
 
   @Test
   void testPostBatchTracking_withNegativeTotalRecords() throws MalformedURLException {
     log.info("--- mod-orders-storage batch-tracking test: POST with negative totalRecords");
 
-    // given
+    // Given
     var batchTracking = createValidBatchTracking();
     batchTracking.withTotalRecords(-5);
-    // when
+    // When
     Response response = postData(BATCH_TRACKING_ENDPOINT, convertToJson(batchTracking).encodePrettily(), headers);
 
-    // then - should fail validation
+    // Then
     response.then()
       .log().all()
-      .statusCode(422); // Unprocessable Entity for validation errors
+      .statusCode(422);
   }
 
   @Test
   void testDeleteBatchTracking_success() throws MalformedURLException {
     log.info("--- mod-orders-storage batch-tracking test: DELETE with existing data");
 
-    // given - create a batch tracking record
+    // Given
     var batchTracking = createValidBatchTracking();
     String batchId = createEntity(BATCH_TRACKING_ENDPOINT, convertToJson(batchTracking).encodePrettily(), headers);
 
-    // when - delete it
+    // When
     Response response = deleteData(BATCH_TRACKING_ENDPOINT_WITH_ID, batchId);
 
-    // then
+    // Then
     response.then()
       .log().all()
       .statusCode(204);
@@ -121,13 +121,13 @@ public class BatchTrackingAPITest extends TestBase {
   void testDeleteBatchTracking_withNonExistentId() throws MalformedURLException {
     log.info("--- mod-orders-storage batch-tracking test: DELETE with non-existent ID");
 
-    // given
+    // Given
     String nonExistentId = UUID.randomUUID().toString();
 
-    // when
+    // When
     Response response = deleteData(BATCH_TRACKING_ENDPOINT_WITH_ID, nonExistentId);
 
-    // then - should return 404
+    // Then
     response.then()
       .log().all()
       .statusCode(404);
@@ -137,17 +137,17 @@ public class BatchTrackingAPITest extends TestBase {
   void testCleanupBatchTracking_success() throws MalformedURLException {
     log.info("--- mod-orders-storage batch-tracking test: Cleanup endpoint executes successfully");
 
-    // given
+    // Given
     var batchTracking = createValidBatchTracking();
     createEntity(BATCH_TRACKING_ENDPOINT, convertToJson(batchTracking).encodePrettily(), headers);
 
-    // when - call cleanup endpoint
+    // When
     Response response = given()
       .headers(headers)
       .contentType(ContentType.TEXT)
       .post(storageUrl(BATCH_TRACKING_CLEANUP_ENDPOINT));
 
-    // then - should succeed
+    // Then
     response.then()
       .log().all()
       .statusCode(204);
