@@ -369,12 +369,6 @@
           "fieldName": "acqUnitIds",
           "caseSensitive": false,
           "removeAccents": false
-        },
-        {
-          "fieldName": "keyword",
-          "caseSensitive": false,
-          "removeAccents": false,
-          "multiFieldNames": "metadata.createdDate,dateOrdered,poNumber"
         }
       ],
       "ginIndex": [
