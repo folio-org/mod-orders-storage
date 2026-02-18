@@ -1,7 +1,6 @@
 package org.folio.event.handler;
 
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
-import static org.folio.event.dto.ItemFields.BATCH_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
 
@@ -55,7 +54,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var itemId = itemObject.getString(ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
-    var batchId = itemObject.getString(BATCH_ID.getValue());
+    var batchId = BatchTrackingService.extractBatchIdFromHeaders(headers);
     var updatedHeaders = HeaderUtils.prepareHeaderForTenant(centralTenantId, headers);
 
     return dbClient.getPgClient()

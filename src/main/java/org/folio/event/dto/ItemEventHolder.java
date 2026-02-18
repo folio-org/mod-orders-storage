@@ -3,7 +3,6 @@ package org.folio.event.dto;
 
 import static org.folio.event.dto.ItemFields.ACCESSION_NUMBER;
 import static org.folio.event.dto.ItemFields.BARCODE;
-import static org.folio.event.dto.ItemFields.BATCH_ID;
 import static org.folio.event.dto.ItemFields.CALL_NUMBER;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_CALL_NUMBER_COMPONENTS;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
@@ -16,6 +15,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.services.batch.BatchTrackingService;
 import org.folio.util.HeaderUtils;
 
 @Data
@@ -48,7 +48,7 @@ public class ItemEventHolder {
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
     setItem(newValue);
     setItemId(newValue.getString(ID.getValue()));
-    setBatchId(newValue.getString(BATCH_ID.getValue()));
+    setBatchId(BatchTrackingService.extractBatchIdFromHeaders(headers));
 
     setHoldingIdPair(Pair.of(
       oldValue.getString(HOLDINGS_RECORD_ID.getValue()),

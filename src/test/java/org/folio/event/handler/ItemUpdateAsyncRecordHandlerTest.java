@@ -2,7 +2,6 @@ package org.folio.event.handler;
 
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.dto.HoldingFields.ID;
-import static org.folio.event.dto.ItemFields.BATCH_ID;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
@@ -10,6 +9,7 @@ import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
+import static org.folio.services.batch.BatchTrackingService.BATCH_TRACKING_HEADER;
 import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,6 +39,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import one.util.streamex.StreamEx;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtils;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -242,14 +243,13 @@ public class ItemUpdateAsyncRecordHandlerTest {
   @Test
   void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
     var resourceEvent = createDefaultUpdateResourceEvent(DIKU_TENANT);
-    var kafkaRecord = createKafkaRecord(resourceEvent, null);
+    var kafkaRecord = createKafkaRecord(resourceEvent);
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalStateException.class, expectedException.getClass());
     assertTrue(expectedException.getMessage().contains(TENANT_NOT_SPECIFIED_MSG));
     verifyNoInteractions(pieceService);
   }
-
 
   @Test
   void positive_shouldProcessItemUpdateEventsInBatch() {
@@ -264,12 +264,13 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var holdingId2 = UUID.randomUUID().toString();
     var batchId = UUID.randomUUID().toString();
     var batchTracking = new BatchTracking().withId(batchId).withTotalRecords(2);
-    var oldItem1ValueBeforeUpdate = createItem(itemId1, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1).put(BATCH_ID.getValue(), batchId);
-    var newItem1ValueBeforeUpdate = createItem(itemId1, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2).put(BATCH_ID.getValue(), batchId);
-    var oldItem2ValueBeforeUpdate = createItem(itemId2, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1).put(BATCH_ID.getValue(), batchId);
-    var newItem2ValueBeforeUpdate = createItem(itemId2, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2).put(BATCH_ID.getValue(), batchId);
-    var kafkaRecord1 = createKafkaRecordWithValues(oldItem1ValueBeforeUpdate, newItem1ValueBeforeUpdate);
-    var kafkaRecord2 = createKafkaRecordWithValues(oldItem2ValueBeforeUpdate, newItem2ValueBeforeUpdate);
+    var batchTrackingHeader = List.of(Pair.of(BATCH_TRACKING_HEADER, batchId));
+    var oldItem1ValueBeforeUpdate = createItem(itemId1, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1);
+    var newItem1ValueBeforeUpdate = createItem(itemId1, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2);
+    var oldItem2ValueBeforeUpdate = createItem(itemId2, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1);
+    var newItem2ValueBeforeUpdate = createItem(itemId2, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2);
+    var kafkaRecord1 = createKafkaRecord(createDefaultUpdateResourceEvent(DIKU_TENANT, oldItem1ValueBeforeUpdate, newItem1ValueBeforeUpdate), DIKU_TENANT, batchTrackingHeader);
+    var kafkaRecord2 = createKafkaRecord(createDefaultUpdateResourceEvent(DIKU_TENANT, oldItem2ValueBeforeUpdate, newItem2ValueBeforeUpdate), DIKU_TENANT, batchTrackingHeader);
 
     var poLine = createPoLine(poLineId, List.of(holdingId1, holdingId1), effectiveLocationId1);
     var piece1 = createPiece(pieceId1, itemId1, holdingId1, null).withPoLineId(poLineId);

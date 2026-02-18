@@ -3,17 +3,17 @@ package org.folio.event.handler;
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.EventType.CREATE;
-import static org.folio.event.dto.ItemFields.BATCH_ID;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.COLLEGE_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.UNIVERSITY_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
+import static org.folio.event.handler.TestHandlerUtil.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.extractResourceEvent;
+import static org.folio.services.batch.BatchTrackingService.BATCH_TRACKING_HEADER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,16 +36,15 @@ import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtils;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
-import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.jaxrs.model.BatchTracking;
 import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -112,10 +111,7 @@ public class ItemCreateAsyncRecordHandlerTest {
         .when(consortiumConfigurationService).getConsortiumConfiguration(any());
       doReturn(Future.succeededFuture(CENTRAL_TENANT))
         .when(consortiumConfigurationService)
-        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT)));
-      doReturn(Future.succeededFuture(CENTRAL_TENANT))
-        .when(consortiumConfigurationService)
-        .getCentralTenantId(any(), eq(Map.of(XOkapiHeaders.TENANT, CENTRAL_TENANT, CONSORTIUM_ID, CENTRAL_TENANT)));
+        .getCentralTenantId(any(), anyMap());
       doReturn(Future.succeededFuture(0)).when(auditOutboxService).processOutboxEventLogs(anyMap());
       doReturn(dbClient).when(handler).createDBClient(any());
       doReturn(pgClient).when(dbClient).getPgClient();
@@ -509,8 +505,8 @@ public class ItemCreateAsyncRecordHandlerTest {
     var pieceId3 = UUID.randomUUID().toString();
     var pieceId4 = UUID.randomUUID().toString();
     // Kafka record
-    var kafkaRecord1 = createItemEventKafkaRecord(itemId1, holdingId2, batchId, effectiveLocationId2, COLLEGE_TENANT);
-    var kafkaRecord2 = createItemEventKafkaRecord(itemId2, holdingId1, batchId, effectiveLocationId1, COLLEGE_TENANT);
+    var kafkaRecord1 = createItemEventKafkaRecord(itemId1, holdingId2, effectiveLocationId2, COLLEGE_TENANT, batchId);
+    var kafkaRecord2 = createItemEventKafkaRecord(itemId2, holdingId1, effectiveLocationId1, COLLEGE_TENANT, batchId);
 
     // PoLine 1 pieces 1, 2
     var piece1 = createPiece(pieceId1, itemId1).withPoLineId(poLineId1).withReceivingTenantId(UNIVERSITY_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
@@ -624,17 +620,15 @@ public class ItemCreateAsyncRecordHandlerTest {
 
   private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId,
                                                                          String effectiveLocationId, String tenantId) {
-    return createItemEventKafkaRecord(itemId, holdingRecordId, null, effectiveLocationId, tenantId);
+    return createItemEventKafkaRecord(itemId, holdingRecordId, effectiveLocationId, tenantId, null);
   }
 
-  private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId, String batchId,
-                                                                         String effectiveLocationId, String tenantId) {
-    var resourceEvent = createResourceEvent(tenantId, CREATE);
+  private KafkaConsumerRecord<String, String> createItemEventKafkaRecord(String itemId, String holdingRecordId,
+                                                                         String effectiveLocationId, String tenantId, String batchId) {
     var itemObject = new JsonObject().put(ID.getValue(), itemId)
       .put(HOLDINGS_RECORD_ID.getValue(), holdingRecordId)
-      .put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId)
-      .put(BATCH_ID.getValue(), batchId);
-    resourceEvent.setNewValue(itemObject);
-    return createKafkaRecord(resourceEvent, CENTRAL_TENANT);
+      .put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId);
+    var resourceEvent = createResourceEvent(tenantId, CREATE, itemObject);
+    return createKafkaRecord(resourceEvent, tenantId, List.of(Pair.of(BATCH_TRACKING_HEADER, batchId)));
   }
 }
