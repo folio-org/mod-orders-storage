@@ -424,16 +424,12 @@
         {
           "fieldName": "details.subscriptionFrom",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'details'->>'subscriptionFrom')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "details.subscriptionTo",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'details'->>'subscriptionTo')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "eresource.accessProvider",
@@ -452,9 +448,7 @@
         {
           "fieldName": "eresource.expectedActivation",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'eresource'->>'expectedActivation')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "eresource.materialType",
@@ -471,11 +465,19 @@
           "sqlExpressionQuery": "$"
         },
         {
+          "fieldName": "lastEDIExportDate",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
           "fieldName": "metadata.createdDate",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'metadata'->>'createdDate')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
+        },
+        {
+          "fieldName": "metadata.updatedDate",
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
           "fieldName": "orderFormat",
@@ -501,9 +503,7 @@
         {
           "fieldName": "physical.expectedReceiptDate",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'physical'->>'expectedReceiptDate')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "physical.materialType",
@@ -515,16 +515,12 @@
         {
           "fieldName": "physical.receiptDue",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'physical'->>'receiptDue')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "receiptDate",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->>'receiptDate')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "receiptStatus",
