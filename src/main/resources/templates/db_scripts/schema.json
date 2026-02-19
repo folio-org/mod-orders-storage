@@ -970,6 +970,17 @@
           "removeAccents": false
         }
       ]
+    },
+    {
+      "tableName": "batch_tracking",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
+      "withMetadata": true,
+      "withOptimisticLocking": "failOnConflict",
+      "index": [
+        {
+          "fieldName": "createdDate"
+        }
+      ]
     }
   ]
 }
