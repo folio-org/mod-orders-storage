@@ -3,10 +3,10 @@ package org.folio.event.handler;
 import static org.folio.TestUtils.mockContext;
 import static org.folio.event.dto.HoldingFields.ID;
 import static org.folio.event.dto.HoldingFields.PERMANENT_LOCATION_ID;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createKafkaRecord;
-import static org.folio.event.handler.InventoryCreateAsyncRecordHandlerTest.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
+import static org.folio.event.handler.TestHandlerUtil.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.extractResourceEvent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -289,9 +289,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
   }
 
   private static KafkaConsumerRecord<String, String> createHoldingEventKafkaRecord(String id) {
-    var resourceEvent = createResourceEvent(TestHandlerUtil.DIKU_TENANT, EventType.CREATE);
     var holdingObject = JsonObject.of(ID.getValue(), id, PERMANENT_LOCATION_ID.getValue(), HoldingCreateAsyncRecordHandlerTest.LOCATION_ID);
-    resourceEvent.setNewValue(holdingObject);
-    return createKafkaRecord(resourceEvent, DIKU_TENANT);
+    return createKafkaRecord(createResourceEvent(DIKU_TENANT, EventType.CREATE, holdingObject), DIKU_TENANT);
   }
 }

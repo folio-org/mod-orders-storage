@@ -42,6 +42,7 @@ import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.core.RestClientTest;
+import org.folio.rest.impl.BatchTrackingAPITest;
 import org.folio.rest.impl.ClaimingAPITest;
 import org.folio.rest.impl.CustomFieldsAPITest;
 import org.folio.rest.impl.CustomFieldsIndexesTest;
@@ -354,6 +355,8 @@ public class StorageTestSuite {
   class RestClientTestNested extends RestClientTest {}
   @Nested
   class WrapperPiecesAPITestNested extends WrapperPiecesAPITest {}
+  @Nested
+  class BatchTrackingAPITestNested extends BatchTrackingAPITest {}
 
   @Nested
   class PrefixDeprecatedQueryTestNested extends PrefixDeprecatedQueryTest {}
