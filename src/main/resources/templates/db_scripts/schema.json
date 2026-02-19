@@ -256,9 +256,7 @@
         {
           "fieldName": "dateOrdered",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->>'dateOrdered')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "ongoing.isSubscription",
@@ -277,9 +275,7 @@
         {
           "fieldName": "metadata.createdDate",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'metadata'->>'createdDate')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "metadata.updatedByUserId",
@@ -291,9 +287,7 @@
         {
           "fieldName": "metadata.updatedDate",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'metadata'->>'updatedDate')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "ongoing.manualRenewal",
@@ -305,9 +299,7 @@
         {
           "fieldName": "ongoing.renewalDate",
           "caseSensitive": true,
-          "removeAccents": false,
-          "sqlExpression": "(jsonb->'ongoing'->>'renewalDate')",
-          "sqlExpressionQuery": "$"
+          "removeAccents": false
         },
         {
           "fieldName": "ongoing.reviewPeriod",
