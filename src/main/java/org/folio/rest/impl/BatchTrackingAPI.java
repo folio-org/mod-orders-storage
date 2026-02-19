@@ -12,7 +12,6 @@ import io.vertx.core.json.JsonObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
-import org.folio.rest.jaxrs.resource.OrdersStorageBatchTrackingCleanup;
 import org.folio.services.batch.BatchTrackingService;
 import org.folio.rest.core.BaseApi;
 import org.folio.rest.jaxrs.model.BatchTracking;
@@ -26,7 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.ws.rs.core.Response;
 import java.util.Map;
 
-public class BatchTrackingAPI extends BaseApi implements OrdersStorageBatchTracking, OrdersStorageBatchTrackingCleanup {
+public class BatchTrackingAPI extends BaseApi implements OrdersStorageBatchTracking {
 
   private static final Logger log = LogManager.getLogger();
 
