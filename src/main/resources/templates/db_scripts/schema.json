@@ -314,6 +314,13 @@
           "sqlExpressionQuery": "$"
         },
         {
+          "fieldName": "poNumber",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'poNumber')",
+          "sqlExpressionQuery": "$"
+        },
+        {
           "fieldName": "poNumberPrefix",
           "caseSensitive": true,
           "removeAccents": false,
@@ -518,6 +525,13 @@
           "removeAccents": false
         },
         {
+          "fieldName": "poLineNumber",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'poLineNumber')",
+          "sqlExpressionQuery": "$"
+        },
+        {
           "fieldName": "receiptDate",
           "caseSensitive": true,
           "removeAccents": false
@@ -541,6 +555,13 @@
           "caseSensitive": true,
           "removeAccents": false,
           "sqlExpression": "(jsonb->>'source')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "vendorDetail.vendorAccount",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'vendorDetail'->>'vendorAccount')",
           "sqlExpressionQuery": "$"
         }
       ],
