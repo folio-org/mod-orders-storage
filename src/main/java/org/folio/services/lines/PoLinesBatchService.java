@@ -1,6 +1,7 @@
 package org.folio.services.lines;
 
 import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.util.MetadataUtils.populateMetadata;
 
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ public class PoLinesBatchService {
       log.warn("poLinesBatchUpdate:: po line list is empty");
       return Future.succeededFuture();
     }
+    poLines.forEach(poLine -> populateMetadata(poLine::getMetadata, poLine::withMetadata, okapiHeaders));
     return pgClient.withTrans(conn ->
       conn.updateBatch(PO_LINE_TABLE, poLines)
         .compose(rowSet -> poLinesService.updateTitles(conn, poLines, okapiHeaders))
