@@ -17,13 +17,10 @@ import org.folio.rest.persist.Conn;
 import org.folio.util.DbUtils;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 @Log4j2
 public class BatchTrackingService {
-
-  public static final String BATCH_TRACKING_HEADER = "X-Batch-Tracking-Id";
 
   private static final String BATCH_TRACKING_PROGRESS_INCREASE_SQL =
     "UPDATE %s SET jsonb = jsonb || jsonb_build_object('processed_count', (jsonb->>'processed_count')::int + 1) WHERE id = $1 RETURNING jsonb";
@@ -96,20 +93,6 @@ public class BatchTrackingService {
       .map(DbUtils::getRowSetAsCount)
       .onSuccess(count -> log.info("cleanupBatchTrackings:: Cleaned up {} batch trackings", count))
       .onFailure(t -> log.warn("cleanupBatchTrackings:: Failed to clean up during batch trackings", t));
-  }
-
-  /**
-    Extracts the batch id from the provided headers map, ignoring case sensitivity of the header name.
-
-    @param headers the map of headers to search for the batch tracking header
-    @return the batch id if found, or null if the header is not present
-   */
-  public static String extractBatchIdFromHeaders(Map<String, String> headers) {
-    return headers.entrySet().stream()
-      .filter(entry -> entry.getKey().equalsIgnoreCase(BATCH_TRACKING_HEADER))
-      .map(Map.Entry::getValue)
-      .findFirst()
-      .orElse(null);
   }
 
 }
