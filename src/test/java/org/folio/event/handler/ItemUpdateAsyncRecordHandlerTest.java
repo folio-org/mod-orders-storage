@@ -4,12 +4,12 @@ import static org.folio.TestUtils.mockContext;
 import static org.folio.event.dto.HoldingFields.ID;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
+import static org.folio.event.dto.ItemFields.PURCHASE_ORDER_LINE_IDENTIFIER;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createDefaultUpdateResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecordWithValues;
-import static org.folio.services.batch.BatchTrackingService.BATCH_TRACKING_HEADER;
 import static org.folio.util.HeaderUtils.TENANT_NOT_SPECIFIED_MSG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -262,15 +262,13 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var itemId2 = UUID.randomUUID().toString();
     var holdingId1 = UUID.randomUUID().toString();
     var holdingId2 = UUID.randomUUID().toString();
-    var batchId = UUID.randomUUID().toString();
-    var batchTracking = new BatchTracking().withId(batchId).withTotalRecords(2);
-    var batchTrackingHeader = List.of(Pair.of(BATCH_TRACKING_HEADER, batchId));
-    var oldItem1ValueBeforeUpdate = createItem(itemId1, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1);
-    var newItem1ValueBeforeUpdate = createItem(itemId1, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2);
-    var oldItem2ValueBeforeUpdate = createItem(itemId2, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1);
-    var newItem2ValueBeforeUpdate = createItem(itemId2, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2);
-    var kafkaRecord1 = createKafkaRecord(createDefaultUpdateResourceEvent(DIKU_TENANT, oldItem1ValueBeforeUpdate, newItem1ValueBeforeUpdate), DIKU_TENANT, batchTrackingHeader);
-    var kafkaRecord2 = createKafkaRecord(createDefaultUpdateResourceEvent(DIKU_TENANT, oldItem2ValueBeforeUpdate, newItem2ValueBeforeUpdate), DIKU_TENANT, batchTrackingHeader);
+    var batchTracking = new BatchTracking().withId(poLineId).withTotalRecords(2);
+    var oldItem1ValueBeforeUpdate = createItem(itemId1, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1).put(PURCHASE_ORDER_LINE_IDENTIFIER.getValue(), poLineId);
+    var newItem1ValueBeforeUpdate = createItem(itemId1, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2).put(PURCHASE_ORDER_LINE_IDENTIFIER.getValue(), poLineId);
+    var oldItem2ValueBeforeUpdate = createItem(itemId2, holdingId1).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId1).put(PURCHASE_ORDER_LINE_IDENTIFIER.getValue(), poLineId);
+    var newItem2ValueBeforeUpdate = createItem(itemId2, holdingId2).put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId2).put(PURCHASE_ORDER_LINE_IDENTIFIER.getValue(), poLineId);
+    var kafkaRecord1 = createKafkaRecord(createDefaultUpdateResourceEvent(DIKU_TENANT, oldItem1ValueBeforeUpdate, newItem1ValueBeforeUpdate), DIKU_TENANT);
+    var kafkaRecord2 = createKafkaRecord(createDefaultUpdateResourceEvent(DIKU_TENANT, oldItem2ValueBeforeUpdate, newItem2ValueBeforeUpdate), DIKU_TENANT);
 
     var poLine = createPoLine(poLineId, List.of(holdingId1, holdingId1), effectiveLocationId1);
     var piece1 = createPiece(pieceId1, itemId1, holdingId1, null).withPoLineId(poLineId);
@@ -282,7 +280,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(List.of(piece2))).when(pieceService).getPiecesByItemId(eq(itemId2), any(Conn.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(anyList(), any(Conn.class), eq(DIKU_TENANT), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
-    doReturn(Future.succeededFuture()).when(batchTrackingService).deleteBatchTracking(conn, batchId);
+    doReturn(Future.succeededFuture()).when(batchTrackingService).deleteBatchTracking(conn, poLineId);
 
     //// First event processing ////
     var expectedPiece1 = createPiece(pieceId1, itemId1, holdingId2, null).withPoLineId(poLineId);
@@ -290,7 +288,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(List.of(expectedPiece1, piece2))).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     doReturn(Future.succeededFuture(List.of(expectedPiece1))).when(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece1)), any(Conn.class), eq(DIKU_TENANT));
-    doReturn(Future.succeededFuture(batchTracking.withProcessedCount(1))).when(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, DIKU_TENANT);
+    doReturn(Future.succeededFuture(batchTracking.withProcessedCount(1))).when(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
 
     var result = handler.handle(kafkaRecord1);
     assertTrue(result.succeeded());
@@ -300,8 +298,8 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece1)), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
-    verify(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, DIKU_TENANT);
-    verify(batchTrackingService, never()).deleteBatchTracking(conn, batchId);
+    verify(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
+    verify(batchTrackingService, never()).deleteBatchTracking(conn, poLineId);
 
     //// Second event processing ////
     var expectedPiece2 = createPiece(pieceId2, itemId2, holdingId2, null).withPoLineId(poLineId);
@@ -309,7 +307,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     doReturn(Future.succeededFuture(List.of(expectedPoLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(List.of(expectedPiece1, expectedPiece2))).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     doReturn(Future.succeededFuture(List.of(expectedPiece2))).when(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece2)), any(Conn.class), eq(DIKU_TENANT));
-    doReturn(Future.succeededFuture(batchTracking.withProcessedCount(2))).when(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, DIKU_TENANT);
+    doReturn(Future.succeededFuture(batchTracking.withProcessedCount(2))).when(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
 
     result = handler.handle(kafkaRecord2);
     assertTrue(result.succeeded());
@@ -319,8 +317,8 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece2)), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
-    verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, batchId, DIKU_TENANT);
-    verify(batchTrackingService).deleteBatchTracking(conn, batchId);
+    verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
+    verify(batchTrackingService).deleteBatchTracking(conn, poLineId);
   }
 
   private static PoLine createPoLine(String poLineId, String holdingId, String... effectiveLocationIds) {

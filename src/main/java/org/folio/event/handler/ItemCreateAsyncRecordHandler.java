@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
+import static org.folio.event.dto.ItemFields.PURCHASE_ORDER_LINE_IDENTIFIER;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -54,7 +55,7 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var itemId = itemObject.getString(ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
-    var batchId = BatchTrackingService.extractBatchIdFromHeaders(headers);
+    var batchId = itemObject.getString(PURCHASE_ORDER_LINE_IDENTIFIER.getValue());
     var updatedHeaders = HeaderUtils.prepareHeaderForTenant(centralTenantId, headers);
 
     return dbClient.getPgClient()

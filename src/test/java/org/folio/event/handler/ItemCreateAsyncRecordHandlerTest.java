@@ -6,6 +6,7 @@ import static org.folio.event.EventType.CREATE;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
+import static org.folio.event.dto.ItemFields.PURCHASE_ORDER_LINE_IDENTIFIER;
 import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.COLLEGE_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
@@ -13,7 +14,6 @@ import static org.folio.event.handler.TestHandlerUtil.UNIVERSITY_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
 import static org.folio.event.handler.TestHandlerUtil.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.extractResourceEvent;
-import static org.folio.services.batch.BatchTrackingService.BATCH_TRACKING_HEADER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -627,8 +627,9 @@ public class ItemCreateAsyncRecordHandlerTest {
                                                                          String effectiveLocationId, String tenantId, String batchId) {
     var itemObject = new JsonObject().put(ID.getValue(), itemId)
       .put(HOLDINGS_RECORD_ID.getValue(), holdingRecordId)
-      .put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId);
+      .put(EFFECTIVE_LOCATION_ID.getValue(), effectiveLocationId)
+      .put(PURCHASE_ORDER_LINE_IDENTIFIER.getValue(), batchId);
     var resourceEvent = createResourceEvent(tenantId, CREATE, itemObject);
-    return createKafkaRecord(resourceEvent, tenantId, List.of(Pair.of(BATCH_TRACKING_HEADER, batchId)));
+    return createKafkaRecord(resourceEvent, tenantId);
   }
 }
