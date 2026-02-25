@@ -301,9 +301,11 @@ public class PoLinesService {
     return promise.future();
   }
 
-  public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn) {
+  public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn, Map<String, String> headers) {
     updateInstanceFieldsForPoLine(poLine, instance);
-    return doUpdatePoLine(poLine, conn);
+    return doUpdatePoLine(poLine, conn)
+      .compose(storedPol -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(storedPol), OrderLineAuditEvent.Action.EDIT, headers))
+      .map(v -> poLine);
   }
 
   public PoLine updateInstanceFieldsForPoLine(PoLine poLine, JsonObject instance) {
