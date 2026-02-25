@@ -1,5 +1,8 @@
 ## 14.0.0 - Unreleased
 
+### Stories
+* [MODORDSTOR-473](https://folio-org.atlassian.net/browse/MODORDSTOR-473) - Restore custom fields sample data
+
 ## 13.9.0 - Released (Sunflower R1 2025)
 The primary focus of this release was to introduce new batch update pieces endpoint, populate metadata for entities batch operations, and batch create pieces API.
 
