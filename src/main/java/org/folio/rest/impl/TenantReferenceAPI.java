@@ -2,6 +2,9 @@ package org.folio.rest.impl;
 
 import static org.folio.util.EnvUtils.getEnvVar;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -10,12 +13,15 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dbschema.Versioned;
+import org.folio.repository.CustomFieldsRepository;
+import org.folio.rest.jaxrs.model.CustomField;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
 import org.folio.spring.SpringContextUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -23,12 +29,16 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.Json;
 
 public class TenantReferenceAPI extends TenantAPI {
 
   private static final Logger log = LogManager.getLogger();
   private static final String PARAMETER_LOAD_SAMPLE = "loadSample";
   private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
+
+  @Autowired
+  private CustomFieldsRepository customFieldsRepository;
 
   public TenantReferenceAPI() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
@@ -47,15 +57,14 @@ public class TenantReferenceAPI extends TenantAPI {
     buildDataLoadingParameters(attributes, tl);
 
     return Future.succeededFuture()
-      .compose(v -> {
-
+      .compose(v -> loadCustomFieldsSampleData(attributes, tenantId))
+      .compose(customFieldsLoaded -> {
         Promise<Integer> promise = Promise.promise();
-
         tl.perform(attributes, headers, vertx, res -> {
           if (res.failed()) {
             promise.fail(res.cause());
           } else {
-            promise.complete(res.result());
+            promise.complete(res.result() + customFieldsLoaded);
           }
         });
         return promise.future();
@@ -78,8 +87,6 @@ public class TenantReferenceAPI extends TenantAPI {
     if (isNew(tenantAttributes, "13.7.0")) {
       tl.withKey(PARAMETER_LOAD_SAMPLE)
         .withLead("data")
-        // Disabled in response to https://folio-org.atlassian.net/browse/MODORDSTOR-472
-        // .add("custom-fields", "custom-fields")
         .add("purchase-orders", "orders-storage/purchase-orders")
         .add("po-lines", "orders-storage/po-lines")
         .add("titles", "orders-storage/titles")
@@ -99,6 +106,38 @@ public class TenantReferenceAPI extends TenantAPI {
         .withPostOnly()
         .add("pieces-batch", "orders-storage/pieces-batch");
     }
+  }
+
+  // Loaded via direct DB insert instead of TenantLoading API call to bypass
+  // sidecar routing issues with the multiple-type custom-fields interface (MODORDSTOR-473)
+  private Future<Integer> loadCustomFieldsSampleData(TenantAttributes attributes, String tenantId) {
+    if (!isLoadSample(attributes) || !isNew(attributes, "13.7.0")) {
+      return Future.succeededFuture(0);
+    }
+    try {
+      var po = readCustomField("data/custom-fields/custom-field-po.json");
+      var pol = readCustomField("data/custom-fields/custom-field-pol.json");
+      return Future.all(saveIfAbsent(po, tenantId), saveIfAbsent(pol, tenantId))
+        .map(cf -> cf.size());
+    } catch (IOException e) {
+      return Future.failedFuture(e);
+    }
+  }
+
+  private CustomField readCustomField(String resourcePath) throws IOException {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
+      if (is == null) {
+        throw new IOException("Resource not found: " + resourcePath);
+      }
+      return Json.decodeValue(new String(is.readAllBytes(), StandardCharsets.UTF_8), CustomField.class);
+    }
+  }
+
+  private Future<Void> saveIfAbsent(CustomField customField, String tenantId) {
+    return customFieldsRepository.findById(customField.getId(), tenantId)
+      .compose(existing -> existing.isPresent()
+        ? Future.succeededFuture()
+        : customFieldsRepository.save(customField, tenantId).mapEmpty());
   }
 
   /**
