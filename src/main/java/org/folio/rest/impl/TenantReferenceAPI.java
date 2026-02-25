@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -114,22 +115,21 @@ public class TenantReferenceAPI extends TenantAPI {
     if (!isLoadSample(attributes) || !isNew(attributes, "13.7.0")) {
       return Future.succeededFuture(0);
     }
-    try {
-      var po = readCustomField("data/custom-fields/custom-field-po.json");
-      var pol = readCustomField("data/custom-fields/custom-field-pol.json");
-      return Future.all(saveIfAbsent(po, tenantId), saveIfAbsent(pol, tenantId))
-        .map(cf -> cf.size());
-    } catch (IOException e) {
-      return Future.failedFuture(e);
-    }
+    return Future.all(
+        readCustomField("data/custom-fields/custom-field-po.json").compose(cf -> saveIfAbsent(cf, tenantId)),
+        readCustomField("data/custom-fields/custom-field-pol.json").compose(cf -> saveIfAbsent(cf, tenantId))
+      ).map(CompositeFuture::size);
   }
 
-  private CustomField readCustomField(String resourcePath) throws IOException {
+  private Future<CustomField> readCustomField(String resourcePath) {
     try (InputStream is = getClass().getClassLoader().getResourceAsStream(resourcePath)) {
       if (is == null) {
-        throw new IOException("Resource not found: " + resourcePath);
+        return Future.failedFuture(new IOException("Resource not found: " + resourcePath));
       }
-      return Json.decodeValue(new String(is.readAllBytes(), StandardCharsets.UTF_8), CustomField.class);
+      return Future.succeededFuture(
+        Json.decodeValue(new String(is.readAllBytes(), StandardCharsets.UTF_8), CustomField.class));
+    } catch (IOException e) {
+      return Future.failedFuture(e);
     }
   }
 
