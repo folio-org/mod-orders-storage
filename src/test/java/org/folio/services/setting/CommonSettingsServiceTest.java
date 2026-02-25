@@ -8,12 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.DateTimeException;
 import java.time.ZoneId;
-import java.util.List;
 
 import org.folio.CopilotGenerated;
-import org.folio.rest.acq.model.settings.CommonSetting;
-import org.folio.rest.acq.model.settings.CommonSettingsCollection;
-import org.folio.rest.acq.model.settings.Value;
 import org.folio.rest.core.RestClient;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.core.models.RequestEntry;
@@ -39,11 +35,20 @@ public class CommonSettingsServiceTest {
   private CommonSettingsService commonSettingsService;
 
   @Test
-  void getTenantTimeZone_returnsDefaultWhenSettingsAreEmpty() {
-    CommonSettingsCollection emptySettings = new CommonSettingsCollection();
-
+  void getTenantTimeZone_returnsDefaultWhenResponseIsEmpty() {
     when(restClient.get(any(RequestEntry.class), any(RequestContext.class)))
-      .thenReturn(Future.succeededFuture(JsonObject.mapFrom(emptySettings)));
+      .thenReturn(Future.succeededFuture(new JsonObject()));
+
+    Future<ZoneId> result = commonSettingsService.getTenantTimeZone(requestContext);
+
+    assertTrue(result.succeeded());
+    assertEquals(ZoneId.of("UTC"), result.result());
+  }
+
+  @Test
+  void getTenantTimeZone_returnsDefaultWhenResponseIsNull() {
+    when(restClient.get(any(RequestEntry.class), any(RequestContext.class)))
+      .thenReturn(Future.succeededFuture(null));
 
     Future<ZoneId> result = commonSettingsService.getTenantTimeZone(requestContext);
 
@@ -53,12 +58,14 @@ public class CommonSettingsServiceTest {
 
   @Test
   void getTenantTimeZone_returnsConfiguredTimeZone() {
-    CommonSettingsCollection settings = new CommonSettingsCollection().withItems(List.of(
-      new CommonSetting().withValue(new Value().withAdditionalProperty("timezone", "America/New_York"))
-    ));
+    var localeResponse = new JsonObject()
+      .put("locale", "en-US")
+      .put("currency", "USD")
+      .put("timezone", "America/New_York")
+      .put("numberingSystem", "latn");
 
     when(restClient.get(any(RequestEntry.class), any(RequestContext.class)))
-      .thenReturn(Future.succeededFuture(JsonObject.mapFrom(settings)));
+      .thenReturn(Future.succeededFuture(localeResponse));
 
     Future<ZoneId> result = commonSettingsService.getTenantTimeZone(requestContext);
 
@@ -68,12 +75,11 @@ public class CommonSettingsServiceTest {
 
   @Test
   void getTenantTimeZone_handlesInvalidTimeZoneGracefully() {
-    CommonSettingsCollection settings = new CommonSettingsCollection().withItems(List.of(
-      new CommonSetting().withValue(new Value().withAdditionalProperty("timezone", "Invalid/TimeZone"))
-    ));
+    var localeResponse = new JsonObject()
+      .put("timezone", "Invalid/TimeZone");
 
     when(restClient.get(any(RequestEntry.class), any(RequestContext.class)))
-      .thenReturn(Future.succeededFuture(JsonObject.mapFrom(settings)));
+      .thenReturn(Future.succeededFuture(localeResponse));
 
     Future<ZoneId> result = commonSettingsService.getTenantTimeZone(requestContext);
 

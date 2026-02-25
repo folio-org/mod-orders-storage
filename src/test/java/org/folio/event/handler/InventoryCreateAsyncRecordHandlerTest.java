@@ -6,9 +6,10 @@ import static org.folio.event.EventType.UPDATE;
 import static org.folio.event.handler.TestHandlerUtil.CENTRAL_TENANT;
 import static org.folio.event.handler.TestHandlerUtil.CONSORTIUM_ID;
 import static org.folio.event.handler.TestHandlerUtil.DIKU_TENANT;
+import static org.folio.event.handler.TestHandlerUtil.createKafkaRecord;
+import static org.folio.event.handler.TestHandlerUtil.createResourceEvent;
 import static org.folio.event.handler.TestHandlerUtil.createSetting;
 import static org.folio.event.handler.TestHandlerUtil.createSettingCollection;
-import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +30,6 @@ import java.util.Optional;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.TestUtils;
-import org.folio.event.EventType;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.okapi.common.XOkapiHeaders;
@@ -49,9 +49,7 @@ import org.mockito.Spy;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.kafka.client.consumer.KafkaConsumerRecord;
 import io.vertx.kafka.client.consumer.impl.KafkaConsumerRecordImpl;
 
 public class InventoryCreateAsyncRecordHandlerTest {
@@ -230,22 +228,4 @@ public class InventoryCreateAsyncRecordHandlerTest {
     });
   }
 
-  static ResourceEvent createResourceEvent(String tenantId, EventType type) {
-    return ResourceEvent.builder()
-      .type(type)
-      .tenant(tenantId)
-      .newValue(new JsonObject())
-      .build();
-  }
-
-  static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent, String tenantId) {
-    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", Json.encode(resourceEvent));
-    Optional.ofNullable(tenantId)
-      .ifPresent(id -> consumerRecord.headers().add(new RecordHeader(OKAPI_HEADER_TENANT, id.getBytes())));
-    return new KafkaConsumerRecordImpl<>(consumerRecord);
-  }
-
-  private static KafkaConsumerRecord<String, String> createKafkaRecord(ResourceEvent resourceEvent) {
-    return createKafkaRecord(resourceEvent, null);
-  }
 }

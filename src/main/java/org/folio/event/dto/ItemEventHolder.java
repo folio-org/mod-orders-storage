@@ -7,6 +7,7 @@ import static org.folio.event.dto.ItemFields.CALL_NUMBER;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_CALL_NUMBER_COMPONENTS;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
+import static org.folio.event.dto.ItemFields.PURCHASE_ORDER_LINE_IDENTIFIER;
 
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +29,9 @@ public class ItemEventHolder {
   private String orderTenantId;
   private String centralTenantId;
 
+  private String batchId;
+  private boolean isLastInBatch;
+
   private String itemId;
   private JsonObject item;
   private String holdingId;
@@ -44,6 +48,7 @@ public class ItemEventHolder {
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
     setItem(newValue);
     setItemId(newValue.getString(ID.getValue()));
+    setBatchId(newValue.getString(PURCHASE_ORDER_LINE_IDENTIFIER.getValue()));
 
     setHoldingIdPair(Pair.of(
       oldValue.getString(HOLDINGS_RECORD_ID.getValue()),

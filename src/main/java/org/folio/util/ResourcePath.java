@@ -12,7 +12,7 @@ public enum ResourcePath {
   STORAGE_HOLDING_URL("/holdings-storage/holdings"),
   STORAGE_BATCH_HOLDING_URL("/holdings-storage/batch/synchronous"),
   STORAGE_INSTANCE_URL("/instance-storage/instances/%s"),
-  SETTINGS_URL("/settings/entries"),;
+  LOCALE_URL("/locale");
 
   private final String path;
 }

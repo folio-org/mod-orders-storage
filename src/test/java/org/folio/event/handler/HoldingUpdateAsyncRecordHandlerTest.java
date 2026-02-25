@@ -494,7 +494,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   @Test
   void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
     var resourceEvent = createDefaultUpdateResourceEvent(UNIVERSITY_TENANT);
-    var kafkaRecord = createKafkaRecord(resourceEvent, null);
+    var kafkaRecord = createKafkaRecord(resourceEvent);
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalStateException.class, expectedException.getClass());

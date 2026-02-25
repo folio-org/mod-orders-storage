@@ -13,7 +13,8 @@ public enum ItemFields {
   BARCODE("barcode"),
   CALL_NUMBER("callNumber"),
   ACCESSION_NUMBER("accessionNumber"),
-  EFFECTIVE_CALL_NUMBER_COMPONENTS("effectiveCallNumberComponents");
+  EFFECTIVE_CALL_NUMBER_COMPONENTS("effectiveCallNumberComponents"),
+  PURCHASE_ORDER_LINE_IDENTIFIER("purchaseOrderLineIdentifier");
 
   private final String value;
 }
