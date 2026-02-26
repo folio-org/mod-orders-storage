@@ -129,6 +129,7 @@ public class TenantReferenceAPI extends TenantAPI {
       return Future.succeededFuture(
         Json.decodeValue(new String(is.readAllBytes(), StandardCharsets.UTF_8), CustomField.class));
     } catch (IOException e) {
+      log.error("readCustomField:: Failed to read resource: {}", resourcePath, e);
       return Future.failedFuture(e);
     }
   }
