@@ -76,7 +76,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       holder.setLastInBatch(false);
       return Future.succeededFuture();
     }
-    return batchTrackingService.increaseBatchTrackingProgress(conn, holder.getBatchId(), holder.getCentralTenantId())
+    return batchTrackingService.increaseBatchTrackingProgress(conn, holder.getBatchId(), holder.getOrderTenantId())
       .map(batchTracking -> Objects.equals(batchTracking.getProcessedCount(), batchTracking.getTotalRecords()))
       .recover(t -> Future.succeededFuture(false))
       .compose(isLastInBatch -> asFuture(() -> holder.setLastInBatch(isLastInBatch)));
