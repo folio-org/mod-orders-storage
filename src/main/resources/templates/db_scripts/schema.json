@@ -205,6 +205,11 @@
       "run": "after",
       "snippetPath": "data-migration/14.0.0/drop_internal_lock_table.ftl",
       "fromModuleVersion": "mod-orders-storage-14.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/14.0.0/update_indices.ftl",
+      "fromModuleVersion": "mod-orders-storage-14.0.0"
     }
   ],
   "tables": [
@@ -223,102 +228,163 @@
       "customSnippetPath": "purchase_order_table.sql",
       "index": [
         {
-          "fieldName": "acqUnitIds",
-          "caseSensitive": false
+          "fieldName": "approved",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'approved')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "assignedTo",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'assignedTo')",
+          "sqlExpressionQuery": "$"
         },
         {
-          "fieldName": "metadata.createdDate",
-          "caseSensitive": false
+          "fieldName": "billTo",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'billTo')",
+          "sqlExpressionQuery": "$"
         },
         {
-          "fieldName": "metadata.createdByUserId",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "workflowStatus",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "approved",
-          "caseSensitive": false
+          "fieldName": "closeReason.reason",
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
           "fieldName": "dateOrdered",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
-          "fieldName": "orderType",
-          "caseSensitive": false
+          "fieldName": "ongoing.isSubscription",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'ongoing'->>'isSubscription')",
+          "sqlExpressionQuery": "$"
         },
         {
-          "fieldName": "reEncumber",
-          "caseSensitive": false
+          "fieldName": "metadata.createdByUserId",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'metadata'->>'createdByUserId')",
+          "sqlExpressionQuery": "$"
         },
         {
-          "fieldName": "vendor",
-          "caseSensitive": false
+          "fieldName": "metadata.createdDate",
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
-          "fieldName": "renewal.manualRenewal",
-          "tOps": "DELETE"
+          "fieldName": "metadata.updatedByUserId",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'metadata'->>'updatedByUserId')",
+          "sqlExpressionQuery": "$"
         },
         {
-          "fieldName": "renewal.renewalDate",
-          "tOps": "DELETE"
-        },
-        {
-          "fieldName": "renewal.reviewPeriod",
-          "tOps": "DELETE"
+          "fieldName": "metadata.updatedDate",
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
           "fieldName": "ongoing.manualRenewal",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'ongoing'->>'manualRenewal')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "ongoing.renewalDate",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
           "fieldName": "ongoing.reviewPeriod",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "orderType",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'orderType')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "poNumber",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'poNumber')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "poNumberPrefix",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'poNumberPrefix')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "poNumberSuffix",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'poNumberSuffix')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "reEncumber",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'reEncumber')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "shipTo",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'shipTo')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "vendor",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'vendor')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "workflowStatus",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'workflowStatus')",
+          "sqlExpressionQuery": "$"
         }
       ],
       "fullTextIndex": [
         {
-          "fieldName": "closeReason.reason"
-        },
-        {
-          "fieldName": "closeReason.note"
-        },
-        {
-          "fieldName": "acqUnitIds"
-        },
-        {
-          "fieldName": "orderType"
-        },
-        {
-          "fieldName": "workflowStatus"
+          "fieldName": "acqUnitIds",
+          "caseSensitive": false,
+          "removeAccents": false
         }
       ],
       "ginIndex": [
         {
-          "fieldName": "poNumber",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
           "fieldName": "dateOrdered",
-          "caseSensitive": false,
-          "removeAccents": true
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
           "fieldName": "metadata.createdDate",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "poNumber",
           "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": false
         }
       ]
     },
@@ -337,117 +403,184 @@
       ],
       "index": [
         {
-          "fieldName": "eresource.accessProvider",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "eresource.activated",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "eresource.expectedActivation",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "eresource.trial",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "eresource.materialType",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "details.subscriptionFrom",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "details.subscriptionTo",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "location.locationId",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "location.holdingId",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "physical.receiptDue",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "physical.expectedReceiptDate",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "physical.volumes",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "physical.materialType",
-          "caseSensitive": false
+          "fieldName": "acquisitionMethod",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'acquisitionMethod')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "claim.grace",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
           "fieldName": "claim.sent",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'claim'->>'sent')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "collection",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'collection')",
+          "sqlExpressionQuery": "$"
         },
         {
-          "fieldName": "receiptStatus",
-          "caseSensitive": false
+          "fieldName": "details.subscriptionFrom",
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
-          "fieldName": "paymentStatus",
-          "caseSensitive": false
+          "fieldName": "details.subscriptionTo",
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
-          "fieldName": "orderFormat",
-          "caseSensitive": false
+          "fieldName": "eresource.accessProvider",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'eresource'->>'accessProvider')",
+          "sqlExpressionQuery": "$"
         },
         {
-          "fieldName": "receiptDate",
-          "caseSensitive": false
+          "fieldName": "eresource.activated",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'eresource'->>'activated')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "eresource.expectedActivation",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "eresource.materialType",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'eresource'->>'materialType')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "eresource.trial",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'eresource'->>'trial')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "lastEDIExportDate",
+          "caseSensitive": true,
+          "removeAccents": false
         },
         {
           "fieldName": "metadata.createdDate",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "metadata.updatedDate",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "orderFormat",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'orderFormat')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "packagePoLineId",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'packagePoLineId')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "paymentStatus",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'paymentStatus')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "physical.expectedReceiptDate",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "physical.materialType",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'physical'->>'materialType')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "physical.receiptDue",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "poLineNumber",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'poLineNumber')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "receiptDate",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "receiptStatus",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'receiptStatus')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "rush",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'rush')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "source",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'source')",
+          "sqlExpressionQuery": "$"
+        },
+        {
+          "fieldName": "vendorDetail.vendorAccount",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->'vendorDetail'->>'vendorAccount')",
+          "sqlExpressionQuery": "$"
         }
       ],
       "fullTextIndex": [
         {
-          "fieldName": "publisher",
-          "tOps": "DELETE"
+          "fieldName": "contributorName",
+          "caseSensitive": false,
+          "removeAccents": true,
+          "multiFieldNames": "contributors[*].contributor"
         },
         {
           "fieldName": "donor",
-          "tOps": "DELETE"
-        },
-        {
-          "fieldName": "selector",
-          "tOps": "DELETE"
-        },
-        {
-          "fieldName": "vendorDetail.referenceNumbers",
           "caseSensitive": false,
-          "removeAccents": true,
-          "arraySubfield": "refNumber",
-          "arrayModifiers": ["refNumberType", "vendorDetailsSource"]
+          "removeAccents": true
+        },
+        {
+          "fieldName": "donorOrganizationIds",
+          "caseSensitive": false,
+          "removeAccents": false
         },
         {
           "fieldName": "fundDistribution",
@@ -457,6 +590,12 @@
           "arrayModifiers": ["fundId"]
         },
         {
+          "fieldName": "keyword",
+          "caseSensitive": false,
+          "removeAccents": true,
+          "multiFieldNames": "contributors[*].contributor,poLineNumber,requester,titleOrPackage,publisher,vendorDetail.vendorAccount,vendorDetail.referenceNumbers[*].refNumber,donor,selector,physical.volumes[*],details.productIds[*].productId"
+        },
+        {
           "fieldName": "locations",
           "caseSensitive": false,
           "removeAccents": false,
@@ -464,53 +603,19 @@
           "arrayModifiers": ["holdingId"]
         },
         {
-          "fieldName": "orderFormat",
+          "fieldName": "physicalVolumes",
           "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": true,
+          "multiFieldNames": "physical.volumes[*]"
         },
         {
           "fieldName": "productIds",
+          "caseSensitive": false,
+          "removeAccents": false,
           "multiFieldNames": "details.productIds[*].productId"
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "fundDistribution",
-          "caseSensitive": false,
-          "removeAccents": true
         },
         {
-          "fieldName": "details.productIds",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "donorOrganizationIds",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "title",
-          "tOps": "DELETE"
-        },
-        {
-          "fieldName": "titleOrPackage",
-          "caseSensitive": false,
-          "removeAccents": true,
-          "tOps": "ADD"
-        },
-        {
-          "fieldName": "vendorDetail.vendorAccount",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "tags",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "contributors",
+          "fieldName": "publisher",
           "caseSensitive": false,
           "removeAccents": true
         },
@@ -520,19 +625,10 @@
           "removeAccents": true
         },
         {
-          "fieldName": "poLineNumber",
+          "fieldName": "searchLocations",
           "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "publisher",
-          "caseSensitive": false,
-          "removeAccents": true
-        },
-        {
-          "fieldName": "donor",
-          "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": false,
+          "multiFieldNames": "locations[*].holdingId,searchLocationIds[*]"
         },
         {
           "fieldName": "selector",
@@ -540,21 +636,40 @@
           "removeAccents": true
         },
         {
+          "fieldName": "tags.tagList",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
+          "fieldName": "titleOrPackage",
+          "caseSensitive": false,
+          "removeAccents": true
+        },
+        {
           "fieldName": "vendorDetail.referenceNumbers",
           "caseSensitive": false,
-          "removeAccents": true,
+          "removeAccents": false,
           "arraySubfield": "refNumber",
           "arrayModifiers": ["refNumberType", "vendorDetailsSource"]
+        }
+      ],
+      "ginIndex": [
+        {
+          "fieldName": "poLineNumber",
+          "caseSensitive": false,
+          "removeAccents": false
         },
         {
-          "fieldName": "physical.volumes",
+          "fieldName": "vendorDetail.vendorAccount",
           "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": false
         },
         {
-          "fieldName": "searchLocationIds",
+          "fieldName": "vendorDetail.referenceNumbers",
           "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": false,
+          "arraySubfield": "refNumber",
+          "arrayModifiers": ["refNumberType", "vendorDetailsSource"]
         }
       ]
     },
@@ -567,8 +682,7 @@
           "fieldName": "poLineId",
           "targetTable":      "po_line",
           "targetTableAlias": "poLine",
-          "tableAlias": "titles",
-          "tOps": "ADD"
+          "tableAlias": "titles"
         },
         {
           "targetPath": ["poLineId", "purchaseOrderId"],
@@ -579,21 +693,36 @@
       ],
       "index": [
         {
-          "fieldName": "acqUnitIds",
-          "caseSensitive": false
-        },
-        {
           "fieldName": "claimingActive",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'claimingActive')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "instanceId",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'instanceId')",
+          "sqlExpressionQuery": "$"
         }
       ],
       "fullTextIndex": [
         {
-          "fieldName": "acqUnitIds"
+          "fieldName": "acqUnitIds",
+          "caseSensitive": false,
+          "removeAccents": false
+        },
+        {
+          "fieldName": "productIds",
+          "caseSensitive": false,
+          "removeAccents": false,
+          "multiFieldNames": "productIds[*].productId"
+        },
+        {
+          "fieldName": "title",
+          "caseSensitive": false,
+          "removeAccents": true
         }
       ]
     },
@@ -612,8 +741,7 @@
           "fieldName": "titleId",
           "targetTable": "titles",
           "targetTableAlias": "titles",
-          "tableAlias": "pieces",
-          "tOps": "ADD"
+          "tableAlias": "pieces"
         },
         {
           "targetPath": ["poLineId", "purchaseOrderId"],
@@ -624,55 +752,39 @@
       ],
       "index": [
         {
-          "fieldName": "format",
-          "caseSensitive": false
-        },
-        {
           "fieldName": "itemId",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'itemId')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "locationId",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'locationId')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "holdingId",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "receivingStatus",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "receivedDate",
-          "caseSensitive": false
-        },
-        {
-          "fieldName": "supplement",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'holdingId')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "bindItemId",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'bindItemId')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "receivingTenantId",
-          "caseSensitive": false
-        }
-      ],
-      "fullTextIndex": [
-        {
-          "fieldName": "comment"
-        },
-        {
-          "fieldName": "receivingStatus"
-        }
-      ],
-      "ginIndex": [
-        {
-          "fieldName": "displaySummary",
-          "caseSensitive": false,
-          "removeAccents": true
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'receivingTenantId')",
+          "sqlExpressionQuery": "$"
         }
       ]
     },
@@ -683,14 +795,18 @@
       "uniqueIndex": [
         {
           "fieldName": "purchaseOrderId_invoiceId",
-          "multiFieldNames": "purchaseOrderId,invoiceId",
-          "tOps": "ADD"
+          "caseSensitive": true,
+          "removeAccents": false,
+          "multiFieldNames": "purchaseOrderId,invoiceId"
         }
       ],
       "index": [
         {
           "fieldName" : "invoiceId",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'invoiceId')",
+          "sqlExpressionQuery": "$"
         }
       ],
       "foreignKeys": [
@@ -698,8 +814,7 @@
           "fieldName": "purchaseOrderId",
           "targetTable": "purchase_order",
           "tableAlias": "orderInvoiceRel",
-          "targetTableAlias": "purchase_order",
-          "tOps": "ADD"
+          "targetTableAlias": "purchase_order"
         }
       ]
     },
@@ -709,21 +824,30 @@
       "withMetadata": true,
       "uniqueIndex": [
         {
-            "fieldName" : "name"
+          "fieldName" : "name"
         }
       ],
       "index": [
         {
           "fieldName": "isDeleted",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'isDeleted')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "protectRead",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'protectRead')",
+          "sqlExpressionQuery": "$"
         },
         {
           "fieldName": "protectCreate",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(jsonb->>'protectCreate')",
+          "sqlExpressionQuery": "$"
         }
       ]
     },
@@ -743,7 +867,11 @@
       ],
       "index": [
          {
-            "fieldName" : "userId"
+           "fieldName" : "userId",
+           "caseSensitive": true,
+           "removeAccents": false,
+           "sqlExpression": "(jsonb->>'userId')",
+           "sqlExpressionQuery": "$"
          }
        ]
      },
@@ -812,20 +940,22 @@
       "index": [
         {
           "fieldName": "exportDate",
-          "caseSensitive": false
+          "caseSensitive": false,
+          "removeAccents": false
         }
       ],
       "uniqueIndex": [
         {
           "fieldName": "exportJobId",
-          "caseSensitive": false
+          "caseSensitive": true,
+          "removeAccents": false
         }
       ],
-      "ginIndex": [
+      "fullTextIndex": [
         {
           "fieldName": "exportedPoLineIds",
           "caseSensitive": false,
-          "removeAccents": true
+          "removeAccents": false
         }
       ]
     },
@@ -857,7 +987,8 @@
       "uniqueIndex": [
         {
           "fieldName": "key",
-          "caseSensitive": false
+          "caseSensitive": false,
+          "removeAccents": false
         }
       ]
     },
