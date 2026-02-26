@@ -589,6 +589,13 @@
         {
           "fieldName": "instanceId",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "claimingActiveBoolean",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(((jsonb ->> 'claimingActive')::boolean))",
+          "sqlExpressionQuery": "$"
         }
       ],
       "fullTextIndex": [
@@ -658,6 +665,13 @@
         {
           "fieldName": "receivingTenantId",
           "caseSensitive": false
+        },
+        {
+          "fieldName": "titleIdReceivingStatus",
+          "caseSensitive": true,
+          "removeAccents": false,
+          "sqlExpression": "(titleid, (jsonb ->> 'receivingStatus'))",
+          "sqlExpressionQuery": "$"
         }
       ],
       "fullTextIndex": [
