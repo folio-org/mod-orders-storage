@@ -39,7 +39,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import one.util.streamex.StreamEx;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtils;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -67,6 +66,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class ItemUpdateAsyncRecordHandlerTest {
 
@@ -76,7 +76,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
   private PieceService pieceService;
   @Mock
   private PoLinesService poLinesService;
-  @Mock
+  @Spy
   private BatchTrackingService batchTrackingService;
   @Mock
   private AuditOutboxService auditOutboxService;

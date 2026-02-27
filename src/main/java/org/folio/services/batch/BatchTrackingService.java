@@ -4,6 +4,8 @@ import static org.folio.rest.persist.HelperUtils.getFullTableName;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Tuple;
+import lombok.Data;
+import lombok.experimental.Accessors;
 import lombok.extern.log4j.Log4j2;
 
 import org.apache.commons.lang3.StringUtils;
@@ -17,6 +19,8 @@ import org.folio.rest.persist.Conn;
 import org.folio.util.DbUtils;
 
 import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Log4j2
@@ -45,12 +49,33 @@ public class BatchTrackingService {
   }
 
   /**
-   * Increases the processed count for a batch tracking record and returns the updated record to check if the batch is complete.
+   * Increases the processed count for a batch tracking record and returns the updated holder.
+   *
+   * @param conn        the sql connection from transaction
+   * @param batchHolder the batch holder containing batch id
+   * @param tenantId    the tenant id
+   * @return future with batch completion status (true if all records processed)
+   */
+  public Future<BatchHolder> increaseBatchTrackingProgress(Conn conn, BatchHolder batchHolder, String tenantId) {
+    if (batchHolder == null || StringUtils.isBlank(batchHolder.getBatchId())) {
+      log.info("increaseBatchTrackingProgress:: No batch tracking progress increase due to missing batch holder or id");
+      return Future.succeededFuture(Optional.ofNullable(batchHolder)
+        .map(holder -> holder.setBatchMode(false))
+        .orElse(null));
+    }
+    return increaseBatchTrackingProgress(conn, batchHolder.getBatchId(), tenantId)
+      .map(batchTracking -> batchHolder.setLastInBatch(Objects.equals(batchTracking.getProcessedCount(), batchTracking.getTotalRecords())))
+      .onFailure(t -> log.error("increaseBatchTrackingProgress:: Batch tracking progress increase failed: {}", t.getMessage()))
+      .recover(t -> Future.succeededFuture(batchHolder.setBatchMode(false)));
+  }
+
+  /**
+   * Increases the processed count for a batch tracking record and returns the updated batch tracking entity.
    *
    * @param conn     the sql connection from transaction
    * @param batchId  the batch id
    * @param tenantId the tenant id
-   * @return future with batch completion status (true if all records processed)
+   * @return future with batch tracking record with updated processed count, or failure if record not found or update failed
    */
   public Future<BatchTracking> increaseBatchTrackingProgress(Conn conn, String batchId, String tenantId) {
     var query = BATCH_TRACKING_PROGRESS_INCREASE_SQL.formatted(getFullTableName(tenantId, TableNames.BATCH_TRACKING_TABLE));
@@ -58,8 +83,23 @@ public class BatchTrackingService {
       .map(rowSet -> DbUtils.getRowSetAsEntity(rowSet, BatchTracking.class))
       .compose(batchTracking -> batchTracking != null
         ? Future.succeededFuture(batchTracking)
-        : Future.failedFuture(new HttpException(HttpStatus.SC_NOT_FOUND, "Batch tracking not found for batchId: " + batchId)))
-      .onFailure(t -> log.error("increaseBatchTrackingProgress:: Batch tracking progress increase failed", t));
+        : Future.failedFuture(new HttpException(HttpStatus.SC_NOT_FOUND, "Batch tracking not found for batchId: " + batchId)));
+  }
+
+  /**
+   * Deletes a batch tracking record by batch id if holder is in batch mode and is last in batch, otherwise does nothing.
+   *
+   * @param conn        the sql connection from transaction
+   * @param batchHolder the batch holder
+   * @return future that completes when the record is deleted
+   */
+  public Future<Void> deleteBatchTracking(Conn conn, BatchHolder batchHolder) {
+    if (batchHolder.isBatchMode() && batchHolder.isLastInBatch()) {
+      log.info("deleteBatchTracking:: Last item in batch, deleting batch tracking, batchId: {}", batchHolder.getBatchId());
+      return deleteBatchTracking(conn, batchHolder.getBatchId())
+        .recover(t -> Future.succeededFuture());
+    }
+    return Future.succeededFuture();
   }
 
   /**
@@ -93,6 +133,14 @@ public class BatchTrackingService {
       .map(DbUtils::getRowSetAsCount)
       .onSuccess(count -> log.info("cleanupBatchTrackings:: Cleaned up {} batch trackings", count))
       .onFailure(t -> log.warn("cleanupBatchTrackings:: Failed to clean up during batch trackings", t));
+  }
+
+  @Data
+  @Accessors(chain = true)
+  public static class BatchHolder {
+    private String batchId;
+    private boolean isBatchMode = true;
+    private boolean isLastInBatch = false;
   }
 
 }
