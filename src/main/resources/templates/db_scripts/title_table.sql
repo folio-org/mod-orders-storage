@@ -10,5 +10,5 @@ CREATE INDEX IF NOT EXISTS titles_receiving_note_sort ON ${myuniversity}_${mymod
 CREATE INDEX IF NOT EXISTS titles_package_sort ON ${myuniversity}_${mymodule}.titles
   (left(lower(f_unaccent(titles.jsonb->'poLine'->>'titleOrPackage')), 600), lower(f_unaccent(titles.jsonb->'poLine'->>'titleOrPackage')));
 
-CREATE INDEX IF NOT EXISTS titles_claiming_active_boolean ON ${myuniversity}_${mymodule}.titles
-  (((jsonb ->> 'claimingActive')::boolean));
+CREATE INDEX IF NOT EXISTS titles_claiming_active_boolean ON ${myuniversity}_${mymodule}.titles (id)
+  WHERE ((jsonb ->> 'claimingActive')::boolean) = TRUE;
