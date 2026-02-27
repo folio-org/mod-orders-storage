@@ -7,6 +7,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 import org.apache.commons.collections4.IteratorUtils;
+import org.folio.HttpStatus;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.DBClient;
@@ -77,12 +78,15 @@ public final class DbUtils {
       .findFirst().orElse(0L);
   }
 
-  public static <T> T convertResponseToEntity(Response response, Class<T> entityClass) {
+  public static <T> Future<T> convertResponseToEntity(Response response, Class<T> entityClass) {
+    if (response.getStatus() != HttpStatus.HTTP_OK.toInt()) {
+      return Future.failedFuture(new HttpException(response.getStatus(), response.getEntity().toString()));
+    }
     try {
-      return JsonObject.mapFrom(response.getEntity()).mapTo(entityClass);
+      return Future.succeededFuture(JsonObject.mapFrom(response.getEntity()).mapTo(entityClass));
     } catch (RuntimeException e) {
-      throw new IllegalStateException(String.format("Cannot convert response '%s' to entity '%s' - error message: %s",
-        response.getEntity(), entityClass.getName(), e.getMessage()));
+      return Future.failedFuture(new IllegalStateException(String.format("Cannot convert response '%s' to entity '%s' - error message: %s",
+        response.getEntity(), entityClass.getName(), e.getMessage())));
     }
   }
 
