@@ -566,6 +566,7 @@
     {
       "tableName": "titles",
       "fromModuleVersion": "mod-orders-storage-11.0.0",
+      "customSnippetPath": "title_table.sql",
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -605,6 +606,7 @@
     {
       "tableName": "pieces",
       "fromModuleVersion": "mod-orders-storage-11.0.0",
+      "customSnippetPath": "piece_table.sql",
       "withMetadata": true,
       "foreignKeys": [
         {
