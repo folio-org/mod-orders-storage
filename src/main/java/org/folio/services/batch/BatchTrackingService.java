@@ -58,7 +58,7 @@ public class BatchTrackingService {
    */
   public Future<BatchHolder> increaseBatchTrackingProgress(Conn conn, BatchHolder batchHolder, String tenantId) {
     if (batchHolder == null || StringUtils.isBlank(batchHolder.getBatchId())) {
-      log.info("increaseBatchTrackingProgress:: No batch tracking progress increase due to missing batch holder or id");
+      log.debug("increaseBatchTrackingProgress:: No batch tracking progress increase due to missing batch holder or id");
       return Future.succeededFuture(Optional.ofNullable(batchHolder)
         .map(holder -> holder.setBatchMode(false))
         .orElse(null));
