@@ -41,7 +41,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtils;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
@@ -79,7 +78,7 @@ public class ItemCreateAsyncRecordHandlerTest {
   private PoLinesService poLinesService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
-  @Mock
+  @Spy
   private BatchTrackingService batchTrackingService;
   @Mock
   private AuditOutboxService auditOutboxService;
