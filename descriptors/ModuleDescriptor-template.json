@@ -696,8 +696,8 @@
           ],
           "pathPattern": "/orders-storage/audit-outbox/process",
           "modulePermissions": [],
-          "unit": "minute",
-          "delay": "30"
+          "unit": "hour",
+          "delay": "6"
         },
         {
           "methods": [
@@ -706,7 +706,7 @@
           "pathPattern": "/orders-storage/claiming/process",
           "modulePermissions": [],
           "unit": "hour",
-          "delay": "1"
+          "delay": "12"
         },
         {
           "methods": [
