@@ -27,7 +27,7 @@ import java.util.UUID;
 public class BatchTrackingService {
 
   private static final String BATCH_TRACKING_PROGRESS_INCREASE_SQL =
-    "UPDATE %s SET jsonb = jsonb || jsonb_build_object('processed_count', (jsonb->>'processed_count')::int + 1) WHERE id = $1 RETURNING jsonb";
+    "UPDATE %s SET jsonb = jsonb || jsonb_build_object('processedCount', (jsonb->>'processedCount')::int + 1) WHERE id = $1 RETURNING jsonb";
   private static final Triple<String, String, String> BATCH_TRACKING_CLEANUP_CRITERIA =
     Triple.of("created_date", "<", "NOW() - INTERVAL '%s hours'");
 
