@@ -196,12 +196,10 @@ public class PoLinesAPI extends BaseApi implements OrdersStoragePoLines {
           asyncResultHandler.handle(buildErrorResponse(ar.cause()));
         } else {
           log.info("Patch order line complete, id={}", id);
+          auditOutboxService.processOutboxEventLogs(okapiHeaders);
           asyncResultHandler.handle(buildNoContentResponse());
         }
       });
   }
 
-  public PostgresClient getPgClient() {
-    return pgClient;
-  }
 }

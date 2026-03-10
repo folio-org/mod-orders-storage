@@ -4,6 +4,7 @@ import static org.folio.event.InventoryEventType.INVENTORY_ITEM_CREATE;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
 import static org.folio.event.dto.ItemFields.PURCHASE_ORDER_LINE_IDENTIFIER;
+import static org.folio.services.batch.BatchTrackingService.BatchHolder;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -17,7 +18,6 @@ import java.util.Objects;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
 import org.folio.services.batch.BatchTrackingService;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -55,35 +55,17 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     var itemObject = JsonObject.mapFrom(resourceEvent.getNewValue());
     var itemId = itemObject.getString(ID.getValue());
     var tenantIdFromEvent = resourceEvent.getTenant();
-    var batchId = itemObject.getString(PURCHASE_ORDER_LINE_IDENTIFIER.getValue());
+    var batchHolder = new BatchHolder().setBatchId(itemObject.getString(PURCHASE_ORDER_LINE_IDENTIFIER.getValue()));
     var updatedHeaders = HeaderUtils.prepareHeaderForTenant(centralTenantId, headers);
 
     return dbClient.getPgClient()
-      .withTrans(conn -> increaseBatchProgress(batchId, centralTenantId, conn)
-        .compose(isLast -> pieceService.getPiecesByItemId(itemId, conn)
-          .compose(pieces -> processPiecesUpdate(pieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
-          .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, batchId, isLast, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
-          .compose(v -> handleBatchCompletion(batchId, isLast, conn))))
+      .withTrans(conn -> batchTrackingService.increaseBatchTrackingProgress(conn, batchHolder, centralTenantId)
+        .compose(holder -> pieceService.getPiecesByItemId(itemId, conn))
+        .compose(pieces -> processPiecesUpdate(pieces, itemObject, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
+        .compose(updatedPieces -> processPoLinesUpdate(updatedPieces, itemObject, batchHolder, tenantIdFromEvent, centralTenantId, updatedHeaders, conn))
+        .compose(v -> batchTrackingService.deleteBatchTracking(conn, batchHolder)))
       .onComplete(v -> auditOutboxService.processOutboxEventLogs(headers))
       .mapEmpty();
-  }
-
-  private Future<Boolean> increaseBatchProgress(String batchId, String centralTenantId, Conn conn) {
-    if (StringUtils.isBlank(batchId)) {
-      return Future.succeededFuture(false);
-    }
-    return batchTrackingService.increaseBatchTrackingProgress(conn, batchId, centralTenantId)
-      .map(batchTracking -> Objects.equals(batchTracking.getProcessedCount(), batchTracking.getTotalRecords()))
-      .recover(t -> Future.succeededFuture(false));
-  }
-
-  private Future<Void> handleBatchCompletion(String batchId, boolean isLastInBatch, Conn conn) {
-    if (StringUtils.isNotBlank(batchId) && isLastInBatch) {
-      log.info("handleBatchCompletion:: Last item in batch, deleting batch tracking, batchId: {}", batchId);
-      return batchTrackingService.deleteBatchTracking(conn, batchId)
-        .recover(t -> Future.succeededFuture());
-    }
-    return Future.succeededFuture();
   }
 
   private Future<List<Piece>> processPiecesUpdate(List<Piece> pieces, JsonObject itemObject, String tenantIdFromEvent,
@@ -138,24 +120,23 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     });
   }
 
-  private Future<Void> processPoLinesUpdate(List<Piece> pieces, JsonObject itemObject, String batchId, boolean isLastInBatch,
+  private Future<Void> processPoLinesUpdate(List<Piece> pieces, JsonObject itemObject, BatchHolder batchHolder,
                                             String tenantIdFromEvent, String centralTenantId, Map<String, String> headers, Conn conn) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.info("processPoLinesUpdate:: No updated pieces were found to update for item: '{}' with batchId='{}' and tenant: '{}' in centralTenant: {}",
-        itemObject.getString(ID.getValue()), batchId, tenantIdFromEvent, centralTenantId);
+        itemObject.getString(ID.getValue()), batchHolder.getBatchId(), tenantIdFromEvent, centralTenantId);
       return Future.succeededFuture();
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
-    boolean isBatchMode = StringUtils.isNotBlank(batchId);
     log.debug("processPoLinesUpdate:: Preparing '{}' poLineIds for update processing with batchId='{}', isBatchMode={}, isLastInBatch={}",
-      poLineIds.size(), batchId, isBatchMode, isLastInBatch);
+      poLineIds.size(), batchHolder.getBatchId(), batchHolder.isBatchMode(), batchHolder.isLastInBatch());
 
     // The skipFiltering is set to true to update all POLs regardless of the checkinItems flag, as items could be located in
     // different tenants and to keep consistency, POLs must be updated regardless of the checkinItems flag (Receiving Workflow)
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, itemObject, true, centralTenantId, headers, conn)
       .compose(updatedPoLines -> {
         // Only save POL outbox logs if NOT in batch mode OR if this is the last item in batch
-        if (isBatchMode && !isLastInBatch) {
+        if (batchHolder.isBatchMode() && !batchHolder.isLastInBatch()) {
           log.debug("processPoLinesUpdate:: Batch mode enabled and not last item, skipping POL outbox save");
           return Future.succeededFuture(false);
         } else {

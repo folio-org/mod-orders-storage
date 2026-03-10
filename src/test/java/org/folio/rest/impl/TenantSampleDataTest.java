@@ -13,6 +13,7 @@ import static org.folio.rest.utils.TestEntities.REASON_FOR_CLOSURE;
 import static org.folio.rest.utils.TestEntities.SUFFIX;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -28,6 +29,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.StorageTestSuite;
+import org.folio.rest.jaxrs.model.CustomField;
+import org.folio.rest.jaxrs.model.CustomFieldCollection;
 import org.folio.rest.jaxrs.model.Prefix;
 import org.folio.rest.jaxrs.model.PrefixCollection;
 import org.folio.rest.jaxrs.model.ReasonForClosure;
@@ -115,14 +118,12 @@ public class TenantSampleDataTest extends TestBase {
         .filter(entity -> !EXPORT_HISTORY.equals(entity))
         .toList();
       for (TestEntities entity : entitySamples) {
-        if (entity == CUSTOM_FIELDS) {
-          log.info("testPartialSampleDataLoading:: Ignoring custom fields validation");
-          continue;
-        }
         log.info("testPartialSampleDataLoading:: Test expected quantity for {}", entity.name());
 
         verifyCollectionQuantity(entity.getEndpoint(), entity.getInitialQuantity() + entity.getEstimatedSystemDataRecordsQuantity(), PARTIAL_TENANT_HEADER);
       }
+
+      verifyCustomFieldsHaveMetadata(PARTIAL_TENANT_HEADER);
     } finally {
       PostgresClient oldClient = PostgresClient.getInstance(StorageTestSuite.getVertx(), PARTIAL_TENANT_HEADER.getValue());
       deleteTenant(tenantJob, PARTIAL_TENANT_HEADER);
@@ -143,6 +144,19 @@ public class TenantSampleDataTest extends TestBase {
         .log()
         .ifValidationFails()
         .statusCode(204);
+    }
+  }
+
+  private void verifyCustomFieldsHaveMetadata(Header tenantHeader) throws MalformedURLException {
+    List<CustomField> customFields = getData(CUSTOM_FIELDS.getEndpoint(), tenantHeader)
+      .then()
+      .statusCode(200)
+      .extract()
+      .as(CustomFieldCollection.class)
+      .getCustomFields();
+    for (CustomField cf : customFields) {
+      assertThat(cf.getMetadata(), notNullValue());
+      assertThat(cf.getMetadata().getCreatedDate(), notNullValue());
     }
   }
 
@@ -185,14 +199,12 @@ public class TenantSampleDataTest extends TestBase {
       .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
     for (TestEntities entity : entitySamples) {
-      if (entity == CUSTOM_FIELDS) {
-        log.info("upgradeTenantWithSampleDataLoad:: Ignoring custom fields validation");
-        continue;
-      }
       log.info("upgradeTenantWithSampleDataLoad:: Test expected quantity for name {}", entity.name());
 
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity() + entity.getInitialQuantity(), ANOTHER_TENANT_HEADER);
     }
+
+    verifyCustomFieldsHaveMetadata(ANOTHER_TENANT_HEADER);
 
     return tenantJob;
   }
@@ -206,10 +218,6 @@ public class TenantSampleDataTest extends TestBase {
       .filter(entity -> !EXPORT_HISTORY.equals(entity) && !ORDER_TEMPLATE_CATEGORIES.equals(entity))
       .toList();
     for (TestEntities entity: entitySamples) {
-      if (entity == CUSTOM_FIELDS) {
-        log.info("upgradeTenantWithNoSampleDataLoad:: Ignoring custom fields validation");
-        continue;
-      }
       log.info("upgradeTenantWithNoSampleDataLoad:: Test expected quantity: 0 for name: {}", entity.name());
 
       verifyCollectionQuantity(entity.getEndpoint(), entity.getEstimatedSystemDataRecordsQuantity());

@@ -560,7 +560,8 @@
     },
     {
       "tableName": "titles",
-      "fromModuleVersion": "mod-orders-storage-11.0.0",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
+      "customSnippetPath": "title_table.sql",
       "withMetadata": true,
       "foreignKeys": [
         {

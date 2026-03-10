@@ -16,6 +16,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.services.batch.BatchTrackingService.BatchHolder;
 import org.folio.util.HeaderUtils;
 
 @Data
@@ -28,9 +29,7 @@ public class ItemEventHolder {
 
   private String orderTenantId;
   private String centralTenantId;
-
-  private String batchId;
-  private boolean isLastInBatch;
+  private BatchHolder batchHolder;
 
   private String itemId;
   private JsonObject item;
@@ -48,7 +47,7 @@ public class ItemEventHolder {
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
     setItem(newValue);
     setItemId(newValue.getString(ID.getValue()));
-    setBatchId(newValue.getString(PURCHASE_ORDER_LINE_IDENTIFIER.getValue()));
+    setBatchHolder(new BatchHolder().setBatchId(newValue.getString(PURCHASE_ORDER_LINE_IDENTIFIER.getValue())));
 
     setHoldingIdPair(Pair.of(
       oldValue.getString(HOLDINGS_RECORD_ID.getValue()),
