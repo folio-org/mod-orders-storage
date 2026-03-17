@@ -706,7 +706,7 @@
           "pathPattern": "/orders-storage/claiming/process",
           "modulePermissions": [],
           "unit": "hour",
-          "delay": "12"
+          "delay": "6"
         },
         {
           "methods": [
