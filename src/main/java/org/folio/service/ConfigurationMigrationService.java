@@ -3,11 +3,9 @@ package org.folio.service;
 import static org.folio.rest.persist.HelperUtils.encodeQuery;
 
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.okapi.common.ModuleId;
 import org.folio.okapi.common.SemVer;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.okapi.common.WebClientFactory;
@@ -30,7 +28,6 @@ public class ConfigurationMigrationService {
   private static final String OKAPI_URL = "x-okapi-url";
   private static final String CONFIGURATIONS_ENTRIES_ENDPOINT = "/configurations/entries";
   private static final String SETTINGS_TABLE = "settings";
-  private static final Pattern VERSION_PATTERN = Pattern.compile(".*-(\\d+\\..*)");
   private static final SemVer MIGRATION_TARGET_VERSION = new SemVer("14.0.0");
 
   public Future<Void> migrateConfigurationData(TenantAttributes attributes, String tenantId,
@@ -106,11 +103,7 @@ public class ConfigurationMigrationService {
   }
 
   private SemVer toSemVer(String moduleId) {
-    Matcher matcher = VERSION_PATTERN.matcher(moduleId);
-    if (matcher.matches()) {
-      return new SemVer(matcher.group(1));
-    }
-    return new SemVer(moduleId);
+    return new ModuleId(moduleId).getSemVer();
   }
 
   private Future<Void> insertConfigurationData(JsonArray configs, String tenantId, Context vertxContext) {
