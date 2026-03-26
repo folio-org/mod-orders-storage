@@ -12,15 +12,14 @@ import org.folio.event.dto.HoldingUpdate;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.core.models.RequestContext;
-import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.location.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.services.inventory.InventoryUpdateService;
 import org.folio.services.lines.PoLinesService;
 import org.folio.spring.SpringContextUtil;
 import org.folio.util.HeaderUtils;
-import org.folio.util.InventoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
