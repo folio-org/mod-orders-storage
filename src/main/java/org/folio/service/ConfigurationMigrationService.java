@@ -3,6 +3,7 @@ package org.folio.service;
 import static org.folio.rest.persist.HelperUtils.encodeQuery;
 
 import java.util.Map;
+import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.okapi.common.ModuleId;
@@ -18,7 +19,6 @@ import io.vertx.core.http.HttpResponseExpectation;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.sqlclient.Tuple;
 
 public class ConfigurationMigrationService {
@@ -82,12 +82,7 @@ public class ConfigurationMigrationService {
   }
 
   private static WebClient getWebClient(Context context) {
-    WebClientOptions options = new WebClientOptions();
-    options.setLogActivity(true);
-    options.setKeepAlive(true);
-    options.setConnectTimeout(2000);
-    options.setIdleTimeout(5000);
-    return WebClientFactory.getWebClient(context.owner(), options);
+    return WebClientFactory.getWebClient(context.owner());
   }
 
   private boolean isMigrationNeeded(TenantAttributes attributes) {
@@ -126,11 +121,10 @@ public class ConfigurationMigrationService {
       .put("value", config.getString("value"))
       .put("metadata", config.getJsonObject("metadata"));
 
-    String sql = "INSERT INTO " + SETTINGS_TABLE + " (id, jsonb) VALUES ('" + id + "', '"
-      + settingJsonb.encode().replace("'", "''")
-      + "'::jsonb) ON CONFLICT (lower(f_unaccent(jsonb->>'key'::text))) DO NOTHING";
+    String sql = "INSERT INTO " + SETTINGS_TABLE + " (id, jsonb) VALUES ($1, $2::jsonb) "
+      + "ON CONFLICT (lower(f_unaccent(jsonb->>'key'::text))) DO NOTHING";
 
-    return pgClient.execute(sql, Tuple.tuple())
+    return pgClient.execute(sql, Tuple.of(UUID.fromString(id), settingJsonb.encode()))
       .onSuccess(rows -> log.info("Successfully migrated setting with id: {}", id))
       .onFailure(e -> log.error("Failed to insert setting with id: {}", id, e))
       .mapEmpty();
