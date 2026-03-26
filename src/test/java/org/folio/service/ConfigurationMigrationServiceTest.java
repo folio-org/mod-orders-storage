@@ -178,12 +178,15 @@ class ConfigurationMigrationServiceTest {
     assertTrue(result.succeeded());
 
     var sqlCaptor = ArgumentCaptor.forClass(String.class);
-    verify(pgClient).execute(sqlCaptor.capture(), any(Tuple.class));
+    var tupleCaptor = ArgumentCaptor.forClass(Tuple.class);
+    verify(pgClient).execute(sqlCaptor.capture(), tupleCaptor.capture());
 
     String sql = sqlCaptor.getValue();
     assertTrue(sql.contains("INSERT INTO settings"));
-    assertTrue(sql.contains("APPROVAL_REQUIRED"));
     assertTrue(sql.contains("ON CONFLICT"));
+
+    String tupleJson = tupleCaptor.getValue().get(String.class, 1);
+    assertTrue(tupleJson.contains("APPROVAL_REQUIRED"));
   }
 
   @Test
@@ -292,7 +295,7 @@ class ConfigurationMigrationServiceTest {
   }
 
   private void mockWebClient() {
-    webClientFactoryMock.when(() -> WebClientFactory.getWebClient(any(Vertx.class), any()))
+    webClientFactoryMock.when(() -> WebClientFactory.getWebClient(any(Vertx.class)))
       .thenReturn(webClient);
     when(webClient.getAbs(anyString())).thenReturn(httpRequest);
     when(httpRequest.putHeaders(any())).thenReturn(httpRequest);
