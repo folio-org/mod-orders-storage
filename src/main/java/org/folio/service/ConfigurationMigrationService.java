@@ -6,8 +6,7 @@ import java.util.Map;
 import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.okapi.common.ModuleId;
-import org.folio.okapi.common.SemVer;
+import org.folio.dbschema.Versioned;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.okapi.common.WebClientFactory;
 import org.folio.rest.jaxrs.model.TenantAttributes;
@@ -28,7 +27,7 @@ public class ConfigurationMigrationService {
   private static final String OKAPI_URL = "x-okapi-url";
   private static final String CONFIGURATIONS_ENTRIES_ENDPOINT = "/configurations/entries";
   private static final String SETTINGS_TABLE = "settings";
-  private static final SemVer MIGRATION_TARGET_VERSION = new SemVer("14.0.0");
+  private static final String MIGRATION_TARGET_VERSION = "14.0.0";
 
   public Future<Void> migrateConfigurationData(TenantAttributes attributes, String tenantId,
       Map<String, String> headers, Context vertxContext) {
@@ -91,29 +90,32 @@ public class ConfigurationMigrationService {
     if (moduleFrom == null || moduleTo == null) {
       return false;
     }
-    SemVer moduleFromVersion = toSemVer(moduleFrom);
-    SemVer moduleToVersion = toSemVer(moduleTo);
-    return moduleFromVersion.compareTo(MIGRATION_TARGET_VERSION) < 0
-      && moduleToVersion.compareTo(MIGRATION_TARGET_VERSION) >= 0;
+    return isNewForVersion(moduleFrom, MIGRATION_TARGET_VERSION)
+      && !isNewForVersion(moduleTo, MIGRATION_TARGET_VERSION);
   }
 
-  private SemVer toSemVer(String moduleId) {
-    return new ModuleId(moduleId).getSemVer();
+  // Uses the same version comparison as schema.json's fromModuleVersion.
+  // Correctly handles SNAPSHOT suffixes, e.g. 14.0.0-SNAPSHOT.123 is treated as 14.0.0.
+  private boolean isNewForVersion(String moduleId, String version) {
+    var since = new Versioned() { };
+    since.setFromModuleVersion(version);
+    return since.isNewForThisInstall(moduleId);
   }
 
   private Future<Void> insertConfigurationData(JsonArray configs, String tenantId, Context vertxContext) {
     PostgresClient pgClient = PostgresClient.getInstance(vertxContext.owner(), tenantId);
+    String schemaName = pgClient.getSchemaName();
     Future<Void> future = Future.succeededFuture();
 
     for (int i = 0; i < configs.size(); i++) {
       JsonObject config = configs.getJsonObject(i);
-      future = future.compose(v -> insertSetting(pgClient, config));
+      future = future.compose(v -> insertSetting(pgClient, schemaName, config));
     }
 
     return future;
   }
 
-  private Future<Void> insertSetting(PostgresClient pgClient, JsonObject config) {
+  private Future<Void> insertSetting(PostgresClient pgClient, String schemaName, JsonObject config) {
     String id = config.getString("id");
     JsonObject settingJsonb = new JsonObject()
       .put("id", id)
@@ -121,8 +123,8 @@ public class ConfigurationMigrationService {
       .put("value", config.getString("value"))
       .put("metadata", config.getJsonObject("metadata"));
 
-    String sql = "INSERT INTO " + SETTINGS_TABLE + " (id, jsonb) VALUES ($1, $2::jsonb) "
-      + "ON CONFLICT (lower(f_unaccent(jsonb->>'key'::text))) DO NOTHING";
+    String sql = "INSERT INTO " + schemaName + "." + SETTINGS_TABLE + " (id, jsonb) VALUES ($1, $2::jsonb) "
+      + "ON CONFLICT (lower(" + schemaName + ".f_unaccent(jsonb->>'key'::text))) DO NOTHING";
 
     return pgClient.execute(sql, Tuple.of(UUID.fromString(id), settingJsonb.encode()))
       .onSuccess(rows -> log.info("Successfully migrated setting with id: {}", id))
