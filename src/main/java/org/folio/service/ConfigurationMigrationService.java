@@ -84,22 +84,16 @@ public class ConfigurationMigrationService {
     return WebClientFactory.getWebClient(context.owner());
   }
 
+  // Mimics schema.json's fromModuleVersion behavior: run for fresh installs
+  // and upgrades from a version before the target. Can be removed after one release cycle.
   private boolean isMigrationNeeded(TenantAttributes attributes) {
     String moduleFrom = attributes.getModuleFrom();
-    String moduleTo = attributes.getModuleTo();
-    if (moduleFrom == null || moduleTo == null) {
-      return false;
+    if (moduleFrom == null) {
+      return true;
     }
-    return isNewForVersion(moduleFrom, MIGRATION_TARGET_VERSION)
-      && !isNewForVersion(moduleTo, MIGRATION_TARGET_VERSION);
-  }
-
-  // Uses the same version comparison as schema.json's fromModuleVersion.
-  // Correctly handles SNAPSHOT suffixes, e.g. 14.0.0-SNAPSHOT.123 is treated as 14.0.0.
-  private boolean isNewForVersion(String moduleId, String version) {
     var since = new Versioned() { };
-    since.setFromModuleVersion(version);
-    return since.isNewForThisInstall(moduleId);
+    since.setFromModuleVersion(MIGRATION_TARGET_VERSION);
+    return since.isNewForThisInstall(moduleFrom);
   }
 
   private Future<Void> insertConfigurationData(JsonArray configs, String tenantId, Context vertxContext) {

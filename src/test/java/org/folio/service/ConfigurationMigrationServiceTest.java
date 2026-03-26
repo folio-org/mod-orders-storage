@@ -82,9 +82,14 @@ class ConfigurationMigrationServiceTest {
   }
 
   @Test
-  void migrateConfigurationData_freshInstall_skipped() {
+  void migrateConfigurationData_freshInstall_migrationTriggered() {
     var attributes = new TenantAttributes()
       .withModuleTo(MODULE_TO_TARGET);
+
+    mockWebClient();
+    mockHttpResponse(200, new JsonObject()
+      .put("configs", new JsonArray())
+      .put("totalRecords", 0));
 
     var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
 
@@ -114,37 +119,10 @@ class ConfigurationMigrationServiceTest {
   }
 
   @Test
-  void migrateConfigurationData_belowTargetVersion_skipped() {
-    var attributes = new TenantAttributes()
-      .withModuleFrom(MODULE_FROM_BEFORE_TARGET)
-      .withModuleTo("mod-orders-storage-13.9.0");
-
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
-
-    assertTrue(result.succeeded());
-  }
-
-  @Test
-  void migrateConfigurationData_snapshotVersion_migrationTriggered() {
+  void migrateConfigurationData_snapshotModuleFrom_migrationTriggered() {
     var attributes = new TenantAttributes()
       .withModuleFrom("mod-orders-storage-13.9.0-SNAPSHOT.123")
       .withModuleTo(MODULE_TO_TARGET);
-
-    mockWebClient();
-    mockHttpResponse(200, new JsonObject()
-      .put("configs", new JsonArray())
-      .put("totalRecords", 0));
-
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
-
-    assertTrue(result.succeeded());
-  }
-
-  @Test
-  void migrateConfigurationData_snapshotModuleTo_migrationTriggered() {
-    var attributes = new TenantAttributes()
-      .withModuleFrom(MODULE_FROM_BEFORE_TARGET)
-      .withModuleTo("mod-orders-storage-14.0.0-SNAPSHOT.123");
 
     mockWebClient();
     mockHttpResponse(200, new JsonObject()
