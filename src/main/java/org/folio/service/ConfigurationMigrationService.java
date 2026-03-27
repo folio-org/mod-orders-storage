@@ -117,10 +117,10 @@ public class ConfigurationMigrationService {
       .put("value", config.getString("value"))
       .put("metadata", config.getJsonObject("metadata"));
 
-    String sql = "INSERT INTO " + schemaName + "." + SETTINGS_TABLE + " (id, jsonb) VALUES ($1, $2::jsonb) "
+    String sql = "INSERT INTO " + schemaName + "." + SETTINGS_TABLE + " (id, jsonb) VALUES ($1, $2) "
       + "ON CONFLICT (lower(" + schemaName + ".f_unaccent(jsonb->>'key'::text))) DO NOTHING";
 
-    return pgClient.execute(sql, Tuple.of(UUID.fromString(id), settingJsonb.encode()))
+    return pgClient.execute(sql, Tuple.of(UUID.fromString(id), settingJsonb))
       .onSuccess(rows -> log.info("Successfully migrated setting with id: {}", id))
       .onFailure(e -> log.error("Failed to insert setting with id: {}", id, e))
       .mapEmpty();
