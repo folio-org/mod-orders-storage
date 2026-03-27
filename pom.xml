@@ -573,6 +573,7 @@
           </argLine>
           <includes>
             <include>org/folio/StorageTestSuite.java</include>
+            <include>org/folio/service/**</include>
           </includes>
         </configuration>
       </plugin>
