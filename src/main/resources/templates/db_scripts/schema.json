@@ -169,7 +169,7 @@
     {
       "run": "after",
       "snippetPath": "views/wrapper_pieces_view.sql",
-      "fromModuleVersion": "mod-orders-storage-13.9.0"
+      "fromModuleVersion": "mod-orders-storage-14.0.0"
     },
     {
       "run": "after",
@@ -319,7 +319,7 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": "mod-orders-storage-13.7.0",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
       "withMetadata": true,
       "customSnippetPath": "po_line_table.sql",
       "foreignKeys": [
