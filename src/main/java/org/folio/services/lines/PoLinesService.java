@@ -179,7 +179,7 @@ public class PoLinesService {
         if (ar.succeeded()) {
           log.trace("getPoLinesByLineIds completed, poLineIds={}", poLineIds);
           promise.complete(ar.result().list().stream()
-            .map(chunkList -> (List<PoLine>) chunkList)
+            .map(chunkList -> (List<PoLine>)chunkList)
             .filter(CollectionUtils::isNotEmpty)
             .flatMap(Collection::stream)
             .toList());
@@ -397,6 +397,7 @@ public class PoLinesService {
 
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, title.getId());
     Title newTitle = createTitleObject(poLine, title.getAcqUnitIds(), headers)
+      .withIsAcknowledged(title.getIsAcknowledged())
       .withNextSequenceNumber(title.getNextSequenceNumber())
       .withId(title.getId());
 
@@ -479,8 +480,8 @@ public class PoLinesService {
         List<Title> titles = result.getResults();
         if (titles.isEmpty()) {
           return createTitle(conn, poLine, headers);
-        } else if (titleUpdateRequired(titles.getFirst(), poLine, headers)) {
-          return updateTitle(conn, titles.getFirst(), poLine, headers);
+        } else if (titleUpdateRequired(titles.get(0), poLine, headers)) {
+          return updateTitle(conn, titles.get(0), poLine, headers);
         }
         return Future.succeededFuture(poLine);
       })
