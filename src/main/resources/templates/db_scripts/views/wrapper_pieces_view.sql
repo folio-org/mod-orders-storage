@@ -1,4 +1,6 @@
-CREATE OR REPLACE VIEW ${myuniversity}_${mymodule}.wrapper_pieces_view AS
+DROP VIEW IF EXISTS ${myuniversity}_${mymodule}.wrapper_pieces_view;
+
+CREATE OR REPLACE VIEW ${myuniversity}_${mymodule}.claiming_wrapper_pieces_view AS
 select t.id,
 			 jsonb_build_object(
          'vendorId', (e.jsonb->>'vendor'),
@@ -15,4 +17,5 @@ select t.id,
     join ${myuniversity}_${mymodule}.po_line c on c.id = t.polineid
     join ${myuniversity}_${mymodule}.titles d on d.id = t.titleId
     join ${myuniversity}_${mymodule}.purchase_order e on e.id = c.purchaseorderid
+  where ((c.jsonb ->> 'claimingActive')::boolean) = TRUE
 ;

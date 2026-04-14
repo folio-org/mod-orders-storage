@@ -677,7 +677,8 @@
       "handlers": [
         {
           "methods": ["POST"],
-          "pathPattern": "/_/tenant"
+          "pathPattern": "/_/tenant",
+          "modulePermissions": ["configuration.entries.collection.get"]
         },
         {
           "methods": ["GET", "DELETE"],
@@ -740,6 +741,10 @@
     {
       "id": "instance-storage",
       "version": "11.0"
+    },
+    {
+      "id": "configuration",
+      "version": "2.0"
     }
   ],
   "permissionSets" : [
