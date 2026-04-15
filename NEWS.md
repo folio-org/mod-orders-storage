@@ -1,7 +1,49 @@
-## 14.0.0 - Unreleased
+## 14.0.0 - Released (Trillium R1 2025)
+The primary focus of this release was to upgrade to Vert.x 5.0, implement FQM entity types, improve batch processing and audit logging, and enhance receiving functionality.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.0...v14.0.0)
 
 ### Stories
+* [MODORDSTOR-505](https://folio-org.atlassian.net/browse/MODORDSTOR-505) - Fix migrate_configuration_data_to_settings.ftl cannot read mod_configuration db table
+* [MODORDSTOR-502](https://folio-org.atlassian.net/browse/MODORDSTOR-502) - Update GitHub Workflows for Maven
+* [MODORDSTOR-501](https://folio-org.atlassian.net/browse/MODORDSTOR-501) - Consolidate Batch Item Events for Audit Logging
+* [MODORDSTOR-500](https://folio-org.atlassian.net/browse/MODORDSTOR-500) - Use GET /locale to get tenant language & locale setting selections
+* [MODORDSTOR-494](https://folio-org.atlassian.net/browse/MODORDSTOR-494) - Display barcode from item in related piece in Receiving
+* [MODORDSTOR-491](https://folio-org.atlassian.net/browse/MODORDSTOR-491) - Improve performance of SQL query that cause Lock on DB
+* [MODORDSTOR-490](https://folio-org.atlassian.net/browse/MODORDSTOR-490) - Use patch method to update only necessary fields for order lines in Kafka consumers
+* [MODORDSTOR-486](https://folio-org.atlassian.net/browse/MODORDSTOR-486) - Update simple Receiving Pieces and Titles ETs based on PO feedback
+* [MODORDSTOR-485](https://folio-org.atlassian.net/browse/MODORDSTOR-485) - BE - Edit sequence number in receiving
+* [MODORDSTOR-484](https://folio-org.atlassian.net/browse/MODORDSTOR-484) - Migration - Assign sequence numbers to existing receiving pieces
+* [MODORDSTOR-482](https://folio-org.atlassian.net/browse/MODORDSTOR-482) - Create reference receiving data
+* [MODORDSTOR-477](https://folio-org.atlassian.net/browse/MODORDSTOR-477) - Upgrade module to Vert.x 5.0
+* [MODORDSTOR-474](https://folio-org.atlassian.net/browse/MODORDSTOR-474) - Create reference order templates in Settings
 * [MODORDSTOR-473](https://folio-org.atlassian.net/browse/MODORDSTOR-473) - Restore custom fields sample data
+* [MODORDSTOR-470](https://folio-org.atlassian.net/browse/MODORDSTOR-470) - Setup dependabot for your module
+* [MODORDSTOR-469](https://folio-org.atlassian.net/browse/MODORDSTOR-469) - Update folio-custom-fields dependency
+* [MODORDSTOR-468](https://folio-org.atlassian.net/browse/MODORDSTOR-468) - Create reference order and order line data
+* [MODORDSTOR-466](https://folio-org.atlassian.net/browse/MODORDSTOR-466) - Take claimingActive and claimingInterval into consideration in titleUpdateRequired
+* [MODORDSTOR-452](https://folio-org.atlassian.net/browse/MODORDSTOR-452) - Replace net.mguenther.kafka:kafka-junit (EOL)
+* [MODORDSTOR-448](https://folio-org.atlassian.net/browse/MODORDSTOR-448) - Change type of eresource.userLimit to string
+* [MODORDSTOR-443](https://folio-org.atlassian.net/browse/MODORDSTOR-443) - Implement API for Order Template Categories
+* [MODORDSTOR-433](https://folio-org.atlassian.net/browse/MODORDSTOR-433) - Replace mod-configuration to retrieve current time zone in Claiming job
+
+### Bug Fixes
+* [MODORDSTOR-504](https://folio-org.atlassian.net/browse/MODORDSTOR-504) - Unable to create a custom field due to null createdDate in reference data custom field
+* [MODORDSTOR-498](https://folio-org.atlassian.net/browse/MODORDSTOR-498) - Do not delete metadata when saving po lines in batch
+* [MODORDSTOR-492](https://folio-org.atlassian.net/browse/MODORDSTOR-492) - Query enabling extensions runs hourly
+* [MODORDSTOR-487](https://folio-org.atlassian.net/browse/MODORDSTOR-487) - Update piece location fields only in item consumers to prevent lost updates
+* [MODORDSTOR-458](https://folio-org.atlassian.net/browse/MODORDSTOR-458) - Invalid reference is displayed in PO line after changing instance connection for the P/E mix order
+
+### Dependencies
+* Bump `raml-module-builder` from `35.4.0` to `36.0.0`
+* Bump `vertx` from `4.5.13` to `5.0.8`
+* Bump `log4j` from `2.24.3` to `2.25.3`
+* Bump `jackson-bom` from `2.18.2` to `2.21.1`
+* Bump `folio-di-support` from `3.0.0` to `4.0.0`
+* Bump `folio-kafka-wrapper` from `3.2.0` to `4.0.0`
+* Bump `folio-custom-fields` from `2.2.0` to `3.0.0`
+* Bump `junit-jupiter` from `5.12.0` to `6.0.3`
+* Bump `rest-assured` from `5.5.1` to `6.0.0`
 
 ## 13.9.0 - Released (Sunflower R1 2025)
 The primary focus of this release was to introduce new batch update pieces endpoint, populate metadata for entities batch operations, and batch create pieces API.
