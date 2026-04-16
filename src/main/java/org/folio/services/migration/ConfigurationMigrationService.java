@@ -53,7 +53,8 @@ public class ConfigurationMigrationService extends AbstractMigrationService {
       return Future.succeededFuture(null);
     }
 
-    String endpoint = "%s%s?limit=1000&query=%s".formatted(okapiUrl, CONFIGURATIONS_ENTRIES_ENDPOINT, encodeQuery("module==ORDERS"));
+    String baseUrl = "%s%s".formatted(okapiUrl, CONFIGURATIONS_ENTRIES_ENDPOINT);
+    String endpoint = baseUrl + "?limit=1000&query=" + encodeQuery("module==ORDERS");
     WebClient client = getWebClient(vertxContext);
     MultiMap caseInsensitiveHeaders = MultiMap.caseInsensitiveMultiMap().addAll(headers);
 

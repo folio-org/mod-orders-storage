@@ -74,7 +74,10 @@ public class FiscalYearMigrationService extends AbstractMigrationService {
       log.warn("fetchFiscalYears:: No x-okapi-url header found, cannot call finance-storage");
       return Future.succeededFuture(null);
     }
-    String endpoint = "%s%s?limit=2147483647&query=%s".formatted(okapiUrl, FISCAL_YEARS_ENDPOINT, encodeQuery("cql.allRecords=1"));
+
+
+    String baseUrl = "%s%s".formatted(okapiUrl, FISCAL_YEARS_ENDPOINT);
+    String endpoint = baseUrl + "?limit=2147483647&query=" + encodeQuery("cql.allRecords=1");
     WebClient client = getWebClient(vertxContext);
     MultiMap caseInsensitiveHeaders = MultiMap.caseInsensitiveMultiMap().addAll(headers);
 
