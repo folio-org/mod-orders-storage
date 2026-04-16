@@ -40,7 +40,7 @@ public class FiscalYearMigrationServiceTest {
   private static final String TENANT_ID = "diku";
   private static final String OKAPI_URL = "http://localhost:9130";
   private static final String MODULE_FROM_BEFORE_TARGET = "mod-orders-storage-13.0.0";
-  private static final String MODULE_TO_TARGET = "mod-orders-storage-14.0.0";
+  private static final String MODULE_TO_TARGET = "mod-orders-storage-14.0.1";
   private static final String SCHEMA_NAME = TENANT_ID + "_mod_orders_storage";
 
   private FiscalYearMigrationService service;
