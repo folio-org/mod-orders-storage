@@ -178,8 +178,8 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/14.0.0/update_po_fiscal_year_id_and_opened_by_id_.ftl",
-      "fromModuleVersion": "mod-orders-storage-14.0.0"
+      "snippetPath": "data-migration/14.0.1/update_po_opened_by_id.ftl",
+      "fromModuleVersion": "mod-orders-storage-14.0.1"
     },
     {
       "run": "after",
