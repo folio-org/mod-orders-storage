@@ -37,7 +37,7 @@ import io.vertx.ext.web.client.HttpResponse;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.sqlclient.Tuple;
 
-class ConfigurationMigrationServiceTest {
+public class ConfigurationMigrationServiceTest {
 
   private static final String TENANT_ID = "diku";
   private static final String OKAPI_URL = "http://localhost:9130";
