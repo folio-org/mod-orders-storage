@@ -100,7 +100,7 @@ public class FiscalYearMigrationServiceTest {
   @Test
   void migrateFiscalYearData_alreadyAtTargetVersion_skipped() {
     var attributes = new TenantAttributes()
-      .withModuleFrom("mod-orders-storage-14.0.0")
+      .withModuleFrom("mod-orders-storage-14.0.1")
       .withModuleTo("mod-orders-storage-14.1.0");
 
     var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
