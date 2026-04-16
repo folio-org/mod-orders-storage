@@ -1,4 +1,4 @@
-package org.folio.service;
+package org.folio.services.migration;
 
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -92,7 +92,7 @@ class ConfigurationMigrationServiceTest {
       .put("configs", new JsonArray())
       .put("totalRecords", 0));
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
   }
@@ -103,7 +103,7 @@ class ConfigurationMigrationServiceTest {
       .withModuleFrom("mod-orders-storage-14.0.0")
       .withModuleTo("mod-orders-storage-14.1.0");
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
   }
@@ -114,7 +114,7 @@ class ConfigurationMigrationServiceTest {
       .withModuleFrom("mod-orders-storage-15.0.0")
       .withModuleTo("mod-orders-storage-15.1.0");
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
   }
@@ -130,7 +130,7 @@ class ConfigurationMigrationServiceTest {
       .put("configs", new JsonArray())
       .put("totalRecords", 0));
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
   }
@@ -144,7 +144,7 @@ class ConfigurationMigrationServiceTest {
     Map<String, String> headersNoUrl = new HashMap<>();
     headersNoUrl.put(OKAPI_HEADER_TENANT, TENANT_ID);
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headersNoUrl, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headersNoUrl, vertxContext);
 
     assertTrue(result.succeeded());
   }
@@ -169,7 +169,7 @@ class ConfigurationMigrationServiceTest {
       .put("totalRecords", 1));
     mockPgExecuteSuccess();
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
 
@@ -211,7 +211,7 @@ class ConfigurationMigrationServiceTest {
       .put("totalRecords", 2));
     mockPgExecuteSuccess();
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
     verify(pgClient, times(2)).execute(anyString(), any(Tuple.class));
@@ -228,7 +228,7 @@ class ConfigurationMigrationServiceTest {
       .put("configs", new JsonArray())
       .put("totalRecords", 0));
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
     verify(pgClient, never()).execute(anyString(), any(Tuple.class));
@@ -244,7 +244,7 @@ class ConfigurationMigrationServiceTest {
     when(httpRequest.send())
       .thenReturn(Future.failedFuture(new RuntimeException("Connection refused")));
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
     verify(pgClient, never()).execute(anyString(), any(Tuple.class));
@@ -259,7 +259,7 @@ class ConfigurationMigrationServiceTest {
     mockWebClient();
     mockHttpResponse(403, new JsonObject());
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
     verify(pgClient, never()).execute(anyString(), any(Tuple.class));
@@ -285,7 +285,7 @@ class ConfigurationMigrationServiceTest {
     when(pgClient.execute(anyString(), any(Tuple.class)))
       .thenReturn(Future.failedFuture(new RuntimeException("DB connection error")));
 
-    var result = service.migrateConfigurationData(attributes, TENANT_ID, headers, vertxContext);
+    var result = service.migrate(attributes, TENANT_ID, headers, vertxContext);
 
     assertTrue(result.succeeded());
   }
