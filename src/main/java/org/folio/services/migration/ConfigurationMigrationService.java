@@ -1,16 +1,13 @@
-package org.folio.service;
+package org.folio.services.migration;
 
 import static org.folio.rest.persist.HelperUtils.encodeQuery;
 
 import java.util.Map;
 import java.util.UUID;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.folio.dbschema.Versioned;
+
 import org.folio.rest.exceptions.HttpException;
-import org.folio.okapi.common.WebClientFactory;
-import org.folio.rest.jaxrs.model.TenantAttributes;
 import org.folio.rest.persist.PostgresClient;
+
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
@@ -19,50 +16,45 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.sqlclient.Tuple;
+import lombok.extern.log4j.Log4j2;
 
-public class ConfigurationMigrationService {
+@Log4j2
+public class ConfigurationMigrationService extends AbstractMigrationService {
 
-  private static final Logger log = LogManager.getLogger(ConfigurationMigrationService.class);
-
-  private static final String OKAPI_URL = "x-okapi-url";
   private static final String CONFIGURATIONS_ENTRIES_ENDPOINT = "/configurations/entries";
   private static final String SETTINGS_TABLE = "settings";
-  private static final String MIGRATION_TARGET_VERSION = "14.0.0";
 
-  public Future<Void> migrateConfigurationData(TenantAttributes attributes, String tenantId,
-      Map<String, String> headers, Context vertxContext) {
-    if (!isMigrationNeeded(attributes)) {
-      log.info("Configuration migration is not needed for moduleFrom={}, moduleTo={}",
-        attributes.getModuleFrom(), attributes.getModuleTo());
-      return Future.succeededFuture();
-    }
+  @Override
+  protected String getMigrationName() {
+    return "Configuration data";
+  }
 
-    log.info("Attempting to migrate configuration data from mod-configuration for tenant: {}", tenantId);
+  @Override
+  protected String getTargetVersion() {
+    return "14.0.0";
+  }
 
+  @Override
+  protected Future<Void> doMigrate(String tenantId, Map<String, String> headers, Context vertxContext) {
     return fetchConfigurationEntries(headers, vertxContext)
       .compose(configs -> {
         if (configs == null || configs.isEmpty()) {
-          log.info("No configuration entries found to migrate");
+          log.info("doMigrate:: No configuration entries found to migrate");
           return Future.succeededFuture();
         }
         return insertConfigurationData(configs, tenantId, vertxContext);
-      })
-      .recover(throwable -> {
-        log.warn("Failed to migrate configuration data from mod-configuration. "
-          + "This is expected if mod-configuration is not deployed.", throwable);
-        return Future.succeededFuture();
       });
   }
 
   private Future<JsonArray> fetchConfigurationEntries(Map<String, String> headers, Context vertxContext) {
     String okapiUrl = headers.get(OKAPI_URL);
     if (okapiUrl == null || okapiUrl.isEmpty()) {
-      log.warn("No x-okapi-url header found, cannot call mod-configuration");
+      log.warn("fetchConfigurationEntries:: No x-okapi-url header found, cannot call mod-configuration");
       return Future.succeededFuture(null);
     }
 
-    String endpoint = okapiUrl + CONFIGURATIONS_ENTRIES_ENDPOINT
-      + "?query=" + encodeQuery("module==ORDERS") + "&limit=1000";
+    String baseUrl = "%s%s".formatted(okapiUrl, CONFIGURATIONS_ENTRIES_ENDPOINT);
+    String endpoint = baseUrl + "?limit=1000&query=" + encodeQuery("module==ORDERS");
     WebClient client = getWebClient(vertxContext);
     MultiMap caseInsensitiveHeaders = MultiMap.caseInsensitiveMultiMap().addAll(headers);
 
@@ -74,30 +66,13 @@ public class ConfigurationMigrationService {
           throw new HttpException(response.statusCode(), "Failed to fetch configuration entries from mod-configuration");
         }
         JsonArray configs = response.bodyAsJsonObject().getJsonArray("configs");
-        log.info("Fetched {} configuration entries from mod-configuration",
-          configs != null ? configs.size() : 0);
+        log.info("fetchConfigurationEntries:: Fetched {} configuration entries from mod-configuration", configs != null ? configs.size() : 0);
         return configs;
       });
   }
 
-  private static WebClient getWebClient(Context context) {
-    return WebClientFactory.getWebClient(context.owner());
-  }
-
-  // Mimics schema.json's fromModuleVersion behavior: run for fresh installs
-  // and upgrades from a version before the target. Can be removed after one release cycle.
-  private boolean isMigrationNeeded(TenantAttributes attributes) {
-    String moduleFrom = attributes.getModuleFrom();
-    if (moduleFrom == null) {
-      return true;
-    }
-    var since = new Versioned() { };
-    since.setFromModuleVersion(MIGRATION_TARGET_VERSION);
-    return since.isNewForThisInstall(moduleFrom);
-  }
-
   private Future<Void> insertConfigurationData(JsonArray configs, String tenantId, Context vertxContext) {
-    PostgresClient pgClient = PostgresClient.getInstance(vertxContext.owner(), tenantId);
+    PostgresClient pgClient = getPgClient(vertxContext, tenantId);
     String schemaName = pgClient.getSchemaName();
     Future<Void> future = Future.succeededFuture();
 
