@@ -750,7 +750,7 @@
       "version": "2.0"
     },
     {
-      "id": "finance.fiscal-years",
+      "id": "finance-storage.fiscal-years",
       "version": "3.0"
     }
   ],
