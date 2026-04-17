@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-orders-storage</artifactId>
-  <version>14.0.0-SNAPSHOT</version>
+  <version>15.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -23,7 +23,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <ramlfiles_path>${basedir}/ramls</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/raml-util</ramlfiles_util_path>
-    <raml-module-builder.version>36.0.0-SNAPSHOT</raml-module-builder.version>
+    <raml-module-builder.version>36.0.0</raml-module-builder.version>
 
     <!--Dependency Management Properties-->
     <vertx.version>5.0.8</vertx.version>
@@ -41,9 +41,9 @@
 
     <!--Folio dependencies properties-->
     <folio-module-descriptor-validator.version>1.0.1</folio-module-descriptor-validator.version>
-    <folio-di-support.version>4.0.0-SNAPSHOT</folio-di-support.version>
-    <folio-custom-fields.version>3.0.0-SNAPSHOT</folio-custom-fields.version>
-    <folio-kafka-wrapper.version>4.0.0-SNAPSHOT</folio-kafka-wrapper.version>
+    <folio-di-support.version>4.0.0</folio-di-support.version>
+    <folio-custom-fields.version>3.0.0</folio-custom-fields.version>
+    <folio-kafka-wrapper.version>4.0.0</folio-kafka-wrapper.version>
 
     <!--Maven plugin properties-->
     <aspectj-maven-plugin.version>1.14.1</aspectj-maven-plugin.version>
@@ -573,7 +573,6 @@
           </argLine>
           <includes>
             <include>org/folio/StorageTestSuite.java</include>
-            <include>org/folio/service/**</include>
           </includes>
         </configuration>
       </plugin>

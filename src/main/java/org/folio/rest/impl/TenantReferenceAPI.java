@@ -21,7 +21,8 @@ import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.MetadataUtil;
 import org.folio.rest.tools.utils.TenantLoading;
 import org.folio.rest.tools.utils.TenantTool;
-import org.folio.service.ConfigurationMigrationService;
+import org.folio.services.migration.ConfigurationMigrationService;
+import org.folio.services.migration.FiscalYearMigrationService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -41,6 +42,7 @@ public class TenantReferenceAPI extends TenantAPI {
   private static final String PARAMETER_LOAD_SYSTEM = "loadSystem";
 
   private final ConfigurationMigrationService configurationMigrationService = new ConfigurationMigrationService();
+  private final FiscalYearMigrationService fiscalYearMigrationService = new FiscalYearMigrationService();
 
   @Autowired
   private CustomFieldsRepository customFieldsRepository;
@@ -74,7 +76,9 @@ public class TenantReferenceAPI extends TenantAPI {
         });
         return promise.future();
       })
-      .compose(loaded -> configurationMigrationService.migrateConfigurationData(attributes, tenantId, headers, vertxContext)
+      .compose(loaded -> configurationMigrationService.migrate(attributes, tenantId, headers, vertxContext)
+        .map(loaded))
+      .compose(loaded -> fiscalYearMigrationService.migrate(attributes, tenantId, headers, vertxContext)
         .map(loaded))
       .onFailure(throwable -> Future.failedFuture(throwable.getCause()));
   }
