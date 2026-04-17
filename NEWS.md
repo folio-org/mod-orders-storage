@@ -1,4 +1,12 @@
-## 14.0.0 - Released (Trillium R1 2025)
+## 14.0.1 - Released (Trillium R1 2026 - Bugfix)
+The primary focus of this release was to upgrade to Vert.x 5.0, implement FQM entity types, improve batch processing and audit logging, and enhance receiving functionality.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.0...v14.0.1)
+
+### Bug Fixes
+* [MODORDSTOR-510](https://folio-org.atlassian.net/browse/MODORDSTOR-510) - Remove cross-schema access from PO fiscal year migration
+
+## 14.0.0 - Released (Trillium R1 2026)
 The primary focus of this release was to upgrade to Vert.x 5.0, implement FQM entity types, improve batch processing and audit logging, and enhance receiving functionality.
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.0...v14.0.0)
