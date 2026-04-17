@@ -25,7 +25,7 @@ public class FiscalYearMigrationService extends AbstractMigrationService {
       SELECT (elem->>'id')::uuid AS id,
              elem->>'periodStart'  AS period_start,
              elem->>'periodEnd'    AS period_end
-        FROM jsonb_array_elements($1::jsonb) elem
+        FROM jsonb_array_elements($1::text::jsonb) elem
     ),
     po_fy AS (
       SELECT DISTINCT po.id, to_jsonb(fy.id) fiscal_year_id
