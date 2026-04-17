@@ -75,6 +75,8 @@ import org.folio.services.inventory.HoldingsServiceTest;
 import org.folio.services.inventory.InventoryUpdateServiceTest;
 import org.folio.services.lines.PoLIneServiceVertxTest;
 import org.folio.services.lines.PoLinesServiceTest;
+import org.folio.services.migration.ConfigurationMigrationServiceTest;
+import org.folio.services.migration.FiscalYearMigrationServiceTest;
 import org.folio.services.piece.PieceServiceTest;
 import org.folio.services.title.TitleServiceTest;
 import org.folio.spring.SpringContextUtil;
@@ -357,6 +359,10 @@ public class StorageTestSuite {
   class WrapperPiecesAPITestNested extends WrapperPiecesAPITest {}
   @Nested
   class BatchTrackingAPITestNested extends BatchTrackingAPITest {}
+  @Nested
+  class ConfigurationMigrationServiceTestNested extends ConfigurationMigrationServiceTest {}
+  @Nested
+  class FiscalYearMigrationServiceTestNested extends FiscalYearMigrationServiceTest {}
 
   @Nested
   class PrefixDeprecatedQueryTestNested extends PrefixDeprecatedQueryTest {}

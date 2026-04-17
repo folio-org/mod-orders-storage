@@ -678,7 +678,10 @@
         {
           "methods": ["POST"],
           "pathPattern": "/_/tenant",
-          "modulePermissions": ["configuration.entries.collection.get"]
+          "modulePermissions": [
+            "configuration.entries.collection.get",
+            "finance-storage.fiscal-years.collection.get"
+          ]
         },
         {
           "methods": ["GET", "DELETE"],
@@ -745,6 +748,10 @@
     {
       "id": "configuration",
       "version": "2.0"
+    },
+    {
+      "id": "finance-storage.fiscal-years",
+      "version": "3.0"
     }
   ],
   "permissionSets" : [

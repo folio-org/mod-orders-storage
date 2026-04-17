@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-orders-storage</artifactId>
-  <version>14.0.1-SNAPSHOT</version>
+  <version>14.0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <licenses>
@@ -573,7 +573,6 @@
           </argLine>
           <includes>
             <include>org/folio/StorageTestSuite.java</include>
-            <include>org/folio/service/**</include>
           </includes>
         </configuration>
       </plugin>
