@@ -101,31 +101,22 @@ public class MockServer {
 
     router.route().handler(BodyHandler.create());
 
-    router.get("/settings/entries").handler(this::handleSettingsModuleResponse);
+    router.get("/locale").handler(this::handleLocaleResponse);
     router.get("/instance-storage/instances/:id").handler(this::handleInstanceByIdResponse);
 
     return router;
   }
 
-  private void handleSettingsModuleResponse(RoutingContext ctx) {
+  private void handleLocaleResponse(RoutingContext ctx) {
     try {
-      List<JsonObject> settingEntries = serverRqRs.column(HttpMethod.SEARCH).get(SETTINGS_FIELD);
-      if (CollectionUtils.isNotEmpty(settingEntries)) {
-        JsonObject settings = new JsonObject().put(SETTINGS_FIELD, settingEntries);
-        serverResponse(ctx, 200, APPLICATION_JSON, settings.encodePrettily());
-        return;
-      }
-
-      String tenant = ctx.request().getHeader(OKAPI_HEADER_TENANT);
-      try {
-        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(SETTINGS_MOCK_PATH, tenant)));
-      } catch(Exception exc){
-        serverResponse(ctx, 200, APPLICATION_JSON, getMockData(String.format(SETTINGS_MOCK_PATH, DEFAULT_SETTINGS_NAME)));
-      }
-    } catch (IOException e) {
+      JsonObject localeResponse = new JsonObject()
+        .put("locale", "en-US")
+        .put("timezone", "UTC")
+        .put("currency", "USD");
+      serverResponse(ctx, 200, APPLICATION_JSON, localeResponse.encodePrettily());
+    } catch (Exception e) {
       serverResponse(ctx, 500, APPLICATION_JSON, INTERNAL_SERVER_ERROR.getReasonPhrase());
     }
-
   }
 
   private void handleInstanceByIdResponse(RoutingContext ctx) {

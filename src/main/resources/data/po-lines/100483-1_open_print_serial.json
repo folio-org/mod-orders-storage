@@ -1,0 +1,64 @@
+{
+  "id": "a7b8c9d0-e1f2-4a3b-8c5d-6e7f8a9b0c1d",
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "cancellationRestriction": false,
+  "checkinItems": true,
+  "claimingActive": true,
+  "claimingInterval": "10",
+  "claims": [],
+  "collection": false,
+  "cost": {
+    "additionalCost": 0,
+    "currency": "USD",
+    "discount": 0,
+    "discountType": "percentage",
+    "listUnitPrice": 20.00,
+    "listUnitPriceElectronic": 0.00,
+    "poLineEstimatedPrice": 20.00,
+    "quantityElectronic": 0,
+    "quantityPhysical": 1
+  },
+  "details": {
+    "productIds": [
+      {
+        "productId": "1234-5678",
+        "productIdType": "913300b2-03ed-469a-8179-c1092c991227"
+      }
+    ],
+    "subscriptionInterval": 0,
+    "isBinderyActive": true
+  },
+  "fundDistribution": [
+    {
+      "code": "UNIV-SUBN",
+      "fundId": "4428a37c-8bae-4f0d-865d-970d83d5ad55",
+      "distributionType": "percentage",
+      "value": 100.0
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "fcd64ce1-6995-48f0-840e-89ffa2288371",
+      "quantity": 1,
+      "quantityElectronic": 0,
+      "quantityPhysical": 1
+    }
+  ],
+  "orderFormat": "Physical Resource",
+  "paymentStatus": "Pending",
+  "physical": {
+    "createInventory": "Instance, Holding, Item",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
+  },
+  "poLineNumber": "100483-1",
+  "purchaseOrderId": "f6a7b8c9-d0e1-4f2a-8b4c-5d6e7f8a9b0c",
+  "receiptStatus": "Pending",
+  "rush": false,
+  "source": "User",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  },
+  "titleOrPackage": "Journal of Library Science"
+}

@@ -96,7 +96,8 @@ public class WrapperPiecesAPITest extends TestBase {
     createEntity(PURCHASE_ORDER.getEndpoint(), mapFrom(purchaseOrder).encode(), headers);
 
     var poLine = getFileAsObject(TestData.PoLine.DEFAULT, PoLine.class).withId(poLineId)
-      .withPurchaseOrderId(purchaseOrder.getId());
+      .withPurchaseOrderId(purchaseOrder.getId())
+      .withClaimingActive(true);
     createEntity(PO_LINE.getEndpoint(), mapFrom(poLine).encode(), headers);
 
     var title = getFileAsObject(TestData.Title.DEFAULT, Title.class).withId(titleId)

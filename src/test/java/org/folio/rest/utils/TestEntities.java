@@ -5,9 +5,9 @@ import org.folio.rest.jaxrs.model.*;
 public enum TestEntities {
   // the below order is important to satisfy the foreign key constraints
   CUSTOM_FIELDS("/custom-fields", CustomField.class, TestData.CustomFields.PO, "helpText", "New help text", 2),
-  PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, TestData.PurchaseOrder.DEFAULT, "poNumber", "666666", 7),
-  PO_LINE("/orders-storage/po-lines", PoLine.class, TestData.PoLine.DEFAULT, "description", "Gift", 6),
-  TITLES("/orders-storage/titles", Title.class, TestData.Title.DEFAULT, "title", "New title", 6),
+  PURCHASE_ORDER("/orders-storage/purchase-orders", PurchaseOrder.class, TestData.PurchaseOrder.DEFAULT, "poNumber", "666666", 13),
+  PO_LINE("/orders-storage/po-lines", PoLine.class, TestData.PoLine.DEFAULT, "description", "Gift", 12),
+  TITLES("/orders-storage/titles", Title.class, TestData.Title.DEFAULT, "title", "New title", 14),
   PIECE("/orders-storage/pieces", Piece.class, TestData.Piece.DEFAULT, "comment", "Update Comment", 24),
   ORDER_INVOICE_RELNS("/orders-storage/order-invoice-relns", OrderInvoiceRelationship.class, TestData.OrderInvoiceRelationship.DEFAULT, "invoiceId", "e41e0161-2bc6-41f3-a6e7-34fc13250bf1", 0),
   ORDER_TEMPLATE("/orders-storage/order-templates", OrderTemplate.class, TestData.OrderTemplate.DEFAULT, "templateCode", "Amazon-A", 9),
@@ -19,7 +19,7 @@ public enum TestEntities {
   PREFIX("/orders-storage/configuration/prefixes", Prefix.class, TestData.Prefix.DEFAULT , "description", "New description", 1),
   SUFFIX("/orders-storage/configuration/suffixes", Suffix.class, TestData.Suffix.DEFAULT, "description", "New description", 1),
   EXPORT_HISTORY("/orders-storage/export-history", ExportHistory.class, TestData.ExportHistory.EXPORT_HISTORY_1, "exportType", "BURSAR_FEES_FINES", 1),
-  ROUTING_LIST("/orders-storage/routing-lists", RoutingList.class, TestData.RoutingList.DEFAULT, "notes", "Updated notes", 0),
+  ROUTING_LIST("/orders-storage/routing-lists", RoutingList.class, TestData.RoutingList.DEFAULT, "notes", "Updated notes", 1),
   SETTING("/orders-storage/settings", Setting.class, TestData.Setting.DEFAULT, "value", "46ff3f08-8f41-485c-98d8-701ba8404f4f", 0);
 
   TestEntities(String endpoint, Class<?> clazz, String sampleFileName, String updatedFieldName, String updatedFieldValue, int initialQuantity) {

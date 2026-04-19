@@ -1,7 +1,10 @@
 package org.folio.rest.impl;
 
+import static io.restassured.RestAssured.given;
+import static org.folio.StorageTestSuite.storageUrl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.restassured.http.ContentType;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,6 +80,37 @@ public class PiecesAPITest extends TestBase {
     assertEquals(2, events.size());
     checkPieceEventContent(events.get(0), PieceAuditEvent.Action.CREATE);
     checkPieceEventContent(events.get(1), PieceAuditEvent.Action.EDIT);
+  }
+
+  @Test
+  void testPieceDeleteEvent() throws MalformedURLException {
+    log.info("--- mod-orders-storage piece test: delete event");
+    // given
+    pieceIds.add(UUID.randomUUID().toString());
+    var jsonPiece = new JsonObject(getEntity(TestData.Piece.DEFAULT, pieceIds.get(0), "poLineId", poLineId, "titleId", titleId));
+    postData(TestEntities.PIECE.getEndpoint(), jsonPiece.toString(), headers)
+      .then()
+      .statusCode(201);
+    callAuditOutboxApi(headers);
+
+    // when - use headers with userId for proper event tracking
+    given()
+      .pathParam("id", jsonPiece.getString("id"))
+      .headers(headers)
+      .contentType(ContentType.JSON)
+      .delete(storageUrl(TestEntities.PIECE.getEndpointWithId()))
+      .then()
+      .statusCode(204);
+    callAuditOutboxApi(headers);
+
+    // then
+    List<String> events = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_PIECE_CHANGED.getTopicName(), 2, userId);
+    assertEquals(2, events.size());
+    checkPieceEventContent(events.get(0), PieceAuditEvent.Action.CREATE);
+    checkPieceEventContent(events.get(1), PieceAuditEvent.Action.DELETE);
+
+    // Remove from cleanup list since already deleted
+    pieceIds.remove(0);
   }
 
   @Test

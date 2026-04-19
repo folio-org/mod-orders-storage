@@ -15,6 +15,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.ObjectUtils;
+import org.folio.services.batch.BatchTrackingService;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -34,6 +35,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   private PieceService pieceService;
   @Autowired
   private OrderLineLocationUpdateService orderLineLocationUpdateService;
+  @Autowired
+  private BatchTrackingService batchTrackingService;
   @Autowired
   private AuditOutboxService auditOutboxService;
 
@@ -55,12 +58,15 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
   }
 
   private Future<Void> processItemUpdateEvent(ItemEventHolder holder) {
-    log.info("processItemUpdateEvent:: Processing item update event for item: '{}' and tenant: '{}' in centralTenant: '{}', active tenant being: '{}'",
-      holder.getItemId(), holder.getTenantId(), holder.getCentralTenantId(), holder.getActiveTenantId());
+    log.info("processItemUpdateEvent:: Processing item update event for item: '{}' and tenant: '{}' in centralTenantId: '{}', active tenant being: '{}', batchId='{}'",
+      holder.getItemId(), holder.getTenantId(), holder.getCentralTenantId(), holder.getActiveTenantId(), holder.getBatchHolder().getBatchId());
+
     return determineOrderTenant(holder)
       .compose(v -> createDBClient(holder.getOrderTenantId()).getPgClient()
-        .withTrans(conn -> processPiecesUpdate(holder, conn)
-          .compose(pieces -> processPoLinesUpdate(pieces, holder, conn)))
+        .withTrans(conn -> batchTrackingService.increaseBatchTrackingProgress(conn, holder.getBatchHolder(), holder.getOrderTenantId())
+          .compose(v2 -> processPiecesUpdate(holder, conn))
+          .compose(pieces -> processPoLinesUpdate(pieces, holder, conn))
+          .compose(v2 -> batchTrackingService.deleteBatchTracking(conn, holder.getBatchHolder())))
         .onComplete(ar -> auditOutboxService.processOutboxEventLogs(holder.getHeaders())));
   }
 
@@ -111,8 +117,19 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       return Future.succeededFuture();
     }
     var poLineIds = pieces.stream().map(Piece::getPoLineId).distinct().toList();
+    log.debug("processPoLinesUpdate:: Updating POLs, batchId='{}', isBatchMode={}, isLastInBatch={}",
+      holder.getBatchHolder().getBatchId(), holder.getBatchHolder().isBatchMode(), holder.getBatchHolder().isLastInBatch());
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn)
-      .compose(updatedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders()))
+      .compose(updatedPoLines -> {
+        // Only save POL outbox logs if NOT in batch mode OR if this is the last item in batch
+        if (holder.getBatchHolder().isBatchMode() && !holder.getBatchHolder().isLastInBatch()) {
+          log.debug("processPoLinesUpdate:: Batch mode enabled and not last item, skipping POL outbox save");
+          return Future.succeededFuture(false);
+        } else {
+          log.debug("processPoLinesUpdate:: Saving POLs to outbox (non-batch mode or last item in batch)");
+          return auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders());
+        }
+      })
       .mapEmpty();
   }
 

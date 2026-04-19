@@ -21,6 +21,7 @@ import org.folio.rest.core.RestClient;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.OrderLinePatchOperationType;
 import org.folio.service.UserService;
+import org.folio.services.batch.BatchTrackingService;
 import org.folio.services.consortium.ConsortiumConfigurationService;
 import org.folio.services.inventory.HoldingsService;
 import org.folio.services.inventory.InstancesService;
@@ -221,6 +222,11 @@ public class ApplicationConfig {
   @Bean
   OrderTemplateCategoryService orderTemplateCategoryService() {
     return new OrderTemplateCategoryService();
+  }
+
+  @Bean
+  BatchTrackingService batchTrackingService() {
+    return new BatchTrackingService();
   }
 
   @Bean

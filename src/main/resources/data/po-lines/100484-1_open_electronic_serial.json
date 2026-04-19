@@ -1,0 +1,63 @@
+{
+  "id": "1b2c3d4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e",
+  "acquisitionMethod": "df26d81b-9d63-4ff8-bf41-49bf75cfa70e",
+  "cancellationRestriction": false,
+  "checkinItems": true,
+  "claims": [],
+  "collection": false,
+  "cost": {
+    "additionalCost": 0,
+    "currency": "USD",
+    "discount": 0,
+    "discountType": "percentage",
+    "listUnitPrice": 0.00,
+    "listUnitPriceElectronic": 20.00,
+    "poLineEstimatedPrice": 20.00,
+    "quantityElectronic": 1,
+    "quantityPhysical": 0
+  },
+  "details": {
+    "productIds": [
+      {
+        "productId": "2345-6789",
+        "productIdType": "913300b2-03ed-469a-8179-c1092c991227"
+      }
+    ],
+    "subscriptionInterval": 0
+  },
+  "eresource": {
+    "accessProvider": "c428b467-7cec-45e1-8f8a-9a46d00181ff",
+    "activated": false,
+    "createInventory": "Instance, Holding",
+    "materialType": "d9acad2f-2aac-4b48-9097-e6ab85906b25"
+  },
+  "fundDistribution": [
+    {
+      "code": "UNIV-SUBN",
+      "fundId": "4428a37c-8bae-4f0d-865d-970d83d5ad55",
+      "distributionType": "percentage",
+      "value": 100.0
+    }
+  ],
+  "locations": [
+    {
+      "locationId": "470ff1dd-937a-4195-bf9e-06bcfcd135df",
+      "quantity": 1,
+      "quantityElectronic": 1,
+      "quantityPhysical": 0
+    }
+  ],
+  "orderFormat": "Electronic Resource",
+  "paymentStatus": "Pending",
+  "poLineNumber": "100484-1",
+  "purchaseOrderId": "0a1b2c3d-4e5f-4a6b-8c8d-9e0f1a2b3c4d",
+  "receiptStatus": "Receipt Not Required",
+  "rush": false,
+  "source": "User",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  },
+  "titleOrPackage": "Journal of Digital Information"
+}

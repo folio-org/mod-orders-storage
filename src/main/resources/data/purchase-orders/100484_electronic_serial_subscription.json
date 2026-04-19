@@ -1,0 +1,26 @@
+{
+  "id": "0a1b2c3d-4e5f-4a6b-8c8d-9e0f1a2b3c4d",
+  "acqUnitIds": [],
+  "approved": true,
+  "approvalDate": "2025-06-01T00:00:00.000Z",
+  "approvedById": "e63273e7-48f5-4c43-ab4e-1751ecacaa21",
+  "manualPo": false,
+  "nextPolNumber": 2,
+  "orderType": "Ongoing",
+  "poNumber": "100484",
+  "reEncumber": true,
+  "ongoing": {
+    "interval": 365,
+    "isSubscription": true,
+    "manualRenewal": false,
+    "renewalDate": "2026-06-01T00:00:00.000Z",
+    "reviewPeriod": 30
+  },
+  "vendor": "c428b467-7cec-45e1-8f8a-9a46d00181ff",
+  "workflowStatus": "Open",
+  "tags": {
+    "tagList": [
+      "reference"
+    ]
+  }
+}

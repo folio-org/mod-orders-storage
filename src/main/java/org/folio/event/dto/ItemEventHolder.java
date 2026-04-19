@@ -7,6 +7,7 @@ import static org.folio.event.dto.ItemFields.CALL_NUMBER;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_CALL_NUMBER_COMPONENTS;
 import static org.folio.event.dto.ItemFields.HOLDINGS_RECORD_ID;
 import static org.folio.event.dto.ItemFields.ID;
+import static org.folio.event.dto.ItemFields.PURCHASE_ORDER_LINE_IDENTIFIER;
 
 import java.util.Map;
 import java.util.Objects;
@@ -15,6 +16,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.services.batch.BatchTrackingService.BatchHolder;
 import org.folio.util.HeaderUtils;
 
 @Data
@@ -27,6 +29,7 @@ public class ItemEventHolder {
 
   private String orderTenantId;
   private String centralTenantId;
+  private BatchHolder batchHolder;
 
   private String itemId;
   private JsonObject item;
@@ -44,6 +47,7 @@ public class ItemEventHolder {
     var newValue = JsonObject.mapFrom(resourceEvent.getNewValue());
     setItem(newValue);
     setItemId(newValue.getString(ID.getValue()));
+    setBatchHolder(new BatchHolder().setBatchId(newValue.getString(PURCHASE_ORDER_LINE_IDENTIFIER.getValue())));
 
     setHoldingIdPair(Pair.of(
       oldValue.getString(HOLDINGS_RECORD_ID.getValue()),

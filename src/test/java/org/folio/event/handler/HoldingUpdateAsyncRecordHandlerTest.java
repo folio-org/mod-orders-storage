@@ -11,14 +11,13 @@ import org.folio.event.dto.InstanceFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
-import org.folio.rest.core.RestClient;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Details;
-import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ProductId;
 import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
@@ -494,7 +493,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
   @Test
   void negative_shouldThrowExceptionOnProcessInventoryUpdateEventIfTenantIdHeaderIsNull() {
     var resourceEvent = createDefaultUpdateResourceEvent(UNIVERSITY_TENANT);
-    var kafkaRecord = createKafkaRecord(resourceEvent, null);
+    var kafkaRecord = createKafkaRecord(resourceEvent);
 
     var expectedException = handler.handle(kafkaRecord).cause();
     assertEquals(IllegalStateException.class, expectedException.getClass());

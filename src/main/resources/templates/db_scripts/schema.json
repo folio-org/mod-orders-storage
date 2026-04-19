@@ -113,11 +113,6 @@
     },
     {
       "run": "after",
-      "snippetPath": "tables/create_internal_lock_table.sql",
-      "fromModuleVersion": "mod-orders-storage-13.5.0"
-    },
-    {
-      "run": "after",
       "snippetPath": "data-migration/13.6.0/replace_po_sequences.ftl",
       "fromModuleVersion": "mod-orders-storage-13.6.0"
     },
@@ -169,7 +164,7 @@
     {
       "run": "after",
       "snippetPath": "views/wrapper_pieces_view.sql",
-      "fromModuleVersion": "mod-orders-storage-13.9.0"
+      "fromModuleVersion": "mod-orders-storage-14.0.0"
     },
     {
       "run": "after",
@@ -183,17 +178,12 @@
     },
     {
       "run": "after",
-      "snippetPath": "data-migration/14.0.0/update_po_fiscal_year_id_and_opened_by_id_.ftl",
-      "fromModuleVersion": "mod-orders-storage-14.0.0"
+      "snippetPath": "data-migration/14.0.1/update_po_opened_by_id.ftl",
+      "fromModuleVersion": "mod-orders-storage-14.0.1"
     },
     {
       "run": "after",
       "snippetPath": "data-migration/14.0.0/prefixes_and_suffixes_add_deprecated.sql",
-      "fromModuleVersion": "mod-orders-storage-14.0.0"
-    },
-    {
-      "run": "after",
-      "snippetPath": "data-migration/14.0.0/insert_settings_from_config_data.ftl",
       "fromModuleVersion": "mod-orders-storage-14.0.0"
     },
     {
@@ -324,7 +314,7 @@
     },
     {
       "tableName": "po_line",
-      "fromModuleVersion": "mod-orders-storage-13.7.0",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
       "withMetadata": true,
       "customSnippetPath": "po_line_table.sql",
       "foreignKeys": [
@@ -560,7 +550,8 @@
     },
     {
       "tableName": "titles",
-      "fromModuleVersion": "mod-orders-storage-11.0.0",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
+      "customSnippetPath": "title_table.sql",
       "withMetadata": true,
       "foreignKeys": [
         {
@@ -858,6 +849,17 @@
         {
           "fieldName": "key",
           "caseSensitive": false
+        }
+      ]
+    },
+    {
+      "tableName": "batch_tracking",
+      "fromModuleVersion": "mod-orders-storage-14.0.0",
+      "withMetadata": true,
+      "withOptimisticLocking": "failOnConflict",
+      "index": [
+        {
+          "fieldName": "createdDate"
         }
       ]
     }
