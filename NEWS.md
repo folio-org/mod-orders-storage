@@ -1,5 +1,12 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.8 - Released (Sunflower R1 2025 Hot Fix)
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.7...v13.9.8)
+
+### Bug Fixes
+* [MODORDSTOR-511](https://folio-org.atlassian.net/browse/MODORDSTOR-511) - Sunflower Backport - Updating receiptDate does not update updatedDate in POL audit history
+
 ## 13.9.7 - Released (Sunflower R1 2025 Hot Fix)
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.6...v13.9.7)
