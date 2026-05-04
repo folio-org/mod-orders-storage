@@ -39,17 +39,16 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import one.util.streamex.StreamEx;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtils;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.BatchTracking;
-import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
@@ -67,6 +66,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class ItemUpdateAsyncRecordHandlerTest {
 
@@ -76,7 +76,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
   private PieceService pieceService;
   @Mock
   private PoLinesService poLinesService;
-  @Mock
+  @Spy
   private BatchTrackingService batchTrackingService;
   @Mock
   private AuditOutboxService auditOutboxService;

@@ -12,9 +12,9 @@ import io.vertx.core.Future;
 import lombok.extern.log4j.Log4j2;
 import one.util.streamex.StreamEx;
 import org.folio.rest.jaxrs.model.Holding;
-import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
+import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.tools.utils.TenantTool;
@@ -51,7 +51,7 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
     return new DBClient(rqContext.getContext(), rqContext.getHeaders()).getPgClient()
       .withTrans(conn -> titleService.updateTitle(storagePol, instanceId, conn)
         .compose(poLine -> updateHoldings(poLine, holder.patchOrderLineRequest().getReplaceInstanceRef(), conn, tenantId))
-        .compose(poLine -> poLinesService.updateInstanceIdForPoLine(poLine, holder.instance(), conn)))
+        .compose(poLine -> poLinesService.updateInstanceIdForPoLine(poLine, holder.instance(), conn, rqContext.getHeaders())))
       .onSuccess(v -> log.info("updateInstance:: Instance was updated successfully, poLine id={}", storagePol.getId()))
       .onFailure(err -> log.warn("updateInstance:: Instance failed to update, poLine id={}", storagePol.getId(), err))
       .mapEmpty();

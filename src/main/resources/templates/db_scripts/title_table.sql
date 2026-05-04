@@ -12,3 +12,6 @@ CREATE INDEX IF NOT EXISTS titles_package_sort ON ${myuniversity}_${mymodule}.ti
 
 CREATE INDEX IF NOT EXISTS titles_no_acq_unit ON ${myuniversity}_${mymodule}.titles
   ((lower(f_unaccent(jsonb->>'acqUnitIds')) NOT LIKE lower(f_unaccent('[]'))));
+
+CREATE INDEX IF NOT EXISTS titles_claiming_active_boolean ON ${myuniversity}_${mymodule}.titles (id)
+  WHERE ((jsonb ->> 'claimingActive')::boolean) = TRUE;

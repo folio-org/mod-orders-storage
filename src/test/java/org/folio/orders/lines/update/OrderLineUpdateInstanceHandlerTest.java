@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.lines.PoLinesDAO;
 import org.folio.dao.lines.PoLinesPostgresDAO;
+import org.folio.repository.CustomFieldsRepository;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.orders.lines.update.instance.WithHoldingOrderLineUpdateInstanceStrategy;
 import org.folio.orders.lines.update.instance.WithoutHoldingOrderLineUpdateInstanceStrategy;
@@ -42,7 +43,6 @@ import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.CreateInventoryType;
 import org.folio.rest.jaxrs.model.Eresource;
 import org.folio.rest.jaxrs.model.Holding;
-import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.Physical;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -50,6 +50,7 @@ import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
@@ -588,6 +589,11 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
   }
 
    static class ContextConfiguration {
+     @Bean
+     CustomFieldsRepository customFieldsRepository() {
+       return mock(CustomFieldsRepository.class);
+     }
+
      @Bean
      PoLinesDAO poLinesDAO() {
        return new PoLinesPostgresDAO();

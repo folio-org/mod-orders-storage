@@ -41,17 +41,16 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.folio.TestUtils;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.BatchTracking;
-import org.folio.rest.jaxrs.model.Location;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.PostgresClient;
@@ -79,7 +78,7 @@ public class ItemCreateAsyncRecordHandlerTest {
   private PoLinesService poLinesService;
   @Mock
   private ConsortiumConfigurationService consortiumConfigurationService;
-  @Mock
+  @Spy
   private BatchTrackingService batchTrackingService;
   @Mock
   private AuditOutboxService auditOutboxService;
