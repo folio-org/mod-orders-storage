@@ -200,6 +200,16 @@
       "run": "after",
       "snippetPath": "data-migration/14.0.0/update_indices.ftl",
       "fromModuleVersion": "mod-orders-storage-14.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "purchase_order_table.sql",
+      "fromModuleVersion": "mod-orders-storage-14.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "title_table.sql",
+      "fromModuleVersion": "mod-orders-storage-14.0.0"
     }
   ],
   "tables": [
