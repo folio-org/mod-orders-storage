@@ -926,7 +926,7 @@
       "index": [
         {
           "fieldName": "exportDate",
-          "caseSensitive": false,
+          "caseSensitive": true,
           "removeAccents": false
         }
       ],
