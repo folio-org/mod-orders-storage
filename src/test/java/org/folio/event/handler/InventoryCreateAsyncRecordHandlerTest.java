@@ -79,7 +79,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
   void positive_shouldProcessInventoryCreate(String tenantId) {
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
-    doReturn(Future.succeededFuture(Response.ok(createSettingCollection(createSetting("true"))).build()))
+    doReturn(Future.succeededFuture(createSettingCollection(createSetting("true"))))
       .when(settingService).getSettings(anyString(), anyInt(), anyInt(), anyMap(), any(Context.class));
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(tenantId, CONSORTIUM_ID))))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
@@ -116,7 +116,7 @@ public class InventoryCreateAsyncRecordHandlerTest {
     var eventObject = createResourceEvent(DIKU_TENANT, CREATE);
     var record = createKafkaRecord(eventObject, DIKU_TENANT);
     var emptySettings = new SettingCollection().withTotalRecords(0);
-    doReturn(Future.succeededFuture(Response.ok(emptySettings).build()))
+    doReturn(Future.succeededFuture(emptySettings))
       .when(settingService).getSettings(anyString(), anyInt(), anyInt(), anyMap(), any(Context.class));
     doReturn(Future.succeededFuture(Optional.of(new ConsortiumConfiguration(DIKU_TENANT, CONSORTIUM_ID))))
       .when(consortiumConfigurationService).getConsortiumConfiguration(any());
