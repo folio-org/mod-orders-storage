@@ -199,7 +199,7 @@
     {
       "run": "after",
       "snippetPath": "data-migration/15.0.0/fill_missing_next_pol_number.ftl",
-      "fromModuleVersion": "mod-orders-storage-15.0.0"
+      "fromModuleVersion": "mod-orders-storage-14.0.2"
     }
   ],
   "tables": [
