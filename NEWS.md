@@ -1,3 +1,11 @@
+## 14.0.2 - Released (Trillium R1 2026 - Bugfix)
+The primary focus of this release was to fix issues with nextPoLineNumber and nextInvoiceLineNumber usage.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.1...v14.0.2)
+
+### Bug Fixes
+* [MODINVOICE-647](https://folio-org.atlassian.net/browse/MODINVOICE-647) - Invoice line number is reused after deletion
+
 ## 14.0.1 - Released (Trillium R1 2026 - Bugfix)
 The primary focus of this release was to remove cross-schema access from PO fiscal year migration.
 
