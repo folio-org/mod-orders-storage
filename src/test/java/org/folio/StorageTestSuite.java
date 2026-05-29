@@ -107,7 +107,7 @@ public class StorageTestSuite {
   public static final Header URL_TO_HEADER = new Header("X-Okapi-Url-to","http://localhost:"+port);
   private static final Header URL_HEADER = new Header(XOkapiHeaders.URL, "http://localhost:" + port);
   private static TenantJob tenantJob;
-  private static final DockerImageName KAFKA_IMAGE_NAME = DockerImageName.parse("apache/kafka-native:3.8.0");
+  private static final DockerImageName KAFKA_IMAGE_NAME = DockerImageName.parse("apache/kafka-native:4.2.0");
   private static final KafkaContainer kafkaContainer = getKafkaContainer();
   public static final String KAFKA_ENV_VALUE = "test-env";
   private static final String KAFKA_HOST = "KAFKA_HOST";
