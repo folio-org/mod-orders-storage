@@ -30,7 +30,6 @@ import java.util.function.Function;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
-import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.folio.rest.jaxrs.model.ExportHistory;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
@@ -157,12 +156,9 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       .withExportedPoLineIds(List.of(lineId))
       .withExportDate(Calendar.getInstance().getTime());
     RecordHeader header = new RecordHeader(TENANT_KEY_LOWER_CASE, DIKU_TENANT.getBytes());
-    RecordHeaders recordHeaders = new RecordHeaders();
-    recordHeaders.add(header);
-    var consumerRecord = new ConsumerRecord("topic", 1, 1,
-      2, null, 1L, 1,1,
-      "key", Json.encode(exportHistory), recordHeaders);
-    var record = new KafkaConsumerRecordImpl(consumerRecord) ;
+    var consumerRecord = new ConsumerRecord<>("topic", 1, 1, "key", Json.encode(exportHistory));
+    consumerRecord.headers().add(header);
+    var record = new KafkaConsumerRecordImpl<>(consumerRecord);
     doThrow(new RuntimeException("Save failed")).when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
     Throwable actExp = handler.handle(record).cause();
     assertEquals(RuntimeException.class, actExp.getClass());
