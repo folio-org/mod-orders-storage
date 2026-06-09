@@ -38,6 +38,7 @@ public class SettingService {
   private static final String SETTINGS_TABLE = "settings";
   private static final String SETTINGS_BY_KEY_QUERY = "key==%s";
   private static final String SETTINGS_CACHE_KEY = "%s.%s";
+  public static final String BYPASS_CACHE_HEADER = "x-okapi-bypass-cache";
 
   private AsyncCache<String, Optional<Setting>> asyncCache;
 
@@ -54,6 +55,9 @@ public class SettingService {
 
   public Future<Optional<Setting>> getSettingByKey(SettingKey settingKey, Map<String, String> okapiHeaders, Context vertxContext) {
     try {
+      if (isCacheBypassRequested(okapiHeaders)) {
+        return Future.fromCompletionStage(getSettingByKeyFromDB(settingKey, okapiHeaders, vertxContext));
+      }
       var settingCacheKey = String.format(SETTINGS_CACHE_KEY, TenantTool.tenantId(okapiHeaders), settingKey.getName());
       return Future.fromCompletionStage(asyncCache.get(settingCacheKey, (key, executor) ->
         getSettingByKeyFromDB(settingKey, okapiHeaders, vertxContext)));
@@ -61,6 +65,15 @@ public class SettingService {
       log.error("Error when retrieving setting with key: '{}'", settingKey.getName(), e);
       return Future.failedFuture(e);
     }
+  }
+
+  private static boolean isCacheBypassRequested(Map<String, String> okapiHeaders) {
+    if (okapiHeaders == null) {
+      return false;
+    }
+    return okapiHeaders.entrySet().stream()
+      .anyMatch(entry -> BYPASS_CACHE_HEADER.equalsIgnoreCase(entry.getKey())
+        && Boolean.parseBoolean(entry.getValue()));
   }
 
   private CompletableFuture<Optional<Setting>> getSettingByKeyFromDB(SettingKey settingKey, Map<String, String> okapiHeaders, Context vertxContext) {
