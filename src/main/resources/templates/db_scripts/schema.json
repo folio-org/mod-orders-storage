@@ -590,7 +590,7 @@
           "caseSensitive": false,
           "removeAccents": false,
           "arraySubfield": "holdingId",
-          "arrayModifiers": ["holdingId"]
+          "arrayModifiers": ["holdingId", "locationId"]
         },
         {
           "fieldName": "physicalVolumes",
