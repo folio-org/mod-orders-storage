@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.folio.CopilotGenerated;
-import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
@@ -33,8 +32,6 @@ public class AuditOutboxServiceTest {
   @Mock
   private AuditOutboxEventsLogRepository outboxRepository;
   @Mock
-  private InternalLockRepository lockRepository;
-  @Mock
   private AuditEventProducer producer;
   @Mock
   private PostgresClientFactory pgClientFactory;
@@ -52,7 +49,6 @@ public class AuditOutboxServiceTest {
   void setUp() {
     okapiHeaders = Map.of("x-okapi-tenant", "testTenant");
     when(pgClientFactory.createInstance(any())).thenReturn(pgClient);
-    when(lockRepository.selectWithLocking(any(), any(), any())).thenReturn(Future.succeededFuture(1));
     when(pgClient.withTrans(any())).thenAnswer(invocation -> invocation.<Function<Conn, Future<?>>>getArgument(0).apply(conn));
   }
 
@@ -130,5 +126,4 @@ public class AuditOutboxServiceTest {
 
     assertTrue(result.succeeded());
   }
-
 }

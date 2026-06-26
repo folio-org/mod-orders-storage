@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.folio.dao.InternalLockRepository;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
 import org.folio.okapi.common.GenericCompositeFuture;
@@ -28,20 +27,17 @@ import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 
 public class AuditOutboxService {
+
   private static final Logger log = LogManager.getLogger();
-  private static final String OUTBOX_LOCK_NAME = "audit_outbox";
 
   private final AuditOutboxEventsLogRepository outboxRepository;
-  private final InternalLockRepository lockRepository;
   private final AuditEventProducer producer;
   private final PostgresClientFactory pgClientFactory;
 
   public AuditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
-                            InternalLockRepository lockRepository,
                             AuditEventProducer producer,
                             PostgresClientFactory pgClientFactory) {
     this.outboxRepository = outboxRepository;
-    this.lockRepository = lockRepository;
     this.producer = producer;
     this.pgClientFactory = pgClientFactory;
   }
@@ -57,8 +53,7 @@ public class AuditOutboxService {
     String tenantId = TenantTool.tenantId(okapiHeaders);
     log.trace("processOutboxEventLogs, tenantId={}", tenantId);
     PostgresClient pgClient = pgClientFactory.createInstance(tenantId);
-    return pgClient.withTrans(conn -> lockRepository.selectWithLocking(conn, OUTBOX_LOCK_NAME, tenantId)
-      .compose(retrievedCount -> outboxRepository.fetchEventLogs(conn, tenantId))
+    return pgClient.withTrans(conn -> outboxRepository.fetchEventLogs(conn, tenantId)
       .compose(logs -> {
         if (CollectionUtils.isEmpty(logs)) {
           log.debug("processOutboxEventLogs completed, no event log found in outbox table");
@@ -204,5 +199,4 @@ public class AuditOutboxService {
       .onSuccess(reply -> log.info("Outbox log has been saved for {} with id: {}", entityType, entityId))
       .onFailure(e -> log.warn("Could not save outbox audit log for {} with id: {}", entityType, entityId, e));
   }
-
 }
