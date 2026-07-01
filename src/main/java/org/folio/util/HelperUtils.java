@@ -73,7 +73,7 @@ public class HelperUtils {
   }
 
   public static <T, R> List<R> mapTo(List<T> list, Function<T, R> mapper) {
-    return list.stream().map(mapper).collect(Collectors.toList());
+    return list.stream().map(mapper).toList();
   }
 
 }

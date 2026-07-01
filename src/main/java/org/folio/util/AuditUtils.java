@@ -17,7 +17,7 @@ public class AuditUtils {
     return KafkaTopicNameHelper.formatTopicName(envId, KafkaTopicNameHelper.getDefaultNameSpace(), tenantId, eventType);
   }
 
-  public static <T> Metadata getMetadataOrThrow(Supplier<Metadata> metadataGetter, Supplier<String> idGetter) {
+  public static Metadata getMetadataOrThrow(Supplier<Metadata> metadataGetter, Supplier<String> idGetter) {
     return Optional.ofNullable(metadataGetter.get())
       .orElseThrow(() -> new IllegalArgumentException("Metadata is null for entity with id: %s".formatted(idGetter.get())));
   }

@@ -3,10 +3,6 @@ package org.folio.event.dto;
 import java.util.List;
 import java.util.function.Function;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 import one.util.streamex.StreamEx;
 
 public record AuditEntityWrapper<T> (T entity, T originalEntity) {
