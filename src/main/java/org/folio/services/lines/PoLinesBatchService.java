@@ -1,6 +1,7 @@
 package org.folio.services.lines;
 
 import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.util.HelperUtils.mapTo;
 import static org.folio.util.MetadataUtils.populateMetadata;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -34,10 +36,10 @@ public class PoLinesBatchService {
       return Future.succeededFuture();
     }
     poLines.forEach(poLine -> populateMetadata(poLine::getMetadata, poLine::withMetadata, okapiHeaders));
-    return pgClient.withTrans(conn ->
-      conn.updateBatch(PO_LINE_TABLE, poLines)
+    return pgClient.withTrans(conn -> poLinesService.getPoLinesByIdsForUpdate(mapTo(poLines, PoLine::getId), pgClient.getTenantId(), conn)
+      .compose(originalPoLines -> conn.updateBatch(PO_LINE_TABLE, poLines)
         .compose(rowSet -> poLinesService.updateTitles(conn, poLines, okapiHeaders))
-        .compose(rowSet -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, okapiHeaders))
-        .mapEmpty());
+        .compose(rowSet -> auditOutboxService.saveOrderLinesOutboxLogs(conn, AuditEntityWrapper.listOf(poLines, originalPoLines, PoLine::getId), OrderLineAuditEvent.Action.EDIT, okapiHeaders))
+        .mapEmpty()));
   }
 }

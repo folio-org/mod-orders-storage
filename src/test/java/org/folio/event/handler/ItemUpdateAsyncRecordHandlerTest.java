@@ -40,6 +40,7 @@ import io.vertx.core.json.JsonObject;
 import one.util.streamex.StreamEx;
 
 import org.folio.TestUtils;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
@@ -138,6 +139,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     var poLine = createPoLine(poLineId, holdingId1, effectiveLocationId1).withCheckinItems(checkinItems);
     var expectedPoLine = createPoLine(poLineId, holdingId2, effectiveLocationId1, effectiveLocationId2);
+    List<AuditEntityWrapper<PoLine>> expectedPoLineOutboxLogs = checkinItems ? List.of() : List.of(AuditEntityWrapper.of(expectedPoLine, poLine));
 
     var actualPieces = List.of(
       createPiece(pieceId1, itemId, holdingId1, null).withPoLineId(poLineId),
@@ -146,11 +148,12 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var expectedPieces = List.of(
       createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
+    var expectedWrappedPieces = AuditEntityWrapper.listOf(expectedPieces, actualPieces, Piece::getId);
 
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
-    doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(expectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(1)).when(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
@@ -161,10 +164,10 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
+    verify(poLinesService, times(checkinItems ? 1 : 2)).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     verify(pieceService, times(checkinItems ? 0 : 1)).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     verify(poLinesService, times(checkinItems ? 0 : 1)).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
-    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(checkinItems ? List.of() : List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(expectedPoLineOutboxLogs), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
   }
 
   @Test
@@ -284,10 +287,11 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     //// First event processing ////
     var expectedPiece1 = createPiece(pieceId1, itemId1, holdingId2, null).withPoLineId(poLineId);
+    var expectedWrappedPieces = List.of(AuditEntityWrapper.of(expectedPiece1, piece1));
 
     doReturn(Future.succeededFuture(List.of(poLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(List.of(expectedPiece1, piece2))).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
-    doReturn(Future.succeededFuture(List.of(expectedPiece1))).when(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece1)), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(expectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece1)), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture(batchTracking.withProcessedCount(1))).when(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
 
     var result = handler.handle(kafkaRecord1);
@@ -297,26 +301,27 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(pieceService).getPiecesByItemId(eq(itemId1), any(Conn.class));
     verify(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece1)), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
-    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(AuditEntityWrapper.of(expectedPoLine, poLine))), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
     verify(batchTrackingService, never()).deleteBatchTracking(conn, poLineId);
 
     //// Second event processing ////
     var expectedPiece2 = createPiece(pieceId2, itemId2, holdingId2, null).withPoLineId(poLineId);
+    expectedWrappedPieces = List.of(AuditEntityWrapper.of(expectedPiece2, piece2));
 
     doReturn(Future.succeededFuture(List.of(expectedPoLine))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(List.of(expectedPiece1, expectedPiece2))).when(pieceService).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
-    doReturn(Future.succeededFuture(List.of(expectedPiece2))).when(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece2)), any(Conn.class), eq(DIKU_TENANT));
+    doReturn(Future.succeededFuture(expectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece2)), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture(batchTracking.withProcessedCount(2))).when(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
 
     result = handler.handle(kafkaRecord2);
     assertTrue(result.succeeded());
 
-    expectedPoLine = createPoLine(poLineId, List.of(holdingId2, holdingId2), effectiveLocationId1, effectiveLocationId2);
+    var expectedUpdatedPoLine = createPoLine(poLineId, List.of(holdingId2, holdingId2), effectiveLocationId1, effectiveLocationId2);
     verify(pieceService).getPiecesByItemId(eq(itemId2), any(Conn.class));
     verify(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece2)), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
-    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(expectedPoLine)), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(poLinesService).updatePoLines(eq(List.of(expectedUpdatedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
+    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(AuditEntityWrapper.of(expectedUpdatedPoLine, expectedPoLine))), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
     verify(batchTrackingService).deleteBatchTracking(conn, poLineId);
   }

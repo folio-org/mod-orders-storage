@@ -47,8 +47,7 @@ public class PoLineBatchAPI extends BaseApi implements OrdersStoragePoLinesBatch
     Future.all(poLineCollection.getPoLines().stream()
         .map(poLine -> validateCustomFields(vertxContext, okapiHeaders, poLine))
         .toList())
-      .compose(cf ->
-        poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders))
+      .compose(cf -> poLinesBatchService.poLinesBatchUpdate(poLineCollection.getPoLines(), pgClient, okapiHeaders))
       .onComplete(ar -> {
         var poLineIds = extractEntityFields(poLineCollection.getPoLines(), PoLine::getId);
         if (ar.failed()) {

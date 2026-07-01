@@ -96,7 +96,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
         "in centralTenant: '{}'", updateRequiredPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
 
     return pieceService.updatePiecesInventoryData(updateRequiredPieces, conn, centralTenantId)
-      .compose(v -> auditOutboxService.savePiecesOutboxLog(conn, updateRequiredPieces, PieceAuditEvent.Action.EDIT, headers).map(updateRequiredPieces));
+      .compose(wrappedPieces -> auditOutboxService.savePiecesOutboxLog(conn, wrappedPieces, PieceAuditEvent.Action.EDIT, headers))
+      .map(updateRequiredPieces);
   }
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantIdFromEvent) {
@@ -134,14 +135,14 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
     // The skipFiltering is set to true to update all POLs regardless of the checkinItems flag, as items could be located in
     // different tenants and to keep consistency, POLs must be updated regardless of the checkinItems flag (Receiving Workflow)
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, itemObject, true, centralTenantId, headers, conn)
-      .compose(updatedPoLines -> {
+      .compose(wrappedPoLines -> {
         // Only save POL outbox logs if NOT in batch mode OR if this is the last item in batch
         if (batchHolder.isBatchMode() && !batchHolder.isLastInBatch()) {
           log.debug("processPoLinesUpdate:: Batch mode enabled and not last item, skipping POL outbox save");
           return Future.succeededFuture(false);
         } else {
           log.debug("processPoLinesUpdate:: Saving POLs to outbox (non-batch mode or last item in batch)");
-          return auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, headers);
+          return auditOutboxService.saveOrderLinesOutboxLogs(conn, wrappedPoLines, OrderLineAuditEvent.Action.EDIT, headers);
         }
       })
       .mapEmpty();

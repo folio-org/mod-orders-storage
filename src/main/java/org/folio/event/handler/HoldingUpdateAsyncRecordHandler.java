@@ -7,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.dto.HoldingEventHolder;
 import org.folio.event.dto.HoldingUpdate;
 import org.folio.event.dto.ResourceEvent;
@@ -30,6 +31,7 @@ import java.util.Objects;
 
 import static org.folio.event.InventoryEventType.INVENTORY_HOLDING_UPDATE;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
+import static org.folio.util.HelperUtils.mapTo;
 
 @Log4j2
 public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHandler {
@@ -88,18 +90,15 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
     return inventoryUpdateService.getAndSetHolderInstanceByIdIfRequired(holder, requestContext)
       .compose(v -> poLinesService.getPoLinesByCqlQuery(PO_LINE_LOCATIONS_HOLDING_ID_CQL.formatted(holder.getHoldingId()), conn))
       .compose(poLines -> updatePoLines(holder, poLines, conn))
-      .compose(dto -> updateTitles(holder, dto.getPoLinesWithUpdatedInstanceId(), conn).map(dto))
+      .compose(dto -> updateTitles(holder, mapTo(dto.getPoLinesWithUpdatedInstanceId(), AuditEntityWrapper::entity), conn).map(dto))
       .compose(dto -> saveOrderLinesOutboxLogsConditionally(holder, conn, dto));
   }
 
   // Supported 2 operations: Move instance in "member tenant" & edit holding in "central tenant"
   private Future<HoldingUpdate> saveOrderLinesOutboxLogsConditionally(HoldingEventHolder holder, Conn conn, HoldingUpdate dto) {
-    List<PoLine> poLinesToLog;
-    if (Boolean.TRUE.equals(dto.isInstanceIdUpdated()) && Boolean.FALSE.equals(dto.isSearchLocationIdsUpdated())) {
-      poLinesToLog = dto.getPoLinesWithUpdatedInstanceId();
-    } else {
-      poLinesToLog = dto.getPoLinesWithUpdatedSearchLocationIds();
-    }
+    var poLinesToLog = Boolean.TRUE.equals(dto.isInstanceIdUpdated()) && Boolean.FALSE.equals(dto.isSearchLocationIdsUpdated())
+      ? dto.getPoLinesWithUpdatedInstanceId()
+      : dto.getPoLinesWithUpdatedSearchLocationIds();
     if (poLinesToLog.isEmpty()) {
       log.info("saveOrderLinesOutboxLogsConditionally:: No updated POLs were found to log, holdingId: {}, instanceId: {}, searchLocationIds: {}",
         holder.getHoldingId(), dto.isInstanceIdUpdated(), dto.isSearchLocationIdsUpdated());
@@ -121,7 +120,8 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLines:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(createNoUpdatedPoLinesDto());
     }
-    return poLinesService.updatePoLines(poLines, conn, holder.getTenantId(), holder.getHeaders())
+    return poLinesService.getPoLinesByIdsForUpdate(mapTo(poLines, PoLine::getId), holder.getTenantId(), conn)
+        .compose(originalPoLines -> poLinesService.updatePoLines(poLines, conn, holder.getTenantId(), holder.getHeaders())
       .map(affectedRows -> {
         log.info("updatePoLines:: Successfully updated POLs for holdingId: {}, POLs updated: {}/{}", holder.getHoldingId(), affectedRows, poLines.size());
         // Very important to return an empty poLine array in cases where no
@@ -130,10 +130,12 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
           .affectedRows(affectedRows)
           .isInstanceIdUpdated(isInstanceIdUpdated.getLeft())
           .isSearchLocationIdsUpdated(isSearchLocationIdsUpdated)
-          .poLinesWithUpdatedInstanceId(Boolean.TRUE.equals(isInstanceIdUpdated.getLeft()) ? isInstanceIdUpdated.getRight() : List.of())
-          .poLinesWithUpdatedSearchLocationIds(poLines)
+          .poLinesWithUpdatedSearchLocationIds(AuditEntityWrapper.listOf(poLines, originalPoLines, PoLine::getId))
+          .poLinesWithUpdatedInstanceId(Boolean.TRUE.equals(isInstanceIdUpdated.getLeft())
+            ? AuditEntityWrapper.listOf(isInstanceIdUpdated.getRight(), originalPoLines, PoLine::getId)
+            : List.of())
           .build();
-      });
+      }));
   }
 
   private HoldingUpdate createNoUpdatedPoLinesDto() {
@@ -155,6 +157,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   // will exclude the current holdingId coming from the kafka event
   private void extractDistinctAdjacentHoldingsToUpdate(HoldingEventHolder holder, HoldingUpdate dto) {
     dto.setAdjacentHoldingIds(dto.getPoLinesWithUpdatedInstanceId().stream()
+      .map(AuditEntityWrapper::entity)
       .map(PoLine::getLocations)
       .flatMap(Collection::stream)
       .map(Location::getHoldingId)
@@ -222,11 +225,11 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
   private Future<Void> processPoLinesUpdateInCentralTenant(HoldingEventHolder holder, Conn conn, Map<String, String> updatedHeaders) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holder.getHoldingId()), conn)
       .compose(poLines -> updatePoLinesInCentralTenant(holder, poLines, conn))
-      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, updatedHeaders).map(poLines))
+      .compose(wrappedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, wrappedPoLines, OrderLineAuditEvent.Action.EDIT, updatedHeaders))
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> updatePoLinesInCentralTenant(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
+  private Future<List<AuditEntityWrapper<PoLine>>> updatePoLinesInCentralTenant(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLinesInCentralTenant:: No POLs were found for holding to update, holdingId: {}", holder.getHoldingId());
       return Future.succeededFuture(List.of());
@@ -236,10 +239,11 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       log.info("updatePoLinesInCentralTenant:: No POLs were updated for holding, holdingId: {}, POLs retrieved: {}", holder.getHoldingId(), poLines.size());
       return Future.succeededFuture(List.of());
     }
-    return poLinesService.updatePoLines(poLines, conn, holder.getCentralTenantId(), holder.getHeaders())
-      .map(affectedRows -> {
-        log.info("updatePoLinesInCentralTenant:: Successfully updated POLs for holdingId: {}, POLs updated: {}/{}", holder.getHoldingId(), affectedRows, poLines.size());
-        return poLines;
-      });
+    return poLinesService.getPoLinesByIdsForUpdate(mapTo(poLines, PoLine::getId), holder.getCentralTenantId(), conn)
+        .compose(originalPoLines -> poLinesService.updatePoLines(poLines, conn, holder.getCentralTenantId(), holder.getHeaders())
+            .map(affectedRows -> {
+              log.info("updatePoLinesInCentralTenant:: Successfully updated POLs for holdingId: {}, POLs updated: {}/{}", holder.getHoldingId(), affectedRows, poLines.size());
+              return AuditEntityWrapper.listOf(poLines, originalPoLines, PoLine::getId);
+            }));
   }
 }

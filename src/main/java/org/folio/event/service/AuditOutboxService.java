@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
@@ -24,6 +25,7 @@ import org.folio.rest.tools.utils.TenantTool;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.Json;
+import io.vertx.core.json.jackson.DatabindCodec;
 
 public class AuditOutboxService {
 
@@ -84,19 +86,19 @@ public class AuditOutboxService {
         }
         switch (eventLog.getEntityType()) {
           case ORDER -> {
-            PurchaseOrder entity = Json.decodeValue(eventLog.getPayload(), PurchaseOrder.class);
+            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), PurchaseOrder.class);
             OrderAuditEvent.Action action = OrderAuditEvent.Action.fromValue(eventLog.getAction());
-            return producer.sendOrderEvent(entity, action, okapiHeaders);
+            return producer.sendOrderEvent(entityWrapper, action, okapiHeaders);
           }
           case ORDER_LINE -> {
-            PoLine entity = Json.decodeValue(eventLog.getPayload(), PoLine.class);
+            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), PoLine.class);
             OrderLineAuditEvent.Action action = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
-            return producer.sendOrderLineEvent(entity, action, okapiHeaders);
+            return producer.sendOrderLineEvent(entityWrapper, action, okapiHeaders);
           }
           case PIECE -> {
-            Piece entity = Json.decodeValue(eventLog.getPayload(), Piece.class);
+            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), Piece.class);
             PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
-            return producer.sendPieceEvent(entity, action, okapiHeaders);
+            return producer.sendPieceEvent(entityWrapper, action, okapiHeaders);
           }
           default -> throw new IllegalStateException("Missing handler for events with entityType: " + eventLog.getEntityType());
         }
@@ -112,13 +114,26 @@ public class AuditOutboxService {
    * Saves order outbox log.
    *
    * @param conn         connection in transaction
-   * @param entity       the purchase order
+   * @param order       the purchase order
    * @param action       the event action
    * @param okapiHeaders okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> saveOrderOutboxLog(Conn conn, PurchaseOrder entity, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER, entity.getId(), entity);
+  public Future<Boolean> saveOrderOutboxLog(Conn conn, AuditEntityWrapper<PurchaseOrder> order, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER, order.entity().getId(), order);
+  }
+
+  /**
+   * Saves order line outbox log.
+   *
+   * @param conn         connection in transaction
+   * @param pol          the poLine
+   * @param action       the event action
+   * @param okapiHeaders okapi headers
+   * @return future with saved outbox log in the same transaction
+   */
+  public Future<Boolean> saveOrderLineOutboxLog(Conn conn, AuditEntityWrapper<PoLine> pol, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, pol.entity().getId(), pol);
   }
 
   /**
@@ -130,9 +145,9 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<PoLine> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+  public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<AuditEntityWrapper<PoLine>> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
     var futures = poLines.stream()
-      .map(poLine -> saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, poLine.getId(), poLine))
+      .map(poLine -> saveOrderLineOutboxLog(conn, poLine, action, okapiHeaders))
       .toList();
 
     return Future.join(futures)
@@ -149,10 +164,7 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> savePiecesOutboxLog(Conn conn,
-                                             List<Piece> pieces,
-                                             PieceAuditEvent.Action action,
-                                             Map<String, String> okapiHeaders) {
+  public Future<Boolean> savePiecesOutboxLog(Conn conn, List<AuditEntityWrapper<Piece>> pieces, PieceAuditEvent.Action action, Map<String, String> okapiHeaders) {
     var futures = pieces.stream()
       .map(piece -> savePieceOutboxLog(conn, piece, action, okapiHeaders))
       .toList();
@@ -172,18 +184,18 @@ public class AuditOutboxService {
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> savePieceOutboxLog(Conn conn,
-                                            Piece piece,
+                                            AuditEntityWrapper<Piece> piece,
                                             PieceAuditEvent.Action action,
                                             Map<String, String> okapiHeaders) {
-    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.PIECE, piece.getId(), piece);
+    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.PIECE, piece.entity().getId(), piece);
   }
 
-  private Future<Boolean> saveOutboxLog(Conn conn,
-                                        Map<String, String> okapiHeaders,
-                                        String action,
-                                        EntityType entityType,
-                                        String entityId,
-                                        Object entity) {
+  private <T> Future<Boolean> saveOutboxLog(Conn conn,
+                                            Map<String, String> okapiHeaders,
+                                            String action,
+                                            EntityType entityType,
+                                            String entityId,
+                                            AuditEntityWrapper<T> auditEntityWrapper) {
     log.debug("saveOutboxLog:: for {} with id: {}", entityType, entityId);
 
     String tenantId = TenantTool.tenantId(okapiHeaders);
@@ -192,10 +204,27 @@ public class AuditOutboxService {
       .withEventId(UUID.randomUUID().toString())
       .withAction(action)
       .withEntityType(entityType)
-      .withPayload(Json.encode(entity));
+      .withPayload(Json.encode(auditEntityWrapper));
 
     return outboxRepository.saveEventLog(conn, eventLog, tenantId)
       .onSuccess(reply -> log.info("Outbox log has been saved for {} with id: {}", entityType, entityId))
       .onFailure(e -> log.warn("Could not save outbox audit log for {} with id: {}", entityType, entityId, e));
   }
+
+  private <T> AuditEntityWrapper<T> decodeOutboxPayload(String payload, Class<T> entityClass) {
+    try {
+      var mapper = DatabindCodec.mapper();
+      var wrapperType = mapper.getTypeFactory().constructParametricType(AuditEntityWrapper.class, entityClass);
+      AuditEntityWrapper<T> wrapper = mapper.readValue(payload, wrapperType);
+      if (wrapper.entity() != null) {
+        return wrapper;
+      }
+    } catch (Exception ignored) {
+      log.debug("decodeOutboxPayload:: Failed to decode payload: {}", payload);
+    }
+    log.info("decodeOutboxPayload:: Falling back to decode payload as {}", entityClass.getSimpleName());
+    T entity = Json.decodeValue(payload, entityClass);
+    return AuditEntityWrapper.of(entity);
+  }
+
 }

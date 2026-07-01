@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_UPDATE;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 import static org.folio.util.HelperUtils.asFuture;
+import static org.folio.util.HelperUtils.mapTo;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.ObjectUtils;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.services.batch.BatchTrackingService;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
@@ -83,10 +85,10 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .compose(pieces -> updatePieces(holder, pieces, conn))
       .compose(piecesToUpdate -> auditOutboxService
         .savePiecesOutboxLog(conn, piecesToUpdate, PieceAuditEvent.Action.EDIT, holder.getHeaders())
-        .map(piecesToUpdate));
+        .map(mapTo(piecesToUpdate, AuditEntityWrapper::entity)));
   }
 
-  private Future<List<Piece>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
+  private Future<List<AuditEntityWrapper<Piece>>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
     var piecesToUpdate = filterPiecesToUpdate(holder, pieces);
 
     if (CollectionUtils.isEmpty(piecesToUpdate)) {
@@ -120,14 +122,14 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     log.debug("processPoLinesUpdate:: Updating POLs, batchId='{}', isBatchMode={}, isLastInBatch={}",
       holder.getBatchHolder().getBatchId(), holder.getBatchHolder().isBatchMode(), holder.getBatchHolder().isLastInBatch());
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn)
-      .compose(updatedPoLines -> {
+      .compose(wrappedPoLines -> {
         // Only save POL outbox logs if NOT in batch mode OR if this is the last item in batch
         if (holder.getBatchHolder().isBatchMode() && !holder.getBatchHolder().isLastInBatch()) {
           log.debug("processPoLinesUpdate:: Batch mode enabled and not last item, skipping POL outbox save");
           return Future.succeededFuture(false);
         } else {
           log.debug("processPoLinesUpdate:: Saving POLs to outbox (non-batch mode or last item in batch)");
-          return auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders());
+          return auditOutboxService.saveOrderLinesOutboxLogs(conn, wrappedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders());
         }
       })
       .mapEmpty();

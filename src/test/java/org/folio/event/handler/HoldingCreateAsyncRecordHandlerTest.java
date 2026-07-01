@@ -129,6 +129,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     );
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(anyList(), anyString(), any(Conn.class));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     doReturn(Future.succeededFuture(expectedPieces)).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT), any());
@@ -206,6 +207,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     );
 
     doReturn(Future.succeededFuture(List.of())).when(pieceService).getPiecesByHoldingId(eq(holdingId1), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(anyList(), anyString(), any(Conn.class));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT), any());
 
@@ -261,6 +263,7 @@ public class HoldingCreateAsyncRecordHandlerTest {
     var expectedPoLines = List.of(createPoLineWithSearchLocationId(poLineId, List.of(createLocation(holdingId, DIKU_TENANT), createLocation(holdingId, DIKU_TENANT))));
 
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByHoldingId(eq(holdingId), any(Conn.class));
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(anyList(), anyString(), any(Conn.class));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(anyString(), any(Conn.class));
     doThrow(new RuntimeException("Piece save failed")).when(pieceService).updatePieces(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doThrow(new RuntimeException("PoLine save failed")).when(poLinesService).updatePoLines(eq(expectedPoLines), any(Conn.class), eq(DIKU_TENANT), any());

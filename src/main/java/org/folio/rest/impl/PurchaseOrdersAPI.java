@@ -11,6 +11,7 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.TableNames;
 import org.folio.rest.annotations.Validate;
@@ -70,9 +71,8 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.debug("Creating a new purchase order");
     validateCustomFields(vertxContext, okapiHeaders, order)
-      .compose(v ->
-        pgClient.withTrans(conn -> createPurchaseOrder(conn, order)
-          .compose(v2 -> auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.CREATE, okapiHeaders))))
+      .compose(v -> pgClient.withTrans(conn -> createPurchaseOrder(conn, order)
+        .compose(v2 -> auditOutboxService.saveOrderOutboxLog(conn, AuditEntityWrapper.of(order), OrderAuditEvent.Action.CREATE, okapiHeaders))))
       .onComplete(ar -> {
         if (ar.failed()) {
           log.error("Order creation failed", ar.cause());
@@ -147,14 +147,13 @@ public class PurchaseOrdersAPI extends BaseApi implements OrdersStoragePurchaseO
   private Future<Response> updateOrder(String id, PurchaseOrder order, Map<String, String> okapiHeaders) {
     log.info("Update purchase order with id={}", order.getId());
     Promise<Response> promise = Promise.promise();
-    pgClient.withTrans(conn ->
-      conn.update(TableNames.PURCHASE_ORDER_TABLE, order, id)
-      .compose(reply -> {
+    pgClient.withTrans(conn -> conn.getByIdForUpdate(TableNames.PURCHASE_ORDER_TABLE, id, PurchaseOrder.class)
+      .compose(originalOrder -> conn.update(TableNames.PURCHASE_ORDER_TABLE, order, id).compose(reply -> {
         if (reply.rowCount() == 0) {
           return Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()));
         }
-        return auditOutboxService.saveOrderOutboxLog(conn, order, OrderAuditEvent.Action.EDIT, okapiHeaders);
-      }))
+        return auditOutboxService.saveOrderOutboxLog(conn, AuditEntityWrapper.of(order, originalOrder), OrderAuditEvent.Action.EDIT, okapiHeaders);
+      })))
       .onComplete(ar -> {
         if (ar.succeeded()) {
           log.info("Purchase order successfully updated, id={}", id);
