@@ -42,6 +42,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.folio.TestUtils;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.ConsortiumConfiguration;
 import org.folio.rest.jaxrs.model.BatchTracking;
@@ -161,10 +162,12 @@ public class ItemCreateAsyncRecordHandlerTest {
     var poLines = List.of(poLine1, poLine2);
     var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+    var affectedWrappedPieces = AuditEntityWrapper.listOf(affectedPieces, pieces, Piece::getId);
+    var affectedWrappedPoLines = AuditEntityWrapper.listOf(affectedPoLines, poLines, PoLine::getId);
 
     // Update Pieces
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(affectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -180,13 +183,13 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
     verify(pieceService, times(1)).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
-    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedWrappedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    verify(poLinesService, times(1)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
+    verify(poLinesService, times(2)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, times(1)).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
-    verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedWrappedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     assertEquals(holdingId1, piece1.getHoldingId());
     assertEquals(holdingId1, piece2.getHoldingId());
@@ -240,10 +243,12 @@ public class ItemCreateAsyncRecordHandlerTest {
     var poLines = List.of(poLine1, poLine2);
     var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+    var affectedWrappedPieces = AuditEntityWrapper.listOf(affectedPieces, pieces, Piece::getId);
+    var affectedWrappedPoLines = AuditEntityWrapper.listOf(affectedPoLines, poLines, PoLine::getId);
 
     // Update Pieces
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(affectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -259,13 +264,13 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
     verify(pieceService, times(1)).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
-    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedWrappedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
-    verify(poLinesService, times(1)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
+    verify(poLinesService, times(2)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, times(1)).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
-    verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, times(1)).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedWrappedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     assertEquals(holdingId1, piece1.getHoldingId());
     assertEquals(holdingId1, piece2.getHoldingId());
@@ -320,10 +325,12 @@ public class ItemCreateAsyncRecordHandlerTest {
     var poLines = List.of(poLine1, poLine2);
     var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+    var affectedWrappedPieces = AuditEntityWrapper.listOf(affectedPieces, pieces, Piece::getId);
+    var affectedWrappedPoLines = AuditEntityWrapper.listOf(affectedPoLines, poLines, PoLine::getId);
 
     // Update Pieces
     doReturn(Future.succeededFuture(pieces)).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
-    doReturn(Future.succeededFuture(affectedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
+    doReturn(Future.succeededFuture(affectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(eq(pieces), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
     // Update PoLines
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2, unaffectedPiece3))).when(pieceService).getPiecesByPoLineId(eq(poLineId1), eq(conn));
@@ -339,13 +346,13 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(handler, times(1)).processInventoryCreationEvent(eq(extractResourceEvent(kafkaRecord)), eq(CENTRAL_TENANT), anyMap(), eq(dbClient));
     verify(pieceService, times(1)).getPiecesByItemId(eq(itemId1), eq(conn));
     verify(pieceService, times(1)).updatePiecesInventoryData(eq(affectedPieces), eq(conn), eq(CENTRAL_TENANT));
-    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, times(1)).savePiecesOutboxLog(any(Conn.class), eq(affectedWrappedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
     // Update PoLines
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId1), eq(conn));
     verify(pieceService, times(1)).getPiecesByPoLineId(eq(poLineId2), eq(conn));
     verify(poLinesService, times(1)).getPoLinesByIdsForUpdate(eq(List.of(poLine1.getId(), poLine2.getId())), eq(CENTRAL_TENANT), eq(conn));
     verify(poLinesService, never()).updatePoLines(eq(affectedPoLines), eq(conn), eq(CENTRAL_TENANT), any());
-    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedWrappedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     assertEquals(holdingId1, piece1.getHoldingId());
     assertEquals(holdingId1, piece2.getHoldingId());
@@ -520,7 +527,6 @@ public class ItemCreateAsyncRecordHandlerTest {
     // Common mocks
     doReturn(Future.succeededFuture(List.of(piece1, piece3))).when(pieceService).getPiecesByItemId(eq(itemId1), eq(conn));
     doReturn(Future.succeededFuture(List.of(piece2, piece4))).when(pieceService).getPiecesByItemId(eq(itemId2), eq(conn));
-    doReturn(Future.succeededFuture()).when(pieceService).updatePiecesInventoryData(anyList(), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture()).when(poLinesService).updatePoLines(anyList(), eq(conn), eq(CENTRAL_TENANT), any());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), anyList(), any(), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).savePiecesOutboxLog(eq(conn), anyList(), any(), anyMap());
@@ -535,10 +541,13 @@ public class ItemCreateAsyncRecordHandlerTest {
     var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece3, piece4), List.of(effectiveLocationId1, effectiveLocationId2));
     var affectedPieces = List.of(affectedPiece1, affectedPiece3);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+    var affectedWrappedPieces = AuditEntityWrapper.listOf(affectedPieces, List.of(piece1, piece3), Piece::getId);
+    var affectedWrappedPoLines = AuditEntityWrapper.listOf(affectedPoLines, List.of(poLine1, poLine2), PoLine::getId);
 
     doReturn(Future.succeededFuture(List.of(poLine1, poLine2))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), eq(conn));
     doReturn(Future.succeededFuture(List.of(affectedPiece1, piece2))).when(pieceService).getPiecesByPoLineId(poLineId1, conn);
     doReturn(Future.succeededFuture(List.of(affectedPiece3, piece4))).when(pieceService).getPiecesByPoLineId(poLineId2, conn);
+    doReturn(Future.succeededFuture(affectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(anyList(), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(batchTracking.withProcessedCount(1))).when(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
 
     var result = handler.handle(kafkaRecord1);
@@ -553,8 +562,8 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
     verify(batchTrackingService, never()).deleteBatchTracking(conn, batchId);
     // Audit logs - No POL log should be saved until batch is finished
-    verify(auditOutboxService).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
-    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService).savePiecesOutboxLog(any(Conn.class), eq(affectedWrappedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedWrappedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
 
     //// Second event processing ////
@@ -562,13 +571,17 @@ public class ItemCreateAsyncRecordHandlerTest {
     var affectedPiece4 = createPiece(pieceId4, itemId2).withPoLineId(poLineId2).withReceivingTenantId(COLLEGE_TENANT).withHoldingId(holdingId1).withFormat(Piece.Format.PHYSICAL);
     doReturn(Future.succeededFuture(List.of(affectedPoLine1, affectedPoLine2))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), eq(conn));
 
-    affectedPoLine1 = createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2), List.of(effectiveLocationId1, effectiveLocationId2));
-    affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece3, affectedPiece4), List.of(effectiveLocationId1, effectiveLocationId2));
     affectedPieces = List.of(affectedPiece2, affectedPiece4);
-    affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
+    affectedPoLines = List.of(
+      createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2), List.of(effectiveLocationId1, effectiveLocationId2)),
+      createPoLine(poLineId2, List.of(affectedPiece3, affectedPiece4), List.of(effectiveLocationId1, effectiveLocationId2))
+    );
+    affectedWrappedPieces = AuditEntityWrapper.listOf(affectedPieces, List.of(piece2, piece4), Piece::getId);
+    affectedWrappedPoLines = AuditEntityWrapper.listOf(affectedPoLines, List.of(affectedPoLine1, affectedPoLine2), PoLine::getId);
 
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2))).when(pieceService).getPiecesByPoLineId(poLineId1, conn);
     doReturn(Future.succeededFuture(List.of(affectedPiece3, affectedPiece4))).when(pieceService).getPiecesByPoLineId(poLineId2, conn);
+    doReturn(Future.succeededFuture(affectedWrappedPieces)).when(pieceService).updatePiecesInventoryData(anyList(), eq(conn), eq(CENTRAL_TENANT));
     doReturn(Future.succeededFuture(batchTracking.withProcessedCount(2))).when(batchTrackingService).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
     doReturn(Future.succeededFuture(batchTracking.withProcessedCount(2))).when(batchTrackingService).deleteBatchTracking(conn, batchId);
 
@@ -584,8 +597,8 @@ public class ItemCreateAsyncRecordHandlerTest {
     verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, batchId, CENTRAL_TENANT);
     verify(batchTrackingService).deleteBatchTracking(conn, batchId);
     // Audit logs - Now POL logs should be saved, as batch is finished
-    verify(auditOutboxService).savePiecesOutboxLog(any(Conn.class), eq(affectedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
-    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService).savePiecesOutboxLog(any(Conn.class), eq(affectedWrappedPieces), eq(PieceAuditEvent.Action.EDIT), anyMap());
+    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(affectedWrappedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
   }
 
