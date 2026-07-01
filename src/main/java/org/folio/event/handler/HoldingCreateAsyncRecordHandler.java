@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -71,7 +72,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                             Conn conn) {
     return poLinesService.getPoLinesByCqlQuery(String.format(PO_LINE_LOCATIONS_HOLDING_ID_CQL, holdingId), conn)
       .compose(poLines -> updatePoLines(poLines, holdingId, permanentLocationId, tenantIdFromEvent, centralTenantId, conn, headers))
-      .compose(poLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, poLines, OrderLineAuditEvent.Action.EDIT, headers))
+      .compose(wrappedPoLines -> auditOutboxService.saveOrderLinesOutboxLogs(conn, wrappedPoLines, OrderLineAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
@@ -83,9 +84,9 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .mapEmpty();
   }
 
-  private Future<List<PoLine>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,
-                                             String tenantIdFromEvent, String centralTenantId, Conn conn,
-                                             Map<String, String> headers) {
+  private Future<List<AuditEntityWrapper<PoLine>>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,
+                                                                 String tenantIdFromEvent, String centralTenantId, Conn conn,
+                                                                 Map<String, String> headers) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLines:: No poLines to update for holding: '{}' and tenant: '{}' in centralTenant: '{}'",
         holdingId, tenantIdFromEvent, centralTenantId);
@@ -104,8 +105,9 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       }
     });
 
-    return poLinesService.updatePoLines(poLines, conn, centralTenantId, headers)
-      .map(v -> poLines);
+    return poLinesService.getPoLinesByIdsForUpdate(poLines.stream().map(PoLine::getId).toList(), centralTenantId, conn)
+      .compose(originalPoLines -> poLinesService.updatePoLines(poLines, conn, centralTenantId, headers)
+        .map(AuditEntityWrapper.listOf(poLines, originalPoLines, PoLine::getId)));
   }
 
   private Future<List<AuditEntityWrapper<Piece>>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent, String centralTenantId, Conn conn) {

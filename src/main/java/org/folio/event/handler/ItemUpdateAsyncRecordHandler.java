@@ -122,14 +122,14 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     log.debug("processPoLinesUpdate:: Updating POLs, batchId='{}', isBatchMode={}, isLastInBatch={}",
       holder.getBatchHolder().getBatchId(), holder.getBatchHolder().isBatchMode(), holder.getBatchHolder().isLastInBatch());
     return orderLineLocationUpdateService.updatePoLineLocationData(poLineIds, holder.getItem(), false, holder.getOrderTenantId(), holder.getHeaders(), conn)
-      .compose(updatedPoLines -> {
+      .compose(wrappedPoLines -> {
         // Only save POL outbox logs if NOT in batch mode OR if this is the last item in batch
         if (holder.getBatchHolder().isBatchMode() && !holder.getBatchHolder().isLastInBatch()) {
           log.debug("processPoLinesUpdate:: Batch mode enabled and not last item, skipping POL outbox save");
           return Future.succeededFuture(false);
         } else {
           log.debug("processPoLinesUpdate:: Saving POLs to outbox (non-batch mode or last item in batch)");
-          return auditOutboxService.saveOrderLinesOutboxLogs(conn, updatedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders());
+          return auditOutboxService.saveOrderLinesOutboxLogs(conn, wrappedPoLines, OrderLineAuditEvent.Action.EDIT, holder.getHeaders());
         }
       })
       .mapEmpty();

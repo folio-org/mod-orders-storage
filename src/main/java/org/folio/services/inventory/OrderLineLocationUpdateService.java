@@ -4,6 +4,7 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static org.folio.event.dto.ItemFields.EFFECTIVE_LOCATION_ID;
 import static org.folio.event.dto.ItemFields.ID;
+import static org.folio.util.HelperUtils.mapTo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.acq.Location;
@@ -48,7 +50,7 @@ public class OrderLineLocationUpdateService {
    * @param conn          connection to be used for the request
    * @return a future with the list of updated POLs
    */
-  public Future<List<PoLine>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering, String tenantId, Map<String, String> headers, Conn conn) {
+  public Future<List<AuditEntityWrapper<PoLine>>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering, String tenantId, Map<String, String> headers, Conn conn) {
     log.info("processPoLinesUpdate:: Fetching '{}' POL(s) to update location data", poLineIds.size());
     return poLinesService.getPoLinesByIdsForUpdate(poLineIds, tenantId, conn)
       .map(poLines -> poLines.stream()
@@ -61,8 +63,7 @@ public class OrderLineLocationUpdateService {
       .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, item, tenantId, headers, conn));
   }
 
-  private Future<List<PoLine>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item,
-                                             String tenantId, Map<String, String> headers, Conn conn) {
+  private Future<List<AuditEntityWrapper<PoLine>>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item, String tenantId, Map<String, String> headers, Conn conn) {
     var poLinesToUpdate = processPoLinePiecePairs(poLinePiecePairs, item);
     if (CollectionUtils.isEmpty(poLinesToUpdate)) {
       log.info("updatePoLines:: No POLs were changed to update for item: '{}' in tenant: '{}'", item.getString(ID.getValue()), tenantId);
@@ -70,8 +71,9 @@ public class OrderLineLocationUpdateService {
     }
     log.info("updatePoLines:: Updating '{}' POL(s) for item: '{}' in tenant: '{}'",
       poLinesToUpdate.size(), item.getString(ID.getValue()), tenantId);
-    return poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
-      .map(v -> poLinesToUpdate);
+    return poLinesService.getPoLinesByIdsForUpdate(mapTo(poLinesToUpdate, PoLine::getId), tenantId, conn)
+      .compose(originalPoLines -> poLinesService.updatePoLines(poLinesToUpdate, conn, tenantId, headers)
+        .map(AuditEntityWrapper.listOf(poLinesToUpdate, originalPoLines, PoLine::getId)));
   }
 
   private List<PoLine> processPoLinePiecePairs(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject itemObject) {
