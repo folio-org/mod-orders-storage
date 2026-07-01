@@ -11,6 +11,7 @@ import static org.folio.util.DbUtils.getEntitiesByField;
 import static org.folio.util.HelperUtils.chainCall;
 import static org.folio.util.HelperUtils.collectResultsOnSuccess;
 import static org.folio.util.HelperUtils.extractEntityFields;
+import static org.folio.util.HelperUtils.mapTo;
 import static org.folio.util.MetadataUtils.populateMetadata;
 
 import javax.ws.rs.core.Response;
@@ -19,10 +20,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.models.TableNames;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -39,8 +42,6 @@ import org.folio.util.SerializerUtil;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.handler.HttpException;
-import io.vertx.sqlclient.Row;
-import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.Tuple;
 import lombok.extern.log4j.Log4j2;
 import one.util.streamex.StreamEx;
@@ -53,6 +54,7 @@ public class PieceService {
   private static final String HOLDING_ID_FIELD = "holdingId";
   private static final String PIECE_NOT_UPDATED = "Pieces with poLineId={} not presented, skipping the update";
 
+  private static final String PIECES_BY_ID_FOR_UPDATE_SQL = "SELECT * FROM %s WHERE id = ANY($1) FOR UPDATE;";
   private static final String PIECES_BATCH_UPDATE_SQL = "UPDATE %s AS pieces SET jsonb = b.jsonb FROM (VALUES  %s) AS b (id, jsonb) WHERE b.id::uuid = pieces.id RETURNING pieces.*;";
   private static final String PIECES_BY_ITEM_ID_COUNT_SQL = "SELECT COUNT(*) FROM %s WHERE left(lower(%s.f_unaccent(jsonb->>'itemId')), 600) = $1;";
   private static final String PIECES_SHIFT_SEQUENCE_NUMBERS =
@@ -96,6 +98,14 @@ public class PieceService {
     return getEntitiesByField(PIECES_TABLE, Piece.class, criterion, conn);
   }
 
+  public Future<List<Piece>> getPiecesByIdsForUpdate(List<String> pieceIds, String tenantId, Conn conn) {
+    var ids = mapTo(pieceIds, UUID::fromString).toArray(UUID[]::new);
+    return conn.execute(PIECES_BY_ID_FOR_UPDATE_SQL.formatted(getFullTableName(tenantId, PIECES_TABLE)), Tuple.of(ids))
+      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
+      .onSuccess(result -> log.info("getPiecesByIdsForUpdate:: Successfully fetched {} piece(s) for update using tenantId: '{}'", result.size(), tenantId))
+      .onFailure(t -> log.error("Failed fetching piece(s) for update using tenantId: '{}'", tenantId, t));
+  }
+
   public Future<String> createPiece(Conn conn, Piece piece, String tenantId) {
     piece.setStatusUpdatedDate(new Date());
     if (StringUtils.isBlank(piece.getId())) {
@@ -128,11 +138,13 @@ public class PieceService {
       .onFailure(t -> log.error("createPieces:: Failed pieces: {}", pieceIds, t));
   }
 
-  public Future<RowSet<Row>> updatePiece(String id, Piece piece, Conn conn, String tenantId) {
+  public Future<AuditEntityWrapper<Piece>> updatePiece(String id, Piece piece, Conn conn, String tenantId) {
     log.debug("updatePiece:: Updating piece: '{}'", id);
     return shiftSequenceNumbersIfNeeded(id, piece, conn, tenantId)
-      .compose(v -> conn.update(TableNames.PIECES_TABLE, piece, id))
-      .compose(DbUtils::failOnNoUpdateOrDelete)
+      .compose(v -> getPieceByIdForUpdate(id, conn))
+      .compose(originalPiece -> conn.update(TableNames.PIECES_TABLE, piece, id)
+        .compose(DbUtils::failOnNoUpdateOrDelete)
+        .map(AuditEntityWrapper.of(piece, originalPiece.orElse(null))))
       .onSuccess(rowSet -> log.info("updatePiece:: Piece successfully updated: '{}'", id))
       .onFailure(e -> log.error("updatePiece:: Update piece failed: '{}'", id, e));
   }
@@ -144,6 +156,11 @@ public class PieceService {
       .compose(piece -> piece == null
         ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), "Piece not found: " + id))
         : Future.succeededFuture(piece));
+  }
+
+  public Future<Optional<Piece>> getPieceByIdForUpdate(String id, Conn conn) {
+    log.debug("getPieceByIdForUpdate:: Getting piece for update: '{}'", id);
+    return conn.getByIdForUpdate(PIECES_TABLE, id, Piece.class).map(Optional::ofNullable);
   }
 
   public Future<Void> deletePiece(String id, Conn conn) {
@@ -169,14 +186,16 @@ public class PieceService {
       .mapEmpty();
   }
 
-  public Future<List<Piece>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
+  public Future<List<AuditEntityWrapper<Piece>>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.warn("updatePieces:: Pieces list is empty, skipping the update");
       return Future.succeededFuture(List.of());
     }
     String query = buildUpdatePieceBatchQuery(pieces, tenantId);
-    return conn.execute(query)
-      .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
+    return getPiecesByIdsForUpdate(mapTo(pieces, Piece::getId), tenantId, conn)
+      .compose(originalPieces -> conn.execute(query)
+        .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
+        .map(updatedPieces -> AuditEntityWrapper.listOf(updatedPieces, originalPieces, Piece::getId)))
       .onSuccess(ar -> log.info("updatePieces:: completed, query={}", query))
       .onFailure(t -> log.error("updatePieces:: failed, query={}", query, t));
   }
@@ -198,7 +217,7 @@ public class PieceService {
    * @param tenantId Tenant identifier
    * @return Future with the list of updated pieces
    */
-  public Future<List<Piece>> updatePiecesInventoryData(List<Piece> pieces, Conn conn, String tenantId) {
+  public Future<List<AuditEntityWrapper<Piece>>> updatePiecesInventoryData(List<Piece> pieces, Conn conn, String tenantId) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.warn("updatePiecesInventoryFieldsOnly:: Pieces list is empty, skipping the update");
       return Future.succeededFuture(List.of());
@@ -208,19 +227,22 @@ public class PieceService {
     return collectResultsOnSuccess(updateFutures);
   }
 
-  private Future<Piece> updatePieceInventoryData(Piece piece, Conn conn, String tenantId) {
+  private Future<AuditEntityWrapper<Piece>> updatePieceInventoryData(Piece piece, Conn conn, String tenantId) {
     var updateQuery = PIECES_UPDATE_INVENTORY_DATA.formatted(getFullTableName(tenantId, PIECES_TABLE));
     var params = Tuple.of(piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber(), piece.getId());
-    return conn.execute(updateQuery, params).map(rows -> {
-      if (rows.rowCount() == 0) {
-        log.warn("updateSinglePieceInventoryFields:: No piece updated with id: {}", piece.getId());
-        return piece;
-      }
-      var updatedPiece = DbUtils.getRowSetAsEntity(rows, Piece.class);
-      log.info("updateSinglePieceInventoryFields:: Successfully updated piece: {} with holdingId: {}, receivingTenantId: {}, barcode: {}, callNumber: {}, accessionNumber: {}",
-        piece.getId(), piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber());
-      return updatedPiece;
-    }).onFailure(e -> log.error("updateSinglePieceInventoryFields:: Failed to update piece: {}", piece.getId(), e));
+    return getPieceByIdForUpdate(piece.getId(), conn)
+      .compose(originalPiece -> conn.execute(updateQuery, params).map(rows -> {
+          if (rows.rowCount() == 0) {
+            log.warn("updateSinglePieceInventoryFields:: No piece updated with id: {}", piece.getId());
+            return piece;
+          }
+          var updatedPiece = DbUtils.getRowSetAsEntity(rows, Piece.class);
+          log.info("updateSinglePieceInventoryFields:: Successfully updated piece: {} with holdingId: {}, receivingTenantId: {}, barcode: {}, callNumber: {}, accessionNumber: {}",
+            piece.getId(), piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber());
+          return updatedPiece;
+        })
+        .map(updatedPiece -> AuditEntityWrapper.of(updatedPiece, originalPiece.orElse(null))))
+      .onFailure(e -> log.error("updateSinglePieceInventoryFields:: Failed to update piece: {}", piece.getId(), e));
   }
 
   public Future<Void> updatePieces(PoLine poLine, ReplaceInstanceRef replaceInstanceRef, Conn conn, String tenantId) {

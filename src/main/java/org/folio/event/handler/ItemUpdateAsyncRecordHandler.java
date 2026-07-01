@@ -3,6 +3,7 @@ package org.folio.event.handler;
 import static org.folio.event.InventoryEventType.INVENTORY_ITEM_UPDATE;
 import static org.folio.util.HeaderUtils.extractTenantFromHeaders;
 import static org.folio.util.HelperUtils.asFuture;
+import static org.folio.util.HelperUtils.mapTo;
 
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.ObjectUtils;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.services.batch.BatchTrackingService;
 import org.folio.event.dto.ItemEventHolder;
 import org.folio.event.dto.ResourceEvent;
@@ -83,10 +85,10 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .compose(pieces -> updatePieces(holder, pieces, conn))
       .compose(piecesToUpdate -> auditOutboxService
         .savePiecesOutboxLog(conn, piecesToUpdate, PieceAuditEvent.Action.EDIT, holder.getHeaders())
-        .map(piecesToUpdate));
+        .map(mapTo(piecesToUpdate, AuditEntityWrapper::entity)));
   }
 
-  private Future<List<Piece>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
+  private Future<List<AuditEntityWrapper<Piece>>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
     var piecesToUpdate = filterPiecesToUpdate(holder, pieces);
 
     if (CollectionUtils.isEmpty(piecesToUpdate)) {

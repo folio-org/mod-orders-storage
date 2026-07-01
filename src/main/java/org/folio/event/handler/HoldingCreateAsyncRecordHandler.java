@@ -79,7 +79,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
                                            String centralTenantId, Map<String, String> headers, Conn conn) {
     return pieceService.getPiecesByHoldingId(holdingId, conn)
       .compose(pieces -> updatePieces(pieces, holdingId, tenantIdFromEvent, centralTenantId, conn))
-      .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, headers))
+      .compose(wrappedPieces -> auditOutboxService.savePiecesOutboxLog(conn, wrappedPieces, PieceAuditEvent.Action.EDIT, headers))
       .mapEmpty();
   }
 
@@ -108,8 +108,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .map(v -> poLines);
   }
 
-  private Future<List<Piece>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent,
-                                           String centralTenantId, Conn conn) {
+  private Future<List<AuditEntityWrapper<Piece>>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent, String centralTenantId, Conn conn) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.info("updatePieces:: No pieces to update were found for holding: '{}' and tenant: '{}' in centralTenant: '{}",
         holdingId, tenantIdFromEvent, centralTenantId);

@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.core.BaseApi;
@@ -64,7 +65,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
   public void postOrdersStoragePieces(Piece entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     pgClient.withTrans(conn -> pieceService.createPiece(conn, entity, pgClient.getTenantId())
-      .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.CREATE, okapiHeaders)))
+      .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, AuditEntityWrapper.of(entity), PieceAuditEvent.Action.CREATE, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
           log.info("Create piece complete, id={}", entity.getId());
@@ -92,7 +93,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
       pieceService.getPieceById(id, conn)
         .compose(piece -> pieceService.deletePiece(id, conn)
           .map(v -> populateMetadata(piece::getMetadata, piece::withMetadata, okapiHeaders)))
-        .compose(piece -> auditOutboxService.savePieceOutboxLog(conn, piece, PieceAuditEvent.Action.DELETE, okapiHeaders)))
+        .compose(piece -> auditOutboxService.savePieceOutboxLog(conn, AuditEntityWrapper.of(piece), PieceAuditEvent.Action.DELETE, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
           log.info("Delete piece complete, id={}", id);
@@ -110,7 +111,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
   public void putOrdersStoragePiecesById(String id, Piece entity, Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     pgClient.withTrans(conn -> pieceService.updatePiece(id, entity, conn, pgClient.getTenantId())
-      .compose(ignore -> auditOutboxService.savePieceOutboxLog(conn, entity, PieceAuditEvent.Action.EDIT, okapiHeaders)))
+      .compose(wrappedPiece -> auditOutboxService.savePieceOutboxLog(conn, wrappedPiece, PieceAuditEvent.Action.EDIT, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
           log.info("Update piece complete, id={}", id);
@@ -129,7 +130,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
     log.info("postOrdersStoragePiecesBatch:: Batch creating {} pieces", piecesCollection.getPieces().size());
     pgClient
       .withTrans(conn -> pieceService.createPieces(piecesCollection.getPieces(), conn, okapiHeaders)
-        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.CREATE, okapiHeaders)))
+        .compose(pieces -> auditOutboxService.savePiecesOutboxLog(conn, AuditEntityWrapper.listOf(pieces), PieceAuditEvent.Action.CREATE, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
           log.info("Create '{}' pieces completed", piecesCollection.getPieces());
@@ -149,7 +150,7 @@ public class PiecesAPI extends BaseApi implements OrdersStoragePieces, OrdersSto
     var pieces = piecesCollection.getPieces().stream().map(piece -> populateMetadata(piece::getMetadata, piece::withMetadata, okapiHeaders)).toList();
     log.info("putOrdersStoragePiecesBatch:: Batch updating {} pieces: {}", piecesIds.size(), piecesIds);
     pgClient.withTrans(conn -> pieceService.updatePieces(pieces, conn, TenantTool.tenantId(okapiHeaders))
-        .compose(v -> auditOutboxService.savePiecesOutboxLog(conn, pieces, PieceAuditEvent.Action.EDIT, okapiHeaders)))
+        .compose(wrappedPieces -> auditOutboxService.savePiecesOutboxLog(conn, wrappedPieces, PieceAuditEvent.Action.EDIT, okapiHeaders)))
       .onComplete(ar -> {
         if (ar.succeeded()) {
           log.info("putOrdersStoragePiecesBatch:: Successfully updated pieces: {}", piecesIds);

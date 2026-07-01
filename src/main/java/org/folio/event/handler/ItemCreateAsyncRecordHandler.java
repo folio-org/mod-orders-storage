@@ -96,7 +96,8 @@ public class ItemCreateAsyncRecordHandler extends InventoryCreateAsyncRecordHand
         "in centralTenant: '{}'", updateRequiredPieces.size(), tenantIdFromEvent, holdingId, centralTenantId);
 
     return pieceService.updatePiecesInventoryData(updateRequiredPieces, conn, centralTenantId)
-      .compose(v -> auditOutboxService.savePiecesOutboxLog(conn, updateRequiredPieces, PieceAuditEvent.Action.EDIT, headers).map(updateRequiredPieces));
+      .compose(wrappedPieces -> auditOutboxService.savePiecesOutboxLog(conn, wrappedPieces, PieceAuditEvent.Action.EDIT, headers))
+      .map(updateRequiredPieces);
   }
 
   private List<Piece> filterPiecesToUpdate(List<Piece> pieces, String holdingId, String tenantIdFromEvent) {
