@@ -371,7 +371,7 @@ public class PoLinesService {
           ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
           : Future.succeededFuture(AuditEntityWrapper.of(poLine, originalPoLine.orElse(null)))))
       .onSuccess(v -> log.info("updatePoLine:: Complete, poLineId={}", poLine.getId()))
-      .onComplete(t -> log.error("updatePoLine:: Failed, poLineId={}", poLine.getId(), t.cause()));
+      .onFailure(t -> log.error("updatePoLine:: Failed, poLineId={}", poLine.getId(), t));
   }
 
   private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine, List<String> acqUnitIds, Map<String, String> headers) {

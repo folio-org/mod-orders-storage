@@ -232,16 +232,15 @@ public class PieceService {
     var params = Tuple.of(piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber(), piece.getId());
     return getPieceByIdForUpdate(piece.getId(), conn)
       .compose(originalPiece -> conn.execute(updateQuery, params).map(rows -> {
-          if (rows.rowCount() == 0) {
-            log.warn("updateSinglePieceInventoryFields:: No piece updated with id: {}", piece.getId());
-            return piece;
-          }
-          var updatedPiece = DbUtils.getRowSetAsEntity(rows, Piece.class);
-          log.info("updateSinglePieceInventoryFields:: Successfully updated piece: {} with holdingId: {}, receivingTenantId: {}, barcode: {}, callNumber: {}, accessionNumber: {}",
-            piece.getId(), piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber());
-          return updatedPiece;
-        })
-        .map(updatedPiece -> AuditEntityWrapper.of(updatedPiece, originalPiece.orElse(null))))
+        if (rows.rowCount() == 0) {
+          log.warn("updateSinglePieceInventoryFields:: No piece updated with id: {}", piece.getId());
+          return AuditEntityWrapper.of(piece, originalPiece.orElse(null));
+        }
+        var updatedPiece = DbUtils.getRowSetAsEntity(rows, Piece.class);
+        log.info("updateSinglePieceInventoryFields:: Successfully updated piece: {} with holdingId: {}, receivingTenantId: {}, barcode: {}, callNumber: {}, accessionNumber: {}",
+          piece.getId(), piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber());
+        return AuditEntityWrapper.of(updatedPiece, originalPiece.orElse(null));
+      }))
       .onFailure(e -> log.error("updateSinglePieceInventoryFields:: Failed to update piece: {}", piece.getId(), e));
   }
 
