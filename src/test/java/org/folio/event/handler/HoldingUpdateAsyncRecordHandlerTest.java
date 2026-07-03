@@ -7,6 +7,7 @@ import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.folio.TestUtils;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.dto.InstanceFields;
 import org.folio.event.dto.ResourceEvent;
 import org.folio.event.service.AuditOutboxService;
@@ -179,12 +180,14 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
       createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
+    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(UNIVERSITY_TENANT), eq(conn));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(List.of()), anyMap());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedAuditEntities), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -235,13 +238,15 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2),
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
+    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(UNIVERSITY_TENANT), eq(conn));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedAuditEntities), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -298,13 +303,15 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2),
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
+    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(UNIVERSITY_TENANT), eq(conn));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(expectedPoLines), anyMap());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(expectedAuditEntities), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -395,14 +402,16 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
       createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
+    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(connCentral));
     doReturn(Future.succeededFuture(2)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(connCentral), eq(CENTRAL_TENANT), any());
     doReturn(Future.succeededFuture()).when(poLinesService).updateTitles(eq(conn), eq(List.of()), anyMap());
     doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(conn), eq(List.of()), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
-    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(connCentral), eq(expectedPoLines), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    doReturn(Future.succeededFuture(true)).when(auditOutboxService).saveOrderLinesOutboxLogs(eq(connCentral), eq(expectedAuditEntities), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
 
     var result = handler.handle(kafkaRecord);
     assertTrue(result.succeeded());
@@ -479,6 +488,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
 
     doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
+    doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(UNIVERSITY_TENANT), eq(conn));
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByCqlQuery(eq(query), eq(conn));
     doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(poLinesService).updatePoLines(eq(expectedPoLines), eq(conn), eq(UNIVERSITY_TENANT), any());
     doReturn(pgClient).when(dbClient).getPgClient();

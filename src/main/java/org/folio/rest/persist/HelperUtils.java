@@ -27,6 +27,7 @@ import org.folio.rest.jaxrs.model.Error;
 import org.folio.rest.jaxrs.model.Parameter;
 import org.folio.rest.persist.Criteria.Criteria;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.rest.persist.Criteria.GroupedCriterias;
 import org.folio.rest.persist.cql.CQLQueryValidationException;
 import org.folio.rest.persist.interfaces.Results;
 
@@ -69,12 +70,24 @@ public class HelperUtils {
     }
   }
 
-  public static Criterion getCriterionByFieldNameAndValue(String filedName, String fieldValue) {
+  public static Criteria getCriteriaByFieldNameAndValue(String filedName, String fieldValue) {
     Criteria a = new Criteria();
     a.addField("'" + filedName + "'");
     a.setOperation("=");
     a.setVal(fieldValue);
-    return new Criterion(a);
+    return a;
+  }
+
+  public static Criterion getCriterionByFieldNameAndValue(String filedName, String fieldValue) {
+    return new Criterion(getCriteriaByFieldNameAndValue(filedName, fieldValue));
+  }
+
+  public static Criterion getCriterionByFieldNameAndValues(String filedName, List<String> fieldValues) {
+    var groupedCriterias = new GroupedCriterias();
+    fieldValues.stream()
+      .map(val -> getCriteriaByFieldNameAndValue(filedName, val))
+      .forEach(groupedCriterias::addCriteria);
+    return new Criterion().addGroupOfCriterias(groupedCriterias);
   }
 
   public static Criterion getCriteriaByFieldNameAndValueNotJsonb(String fieldName, String fieldValue) {

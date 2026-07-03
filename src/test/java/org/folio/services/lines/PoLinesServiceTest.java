@@ -35,6 +35,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.RowSet;
 import org.folio.dao.lines.PoLinesDAO;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.exceptions.HttpException;
 import org.folio.rest.jaxrs.model.PoLine;
@@ -44,7 +45,6 @@ import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
 import org.folio.rest.persist.Criteria.Criterion;
 import org.folio.rest.persist.PostgresClient;
-import org.folio.rest.persist.SQLConnection;
 import org.folio.rest.persist.interfaces.Results;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -409,8 +409,10 @@ public class PoLinesServiceTest {
     }).when(pgClient).withTrans(any());
     doAnswer((Answer<Future<RowSet<Row>>>) invocation -> failedFuture(new Exception("unknown")))
       .when(conn).update(anyString(), any(PoLine.class), anyString(), anyString(), anyBoolean());
+    doReturn(succeededFuture(poLine))
+      .when(conn).getByIdForUpdate(anyString(), eq(poLineId), eq(PoLine.class));
 
-    Future<PoLine> f = pgClient.withTrans(conn -> poLinesService.doUpdatePoLine(poLine, conn));
+    Future<AuditEntityWrapper<PoLine>> f = pgClient.withTrans(conn -> poLinesService.doUpdatePoLine(poLine, conn));
 
     assertThat(f.failed(), is(true));
     io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();
@@ -452,6 +454,8 @@ public class PoLinesServiceTest {
       .when(rowSet).rowCount();
     doReturn(succeededFuture(results))
       .when(conn).get(anyString(), eq(Title.class), any(Criterion.class), anyBoolean());
+    doReturn(succeededFuture(poLine))
+      .when(conn).getByIdForUpdate(anyString(), eq(poLineId), eq(PoLine.class));
 
     Future<Void> f = poLinesService.updatePoLineWithTitle(conn, poLineId, poLine, requestContext);
 

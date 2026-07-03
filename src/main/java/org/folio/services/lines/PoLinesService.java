@@ -32,11 +32,13 @@ import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.folio.dao.lines.PoLinesDAO;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.event.service.AuditOutboxService;
 import org.folio.models.CriterionBuilder;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Title;
@@ -105,8 +107,8 @@ public class PoLinesService {
     poLine.setId(id);
 
     updatePoLine(poLine, conn)
-        .compose(line -> updateTitle(conn, line, requestContext.getHeaders()))
-        .compose(line -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(line), OrderLineAuditEvent.Action.EDIT, okapiHeaders))
+        .compose(wrappedPoLine -> updateTitle(conn, wrappedPoLine.entity(), requestContext.getHeaders())
+          .compose(line -> auditOutboxService.saveOrderLineOutboxLog(conn, AuditEntityWrapper.of(line, wrappedPoLine.originalEntity()), OrderLineAuditEvent.Action.EDIT, okapiHeaders)))
         .onComplete(ar -> {
           if (ar.succeeded()) {
             log.info("POLine and associated data were successfully updated, id={}", id);
@@ -301,10 +303,15 @@ public class PoLinesService {
     return promise.future();
   }
 
+  public Future<Optional<PoLine>> getPoLineByIdForUpdate(String id, Conn conn) {
+    log.debug("getPoLineByIdForUpdate:: Getting POL for update: '{}'", id);
+    return conn.getByIdForUpdate(PO_LINE_TABLE, id, PoLine.class).map(Optional::ofNullable);
+  }
+
   public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn, Map<String, String> headers) {
     updateInstanceFieldsForPoLine(poLine, instance);
     return doUpdatePoLine(poLine, conn)
-      .compose(storedPol -> auditOutboxService.saveOrderLinesOutboxLogs(conn, List.of(storedPol), OrderLineAuditEvent.Action.EDIT, headers))
+      .compose(wrappedPoLine -> auditOutboxService.saveOrderLineOutboxLog(conn, wrappedPoLine, OrderLineAuditEvent.Action.EDIT, headers))
       .map(v -> poLine);
   }
 
@@ -347,7 +354,7 @@ public class PoLinesService {
       .mapEmpty();
   }
 
-  public Future<PoLine> updatePoLine(PoLine poLine, Conn conn) {
+  public Future<AuditEntityWrapper<PoLine>> updatePoLine(PoLine poLine, Conn conn) {
     if (poLine.getPurchaseOrderId() == null) {
       log.error("Can't update po line: missing purchaseOrderId");
       return Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "Can't update po line: missing purchaseOrderId"));
@@ -355,15 +362,16 @@ public class PoLinesService {
     return doUpdatePoLine(poLine, conn);
   }
 
-  public Future<PoLine> doUpdatePoLine(PoLine poLine, Conn conn) {
+  public Future<AuditEntityWrapper<PoLine>> doUpdatePoLine(PoLine poLine, Conn conn) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
-    return conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
-      .recover(t -> Future.failedFuture(httpHandleFailure(t)))
-      .compose(rows -> rows.rowCount() == 0
-        ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
-        : Future.succeededFuture(poLine))
+    return getPoLineByIdForUpdate(poLine.getId(), conn)
+      .compose(originalPoLine -> conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
+        .recover(t -> Future.failedFuture(httpHandleFailure(t)))
+        .compose(rows -> rows.rowCount() == 0
+          ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
+          : Future.succeededFuture(AuditEntityWrapper.of(poLine, originalPoLine.orElse(null)))))
       .onSuccess(v -> log.info("updatePoLine:: Complete, poLineId={}", poLine.getId()))
-      .onComplete(t -> log.error("updatePoLine:: Failed, poLineId={}", poLine.getId(), t.cause()));
+      .onFailure(t -> log.error("updatePoLine:: Failed, poLineId={}", poLine.getId(), t));
   }
 
   private Future<PoLine> createTitleAndSave(Conn conn, PoLine poLine, List<String> acqUnitIds, Map<String, String> headers) {

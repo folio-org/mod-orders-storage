@@ -356,7 +356,7 @@ public abstract class TestBase {
     assertNotNull(event.getOrderId());
     assertNotNull(event.getActionDate());
     assertNotNull(event.getEventDate());
-    assertNotNull(event.getPurchaseOrder());
+    assertNotNull(event.getOrderSnapshot());
   }
 
   protected void checkOrderLineEventContent(String eventPayload, OrderLineAuditEvent.Action action) {
@@ -367,7 +367,7 @@ public abstract class TestBase {
     assertNotNull(event.getOrderLineId());
     assertNotNull(event.getActionDate());
     assertNotNull(event.getEventDate());
-    assertNotNull(event.getPoLine());
+    assertNotNull(event.getOrderLineSnapshot());
   }
 
   protected void checkPieceEventContent(String eventPayload, PieceAuditEvent.Action action) {
@@ -377,6 +377,6 @@ public abstract class TestBase {
     assertNotNull(event.getPieceId());
     assertNotNull(event.getActionDate());
     assertNotNull(event.getEventDate());
-    assertNotNull(event.getPiece());
+    assertNotNull(event.getPieceSnapshot());
   }
 }

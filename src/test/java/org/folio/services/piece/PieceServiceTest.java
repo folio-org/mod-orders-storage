@@ -21,6 +21,7 @@ import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.Holding;
 import org.folio.rest.jaxrs.model.Piece;
@@ -268,12 +269,12 @@ public class PieceServiceTest extends TestBase {
   void shouldNotUpdatePiecesWhenEmpty(Vertx vertx, VertxTestContext testContext) {
     new DBClient(vertx, TEST_TENANT).getPgClient().withConn(connection -> {
       var conn = spy(connection);
-      List<Piece> piecesToUpdate = List.of();
-      var updatePiecesFuture = pieceService.updatePieces(piecesToUpdate, conn, TEST_TENANT);
+      List<AuditEntityWrapper<Piece>> piecesToUpdate = List.of();
+      var updatePiecesFuture = pieceService.updatePieces(List.of(), conn, TEST_TENANT);
 
       return testContext.assertComplete(updatePiecesFuture)
         .onComplete(ar -> {
-          List<Piece> actPieces = ar.result();
+          List<AuditEntityWrapper<Piece>> actPieces = ar.result();
           testContext.verify(() -> {
             assertThat(actPieces, is(piecesToUpdate));
             verifyNoInteractions(conn);
@@ -314,8 +315,8 @@ public class PieceServiceTest extends TestBase {
         .compose(v -> pieceService.updatePiecesInventoryData(List.of(update), conn, TEST_TENANT))
         .onComplete(ar -> {
           testContext.verify(() -> {
-            assertThat(ar.result().getFirst().getHoldingId(), is(newHoldingId));
-            assertThat(ar.result().getFirst().getReceivingTenantId(), is(TEST_TENANT));
+            assertThat(ar.result().getFirst().entity().getHoldingId(), is(newHoldingId));
+            assertThat(ar.result().getFirst().entity().getReceivingTenantId(), is(TEST_TENANT));
           });
           testContext.completeNow();
         })
@@ -337,8 +338,8 @@ public class PieceServiceTest extends TestBase {
         .onComplete(ar -> {
           testContext.verify(() -> {
             assertThat(ar.result().size(), is(2));
-            assertThat(ar.result().get(0).getHoldingId(), is(newHoldingId));
-            assertThat(ar.result().get(1).getHoldingId(), is(newHoldingId2));
+            assertThat(ar.result().get(0).entity().getHoldingId(), is(newHoldingId));
+            assertThat(ar.result().get(1).entity().getHoldingId(), is(newHoldingId2));
           });
           testContext.completeNow();
         })
@@ -370,7 +371,7 @@ public class PieceServiceTest extends TestBase {
         .compose(v -> pieceService.updatePiecesInventoryData(
           List.of(new Piece().withId(pieceId).withHoldingId(null)), conn, TEST_TENANT))
         .onComplete(ar -> {
-          testContext.verify(() -> assertNull(ar.result().getFirst().getHoldingId()));
+          testContext.verify(() -> assertNull(ar.result().getFirst().entity().getHoldingId()));
           testContext.completeNow();
         })
     );
@@ -384,7 +385,7 @@ public class PieceServiceTest extends TestBase {
       pieceService.updatePiecesInventoryData(
         List.of(new Piece().withId(nonExistentId).withHoldingId(newHoldingId)), conn, TEST_TENANT)
         .onComplete(ar -> {
-          testContext.verify(() -> assertThat(ar.result().getFirst().getId(), is(nonExistentId)));
+          testContext.verify(() -> assertThat(ar.result().getFirst().entity().getId(), is(nonExistentId)));
           testContext.completeNow();
         })
     );
