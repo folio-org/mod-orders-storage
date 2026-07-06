@@ -42,6 +42,7 @@ import org.folio.postgres.testing.PostgresTesterContainer;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.core.ResponseUtilTest;
 import org.folio.rest.core.RestClientTest;
+import org.folio.rest.impl.AcquisitionMethodDeprecatedQueryTest;
 import org.folio.rest.impl.BatchTrackingAPITest;
 import org.folio.rest.impl.ClaimingAPITest;
 import org.folio.rest.impl.CustomFieldsAPITest;
@@ -369,4 +370,7 @@ public class StorageTestSuite {
 
   @Nested
   class SuffixDeprecatedQueryTestNested extends SuffixDeprecatedQueryTest {}
+
+  @Nested
+  class AcquisitionMethodDeprecatedQueryTestNested extends AcquisitionMethodDeprecatedQueryTest {}
 }

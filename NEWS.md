@@ -1,3 +1,8 @@
+## 15.0.0 - Unreleased
+
+### Stories
+* [MODORDSTOR-522](https://folio-org.atlassian.net/browse/MODORDSTOR-522) - Support deprecated flag on acquisition methods
+
 ## 14.0.0 - Released (Trillium R1 2025)
 The primary focus of this release was to upgrade to Vert.x 5.0, implement FQM entity types, improve batch processing and audit logging, and enhance receiving functionality.
 
