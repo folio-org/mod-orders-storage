@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.Metadata;
 
+import io.vertx.core.json.JsonObject;
 import jakarta.annotation.Nullable;
 import lombok.experimental.UtilityClass;
 
@@ -23,8 +24,12 @@ public class AuditUtils {
   }
 
   @Nullable
-  public static <T> T withNullMetadata(T entity, BiFunction<T, Metadata, T> setter) {
-    return Optional.ofNullable(entity).map(e -> setter.apply(e, null)).orElse(null);
+  public static <T, R> R convertToSnapshot(T entity, BiFunction<T, Metadata, T> medatadaSetter, Class<R> snapshotClass) {
+    return Optional.ofNullable(entity)
+      .map(e -> medatadaSetter.apply(e, null))
+      .map(JsonObject::mapFrom)
+      .map(json -> json.mapTo(snapshotClass))
+      .orElse(null);
   }
 
 }
