@@ -1,5 +1,12 @@
 ## 14.0.0 - Unreleased
 
+## 13.9.10 - Released (Sunflower R1 2025 Hot Fix)
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.9...v13.9.10)
+
+### Bug Fixes
+* [MODORDSTOR-518](https://folio-org.atlassian.net/browse/MODORDSTOR-518) - Sunflower CSP: Bump Vertx to latest 4.5.x fixing Netty vulns
+
 ## 13.9.9 - Released (Sunflower R1 2025 Hot Fix)
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v13.9.8...v13.9.9)
