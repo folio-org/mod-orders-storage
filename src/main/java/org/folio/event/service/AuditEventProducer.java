@@ -2,7 +2,7 @@ package org.folio.event.service;
 
 import static org.folio.util.AuditUtils.buildTopicName;
 import static org.folio.util.AuditUtils.getMetadataOrThrow;
-import static org.folio.util.AuditUtils.withNullMetadata;
+import static org.folio.util.AuditUtils.convertToSnapshot;
 
 import java.util.Date;
 import java.util.Map;
@@ -15,9 +15,12 @@ import org.folio.kafka.SimpleKafkaProducerManager;
 import org.folio.kafka.services.KafkaProducerRecordBuilder;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
+import org.folio.rest.jaxrs.model.OrderLineSnapshot;
+import org.folio.rest.jaxrs.model.OrderSnapshot;
 import org.folio.rest.jaxrs.model.OutboxEventLog.EntityType;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
+import org.folio.rest.jaxrs.model.PieceSnapshot;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.tools.utils.TenantTool;
@@ -103,8 +106,8 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalOrderSnapshot(withNullMetadata(originalOrder, PurchaseOrder::withMetadata))
-      .withOrderSnapshot(withNullMetadata(order, PurchaseOrder::withMetadata)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalOrderSnapshot(convertToSnapshot(originalOrder, PurchaseOrder::withMetadata, OrderSnapshot.class))
+      .withOrderSnapshot(convertToSnapshot(order, PurchaseOrder::withMetadata, OrderSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
   }
 
   private OrderLineAuditEvent getOrderLineEvent(@Nonnull PoLine poLine, @Nullable PoLine originalPoLine, OrderLineAuditEvent.Action eventAction) {
@@ -117,8 +120,8 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalOrderLineSnapshot(withNullMetadata(originalPoLine, PoLine::withMetadata))
-      .withOrderLineSnapshot(withNullMetadata(poLine, PoLine::withMetadata)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalOrderLineSnapshot(convertToSnapshot(originalPoLine, PoLine::withMetadata, OrderLineSnapshot.class))
+      .withOrderLineSnapshot(convertToSnapshot(poLine, PoLine::withMetadata, OrderLineSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
   }
 
   private PieceAuditEvent getPieceEvent(@Nonnull Piece piece, @Nullable Piece originalPiece, PieceAuditEvent.Action eventAction) {
@@ -130,8 +133,8 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalPieceSnapshot(withNullMetadata(originalPiece, Piece::withMetadata))
-      .withPieceSnapshot(withNullMetadata(piece, Piece::withMetadata)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalPieceSnapshot(convertToSnapshot(originalPiece, Piece::withMetadata, PieceSnapshot.class))
+      .withPieceSnapshot(convertToSnapshot(piece, Piece::withMetadata, PieceSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,
