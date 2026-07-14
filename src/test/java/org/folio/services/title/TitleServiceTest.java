@@ -33,6 +33,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import io.restassured.http.Header;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
@@ -49,6 +50,7 @@ public class TitleServiceTest extends TestBase {
   TitleService titleService = new TitleService();
   private static TenantJob tenantJob;
   private final String newInstanceId = UUID.randomUUID().toString();
+  private final String newInstanceTitle = "New instance title";
 
   @BeforeEach
   public void initMocks() throws MalformedURLException {
@@ -93,14 +95,19 @@ public class TitleServiceTest extends TestBase {
       });
     });
 
+    JsonObject newInstance = new JsonObject()
+      .put("id", newInstanceId)
+      .put("title", newInstanceTitle);
+
     testContext.assertComplete(client.getPgClient()
-      .withTrans(conn -> promise2.future().compose(o -> titleService.updateTitle(poLine, newInstanceId, conn))
+      .withTrans(conn -> promise2.future().compose(o -> titleService.updateTitle(poLine, newInstance, conn))
         .onComplete(v -> titleService.getTitleByPoLineId(poLineId, conn)
           .onComplete(ar -> {
             Title actTitle = ar.result();
             testContext.verify(() -> {
               assertThat(actTitle.getId(), is(titleId));
               assertThat(actTitle.getInstanceId(), is(newInstanceId));
+              assertThat(actTitle.getTitle(), is(newInstanceTitle));
             });
             testContext.completeNow();
           }))));
