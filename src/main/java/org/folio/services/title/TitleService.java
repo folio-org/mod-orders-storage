@@ -53,8 +53,6 @@ public class TitleService {
 
   private Future<PoLine> updateInstanceForTitle(PoLine poLine, Title title, JsonObject instance, Conn conn) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
-    log.debug("updateInstanceForTitle:: Refreshing instance-derived fields for titleId={} from instanceId={} "
-        + "to avoid stale title left by the async HOLDING_UPDATE handler", title.getId(), InventoryUtils.getInstanceId(instance));
     updateInstanceFieldsForTitle(title, instance);
     return conn.update(TITLES_TABLE, title, JSONB, criterion.toString(), false)
       .map(poLine)
@@ -64,10 +62,11 @@ public class TitleService {
   }
 
   /**
-   * Applies the instance-derived fields to the given title. Mirrors {@code PoLinesService#updateInstanceFieldsForPoLine}
-   * so that a PO line and its title stay in sync with the same instance data.
+   * Applies the instance-derived fields to the given title. Mirrors {@code PoLinesService#updateInstanceFieldsForPoLine},
+   * so that a PO line and its title stay in sync with the same instance data. Updating the instanceId alone is not enough:
+   * a title would then keep displaying the name of the previously connected instance while already pointing at the new one.
    */
-  public void updateInstanceFieldsForTitle(Title title, JsonObject instance) {
+  private void updateInstanceFieldsForTitle(Title title, JsonObject instance) {
     title.withInstanceId(InventoryUtils.getInstanceId(instance))
       .withTitle(InventoryUtils.getInstanceTitle(instance))
       .withPublisher(InventoryUtils.getPublisher(instance))
