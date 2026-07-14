@@ -12,6 +12,7 @@ import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME;
 import static org.folio.event.dto.InstanceFields.CONTRIBUTOR_NAME_TYPE_ID;
 import static org.folio.event.dto.InstanceFields.CONTRIBUTORS;
 import static org.folio.event.dto.InstanceFields.DATE_OF_PUBLICATION;
+import static org.folio.event.dto.InstanceFields.ID;
 import static org.folio.event.dto.InstanceFields.IDENTIFIERS;
 import static org.folio.event.dto.InstanceFields.IDENTIFIER_TYPE_ID;
 import static org.folio.event.dto.InstanceFields.IDENTIFIER_TYPE_VALUE;
@@ -21,6 +22,10 @@ import static org.folio.event.dto.InstanceFields.TITLE;
 
 @UtilityClass
 public class InventoryUtils {
+
+  public static String getInstanceId(JsonObject instance) {
+    return instance.getString(ID.getValue());
+  }
 
   public static String getInstanceTitle(JsonObject instance) {
     return instance.getString(TITLE.getValue());

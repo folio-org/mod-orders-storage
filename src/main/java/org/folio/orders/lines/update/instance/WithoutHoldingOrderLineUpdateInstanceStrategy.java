@@ -30,10 +30,9 @@ public class WithoutHoldingOrderLineUpdateInstanceStrategy implements OrderLineU
 
     log.info("updateInstance:: Starting update instance process for poLine id={}", holder.storagePoLine().getId());
     var storagePol = holder.storagePoLine();
-    var instanceId = holder.patchOrderLineRequest().getReplaceInstanceRef().getNewInstanceId();
 
     return new DBClient(rqContext.getContext(), rqContext.getHeaders()).getPgClient()
-      .withTrans(conn -> titleService.updateTitle(storagePol, instanceId, conn)
+      .withTrans(conn -> titleService.updateTitle(storagePol, holder.instance(), conn)
         .compose(poLine -> poLinesService.updateInstanceIdForPoLine(poLine, holder.instance(), conn, rqContext.getHeaders())))
       .onSuccess(v -> log.info("updateInstance:: Instance was updated successfully, poLine id={}", storagePol.getId()))
       .onFailure(err -> log.warn("updateInstance:: Instance failed to update, poLine id={}", storagePol.getId(), err))

@@ -24,8 +24,10 @@ import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleSequenceNumbers;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.util.InventoryUtils;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -49,19 +51,35 @@ public class TitleService {
       });
   }
 
-  private Future<PoLine> updateInstanceIdForTitle(PoLine poLine, Title title, String instanceId, Conn conn) {
+  private Future<PoLine> updateInstanceForTitle(PoLine poLine, Title title, JsonObject instance, Conn conn) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
-    title.setInstanceId(instanceId);
+    log.debug("updateInstanceForTitle:: Refreshing instance-derived fields for titleId={} from instanceId={} "
+        + "to avoid stale title left by the async HOLDING_UPDATE handler", title.getId(), InventoryUtils.getInstanceId(instance));
+    updateInstanceFieldsForTitle(title, instance);
     return conn.update(TITLES_TABLE, title, JSONB, criterion.toString(), false)
       .map(poLine)
       .recover(t -> Future.failedFuture(httpHandleFailure(t)))
-      .onSuccess(v -> log.info("InstanceId in Title record {} was successfully updated", title.getId()))
-      .onFailure(t -> log.error("updateInstanceIdForTitle failed, poLineId={}, titleId={}", poLine.getId(), title.getId(), t));
+      .onSuccess(v -> log.info("Instance data in Title record {} was successfully updated", title.getId()))
+      .onFailure(t -> log.error("updateInstanceForTitle failed, poLineId={}, titleId={}", poLine.getId(), title.getId(), t));
   }
 
-  public Future<PoLine> updateTitle(PoLine poLine, String instanceId, Conn conn) {
+  /**
+   * Applies the instance-derived fields to the given title. Mirrors {@code PoLinesService#updateInstanceFieldsForPoLine}
+   * so that a PO line and its title stay in sync with the same instance data.
+   */
+  public void updateInstanceFieldsForTitle(Title title, JsonObject instance) {
+    title.withInstanceId(InventoryUtils.getInstanceId(instance))
+      .withTitle(InventoryUtils.getInstanceTitle(instance))
+      .withPublisher(InventoryUtils.getPublisher(instance))
+      .withPublishedDate(InventoryUtils.getPublicationDate(instance))
+      .withContributors(InventoryUtils.getContributors(instance))
+      .withProductIds(InventoryUtils.getProductIds(instance));
+  }
+
+  public Future<PoLine> updateTitle(PoLine poLine, JsonObject instance, Conn conn) {
+    var instanceId = InventoryUtils.getInstanceId(instance);
     return getTitleByPoLineId(poLine.getId(), conn)
-      .compose(title -> updateInstanceIdForTitle(poLine, title, instanceId, conn))
+      .compose(title -> updateInstanceForTitle(poLine, title, instance, conn))
       .onSuccess(v -> log.debug("updateTitle:: Succeeded for poLineId={}, instanceId={}", poLine.getId(), instanceId))
       .onFailure(t -> log.error("updateTitle:: Failed for poLineId={}, instanceId={}", poLine.getId(), instanceId, t));
   }
