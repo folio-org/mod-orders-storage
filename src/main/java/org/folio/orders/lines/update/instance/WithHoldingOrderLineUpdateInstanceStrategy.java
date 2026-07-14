@@ -48,7 +48,9 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
     var tenantId = TenantTool.tenantId(rqContext.getHeaders());
 
     return new DBClient(rqContext.getContext(), rqContext.getHeaders()).getPgClient()
-      .withTrans(conn -> titleService.updateTitle(storagePol, holder.instance(), conn)
+      // locks po_line before titles. Taking the locks in a different order here would cause a deadlock.
+      .withTrans(conn -> poLinesService.getPoLineByIdForUpdate(storagePol.getId(), conn)
+        .compose(v -> titleService.updateTitle(storagePol, holder.instance(), conn))
         .compose(poLine -> updateHoldings(poLine, holder.patchOrderLineRequest().getReplaceInstanceRef(), conn, tenantId))
         .compose(poLine -> poLinesService.updateInstanceIdForPoLine(poLine, holder.instance(), conn, rqContext.getHeaders())))
       .onSuccess(v -> log.info("updateInstance:: Instance was updated successfully, poLine id={}", storagePol.getId()))
