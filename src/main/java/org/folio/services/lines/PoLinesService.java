@@ -301,6 +301,11 @@ public class PoLinesService {
     return promise.future();
   }
 
+  public Future<Optional<PoLine>> getPoLineByIdForUpdate(String id, Conn conn) {
+    log.debug("getPoLineByIdForUpdate:: Getting POL for update: '{}'", id);
+    return conn.getByIdForUpdate(PO_LINE_TABLE, id, PoLine.class).map(Optional::ofNullable);
+  }
+
   public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn, Map<String, String> headers) {
     updateInstanceFieldsForPoLine(poLine, instance);
     return doUpdatePoLine(poLine, conn)
