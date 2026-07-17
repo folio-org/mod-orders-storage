@@ -13,6 +13,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import lombok.extern.log4j.Log4j2;
+import one.util.streamex.StreamEx;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.ObjectUtils;
@@ -69,8 +70,9 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     return determineOrderTenant(holder)
       .compose(v -> createDBClient(holder.getOrderTenantId()).getPgClient()
         .withTrans(conn -> batchTrackingService.increaseBatchTrackingProgress(conn, holder.getBatchHolder(), holder.getOrderTenantId())
-          .compose(v2 -> lockPoLinesBeforePieces(holder, conn))
-          .compose(v2 -> processPiecesUpdate(holder, conn))
+          .compose(v2 -> pieceService.getPiecesByItemId(holder.getItemId(), conn))
+          .compose(pieces -> lockPoLinesBeforePieces(pieces, holder, conn).map(pieces))
+          .compose(pieces -> processPiecesUpdate(pieces, holder, conn))
           .compose(pieces -> processPoLinesUpdate(pieces, holder, conn))
           .compose(v2 -> batchTrackingService.deleteBatchTracking(conn, holder.getBatchHolder())))
         .onComplete(ar -> auditOutboxService.processOutboxEventLogs(holder.getHeaders())));
@@ -81,15 +83,15 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
    * the one used by the instance-update PATCH strategies (po_line -> titles -> pieces). Taking the locks in a different
    * order would cause a deadlock.
    */
-  private Future<Void> lockPoLinesBeforePieces(ItemEventHolder holder, Conn conn) {
-    return pieceService.getPiecesByItemId(holder.getItemId(), conn)
-      .map(pieces -> filterPiecesToUpdate(holder, pieces).stream().map(Piece::getPoLineId).distinct().toList())
-      .compose(poLineIds -> {
-        if (CollectionUtils.isEmpty(poLineIds)) {
-          return Future.succeededFuture();
-        }
-        return poLinesService.getPoLinesByIdsForUpdate(poLineIds, holder.getOrderTenantId(), conn).mapEmpty();
-      });
+  private Future<Void> lockPoLinesBeforePieces(List<Piece> pieces, ItemEventHolder holder, Conn conn) {
+    var poLineIds = StreamEx.of(filterPiecesToUpdate(holder, pieces))
+      .map(Piece::getPoLineId)
+      .distinct()
+      .toList();
+    if (CollectionUtils.isEmpty(poLineIds)) {
+      return Future.succeededFuture();
+    }
+    return poLinesService.getPoLinesByIdsForUpdate(poLineIds, holder.getOrderTenantId(), conn).mapEmpty();
   }
 
   private Future<Void> determineOrderTenant(ItemEventHolder holder) {
@@ -99,10 +101,9 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
       .compose(tenantId -> asFuture(() -> holder.setOrderTenantId(tenantId)));
   }
 
-  private Future<List<Piece>> processPiecesUpdate(ItemEventHolder holder, Conn conn) {
+  private Future<List<Piece>> processPiecesUpdate(List<Piece> pieces, ItemEventHolder holder, Conn conn) {
     log.info("processPiecesUpdate:: Processing pieces update with determined order tenant: '{}'", holder.getOrderTenantId());
-    return pieceService.getPiecesByItemId(holder.getItemId(), conn)
-      .compose(pieces -> updatePieces(holder, pieces, conn))
+    return updatePieces(holder, pieces, conn)
       .compose(piecesToUpdate -> auditOutboxService
         .savePiecesOutboxLog(conn, piecesToUpdate, PieceAuditEvent.Action.EDIT, holder.getHeaders())
         .map(mapTo(piecesToUpdate, AuditEntityWrapper::entity)));

@@ -102,6 +102,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
       var vertx = Vertx.vertx();
       var itemHandler = new ItemUpdateAsyncRecordHandler(vertx, mockContext(vertx));
       TestUtils.setInternalState(itemHandler, "pieceService", pieceService);
+      TestUtils.setInternalState(itemHandler, "poLinesService", poLinesService);
       TestUtils.setInternalState(itemHandler, "orderLineLocationUpdateService", orderLineLocationUpdateService);
       TestUtils.setInternalState(itemHandler, "batchTrackingService", batchTrackingService);
       TestUtils.setInternalState(itemHandler, "auditOutboxService", auditOutboxService);
@@ -164,7 +165,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(handler).processInventoryUpdateEvent(any(ResourceEvent.class), anyMap());
     verify(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
     verify(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService, times(checkinItems ? 1 : 2)).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
+    verify(poLinesService, times(checkinItems ? 2 : 3)).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     verify(pieceService, times(checkinItems ? 0 : 1)).getPiecesByPoLineId(eq(poLineId), any(Conn.class));
     verify(poLinesService, times(checkinItems ? 0 : 1)).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
     verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(expectedPoLineOutboxLogs), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
@@ -212,6 +213,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
   @Test
   void negative_shouldNotProcessItemUpdateEventReturnFailedFuture() {
+    var poLineId = UUID.randomUUID().toString();
     var pieceId1 = UUID.randomUUID().toString();
     var pieceId2 = UUID.randomUUID().toString();
     var locationId = UUID.randomUUID().toString();
@@ -223,15 +225,16 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var kafkaRecord = createKafkaRecordWithValues(oldItemValueBeforeUpdate, newItemValueBeforeUpdate);
 
     var actualPieces = List.of(
-      createPiece(pieceId1, itemId, holdingId1, null),
-      createPiece(pieceId2, itemId, null, locationId)
+      createPiece(pieceId1, itemId, holdingId1, null).withPoLineId(poLineId),
+      createPiece(pieceId2, itemId, null, locationId).withPoLineId(poLineId)
     );
     var expectedPieces = List.of(
-      createPiece(pieceId1, itemId, holdingId2, null)
+      createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
 
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
+    doReturn(Future.succeededFuture(List.of())).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId)), eq(DIKU_TENANT), any(Conn.class));
     doThrow(new RuntimeException(PO_LINE_SAVE_FAILED_MSG)).when(pieceService).updatePiecesInventoryData(eq(expectedPieces), any(Conn.class), eq(DIKU_TENANT));
     doReturn(pgClient).when(dbClient).getPgClient();
 
