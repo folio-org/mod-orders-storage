@@ -26,6 +26,7 @@ import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.persist.Conn;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
+import org.folio.services.lines.PoLinesService;
 import org.folio.services.piece.PieceService;
 import org.folio.spring.SpringContextUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
 
   @Autowired
   private PieceService pieceService;
+  @Autowired
+  private PoLinesService poLinesService;
   @Autowired
   private OrderLineLocationUpdateService orderLineLocationUpdateService;
   @Autowired
@@ -66,10 +69,27 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
     return determineOrderTenant(holder)
       .compose(v -> createDBClient(holder.getOrderTenantId()).getPgClient()
         .withTrans(conn -> batchTrackingService.increaseBatchTrackingProgress(conn, holder.getBatchHolder(), holder.getOrderTenantId())
+          .compose(v2 -> lockPoLinesBeforePieces(holder, conn))
           .compose(v2 -> processPiecesUpdate(holder, conn))
           .compose(pieces -> processPoLinesUpdate(pieces, holder, conn))
           .compose(v2 -> batchTrackingService.deleteBatchTracking(conn, holder.getBatchHolder())))
         .onComplete(ar -> auditOutboxService.processOutboxEventLogs(holder.getHeaders())));
+  }
+
+  /**
+   * Locks the po_line rows this transaction is going to touch before any piece is locked, so that the lock order matches
+   * the one used by the instance-update PATCH strategies (po_line -> titles -> pieces). Taking the locks in a different
+   * order would cause a deadlock.
+   */
+  private Future<Void> lockPoLinesBeforePieces(ItemEventHolder holder, Conn conn) {
+    return pieceService.getPiecesByItemId(holder.getItemId(), conn)
+      .map(pieces -> filterPiecesToUpdate(holder, pieces).stream().map(Piece::getPoLineId).distinct().toList())
+      .compose(poLineIds -> {
+        if (CollectionUtils.isEmpty(poLineIds)) {
+          return Future.succeededFuture();
+        }
+        return poLinesService.getPoLinesByIdsForUpdate(poLineIds, holder.getOrderTenantId(), conn).mapEmpty();
+      });
   }
 
   private Future<Void> determineOrderTenant(ItemEventHolder holder) {
