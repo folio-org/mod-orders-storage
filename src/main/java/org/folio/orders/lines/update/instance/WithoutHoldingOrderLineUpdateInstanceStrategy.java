@@ -33,9 +33,8 @@ public class WithoutHoldingOrderLineUpdateInstanceStrategy implements OrderLineU
 
     return new DBClient(rqContext.getContext(), rqContext.getHeaders()).getPgClient()
       // locks po_line before titles. Taking the locks in a different order here would cause a deadlock.
-      .withTrans(conn -> poLinesService.getPoLineByIdForUpdate(storagePol.getId(), conn)
-        .compose(v -> titleService.updateTitle(storagePol, holder.instance(), conn))
-        .compose(poLine -> poLinesService.updateInstanceIdForPoLine(poLine, holder.instance(), conn, rqContext.getHeaders())))
+      .withTrans(conn -> poLinesService.updateInstanceIdForPoLine(storagePol, holder.instance(), conn, rqContext.getHeaders())
+        .compose(poLine -> titleService.updateTitle(poLine, holder.instance(), conn)))
       .onSuccess(v -> log.info("updateInstance:: Instance was updated successfully, poLine id={}", storagePol.getId()))
       .onFailure(err -> log.warn("updateInstance:: Instance failed to update, poLine id={}", storagePol.getId(), err))
       .mapEmpty();
