@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.collections4.CollectionUtils;
 import org.folio.rest.jaxrs.model.ExportHistory;
+import org.folio.rest.jaxrs.model.LastExport;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
@@ -75,8 +76,26 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
   }
 
   private List<PoLine> updatePoLinesWithExportHistoryData(ExportHistory exportHistory, List<PoLine> poLines) {
+    var lastExport = toLastExport(exportHistory.getExportTransmissionMethod());
     return poLines.stream()
-                  .map(poLine -> poLine.withLastEDIExportDate(exportHistory.getExportDate()))
+                  .map(poLine -> poLine.withLastEDIExportDate(exportHistory.getExportDate())
+                                       .withLastExport(lastExport))
                   .collect(Collectors.toList());
+  }
+
+  /**
+   * The export history event carries the transmission method as a plain string, so an unknown value
+   * only clears the po line field instead of failing the whole event and blocking the export date update.
+   */
+  private LastExport toLastExport(String exportTransmissionMethod) {
+    if (exportTransmissionMethod == null) {
+      return null;
+    }
+    try {
+      return new LastExport().withTransmissionMethod(LastExport.TransmissionMethod.fromValue(exportTransmissionMethod));
+    } catch (IllegalArgumentException e) {
+      log.warn("Unknown export transmission method: {}, po line field will be cleared", exportTransmissionMethod);
+      return null;
+    }
   }
 }

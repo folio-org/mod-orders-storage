@@ -52,6 +52,7 @@ import org.folio.rest.impl.EntititesCustomFieldsTest;
 import org.folio.rest.impl.HelperUtilsTest;
 import org.folio.rest.impl.OrdersAPITest;
 import org.folio.rest.impl.PiecesAPITest;
+import org.folio.rest.impl.PoLineTransmissionMethodQueryTest;
 import org.folio.rest.impl.PoLineBatchAPITest;
 import org.folio.rest.impl.PoNumberTest;
 import org.folio.rest.impl.PrefixDeprecatedQueryTest;
@@ -373,4 +374,7 @@ public class StorageTestSuite {
 
   @Nested
   class AcquisitionMethodDeprecatedQueryTestNested extends AcquisitionMethodDeprecatedQueryTest {}
+
+  @Nested
+  class PoLineTransmissionMethodQueryTestNested extends PoLineTransmissionMethodQueryTest {}
 }

@@ -472,6 +472,11 @@
           "removeAccents": false
         },
         {
+          "fieldName": "lastExport.transmissionMethod",
+          "caseSensitive": true,
+          "removeAccents": false
+        },
+        {
           "fieldName": "metadata.createdDate",
           "caseSensitive": true,
           "removeAccents": false

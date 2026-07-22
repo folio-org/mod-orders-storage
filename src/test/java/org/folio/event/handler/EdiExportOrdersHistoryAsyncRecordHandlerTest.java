@@ -1,5 +1,6 @@
 package org.folio.event.handler;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -31,12 +32,16 @@ import java.util.function.Function;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.header.internals.RecordHeader;
 import org.folio.rest.jaxrs.model.ExportHistory;
+import org.folio.rest.jaxrs.model.LastExport;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.persist.DBClient;
 import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockitoAnnotations;
 
 import io.vertx.core.Context;
@@ -114,7 +119,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     ExportHistory exportHistory = new ExportHistory().withId(id).withExportJobId(jobId)
       .withExportType("EDIFACT_ORDERS_EXPORT")
       .withExportedPoLineIds(List.of(lineId))
-      .withExportDate(Calendar.getInstance().getTime());
+      .withExportDate(Calendar.getInstance().getTime())
+      .withExportTransmissionMethod("FTP");
     var headers = Map.of(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
 
     doReturn(Future.succeededFuture(exportHistory))
@@ -144,6 +150,51 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString(), any());
 
     assertEquals(exportHistory.getExportDate(), poLines.get(0).getLastEDIExportDate());
+    assertEquals(LastExport.TransmissionMethod.FTP, poLines.get(0).getLastExport().getTransmissionMethod());
+  }
+
+  @ParameterizedTest
+  @NullSource
+  @ValueSource(strings = {"SFTP"})
+  void shouldClearLastExportWhenExportHistoryHasNoTransmissionMethodOrUnknownOne(String exportTransmissionMethod)
+    throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    String id = UUID.randomUUID().toString();
+    String jobId = UUID.randomUUID().toString();
+    String lineId = UUID.randomUUID().toString();
+    ExportHistory exportHistory = new ExportHistory().withId(id).withExportJobId(jobId)
+      .withExportType("EDIFACT_ORDERS_EXPORT")
+      .withExportedPoLineIds(List.of(lineId))
+      .withExportDate(Calendar.getInstance().getTime())
+      .withExportTransmissionMethod(exportTransmissionMethod);
+    var headers = Map.of(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
+
+    doReturn(Future.succeededFuture(exportHistory))
+      .when(exportHistoryService).createExportHistory(eq(exportHistory), any(DBClient.class));
+    List<PoLine> poLines = List.of(new PoLine().withId(lineId)
+      .withLastExport(new LastExport().withTransmissionMethod(LastExport.TransmissionMethod.EMAIL)));
+    doReturn(Future.succeededFuture(poLines))
+      .when(poLinesService).getPoLinesByLineIdsByChunks(eq(exportHistory.getExportedPoLineIds()), any(Conn.class));
+    doReturn(Future.succeededFuture(1))
+      .when(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString(), any());
+    doReturn(pgClient)
+      .when(dbClient).getPgClient();
+    doReturn(DIKU_TENANT)
+      .when(dbClient).getTenantId();
+    doAnswer(invocation -> {
+        Function<Conn, Future<ExportHistory>> f = invocation.getArgument(0);
+        return f.apply(conn);
+      })
+      .when(pgClient).withConn(any());
+
+    Method exportHistoryMethod = EdiExportOrdersHistoryAsyncRecordHandler.class
+      .getDeclaredMethod("exportHistory", ExportHistory.class, DBClient.class, Map.class);
+    exportHistoryMethod.setAccessible(true);
+
+    exportHistoryMethod.invoke(handler, exportHistory, dbClient, headers);
+
+    verify(poLinesService).updatePoLines(eq(poLines), any(Conn.class), anyString(), any());
+    assertEquals(exportHistory.getExportDate(), poLines.get(0).getLastEDIExportDate());
+    assertNull(poLines.get(0).getLastExport());
   }
 
   @Test
