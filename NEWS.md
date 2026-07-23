@@ -1,3 +1,11 @@
+## 14.0.3 - Released (Trillium R1 2026 - Bugfix)
+The primary focus of this release was to fix the issue where the title is not updated after changing the instance connection.
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.2...v14.0.3)
+
+### Bug Fixes
+* [MODORDSTOR-524](https://folio-org.atlassian.net/browse//MODORDSTOR-524) - Title name is not updated after changing instance connection
+
 ## 14.0.2 - Released (Trillium R1 2026 - Bugfix)
 The primary focus of this release was to fix issues with nextPoLineNumber and nextInvoiceLineNumber usage.
 

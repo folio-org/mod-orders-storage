@@ -78,6 +78,14 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
   static final String TEST_TENANT = "test_tenant";
   public static final String INSTANCE_MOCK_FILE = "mockdata/inventory/instance.json";
+  private static final String INSTANCE_MOCK_ID = "e677e090-7dfc-4a40-b5fd-fde37793c52b";
+  private static final String INSTANCE_MOCK_PUBLISHER = "Hirmer";
+  private static final String INSTANCE_MOCK_PUBLISHED_DATE = "c2014";
+  private static final String INSTANCE_MOCK_FIRST_CONTRIBUTOR = "Arnhold, Hermann";
+  private static final int INSTANCE_MOCK_CONTRIBUTORS_COUNT = 3;
+  private static final String INSTANCE_MOCK_FIRST_PRODUCT_ID = "(OCoLC)ocn893407036";
+  private static final int INSTANCE_MOCK_PRODUCT_IDS_COUNT = 4;
+  private static final String OLD_TITLE_NAME = "Old title name";
   private static final Header TEST_TENANT_HEADER = new Header(OKAPI_HEADER_TENANT, TEST_TENANT);
   private Map<String, String> headers = new HashMap<>(Collections.singletonMap(OKAPI_HEADER_TENANT, TEST_TENANT));
 
@@ -100,7 +108,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
   private static TenantJob tenantJob;
   private final String newHoldingId = UUID.randomUUID().toString();
-  private final String newInstanceId = UUID.randomUUID().toString();
+  private final String newInstanceId = INSTANCE_MOCK_ID;
   private static boolean runningOnOwn;
 
   @BeforeEach
@@ -150,6 +158,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
     PoLine poLine = new PoLine()
       .withId(poLineId)
       .withInstanceId(instanceId)
+      .withTitleOrPackage(OLD_TITLE_NAME)
       .withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
       .withPhysical(new Physical()
         .withCreateInventory(Physical.CreateInventory.INSTANCE_HOLDING_ITEM))
@@ -157,7 +166,8 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
     Title title = new Title()
       .withId(titleId)
       .withPoLineId(poLineId)
-      .withInstanceId(instanceId);
+      .withInstanceId(instanceId)
+      .withTitle(OLD_TITLE_NAME);
     JsonObject instance = new JsonObject(getFile(INSTANCE_MOCK_FILE));
     Piece piece = new Piece()
       .withId(pieceId)
@@ -220,6 +230,13 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
           assertThat(actTitle.getInstanceId(), is(newInstanceId));
+          assertThat(actTitle.getTitle(), is(instance.getString("title")));
+          assertThat(actTitle.getPublisher(), is(INSTANCE_MOCK_PUBLISHER));
+          assertThat(actTitle.getPublishedDate(), is(INSTANCE_MOCK_PUBLISHED_DATE));
+          assertThat(actTitle.getContributors().size(), is(INSTANCE_MOCK_CONTRIBUTORS_COUNT));
+          assertThat(actTitle.getContributors().getFirst().getContributor(), is(INSTANCE_MOCK_FIRST_CONTRIBUTOR));
+          assertThat(actTitle.getProductIds().size(), is(INSTANCE_MOCK_PRODUCT_IDS_COUNT));
+          assertThat(actTitle.getProductIds().getFirst().getProductId(), is(INSTANCE_MOCK_FIRST_PRODUCT_ID));
         });
         testContext.completeNow();
       })
@@ -402,13 +419,15 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
     PoLine poLine = new PoLine()
       .withId(poLineId)
       .withInstanceId(instanceId)
+      .withTitleOrPackage(OLD_TITLE_NAME)
       .withOrderFormat(PoLine.OrderFormat.ELECTRONIC_RESOURCE)
       .withEresource(new Eresource()
         .withCreateInventory(Eresource.CreateInventory.INSTANCE));
     Title title = new Title()
       .withId(titleId)
       .withPoLineId(poLineId)
-      .withInstanceId(instanceId);
+      .withInstanceId(instanceId)
+      .withTitle(OLD_TITLE_NAME);
     JsonObject instance = new JsonObject(getFile(INSTANCE_MOCK_FILE));
     ReplaceInstanceRef replaceInstanceRef = new ReplaceInstanceRef()
       .withNewInstanceId(newInstanceId)
@@ -449,6 +468,13 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.verify(() -> {
           assertThat(actTitle.getId(), is(titleId));
           assertThat(actTitle.getInstanceId(), is(newInstanceId));
+          assertThat(actTitle.getTitle(), is(instance.getString("title")));
+          assertThat(actTitle.getPublisher(), is(INSTANCE_MOCK_PUBLISHER));
+          assertThat(actTitle.getPublishedDate(), is(INSTANCE_MOCK_PUBLISHED_DATE));
+          assertThat(actTitle.getContributors().size(), is(INSTANCE_MOCK_CONTRIBUTORS_COUNT));
+          assertThat(actTitle.getContributors().getFirst().getContributor(), is(INSTANCE_MOCK_FIRST_CONTRIBUTOR));
+          assertThat(actTitle.getProductIds().size(), is(INSTANCE_MOCK_PRODUCT_IDS_COUNT));
+          assertThat(actTitle.getProductIds().getFirst().getProductId(), is(INSTANCE_MOCK_FIRST_PRODUCT_ID));
         });
         testContext.completeNow();
       })
@@ -458,6 +484,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
         testContext.verify(() -> {
           assertThat(actPoLine.getId(), is(poLineId));
           assertThat(actPoLine.getInstanceId(), is(newInstanceId));
+          assertThat(actPoLine.getTitleOrPackage(), is(instance.getString("title")));
         });
         testContext.completeNow();
       })));
