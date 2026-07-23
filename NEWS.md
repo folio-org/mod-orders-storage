@@ -1,5 +1,5 @@
 ## 14.0.3 - Released (Trillium R1 2026 - Bugfix)
-The primary focus of this release was to fix issue when title is not updated after changing instance connection.
+The primary focus of this release was to fix the issue where the title is not updated after changing the instance connection.
 
 [Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.2...v14.0.3)
 
