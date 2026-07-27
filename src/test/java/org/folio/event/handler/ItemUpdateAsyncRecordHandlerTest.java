@@ -321,7 +321,9 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(pieceService).getPiecesByItemId(eq(itemId2), any(Conn.class));
     verify(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece2)), any(Conn.class), eq(DIKU_TENANT));
     verify(poLinesService).updatePoLines(eq(List.of(expectedUpdatedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
-    verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(AuditEntityWrapper.of(expectedUpdatedPoLine, expectedPoLine))), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
+    // In batch mode (change-instance flow) the item handler never emits the po_line audit, not even on the
+    // last item of the batch - the change-instance PATCH transaction emits the authoritative version instead.
+    verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), anyList(), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
     verify(batchTrackingService).deleteBatchTracking(conn, poLineId);
   }
