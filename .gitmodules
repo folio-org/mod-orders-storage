@@ -4,5 +4,5 @@
         branch = raml1.0
 [submodule "ramls/acq-models"]
 	path = ramls/acq-models
-	url = https://github.com/slub/acq-models.git
-        branch = MODORDSTOR-526
+	url = https://github.com/folio-org/acq-models.git
+	branch = MODORDSTOR-526
