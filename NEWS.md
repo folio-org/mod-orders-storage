@@ -1,6 +1,7 @@
 ## 15.0.0 - Unreleased
 
 ### Stories
+* [MODORDSTOR-526](https://folio-org.atlassian.net/browse/MODORDSTOR-526) - Support export transmission method on purchase order lines
 * [MODORDSTOR-522](https://folio-org.atlassian.net/browse/MODORDSTOR-522) - Support deprecated flag on acquisition methods
 
 ## 14.0.0 - Released (Trillium R1 2025)
