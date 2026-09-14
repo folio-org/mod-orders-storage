@@ -60,10 +60,13 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
   private Future<PoLine> updateHoldings(PoLine poLine, ReplaceInstanceRef replaceInstanceRef, Conn conn, String tenantId) {
     if (!isUpdatedHolding(replaceInstanceRef.getHoldings())) {
       log.info("Holding does not require an update");
-      return Future.succeededFuture(poLine);
+      // Re-read the po_line to avoid lost updates
+      return getPoLineForUpdate(poLine.getId(), conn);
     }
     return pieceService.updatePieces(poLine, replaceInstanceRef, conn, tenantId)
-      .map(v -> updateLocations(poLine, replaceInstanceRef))
+      // Re-read the po_line to avoid lost updates
+      .compose(v -> getPoLineForUpdate(poLine.getId(), conn))
+      .map(lockedPoLine -> updateLocations(lockedPoLine, replaceInstanceRef))
       .onComplete(ar -> {
         if (ar.failed()) {
           log.warn("updateHoldings failed, poLine id={}", poLine.getId(), ar.cause());
@@ -71,6 +74,12 @@ public class WithHoldingOrderLineUpdateInstanceStrategy implements OrderLineUpda
           log.debug("updateHoldings completed, poLine id={}", poLine.getId());
         }
       });
+  }
+
+  private Future<PoLine> getPoLineForUpdate(String poLineId, Conn conn) {
+    return poLinesService.getPoLineByIdForUpdate(poLineId, conn)
+      .map(optionalPoLine -> optionalPoLine.orElseThrow(() ->
+        new HttpException(Response.Status.NOT_FOUND.getStatusCode(), "PoLine not found by id: " + poLineId)));
   }
 
   private boolean isUpdatedHolding(List<Holding> holdings) {
