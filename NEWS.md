@@ -2,6 +2,7 @@
 
 ### Stories
 * [MODORDSTOR-526](https://folio-org.atlassian.net/browse/MODORDSTOR-526) - Support export transmission method on purchase order lines
+* [MODORDSTOR-533](https://folio-org.atlassian.net/browse/MODORDSTOR-533) - Create a script to populate "multiYearPayment" field for existing orders
 * [MODORDSTOR-522](https://folio-org.atlassian.net/browse/MODORDSTOR-522) - Support deprecated flag on acquisition methods
 
 ## 14.0.0 - Released (Trillium R1 2025)
