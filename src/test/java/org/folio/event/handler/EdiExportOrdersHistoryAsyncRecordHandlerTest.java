@@ -39,9 +39,6 @@ import org.folio.services.lines.PoLinesService;
 import org.folio.services.order.ExportHistoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.MockitoAnnotations;
 
 import io.vertx.core.Context;
@@ -120,7 +117,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
       .withExportType("EDIFACT_ORDERS_EXPORT")
       .withExportedPoLineIds(List.of(lineId))
       .withExportDate(Calendar.getInstance().getTime())
-      .withExportTransmissionMethod("FTP");
+      .withExportTransmissionMethod(ExportHistory.ExportTransmissionMethod.FTP);
     var headers = Map.of(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
 
     doReturn(Future.succeededFuture(exportHistory))
@@ -153,10 +150,8 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     assertEquals(LastExport.TransmissionMethod.FTP, poLines.get(0).getLastExport().getTransmissionMethod());
   }
 
-  @ParameterizedTest
-  @NullSource
-  @ValueSource(strings = {"SFTP"})
-  void shouldClearLastExportWhenExportHistoryHasNoTransmissionMethodOrUnknownOne(String exportTransmissionMethod)
+  @Test
+  void shouldClearLastExportWhenExportHistoryHasNoTransmissionMethod()
     throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
     String id = UUID.randomUUID().toString();
     String jobId = UUID.randomUUID().toString();
@@ -164,8 +159,7 @@ public class EdiExportOrdersHistoryAsyncRecordHandlerTest {
     ExportHistory exportHistory = new ExportHistory().withId(id).withExportJobId(jobId)
       .withExportType("EDIFACT_ORDERS_EXPORT")
       .withExportedPoLineIds(List.of(lineId))
-      .withExportDate(Calendar.getInstance().getTime())
-      .withExportTransmissionMethod(exportTransmissionMethod);
+      .withExportDate(Calendar.getInstance().getTime());
     var headers = Map.of(XOkapiHeaders.USER_ID, UUID.randomUUID().toString());
 
     doReturn(Future.succeededFuture(exportHistory))

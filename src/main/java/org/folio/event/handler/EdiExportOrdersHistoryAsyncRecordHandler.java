@@ -83,19 +83,10 @@ public class EdiExportOrdersHistoryAsyncRecordHandler extends BaseAsyncRecordHan
                   .collect(Collectors.toList());
   }
 
-  /**
-   * The export history event carries the transmission method as a plain string, so an unknown value
-   * only clears the po line field instead of failing the whole event and blocking the export date update.
-   */
-  private LastExport toLastExport(String exportTransmissionMethod) {
+  private LastExport toLastExport(ExportHistory.ExportTransmissionMethod exportTransmissionMethod) {
     if (exportTransmissionMethod == null) {
       return null;
     }
-    try {
-      return new LastExport().withTransmissionMethod(LastExport.TransmissionMethod.fromValue(exportTransmissionMethod));
-    } catch (IllegalArgumentException e) {
-      log.warn("Unknown export transmission method: {}, po line field will be cleared", exportTransmissionMethod);
-      return null;
-    }
+    return new LastExport().withTransmissionMethod(LastExport.TransmissionMethod.fromValue(exportTransmissionMethod.value()));
   }
 }
