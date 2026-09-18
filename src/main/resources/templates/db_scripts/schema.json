@@ -205,6 +205,11 @@
       "run": "after",
       "snippetPath": "data-migration/15.0.0/acquisition_method_add_deprecated.sql",
       "fromModuleVersion": "mod-orders-storage-15.0.0"
+    },
+    {
+      "run": "after",
+      "snippetPath": "data-migration/15.0.0/po_line_add_multi_year_payment.sql",
+      "fromModuleVersion": "mod-orders-storage-15.0.0"
     }
   ],
   "tables": [
