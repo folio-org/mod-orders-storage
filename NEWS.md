@@ -1,6 +1,7 @@
 ## 15.0.0 - Unreleased
 
 ### Stories
+* [MODORDSTOR-526](https://folio-org.atlassian.net/browse/MODORDSTOR-526) - Support export transmission method on purchase order lines
 * [FCFIELDS-90](https://folio-org.atlassian.net/browse/FCFIELDS-90) - Upgrade folio-custom-fields to 4.0.0, provide `custom-fields` 3.2 (LOOKUP custom field type)
 * [MODORDSTOR-533](https://folio-org.atlassian.net/browse/MODORDSTOR-533) - Create a script to populate "multiYearPayment" field for existing orders
 * [MODORDSTOR-522](https://folio-org.atlassian.net/browse/MODORDSTOR-522) - Support deprecated flag on acquisition methods
