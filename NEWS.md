@@ -1,3 +1,11 @@
+## 14.0.4 - Released (Trillium R1 2026 - Bugfix)
+The primary focus of this release was to update cql migration to not fail when an Open PO has no approvedById
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.3...v14.0.4)
+
+### Bug Fixes
+* [MODORDSTOR-536](https://folio-org.atlassian.net/browse/MODORDSTOR-536) - Migration fails on "update_po_opened_by_id" when an Open PO has no approvedById
+
 ## 14.0.3 - Released (Trillium R1 2026 - Bugfix)
 The primary focus of this release was to fix the issue where the title is not updated after changing the instance connection.
 
