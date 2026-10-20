@@ -3,6 +3,7 @@ package org.folio.util;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import jakarta.annotation.Nonnull;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.Metadata;
 
@@ -30,8 +31,8 @@ public class AuditUtils {
       .orElse(null);
   }
 
-  public static void copyCreatedMetadata(@Nullable Metadata originalMetadata, @Nullable Metadata metadata) {
-    if (originalMetadata == null || metadata == null) {
+  public static void copyCreatedMetadata(@Nullable Metadata originalMetadata, @Nonnull Metadata metadata) {
+    if (originalMetadata == null) {
       return;
     }
     metadata
