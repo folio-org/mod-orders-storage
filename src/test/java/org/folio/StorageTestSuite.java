@@ -69,6 +69,7 @@ import org.folio.rest.impl.WrapperPiecesAPITest;
 import org.folio.rest.jaxrs.model.TenantJob;
 import org.folio.rest.persist.DBClientTest;
 import org.folio.rest.persist.ExceptionUtilTest;
+import org.folio.util.AuditUtilsTest;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.rest.tools.utils.NetworkUtils;
@@ -311,6 +312,8 @@ public class StorageTestSuite {
   class DBClientTestNested extends DBClientTest {}
   @Nested
   class ExceptionUtilTestNested extends ExceptionUtilTest {}
+  @Nested
+  class AuditUtilsTestNested extends AuditUtilsTest {}
   @Nested
   class ResponseUtilTestNested extends ResponseUtilTest {}
   @Nested
