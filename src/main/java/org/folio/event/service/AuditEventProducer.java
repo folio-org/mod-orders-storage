@@ -103,7 +103,8 @@ public class AuditEventProducer {
     var metadata = getMetadataOrThrow(order::getMetadata, order::getId);
     var originalSnapshot = convertToSnapshot(originalOrder, OrderSnapshot.class);
     var snapshot = convertToSnapshot(order, OrderSnapshot.class);
-    copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderSnapshot::getMetadata).orElse(null), snapshot.getMetadata());
+    Optional.ofNullable(snapshot).map(OrderSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -119,7 +120,8 @@ public class AuditEventProducer {
     var metadata = getMetadataOrThrow(poLine::getMetadata, poLine::getId);
     var originalSnapshot = convertToSnapshot(originalPoLine, OrderLineSnapshot.class);
     var snapshot = convertToSnapshot(poLine, OrderLineSnapshot.class);
-    copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderLineSnapshot::getMetadata).orElse(null), snapshot.getMetadata());
+    Optional.ofNullable(snapshot).map(OrderLineSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderLineSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -136,7 +138,8 @@ public class AuditEventProducer {
     var metadata = getMetadataOrThrow(piece::getMetadata, piece::getId);
     var originalSnapshot = convertToSnapshot(originalPiece, PieceSnapshot.class);
     var snapshot = convertToSnapshot(piece, PieceSnapshot.class);
-    copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(PieceSnapshot::getMetadata).orElse(null), snapshot.getMetadata());
+    Optional.ofNullable(snapshot).map(PieceSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(PieceSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
