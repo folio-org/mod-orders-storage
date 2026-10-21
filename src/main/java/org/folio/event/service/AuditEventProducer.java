@@ -3,9 +3,11 @@ package org.folio.event.service;
 import static org.folio.util.AuditUtils.buildTopicName;
 import static org.folio.util.AuditUtils.getMetadataOrThrow;
 import static org.folio.util.AuditUtils.convertToSnapshot;
+import static org.folio.util.AuditUtils.copyCreatedMetadata;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.event.AuditEventType;
@@ -99,6 +101,10 @@ public class AuditEventProducer {
 
   private OrderAuditEvent getOrderEvent(@Nonnull PurchaseOrder order, @Nullable PurchaseOrder originalOrder, OrderAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(order::getMetadata, order::getId);
+    var originalSnapshot = convertToSnapshot(originalOrder, OrderSnapshot.class);
+    var snapshot = convertToSnapshot(order, OrderSnapshot.class);
+    Optional.ofNullable(snapshot).map(OrderSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -106,12 +112,16 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalOrderSnapshot(convertToSnapshot(originalOrder, PurchaseOrder::withMetadata, OrderSnapshot.class))
-      .withOrderSnapshot(convertToSnapshot(order, PurchaseOrder::withMetadata, OrderSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalOrderSnapshot(originalSnapshot)
+      .withOrderSnapshot(snapshot);
   }
 
   private OrderLineAuditEvent getOrderLineEvent(@Nonnull PoLine poLine, @Nullable PoLine originalPoLine, OrderLineAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(poLine::getMetadata, poLine::getId);
+    var originalSnapshot = convertToSnapshot(originalPoLine, OrderLineSnapshot.class);
+    var snapshot = convertToSnapshot(poLine, OrderLineSnapshot.class);
+    Optional.ofNullable(snapshot).map(OrderLineSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderLineSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -120,12 +130,16 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalOrderLineSnapshot(convertToSnapshot(originalPoLine, PoLine::withMetadata, OrderLineSnapshot.class))
-      .withOrderLineSnapshot(convertToSnapshot(poLine, PoLine::withMetadata, OrderLineSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalOrderLineSnapshot(originalSnapshot)
+      .withOrderLineSnapshot(snapshot);
   }
 
   private PieceAuditEvent getPieceEvent(@Nonnull Piece piece, @Nullable Piece originalPiece, PieceAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(piece::getMetadata, piece::getId);
+    var originalSnapshot = convertToSnapshot(originalPiece, PieceSnapshot.class);
+    var snapshot = convertToSnapshot(piece, PieceSnapshot.class);
+    Optional.ofNullable(snapshot).map(PieceSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(PieceSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -133,8 +147,8 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalPieceSnapshot(convertToSnapshot(originalPiece, Piece::withMetadata, PieceSnapshot.class))
-      .withPieceSnapshot(convertToSnapshot(piece, Piece::withMetadata, PieceSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalPieceSnapshot(originalSnapshot)
+      .withPieceSnapshot(snapshot);
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,

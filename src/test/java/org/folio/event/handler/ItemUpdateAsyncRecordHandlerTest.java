@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -300,7 +302,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var expectedPoLine = createPoLine(poLineId, List.of(holdingId1, holdingId2), effectiveLocationId1, effectiveLocationId2);
     verify(pieceService).getPiecesByItemId(eq(itemId1), any(Conn.class));
     verify(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece1)), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
+    verify(poLinesService).updatePoLines(eqIgnoringLocationsOrder(expectedPoLine), any(Conn.class), eq(DIKU_TENANT), anyMap());
     verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(AuditEntityWrapper.of(expectedPoLine, poLine))), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
     verify(batchTrackingService, never()).deleteBatchTracking(conn, poLineId);
@@ -324,6 +326,18 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(AuditEntityWrapper.of(expectedUpdatedPoLine, expectedPoLine))), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
     verify(batchTrackingService).deleteBatchTracking(conn, poLineId);
+  }
+
+  // Locations are built from a HashMap grouping, so their order is not guaranteed
+  private static List<PoLine> eqIgnoringLocationsOrder(PoLine expected) {
+    return argThat(actual -> actual != null && actual.size() == 1
+      && withSortedLocations(actual.get(0)).equals(withSortedLocations(expected)));
+  }
+
+  private static PoLine withSortedLocations(PoLine poLine) {
+    var copy = JsonObject.mapFrom(poLine).mapTo(PoLine.class);
+    copy.getLocations().sort(Comparator.comparing(Location::getHoldingId));
+    return copy;
   }
 
   private static PoLine createPoLine(String poLineId, String holdingId, String... effectiveLocationIds) {
