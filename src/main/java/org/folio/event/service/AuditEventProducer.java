@@ -51,7 +51,7 @@ public class AuditEventProducer {
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future in another case
    */
-  public Future<Boolean> sendOrderEvent(AuditEntityWrapper<PurchaseOrder> orderWrapper,
+  public Future<Boolean> sendOrderEvent(AuditEntityWrapper<PurchaseOrder, Void> orderWrapper,
                                         OrderAuditEvent.Action eventAction,
                                         Map<String, String> okapiHeaders) {
     var order = orderWrapper.entity();
@@ -70,11 +70,11 @@ public class AuditEventProducer {
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future otherwise
    */
-  public Future<Boolean> sendOrderLineEvent(AuditEntityWrapper<PoLine> poLineWrapper,
+  public Future<Boolean> sendOrderLineEvent(AuditEntityWrapper<PoLine, PurchaseOrder> poLineWrapper,
                                             OrderLineAuditEvent.Action eventAction,
                                             Map<String, String> okapiHeaders) {
     var poLine = poLineWrapper.entity();
-    var event = getOrderLineEvent(poLine, poLineWrapper.originalEntity(), eventAction);
+    var event = getOrderLineEvent(poLine, poLineWrapper.originalEntity(), poLineWrapper.parentEntity(), eventAction);
     log.info("Starting to send event with id: {} for Order Line to Kafka for orderLineId: {}", event.getId(), poLine.getId());
     return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, event, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE)
       .onFailure(t -> log.warn("sendOrderLineEvent failed, poLine id={}", poLine.getId(), t));
@@ -89,7 +89,7 @@ public class AuditEventProducer {
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future otherwise
    */
-  public Future<Boolean> sendPieceEvent(AuditEntityWrapper<Piece> pieceWrapper,
+  public Future<Boolean> sendPieceEvent(AuditEntityWrapper<Piece, Void> pieceWrapper,
                                         PieceAuditEvent.Action eventAction,
                                         Map<String, String> okapiHeaders) {
     var piece = pieceWrapper.entity();
@@ -116,7 +116,8 @@ public class AuditEventProducer {
       .withOrderSnapshot(snapshot);
   }
 
-  private OrderLineAuditEvent getOrderLineEvent(@Nonnull PoLine poLine, @Nullable PoLine originalPoLine, OrderLineAuditEvent.Action eventAction) {
+  OrderLineAuditEvent getOrderLineEvent(@Nonnull PoLine poLine, @Nullable PoLine originalPoLine,
+                                        @Nullable PurchaseOrder order, OrderLineAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(poLine::getMetadata, poLine::getId);
     var originalSnapshot = convertToSnapshot(originalPoLine, OrderLineSnapshot.class);
     var snapshot = convertToSnapshot(poLine, OrderLineSnapshot.class);
@@ -131,7 +132,8 @@ public class AuditEventProducer {
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
       .withOriginalOrderLineSnapshot(originalSnapshot)
-      .withOrderLineSnapshot(snapshot);
+      .withOrderLineSnapshot(snapshot)
+      .withOrderSnapshot(convertToSnapshot(order, OrderSnapshot.class));
   }
 
   private PieceAuditEvent getPieceEvent(@Nonnull Piece piece, @Nullable Piece originalPiece, PieceAuditEvent.Action eventAction) {

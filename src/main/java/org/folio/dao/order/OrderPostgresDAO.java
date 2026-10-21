@@ -8,12 +8,25 @@ import org.apache.logging.log4j.Logger;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.persist.Conn;
 
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.folio.models.TableNames.ORDER_NUMBER_TABLE;
 import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 
 public class OrderPostgresDAO implements OrderDAO {
   private static final String UPDATE_NUMBER_QUERY = "UPDATE %s SET last_number = last_number + 1 RETURNING last_number";
   private static final Logger log = LogManager.getLogger();
+
+  @Override
+  public Future<PurchaseOrder> getOrderById(String orderId, Conn conn) {
+    return conn.getById(PURCHASE_ORDER_TABLE, orderId, PurchaseOrder.class)
+      .map(order -> {
+        if (order == null) {
+          throw new HttpException(NOT_FOUND.getStatusCode(), NOT_FOUND.getReasonPhrase());
+        }
+        return order;
+      })
+      .onFailure(t -> log.error("getOrderById failed for order with id {}", orderId, t));
+  }
 
   @Override
   public Future<PurchaseOrder> getOrderByIdForUpdate(String orderId, Conn conn) {

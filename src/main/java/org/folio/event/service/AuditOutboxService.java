@@ -1,5 +1,6 @@
 package org.folio.event.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.dao.PostgresClientFactory;
 import org.folio.dao.audit.AuditOutboxEventsLogRepository;
+import org.folio.dao.order.OrderDAO;
 import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
@@ -34,13 +36,16 @@ public class AuditOutboxService {
   private final AuditOutboxEventsLogRepository outboxRepository;
   private final AuditEventProducer producer;
   private final PostgresClientFactory pgClientFactory;
+  private final OrderDAO orderDAO;
 
   public AuditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
                             AuditEventProducer producer,
-                            PostgresClientFactory pgClientFactory) {
+                            PostgresClientFactory pgClientFactory,
+                            OrderDAO orderDAO) {
     this.outboxRepository = outboxRepository;
     this.producer = producer;
     this.pgClientFactory = pgClientFactory;
+    this.orderDAO = orderDAO;
   }
 
   /**
@@ -86,17 +91,17 @@ public class AuditOutboxService {
         }
         switch (eventLog.getEntityType()) {
           case ORDER -> {
-            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), PurchaseOrder.class);
+            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), PurchaseOrder.class, Void.class);
             OrderAuditEvent.Action action = OrderAuditEvent.Action.fromValue(eventLog.getAction());
             return producer.sendOrderEvent(entityWrapper, action, okapiHeaders);
           }
           case ORDER_LINE -> {
-            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), PoLine.class);
+            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), PoLine.class, PurchaseOrder.class);
             OrderLineAuditEvent.Action action = OrderLineAuditEvent.Action.fromValue(eventLog.getAction());
             return producer.sendOrderLineEvent(entityWrapper, action, okapiHeaders);
           }
           case PIECE -> {
-            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), Piece.class);
+            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), Piece.class, Void.class);
             PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
             return producer.sendPieceEvent(entityWrapper, action, okapiHeaders);
           }
@@ -119,12 +124,12 @@ public class AuditOutboxService {
    * @param okapiHeaders okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> saveOrderOutboxLog(Conn conn, AuditEntityWrapper<PurchaseOrder> order, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
+  public Future<Boolean> saveOrderOutboxLog(Conn conn, AuditEntityWrapper<PurchaseOrder, Void> order, OrderAuditEvent.Action action, Map<String, String> okapiHeaders) {
     return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER, order.entity().getId(), order);
   }
 
   /**
-   * Saves order line outbox log.
+   * Saves order line outbox log along with the parent order fetched in the same transaction.
    *
    * @param conn         connection in transaction
    * @param pol          the poLine
@@ -132,12 +137,18 @@ public class AuditOutboxService {
    * @param okapiHeaders okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> saveOrderLineOutboxLog(Conn conn, AuditEntityWrapper<PoLine> pol, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, pol.entity().getId(), pol);
+  public Future<Boolean> saveOrderLineOutboxLog(Conn conn, AuditEntityWrapper<PoLine, PurchaseOrder> pol, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    return saveOrderLineOutboxLog(conn, pol, orderDAO.getOrderById(pol.entity().getPurchaseOrderId(), conn), action, okapiHeaders);
+  }
+
+  private Future<Boolean> saveOrderLineOutboxLog(Conn conn, AuditEntityWrapper<PoLine, PurchaseOrder> pol, Future<PurchaseOrder> orderFuture,
+                                                 OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    return orderFuture.compose(order -> saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, pol.entity().getId(),
+      pol.withParentEntity(order)));
   }
 
   /**
-   * Saves order lines outbox logs.
+   * Saves order lines outbox logs along with their parent orders fetched in the same transaction.
    *
    * @param conn         connection in transaction
    * @param poLines      the poLine
@@ -145,9 +156,12 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<AuditEntityWrapper<PoLine>> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+  public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<AuditEntityWrapper<PoLine, PurchaseOrder>> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    Map<String, Future<PurchaseOrder>> orderFutures = new HashMap<>();
     var futures = poLines.stream()
-      .map(poLine -> saveOrderLineOutboxLog(conn, poLine, action, okapiHeaders))
+      .map(poLine -> saveOrderLineOutboxLog(conn, poLine,
+        orderFutures.computeIfAbsent(poLine.entity().getPurchaseOrderId(), orderId -> orderDAO.getOrderById(orderId, conn)),
+        action, okapiHeaders))
       .toList();
 
     return Future.join(futures)
@@ -164,7 +178,7 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> savePiecesOutboxLog(Conn conn, List<AuditEntityWrapper<Piece>> pieces, PieceAuditEvent.Action action, Map<String, String> okapiHeaders) {
+  public Future<Boolean> savePiecesOutboxLog(Conn conn, List<AuditEntityWrapper<Piece, Void>> pieces, PieceAuditEvent.Action action, Map<String, String> okapiHeaders) {
     var futures = pieces.stream()
       .map(piece -> savePieceOutboxLog(conn, piece, action, okapiHeaders))
       .toList();
@@ -184,7 +198,7 @@ public class AuditOutboxService {
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> savePieceOutboxLog(Conn conn,
-                                            AuditEntityWrapper<Piece> piece,
+                                            AuditEntityWrapper<Piece, Void> piece,
                                             PieceAuditEvent.Action action,
                                             Map<String, String> okapiHeaders) {
     return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.PIECE, piece.entity().getId(), piece);
@@ -195,7 +209,7 @@ public class AuditOutboxService {
                                             String action,
                                             EntityType entityType,
                                             String entityId,
-                                            AuditEntityWrapper<T> auditEntityWrapper) {
+                                            AuditEntityWrapper<T, ?> auditEntityWrapper) {
     log.debug("saveOutboxLog:: for {} with id: {}", entityType, entityId);
 
     String tenantId = TenantTool.tenantId(okapiHeaders);
@@ -211,11 +225,11 @@ public class AuditOutboxService {
       .onFailure(e -> log.warn("Could not save outbox audit log for {} with id: {}", entityType, entityId, e));
   }
 
-  private <T> AuditEntityWrapper<T> decodeOutboxPayload(String payload, Class<T> entityClass) {
+  private <T, P> AuditEntityWrapper<T, P> decodeOutboxPayload(String payload, Class<T> entityClass, Class<P> parentEntityClass) {
     try {
       var mapper = DatabindCodec.mapper();
-      var wrapperType = mapper.getTypeFactory().constructParametricType(AuditEntityWrapper.class, entityClass);
-      AuditEntityWrapper<T> wrapper = mapper.readValue(payload, wrapperType);
+      var wrapperType = mapper.getTypeFactory().constructParametricType(AuditEntityWrapper.class, entityClass, parentEntityClass);
+      AuditEntityWrapper<T, P> wrapper = mapper.readValue(payload, wrapperType);
       if (wrapper.entity() != null) {
         return wrapper;
       }

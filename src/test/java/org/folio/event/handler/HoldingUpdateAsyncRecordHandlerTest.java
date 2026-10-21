@@ -16,6 +16,7 @@ import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Details;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ProductId;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.model.acq.Location;
@@ -180,7 +181,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
       createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
-    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
+    var expectedAuditEntities = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(UNIVERSITY_TENANT), eq(conn));
@@ -238,7 +239,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2),
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
-    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
+    var expectedAuditEntities = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
@@ -303,7 +304,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2),
       createPoLine(poLineId2, instanceId2, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_2, PUBLISHER_2, DATE_OF_PUBLICATION_2, CONTRIBUTOR_2, CONTRIBUTOR_NAME_TYPE_ID_2, IDENTIFIER_TYPE_VALUE_2, IDENTIFIER_TYPE_ID_2)
     );
-    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
+    var expectedAuditEntities = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doCallRealMethod().when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(newInstance)).when(instancesService).getInstanceById(any(), any());
@@ -402,7 +403,7 @@ public class HoldingUpdateAsyncRecordHandlerTest {
       createPoLine(poLineId1, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1),
       createPoLine(poLineId2, instanceId1, List.of(newHoldingValueAfterUpdate), List.of(permanentSearchLocationId1), TITLE_1, PUBLISHER_1, DATE_OF_PUBLICATION_1, CONTRIBUTOR_1, CONTRIBUTOR_NAME_TYPE_ID_1, IDENTIFIER_TYPE_VALUE_1, IDENTIFIER_TYPE_ID_1)
     );
-    var expectedAuditEntities = AuditEntityWrapper.listOf(expectedPoLines, actualPoLines, PoLine::getId);
+    var expectedAuditEntities = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(expectedPoLines, actualPoLines, PoLine::getId);
 
     doReturn(Future.succeededFuture()).when(inventoryUpdateService).getAndSetHolderInstanceByIdIfRequired(any(), any());
     doReturn(Future.succeededFuture(actualPoLines)).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), any(Conn.class));

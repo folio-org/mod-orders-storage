@@ -17,6 +17,7 @@ import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -84,7 +85,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
       .mapEmpty();
   }
 
-  private Future<List<AuditEntityWrapper<PoLine>>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,
+  private Future<List<AuditEntityWrapper<PoLine, PurchaseOrder>>> updatePoLines(List<PoLine> poLines, String holdingId, String permanentLocationId,
                                                                  String tenantIdFromEvent, String centralTenantId, Conn conn,
                                                                  Map<String, String> headers) {
     if (CollectionUtils.isEmpty(poLines)) {
@@ -110,7 +111,7 @@ public class HoldingCreateAsyncRecordHandler extends InventoryCreateAsyncRecordH
         .map(AuditEntityWrapper.listOf(poLines, originalPoLines, PoLine::getId)));
   }
 
-  private Future<List<AuditEntityWrapper<Piece>>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent, String centralTenantId, Conn conn) {
+  private Future<List<AuditEntityWrapper<Piece, Void>>> updatePieces(List<Piece> pieces, String holdingId, String tenantIdFromEvent, String centralTenantId, Conn conn) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.info("updatePieces:: No pieces to update were found for holding: '{}' and tenant: '{}' in centralTenant: '{}",
         holdingId, tenantIdFromEvent, centralTenantId);

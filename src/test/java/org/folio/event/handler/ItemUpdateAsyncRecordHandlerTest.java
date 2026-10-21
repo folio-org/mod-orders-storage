@@ -50,6 +50,7 @@ import org.folio.rest.jaxrs.model.BatchTracking;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Setting;
 import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
@@ -141,7 +142,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     var poLine = createPoLine(poLineId, holdingId1, effectiveLocationId1).withCheckinItems(checkinItems);
     var expectedPoLine = createPoLine(poLineId, holdingId2, effectiveLocationId1, effectiveLocationId2);
-    List<AuditEntityWrapper<PoLine>> expectedPoLineOutboxLogs = checkinItems ? List.of() : List.of(AuditEntityWrapper.of(expectedPoLine, poLine));
+    List<AuditEntityWrapper<PoLine, PurchaseOrder>> expectedPoLineOutboxLogs = checkinItems ? List.of() : List.of(AuditEntityWrapper.of(expectedPoLine, poLine));
 
     var actualPieces = List.of(
       createPiece(pieceId1, itemId, holdingId1, null).withPoLineId(poLineId),
@@ -150,7 +151,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var expectedPieces = List.of(
       createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
-    var expectedWrappedPieces = AuditEntityWrapper.listOf(expectedPieces, actualPieces, Piece::getId);
+    var expectedWrappedPieces = AuditEntityWrapper.<Piece, Void>listOf(expectedPieces, actualPieces, Piece::getId);
 
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));

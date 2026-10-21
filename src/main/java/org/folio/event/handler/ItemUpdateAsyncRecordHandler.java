@@ -88,7 +88,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
         .map(mapTo(piecesToUpdate, AuditEntityWrapper::entity)));
   }
 
-  private Future<List<AuditEntityWrapper<Piece>>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
+  private Future<List<AuditEntityWrapper<Piece, Void>>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
     var piecesToUpdate = filterPiecesToUpdate(holder, pieces);
 
     if (CollectionUtils.isEmpty(piecesToUpdate)) {

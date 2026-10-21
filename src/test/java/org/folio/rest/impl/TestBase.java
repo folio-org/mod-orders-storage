@@ -368,6 +368,8 @@ public abstract class TestBase {
     assertNotNull(event.getActionDate());
     assertNotNull(event.getEventDate());
     assertNotNull(event.getOrderLineSnapshot());
+    assertNotNull(event.getOrderSnapshot());
+    Assertions.assertEquals(event.getOrderId(), event.getOrderSnapshot().getId());
   }
 
   protected void checkPieceEventContent(String eventPayload, PieceAuditEvent.Action action) {
