@@ -5,6 +5,7 @@ import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.persist.Conn;
 
 public interface OrderDAO {
+  Future<PurchaseOrder> getOrderById(String orderId, Conn conn);
   Future<PurchaseOrder> getOrderByIdForUpdate(String orderId, Conn conn);
   Future<Void> updateOrder(PurchaseOrder po, Conn conn);
   Future<Long> getNextPoNumber(Conn conn);

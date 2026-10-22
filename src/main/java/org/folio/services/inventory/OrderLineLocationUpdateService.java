@@ -19,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.services.lines.PoLinesService;
@@ -50,7 +51,7 @@ public class OrderLineLocationUpdateService {
    * @param conn          connection to be used for the request
    * @return a future with the list of updated POLs
    */
-  public Future<List<AuditEntityWrapper<PoLine>>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering, String tenantId, Map<String, String> headers, Conn conn) {
+  public Future<List<AuditEntityWrapper<PoLine, PurchaseOrder>>> updatePoLineLocationData(List<String> poLineIds, JsonObject item, boolean skipFiltering, String tenantId, Map<String, String> headers, Conn conn) {
     log.info("processPoLinesUpdate:: Fetching '{}' POL(s) to update location data", poLineIds.size());
     return poLinesService.getPoLinesByIdsForUpdate(poLineIds, tenantId, conn)
       .map(poLines -> poLines.stream()
@@ -63,7 +64,7 @@ public class OrderLineLocationUpdateService {
       .compose(poLinePiecePairs -> updatePoLines(poLinePiecePairs, item, tenantId, headers, conn));
   }
 
-  private Future<List<AuditEntityWrapper<PoLine>>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item, String tenantId, Map<String, String> headers, Conn conn) {
+  private Future<List<AuditEntityWrapper<PoLine, PurchaseOrder>>> updatePoLines(List<Pair<PoLine, List<Piece>>> poLinePiecePairs, JsonObject item, String tenantId, Map<String, String> headers, Conn conn) {
     var poLinesToUpdate = processPoLinePiecePairs(poLinePiecePairs, item);
     if (CollectionUtils.isEmpty(poLinesToUpdate)) {
       log.info("updatePoLines:: No POLs were changed to update for item: '{}' in tenant: '{}'", item.getString(ID.getValue()), tenantId);

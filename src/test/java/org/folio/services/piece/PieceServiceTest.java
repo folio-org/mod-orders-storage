@@ -269,12 +269,12 @@ public class PieceServiceTest extends TestBase {
   void shouldNotUpdatePiecesWhenEmpty(Vertx vertx, VertxTestContext testContext) {
     new DBClient(vertx, TEST_TENANT).getPgClient().withConn(connection -> {
       var conn = spy(connection);
-      List<AuditEntityWrapper<Piece>> piecesToUpdate = List.of();
+      List<AuditEntityWrapper<Piece, Void>> piecesToUpdate = List.of();
       var updatePiecesFuture = pieceService.updatePieces(List.of(), conn, TEST_TENANT);
 
       return testContext.assertComplete(updatePiecesFuture)
         .onComplete(ar -> {
-          List<AuditEntityWrapper<Piece>> actPieces = ar.result();
+          List<AuditEntityWrapper<Piece, Void>> actPieces = ar.result();
           testContext.verify(() -> {
             assertThat(actPieces, is(piecesToUpdate));
             verifyNoInteractions(conn);

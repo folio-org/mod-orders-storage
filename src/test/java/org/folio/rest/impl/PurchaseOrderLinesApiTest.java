@@ -2,6 +2,7 @@ package org.folio.rest.impl;
 
 import io.restassured.http.Headers;
 import io.restassured.response.Response;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.Logger;
@@ -250,6 +251,64 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"));
     deleteData(PO_LINE.getEndpointWithId(), poLine.getId());
     deleteData(TITLES.getEndpointWithId(), titleAfter.getId());
+  }
+
+  @Test
+  void testPoLineEventsContainActualOrderSnapshot() throws MalformedURLException {
+    log.info("--- mod-orders-storage orders test: PoLine audit events contain the parent order snapshot at the time of the line change");
+    String poNumber = "SNAP" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+    String orderId = UUID.randomUUID().toString();
+    String firstAssigneeId = UUID.randomUUID().toString();
+    String secondAssigneeId = UUID.randomUUID().toString();
+    JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"))
+      .put("id", orderId)
+      .put("poNumber", poNumber)
+      .put("assignedTo", firstAssigneeId);
+    JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"))
+      .put("id", UUID.randomUUID().toString())
+      .put("purchaseOrderId", orderId)
+      .put("poLineNumber", poNumber + "-1");
+
+    String userId = UUID.randomUUID().toString();
+    Headers headers = getIsolatedTenantHeaders(userId);
+
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), headers).then().statusCode(201);
+    PoLine poLine = postData(PO_LINE.getEndpoint(), jsonLine.toString(), headers)
+      .then()
+      .statusCode(201)
+      .extract().as(PoLine.class);
+
+    jsonOrder.put("assignedTo", secondAssigneeId);
+    putData(PURCHASE_ORDER.getEndpointWithId(), orderId, jsonOrder.toString(), headers).then().statusCode(204);
+    poLine.setTitleOrPackage("updated title");
+    putData(PO_LINE.getEndpointWithId(), poLine.getId(), JsonObject.mapFrom(poLine).encode(), headers).then().statusCode(204);
+
+    callAuditOutboxApi(headers);
+
+    List<OrderLineAuditEvent> events = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_ORDER_LINE_CHANGED.getTopicName(), 2, userId)
+      .stream()
+      .map(event -> Json.decodeValue(event, OrderLineAuditEvent.class))
+      .filter(event -> poLine.getId().equals(event.getOrderLineId()))
+      .toList();
+    assertEquals(2, events.size());
+
+    OrderLineAuditEvent createEvent = getOrderLineEvent(events, OrderLineAuditEvent.Action.CREATE);
+    assertEquals(orderId, createEvent.getOrderSnapshot().getId());
+    assertEquals(poNumber, createEvent.getOrderSnapshot().getPoNumber());
+    assertEquals(firstAssigneeId, createEvent.getOrderSnapshot().getAssignedTo());
+
+    OrderLineAuditEvent editEvent = getOrderLineEvent(events, OrderLineAuditEvent.Action.EDIT);
+    assertEquals(orderId, editEvent.getOrderSnapshot().getId());
+    assertEquals(poNumber, editEvent.getOrderSnapshot().getPoNumber());
+    assertEquals(secondAssigneeId, editEvent.getOrderSnapshot().getAssignedTo());
+    assertEquals("updated title", editEvent.getOrderLineSnapshot().getTitleOrPackage());
+  }
+
+  private OrderLineAuditEvent getOrderLineEvent(List<OrderLineAuditEvent> events, OrderLineAuditEvent.Action action) {
+    return events.stream()
+      .filter(event -> event.getAction() == action)
+      .findFirst()
+      .orElseThrow(() -> new AssertionError("No order line event with action " + action));
   }
 
   @Test
