@@ -310,6 +310,7 @@ public class PoLinesService {
 
   public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn, Map<String, String> headers) {
     updateInstanceFieldsForPoLine(poLine, instance);
+    populateMetadata(poLine::getMetadata, poLine::withMetadata, headers);
     return doUpdatePoLine(poLine, conn)
       .compose(wrappedPoLine -> auditOutboxService.saveOrderLineOutboxLog(conn, wrappedPoLine, OrderLineAuditEvent.Action.EDIT, headers))
       .map(v -> poLine);
