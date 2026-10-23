@@ -13,11 +13,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.CopilotGenerated;
+import org.folio.okapi.common.XOkapiHeaders;
 import org.folio.rest.impl.TestBase;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
@@ -67,6 +69,7 @@ public class TitleServiceTest extends TestBase {
   @Test
   void shouldUpdateTitle(Vertx vertx, VertxTestContext testContext) {
     String poLineId = UUID.randomUUID().toString();
+    String userId = UUID.randomUUID().toString();
     String titleId = UUID.randomUUID().toString();
     String instanceId = UUID.randomUUID().toString();
     Promise<Void> promise1 = Promise.promise();
@@ -100,7 +103,7 @@ public class TitleServiceTest extends TestBase {
       .put("title", newInstanceTitle);
 
     testContext.assertComplete(client.getPgClient()
-      .withTrans(conn -> promise2.future().compose(o -> titleService.updateTitle(poLine, newInstance, conn))
+      .withTrans(conn -> promise2.future().compose(o -> titleService.updateTitle(poLine, newInstance, conn, Map.of(XOkapiHeaders.USER_ID, userId)))
         .onComplete(v -> titleService.getTitleByPoLineId(poLineId, conn)
           .onComplete(ar -> {
             Title actTitle = ar.result();
@@ -108,6 +111,8 @@ public class TitleServiceTest extends TestBase {
               assertThat(actTitle.getId(), is(titleId));
               assertThat(actTitle.getInstanceId(), is(newInstanceId));
               assertThat(actTitle.getTitle(), is(newInstanceTitle));
+              assertThat(actTitle.getMetadata().getUpdatedByUserId(), is(userId));
+              assertNotNull(actTitle.getMetadata().getUpdatedDate());
             });
             testContext.completeNow();
           }))));

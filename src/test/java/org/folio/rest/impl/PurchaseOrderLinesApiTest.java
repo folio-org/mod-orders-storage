@@ -49,6 +49,7 @@ import static org.hamcrest.core.StringContains.containsString;
 public class PurchaseOrderLinesApiTest extends TestBase {
 
   private static final Logger log = LogManager.getLogger();
+  private static final String MOCK_INSTANCE_ID = "e677e090-7dfc-4a40-b5fd-fde37793c52b";
 
   @BeforeAll
   public static void beforeAll() throws ExecutionException, InterruptedException, TimeoutException {
@@ -489,6 +490,67 @@ public class PurchaseOrderLinesApiTest extends TestBase {
     patchData(PO_LINE.getEndpointWithId(), poLineId, patchRequestString, headers)
       .then()
       .statusCode(400);
+  }
+
+  @Test
+  void testPatchPoLineReplaceInstanceRefUpdatesMetadata() throws MalformedURLException {
+    log.info("--- mod-orders-storage orders test: PoLine patch with replaceInstanceRef must update metadata");
+    JsonObject jsonOrder = new JsonObject(getFile("data/purchase-orders/81_ongoing_pending.json"));
+    JsonObject jsonLine = new JsonObject(getFile("data/po-lines/81-1_pending_fomat-other.json"));
+    jsonLine.getJsonObject("physical").put("createInventory", "Instance");
+
+    String creatorUserId = UUID.randomUUID().toString();
+    String patcherUserId = UUID.randomUUID().toString();
+    Headers creatorHeaders = getIsolatedTenantHeaders(creatorUserId);
+    Headers patcherHeaders = getIsolatedTenantHeaders(patcherUserId);
+
+    postData(PURCHASE_ORDER.getEndpoint(), jsonOrder.toString(), creatorHeaders).then().statusCode(201);
+    PoLine poLineBefore = postData(PO_LINE.getEndpoint(), jsonLine.toString(), creatorHeaders)
+      .then()
+      .statusCode(201)
+      .extract().as(PoLine.class);
+    assertEquals(creatorUserId, poLineBefore.getMetadata().getUpdatedByUserId());
+    Map<String, Object> titleParams = Map.of("query", "poLineId==" + poLineBefore.getId());
+    Title titleBefore = getTitleByParams(titleParams);
+
+    StoragePatchOrderLineRequest patchRequest = new StoragePatchOrderLineRequest()
+      .withOperation(StoragePatchOrderLineRequest.Operation.REPLACE_INSTANCE_REF)
+      .withReplaceInstanceRef(new ReplaceInstanceRef().withNewInstanceId(MOCK_INSTANCE_ID));
+
+    patchData(PO_LINE.getEndpointWithId(), poLineBefore.getId(), JsonObject.mapFrom(patchRequest).encode(), patcherHeaders)
+      .then()
+      .statusCode(204);
+
+    PoLine poLineAfter = getDataById(PO_LINE.getEndpointWithId(), poLineBefore.getId(), ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(200)
+      .extract().as(PoLine.class);
+
+    assertEquals(MOCK_INSTANCE_ID, poLineAfter.getInstanceId());
+    assertEquals(creatorUserId, poLineAfter.getMetadata().getCreatedByUserId());
+    assertEquals(poLineBefore.getMetadata().getCreatedDate(), poLineAfter.getMetadata().getCreatedDate());
+    assertEquals(patcherUserId, poLineAfter.getMetadata().getUpdatedByUserId());
+    assertTrue(poLineAfter.getMetadata().getUpdatedDate().after(poLineBefore.getMetadata().getUpdatedDate()));
+
+    Title titleAfter = getTitleByParams(titleParams);
+    assertEquals(MOCK_INSTANCE_ID, titleAfter.getInstanceId());
+    assertEquals(titleBefore.getMetadata().getCreatedByUserId(), titleAfter.getMetadata().getCreatedByUserId());
+    assertEquals(titleBefore.getMetadata().getCreatedDate(), titleAfter.getMetadata().getCreatedDate());
+    assertEquals(patcherUserId, titleAfter.getMetadata().getUpdatedByUserId());
+    assertTrue(titleAfter.getMetadata().getUpdatedDate().after(titleBefore.getMetadata().getUpdatedDate()));
+
+    deleteData(PO_LINE.getEndpointWithId(), poLineBefore.getId(), ISOLATED_TENANT_HEADER);
+    deleteData(PURCHASE_ORDER.getEndpointWithId(), jsonOrder.getString("id"), ISOLATED_TENANT_HEADER);
+  }
+
+  private Title getTitleByParams(Map<String, Object> params) throws MalformedURLException {
+    TitleCollection titles = getDataByParam(TITLES.getEndpoint(), params, ISOLATED_TENANT_HEADER)
+      .then()
+      .statusCode(200)
+      .extract()
+      .as(TitleCollection.class);
+    assertThat(titles.getTitles(), hasSize(1));
+    return titles.getTitles().getFirst();
   }
 
 }

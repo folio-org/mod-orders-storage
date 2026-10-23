@@ -6,8 +6,10 @@ import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
+import static org.folio.util.MetadataUtils.populateMetadata;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -51,9 +53,11 @@ public class TitleService {
       });
   }
 
-  private Future<PoLine> updateInstanceForTitle(PoLine poLine, Title title, JsonObject instance, Conn conn) {
+  private Future<PoLine> updateInstanceForTitle(PoLine poLine, Title title, JsonObject instance, Conn conn,
+                                                Map<String, String> headers) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
     updateInstanceFieldsForTitle(title, instance);
+    populateMetadata(title::getMetadata, title::withMetadata, headers);
     return conn.update(TITLES_TABLE, title, JSONB, criterion.toString(), false)
       .map(poLine)
       .recover(t -> Future.failedFuture(httpHandleFailure(t)))
@@ -75,10 +79,10 @@ public class TitleService {
       .withProductIds(InventoryUtils.getProductIds(instance));
   }
 
-  public Future<PoLine> updateTitle(PoLine poLine, JsonObject instance, Conn conn) {
+  public Future<PoLine> updateTitle(PoLine poLine, JsonObject instance, Conn conn, Map<String, String> headers) {
     var instanceId = InventoryUtils.getInstanceId(instance);
     return getTitleByPoLineId(poLine.getId(), conn)
-      .compose(title -> updateInstanceForTitle(poLine, title, instance, conn))
+      .compose(title -> updateInstanceForTitle(poLine, title, instance, conn, headers))
       .onSuccess(v -> log.debug("updateTitle:: Succeeded for poLineId={}, instanceId={}", poLine.getId(), instanceId))
       .onFailure(t -> log.error("updateTitle:: Failed for poLineId={}, instanceId={}", poLine.getId(), instanceId, t));
   }
