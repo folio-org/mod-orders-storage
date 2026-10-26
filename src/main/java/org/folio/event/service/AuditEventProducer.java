@@ -25,6 +25,8 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PieceSnapshot;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.TitleSnapshot;
 import org.folio.rest.tools.utils.TenantTool;
 
 import io.vertx.core.Future;
@@ -89,11 +91,11 @@ public class AuditEventProducer {
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future otherwise
    */
-  public Future<Boolean> sendPieceEvent(AuditEntityWrapper<Piece, Void> pieceWrapper,
+  public Future<Boolean> sendPieceEvent(AuditEntityWrapper<Piece, Title> pieceWrapper,
                                         PieceAuditEvent.Action eventAction,
                                         Map<String, String> okapiHeaders) {
     var piece = pieceWrapper.entity();
-    var event = getPieceEvent(piece, pieceWrapper.originalEntity(), eventAction);
+    var event = getPieceEvent(piece, pieceWrapper.originalEntity(), pieceWrapper.parentEntity(), eventAction);
     log.info("Starting to send event with id: {} for Piece to Kafka for pieceId: {}", event.getId(), piece.getId());
     return sendToKafka(AuditEventType.ACQ_PIECE_CHANGED, event, okapiHeaders, event.getPieceId(), EntityType.PIECE)
       .onFailure(t -> log.warn("sendPieceEvent failed, piece id={}", piece.getId(), t));
@@ -136,7 +138,8 @@ public class AuditEventProducer {
       .withOrderSnapshot(convertToSnapshot(order, OrderSnapshot.class));
   }
 
-  private PieceAuditEvent getPieceEvent(@Nonnull Piece piece, @Nullable Piece originalPiece, PieceAuditEvent.Action eventAction) {
+  PieceAuditEvent getPieceEvent(@Nonnull Piece piece, @Nullable Piece originalPiece,
+                                @Nullable Title title, PieceAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(piece::getMetadata, piece::getId);
     var originalSnapshot = convertToSnapshot(originalPiece, PieceSnapshot.class);
     var snapshot = convertToSnapshot(piece, PieceSnapshot.class);
@@ -150,7 +153,8 @@ public class AuditEventProducer {
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
       .withOriginalPieceSnapshot(originalSnapshot)
-      .withPieceSnapshot(snapshot);
+      .withPieceSnapshot(snapshot)
+      .withTitleSnapshot(convertToSnapshot(title, TitleSnapshot.class));
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,

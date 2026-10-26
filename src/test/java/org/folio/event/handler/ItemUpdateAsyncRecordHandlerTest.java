@@ -52,6 +52,7 @@ import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -151,7 +152,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var expectedPieces = List.of(
       createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
-    var expectedWrappedPieces = AuditEntityWrapper.<Piece, Void>listOf(expectedPieces, actualPieces, Piece::getId);
+    var expectedWrappedPieces = AuditEntityWrapper.<Piece, Title>listOf(expectedPieces, actualPieces, Piece::getId);
 
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));

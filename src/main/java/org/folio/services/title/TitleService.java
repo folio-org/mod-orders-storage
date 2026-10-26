@@ -53,6 +53,11 @@ public class TitleService {
       });
   }
 
+  public Future<Title> getTitleById(String titleId, Conn conn) {
+    return conn.getById(TITLES_TABLE, titleId, Title.class)
+      .onFailure(t -> log.error("getTitleById failed for title with id {}", titleId, t));
+  }
+
   private Future<PoLine> updateInstanceForTitle(PoLine poLine, Title title, JsonObject instance, Conn conn,
                                                 Map<String, String> headers) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());

@@ -36,10 +36,11 @@ public class PieceClaimingRepository {
           OR (pieces.jsonb ->> 'receivingStatus' IN ('Claim delayed', 'Claim sent')
               AND $2::date >= (((pieces.jsonb ->> 'statusUpdatedDate')::timestamptz  AT TIME ZONE $3)::date + INTERVAL '1 day' * (pieces.jsonb->>'claimingInterval')::int))
         )
-        RETURNING pieces.*
+        RETURNING pieces.jsonb AS piece_jsonb, titles.jsonb AS title_jsonb
     )
     INSERT INTO %1$s.%4$s (event_id, entity_type, action, payload)
-    SELECT public.uuid_generate_v4(), 'Piece', 'Edit', to_jsonb(updated.jsonb::text)
+    SELECT public.uuid_generate_v4(), 'Piece', 'Edit',
+      to_jsonb(jsonb_build_object('entity', updated.piece_jsonb, 'parentEntity', updated.title_jsonb)::text)
     FROM updated;
     """;
 

@@ -21,9 +21,11 @@ import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
 import org.folio.rest.tools.utils.TenantTool;
+import org.folio.services.title.TitleService;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.Json;
@@ -37,15 +39,18 @@ public class AuditOutboxService {
   private final AuditEventProducer producer;
   private final PostgresClientFactory pgClientFactory;
   private final OrderDAO orderDAO;
+  private final TitleService titleService;
 
   public AuditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
                             AuditEventProducer producer,
                             PostgresClientFactory pgClientFactory,
-                            OrderDAO orderDAO) {
+                            OrderDAO orderDAO,
+                            TitleService titleService) {
     this.outboxRepository = outboxRepository;
     this.producer = producer;
     this.pgClientFactory = pgClientFactory;
     this.orderDAO = orderDAO;
+    this.titleService = titleService;
   }
 
   /**
@@ -101,7 +106,7 @@ public class AuditOutboxService {
             return producer.sendOrderLineEvent(entityWrapper, action, okapiHeaders);
           }
           case PIECE -> {
-            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), Piece.class, Void.class);
+            var entityWrapper = decodeOutboxPayload(eventLog.getPayload(), Piece.class, Title.class);
             PieceAuditEvent.Action action = PieceAuditEvent.Action.fromValue(eventLog.getAction());
             return producer.sendPieceEvent(entityWrapper, action, okapiHeaders);
           }
@@ -178,9 +183,12 @@ public class AuditOutboxService {
    * @param okapiHeaders the okapi headers
    * @return future with saved outbox log in the same transaction
    */
-  public Future<Boolean> savePiecesOutboxLog(Conn conn, List<AuditEntityWrapper<Piece, Void>> pieces, PieceAuditEvent.Action action, Map<String, String> okapiHeaders) {
+  public Future<Boolean> savePiecesOutboxLog(Conn conn, List<AuditEntityWrapper<Piece, Title>> pieces, PieceAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    Map<String, Future<Title>> titleFutures = new HashMap<>();
     var futures = pieces.stream()
-      .map(piece -> savePieceOutboxLog(conn, piece, action, okapiHeaders))
+      .map(piece -> savePieceOutboxLog(conn, piece,
+        titleFutures.computeIfAbsent(piece.entity().getTitleId(), titleId -> titleService.getTitleById(titleId, conn)),
+        action, okapiHeaders))
       .toList();
 
     return Future.join(futures)
@@ -198,10 +206,16 @@ public class AuditOutboxService {
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> savePieceOutboxLog(Conn conn,
-                                            AuditEntityWrapper<Piece, Void> piece,
+                                            AuditEntityWrapper<Piece, Title> piece,
                                             PieceAuditEvent.Action action,
                                             Map<String, String> okapiHeaders) {
-    return saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.PIECE, piece.entity().getId(), piece);
+    return savePieceOutboxLog(conn, piece, titleService.getTitleById(piece.entity().getTitleId(), conn), action, okapiHeaders);
+  }
+
+  private Future<Boolean> savePieceOutboxLog(Conn conn, AuditEntityWrapper<Piece, Title> piece, Future<Title> titleFuture,
+                                             PieceAuditEvent.Action action, Map<String, String> okapiHeaders) {
+    return titleFuture.compose(title -> saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.PIECE, piece.entity().getId(),
+      piece.withParentEntity(title)));
   }
 
   private <T> Future<Boolean> saveOutboxLog(Conn conn,

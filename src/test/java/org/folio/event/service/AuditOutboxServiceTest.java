@@ -23,10 +23,14 @@ import org.folio.dao.order.OrderDAO;
 import org.folio.event.dto.AuditEntityWrapper;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.OutboxEventLog;
+import org.folio.rest.jaxrs.model.Piece;
+import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.PostgresClient;
+import org.folio.services.title.TitleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +57,8 @@ public class AuditOutboxServiceTest {
   private PostgresClient pgClient;
   @Mock
   private OrderDAO orderDAO;
+  @Mock
+  private TitleService titleService;
   @Mock
   private Conn conn;
 
@@ -225,6 +231,63 @@ public class AuditOutboxServiceTest {
     assertTrue(result.succeeded());
     assertTrue(result.result());
     verify(orderDAO, times(1)).getOrderById(order.getId(), conn);
+    verify(outboxRepository, times(2)).saveEventLog(eq(conn), any(), any());
+  }
+
+  @Test
+  void processOutboxEventLogs_sendsPieceEventWithParentTitle() {
+    mockTransaction();
+    var title = new Title().withId(UUID.randomUUID().toString()).withTitle("Test title");
+    var piece = new Piece().withId(UUID.randomUUID().toString()).withTitleId(title.getId());
+    OutboxEventLog eventLog = new OutboxEventLog()
+      .withEventId("eventId")
+      .withEntityType(OutboxEventLog.EntityType.PIECE)
+      .withAction("Edit")
+      .withPayload(Json.encode(new AuditEntityWrapper<>(piece, null, title)));
+    when(outboxRepository.fetchEventLogs(any(), any())).thenReturn(Future.succeededFuture(List.of(eventLog)));
+    when(outboxRepository.deleteBatch(any(), any(), any())).thenReturn(Future.succeededFuture(1));
+    when(producer.sendPieceEvent(any(), any(), any())).thenReturn(Future.succeededFuture(true));
+
+    Future<Integer> result = auditOutboxService.processOutboxEventLogs(okapiHeaders);
+
+    assertTrue(result.succeeded());
+    verify(producer).sendPieceEvent(argThat(wrapper -> piece.getId().equals(wrapper.entity().getId())
+      && "Test title".equals(wrapper.parentEntity().getTitle())), eq(PieceAuditEvent.Action.EDIT), any());
+  }
+
+  @Test
+  void savePieceOutboxLog_savesParentTitleInPayload() {
+    var title = new Title().withId(UUID.randomUUID().toString()).withTitle("Test title");
+    var piece = new Piece().withId(UUID.randomUUID().toString()).withTitleId(title.getId());
+    when(titleService.getTitleById(title.getId(), conn)).thenReturn(Future.succeededFuture(title));
+    when(outboxRepository.saveEventLog(any(), any(), any())).thenReturn(Future.succeededFuture(true));
+
+    Future<Boolean> result = auditOutboxService.savePieceOutboxLog(conn, AuditEntityWrapper.of(piece),
+      PieceAuditEvent.Action.CREATE, okapiHeaders);
+
+    assertTrue(result.succeeded());
+    var captor = ArgumentCaptor.forClass(OutboxEventLog.class);
+    verify(outboxRepository).saveEventLog(eq(conn), captor.capture(), any());
+    var payload = new JsonObject(captor.getValue().getPayload());
+    assertEquals(piece.getId(), payload.getJsonObject("entity").getString("id"));
+    assertNull(payload.getJsonObject("originalEntity"));
+    assertEquals("Test title", payload.getJsonObject("parentEntity").getString("title"));
+  }
+
+  @Test
+  void savePiecesOutboxLog_fetchesEachParentTitleOnce() {
+    var title = new Title().withId(UUID.randomUUID().toString());
+    var piece1 = new Piece().withId(UUID.randomUUID().toString()).withTitleId(title.getId());
+    var piece2 = new Piece().withId(UUID.randomUUID().toString()).withTitleId(title.getId());
+    when(titleService.getTitleById(title.getId(), conn)).thenReturn(Future.succeededFuture(title));
+    when(outboxRepository.saveEventLog(any(), any(), any())).thenReturn(Future.succeededFuture(true));
+
+    Future<Boolean> result = auditOutboxService.savePiecesOutboxLog(conn,
+      AuditEntityWrapper.listOf(List.of(piece1, piece2)), PieceAuditEvent.Action.EDIT, okapiHeaders);
+
+    assertTrue(result.succeeded());
+    assertTrue(result.result());
+    verify(titleService, times(1)).getTitleById(title.getId(), conn);
     verify(outboxRepository, times(2)).saveEventLog(eq(conn), any(), any());
   }
 }
