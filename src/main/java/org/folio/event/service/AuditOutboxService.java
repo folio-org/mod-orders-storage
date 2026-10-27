@@ -176,8 +176,7 @@ public class AuditOutboxService {
         .map(poLine -> saveOrderLineOutboxLog(conn, poLine,
           Future.succeededFuture(getParentOrder(orders, poLine.entity())), action, okapiHeaders))
         .toList()))
-      .map(res -> true)
-      .otherwise(t -> false);
+      .map(res -> true);
   }
 
   /**
@@ -200,8 +199,7 @@ public class AuditOutboxService {
         .map(piece -> savePieceOutboxLog(conn, piece,
           Future.succeededFuture(getParentTitle(titles, piece.entity())), action, okapiHeaders))
         .toList()))
-      .map(res -> true)
-      .otherwise(t -> false);
+      .map(res -> true);
   }
 
   /**
