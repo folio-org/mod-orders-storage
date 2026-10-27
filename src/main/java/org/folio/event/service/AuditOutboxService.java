@@ -1,8 +1,8 @@
 package org.folio.event.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -124,7 +124,7 @@ public class AuditOutboxService {
    * Saves order outbox log.
    *
    * @param conn         connection in transaction
-   * @param order       the purchase order
+   * @param order        the purchase order
    * @param action       the event action
    * @param okapiHeaders okapi headers
    * @return future with saved outbox log in the same transaction
@@ -146,6 +146,10 @@ public class AuditOutboxService {
     return saveOrderLineOutboxLog(conn, pol, orderDAO.getOrderById(pol.entity().getPurchaseOrderId(), conn), action, okapiHeaders);
   }
 
+  private PurchaseOrder getParentOrder(Map<String, PurchaseOrder> orders, PoLine poLine) {
+    return poLine.getPurchaseOrderId() == null ? null : orders.get(poLine.getPurchaseOrderId());
+  }
+
   private Future<Boolean> saveOrderLineOutboxLog(Conn conn, AuditEntityWrapper<PoLine, PurchaseOrder> pol, Future<PurchaseOrder> orderFuture,
                                                  OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
     return orderFuture.compose(order -> saveOutboxLog(conn, okapiHeaders, action.value(), EntityType.ORDER_LINE, pol.entity().getId(),
@@ -162,14 +166,16 @@ public class AuditOutboxService {
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> saveOrderLinesOutboxLogs(Conn conn, List<AuditEntityWrapper<PoLine, PurchaseOrder>> poLines, OrderLineAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Map<String, Future<PurchaseOrder>> orderFutures = new HashMap<>();
-    var futures = poLines.stream()
-      .map(poLine -> saveOrderLineOutboxLog(conn, poLine,
-        orderFutures.computeIfAbsent(poLine.entity().getPurchaseOrderId(), orderId -> orderDAO.getOrderById(orderId, conn)),
-        action, okapiHeaders))
-      .toList();
+    var orderIds = poLines.stream()
+      .map(poLine -> poLine.entity().getPurchaseOrderId())
+      .filter(Objects::nonNull)
+      .collect(Collectors.toSet());
 
-    return Future.join(futures)
+    return orderDAO.getOrdersByIds(orderIds, TenantTool.tenantId(okapiHeaders), conn)
+      .compose(orders -> Future.join(poLines.stream()
+        .map(poLine -> saveOrderLineOutboxLog(conn, poLine,
+          Future.succeededFuture(getParentOrder(orders, poLine.entity())), action, okapiHeaders))
+        .toList()))
       .map(res -> true)
       .otherwise(t -> false);
   }
@@ -184,14 +190,16 @@ public class AuditOutboxService {
    * @return future with saved outbox log in the same transaction
    */
   public Future<Boolean> savePiecesOutboxLog(Conn conn, List<AuditEntityWrapper<Piece, Title>> pieces, PieceAuditEvent.Action action, Map<String, String> okapiHeaders) {
-    Map<String, Future<Title>> titleFutures = new HashMap<>();
-    var futures = pieces.stream()
-      .map(piece -> savePieceOutboxLog(conn, piece,
-        titleFutures.computeIfAbsent(piece.entity().getTitleId(), titleId -> titleService.getTitleById(titleId, conn)),
-        action, okapiHeaders))
-      .toList();
+    var titleIds = pieces.stream()
+      .map(piece -> piece.entity().getTitleId())
+      .filter(Objects::nonNull)
+      .collect(Collectors.toSet());
 
-    return Future.join(futures)
+    return titleService.getTitlesByIds(titleIds, TenantTool.tenantId(okapiHeaders), conn)
+      .compose(titles -> Future.join(pieces.stream()
+        .map(piece -> savePieceOutboxLog(conn, piece,
+          Future.succeededFuture(getParentTitle(titles, piece.entity())), action, okapiHeaders))
+        .toList()))
       .map(res -> true)
       .otherwise(t -> false);
   }
@@ -210,6 +218,10 @@ public class AuditOutboxService {
                                             PieceAuditEvent.Action action,
                                             Map<String, String> okapiHeaders) {
     return savePieceOutboxLog(conn, piece, titleService.getTitleById(piece.entity().getTitleId(), conn), action, okapiHeaders);
+  }
+
+  private Title getParentTitle(Map<String, Title> titles, Piece piece) {
+    return piece.getTitleId() == null ? null : titles.get(piece.getTitleId());
   }
 
   private Future<Boolean> savePieceOutboxLog(Conn conn, AuditEntityWrapper<Piece, Title> piece, Future<Title> titleFuture,

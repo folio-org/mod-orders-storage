@@ -10,10 +10,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
@@ -418,6 +420,45 @@ public class TitleServiceTest extends TestBase {
           assertNotNull(throwable);
           // The exact error message may vary depending on implementation
         });
+        testContext.completeNow();
+      });
+  }
+
+  @Test
+  void shouldReturnOnlyExistingTitles_whenGetTitlesByIds(Vertx vertx, VertxTestContext testContext) {
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+    String poLineId = UUID.randomUUID().toString();
+    Title title1 = new Title().withId(UUID.randomUUID().toString()).withPoLineId(poLineId).withTitle("Title 1");
+    Title title2 = new Title().withId(UUID.randomUUID().toString()).withPoLineId(poLineId).withTitle("Title 2");
+    Title notRequestedTitle = new Title().withId(UUID.randomUUID().toString()).withPoLineId(poLineId).withTitle("Not requested");
+    String nonExistentTitleId = UUID.randomUUID().toString();
+
+    var saveFuture = client.getPgClient().save(PO_LINE_TABLE, poLineId, new PoLine().withId(poLineId))
+      .compose(v -> client.getPgClient().save(TITLES_TABLE, title1.getId(), title1))
+      .compose(v -> client.getPgClient().save(TITLES_TABLE, title2.getId(), title2))
+      .compose(v -> client.getPgClient().save(TITLES_TABLE, notRequestedTitle.getId(), notRequestedTitle));
+
+    testContext.assertComplete(saveFuture
+        .compose(v -> client.getPgClient().withConn(conn ->
+          titleService.getTitlesByIds(Set.of(title1.getId(), title2.getId(), nonExistentTitleId), TEST_TENANT, conn))))
+      .onComplete(ar -> {
+        Map<String, Title> titles = ar.result();
+        testContext.verify(() -> {
+          assertEquals(Set.of(title1.getId(), title2.getId()), titles.keySet());
+          assertEquals("Title 1", titles.get(title1.getId()).getTitle());
+          assertEquals("Title 2", titles.get(title2.getId()).getTitle());
+        });
+        testContext.completeNow();
+      });
+  }
+
+  @Test
+  void shouldReturnEmptyMap_whenGetTitlesByIdsWithNoIds(Vertx vertx, VertxTestContext testContext) {
+    final DBClient client = new DBClient(vertx, TEST_TENANT);
+
+    testContext.assertComplete(client.getPgClient().withConn(conn -> titleService.getTitlesByIds(Set.of(), TEST_TENANT, conn)))
+      .onComplete(ar -> {
+        testContext.verify(() -> assertTrue(ar.result().isEmpty()));
         testContext.completeNow();
       });
   }
