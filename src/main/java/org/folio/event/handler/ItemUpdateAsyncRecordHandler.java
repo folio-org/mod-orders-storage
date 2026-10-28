@@ -24,6 +24,7 @@ import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PieceAuditEvent;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.Conn;
 import org.folio.services.inventory.OrderLineLocationUpdateService;
 import org.folio.services.piece.PieceService;
@@ -88,7 +89,7 @@ public class ItemUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordHand
         .map(mapTo(piecesToUpdate, AuditEntityWrapper::entity)));
   }
 
-  private Future<List<AuditEntityWrapper<Piece, Void>>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
+  private Future<List<AuditEntityWrapper<Piece, Title>>> updatePieces(ItemEventHolder holder, List<Piece> pieces, Conn conn) {
     var piecesToUpdate = filterPiecesToUpdate(holder, pieces);
 
     if (CollectionUtils.isEmpty(piecesToUpdate)) {

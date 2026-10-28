@@ -138,13 +138,13 @@ public class PieceService {
       .onFailure(t -> log.error("createPieces:: Failed pieces: {}", pieceIds, t));
   }
 
-  public Future<AuditEntityWrapper<Piece, Void>> updatePiece(String id, Piece piece, Conn conn, String tenantId) {
+  public Future<AuditEntityWrapper<Piece, Title>> updatePiece(String id, Piece piece, Conn conn, String tenantId) {
     log.debug("updatePiece:: Updating piece: '{}'", id);
     return shiftSequenceNumbersIfNeeded(id, piece, conn, tenantId)
       .compose(v -> getPieceByIdForUpdate(id, conn))
       .compose(originalPiece -> conn.update(TableNames.PIECES_TABLE, piece, id)
         .compose(DbUtils::failOnNoUpdateOrDelete)
-        .map(AuditEntityWrapper.<Piece, Void>of(piece, originalPiece.orElse(null))))
+        .map(AuditEntityWrapper.<Piece, Title>of(piece, originalPiece.orElse(null))))
       .onSuccess(rowSet -> log.info("updatePiece:: Piece successfully updated: '{}'", id))
       .onFailure(e -> log.error("updatePiece:: Update piece failed: '{}'", id, e));
   }
@@ -186,7 +186,7 @@ public class PieceService {
       .mapEmpty();
   }
 
-  public Future<List<AuditEntityWrapper<Piece, Void>>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
+  public Future<List<AuditEntityWrapper<Piece, Title>>> updatePieces(List<Piece> pieces, Conn conn, String tenantId) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.warn("updatePieces:: Pieces list is empty, skipping the update");
       return Future.succeededFuture(List.of());
@@ -195,7 +195,7 @@ public class PieceService {
     return getPiecesByIdsForUpdate(mapTo(pieces, Piece::getId), tenantId, conn)
       .compose(originalPieces -> conn.execute(query)
         .map(rows -> DbUtils.getRowSetAsList(rows, Piece.class))
-        .map(updatedPieces -> AuditEntityWrapper.<Piece, Void>listOf(updatedPieces, originalPieces, Piece::getId)))
+        .map(updatedPieces -> AuditEntityWrapper.<Piece, Title>listOf(updatedPieces, originalPieces, Piece::getId)))
       .onSuccess(ar -> log.info("updatePieces:: completed, query={}", query))
       .onFailure(t -> log.error("updatePieces:: failed, query={}", query, t));
   }
@@ -217,7 +217,7 @@ public class PieceService {
    * @param tenantId Tenant identifier
    * @return Future with the list of updated pieces
    */
-  public Future<List<AuditEntityWrapper<Piece, Void>>> updatePiecesInventoryData(List<Piece> pieces, Conn conn, String tenantId) {
+  public Future<List<AuditEntityWrapper<Piece, Title>>> updatePiecesInventoryData(List<Piece> pieces, Conn conn, String tenantId) {
     if (CollectionUtils.isEmpty(pieces)) {
       log.warn("updatePiecesInventoryFieldsOnly:: Pieces list is empty, skipping the update");
       return Future.succeededFuture(List.of());
@@ -227,19 +227,19 @@ public class PieceService {
     return collectResultsOnSuccess(updateFutures);
   }
 
-  private Future<AuditEntityWrapper<Piece, Void>> updatePieceInventoryData(Piece piece, Conn conn, String tenantId) {
+  private Future<AuditEntityWrapper<Piece, Title>> updatePieceInventoryData(Piece piece, Conn conn, String tenantId) {
     var updateQuery = PIECES_UPDATE_INVENTORY_DATA.formatted(getFullTableName(tenantId, PIECES_TABLE));
     var params = Tuple.of(piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber(), piece.getId());
     return getPieceByIdForUpdate(piece.getId(), conn)
       .compose(originalPiece -> conn.execute(updateQuery, params).map(rows -> {
         if (rows.rowCount() == 0) {
           log.warn("updateSinglePieceInventoryFields:: No piece updated with id: {}", piece.getId());
-          return AuditEntityWrapper.<Piece, Void>of(piece, originalPiece.orElse(null));
+          return AuditEntityWrapper.<Piece, Title>of(piece, originalPiece.orElse(null));
         }
         var updatedPiece = DbUtils.getRowSetAsEntity(rows, Piece.class);
         log.info("updateSinglePieceInventoryFields:: Successfully updated piece: {} with holdingId: {}, receivingTenantId: {}, barcode: {}, callNumber: {}, accessionNumber: {}",
           piece.getId(), piece.getHoldingId(), piece.getReceivingTenantId(), piece.getBarcode(), piece.getCallNumber(), piece.getAccessionNumber());
-        return AuditEntityWrapper.<Piece, Void>of(updatedPiece, originalPiece.orElse(null));
+        return AuditEntityWrapper.<Piece, Title>of(updatedPiece, originalPiece.orElse(null));
       }))
       .onFailure(e -> log.error("updateSinglePieceInventoryFields:: Failed to update piece: {}", piece.getId(), e));
   }

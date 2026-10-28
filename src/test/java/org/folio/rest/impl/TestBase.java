@@ -380,5 +380,7 @@ public abstract class TestBase {
     assertNotNull(event.getActionDate());
     assertNotNull(event.getEventDate());
     assertNotNull(event.getPieceSnapshot());
+    assertNotNull(event.getTitleSnapshot());
+    Assertions.assertEquals(event.getPieceSnapshot().getTitleId(), event.getTitleSnapshot().getId());
   }
 }
