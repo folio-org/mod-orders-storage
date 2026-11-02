@@ -113,6 +113,8 @@ public class StorageTestSuite {
   private static final DockerImageName KAFKA_IMAGE_NAME = DockerImageName.parse("apache/kafka-native:4.2.0");
   private static final KafkaContainer kafkaContainer = getKafkaContainer();
   public static final String KAFKA_ENV_VALUE = "test-env";
+  private static final Duration KAFKA_OBSERVE_TIMEOUT = Duration.ofSeconds(30);
+  private static final Duration KAFKA_POLL_INTERVAL = Duration.ofMillis(500);
   private static final String KAFKA_HOST = "KAFKA_HOST";
   private static final String KAFKA_PORT = "KAFKA_PORT";
   private static final String KAFKA_ENV = "ENV";
@@ -239,24 +241,34 @@ public class StorageTestSuite {
   @SneakyThrows
   public static List<String> checkKafkaEventSent(String tenant, String eventType, int expected, String userId) {
     String topicToObserve = formatToKafkaTopicName(tenant, eventType);
-    return observeTopic(topicToObserve, userId);
+    return observeTopic(topicToObserve, expected, userId);
   }
 
-  private static List<String> observeTopic(String topic, String userId) {
+  private static List<String> observeTopic(String topic, int expected, String userId) {
     List<String> result = new ArrayList<>();
-    ConsumerRecords<String, String> records;
+    long deadline = System.nanoTime() + KAFKA_OBSERVE_TIMEOUT.toNanos();
     try (var kafkaConsumer = createKafkaConsumer()) {
       kafkaConsumer.subscribe(List.of(topic));
-      records = kafkaConsumer.poll(Duration.ofSeconds(30));
+      if (expected <= 0) {
+        collectUserRecords(kafkaConsumer.poll(KAFKA_OBSERVE_TIMEOUT), userId, result);
+        return result;
+      }
+      long remaining;
+      while (result.size() < expected && (remaining = deadline - System.nanoTime()) > 0) {
+        var pollTimeout = Duration.ofNanos(Math.min(remaining, KAFKA_POLL_INTERVAL.toNanos()));
+        collectUserRecords(kafkaConsumer.poll(pollTimeout), userId, result);
+      }
     }
+    return result;
+  }
+
+  private static void collectUserRecords(ConsumerRecords<String, String> records, String userId, List<String> result) {
     records.forEach(rec -> {
       var header = rec.headers().lastHeader(RestVerticle.OKAPI_USERID_HEADER.toLowerCase());
       if (header != null && new String(header.value()).equalsIgnoreCase(userId)) {
         result.add(rec.value());
       }
     });
-
-    return result;
   }
 
   private static KafkaConsumer<String, String> createKafkaConsumer() {
