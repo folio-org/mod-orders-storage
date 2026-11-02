@@ -163,8 +163,9 @@ public class ApplicationConfig {
   AuditOutboxService auditOutboxService(AuditOutboxEventsLogRepository outboxRepository,
                                         AuditEventProducer producer,
                                         PostgresClientFactory pgClientFactory,
-                                        OrderDAO orderDAO) {
-    return new AuditOutboxService(outboxRepository, producer, pgClientFactory, orderDAO);
+                                        OrderDAO orderDAO,
+                                        TitleService titleService) {
+    return new AuditOutboxService(outboxRepository, producer, pgClientFactory, orderDAO, titleService);
   }
 
   @Bean

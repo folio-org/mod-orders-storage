@@ -52,6 +52,7 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -163,7 +164,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var poLines = List.of(poLine1, poLine2);
     var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
-    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Void>listOf(affectedPieces, pieces, Piece::getId);
+    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Title>listOf(affectedPieces, pieces, Piece::getId);
     var affectedWrappedPoLines = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(affectedPoLines, poLines, PoLine::getId);
 
     // Update Pieces
@@ -244,7 +245,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var poLines = List.of(poLine1, poLine2);
     var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
-    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Void>listOf(affectedPieces, pieces, Piece::getId);
+    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Title>listOf(affectedPieces, pieces, Piece::getId);
     var affectedWrappedPoLines = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(affectedPoLines, poLines, PoLine::getId);
 
     // Update Pieces
@@ -326,7 +327,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var poLines = List.of(poLine1, poLine2);
     var affectedPieces = List.of(affectedPiece1, affectedPiece2, affectedPiece4);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
-    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Void>listOf(affectedPieces, pieces, Piece::getId);
+    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Title>listOf(affectedPieces, pieces, Piece::getId);
     var affectedWrappedPoLines = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(affectedPoLines, poLines, PoLine::getId);
 
     // Update Pieces
@@ -542,7 +543,7 @@ public class ItemCreateAsyncRecordHandlerTest {
     var affectedPoLine2 = createPoLine(poLineId2, List.of(affectedPiece3, piece4), List.of(effectiveLocationId1, effectiveLocationId2));
     var affectedPieces = List.of(affectedPiece1, affectedPiece3);
     var affectedPoLines = List.of(affectedPoLine1, affectedPoLine2);
-    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Void>listOf(affectedPieces, List.of(piece1, piece3), Piece::getId);
+    var affectedWrappedPieces = AuditEntityWrapper.<Piece, Title>listOf(affectedPieces, List.of(piece1, piece3), Piece::getId);
     var affectedWrappedPoLines = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(affectedPoLines, List.of(poLine1, poLine2), PoLine::getId);
 
     doReturn(Future.succeededFuture(List.of(poLine1, poLine2))).when(poLinesService).getPoLinesByIdsForUpdate(eq(List.of(poLineId1, poLineId2)), eq(CENTRAL_TENANT), eq(conn));
@@ -577,7 +578,7 @@ public class ItemCreateAsyncRecordHandlerTest {
       createPoLine(poLineId1, List.of(affectedPiece1, affectedPiece2), List.of(effectiveLocationId1, effectiveLocationId2)),
       createPoLine(poLineId2, List.of(affectedPiece3, affectedPiece4), List.of(effectiveLocationId1, effectiveLocationId2))
     );
-    affectedWrappedPieces = AuditEntityWrapper.<Piece, Void>listOf(affectedPieces, List.of(piece2, piece4), Piece::getId);
+    affectedWrappedPieces = AuditEntityWrapper.<Piece, Title>listOf(affectedPieces, List.of(piece2, piece4), Piece::getId);
     affectedWrappedPoLines = AuditEntityWrapper.<PoLine, PurchaseOrder>listOf(affectedPoLines, List.of(affectedPoLine1, affectedPoLine2), PoLine::getId);
 
     doReturn(Future.succeededFuture(List.of(affectedPiece1, affectedPiece2))).when(pieceService).getPiecesByPoLineId(poLineId1, conn);

@@ -28,6 +28,7 @@ import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.TenantJob;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.persist.DBClient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -269,12 +270,12 @@ public class PieceServiceTest extends TestBase {
   void shouldNotUpdatePiecesWhenEmpty(Vertx vertx, VertxTestContext testContext) {
     new DBClient(vertx, TEST_TENANT).getPgClient().withConn(connection -> {
       var conn = spy(connection);
-      List<AuditEntityWrapper<Piece, Void>> piecesToUpdate = List.of();
+      List<AuditEntityWrapper<Piece, Title>> piecesToUpdate = List.of();
       var updatePiecesFuture = pieceService.updatePieces(List.of(), conn, TEST_TENANT);
 
       return testContext.assertComplete(updatePiecesFuture)
         .onComplete(ar -> {
-          List<AuditEntityWrapper<Piece, Void>> actPieces = ar.result();
+          List<AuditEntityWrapper<Piece, Title>> actPieces = ar.result();
           testContext.verify(() -> {
             assertThat(actPieces, is(piecesToUpdate));
             verifyNoInteractions(conn);
