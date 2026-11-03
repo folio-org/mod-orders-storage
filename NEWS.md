@@ -5,6 +5,7 @@
 * [FCFIELDS-90](https://folio-org.atlassian.net/browse/FCFIELDS-90) - Upgrade folio-custom-fields to 4.0.0, provide `custom-fields` 3.2 (LOOKUP custom field type)
 * [MODORDSTOR-533](https://folio-org.atlassian.net/browse/MODORDSTOR-533) - Create a script to populate "multiYearPayment" field for existing orders
 * [MODORDSTOR-522](https://folio-org.atlassian.net/browse/MODORDSTOR-522) - Support deprecated flag on acquisition methods
+* [MODORDSTOR-532](https://folio-org.atlassian.net/browse/MODORDSTOR-532) - Upgrade from Java 21 to Java 25
 
 ## 14.0.0 - Released (Trillium R1 2025)
 The primary focus of this release was to upgrade to Vert.x 5.0, implement FQM entity types, improve batch processing and audit logging, and enhance receiving functionality.
