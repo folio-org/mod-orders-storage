@@ -1,0 +1,363 @@
+{
+  "description": "mod-orders-storage configuration template. Default values are calibrated against a reference bugfest environment (tebfcon-mod-orders-storage revision 17, image 14.0.4); see ADR-0013 (Module configuration management) for the governance model behind this file. mod-orders-storage is an RMB (Vert.x) storage module: it keeps orders data in PostgreSQL, publishes audit events to Kafka and consumes inventory and EDI export events. Resource values and JVM limits must be adjusted to the target host capacity.",
+  "moduleDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for the mod-orders-storage container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for the mod-orders-storage container in MiB"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "896",
+        "description": "Memory reservation (soft limit) for the mod-orders-storage container in MiB"
+      }
+    ],
+    "java": [
+      {
+        "name": "xmx",
+        "value": "700m",
+        "description": "Maximum Java heap size. Value taken from bugfest; with MaxMetaspaceSize it leaves under 200 MiB of the container for non-heap memory, so lower it if the container limit is reduced"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "128m",
+        "description": "Maximum Java metaspace size. Value taken from bugfest"
+      },
+      {
+        "name": "MetaspaceSize",
+        "value": "88m",
+        "description": "Threshold for the first metaspace garbage collection (not a limit). Value taken from bugfest"
+      }
+    ],
+    "deployment": {
+      "isHaSupported": true,
+      "replicasRecommendedCount": 2,
+      "description": "All state is in PostgreSQL and Kafka consumers share one consumer group per event type, so replicas can run side by side; the only in-memory state is short-lived settings and consortium caches. Audit outbox processing and batch tracking cleanup are triggered by mod-scheduler."
+    },
+    "kong": {
+      "timeouts": {
+        "connect": "60s",
+        "send": "60s",
+        "read": "60s"
+      },
+      "description": "Default Kong proxy timeouts are sufficient for storage CRUD, batch and search endpoints."
+    },
+    "EnvVars": [
+      {
+        "name": "DB_HOST",
+        "value": null,
+        "description": "PostgreSQL database host",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PORT",
+        "value": "5432",
+        "description": "PostgreSQL database port",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_USERNAME",
+        "value": null,
+        "description": "PostgreSQL database username (sourced from the secret store)",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_PASSWORD",
+        "value": null,
+        "description": "PostgreSQL database password (sourced from the secret store)",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_DATABASE",
+        "value": null,
+        "description": "PostgreSQL database name holding the per-tenant mod-orders-storage schemas",
+        "type": "DB",
+        "essential": true
+      },
+      {
+        "name": "DB_HOST_READER",
+        "value": null,
+        "description": "Optional read-replica host for read queries; used only together with DB_PORT_READER",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_PORT_READER",
+        "value": null,
+        "description": "Port of the read replica set in DB_HOST_READER",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_HOST_READER_ASYNC",
+        "value": null,
+        "description": "Optional asynchronous read-replica host; falls back to DB_HOST_READER, then DB_HOST",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_PORT_READER_ASYNC",
+        "value": null,
+        "description": "Port of the asynchronous read replica set in DB_HOST_READER_ASYNC",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_SERVER_PEM",
+        "value": null,
+        "description": "PEM certificate of the PostgreSQL server; when set, connections use TLSv1.3 with full verification",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_MAXPOOLSIZE",
+        "value": "20",
+        "description": "Maximum connections per tenant pool. Value taken from bugfest; RMB default is 4",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_MAXSHAREDPOOLSIZE",
+        "value": null,
+        "description": "When set, all tenants share one pool of this size instead of per-tenant pools of DB_MAXPOOLSIZE",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_CONNECTIONRELEASEDELAY",
+        "value": "60000",
+        "description": "Idle time in milliseconds before a pooled connection is closed (RMB default)",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_MAX_LIFETIME",
+        "value": "1800000",
+        "description": "Maximum lifetime of a pooled connection in milliseconds (RMB default)",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_RECONNECTATTEMPTS",
+        "value": "0",
+        "description": "Number of reconnect attempts when a database connection cannot be established (Vert.x default 0)",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_RECONNECTINTERVAL",
+        "value": "1000",
+        "description": "Interval in milliseconds between database reconnect attempts (Vert.x default)",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_EXPLAIN_QUERY_THRESHOLD",
+        "value": "300000",
+        "description": "Queries slower than this many milliseconds are logged with EXPLAIN ANALYZE. Value taken from bugfest; RMB default is 1000",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "DB_ALLOW_SUPPRESS_OPTIMISTIC_LOCKING",
+        "value": null,
+        "description": "ISO-8601 timestamp until which clients may bypass optimistic locking (_version) on purchase orders, order lines and pieces; unset means never",
+        "type": "DB",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_HOST",
+        "value": null,
+        "description": "Kafka broker host for audit event publishing and inventory / EDI export event consumers",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "KAFKA_PORT",
+        "value": "9092",
+        "description": "Kafka broker port",
+        "type": "KAFKA",
+        "essential": true
+      },
+      {
+        "name": "REPLICATION_FACTOR",
+        "value": "2",
+        "description": "Replication factor for Kafka topics created by this module. Value taken from bugfest; module default is 1",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "MAX_REQUEST_SIZE",
+        "value": "1048576",
+        "description": "Kafka producer max.request.size in bytes (module default)",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_PRODUCER_TENANT_COLLECTION",
+        "value": "ALL",
+        "description": "Enables tenant collection topics ({ENV}.Default.{value}.{EVENT}); must match [A-Z][A-Z0-9]{0,30} and be the same across modules. Value taken from bugfest; unset means per-tenant topics",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ENABLED",
+        "value": "false",
+        "description": "Enables folio-kafka-wrapper filtering of consumed records by tenant entitlement (library default)",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_TENANT_DISABLED_STRATEGY",
+        "value": "SKIP",
+        "description": "Handling of records for a tenant without entitlement (ACCEPT, SKIP, FAIL). Applies when KAFKA_TENANT_FILTER_ENABLED is true",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ALL_TENANTS_DISABLED_STRATEGY",
+        "value": "FAIL",
+        "description": "Handling of records when no tenant is entitled (ACCEPT, SKIP, FAIL). Applies when KAFKA_TENANT_FILTER_ENABLED is true",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ENTITLEMENT_REFRESH_INTERVAL_SECONDS",
+        "value": "900",
+        "description": "Interval in seconds for refreshing the tenant entitlement list. Applies when KAFKA_TENANT_FILTER_ENABLED is true",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "KAFKA_TENANT_FILTER_ENTITLEMENT_LOOKUP_TIMEOUT_SECONDS",
+        "value": "5",
+        "description": "Timeout in seconds for a tenant entitlement lookup. Applies when KAFKA_TENANT_FILTER_ENABLED is true",
+        "type": "KAFKA",
+        "essential": false
+      },
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Logical deployment name used as the Kafka topic prefix; must match the other modules",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "OKAPI_URL",
+        "value": null,
+        "description": "Base URL (the module's sidecar on Eureka) for tenant entitlement lookups; used only when KAFKA_TENANT_FILTER_ENABLED is true",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTIONS",
+        "value": null,
+        "description": "JVM options read by the run-java.sh entrypoint of the folioci base image (heap sizing from the java block; -Dhttp.port overrides the default port 8081, which must match the sidecar's MODULE_URL)",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "LOG4J_CONFIGURATION_FILE",
+        "value": null,
+        "description": "Location of an external Log4j2 configuration overriding the bundled log4j2.properties",
+        "type": "CONFIG",
+        "essential": false
+      }
+    ]
+  },
+  "sidecarDefaults": {
+    "resources": [
+      {
+        "name": "cpu",
+        "value": "64",
+        "description": "CPU request/limit for the sidecar container"
+      },
+      {
+        "name": "memory",
+        "value": "1024",
+        "description": "Memory hard limit for the sidecar container in MiB"
+      },
+      {
+        "name": "memoryReservation",
+        "value": "512",
+        "description": "Memory reservation (soft limit) for the sidecar container in MiB"
+      }
+    ],
+    "java": [
+      {
+        "name": "xms",
+        "value": "128m",
+        "description": "Initial Java heap size"
+      },
+      {
+        "name": "xmx",
+        "value": "256m",
+        "description": "Maximum Java heap size"
+      },
+      {
+        "name": "MaxMetaspaceSize",
+        "value": "96m",
+        "description": "Maximum Java metaspace size"
+      },
+      {
+        "name": "UseZGC",
+        "value": "true",
+        "description": "Use the ZGC low-pause collector"
+      }
+    ],
+    "EnvVars": [
+      {
+        "name": "ENV",
+        "value": null,
+        "description": "Deployment environment identifier; must match the module's ENV",
+        "type": "CONFIG",
+        "essential": false
+      },
+      {
+        "name": "JAVA_OPTS",
+        "value": null,
+        "description": "JVM options for the sidecar process: the java block sizing plus -Dquarkus.http.host=0.0.0.0 and -Djava.util.logging.manager=org.jboss.logmanager.LogManager, as on bugfest",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_NAME",
+        "value": "mod-orders-storage",
+        "description": "Name of the backend module the sidecar fronts",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_URL",
+        "value": null,
+        "description": "Internal URL (host:port) at which the mod-orders-storage container is reachable from its sidecar",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "MODULE_VERSION",
+        "value": null,
+        "description": "Version of the mod-orders-storage module deployed alongside this sidecar",
+        "type": "CONFIG",
+        "essential": true
+      },
+      {
+        "name": "ALLOW_CROSS_TENANT_REQUESTS",
+        "value": "true",
+        "description": "Allows requests whose tenant differs from the token's tenant; needed in consortium (ECS) deployments, where inventory events from member tenants are handled with central tenant calls. Value taken from bugfest",
+        "type": "CONFIG",
+        "essential": false
+      }
+    ]
+  }
+}
