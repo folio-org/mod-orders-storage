@@ -350,13 +350,6 @@
         "description": "Version of the mod-orders-storage module deployed alongside this sidecar",
         "type": "CONFIG",
         "essential": true
-      },
-      {
-        "name": "ALLOW_CROSS_TENANT_REQUESTS",
-        "value": "true",
-        "description": "Allows requests whose tenant differs from the token's tenant; needed in consortium (ECS) deployments, where inventory events from member tenants are handled with central tenant calls. Value taken from bugfest",
-        "type": "CONFIG",
-        "essential": false
       }
     ]
   }
