@@ -310,13 +310,6 @@
         "essential": true
       },
       {
-        "name": "JAVA_OPTS",
-        "value": null,
-        "description": "JVM options for the sidecar process: the java block sizing plus -Dquarkus.http.host=0.0.0.0 and -Djava.util.logging.manager=org.jboss.logmanager.LogManager, as on bugfest",
-        "type": "CONFIG",
-        "essential": false
-      },
-      {
         "name": "MODULE_NAME",
         "value": "mod-orders-storage",
         "description": "Name of the backend module the sidecar fronts",
