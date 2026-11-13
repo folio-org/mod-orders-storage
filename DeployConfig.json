@@ -99,20 +99,6 @@
         "essential": false
       },
       {
-        "name": "DB_HOST_READER_ASYNC",
-        "value": null,
-        "description": "Optional asynchronous read-replica host; falls back to DB_HOST_READER, then DB_HOST",
-        "type": "DB",
-        "essential": false
-      },
-      {
-        "name": "DB_PORT_READER_ASYNC",
-        "value": null,
-        "description": "Port of the asynchronous read replica set in DB_HOST_READER_ASYNC",
-        "type": "DB",
-        "essential": false
-      },
-      {
         "name": "DB_SERVER_PEM",
         "value": null,
         "description": "PEM certificate of the PostgreSQL server; when set, connections use TLSv1.3 with full verification",
