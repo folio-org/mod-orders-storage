@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
@@ -28,6 +29,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -48,7 +50,9 @@ import org.folio.rest.jaxrs.model.BatchTracking;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.Setting;
+import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.DBClient;
@@ -139,7 +143,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
 
     var poLine = createPoLine(poLineId, holdingId1, effectiveLocationId1).withCheckinItems(checkinItems);
     var expectedPoLine = createPoLine(poLineId, holdingId2, effectiveLocationId1, effectiveLocationId2);
-    List<AuditEntityWrapper<PoLine>> expectedPoLineOutboxLogs = checkinItems ? List.of() : List.of(AuditEntityWrapper.of(expectedPoLine, poLine));
+    List<AuditEntityWrapper<PoLine, PurchaseOrder>> expectedPoLineOutboxLogs = checkinItems ? List.of() : List.of(AuditEntityWrapper.of(expectedPoLine, poLine));
 
     var actualPieces = List.of(
       createPiece(pieceId1, itemId, holdingId1, null).withPoLineId(poLineId),
@@ -148,7 +152,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var expectedPieces = List.of(
       createPiece(pieceId1, itemId, holdingId2, null).withPoLineId(poLineId)
     );
-    var expectedWrappedPieces = AuditEntityWrapper.listOf(expectedPieces, actualPieces, Piece::getId);
+    var expectedWrappedPieces = AuditEntityWrapper.<Piece, Title>listOf(expectedPieces, actualPieces, Piece::getId);
 
     doReturn(Future.succeededFuture(true)).when(pieceService).getPiecesByItemIdExist(eq(itemId), eq(DIKU_TENANT), any(Conn.class));
     doReturn(Future.succeededFuture(actualPieces)).when(pieceService).getPiecesByItemId(eq(itemId), any(Conn.class));
@@ -300,7 +304,7 @@ public class ItemUpdateAsyncRecordHandlerTest {
     var expectedPoLine = createPoLine(poLineId, List.of(holdingId1, holdingId2), effectiveLocationId1, effectiveLocationId2);
     verify(pieceService).getPiecesByItemId(eq(itemId1), any(Conn.class));
     verify(pieceService).updatePiecesInventoryData(eq(List.of(expectedPiece1)), any(Conn.class), eq(DIKU_TENANT));
-    verify(poLinesService).updatePoLines(eq(List.of(expectedPoLine)), any(Conn.class), eq(DIKU_TENANT), anyMap());
+    verify(poLinesService).updatePoLines(eqIgnoringLocationsOrder(expectedPoLine), any(Conn.class), eq(DIKU_TENANT), anyMap());
     verify(auditOutboxService, never()).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(AuditEntityWrapper.of(expectedPoLine, poLine))), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(batchTrackingService).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
     verify(batchTrackingService, never()).deleteBatchTracking(conn, poLineId);
@@ -324,6 +328,18 @@ public class ItemUpdateAsyncRecordHandlerTest {
     verify(auditOutboxService).saveOrderLinesOutboxLogs(any(Conn.class), eq(List.of(AuditEntityWrapper.of(expectedUpdatedPoLine, expectedPoLine))), eq(OrderLineAuditEvent.Action.EDIT), anyMap());
     verify(batchTrackingService, times(2)).increaseBatchTrackingProgress(conn, poLineId, DIKU_TENANT);
     verify(batchTrackingService).deleteBatchTracking(conn, poLineId);
+  }
+
+  // Locations are built from a HashMap grouping, so their order is not guaranteed
+  private static List<PoLine> eqIgnoringLocationsOrder(PoLine expected) {
+    return argThat(actual -> actual != null && actual.size() == 1
+      && withSortedLocations(actual.get(0)).equals(withSortedLocations(expected)));
+  }
+
+  private static PoLine withSortedLocations(PoLine poLine) {
+    var copy = JsonObject.mapFrom(poLine).mapTo(PoLine.class);
+    copy.getLocations().sort(Comparator.comparing(Location::getHoldingId));
+    return copy;
   }
 
   private static PoLine createPoLine(String poLineId, String holdingId, String... effectiveLocationIds) {

@@ -15,6 +15,7 @@ import org.folio.event.service.AuditOutboxService;
 import org.folio.rest.core.models.RequestContext;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.acq.Location;
 import org.folio.rest.persist.Conn;
 import org.folio.services.inventory.InventoryUpdateService;
@@ -229,7 +230,7 @@ public class HoldingUpdateAsyncRecordHandler extends InventoryUpdateAsyncRecordH
       .mapEmpty();
   }
 
-  private Future<List<AuditEntityWrapper<PoLine>>> updatePoLinesInCentralTenant(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
+  private Future<List<AuditEntityWrapper<PoLine, PurchaseOrder>>> updatePoLinesInCentralTenant(HoldingEventHolder holder, List<PoLine> poLines, Conn conn) {
     if (CollectionUtils.isEmpty(poLines)) {
       log.info("updatePoLinesInCentralTenant:: No POLs were found for holding to update, holdingId: {}", holder.getHoldingId());
       return Future.succeededFuture(List.of());

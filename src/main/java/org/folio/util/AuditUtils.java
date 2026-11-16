@@ -1,9 +1,9 @@
 package org.folio.util;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
+import jakarta.annotation.Nonnull;
 import org.folio.kafka.KafkaTopicNameHelper;
 import org.folio.rest.jaxrs.model.Metadata;
 
@@ -24,12 +24,20 @@ public class AuditUtils {
   }
 
   @Nullable
-  public static <T, R> R convertToSnapshot(T entity, BiFunction<T, Metadata, T> medatadaSetter, Class<R> snapshotClass) {
+  public static <T, R> R convertToSnapshot(T entity, Class<R> snapshotClass) {
     return Optional.ofNullable(entity)
-      .map(e -> medatadaSetter.apply(e, null))
       .map(JsonObject::mapFrom)
       .map(json -> json.mapTo(snapshotClass))
       .orElse(null);
+  }
+
+  public static void copyCreatedMetadata(@Nullable Metadata originalMetadata, @Nonnull Metadata metadata) {
+    if (originalMetadata == null) {
+      return;
+    }
+    metadata
+      .withCreatedDate(originalMetadata.getCreatedDate())
+      .withCreatedByUserId(originalMetadata.getCreatedByUserId());
   }
 
 }

@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.net.MalformedURLException;
@@ -25,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.folio.StorageTestSuite;
 import org.folio.event.AuditEventType;
+import org.folio.rest.jaxrs.model.Metadata;
 import org.folio.rest.jaxrs.model.OrderAuditEvent;
 import org.folio.rest.jaxrs.model.OrderLineAuditEvent;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
@@ -34,6 +36,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.restassured.http.Headers;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 
 
@@ -210,6 +213,35 @@ public class OrdersAPITest extends TestBase {
     checkOrderEventContent(sentCreateOrderEvents.get(1), OrderAuditEvent.Action.EDIT);
 
     deleteData(PURCHASE_ORDER.getEndpointWithId(), orderId);
+  }
+
+  @Test
+  public void testEditOrderEventSnapshotsContainMetadata() throws MalformedURLException {
+    String creatorUserId = UUID.randomUUID().toString();
+    String editorUserId = UUID.randomUUID().toString();
+    String orderId = createEntity(PURCHASE_ORDER.getEndpoint(), purchaseOrderWithoutPOLines, getDikuTenantHeaders(creatorUserId));
+    try {
+      putData("/orders-storage/purchase-orders/{id}", orderId, purchaseOrderWithoutPOLines, getDikuTenantHeaders(editorUserId))
+        .then()
+        .statusCode(204);
+
+      List<String> sentEditOrderEvents = StorageTestSuite.checkKafkaEventSent(TENANT_NAME, AuditEventType.ACQ_ORDER_CHANGED.getTopicName(), 1, editorUserId);
+      Assertions.assertEquals(1, sentEditOrderEvents.size());
+      OrderAuditEvent event = Json.decodeValue(sentEditOrderEvents.get(0), OrderAuditEvent.class);
+      Assertions.assertEquals(OrderAuditEvent.Action.EDIT, event.getAction());
+
+      Metadata originalMetadata = event.getOriginalOrderSnapshot().getMetadata();
+      Metadata metadata = event.getOrderSnapshot().getMetadata();
+      assertNotNull(originalMetadata);
+      assertNotNull(metadata);
+      // creation info must be taken from the original snapshot, not from the editing user
+      assertEquals(creatorUserId, originalMetadata.getCreatedByUserId());
+      assertEquals(creatorUserId, metadata.getCreatedByUserId());
+      assertEquals(originalMetadata.getCreatedDate(), metadata.getCreatedDate());
+      assertEquals(editorUserId, metadata.getUpdatedByUserId());
+    } finally {
+      deleteData(PURCHASE_ORDER.getEndpointWithId(), orderId);
+    }
   }
 
   @Test

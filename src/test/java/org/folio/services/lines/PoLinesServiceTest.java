@@ -412,7 +412,7 @@ public class PoLinesServiceTest {
     doReturn(succeededFuture(poLine))
       .when(conn).getByIdForUpdate(anyString(), eq(poLineId), eq(PoLine.class));
 
-    Future<AuditEntityWrapper<PoLine>> f = pgClient.withTrans(conn -> poLinesService.doUpdatePoLine(poLine, conn));
+    Future<AuditEntityWrapper<PoLine, PurchaseOrder>> f = pgClient.withTrans(conn -> poLinesService.doUpdatePoLine(poLine, conn));
 
     assertThat(f.failed(), is(true));
     io.vertx.ext.web.handler.HttpException thrown = (io.vertx.ext.web.handler.HttpException) f.cause();

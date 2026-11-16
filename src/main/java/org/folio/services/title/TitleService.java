@@ -6,11 +6,17 @@ import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.core.ResponseUtil.httpHandleFailure;
 import static org.folio.rest.persist.HelperUtils.JSONB;
 import static org.folio.rest.persist.HelperUtils.getCriteriaByFieldNameAndValueNotJsonb;
+import static org.folio.rest.persist.HelperUtils.getFullTableName;
+import static org.folio.util.MetadataUtils.populateMetadata;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -24,16 +30,19 @@ import org.folio.rest.jaxrs.model.Title;
 import org.folio.rest.jaxrs.model.TitleSequenceNumbers;
 import org.folio.rest.persist.Conn;
 import org.folio.rest.persist.Criteria.Criterion;
+import org.folio.util.DbUtils;
 import org.folio.util.InventoryUtils;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Tuple;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class TitleService {
 
   private static final String POLINE_ID_FIELD = "poLineId";
+  private static final String TITLES_BY_IDS_SQL = "SELECT * FROM %s WHERE id = ANY($1);";
 
   public Future<Title> getTitleByPoLineId(String poLineId, Conn conn) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLineId);
@@ -51,9 +60,28 @@ public class TitleService {
       });
   }
 
-  private Future<PoLine> updateInstanceForTitle(PoLine poLine, Title title, JsonObject instance, Conn conn) {
+  public Future<Title> getTitleById(String titleId, Conn conn) {
+    return conn.getById(TITLES_TABLE, titleId, Title.class)
+      .onFailure(t -> log.error("getTitleById failed for title with id {}", titleId, t));
+  }
+
+  public Future<Map<String, Title>> getTitlesByIds(Collection<String> titleIds, String tenantId, Conn conn) {
+    if (CollectionUtils.isEmpty(titleIds)) {
+      return Future.succeededFuture(Map.of());
+    }
+    var ids = titleIds.stream().map(UUID::fromString).toArray(UUID[]::new);
+    return conn.execute(TITLES_BY_IDS_SQL.formatted(getFullTableName(tenantId, TITLES_TABLE)), Tuple.of(ids))
+      .map(rows -> DbUtils.getRowSetAsList(rows, Title.class).stream()
+        .collect(Collectors.toMap(Title::getId, Function.identity())))
+      .onSuccess(titles -> log.debug("getTitlesByIds:: Fetched {} of {} title(s)", titles.size(), ids.length))
+      .onFailure(t -> log.error("getTitlesByIds failed for title ids {}", titleIds, t));
+  }
+
+  private Future<PoLine> updateInstanceForTitle(PoLine poLine, Title title, JsonObject instance, Conn conn,
+                                                Map<String, String> headers) {
     Criterion criterion = getCriteriaByFieldNameAndValueNotJsonb(POLINE_ID_FIELD, poLine.getId());
     updateInstanceFieldsForTitle(title, instance);
+    populateMetadata(title::getMetadata, title::withMetadata, headers);
     return conn.update(TITLES_TABLE, title, JSONB, criterion.toString(), false)
       .map(poLine)
       .recover(t -> Future.failedFuture(httpHandleFailure(t)))
@@ -75,10 +103,10 @@ public class TitleService {
       .withProductIds(InventoryUtils.getProductIds(instance));
   }
 
-  public Future<PoLine> updateTitle(PoLine poLine, JsonObject instance, Conn conn) {
+  public Future<PoLine> updateTitle(PoLine poLine, JsonObject instance, Conn conn, Map<String, String> headers) {
     var instanceId = InventoryUtils.getInstanceId(instance);
     return getTitleByPoLineId(poLine.getId(), conn)
-      .compose(title -> updateInstanceForTitle(poLine, title, instance, conn))
+      .compose(title -> updateInstanceForTitle(poLine, title, instance, conn, headers))
       .onSuccess(v -> log.debug("updateTitle:: Succeeded for poLineId={}, instanceId={}", poLine.getId(), instanceId))
       .onFailure(t -> log.error("updateTitle:: Failed for poLineId={}, instanceId={}", poLine.getId(), instanceId, t));
   }

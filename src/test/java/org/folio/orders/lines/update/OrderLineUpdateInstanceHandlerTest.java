@@ -4,6 +4,7 @@ import static org.folio.StorageTestSuite.clearVertxContext;
 import static org.folio.StorageTestSuite.initSpringContext;
 import static org.folio.models.TableNames.PIECES_TABLE;
 import static org.folio.models.TableNames.PO_LINE_TABLE;
+import static org.folio.models.TableNames.PURCHASE_ORDER_TABLE;
 import static org.folio.models.TableNames.TITLES_TABLE;
 import static org.folio.rest.RestVerticle.OKAPI_HEADER_TENANT;
 import static org.folio.rest.util.TestConfig.autowireDependencies;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.vertx.core.json.JsonObject;
@@ -46,6 +48,7 @@ import org.folio.rest.jaxrs.model.Holding;
 import org.folio.rest.jaxrs.model.Physical;
 import org.folio.rest.jaxrs.model.Piece;
 import org.folio.rest.jaxrs.model.PoLine;
+import org.folio.rest.jaxrs.model.PurchaseOrder;
 import org.folio.rest.jaxrs.model.ReplaceInstanceRef;
 import org.folio.rest.jaxrs.model.StoragePatchOrderLineRequest;
 import org.folio.rest.jaxrs.model.TenantJob;
@@ -109,14 +112,18 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
   private static TenantJob tenantJob;
   private final String newHoldingId = UUID.randomUUID().toString();
   private final String newInstanceId = INSTANCE_MOCK_ID;
+  private final String orderId = UUID.randomUUID().toString();
   private static boolean runningOnOwn;
 
   @BeforeEach
-  public void initMocks() throws MalformedURLException {
+  public void initMocks(Vertx vertx) throws Exception {
     autowireDependencies(this);
     MockitoAnnotations.openMocks(this);
     tenantJob = prepareTenant(TEST_TENANT_HEADER, false, false);
     pieceService = Mockito.mock(PieceService.class, Mockito.CALLS_REAL_METHODS);
+    new DBClient(vertx, TEST_TENANT).getPgClient()
+      .save(PURCHASE_ORDER_TABLE, orderId, new PurchaseOrder().withId(orderId))
+      .toCompletionStage().toCompletableFuture().get(10, TimeUnit.SECONDS);
   }
 
   @AfterEach
@@ -157,6 +164,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     PoLine poLine = new PoLine()
       .withId(poLineId)
+      .withPurchaseOrderId(orderId)
       .withInstanceId(instanceId)
       .withTitleOrPackage(OLD_TITLE_NAME)
       .withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
@@ -268,6 +276,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     PoLine poLine = new PoLine()
       .withId(poLineId)
+      .withPurchaseOrderId(orderId)
       .withInstanceId(instanceId)
       .withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
       .withPhysical(new Physical()
@@ -314,6 +323,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     PoLine poLine = new PoLine()
       .withId(poLineId)
+      .withPurchaseOrderId(orderId)
       .withInstanceId(instanceId)
       .withOrderFormat(PoLine.OrderFormat.PHYSICAL_RESOURCE)
       .withPhysical(new Physical()
@@ -418,6 +428,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     PoLine poLine = new PoLine()
       .withId(poLineId)
+      .withPurchaseOrderId(orderId)
       .withInstanceId(instanceId)
       .withTitleOrPackage(OLD_TITLE_NAME)
       .withOrderFormat(PoLine.OrderFormat.ELECTRONIC_RESOURCE)
@@ -514,6 +525,7 @@ public class OrderLineUpdateInstanceHandlerTest extends TestBase {
 
     PoLine poLine = new PoLine()
       .withId(poLineId)
+      .withPurchaseOrderId(orderId)
       .withInstanceId(instanceId)
       .withOrderFormat(PoLine.OrderFormat.P_E_MIX)
       .withPhysical(new Physical()

@@ -104,7 +104,7 @@ public class ClaimingAPITest extends TestBase {
 
     callClaimingApi(headers);
 
-    List<String> events = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_PIECE_CHANGED.getTopicName(), 7, userId);
+    List<String> events = StorageTestSuite.checkKafkaEventSent(ISOLATED_TENANT, AuditEventType.ACQ_PIECE_CHANGED.getTopicName(), 9, userId);
     assertEquals(9, events.size());
     checkPieceEventContent(events.get(0), PieceAuditEvent.Action.CREATE);
     checkPieceEventContent(events.get(1), PieceAuditEvent.Action.CREATE);

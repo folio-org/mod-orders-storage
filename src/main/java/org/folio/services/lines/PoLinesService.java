@@ -310,6 +310,7 @@ public class PoLinesService {
 
   public Future<PoLine> updateInstanceIdForPoLine(PoLine poLine, JsonObject instance, Conn conn, Map<String, String> headers) {
     updateInstanceFieldsForPoLine(poLine, instance);
+    populateMetadata(poLine::getMetadata, poLine::withMetadata, headers);
     return doUpdatePoLine(poLine, conn)
       .compose(wrappedPoLine -> auditOutboxService.saveOrderLineOutboxLog(conn, wrappedPoLine, OrderLineAuditEvent.Action.EDIT, headers))
       .map(v -> poLine);
@@ -354,7 +355,7 @@ public class PoLinesService {
       .mapEmpty();
   }
 
-  public Future<AuditEntityWrapper<PoLine>> updatePoLine(PoLine poLine, Conn conn) {
+  public Future<AuditEntityWrapper<PoLine, PurchaseOrder>> updatePoLine(PoLine poLine, Conn conn) {
     if (poLine.getPurchaseOrderId() == null) {
       log.error("Can't update po line: missing purchaseOrderId");
       return Future.failedFuture(new HttpException(Response.Status.BAD_REQUEST.getStatusCode(), "Can't update po line: missing purchaseOrderId"));
@@ -362,14 +363,14 @@ public class PoLinesService {
     return doUpdatePoLine(poLine, conn);
   }
 
-  public Future<AuditEntityWrapper<PoLine>> doUpdatePoLine(PoLine poLine, Conn conn) {
+  public Future<AuditEntityWrapper<PoLine, PurchaseOrder>> doUpdatePoLine(PoLine poLine, Conn conn) {
     var criterion = getCriteriaByFieldNameAndValueNotJsonb(ID_FIELD_NAME, poLine.getId());
     return getPoLineByIdForUpdate(poLine.getId(), conn)
       .compose(originalPoLine -> conn.update(PO_LINE_TABLE, poLine, JSONB, criterion.toString(), true)
         .recover(t -> Future.failedFuture(httpHandleFailure(t)))
         .compose(rows -> rows.rowCount() == 0
           ? Future.failedFuture(new HttpException(Response.Status.NOT_FOUND.getStatusCode(), Response.Status.NOT_FOUND.getReasonPhrase()))
-          : Future.succeededFuture(AuditEntityWrapper.of(poLine, originalPoLine.orElse(null)))))
+          : Future.succeededFuture(AuditEntityWrapper.<PoLine, PurchaseOrder>of(poLine, originalPoLine.orElse(null)))))
       .onSuccess(v -> log.info("updatePoLine:: Complete, poLineId={}", poLine.getId()))
       .onFailure(t -> log.error("updatePoLine:: Failed, poLineId={}", poLine.getId(), t));
   }

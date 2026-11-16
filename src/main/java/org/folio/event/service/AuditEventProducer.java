@@ -3,9 +3,11 @@ package org.folio.event.service;
 import static org.folio.util.AuditUtils.buildTopicName;
 import static org.folio.util.AuditUtils.getMetadataOrThrow;
 import static org.folio.util.AuditUtils.convertToSnapshot;
+import static org.folio.util.AuditUtils.copyCreatedMetadata;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.folio.event.AuditEventType;
@@ -23,6 +25,8 @@ import org.folio.rest.jaxrs.model.PieceAuditEvent;
 import org.folio.rest.jaxrs.model.PieceSnapshot;
 import org.folio.rest.jaxrs.model.PoLine;
 import org.folio.rest.jaxrs.model.PurchaseOrder;
+import org.folio.rest.jaxrs.model.Title;
+import org.folio.rest.jaxrs.model.TitleSnapshot;
 import org.folio.rest.tools.utils.TenantTool;
 
 import io.vertx.core.Future;
@@ -49,7 +53,7 @@ public class AuditEventProducer {
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future in another case
    */
-  public Future<Boolean> sendOrderEvent(AuditEntityWrapper<PurchaseOrder> orderWrapper,
+  public Future<Boolean> sendOrderEvent(AuditEntityWrapper<PurchaseOrder, Void> orderWrapper,
                                         OrderAuditEvent.Action eventAction,
                                         Map<String, String> okapiHeaders) {
     var order = orderWrapper.entity();
@@ -68,11 +72,11 @@ public class AuditEventProducer {
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future otherwise
    */
-  public Future<Boolean> sendOrderLineEvent(AuditEntityWrapper<PoLine> poLineWrapper,
+  public Future<Boolean> sendOrderLineEvent(AuditEntityWrapper<PoLine, PurchaseOrder> poLineWrapper,
                                             OrderLineAuditEvent.Action eventAction,
                                             Map<String, String> okapiHeaders) {
     var poLine = poLineWrapper.entity();
-    var event = getOrderLineEvent(poLine, poLineWrapper.originalEntity(), eventAction);
+    var event = getOrderLineEvent(poLine, poLineWrapper.originalEntity(), poLineWrapper.parentEntity(), eventAction);
     log.info("Starting to send event with id: {} for Order Line to Kafka for orderLineId: {}", event.getId(), poLine.getId());
     return sendToKafka(AuditEventType.ACQ_ORDER_LINE_CHANGED, event, okapiHeaders, event.getOrderLineId(), EntityType.ORDER_LINE)
       .onFailure(t -> log.warn("sendOrderLineEvent failed, poLine id={}", poLine.getId(), t));
@@ -87,11 +91,11 @@ public class AuditEventProducer {
    * @param okapiHeaders the okapi headers
    * @return future with true if sending was success or failed future otherwise
    */
-  public Future<Boolean> sendPieceEvent(AuditEntityWrapper<Piece> pieceWrapper,
+  public Future<Boolean> sendPieceEvent(AuditEntityWrapper<Piece, Title> pieceWrapper,
                                         PieceAuditEvent.Action eventAction,
                                         Map<String, String> okapiHeaders) {
     var piece = pieceWrapper.entity();
-    var event = getPieceEvent(piece, pieceWrapper.originalEntity(), eventAction);
+    var event = getPieceEvent(piece, pieceWrapper.originalEntity(), pieceWrapper.parentEntity(), eventAction);
     log.info("Starting to send event with id: {} for Piece to Kafka for pieceId: {}", event.getId(), piece.getId());
     return sendToKafka(AuditEventType.ACQ_PIECE_CHANGED, event, okapiHeaders, event.getPieceId(), EntityType.PIECE)
       .onFailure(t -> log.warn("sendPieceEvent failed, piece id={}", piece.getId(), t));
@@ -99,6 +103,10 @@ public class AuditEventProducer {
 
   private OrderAuditEvent getOrderEvent(@Nonnull PurchaseOrder order, @Nullable PurchaseOrder originalOrder, OrderAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(order::getMetadata, order::getId);
+    var originalSnapshot = convertToSnapshot(originalOrder, OrderSnapshot.class);
+    var snapshot = convertToSnapshot(order, OrderSnapshot.class);
+    Optional.ofNullable(snapshot).map(OrderSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new OrderAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -106,12 +114,17 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalOrderSnapshot(convertToSnapshot(originalOrder, PurchaseOrder::withMetadata, OrderSnapshot.class))
-      .withOrderSnapshot(convertToSnapshot(order, PurchaseOrder::withMetadata, OrderSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalOrderSnapshot(originalSnapshot)
+      .withOrderSnapshot(snapshot);
   }
 
-  private OrderLineAuditEvent getOrderLineEvent(@Nonnull PoLine poLine, @Nullable PoLine originalPoLine, OrderLineAuditEvent.Action eventAction) {
+  OrderLineAuditEvent getOrderLineEvent(@Nonnull PoLine poLine, @Nullable PoLine originalPoLine,
+                                        @Nullable PurchaseOrder order, OrderLineAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(poLine::getMetadata, poLine::getId);
+    var originalSnapshot = convertToSnapshot(originalPoLine, OrderLineSnapshot.class);
+    var snapshot = convertToSnapshot(poLine, OrderLineSnapshot.class);
+    Optional.ofNullable(snapshot).map(OrderLineSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(OrderLineSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new OrderLineAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -120,12 +133,18 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalOrderLineSnapshot(convertToSnapshot(originalPoLine, PoLine::withMetadata, OrderLineSnapshot.class))
-      .withOrderLineSnapshot(convertToSnapshot(poLine, PoLine::withMetadata, OrderLineSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalOrderLineSnapshot(originalSnapshot)
+      .withOrderLineSnapshot(snapshot)
+      .withOrderSnapshot(convertToSnapshot(order, OrderSnapshot.class));
   }
 
-  private PieceAuditEvent getPieceEvent(@Nonnull Piece piece, @Nullable Piece originalPiece, PieceAuditEvent.Action eventAction) {
+  PieceAuditEvent getPieceEvent(@Nonnull Piece piece, @Nullable Piece originalPiece,
+                                @Nullable Title title, PieceAuditEvent.Action eventAction) {
     var metadata = getMetadataOrThrow(piece::getMetadata, piece::getId);
+    var originalSnapshot = convertToSnapshot(originalPiece, PieceSnapshot.class);
+    var snapshot = convertToSnapshot(piece, PieceSnapshot.class);
+    Optional.ofNullable(snapshot).map(PieceSnapshot::getMetadata)
+      .ifPresent(snapshotMetadata -> copyCreatedMetadata(Optional.ofNullable(originalSnapshot).map(PieceSnapshot::getMetadata).orElse(null), snapshotMetadata));
     return new PieceAuditEvent()
       .withId(UUID.randomUUID().toString())
       .withAction(eventAction)
@@ -133,8 +152,9 @@ public class AuditEventProducer {
       .withEventDate(new Date())
       .withActionDate(metadata.getUpdatedDate())
       .withUserId(metadata.getUpdatedByUserId())
-      .withOriginalPieceSnapshot(convertToSnapshot(originalPiece, Piece::withMetadata, PieceSnapshot.class))
-      .withPieceSnapshot(convertToSnapshot(piece, Piece::withMetadata, PieceSnapshot.class)); // not populate metadata to not include it in snapshot's comparison in UI
+      .withOriginalPieceSnapshot(originalSnapshot)
+      .withPieceSnapshot(snapshot)
+      .withTitleSnapshot(convertToSnapshot(title, TitleSnapshot.class));
   }
 
   private Future<Boolean> sendToKafka(AuditEventType eventType,
