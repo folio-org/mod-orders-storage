@@ -1,6 +1,7 @@
 ## 15.0.0 - Unreleased
 
 ### Stories
+* [FCFIELDS-95](https://folio-org.atlassian.net/browse/FCFIELDS-95) - Provide custom field sections (`/custom-field-sections`) of folio-custom-fields
 * [MODORDSTOR-526](https://folio-org.atlassian.net/browse/MODORDSTOR-526) - Support export transmission method on purchase order lines
 * [FCFIELDS-90](https://folio-org.atlassian.net/browse/FCFIELDS-90) - Upgrade folio-custom-fields to 4.0.0, provide `custom-fields` 3.2 (LOOKUP custom field type)
 * [MODORDSTOR-533](https://folio-org.atlassian.net/browse/MODORDSTOR-533) - Create a script to populate "multiYearPayment" field for existing orders
