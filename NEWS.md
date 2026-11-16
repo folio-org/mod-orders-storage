@@ -1,3 +1,14 @@
+## 14.0.5 - Released (Trillium R1 2026 - Bugfix)
+The primary focus of this release was to skip already cleaned order lines in the remove alerts and reporting codes migration and to add DeployConfig.json
+
+[Full Changelog](https://github.com/folio-org/mod-orders-storage/compare/v14.0.4...v14.0.5)
+
+### Bug Fixes
+* [MODORDSTOR-543](https://folio-org.atlassian.net/browse/MODORDSTOR-543) - Skip already cleaned order lines in remove alerts and reporting codes migration
+
+### Tech Debts
+* [MODORDSTOR-528](https://folio-org.atlassian.net/browse/MODORDSTOR-528) - Add DeployConfig.json to mod-orders-storage (ADR-0013 Configuration Management)
+
 ## 14.0.4 - Released (Trillium R1 2026 - Bugfix)
 The primary focus of this release was to update cql migration to not fail when an Open PO has no approvedById
 
