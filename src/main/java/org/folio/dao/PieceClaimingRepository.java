@@ -27,20 +27,24 @@ public class PieceClaimingRepository {
             'metadata', pieces.jsonb -> 'metadata' || jsonb_build_object(
                 'updatedDate', to_char(clock_timestamp(),'YYYY-MM-DD"T"HH24:MI:SS.MSTZH:TZM')::text,
                 'updatedByUserId', $1::text))
-        FROM %1$s.%3$s as titles
+        FROM %1$s.%3$s as titles, %1$s.%2$s as original_pieces
         WHERE (titles.jsonb ->> 'claimingActive')::boolean = TRUE
         AND pieces.titleid = titles.id
+        AND original_pieces.id = pieces.id
         AND (
           (pieces.jsonb ->> 'receivingStatus' = 'Expected'
               AND $2::date >= (((pieces.jsonb ->> 'receiptDate')::timestamptz AT TIME ZONE $3)::date + INTERVAL '1 day' * (titles.jsonb ->> 'claimingInterval')::int))
           OR (pieces.jsonb ->> 'receivingStatus' IN ('Claim delayed', 'Claim sent')
               AND $2::date >= (((pieces.jsonb ->> 'statusUpdatedDate')::timestamptz  AT TIME ZONE $3)::date + INTERVAL '1 day' * (pieces.jsonb->>'claimingInterval')::int))
         )
-        RETURNING pieces.jsonb AS piece_jsonb, titles.jsonb AS title_jsonb
+        RETURNING pieces.jsonb AS piece_jsonb, original_pieces.jsonb AS original_piece_jsonb, titles.jsonb AS title_jsonb
     )
     INSERT INTO %1$s.%4$s (event_id, entity_type, action, payload)
     SELECT public.uuid_generate_v4(), 'Piece', 'Edit',
-      to_jsonb(jsonb_build_object('entity', updated.piece_jsonb, 'parentEntity', updated.title_jsonb)::text)
+      to_jsonb(jsonb_build_object(
+        'entity', updated.piece_jsonb,
+        'originalEntity', updated.original_piece_jsonb,
+        'parentEntity', updated.title_jsonb)::text)
     FROM updated;
     """;
 

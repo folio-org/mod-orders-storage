@@ -25,10 +25,14 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import io.vertx.core.json.JsonObject;
 
 import static io.vertx.core.json.JsonObject.mapFrom;
 import static org.folio.rest.utils.TestEntities.PIECE;
@@ -115,6 +119,17 @@ public class ClaimingAPITest extends TestBase {
     checkPieceEventContent(events.get(6), PieceAuditEvent.Action.EDIT);
     checkPieceEventContent(events.get(7), PieceAuditEvent.Action.EDIT);
     checkPieceEventContent(events.get(8), PieceAuditEvent.Action.EDIT);
+
+    Map<String, String> expectedOriginalStatuses = Map.of(
+      pieceExpectedOutdated.getId(), Piece.ReceivingStatus.EXPECTED.value(),
+      pieceClaimSentOutdated.getId(), Piece.ReceivingStatus.CLAIM_SENT.value(),
+      pieceClaimDelayedOutdated.getId(), Piece.ReceivingStatus.CLAIM_DELAYED.value());
+    Map<String, String> actualOriginalStatuses = events.stream()
+      .map(JsonObject::new)
+      .filter(event -> Piece.ReceivingStatus.LATE.value().equals(event.getJsonObject("pieceSnapshot").getString("receivingStatus")))
+      .collect(Collectors.toMap(event -> event.getString("pieceId"),
+        event -> event.getJsonObject("originalPieceSnapshot").getString("receivingStatus")));
+    assertEquals(expectedOriginalStatuses, actualOriginalStatuses);
 
     ZonedDateTime startOfDay = ZonedDateTime.now(ZoneId.systemDefault()).toLocalDate().atStartOfDay(ZoneId.systemDefault());
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX");
