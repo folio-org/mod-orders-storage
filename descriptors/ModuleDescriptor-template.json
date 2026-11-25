@@ -589,6 +589,36 @@
           "methods": ["GET"],
           "pathPattern": "/custom-fields/{id}/options/{optId}/stats",
           "permissionsRequired": ["orders-storage.custom-fields.item.option.stats.get"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/custom-field-sections",
+          "permissionsRequired": ["orders-storage.custom-fields.sections.collection.get"]
+        },
+        {
+          "methods": ["POST"],
+          "pathPattern": "/custom-field-sections",
+          "permissionsRequired": ["orders-storage.custom-fields.sections.item.post"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/custom-field-sections",
+          "permissionsRequired": ["orders-storage.custom-fields.sections.collection.put"]
+        },
+        {
+          "methods": ["GET"],
+          "pathPattern": "/custom-field-sections/{id}",
+          "permissionsRequired": ["orders-storage.custom-fields.sections.item.get"]
+        },
+        {
+          "methods": ["PUT"],
+          "pathPattern": "/custom-field-sections/{id}",
+          "permissionsRequired": ["orders-storage.custom-fields.sections.item.put"]
+        },
+        {
+          "methods": ["DELETE"],
+          "pathPattern": "/custom-field-sections/{id}",
+          "permissionsRequired": ["orders-storage.custom-fields.sections.item.delete"]
         }
       ]
     },
@@ -1435,6 +1465,36 @@
       "description": "Get Custom Field Option Statistic"
     },
     {
+      "permissionName": "orders-storage.custom-fields.sections.collection.get",
+      "displayName": "Custom Fields - get section collection",
+      "description": "Get Custom Field Sections collection"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.sections.collection.put",
+      "displayName": "Custom Fields - replace section collection",
+      "description": "Replace all Custom Field Sections of an entity type, sets their order"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.sections.item.post",
+      "displayName": "Custom Fields - create section",
+      "description": "Create Custom Field Section"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.sections.item.get",
+      "displayName": "Custom Fields - get section",
+      "description": "Get Custom Field Section"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.sections.item.put",
+      "displayName": "Custom Fields - modify section",
+      "description": "Modify Custom Field Section"
+    },
+    {
+      "permissionName": "orders-storage.custom-fields.sections.item.delete",
+      "displayName": "Custom Fields - delete section",
+      "description": "Delete Custom Field Section"
+    },
+    {
       "permissionName": "orders-storage.custom-fields.all",
       "displayName": "Custom Fields module - all permissions",
       "description": "Entire set of permissions needed to use the custom fields module",
@@ -1446,7 +1506,13 @@
         "orders-storage.custom-fields.item.put",
         "orders-storage.custom-fields.item.delete",
         "orders-storage.custom-fields.item.stats.get",
-        "orders-storage.custom-fields.item.option.stats.get"
+        "orders-storage.custom-fields.item.option.stats.get",
+        "orders-storage.custom-fields.sections.collection.get",
+        "orders-storage.custom-fields.sections.collection.put",
+        "orders-storage.custom-fields.sections.item.post",
+        "orders-storage.custom-fields.sections.item.get",
+        "orders-storage.custom-fields.sections.item.put",
+        "orders-storage.custom-fields.sections.item.delete"
       ],
       "visible": false
     },

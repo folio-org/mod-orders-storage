@@ -45,6 +45,7 @@ import org.folio.rest.core.RestClientTest;
 import org.folio.rest.impl.AcquisitionMethodDeprecatedQueryTest;
 import org.folio.rest.impl.BatchTrackingAPITest;
 import org.folio.rest.impl.ClaimingAPITest;
+import org.folio.rest.impl.CustomFieldSectionsAPITest;
 import org.folio.rest.impl.CustomFieldsAPITest;
 import org.folio.rest.impl.CustomFieldsIndexesTest;
 import org.folio.rest.impl.EntitiesCrudTest;
@@ -360,6 +361,8 @@ public class StorageTestSuite {
   class ClaimingAPITestNested extends ClaimingAPITest {}
   @Nested
   class CustomFieldsAPITestNested extends CustomFieldsAPITest {}
+  @Nested
+  class CustomFieldSectionsAPITestNested extends CustomFieldSectionsAPITest {}
   @Nested
   class CustomFieldsIndexesTestNested extends CustomFieldsIndexesTest {}
   @Nested
