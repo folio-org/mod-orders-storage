@@ -267,6 +267,31 @@ public class AuditOutboxServiceTest {
   }
 
   @Test
+  void processOutboxEventLogs_passesOriginalPieceToProducer_whenPayloadContainsOriginalEntity() {
+    mockTransaction();
+    var title = new Title().withId(UUID.randomUUID().toString()).withTitle("Test title");
+    var pieceId = UUID.randomUUID().toString();
+    var originalPiece = new Piece().withId(pieceId).withTitleId(title.getId()).withReceivingStatus(Piece.ReceivingStatus.EXPECTED);
+    var updatedPiece = new Piece().withId(pieceId).withTitleId(title.getId()).withReceivingStatus(Piece.ReceivingStatus.LATE);
+    OutboxEventLog eventLog = new OutboxEventLog()
+      .withEventId("eventId")
+      .withEntityType(OutboxEventLog.EntityType.PIECE)
+      .withAction("Edit")
+      .withPayload(Json.encode(new AuditEntityWrapper<>(updatedPiece, originalPiece, title)));
+    when(outboxRepository.fetchEventLogs(any(), any())).thenReturn(Future.succeededFuture(List.of(eventLog)));
+    when(outboxRepository.deleteBatch(any(), any(), any())).thenReturn(Future.succeededFuture(1));
+    when(producer.sendPieceEvent(any(), any(), any())).thenReturn(Future.succeededFuture(true));
+
+    Future<Integer> result = auditOutboxService.processOutboxEventLogs(okapiHeaders);
+
+    assertTrue(result.succeeded());
+    verify(producer).sendPieceEvent(argThat(wrapper -> Piece.ReceivingStatus.LATE == wrapper.entity().getReceivingStatus()
+      && wrapper.originalEntity() != null
+      && Piece.ReceivingStatus.EXPECTED == wrapper.originalEntity().getReceivingStatus()
+      && "Test title".equals(wrapper.parentEntity().getTitle())), eq(PieceAuditEvent.Action.EDIT), any());
+  }
+
+  @Test
   void savePieceOutboxLog_savesParentTitleInPayload() {
     var title = new Title().withId(UUID.randomUUID().toString()).withTitle("Test title");
     var piece = new Piece().withId(UUID.randomUUID().toString()).withTitleId(title.getId());
